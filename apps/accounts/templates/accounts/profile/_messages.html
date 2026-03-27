@@ -1,7 +1,10 @@
 {% if messages %}
 <div>
     {% for message in messages %}
-    <div class="profile-alert {% if message.tags == 'success' %}profile-alert--success{% else %}profile-alert--error{% endif %}">
+    <div class="profile-alert {% if message.tags == 'success' %}profile-alert--success{% else %}profile-alert--error{% endif %}"
+         role="alert"
+         data-profile-flash-message
+         tabindex="0">
         {{ message }}
     </div>
     {% endfor %}

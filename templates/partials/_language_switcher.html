@@ -76,7 +76,7 @@
     </div>
 </div>
 {% endwith %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     'use strict';
     var s = document.currentScript;

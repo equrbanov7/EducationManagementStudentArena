@@ -4,7 +4,7 @@
     <div class="section-card pending-post-approvals-card">
         <div class="section-title">
             <i class="fas fa-user-check"></i>
-            Təsdiq gözləyən postlar ({{ pending_post_approval_count }})
+            Postların idarəetməsi ({{ pending_post_approval_count }})
         </div>
 
         <form method="get" class="search-form pending-post-approvals-filters" data-auto-filter-form>
@@ -51,10 +51,19 @@
 
                         <div class="post-info">
                             <div class="post-title">
-                                <a href="{% url 'article_detail' item.post.slug %}" class="pending-post-title-link">
-                                    {{ item.post.title }}
-                                </a>
+                                {% if item.post.is_published %}
+                                    <a href="{% url 'article_detail' item.post.slug %}" class="pending-post-title-link">
+                                        {{ item.post.title }}
+                                    </a>
+                                {% else %}
+                                    <span class="pending-post-title-link">{{ item.post.title }}</span>
+                                {% endif %}
                                 <span class="post-status-badge {{ item.status_class }}">{{ item.status_label }}</span>
+                                {% if item.post.approval_status == 'approved' and not item.post.is_published %}
+                                    <span class="post-status-badge status-draft">
+                                        <i class="fas fa-eye-slash"></i> Deaktivdir
+                                    </span>
+                                {% endif %}
                             </div>
 
                             <div class="post-date pending-post-meta">
@@ -112,9 +121,14 @@
                             {% endif %}
 
                             {% if item.post.approval_status != 'approved' %}
-                                <form method="post" action="{% url 'review_post' item.post.id %}" class="pending-post-actions">
+                                {# ===== Pending / needs-changes: review form ===== #}
+                                <form method="post"
+                                      action="{% url 'review_post' item.post.id %}"
+                                      class="pending-post-actions"
+                                      data-post-title="{{ item.post.title|escape }}">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="action" class="js-form-action" value="">
                                     <label class="pending-post-feedback-label" for="feedback_{{ item.post.id }}">
                                         Feedback (müsbət və ya düzəliş üçün)
                                     </label>
@@ -125,19 +139,147 @@
                                               placeholder="Rəyini yaz..."></textarea>
 
                                     <div class="pending-post-buttons">
-                                        <button type="submit" name="action" value="needs_changes" class="btn btn-outline-warning btn-sm">
+                                        <button type="button"
+                                                class="btn btn-outline-warning btn-sm js-post-action-btn"
+                                                data-action="needs_changes"
+                                                data-confirm-title="Düzəliş istənilsin?"
+                                                data-confirm-msg="Bu posta düzəliş tələbi göndəriləcək.">
                                             <i class="fas fa-pen"></i> Düzəliş istə
                                         </button>
-                                        <button type="submit" name="action" value="approve" class="btn btn-review-view btn-sm">
+                                        <button type="button"
+                                                class="btn btn-review-view btn-sm js-post-action-btn"
+                                                data-action="approve"
+                                                data-confirm-title="Post təsdiqlənsin?"
+                                                data-confirm-msg="Post təsdiqlənib paylaşılacaq.">
                                             <i class="fas fa-check"></i> Təsdiqlə və paylaş
                                         </button>
                                     </div>
                                 </form>
-                            {% else %}
+
+                                {# Delete form for pending posts #}
+                                <form method="post"
+                                      action="{% url 'teacher_moderate_post' item.post.id %}"
+                                      class="pending-post-actions pending-post-moderate-form"
+                                      data-post-title="{{ item.post.title|escape }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <label class="pending-post-feedback-label" for="del_reason_{{ item.post.id }}">
+                                        Silmə səbəbi <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea id="del_reason_{{ item.post.id }}"
+                                              name="feedback"
+                                              rows="2"
+                                              class="form-control pending-post-moderate-reason"
+                                              placeholder="Niyə silirsiniz? Tələbəyə izah edin..."
+                                              aria-required="true"
+                                              required></textarea>
+                                    <div class="pending-post-buttons">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm js-post-action-btn"
+                                                data-action="delete"
+                                                data-confirm-title="Post silinsin?"
+                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
+
+                            {% elif item.post.is_published %}
+                                {# ===== Approved + published: deactivate / delete ===== #}
                                 <div class="pending-post-approved-note">
                                     <i class="fas fa-circle-check"></i>
                                     Bu post artıq təsdiqlənib və paylaşılıb.
                                 </div>
+                                <form method="post"
+                                      action="{% url 'teacher_moderate_post' item.post.id %}"
+                                      class="pending-post-actions pending-post-moderate-form"
+                                      data-post-title="{{ item.post.title|escape }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="action" class="js-form-action" value="">
+                                    <label class="pending-post-feedback-label" for="moderate_reason_{{ item.post.id }}">
+                                        Səbəb <span class="text-danger">*</span> (məcburi — tələbəyə bildiriş göndəriləcək)
+                                    </label>
+                                    <textarea id="moderate_reason_{{ item.post.id }}"
+                                              name="feedback"
+                                              rows="3"
+                                              class="form-control pending-post-moderate-reason"
+                                              placeholder="Niyə deaktiv edirsiz / silirsiniz? Tələbəyə izah edin..."
+                                              aria-required="true"
+                                              required></textarea>
+                                    <div class="pending-post-buttons">
+                                        <button type="button"
+                                                class="btn btn-outline-warning btn-sm js-post-action-btn"
+                                                data-action="deactivate"
+                                                data-confirm-title="Post deaktiv edilsin?"
+                                                data-confirm-msg="Post gizlədiləcək. Tələbə görə bilməyəcək, lakin silinməyəcək.">
+                                            <i class="fas fa-eye-slash"></i> Deaktiv et
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm js-post-action-btn"
+                                                data-action="delete"
+                                                data-confirm-title="Post silinsin?"
+                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
+
+                            {% else %}
+                                {# ===== Approved + deactivated: reactivate / delete ===== #}
+                                <div class="pending-post-deactivated-note">
+                                    <i class="fas fa-eye-slash"></i>
+                                    Bu post deaktivdir — gizlədilib, tələbə görə bilmir.
+                                </div>
+
+                                {# Reactivate: no mandatory feedback #}
+                                <form method="post"
+                                      action="{% url 'teacher_moderate_post' item.post.id %}"
+                                      class="pending-post-actions"
+                                      data-post-title="{{ item.post.title|escape }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="action" value="reactivate">
+                                    <div class="pending-post-buttons">
+                                        <button type="button"
+                                                class="btn btn-outline-success btn-sm js-post-action-btn"
+                                                data-action="reactivate"
+                                                data-confirm-title="Post aktiv edilsin?"
+                                                data-confirm-msg="Post yenidən paylaşılacaq. Tələbə görə biləcək.">
+                                            <i class="fas fa-eye"></i> Aktiv et
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {# Delete deactivated post: feedback required #}
+                                <form method="post"
+                                      action="{% url 'teacher_moderate_post' item.post.id %}"
+                                      class="pending-post-actions pending-post-moderate-form"
+                                      data-post-title="{{ item.post.title|escape }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <label class="pending-post-feedback-label" for="deact_del_reason_{{ item.post.id }}">
+                                        Silmə səbəbi <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea id="deact_del_reason_{{ item.post.id }}"
+                                              name="feedback"
+                                              rows="2"
+                                              class="form-control pending-post-moderate-reason"
+                                              placeholder="Niyə silirsiniz? Tələbəyə izah edin..."
+                                              aria-required="true"
+                                              required></textarea>
+                                    <div class="pending-post-buttons">
+                                        <button type="button"
+                                                class="btn btn-outline-danger btn-sm js-post-action-btn"
+                                                data-action="delete"
+                                                data-confirm-title="Post silinsin?"
+                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
                             {% endif %}
                         </div>
                     </article>
@@ -154,13 +296,24 @@
     {% endif %}
 </section>
 
+{# ===== Shared confirmation modal ===== #}
+<div id="postActionConfirmModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="postActionConfirmTitle">
+    <div class="modal-content">
+        <h3 id="postActionConfirmTitle" class="modal-title">Əminsiniz?</h3>
+        <p id="postActionConfirmMsg" class="modal-body-text"></p>
+        <div class="modal-buttons">
+            <button id="postActionConfirmCancel" class="modal-cancel-btn" type="button">Ləğv et</button>
+            <button id="postActionConfirmOk" class="modal-confirm-btn" type="button">Təsdiqlə</button>
+        </div>
+    </div>
+</div>
+
 <script nonce="{{ request.csp_nonce }}">
 (function () {
-    var forms = document.querySelectorAll(".pending-post-approvals-filters[data-auto-filter-form]");
-    forms.forEach(function (form) {
-        if (!form || form.dataset.autoFilterBound === "1") {
-            return;
-        }
+    /* ---- Auto-filter form ---- */
+    var filterForms = document.querySelectorAll(".pending-post-approvals-filters[data-auto-filter-form]");
+    filterForms.forEach(function (form) {
+        if (!form || form.dataset.autoFilterBound === "1") return;
         form.dataset.autoFilterBound = "1";
 
         var debounceHandle = null;
@@ -168,10 +321,7 @@
         var selects = form.querySelectorAll("select");
 
         function submitForm() {
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit();
-                return;
-            }
+            if (typeof form.requestSubmit === "function") { form.requestSubmit(); return; }
             form.submit();
         }
 
@@ -181,38 +331,22 @@
                 debounceHandle = window.setTimeout(submitForm, 350);
             });
             field.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    window.clearTimeout(debounceHandle);
-                    submitForm();
-                }
+                if (event.key === "Enter") { event.preventDefault(); window.clearTimeout(debounceHandle); submitForm(); }
             });
         });
-
-        selects.forEach(function (select) {
-            select.addEventListener("change", submitForm);
-        });
+        selects.forEach(function (select) { select.addEventListener("change", submitForm); });
     });
 
-    var toggleButtons = document.querySelectorAll("[data-pending-post-toggle]");
-    toggleButtons.forEach(function (button) {
-        if (!button || button.dataset.toggleBound === "1") {
-            return;
-        }
+    /* ---- Content toggle ---- */
+    document.querySelectorAll("[data-pending-post-toggle]").forEach(function (button) {
+        if (!button || button.dataset.toggleBound === "1") return;
         button.dataset.toggleBound = "1";
-
         button.addEventListener("click", function () {
             var container = button.closest("[data-pending-post-content]");
-            if (!container) {
-                return;
-            }
-
+            if (!container) return;
             var preview = container.querySelector("[data-pending-post-preview]");
             var full = container.querySelector("[data-pending-post-full]");
-            if (!preview || !full) {
-                return;
-            }
-
+            if (!preview || !full) return;
             var isExpanded = button.getAttribute("aria-expanded") === "true";
             preview.hidden = !isExpanded;
             full.hidden = isExpanded;
@@ -221,6 +355,83 @@
                 ? (button.dataset.collapsedLabel || "Show more")
                 : (button.dataset.expandedLabel || "Show less");
             container.classList.toggle("is-expanded", !isExpanded);
+        });
+    });
+
+    /* ---- Shared confirmation modal ---- */
+    var modal = document.getElementById("postActionConfirmModal");
+    var modalTitle = document.getElementById("postActionConfirmTitle");
+    var modalMsg = document.getElementById("postActionConfirmMsg");
+    var modalOk = document.getElementById("postActionConfirmOk");
+    var modalCancel = document.getElementById("postActionConfirmCancel");
+    var pendingCallback = null;
+
+    function openModal(title, msg, onConfirm) {
+        modalTitle.textContent = title;
+        modalMsg.textContent = msg;
+        pendingCallback = onConfirm;
+        modal.style.display = "flex";
+        modalOk.focus();
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+        pendingCallback = null;
+    }
+
+    if (modalCancel) modalCancel.addEventListener("click", closeModal);
+    if (modalOk) {
+        modalOk.addEventListener("click", function () {
+            var cb = pendingCallback;
+            closeModal();
+            if (cb) cb();
+        });
+    }
+    if (modal) {
+        modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.style.display === "flex") closeModal(); });
+    }
+
+    /* ---- Action button handler (all action buttons use js-post-action-btn) ---- */
+    document.querySelectorAll(".js-post-action-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var form = btn.closest("form");
+            if (!form) return;
+
+            var action = btn.dataset.action || "";
+            var confirmTitle = btn.dataset.confirmTitle || "Əminsiniz?";
+            var confirmMsg = btn.dataset.confirmMsg || "";
+            var postTitle = (form.dataset.postTitle || "").trim();
+            var fullMsg = postTitle ? '"' + postTitle + '"\n' + confirmMsg : confirmMsg;
+
+            openModal(confirmTitle, fullMsg, function () {
+                /* Validate feedback textarea if present and required */
+                var reasonField = form.querySelector(".pending-post-moderate-reason");
+                if (reasonField && reasonField.required && !reasonField.value.trim()) {
+                    reasonField.focus();
+                    reasonField.classList.add("is-invalid");
+                    var existing = form.querySelector(".moderate-reason-error");
+                    if (!existing) {
+                        var errDiv = document.createElement("div");
+                        errDiv.className = "invalid-feedback moderate-reason-error";
+                        errDiv.style.display = "block";
+                        errDiv.textContent = "Zəhmət olmasa səbəbi yazın.";
+                        reasonField.parentNode.insertBefore(errDiv, reasonField.nextSibling);
+                    }
+                    return;
+                }
+                if (reasonField) {
+                    reasonField.classList.remove("is-invalid");
+                    var err = form.querySelector(".moderate-reason-error");
+                    if (err) err.remove();
+                }
+
+                /* Set dynamic action input if the form uses one */
+                var actionInput = form.querySelector("input.js-form-action[name='action']");
+                if (actionInput) actionInput.value = action;
+
+                form.submit();
+            });
         });
     });
 })();

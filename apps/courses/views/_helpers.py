@@ -21,6 +21,7 @@ from django.utils.translation import pgettext
 from apps.courses.models import Course
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
+from core.tenancy import restore_request_organization_from_profile
 
 # ════════════════════════════════════════════════════════════════════════════
 # Helper Functions
@@ -44,6 +45,7 @@ def _student_users_queryset(queryset):
 
 def _require_org_permission(request, permission):
     """Require that the request user has a specific organization permission."""
+    restore_request_organization_from_profile(request)
     if request_has_permission(request, permission):
         return
     raise PermissionDenied(

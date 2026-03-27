@@ -15,6 +15,7 @@ from django.core.files.images import get_image_dimensions
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.db.models.deletion import ProtectedError
 from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -37,7 +38,7 @@ from apps.notifications.services import (
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
-from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
+from core.tenancy import restore_request_organization_from_profile
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from ..forms import CustomPasswordChangeForm
@@ -141,48 +142,7 @@ def _restore_profile_org_context(request, profile, active_section):
     """
     if active_section not in PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT:
         return
-    if getattr(request, "organization", None) is not None:
-        return
-
-    fallback_org = getattr(profile, "organization", None)
-    if fallback_org is None or not getattr(fallback_org, "is_active", False):
-        return
-
-    from apps.organizations.models import Membership
-
-    memberships = list(
-        Membership.objects.filter(
-            user=request.user,
-            organization=fallback_org,
-            organization__is_active=True,
-            is_active=True,
-        )
-        .select_related("organization", "role", "scope_unit")
-        .order_by("-is_primary", "-role__level")
-    )
-    is_owner = getattr(fallback_org, "owner_id", None) == getattr(request.user, "id", None)
-    is_superadmin = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False))
-    if not memberships and not is_owner and not is_superadmin:
-        return
-
-    permissions_set = set()
-    for membership in memberships:
-        if membership.role.permissions:
-            permissions_set.update(membership.role.permissions)
-        if getattr(membership.role, "name", "") == "teacher":
-            permissions_set.add("course.create")
-
-    request.organization = fallback_org
-    request.org_memberships = memberships
-    request.org_permissions = list(permissions_set)
-    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, bool(is_owner and not memberships))
-    request.session["active_organization"] = fallback_org.slug
-    if hasattr(request.user, "set_active_organization_context"):
-        request.user.set_active_organization_context(
-            fallback_org,
-            memberships=memberships,
-            permissions=request.org_permissions,
-        )
+    restore_request_organization_from_profile(request, profile=profile)
 
 
 def _parse_public_profile_page_number(raw_value):
@@ -349,11 +309,12 @@ def user_profile(request):
     Ensures profile exists before rendering.
     Now accessible to ALL users (not just teachers).
     """
-    from apps.blog.models import Post
-    from apps.blog.selectors import get_category_assignment_choices
+    from apps.blog.forms import CategoryManagementForm
+    from apps.blog.models import Category, Post
+    from apps.blog.selectors import build_post_category_picker_options, get_post_category_tree
     from apps.blog.services import (
         author_requires_post_approval,
-        can_user_create_post_category,
+        can_user_manage_categories,
         collect_reviewable_posts,
         count_pending_reviewable_posts,
     )
@@ -410,6 +371,23 @@ def user_profile(request):
     allowed_sections = capabilities["allowed_sections"]
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
     password_change_form = CustomPasswordChangeForm(request.user)
+    category_management_create_form = None
+    category_management_edit_form = None
+    category_management_edit_item = None
+
+    def _category_section_url(*, section="category-management", edit_category=None):
+        query_params = QueryDict(mutable=True)
+        query_params["section"] = section
+        if edit_category:
+            query_params["edit_category"] = str(edit_category)
+        return f"{reverse('accounts:profile')}?{query_params.urlencode()}"
+
+    def _load_managed_category(raw_category_id):
+        try:
+            category_id = int(str(raw_category_id or "").strip())
+        except (TypeError, ValueError):
+            return None
+        return Category.objects.select_related("parent").filter(pk=category_id).first()
 
     if request.method == "POST":
         submitted_form = (request.POST.get("profile_form") or "").strip()
@@ -527,75 +505,136 @@ def user_profile(request):
             else:
                 messages.error(request, _("notif_no_recipients"))
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+        elif submitted_form in {"category-create", "category-management-save", "category-management-delete"}:
+            if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(
+                request.user
+            ):
+                messages.error(request, "Bu bölməni yalnız SuperAdmin idarə edə bilər.")
+                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
+
+            if submitted_form == "category-management-delete":
+                active_section = "category-management"
+                category_to_delete = _load_managed_category(request.POST.get("category_id"))
+                if category_to_delete is None:
+                    messages.error(request, "Silinəcək kateqoriya tapılmadı.")
+                    return redirect(_category_section_url(section="category-management"))
+
+                deleted_category_name = category_to_delete.localized_full_name
+                try:
+                    category_to_delete.delete()
+                except ProtectedError:
+                    messages.error(
+                        request,
+                        "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur.",
+                    )
+                else:
+                    messages.success(request, f'"{deleted_category_name}" uğurla silindi.')
+                return redirect(_category_section_url(section="category-management"))
+
+            if submitted_form == "category-create":
+                active_section = "create-category"
+                category_management_bound_form = CategoryManagementForm(request.POST)
+
+                if category_management_bound_form.is_valid():
+                    saved_category = category_management_bound_form.save()
+                    saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
+                    messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yaradıldı.')
+                    return redirect(_category_section_url(section="create-category"))
+
+                category_management_create_form = category_management_bound_form
+                messages.error(request, "Kateqoriya yaradılmadı. Zəhmət olmasa xətaları düzəldin.")
+            else:
+                active_section = "category-management"
+
+                submitted_category_id = request.POST.get("category_id")
+                category_management_edit_item = _load_managed_category(submitted_category_id)
+                if submitted_category_id and category_management_edit_item is None:
+                    messages.error(request, "Redaktə ediləcək kateqoriya tapılmadı.")
+                    return redirect(_category_section_url(section="category-management"))
+
+                category_management_bound_form = CategoryManagementForm(
+                    request.POST,
+                    instance=category_management_edit_item,
+                )
+
+                if category_management_bound_form.is_valid():
+                    saved_category = category_management_bound_form.save()
+                    saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
+                    messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yeniləndi.')
+                    return redirect(_category_section_url(section="category-management"))
+
+                category_management_edit_form = category_management_bound_form
+                messages.error(request, "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin.")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section
             if target_section not in allowed_sections:
                 target_section = "profile-info"
             return redirect(f"{reverse('accounts:profile')}?section={target_section}")
 
-        allowed_user_fields = ["first_name", "last_name", "email"]
-        user_update_payload = {
-            "first_name": (request.POST.get("first_name", request.user.first_name) or "").strip(),
-            "last_name": (request.POST.get("last_name", request.user.last_name) or "").strip(),
-            "email": (request.POST.get("email", request.user.email) or "").strip().lower(),
-        }
-        first_name = user_update_payload["first_name"]
-        last_name = user_update_payload["last_name"]
-        new_email = user_update_payload["email"]
-        student_university_name = (
-            request.POST.get("student_university_name", profile.student_university_name) or ""
-        ).strip()
-        student_school_identifier = (
-            request.POST.get("student_school_identifier", profile.student_school_identifier) or ""
-        ).strip()
+        if submitted_form == "edit-profile":
+            allowed_user_fields = ["first_name", "last_name", "email"]
+            user_update_payload = {
+                "first_name": (request.POST.get("first_name", request.user.first_name) or "").strip(),
+                "last_name": (request.POST.get("last_name", request.user.last_name) or "").strip(),
+                "email": (request.POST.get("email", request.user.email) or "").strip().lower(),
+            }
+            first_name = user_update_payload["first_name"]
+            last_name = user_update_payload["last_name"]
+            new_email = user_update_payload["email"]
+            student_university_name = (
+                request.POST.get("student_university_name", profile.student_university_name) or ""
+            ).strip()
+            student_school_identifier = (
+                request.POST.get("student_school_identifier", profile.student_school_identifier) or ""
+            ).strip()
 
-        if not first_name or not last_name or not new_email:
-            messages.error(request, pgettext_lazy("accounts.profile_edit.message", "required_fields_missing"))
-            return redirect("accounts:profile" + "?section=edit-profile")
-
-        if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
-            messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
-            return redirect("accounts:profile" + "?section=edit-profile")
-
-        # Update user info
-        for field_name, field_value in user_update_payload.items():
-            setattr(request.user, field_name, field_value)
-        request.user.save(update_fields=allowed_user_fields)
-
-        # Update profile
-        profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
-        profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
-        profile.location = (request.POST.get("location", profile.location) or "").strip()
-        profile.student_university_name = student_university_name
-        profile.student_school_identifier = student_school_identifier
-
-        # Handle avatar upload
-        uploaded_avatar = request.FILES.get("avatar")
-        if uploaded_avatar is not None:
-            avatar_error = _validate_avatar_upload(uploaded_avatar)
-            if avatar_error:
-                messages.error(request, avatar_error)
+            if not first_name or not last_name or not new_email:
+                messages.error(request, pgettext_lazy("accounts.profile_edit.message", "required_fields_missing"))
                 return redirect("accounts:profile" + "?section=edit-profile")
-            randomize_uploaded_filename(uploaded_avatar)
-            profile.avatar = uploaded_avatar
 
-        # Only admins can change supervisor_code
-        if getattr(request.user, "is_admin_level", False):
-            profile.supervisor_code = request.POST.get("supervisor_code", "")
+            if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
+                messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
+                return redirect("accounts:profile" + "?section=edit-profile")
 
-        if _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}) and not (
-            profile.student_university_name or profile.student_school_identifier
-        ):
-            messages.error(
-                request,
-                pgettext_lazy("accounts.profile_edit.message", "student_university_or_school_required"),
-            )
-            return redirect("accounts:profile" + "?section=edit-profile")
+            # Update user info
+            for field_name, field_value in user_update_payload.items():
+                setattr(request.user, field_name, field_value)
+            request.user.save(update_fields=allowed_user_fields)
 
-        profile.save()
+            # Update profile
+            profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
+            profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
+            profile.location = (request.POST.get("location", profile.location) or "").strip()
+            profile.student_university_name = student_university_name
+            profile.student_school_identifier = student_school_identifier
 
-        messages.success(request, pgettext_lazy("accounts.profile_edit.message", "profile_updated_successfully"))
-        return redirect("accounts:profile")
+            # Handle avatar upload
+            uploaded_avatar = request.FILES.get("avatar")
+            if uploaded_avatar is not None:
+                avatar_error = _validate_avatar_upload(uploaded_avatar)
+                if avatar_error:
+                    messages.error(request, avatar_error)
+                    return redirect("accounts:profile" + "?section=edit-profile")
+                randomize_uploaded_filename(uploaded_avatar)
+                profile.avatar = uploaded_avatar
+
+            # Only admins can change supervisor_code
+            if getattr(request.user, "is_admin_level", False):
+                profile.supervisor_code = request.POST.get("supervisor_code", "")
+
+            if _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}) and not (
+                profile.student_university_name or profile.student_school_identifier
+            ):
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.profile_edit.message", "student_university_or_school_required"),
+                )
+                return redirect("accounts:profile" + "?section=edit-profile")
+
+            profile.save()
+
+            messages.success(request, pgettext_lazy("accounts.profile_edit.message", "profile_updated_successfully"))
+            return redirect("accounts:profile")
 
     # Get user's roles
     user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
@@ -632,9 +671,10 @@ def user_profile(request):
 
     user_posts = None
     posts_count = 0
-    categories = []
+    post_category_tree = []
+    post_category_root_options = []
+    post_category_subcategory_options = []
     post_creation_requires_approval = False
-    can_create_post_categories = False
     if capabilities["can_manage_blog"]:
         user_posts_qs = (
             Post.objects.filter(author=request.user)
@@ -644,9 +684,11 @@ def user_profile(request):
         )
         posts_count = user_posts_qs.count()
         user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
-        categories = get_category_assignment_choices()
+        post_category_tree = get_post_category_tree()
+        post_category_root_options, post_category_subcategory_options = build_post_category_picker_options(
+            post_category_tree
+        )
         post_creation_requires_approval = author_requires_post_approval(request.user)
-        can_create_post_categories = can_user_create_post_category(request.user)
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -1227,6 +1269,16 @@ def user_profile(request):
                 .distinct()
             )
 
+            # Include the requesting superadmin's own profile even without a formal membership
+            if capabilities["is_superadmin"] and not manage_role_profiles.filter(user=request.user).exists():
+                own_profile_qs = (
+                    UserProfile.objects.filter(user=request.user)
+                    .select_related("user")
+                    .prefetch_related("user__memberships__role")
+                    .distinct()
+                )
+                manage_role_profiles = (manage_role_profiles | own_profile_qs).distinct()
+
         if manage_roles_search:
             manage_role_profiles = manage_role_profiles.filter(
                 Q(user__username__icontains=manage_roles_search)
@@ -1291,14 +1343,136 @@ def user_profile(request):
     notif_filter = request.GET.get("notif_filter", "all")
     if notif_filter not in ("all", "unread", "read"):
         notif_filter = "all"
-    in_app_notifications_qs = get_user_notifications(user=request.user, filter_by=notif_filter)
+    notif_search_query = _normalize_public_profile_query_value(
+        request.GET.get("notif_search"),
+        max_length=100,
+    )
+    in_app_notifications_qs = get_user_notifications(
+        user=request.user,
+        filter_by=notif_filter,
+        search_query=notif_search_query,
+    )
     in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
     in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+    notif_pagination_query = _query_string(
+        section="notifications",
+        notif_filter=notif_filter,
+        notif_search=notif_search_query,
+    )
 
     # Publish-notification data (teacher groups, org info)
     publish_notification_targets = []
     if "publish-notification" in allowed_sections:
         publish_notification_targets = _get_publish_notification_targets(request.user, capabilities)
+
+    category_management_page = None
+    category_management_create_parent_options = []
+    category_management_create_selected_parent_id = ""
+    category_management_edit_parent_options = []
+    category_management_edit_selected_parent_id = ""
+    category_management_search_query = ""
+    category_management_page_param = "category_page"
+    category_management_pagination_query = ""
+    category_management_total_count = 0
+    category_management_filtered_count = 0
+    if {"create-category", "category-management"} & set(allowed_sections):
+        if category_management_create_form is None:
+            category_management_create_form = CategoryManagementForm()
+
+        category_management_create_parent_options = [
+            {
+                "value": str(category.id),
+                "label": category.localized_name,
+                "attrs": "",
+            }
+            for category in category_management_create_form.fields["parent"].queryset
+        ]
+        category_management_create_selected_parent_id = category_management_create_form["parent"].value() or ""
+
+    if "category-management" in allowed_sections:
+        category_management_search_query = _normalize_public_profile_query_value(
+            request.GET.get("category_search"),
+            max_length=100,
+        )
+        normalized_category_search = category_management_search_query.casefold()
+        managed_categories_queryset = Category.objects.annotate(direct_post_count=Count("posts")).order_by(
+            "sort_order",
+            "name_en",
+            "name_az",
+            "id",
+        )
+        category_management_tree = get_post_category_tree(category_queryset=managed_categories_queryset)
+        filtered_category_tree = []
+
+        def _category_matches_search(category):
+            if not normalized_category_search:
+                return True
+            searchable_values = (
+                category.name_az,
+                category.name_en,
+                category.name_ru,
+                category.name_tr,
+                category.slug,
+            )
+            return any(normalized_category_search in (value or "").casefold() for value in searchable_values)
+
+        for root_category in category_management_tree:
+            root_children = list(getattr(root_category, "child_categories", []))
+            matching_children = [
+                child_category for child_category in root_children if _category_matches_search(child_category)
+            ]
+            if normalized_category_search:
+                root_matches = _category_matches_search(root_category)
+                if not root_matches and not matching_children:
+                    continue
+                visible_children = root_children if root_matches else matching_children
+            else:
+                visible_children = root_children
+
+            root_category.total_child_count = len(root_children)
+            root_category.can_delete = root_category.direct_post_count == 0 and not root_children
+            root_category.child_categories = visible_children
+
+            for child_category in visible_children:
+                child_category.can_delete = child_category.direct_post_count == 0
+
+            filtered_category_tree.append(root_category)
+
+        category_management_total_count = len(category_management_tree)
+        category_management_filtered_count = len(filtered_category_tree)
+        category_management_page = Paginator(filtered_category_tree, 6).get_page(
+            request.GET.get(category_management_page_param)
+        )
+        category_management_pagination_query = _query_string(
+            section="category-management",
+            category_search=category_management_search_query,
+        )
+
+        if category_management_edit_form is None:
+            category_management_edit_item = _load_managed_category(request.GET.get("edit_category"))
+            if category_management_edit_item is not None:
+                category_management_edit_form = CategoryManagementForm(instance=category_management_edit_item)
+
+        if category_management_edit_form is not None:
+            category_management_edit_parent_options = [
+                {
+                    "value": str(category.id),
+                    "label": category.localized_name,
+                    "attrs": "",
+                }
+                for category in category_management_edit_form.fields["parent"].queryset
+            ]
+            category_management_edit_selected_parent_id = category_management_edit_form["parent"].value() or ""
+        else:
+            category_management_edit_form = CategoryManagementForm()
+            category_management_edit_parent_options = [
+                {
+                    "value": str(category.id),
+                    "label": category.localized_name,
+                    "attrs": "",
+                }
+                for category in category_management_edit_form.fields["parent"].queryset
+            ]
 
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
@@ -1306,6 +1480,8 @@ def user_profile(request):
         "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
         "posts": pgettext_lazy("profile.section", "posts"),
         "create-post": pgettext_lazy("profile.section", "create_post"),
+        "create-category": "Create category",
+        "category-management": "Categories",
         "courses": pgettext_lazy("profile.section", "my_courses"),
         "my-exams": pgettext_lazy("profile.section", "my_exams"),
         "my-courses": pgettext_lazy("profile.section", "my_created_courses"),
@@ -1314,12 +1490,12 @@ def user_profile(request):
         "my-results": pgettext_lazy("profile.section", "my_results"),
         "pending-answers": "Pending cavablar",
         "groups": pgettext_lazy("profile.section", "groups"),
-        "pending-post-approvals": "Təsdiq gözləyən postlar",
+        "pending-post-approvals": "Postların idarəetməsi",
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
         "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
-        "student-organization-management": "Staff İdarəetməsi",
+        "student-organization-management": pgettext_lazy("profile.section", "staff_management"),
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
@@ -1329,18 +1505,6 @@ def user_profile(request):
     }
 
     shortcut_sections = []
-    if "create-post" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "create-post",
-                "title": section_titles["create-post"],
-                "url": reverse("create_post"),
-                "icon": "fas fa-plus-circle",
-                "source_url": reverse("create_post"),
-                "description": pgettext_lazy("profile.shortcut", "create_post_description"),
-                "action_label": pgettext_lazy("profile.shortcut", "create_post_action"),
-            }
-        )
     if capabilities["can_view_blog"]:
         shortcut_sections.append(
             {
@@ -1368,9 +1532,10 @@ def user_profile(request):
         "password_change_form": password_change_form,
         "user_posts": user_posts,
         "posts_count": posts_count,
-        "categories": categories,
+        "post_category_tree": post_category_tree,
+        "post_category_root_options": post_category_root_options,
+        "post_category_subcategory_options": post_category_subcategory_options,
         "post_creation_requires_approval": post_creation_requires_approval,
-        "can_create_post_categories": can_create_post_categories,
         "my_courses": my_courses,
         "courses_count": courses_count,
         "my_exams": my_exams,
@@ -1430,6 +1595,8 @@ def user_profile(request):
         "in_app_unread_count": in_app_unread_count,
         "in_app_notifications_page": in_app_notifications_page,
         "notif_filter": notif_filter,
+        "notif_search_query": notif_search_query,
+        "notif_pagination_query": notif_pagination_query,
         "pending_student_join_org_name": pending_student_join_org_name,
         "pending_student_join_message": pending_student_join_message,
         "student_can_leave_org": student_can_leave_org,
@@ -1439,6 +1606,19 @@ def user_profile(request):
         "student_org_management_section": student_org_management_section,
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
+        "category_management_create_form": category_management_create_form,
+        "category_management_edit_form": category_management_edit_form,
+        "category_management_edit_item": category_management_edit_item,
+        "category_management_page": category_management_page,
+        "category_management_create_parent_options": category_management_create_parent_options,
+        "category_management_create_selected_parent_id": category_management_create_selected_parent_id,
+        "category_management_edit_parent_options": category_management_edit_parent_options,
+        "category_management_edit_selected_parent_id": category_management_edit_selected_parent_id,
+        "category_management_search_query": category_management_search_query,
+        "category_management_page_param": category_management_page_param,
+        "category_management_pagination_query": category_management_pagination_query,
+        "category_management_total_count": category_management_total_count,
+        "category_management_filtered_count": category_management_filtered_count,
         "superadmin_organizations_section": superadmin_organizations_section,
         "superadmin_pending_org_count": superadmin_organizations_section.get("pending_count", 0),
         "is_teacher": capabilities["is_teacher"],

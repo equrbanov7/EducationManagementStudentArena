@@ -1,0 +1,96 @@
+{% load i18n %}
+{% if 'create-post' in allowed_sections %}
+<section class="profile-section-panel profile-section--create-post {% if active_section == 'create-post' %}is-active{% endif %}"
+         data-profile-section-panel="create-post"
+         data-source-url="{% url 'create_post' %}">
+    <div class="section-card profile-posts-card profile-create-post-card" data-create-post-form-container>
+        <div class="section-title">
+            <i class="fas fa-plus-circle"></i>
+            {% trans "create_post" context "profile.section" %}
+        </div>
+
+        <p class="settings-note">
+            <i class="fas fa-circle-info"></i>
+            {% trans "create_post_description" context "profile.shortcut" %}
+        </p>
+
+        <div id="createFormError" class="create-form-error" hidden></div>
+
+        <form id="createForm" enctype="multipart/form-data" data-requires-approval="{{ post_creation_requires_approval|yesno:'true,false' }}">
+            {% csrf_token %}
+            {% if post_creation_requires_approval %}
+                <div class="approval-notice">
+                    Bu post əvvəlcə müəllim təsdiqinə gedəcək və təsdiqlənənə qədər paylaşılmayacaq.
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="createTitle">{% trans "label_title" context "profile.posts" %}</label>
+                <input type="text" id="createTitle" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="createCategory">{% trans "label_category" context "profile.posts" %}</label>
+                <div class="profile-post-category-picker js-post-category-picker">
+                    <div class="profile-post-category-grid">
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Category" field_label_class="profile-post-category-grid__label" field_id="createCategory" field_name="category" field_placeholder="Select a category" field_options=post_category_root_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-root required" %}
+
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Subcategory" field_optional_label="Optional" field_label_class="profile-post-category-grid__label" field_id="createSubcategory" field_name="subcategory" field_placeholder="Select a subcategory" field_options=post_category_subcategory_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-sub" field_hint="Optional: choose a more specific subcategory if it matches your post." field_hint_class="profile-post-category-grid__hint" field_hint_attrs="data-post-category-sub-hint" %}
+                    </div>
+
+                    <small class="profile-post-category-picker__footer">
+                        Categories are managed by SuperAdmin. New categories cannot be created here.
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="createExcerpt">{% trans "label_excerpt" context "profile.posts" %}</label>
+                <textarea id="createExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="createContent">{% trans "label_content" context "profile.posts" %}</label>
+                <textarea id="createContent" name="content" class="form-control" rows="10" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="createImageUrl">{% trans "label_image_url" context "profile.posts" %}</label>
+                <input type="url" id="createImageUrl" name="image_url" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="createImage">{% trans "label_upload_image" context "profile.posts" %}</label>
+                <input type="file" id="createImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
+                <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
+            </div>
+
+            {% if post_creation_requires_approval %}
+                <div class="form-group">
+                    <div class="approval-lock-row">
+                        <i class="fas fa-lock"></i>
+                        <span>Bu post avtomatik olaraq müəllim təsdiqinə göndəriləcək.</span>
+                    </div>
+                    <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
+                </div>
+            {% else %}
+                <div class="form-group form-check publish-toggle">
+                    <label class="checkbox-label checkbox-label--prominent">
+                        <input type="checkbox"
+                               id="createIsPublished"
+                               name="is_published"
+                               checked>
+                        <span class="checkbox-label-text">{% trans "publish_article" context "profile.posts" %}</span>
+                    </label>
+                </div>
+            {% endif %}
+
+            <div class="profile-create-post-actions">
+                <button type="submit" id="saveCreate" class="btn profile-action-btn profile-action-btn--ocean">
+                    {% trans "create" context "profile.posts" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endif %}

@@ -15,6 +15,13 @@ from core.utils import get_client_ip
 User = get_user_model()
 
 
+def is_tenant_accessible_organization(organization) -> bool:
+    """Return whether an organization may be used as an active tenant context."""
+    return bool(
+        organization and getattr(organization, "is_active", False) and getattr(organization, "status", "") == "active"
+    )
+
+
 def get_active_memberships(user, organization=None):
     """
     Return active memberships for ``user``.
@@ -32,6 +39,7 @@ def get_active_memberships(user, organization=None):
             user=user,
             is_active=True,
             organization__is_active=True,
+            organization__status="active",
         )
         .select_related("organization", "role", "scope_unit")
         .order_by("-is_primary", "-role__level", "id")
@@ -133,12 +141,13 @@ def _candidate_membership_role_names(role_names):
 def organization_user_queryset(organization, queryset=None):
     """Return active users who belong to ``organization``."""
     base_queryset = queryset if queryset is not None else User.objects.all()
-    if organization is None:
+    if not is_tenant_accessible_organization(organization):
         return base_queryset.none()
 
     return base_queryset.filter(
         memberships__organization=organization,
         memberships__organization__is_active=True,
+        memberships__organization__status="active",
         memberships__is_active=True,
     ).distinct()
 
@@ -169,7 +178,7 @@ def tenant_filter(queryset: QuerySet, organization, field_name="organization"):
     Filter a queryset to only include objects belonging to the given organization.
     Returns empty queryset if organization is None.
     """
-    if organization is None:
+    if not is_tenant_accessible_organization(organization):
         return queryset.none()
     return queryset.filter(**{field_name: organization})
 
@@ -178,13 +187,14 @@ def get_org_members(organization):
     """Get all active memberships for an organization."""
     from apps.organizations.models import Membership
 
-    if organization is None:
+    if not is_tenant_accessible_organization(organization):
         return Membership.objects.none()
 
     return (
         Membership.objects.filter(
             organization=organization,
             organization__is_active=True,
+            organization__status="active",
             is_active=True,
             user__is_active=True,
         )
@@ -195,7 +205,7 @@ def get_org_members(organization):
 
 def get_org_roles(organization):
     """Get all active roles for an organization."""
-    if organization is None:
+    if not is_tenant_accessible_organization(organization):
         return []
     from apps.organizations.models import Role
 
@@ -204,7 +214,7 @@ def get_org_roles(organization):
 
 def get_user_org_role_level(user, organization):
     """Get the highest role level a user has in an organization."""
-    if not user or not organization:
+    if not user or not is_tenant_accessible_organization(organization):
         return 0
     if getattr(organization, "owner_id", None) == getattr(user, "id", None):
         return max(
@@ -220,6 +230,8 @@ def get_user_org_role_level(user, organization):
 
 def can_user_manage_org(user, organization):
     """Check if user has management-level access to the organization (level >= 80)."""
+    if not is_tenant_accessible_organization(organization):
+        return False
     return get_user_org_role_level(user, organization) >= 80
 
 

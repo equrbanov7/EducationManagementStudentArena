@@ -13,10 +13,14 @@ from django.utils.translation import pgettext
 from core.helpers import _safe_same_origin_redirect_path
 
 from .models import Organization
+from .services import can_user_manage_org, is_tenant_accessible_organization
 
 
 def _can_access_organization(user, organization):
     if not getattr(user, "is_authenticated", False):
+        return False
+
+    if not is_tenant_accessible_organization(organization):
         return False
 
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
@@ -25,7 +29,17 @@ def _can_access_organization(user, organization):
     if getattr(organization, "owner_id", None) == user.id:
         return True
 
-    return user.memberships.filter(organization=organization, is_active=True).exists()
+    return user.memberships.filter(organization=organization, organization__status="active", is_active=True).exists()
+
+
+def _can_manage_organization(user, organization):
+    if not _can_access_organization(user, organization):
+        return False
+
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+
+    return can_user_manage_org(user, organization)
 
 
 @login_required
@@ -36,7 +50,9 @@ def select_organization(request):
     is_superadmin = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
 
     # Get all organizations user is a member of
-    user_memberships = request.user.memberships.filter(is_active=True).select_related("organization", "role")
+    user_memberships = request.user.memberships.filter(is_active=True, organization__status="active").select_related(
+        "organization", "role"
+    )
 
     organizations = {}
     for membership in user_memberships:
@@ -49,7 +65,9 @@ def select_organization(request):
                 }
             organizations[org.id]["memberships"].append(membership)
 
-    owned_organizations = Organization.objects.filter(owner=request.user, is_active=True).order_by("name")
+    owned_organizations = Organization.objects.filter(owner=request.user, is_active=True, status="active").order_by(
+        "name"
+    )
     for organization in owned_organizations:
         organizations.setdefault(
             organization.id,
@@ -60,7 +78,9 @@ def select_organization(request):
         )
 
     if is_superadmin:
-        for organization in Organization.objects.filter(is_active=True).select_related("owner").order_by("name"):
+        for organization in (
+            Organization.objects.filter(is_active=True, status="active").select_related("owner").order_by("name")
+        ):
             organizations.setdefault(
                 organization.id,
                 {
@@ -194,7 +214,7 @@ def organization_members(request, slug):
 
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    if not _can_access_organization(request.user, organization):
+    if not _can_manage_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -237,7 +257,7 @@ def organization_roles(request, slug):
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    if not _can_access_organization(request.user, organization):
+    if not _can_manage_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -273,7 +293,7 @@ def organization_settings(request, slug):
     if not is_superadmin and not is_owner:
         # Check if user has admin role
         has_admin = request.user.memberships.filter(
-            organization=organization, role__level__gte=90, is_active=True
+            organization=organization, organization__status="active", role__level__gte=90, is_active=True
         ).exists()
 
         if not has_admin:
