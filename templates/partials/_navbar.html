@@ -2,6 +2,7 @@
 {% url 'home' as home_url %}
 {% url 'about' as about_url %}
 {% url 'subscribe' as subscribe_url %}
+{% with technology_url=home_url|add:'?category=technology' education_url=home_url|add:'?category=education' %}
 <header class="blog-header">
     <div class="blog-header__container">
         <nav class="blog-header__nav">
@@ -10,18 +11,22 @@
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
                 <li class="blog-header__nav-item">
                     <a href="{{ home_url }}"
-                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' %}blog-header__nav-link--active{% endif %}">
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
                         {% trans "home" context "nav" %}
                     </a>
                 </li>
-                {% for nav_category in blog_navbar_categories %}
-                    <li class="blog-header__nav-item">
-                        <a href="{% url 'category_detail' nav_category.slug %}"
-                           class="blog-header__nav-link {% if active_blog_nav_slug == nav_category.slug %}blog-header__nav-link--active{% endif %}">
-                            {{ nav_category.localized_name }}
-                        </a>
-                    </li>
-                {% endfor %}
+                <li class="blog-header__nav-item">
+                    <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                       class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "technology" context "nav" %}
+                    </a>
+                </li>
+                <li class="blog-header__nav-item">
+                    <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                       class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "education" context "nav" %}
+                    </a>
+                </li>
                 <li class="blog-header__nav-item">
                     <a href="{{ about_url }}"
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
@@ -34,7 +39,7 @@
                         {% trans "exams" context "nav" %}
                     </a>
                 </li>
-               {% comment %} It is temporary deactivate {% endcomment %} 
+               {% comment %} It is temporary deactivate {% endcomment %}
                 {% comment %} <li class="blog-header__nav-item">
                     <a href="{{ subscribe_url }}"
                        class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
@@ -88,9 +93,12 @@
                                     <span class="badge bg-danger ms-1" style="font-size:0.7rem">{{ notif_count }}</span>
                                 {% endif %}
                             </a>
-                            <a href="{% url 'accounts:logout' %}" class="blog-header__user-menu-item">
-                                {% trans "logout" context "nav" %}
-                            </a>
+                            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0;display:contents">
+                                {% csrf_token %}
+                                <button type="submit" class="blog-header__user-menu-item">
+                                    {% trans "logout" context "nav" %}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% else %}
@@ -118,18 +126,22 @@
 <ul class="blog-header__nav-list mobile-nav-panel">
     <li class="blog-header__nav-item">
         <a href="{{ home_url }}"
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' %}blog-header__nav-link--active{% endif %}">
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
             {% trans "home" context "nav" %}
         </a>
     </li>
-    {% for nav_category in blog_navbar_categories %}
-        <li class="blog-header__nav-item">
-            <a href="{% url 'category_detail' nav_category.slug %}"
-               class="blog-header__nav-link {% if active_blog_nav_slug == nav_category.slug %}blog-header__nav-link--active{% endif %}">
-                {{ nav_category.localized_name }}
-            </a>
-        </li>
-    {% endfor %}
+    <li class="blog-header__nav-item">
+        <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+           class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
+            {% trans "technology" context "nav" %}
+        </a>
+    </li>
+    <li class="blog-header__nav-item">
+        <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+           class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
+            {% trans "education" context "nav" %}
+        </a>
+    </li>
     <li class="blog-header__nav-item">
         <a href="{{ about_url }}"
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
@@ -150,9 +162,12 @@
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:logout' %}" class="blog-header__nav-link">
-                {% trans "logout" context "nav" %}
-            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
+                {% csrf_token %}
+                <button type="submit" class="blog-header__nav-link">
+                    {% trans "logout" context "nav" %}
+                </button>
+            </form>
         </li>
     {% else %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
@@ -171,11 +186,5 @@
     <li class="blog-header__nav-item blog-header__nav-item--language">
         {% include "partials/_language_switcher.html" with switcher_variant="mobile" %}
     </li>
-
-    <li class="blog-header__nav-item">
-        <a href="{{ subscribe_url }}"
-           class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
-            {% trans "subscribe" context "nav" %}
-        </a>
-    </li>
 </ul>
+{% endwith %}

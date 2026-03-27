@@ -4,15 +4,17 @@
     <div class="org-management-shell__header">
         <div>
             <div class="section-title">
-                <i class="fas fa-users-cog"></i> Staff İdarəetməsi
+                <i class="fas fa-users-cog"></i> {% trans "Staff Management" context "staff.management" %}
             </div>
             <p class="org-management-shell__lead">
                 {% if organization %}
-                {{ organization.name }} daxilində hansı qrupa baxmaq istədiyinizi seçin.
+                {% blocktrans trimmed with organization_name=organization.name context "staff.management" %}
+                Choose which group you want to view inside {{ organization_name }}.
+                {% endblocktrans %}
                 {% else %}
-                Superadmin görünüşündə hansı qrupa baxmaq istədiyinizi seçin.
+                {% trans "Choose which group you want to view in superadmin mode." context "staff.management" %}
                 {% endif %}
-                Heç nə seçilməsə, bütün hissələr açıq qalacaq və seçdiyiniz filterlərə uyğun panellər görünəcək.
+                {% trans "If nothing is selected, all sections stay open and panels are shown according to the filters you choose." context "staff.management" %}
             </p>
         </div>
         <div class="org-management-shell__badges">
@@ -20,7 +22,7 @@
             <span class="role-badge">{{ organization.get_org_type_display }}</span>
             {% endif %}
             {% if is_superadmin %}
-            <span class="role-badge role-warning">Superadmin görünüşü</span>
+            <span class="role-badge role-warning">{% trans "Superadmin view" context "staff.management" %}</span>
             {% endif %}
         </div>
     </div>
@@ -31,79 +33,79 @@
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-all>
-            <span>Hamısı</span>
+            <span>{% trans "All" context "staff.management" %}</span>
         </button>
         {% if organization %}
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-members">
-            <span>Tələbələr</span>
+            <span>{% trans "Students" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ students.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-pending">
-            <span>Tələbə müraciətləri</span>
+            <span>{% trans "Student requests" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ pending_requested_students.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-unassigned">
-            <span>Dəvətsizlər</span>
+            <span>{% trans "Unassigned" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ unassigned_students.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-invites">
-            <span>Dəvətlər</span>
+            <span>{% trans "Invites" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ sent_student_invites.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-members">
-            <span>Müəllimlər</span>
+            <span>{% trans "Teachers" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ teacher_members.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-requests">
-            <span>Müəllim müraciətləri</span>
+            <span>{% trans "Teacher requests" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ pending_teacher_requests.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-unassigned">
-            <span>Müəllim dəvətsizlər</span>
+            <span>{% trans "Unassigned teachers" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ unassigned_teachers.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-invites">
-            <span>Müəllim dəvətləri</span>
+            <span>{% trans "Teacher invites" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ sent_teacher_invites.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-members">
-            <span>Staff</span>
+            <span>{% trans "Staff" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ staff_members.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-requests">
-            <span>Staff müraciətləri</span>
+            <span>{% trans "Staff requests" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ pending_staff_requests.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-unassigned">
-            <span>Staff dəvətsizlər</span>
+            <span>{% trans "Unassigned staff" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ unassigned_staff.paginator.count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-invites">
-            <span>Staff dəvətləri</span>
+            <span>{% trans "Staff invites" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ sent_staff_invites.paginator.count }}</span>
         </button>
         {% endif %}
@@ -111,7 +113,7 @@
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="organizations">
-            <span>Təşkilatlar</span>
+            <span>{% trans "Organizations" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ organization_records.paginator.count }}</span>
         </button>
         {% endif %}
@@ -129,9 +131,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="student-members">
     <div class="section-title">
-        <i class="fas fa-user-graduate"></i> Təşkilat tələbələri
+        <i class="fas fa-user-graduate"></i> {% trans "Organization students" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Aktiv tələbələri buradan idarə edin.</p>
+    <p class="text-muted mb-3">{% trans "Manage active students from here." context "staff.management" %}</p>
     <form method="get"
           class="search-form role-assignment-search-form"
           data-standard-search-form
@@ -146,14 +148,14 @@
             <input type="text"
                    name="student_org_search"
                    value="{{ student_search_query }}"
-                   placeholder="Tələbə axtar..."
+                   placeholder="{% trans 'Search students...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -161,17 +163,17 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -191,15 +193,15 @@
                             data-student-username="@{{ student.user.username }}"
                             data-student-email="{{ student.user.email }}"
                             data-student-org="{{ organization.name }}"
-                            data-student-role="Tələbə"
+                            data-student-role="{% trans 'Student' context 'membership_request.role' %}"
                             {% if not can_manage_students %}disabled{% endif %}>
-                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                            <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
                         </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Tələbə tapılmadı.</td>
+                    <td colspan="4" class="text-center">{% trans "No student found." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -212,9 +214,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="student-pending">
     <div class="section-title">
-        <i class="fas fa-user-clock"></i> Təsdiq gözləyən tələbələr
+        <i class="fas fa-user-clock"></i> {% trans "Pending students" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Gözləyən müraciətləri qəbul edin və ya silin.</p>
+    <p class="text-muted mb-3">{% trans "Approve or delete pending requests from here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -229,14 +231,14 @@
             <input type="text"
                    name="student_org_pending_search"
                    value="{{ pending_search_query }}"
-                   placeholder="Gözləyən tələbə axtar..."
+                   placeholder="{% trans 'Search pending students...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -244,7 +246,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -260,31 +262,31 @@
                        id="selectAllPendingStudents"
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <div class="d-flex gap-2">
                 <button type="button"
                         class="btn btn-success btn-sm js-pending-add-confirm-bulk"
-                        data-default-label="Seçilənləri təşkilata əlavə et"
-                        data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"
-                        data-disabled-tooltip="Ən az 1 tələbə seçin"
+                        data-default-label="{% trans 'Add selected users to the organization' context 'staff.management' %}"
+                        data-selected-label="{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}"
+                        data-disabled-tooltip="{% trans 'Select at least 1 student' context 'staff.management' %}"
                         data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                        title="Ən az 1 tələbə seçin"
+                        title="{% trans 'Select at least 1 student' context 'staff.management' %}"
                         {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
                     <i class="fas fa-check-double"></i>
-                    <span class="js-pending-add-bulk-label">Seçilənləri təşkilata əlavə et</span>
+                    <span class="js-pending-add-bulk-label">{% trans "Add selected users to the organization" context "staff.management" %}</span>
                 </button>
                 <button type="submit"
                         name="bulk_reject"
                         value="1"
                         class="btn btn-outline-danger btn-sm js-pending-remove-bulk"
-                        data-default-label="Seçilənləri sil"
-                        data-selected-label="Seçilənləri sil ({count} seçildi)"
-                        data-disabled-tooltip="Ən az 1 seçin"
+                        data-default-label="{% trans 'Delete selected users' context 'staff.management' %}"
+                        data-selected-label="{% trans 'Delete selected users ({count} selected)' context 'staff.management' %}"
+                        data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                         data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                        title="Ən az 1 seçin"
+                        title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                         {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
-                    <i class="fas fa-trash"></i> Seçilənləri sil
+                    <i class="fas fa-trash"></i> {% trans "Delete selected users" context "staff.management" %}
                 </button>
             </div>
         </div>
@@ -294,12 +296,12 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Mesaj</th>
-                        <th>Status/Qeyd</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Message" context "staff.management" %}</th>
+                        <th>{% trans "Status / note" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -313,7 +315,7 @@
                                    data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
                                    data-user-username="@{{ pending_request.user.username }}"
                                    data-user-email="{{ pending_request.user.email }}"
-                                   data-target-role="Tələbə"
+                                   data-target-role="{% trans 'Student' context 'membership_request.role' %}"
                                    {% if not pending_request.request_is_actionable %}disabled{% endif %}>
                         </td>
                         <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>
@@ -335,9 +337,9 @@
                                         data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
                                         data-user-username="@{{ pending_request.user.username }}"
                                         data-user-email="{{ pending_request.user.email }}"
-                                        data-target-role="Tələbə"
+                                        data-target-role="{% trans 'Student' context 'membership_request.role' %}"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Təşkilata əlavə et
+                                    <i class="fas fa-user-check"></i> {% trans "Add to organization" context "staff.management" %}
                                 </button>
                                 {% endif %}
                                 <button type="submit"
@@ -345,7 +347,7 @@
                                         value="{{ pending_request.user.id }}"
                                         class="btn btn-outline-danger btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-trash"></i> Sil
+                                    <i class="fas fa-trash"></i> {% trans "Delete" context "staff.management" %}
                                 </button>
                             </div>
                         </td>
@@ -355,7 +357,7 @@
             </table>
         </div>
         {% if not pending_requested_students.paginator.count %}
-        <p class="text-center text-muted mt-2 mb-0">Təsdiq gözləyən tələbə yoxdur.</p>
+        <p class="text-center text-muted mt-2 mb-0">{% trans "There are no pending students." context "staff.management" %}</p>
         {% endif %}
     </form>
     {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
@@ -365,9 +367,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="student-unassigned">
     <div class="section-title">
-        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan tələbələr
+        <i class="fas fa-user-plus"></i> {% trans "Students without organization" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Dəvət göndərilə bilən tələbələr burada görünür.</p>
+    <p class="text-muted mb-3">{% trans "Students who can be invited appear here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -382,14 +384,14 @@
             <input type="text"
                    name="student_org_unassigned_search"
                    value="{{ unassigned_search_query }}"
-                   placeholder="Tələbə axtar..."
+                   placeholder="{% trans 'Search students...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -397,7 +399,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -412,19 +414,19 @@
                        data-select-all-unassigned
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
                     data-invite-action="bulk_invite_students"
                     data-invite-role-type="student"
-                    data-default-label="Seçilənlərə dəvət et"
-                    data-selected-label="Seçilənlərə dəvət et ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Invite selected users' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Invite selected users ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
+                <i class="fas fa-paper-plane"></i> {% trans "Invite selected users" context "staff.management" %}
             </button>
         </div>
 
@@ -433,10 +435,10 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -450,7 +452,7 @@
                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
-                                   data-target-role="Tələbə"
+                                   data-target-role="{% trans 'Student' context 'membership_request.role' %}"
                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
@@ -465,15 +467,15 @@
                                     data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                     data-user-username="@{{ profile.user.username }}"
                                     data-user-email="{{ profile.user.email }}"
-                                    data-target-role="Tələbə"
+                                    data-target-role="{% trans 'Student' context 'membership_request.role' %}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-paper-plane"></i> Dəvət et
+                                <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">Dəvət göndəriləcək tələbə tapılmadı.</td>
+                        <td colspan="5" class="text-center">{% trans "No student available for invitation." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -487,9 +489,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="student-invites">
     <div class="section-title">
-        <i class="fas fa-paper-plane"></i> Göndərilmiş dəvətlər
+        <i class="fas fa-paper-plane"></i> {% trans "Sent invites" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Qəbul edilməmiş dəvətləri buradan geri çəkin.</p>
+    <p class="text-muted mb-3">{% trans "Withdraw pending invites from here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -504,14 +506,14 @@
             <input type="text"
                    name="student_org_sent_invite_search"
                    value="{{ sent_invite_search_query }}"
-                   placeholder="Dəvət axtar..."
+                   placeholder="{% trans 'Search invites...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -519,7 +521,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -536,7 +538,7 @@
                        data-select-all-sent-invites
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
@@ -545,13 +547,13 @@
                     data-revoke-mode="bulk"
                     data-revoke-action="revoke_sent_invites"
                     data-revoke-role-type="student"
-                    data-default-label="Seçilənləri geri çək"
-                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Withdraw selected invites' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Withdraw selected invites ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-trash"></i> Seçilənləri geri çək
+                <i class="fas fa-trash"></i> {% trans "Withdraw selected invites" context "staff.management" %}
             </button>
         </div>
 
@@ -560,11 +562,11 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Göndərən</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Sender" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -592,13 +594,13 @@
                                     data-single-revoke-user-id="{{ invite.user.id }}"
                                     data-single-revoke-username="@{{ invite.user.username }}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-trash"></i> Geri çək
+                                <i class="fas fa-trash"></i> {% trans "Withdraw" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Geri çəkiləcək aktiv dəvət yoxdur.</td>
+                        <td colspan="6" class="text-center">{% trans "There are no active invites to withdraw." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -612,9 +614,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="teacher-members">
     <div class="section-title">
-        <i class="fas fa-chalkboard-teacher"></i> Təşkilat müəllimləri
+        <i class="fas fa-chalkboard-teacher"></i> {% trans "Teachers in organization" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Aktiv müəllim hesabları burada göstərilir.</p>
+    <p class="text-muted mb-3">{% trans "Active teacher accounts are shown here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -629,14 +631,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Müəllim axtar..."
+                   placeholder="{% trans 'Search teachers...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -644,18 +646,18 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Role" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -679,16 +681,16 @@
                             data-student-org="{{ organization.name }}"
                             data-student-role="{{ membership.management_role_label }}"
                             {% if not can_manage_students %}disabled{% endif %}>
-                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                            <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
                         </button>
                         {% else %}
-                        <span class="text-muted">-</span>
+                        <span class="text-muted">{% trans "Not available" context "staff.management" %}</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">Müəllim tapılmadı.</td>
+                    <td colspan="5" class="text-center">{% trans "No teacher found." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -701,9 +703,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="teacher-requests">
     <div class="section-title">
-        <i class="fas fa-user-clock"></i> Müəllim müraciətləri
+        <i class="fas fa-user-clock"></i> {% trans "Teacher requests" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Gözləyən müəllim müraciətlərini buradan cavablandırın.</p>
+    <p class="text-muted mb-3">{% trans "Respond to pending teacher requests here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -718,14 +720,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Müəllim müraciəti axtar..."
+                   placeholder="{% trans 'Search teacher requests...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -733,19 +735,19 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Mesaj</th>
-                    <th>Müraciət tarixi</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Message" context "staff.management" %}</th>
+                    <th>{% trans "Request date" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -766,7 +768,7 @@
                                 <button type="submit"
                                         class="btn btn-success btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Təsdiqlə
+                                    <i class="fas fa-user-check"></i> {% trans "Approve" context "staff.management" %}
                                 </button>
                             </form>
                             <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -777,7 +779,7 @@
                                 <button type="submit"
                                         class="btn btn-outline-danger btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-times"></i> Rədd et
+                                    <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
                                 </button>
                             </form>
                         </div>
@@ -785,7 +787,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">Gözləyən müəllim müraciəti yoxdur.</td>
+                    <td colspan="6" class="text-center">{% trans "There are no pending teacher requests." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -798,9 +800,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="teacher-unassigned">
     <div class="section-title">
-        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan müəllimlər
+        <i class="fas fa-user-plus"></i> {% trans "Teachers without organization" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Dəvət göndərilə bilən müəllimlər burada görünür.</p>
+    <p class="text-muted mb-3">{% trans "Teachers who can be invited appear here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -815,14 +817,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Müəllim axtar..."
+                   placeholder="{% trans 'Search teachers...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -830,7 +832,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -848,19 +850,19 @@
                        data-select-all-unassigned
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not unassigned_teachers.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
                     data-invite-action="bulk_invite_teacher_staff"
                     data-invite-role-type="teacher"
-                    data-default-label="Seçilən müəllimlərə dəvət et"
-                    data-selected-label="Seçilən müəllimlərə dəvət et ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Invite selected teachers' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Invite selected teachers ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not unassigned_teachers.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-paper-plane"></i> Seçilən müəllimlərə dəvət et
+                <i class="fas fa-paper-plane"></i> {% trans "Invite selected teachers" context "staff.management" %}
             </button>
         </div>
 
@@ -869,11 +871,11 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Kafedra</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Department" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -887,7 +889,7 @@
                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
-                                   data-target-role="Müəllim"
+                                   data-target-role="{% trans 'Teacher' context 'membership.role' %}"
                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
@@ -903,15 +905,15 @@
                                     data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                     data-user-username="@{{ profile.user.username }}"
                                     data-user-email="{{ profile.user.email }}"
-                                    data-target-role="Müəllim"
+                                    data-target-role="{% trans 'Teacher' context 'membership.role' %}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-paper-plane"></i> Dəvət et
+                                <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Dəvət göndəriləcək müəllim tapılmadı.</td>
+                        <td colspan="6" class="text-center">{% trans "No teacher available for invitation." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -925,9 +927,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="teacher-invites">
     <div class="section-title">
-        <i class="fas fa-paper-plane"></i> Göndərilmiş müəllim dəvətləri
+        <i class="fas fa-paper-plane"></i> {% trans "Sent teacher invites" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Qəbul edilməmiş müəllim dəvətlərini buradan geri çəkin.</p>
+    <p class="text-muted mb-3">{% trans "Withdraw pending teacher invites from here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -942,14 +944,14 @@
             <input type="text"
                    name="student_org_sent_invite_search"
                    value="{{ sent_invite_search_query }}"
-                   placeholder="Müəllim dəvəti axtar..."
+                   placeholder="{% trans 'Search teacher invites...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -957,7 +959,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -975,7 +977,7 @@
                        data-select-all-sent-invites
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not sent_teacher_invites.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
@@ -984,13 +986,13 @@
                     data-revoke-mode="bulk"
                     data-revoke-action="revoke_teacher_staff_invites"
                     data-revoke-role-type="teacher"
-                    data-default-label="Seçilənləri geri çək"
-                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Withdraw selected invites' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Withdraw selected invites ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not sent_teacher_invites.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-trash"></i> Seçilənləri geri çək
+                <i class="fas fa-trash"></i> {% trans "Withdraw selected invites" context "staff.management" %}
             </button>
         </div>
 
@@ -999,12 +1001,12 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Kafedra</th>
-                        <th>Göndərən</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Department" context "staff.management" %}</th>
+                        <th>{% trans "Sender" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1033,13 +1035,13 @@
                                     data-single-revoke-user-id="{{ invite.user.id }}"
                                     data-single-revoke-username="@{{ invite.user.username }}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-trash"></i> Geri çək
+                                <i class="fas fa-trash"></i> {% trans "Withdraw" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">Geri çəkiləcək müəllim dəvəti yoxdur.</td>
+                        <td colspan="7" class="text-center">{% trans "There are no active teacher invites to withdraw." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -1053,9 +1055,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="staff-members">
     <div class="section-title">
-        <i class="fas fa-id-badge"></i> Təşkilat staff siyahısı
+        <i class="fas fa-id-badge"></i> {% trans "Organization staff" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Qeyri-müəllim əməkdaşlar burada göstərilir.</p>
+    <p class="text-muted mb-3">{% trans "Non-teaching staff members are listed here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -1070,14 +1072,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Staff axtar..."
+                   placeholder="{% trans 'Search staff...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -1085,19 +1087,19 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Vəzifə</th>
-                    <th>Rol</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Position" context "staff.management" %}</th>
+                    <th>{% trans "Role" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1122,7 +1124,7 @@
                             data-student-org="{{ organization.name }}"
                             data-student-role="{{ membership.management_role_label }}"
                             {% if not can_manage_students %}disabled{% endif %}>
-                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                            <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
                         </button>
                         {% else %}
                         <span class="text-muted">-</span>
@@ -1131,7 +1133,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">Staff tapılmadı.</td>
+                    <td colspan="6" class="text-center">{% trans "No staff member found." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1144,9 +1146,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="staff-requests">
     <div class="section-title">
-        <i class="fas fa-user-clock"></i> Staff müraciətləri
+        <i class="fas fa-user-clock"></i> {% trans "Staff requests" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Gözləyən staff müraciətlərini buradan cavablandırın.</p>
+    <p class="text-muted mb-3">{% trans "Review pending staff requests here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -1161,14 +1163,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Staff müraciəti axtar..."
+                   placeholder="{% trans 'Search staff requests...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -1176,19 +1178,19 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Mesaj</th>
-                    <th>Müraciət tarixi</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Message" context "staff.management" %}</th>
+                    <th>{% trans "Request date" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1209,7 +1211,7 @@
                                 <button type="submit"
                                         class="btn btn-success btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Təsdiqlə
+                                    <i class="fas fa-user-check"></i> {% trans "Approve" context "staff.management" %}
                                 </button>
                             </form>
                             <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -1220,7 +1222,7 @@
                                 <button type="submit"
                                         class="btn btn-outline-danger btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-times"></i> Rədd et
+                                    <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
                                 </button>
                             </form>
                         </div>
@@ -1228,7 +1230,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">Gözləyən staff müraciəti yoxdur.</td>
+                    <td colspan="6" class="text-center">{% trans "There are no pending staff requests." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1241,9 +1243,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="staff-unassigned">
     <div class="section-title">
-        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan staff
+        <i class="fas fa-user-plus"></i> {% trans "Staff without organization" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Dəvət göndərilə bilən staff istifadəçilər burada görünür.</p>
+    <p class="text-muted mb-3">{% trans "Staff users who can be invited appear here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -1258,14 +1260,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Staff axtar..."
+                   placeholder="{% trans 'Search staff...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -1273,7 +1275,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -1291,19 +1293,19 @@
                        data-select-all-unassigned
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not unassigned_staff.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
                     data-invite-action="bulk_invite_teacher_staff"
                     data-invite-role-type="staff"
-                    data-default-label="Seçilən staff istifadəçilərə dəvət et"
-                    data-selected-label="Seçilən staff istifadəçilərə dəvət et ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Invite selected staff users' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Invite selected staff users ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not unassigned_staff.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
+                <i class="fas fa-paper-plane"></i> {% trans "Invite selected users" context "staff.management" %}
             </button>
         </div>
 
@@ -1312,12 +1314,12 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Kafedra</th>
-                        <th>Vəzifə</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Department" context "staff.management" %}</th>
+                        <th>{% trans "Position" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1327,12 +1329,12 @@
                             <input type="checkbox"
                                    class="unassigned-student-checkbox form-check-input"
                                    name="selected_unassigned_staff_user_ids"
-                                   value="{{ profile.user.id }}"
-                                   data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
-                                   data-user-username="@{{ profile.user.username }}"
-                                   data-user-email="{{ profile.user.email }}"
-                                   data-target-role="Staff"
-                                   {% if not can_manage_students %}disabled{% endif %}>
+                                    value="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="{% trans 'Staff' context 'membership_request.role' %}"
+                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
                         <td>@{{ profile.user.username }}</td>
@@ -1348,15 +1350,15 @@
                                     data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                     data-user-username="@{{ profile.user.username }}"
                                     data-user-email="{{ profile.user.email }}"
-                                    data-target-role="Staff"
+                                    data-target-role="{% trans 'Staff' context 'membership_request.role' %}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-paper-plane"></i> Dəvət et
+                                <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">Dəvət göndəriləcək staff tapılmadı.</td>
+                        <td colspan="7" class="text-center">{% trans "No staff member available for invitation." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -1370,9 +1372,9 @@
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="staff-invites">
     <div class="section-title">
-        <i class="fas fa-paper-plane"></i> Göndərilmiş staff dəvətləri
+        <i class="fas fa-paper-plane"></i> {% trans "Sent staff invites" context "staff.management" %}
     </div>
-    <p class="text-muted mb-3">Qəbul edilməmiş staff dəvətlərini buradan geri çəkin.</p>
+    <p class="text-muted mb-3">{% trans "Withdraw pending staff invites from here." context "staff.management" %}</p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
           data-standard-search-form
@@ -1387,14 +1389,14 @@
             <input type="text"
                    name="student_org_sent_invite_search"
                    value="{{ sent_invite_search_query }}"
-                   placeholder="Staff dəvəti axtar..."
+                   placeholder="{% trans 'Search staff invites...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -1402,7 +1404,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
         </button>
     </form>
 
@@ -1420,7 +1422,7 @@
                        data-select-all-sent-invites
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not sent_staff_invites.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
             </label>
             <button type="button"
                     class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
@@ -1429,13 +1431,13 @@
                     data-revoke-mode="bulk"
                     data-revoke-action="revoke_teacher_staff_invites"
                     data-revoke-role-type="staff"
-                    data-default-label="Seçilənləri geri çək"
-                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'Withdraw selected invites' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Withdraw selected invites ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
                     {% if not can_manage_students or not sent_staff_invites.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-trash"></i> Seçilənləri geri çək
+                <i class="fas fa-trash"></i> {% trans "Withdraw selected invites" context "staff.management" %}
             </button>
         </div>
 
@@ -1444,12 +1446,12 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Vəzifə</th>
-                        <th>Göndərən</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Position" context "staff.management" %}</th>
+                        <th>{% trans "Sender" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1478,13 +1480,13 @@
                                     data-single-revoke-user-id="{{ invite.user.id }}"
                                     data-single-revoke-username="@{{ invite.user.username }}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-trash"></i> Geri çək
+                                <i class="fas fa-trash"></i> {% trans "Withdraw" context "staff.management" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">Geri çəkiləcək staff dəvəti yoxdur.</td>
+                        <td colspan="7" class="text-center">{% trans "There are no active staff invites to withdraw." context "staff.management" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -1498,12 +1500,12 @@
 {% if is_superadmin %}
 <div class="section-card org-management-panel" data-management-panel="organizations">
     <div class="section-title">
-        <i class="fas fa-building"></i> Təşkilatlar
+        <i class="fas fa-building"></i> {% trans "Organizations" context "staff.management" %}
         {% if pending_org_count %}
         <span class="sidebar-menu-badge sidebar-menu-badge--warning ms-2">{{ pending_org_count }}</span>
         {% endif %}
     </div>
-    <p class="text-muted mb-3">Superadmin üçün təşkilat görünüşü və status əməliyyatları.</p>
+    <p class="text-muted mb-3">{% trans "Superadmin organization overview and status actions." context "staff.management" %}</p>
     <form method="get"
           class="org-management-org-filters"
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
@@ -1515,47 +1517,47 @@
             <input type="text"
                    name="organization_search"
                    value="{{ organization_search_query }}"
-                   placeholder="Təşkilat axtar..."
+                   placeholder="{% trans 'Search organizations...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <select name="organization_status" class="form-select org-management-select">
-            <option value="">Bütün statuslar</option>
-            <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>Aktiv</option>
-            <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>Gözləyən</option>
-            <option value="suspended" {% if organization_status_filter == "suspended" %}selected{% endif %}>Dayandırılmış</option>
-            <option value="inactive" {% if organization_status_filter == "inactive" %}selected{% endif %}>Qeyri-aktiv</option>
+            <option value="">{% trans "All statuses" context "staff.management" %}</option>
+            <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
+            <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
+            <option value="suspended" {% if organization_status_filter == "suspended" %}selected{% endif %}>{% trans "Suspended" context "staff.management" %}</option>
+            <option value="inactive" {% if organization_status_filter == "inactive" %}selected{% endif %}>{% trans "Inactive" context "staff.management" %}</option>
         </select>
         <select name="organization_type" class="form-select org-management-select">
-            <option value="">Bütün növlər</option>
-            <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>Məktəb</option>
-            <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>Universitet</option>
-            <option value="course_center" {% if organization_type_filter == "course_center" %}selected{% endif %}>Tədris mərkəzi</option>
-            <option value="individual" {% if organization_type_filter == "individual" %}selected{% endif %}>Fərdi</option>
+            <option value="">{% trans "All types" context "staff.management" %}</option>
+            <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
+            <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>
+            <option value="course_center" {% if organization_type_filter == "course_center" %}selected{% endif %}>{% trans "Course center" context "staff.management" %}</option>
+            <option value="individual" {% if organization_type_filter == "individual" %}selected{% endif %}>{% trans "Individual" context "staff.management" %}</option>
         </select>
         <button type="submit" class="btn btn-primary">
-            <i class="fas fa-filter"></i> Tətbiq et
+            <i class="fas fa-filter"></i> {% trans "Apply filters" context "staff.management" %}
         </button>
     </form>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Təşkilat</th>
-                    <th>Növ</th>
-                    <th>Sahib</th>
-                    <th>Status</th>
-                    <th>Aktiv üzv</th>
-                    <th>Detallar</th>
-                    <th>İdarə et</th>
+                    <th>{% trans "Organization" context "staff.management" %}</th>
+                    <th>{% trans "Type" context "staff.management" %}</th>
+                    <th>{% trans "Owner" context "staff.management" %}</th>
+                    <th>{% trans "Status" context "staff.management" %}</th>
+                    <th>{% trans "Active members" context "staff.management" %}</th>
+                    <th>{% trans "Details" context "staff.management" %}</th>
+                    <th>{% trans "Manage" context "staff.management" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1566,21 +1568,21 @@
                     <td>{{ organization_item.owner.username }}</td>
                     <td>
                         {% if organization_item.status == "suspended" %}
-                        <span class="role-badge role-danger">Dayandırılıb</span>
+                        <span class="role-badge role-danger">{% trans "Suspended" context "staff.management" %}</span>
                         {% elif organization_item.status == "pending" %}
-                        <span class="role-badge role-warning">Gözləyir</span>
+                        <span class="role-badge role-warning">{% trans "Pending" context "staff.management" %}</span>
                         {% elif organization_item.is_active %}
-                        <span class="role-badge role-success">Aktiv</span>
+                        <span class="role-badge role-success">{% trans "Active" context "staff.management" %}</span>
                         {% else %}
-                        <span class="role-badge role-warning">Qeyri-aktiv</span>
+                        <span class="role-badge role-warning">{% trans "Inactive" context "staff.management" %}</span>
                         {% endif %}
                     </td>
                     <td>{{ organization_item.active_member_count }}</td>
                     <td>
-                        <div><strong>Kod:</strong> {{ organization_item.organization_identifier|default:"-" }}</div>
-                        <div><strong>Lisenziya:</strong> {{ organization_item.license_identifier|default:"-" }}</div>
+                        <div><strong>{% trans "Code" context "staff.management" %}:</strong> {{ organization_item.organization_identifier|default:"-" }}</div>
+                        <div><strong>{% trans "License" context "staff.management" %}:</strong> {{ organization_item.license_identifier|default:"-" }}</div>
                         {% if organization_item.suspension_reason %}
-                        <div><strong>Səbəb:</strong> {{ organization_item.suspension_reason }}</div>
+                        <div><strong>{% trans "Reason" context "staff.management" %}:</strong> {{ organization_item.suspension_reason }}</div>
                         {% endif %}
                     </td>
                     <td>
@@ -1591,21 +1593,21 @@
                             {% if organization_item.status == "pending" %}
                             <div class="d-flex flex-column gap-2">
                                 <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
-                                    <i class="fas fa-check"></i> Təsdiqlə
+                                    <i class="fas fa-check"></i> {% trans "Approve" context "staff.management" %}
                                 </button>
                                 <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" name="reason" placeholder="Rədd səbəbi (opsional)">
+                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}">
                                     <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-times"></i> Rədd et
+                                        <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
                                     </button>
                                 </div>
                             </div>
                             {% elif organization_item.status == "suspended" or not organization_item.is_active %}
-                            <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">Unsuspend</button>
+                            <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">{% trans "Unsuspend" context "staff.management" %}</button>
                             {% else %}
                             <div class="d-flex flex-column gap-2">
-                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="Suspend səbəbi">
-                                <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">Suspend</button>
+                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}">
+                                <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "Suspend" context "staff.management" %}</button>
                             </div>
                             {% endif %}
                         </form>
@@ -1613,7 +1615,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">Təşkilat tapılmadı.</td>
+                    <td colspan="7" class="text-center">{% trans "No organization found." context "staff.management" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1634,19 +1636,19 @@
                 <input type="hidden" name="single_revoke_user_id" id="revokeSentInvitesSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="revokeSentInvitesSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Dəvəti geri çək</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>{% trans "Withdraw invite" context "staff.management" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'staff.management' %}"></button>
                 </div>
                 <div class="modal-body">
                     <p class="mb-0" id="revokeSentInvitesModalText">
-                        Seçilən dəvətləri geri çəkmək istədiyinizi təsdiqləyin.
+                        {% trans "Please confirm that you want to withdraw the selected invites." context "staff.management" %}
                     </p>
                     <small class="text-muted d-block mt-2" id="revokeSentInvitesModalHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "staff.management" %}</button>
                     <button type="submit" class="btn btn-danger" id="revokeSentInvitesConfirmBtn">
-                        <i class="fas fa-trash"></i> Təsdiqlə
+                        <i class="fas fa-trash"></i> {% trans "Confirm" context "staff.management" %}
                     </button>
                 </div>
             </form>
@@ -1662,31 +1664,31 @@
                 <input type="hidden" name="action" value="remove_student">
                 <input type="hidden" name="user_id" id="removeStudentModalUserId">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>Təşkilatdan uzaqlaşdır</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>{% trans "Remove from organization" context "staff.management" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'staff.management' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3">Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin.</p>
+                    <p class="mb-3">{% trans "Please confirm that you want to remove the following user from the organization." context "staff.management" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="removeStudentModalFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="removeStudentModalUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="removeStudentModalEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="removeStudentModalOrg">-</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="removeStudentModalRole">-</span></li>
+                        <li><strong>{% trans "Name" context "staff.management" %}:</strong> <span id="removeStudentModalFullName">-</span></li>
+                        <li><strong>{% trans "Username" context "staff.management" %}:</strong> <span id="removeStudentModalUsername">-</span></li>
+                        <li><strong>{% trans "Email" context "staff.management" %}:</strong> <span id="removeStudentModalEmail">-</span></li>
+                        <li><strong>{% trans "Organization" context "staff.management" %}:</strong> <span id="removeStudentModalOrg">-</span></li>
+                        <li><strong>{% trans "Target role" context "staff.management" %}:</strong> <span id="removeStudentModalRole">-</span></li>
                     </ul>
-                    <label for="removeStudentReasonInput" class="form-label mt-3">Qısa qeyd (opsional)</label>
+                    <label for="removeStudentReasonInput" class="form-label mt-3">{% trans "Short note (optional)" context "staff.management" %}</label>
                     <textarea
                         id="removeStudentReasonInput"
                         name="remove_reason"
                         class="form-control"
                         rows="3"
                         maxlength="280"
-                        placeholder="Uzaqlaşdırma səbəbi..."></textarea>
+                        placeholder="{% trans 'Reason for removal...' context 'staff.management' %}"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "staff.management" %}</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                        <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
                     </button>
                 </div>
             </form>
@@ -1704,24 +1706,24 @@
                 <input type="hidden" name="single_user_id" id="pendingAddSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="pendingAddSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Təşkilata əlavə et</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>{% trans "Add to organization" context "staff.management" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'staff.management' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3" id="pendingAddLeadText">Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin.</p>
+                    <p class="mb-3" id="pendingAddLeadText">{% trans "Please confirm that you want to add the selected user(s) to the organization." context "staff.management" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="pendingAddModalFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="pendingAddModalUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="pendingAddModalEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="pendingAddModalRole">Tələbə</span></li>
+                        <li><strong>{% trans "Name" context "staff.management" %}:</strong> <span id="pendingAddModalFullName">-</span></li>
+                        <li><strong>{% trans "Username" context "staff.management" %}:</strong> <span id="pendingAddModalUsername">-</span></li>
+                        <li><strong>{% trans "Email" context "staff.management" %}:</strong> <span id="pendingAddModalEmail">-</span></li>
+                        <li><strong>{% trans "Organization" context "staff.management" %}:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "Target role" context "staff.management" %}:</strong> <span id="pendingAddModalRole">{% trans "Student" context "membership_request.role" %}</span></li>
                     </ul>
                     <small class="text-muted d-block mt-2" id="pendingAddModalHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "staff.management" %}</button>
                     <button type="submit" class="btn btn-success" id="pendingAddConfirmBtn">
-                        <i class="fas fa-user-check"></i> Təşkilata əlavə et
+                        <i class="fas fa-user-check"></i> {% trans "Add to organization" context "staff.management" %}
                     </button>
                 </div>
             </form>
@@ -1740,24 +1742,24 @@
                 <input type="hidden" name="single_invite_user_id" id="inviteConfirmSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="inviteConfirmSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Dəvət et</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>{% trans "Invite user" context "staff.management" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'staff.management' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3" id="inviteConfirmLeadText">Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin.</p>
+                    <p class="mb-3" id="inviteConfirmLeadText">{% trans "Please confirm that you want to invite the selected user(s)." context "staff.management" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="inviteConfirmFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="inviteConfirmUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="inviteConfirmEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="inviteConfirmRole">Tələbə</span></li>
+                        <li><strong>{% trans "Name" context "staff.management" %}:</strong> <span id="inviteConfirmFullName">-</span></li>
+                        <li><strong>{% trans "Username" context "staff.management" %}:</strong> <span id="inviteConfirmUsername">-</span></li>
+                        <li><strong>{% trans "Email" context "staff.management" %}:</strong> <span id="inviteConfirmEmail">-</span></li>
+                        <li><strong>{% trans "Organization" context "staff.management" %}:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "Target role" context "staff.management" %}:</strong> <span id="inviteConfirmRole">{% trans "Student" context "membership_request.role" %}</span></li>
                     </ul>
                     <small class="text-muted d-block mt-2" id="inviteConfirmHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "staff.management" %}</button>
                     <button type="submit" class="btn btn-success" id="inviteConfirmBtn">
-                        <i class="fas fa-paper-plane"></i> Dəvət et
+                        <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
                     </button>
                 </div>
             </form>
@@ -1877,14 +1879,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var pendingRemoveBulkBtn = document.querySelector(".js-pending-remove-bulk");
     var pendingAddBulkLabel = document.querySelector(".js-pending-add-bulk-label");
     var pendingAddDefaultLabel = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "Seçilənləri təşkilata əlavə et")
-        : "Seçilənləri təşkilata əlavə et";
+        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "{% trans 'Add selected users to the organization' context 'staff.management' %}")
+        : "{% trans 'Add selected users to the organization' context 'staff.management' %}";
     var pendingAddSelectedLabelTemplate = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "Seçilənləri təşkilata əlavə et ({count} seçildi)")
-        : "Seçilənləri təşkilata əlavə et ({count} seçildi)";
+        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}")
+        : "{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}";
     var pendingAddDisabledTooltip = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 tələbə seçin")
-        : "Ən az 1 tələbə seçin";
+        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 student' context 'staff.management' %}")
+        : "{% trans 'Select at least 1 student' context 'staff.management' %}";
     var pendingAddPermissionDisabled = pendingAddBulkBtn
         ? pendingAddBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
@@ -1892,8 +1894,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? pendingRemoveBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
     var pendingRemoveDisabledTooltip = pendingRemoveBulkBtn
-        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
+        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+        : "{% trans 'Select at least 1 user' context 'staff.management' %}";
 
     var unassignedFormConfigs = Array.from(document.querySelectorAll("[data-unassigned-form]")).map(function (form) {
         var bulkButton = form.querySelector(".js-invite-confirm-bulk");
@@ -1904,8 +1906,8 @@ document.addEventListener("DOMContentLoaded", function () {
             bulkButton: bulkButton,
             permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
             disabledTooltip: bulkButton
-                ? (bulkButton.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-                : "Ən az 1 seçin",
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+                : "{% trans 'Select at least 1 user' context 'staff.management' %}",
         };
     });
 
@@ -1918,8 +1920,8 @@ document.addEventListener("DOMContentLoaded", function () {
             bulkButton: bulkButton,
             permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
             disabledTooltip: bulkButton
-                ? (bulkButton.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-                : "Ən az 1 seçin",
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+                : "{% trans 'Select at least 1 user' context 'staff.management' %}",
         };
     });
 
@@ -2092,7 +2094,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fullName: checkbox.getAttribute("data-user-full-name") || "-",
                     username: checkbox.getAttribute("data-user-username") || "-",
                     email: checkbox.getAttribute("data-user-email") || "-",
-                    role: checkbox.getAttribute("data-target-role") || "Tələbə",
+                    role: checkbox.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
                 };
             })
             .filter(function (entry) {
@@ -2111,7 +2113,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fullName: checkbox.getAttribute("data-user-full-name") || "-",
                     username: checkbox.getAttribute("data-user-username") || "-",
                     email: checkbox.getAttribute("data-user-email") || "-",
-                    role: checkbox.getAttribute("data-target-role") || "Tələbə",
+                    role: checkbox.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
                 };
             })
             .filter(function (entry) {
@@ -2172,7 +2174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (mode === "single") {
                 var singleUserId = trigger ? (trigger.getAttribute("data-single-revoke-user-id") || "") : "";
-                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "Bu istifadəçi") : "Bu istifadəçi";
+                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "{% trans 'This user' context 'staff.management' %}") : "{% trans 'This user' context 'staff.management' %}";
                 if (revokeSingleInput) {
                     revokeSingleInput.value = singleUserId;
                 }
@@ -2189,17 +2191,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (selectedUserIds.length) {
                 if (revokeTextNode) {
-                    revokeTextNode.textContent = "Seçilmiş dəvətləri geri çəkmək istədiyinizi təsdiqləyin.";
+                    revokeTextNode.textContent = "{% trans 'Please confirm that you want to withdraw the selected invites.' context 'staff.management' %}";
                 }
                 if (revokeHintNode) {
-                    revokeHintNode.textContent = "Seçilən dəvət sayı: " + String(selectedUserIds.length);
+                    revokeHintNode.textContent = "{% trans 'Selected invites:' context 'staff.management' %}" + " " + String(selectedUserIds.length);
                 }
             } else {
                 if (revokeTextNode) {
-                    revokeTextNode.textContent = "Əvvəlcə ən azı bir dəvət seçin.";
+                    revokeTextNode.textContent = "{% trans 'Please select at least one invite first.' context 'staff.management' %}";
                 }
                 if (revokeHintNode) {
-                    revokeHintNode.textContent = "Bu halda təsdiqlə düyməsi deaktiv edilir.";
+                    revokeHintNode.textContent = "{% trans 'The confirm button is disabled in this state.' context 'staff.management' %}";
                 }
                 if (revokeConfirmBtn) {
                     revokeConfirmBtn.disabled = true;
@@ -2227,7 +2229,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 fullNameNode.textContent = trigger.getAttribute("data-student-full-name") || "-";
             }
             if (usernameNode) {
-                usernameNode.textContent = trigger.getAttribute("data-student-username") || "Bu istifadəçi";
+                usernameNode.textContent = trigger.getAttribute("data-student-username") || "{% trans 'This user' context 'staff.management' %}";
             }
             if (emailNode) {
                 emailNode.textContent = trigger.getAttribute("data-student-email") || "-";
@@ -2236,7 +2238,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 orgNode.textContent = trigger.getAttribute("data-student-org") || "-";
             }
             if (roleNode) {
-                roleNode.textContent = trigger.getAttribute("data-student-role") || "Tələbə";
+                roleNode.textContent = trigger.getAttribute("data-student-role") || "{% trans 'Student' context 'membership_request.role' %}";
             }
             if (reasonInput) {
                 reasonInput.value = "";
@@ -2277,16 +2279,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 pendingAddEmail.textContent = firstUser ? firstUser.email : "-";
             }
             if (pendingAddRole) {
-                pendingAddRole.textContent = firstUser ? firstUser.role : "Tələbə";
+                pendingAddRole.textContent = firstUser ? firstUser.role : "{% trans 'Student' context 'membership_request.role' %}";
             }
             if (pendingAddLeadText) {
                 pendingAddLeadText.textContent = mode === "bulk"
-                    ? "Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin."
-                    : "İstifadəçini təşkilata əlavə etməyi təsdiqləyin.";
+                    ? "{% trans 'Please confirm that you want to add the selected user(s) to the organization.' context 'staff.management' %}"
+                    : "{% trans 'Please confirm that you want to add this user to the organization.' context 'staff.management' %}";
             }
             if (pendingAddHint) {
                 pendingAddHint.textContent = users.length > 1
-                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    ? "{% trans 'Selected users:' context 'staff.management' %}" + " " + String(users.length)
                     : "";
             }
             if (pendingAddConfirmBtn) {
@@ -2302,7 +2304,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         fullName: button.getAttribute("data-user-full-name") || "-",
                         username: button.getAttribute("data-user-username") || "-",
                         email: button.getAttribute("data-user-email") || "-",
-                        role: button.getAttribute("data-target-role") || "Tələbə",
+                        role: button.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
                     }
                 ], "single");
                 pendingAddModalInstance.show();
@@ -2359,16 +2361,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 inviteEmail.textContent = firstUser ? firstUser.email : "-";
             }
             if (inviteRole) {
-                inviteRole.textContent = firstUser ? firstUser.role : "Tələbə";
+                inviteRole.textContent = firstUser ? firstUser.role : "{% trans 'Student' context 'membership_request.role' %}";
             }
             if (inviteLeadText) {
                 inviteLeadText.textContent = mode === "bulk"
-                    ? "Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin."
-                    : "İstifadəçiyə dəvət göndərməyi təsdiqləyin.";
+                    ? "{% trans 'Please confirm that you want to invite the selected user(s).' context 'staff.management' %}"
+                    : "{% trans 'Please confirm that you want to invite this user.' context 'staff.management' %}";
             }
             if (inviteHint) {
                 inviteHint.textContent = users.length > 1
-                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    ? "{% trans 'Selected users:' context 'staff.management' %}" + " " + String(users.length)
                     : "";
             }
             if (inviteConfirmBtn) {
@@ -2385,7 +2387,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             fullName: button.getAttribute("data-user-full-name") || "-",
                             username: button.getAttribute("data-user-username") || "-",
                             email: button.getAttribute("data-user-email") || "-",
-                            role: button.getAttribute("data-target-role") || "Tələbə",
+                            role: button.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
                         }
                     ], "single", {
                         action: button.getAttribute("data-invite-action") || "bulk_invite_students",

@@ -5,6 +5,7 @@ This module contains service functions that encapsulate business operations.
 
 from collections import defaultdict
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from apps.accounts.models import ProfileRole
@@ -12,7 +13,7 @@ from apps.accounts.policies import get_user_role_level, is_superadmin_user, user
 from apps.exams.models import StudentGroup
 from core.constants import ROLE_LEVEL_TEACHER
 
-from .models import Post
+from .models import Category, Post
 
 APPROVAL_STATUS_FILTERS = {
     "all",
@@ -30,10 +31,30 @@ def author_requires_post_approval(author):
     return user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
 
 
-def can_user_create_post_category(user):
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    return get_user_role_level(user) >= ROLE_LEVEL_TEACHER
+def can_user_manage_categories(user):
+    return is_superadmin_user(user)
+
+
+def resolve_post_category_selection(*, category=None, subcategory=None):
+    if category is None:
+        raise ValidationError({"category": "Please select a category."})
+
+    if category.parent_id:
+        raise ValidationError({"category": "Please select a top-level category."})
+
+    if subcategory is None:
+        return category
+
+    if not isinstance(subcategory, Category):
+        raise ValidationError({"subcategory": "Please select a valid subcategory."})
+
+    if not subcategory.parent_id:
+        raise ValidationError({"subcategory": "Please select a valid subcategory."})
+
+    if subcategory.parent_id != category.id:
+        raise ValidationError({"subcategory": "Selected subcategory does not belong to the chosen category."})
+
+    return subcategory
 
 
 def can_user_review_post(user, post):
@@ -47,6 +68,11 @@ def can_user_review_post(user, post):
         return True
 
     reviewer_level = get_user_role_level(user)
+
+    # Org admin / org owner can manage any post that requires approval.
+    if reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
+        return True
+
     author_level = get_user_role_level(post.author)
     if reviewer_level < ROLE_LEVEL_TEACHER or reviewer_level <= author_level:
         return False
@@ -66,6 +92,9 @@ def normalize_approval_status(value, *, include_all=False, default=Post.Approval
 def _build_group_scope_for_reviewer(reviewer):
     if is_superadmin_user(reviewer):
         return StudentGroup.objects.filter(students__posts__requires_approval=True).distinct()
+    reviewer_level = get_user_role_level(reviewer)
+    if reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
+        return StudentGroup.objects.filter(students__posts__requires_approval=True).distinct()
     return StudentGroup.objects.filter(Q(teacher=reviewer) | Q(teachers=reviewer)).distinct()
 
 
@@ -76,7 +105,9 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
 
     reviewer_level = get_user_role_level(reviewer)
     superadmin = is_superadmin_user(reviewer)
-    if not superadmin and reviewer_level < ROLE_LEVEL_TEACHER:
+    # Org admin / org owner see all posts just like a superadmin.
+    is_elevated = superadmin or reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
+    if not is_elevated and reviewer_level < ROLE_LEVEL_TEACHER:
         return [], normalized_search, normalized_status, "", []
 
     groups_scope = _build_group_scope_for_reviewer(reviewer)
@@ -105,7 +136,7 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
             | Q(author__last_name__icontains=normalized_search)
         )
 
-    if superadmin:
+    if is_elevated:
         if selected_group:
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
     else:
@@ -114,14 +145,14 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
 
     posts = list(posts_qs)
-    if not superadmin:
+    if not is_elevated:
         posts = [post for post in posts if reviewer_level > get_user_role_level(post.author)]
 
     author_ids = {post.author_id for post in posts}
     author_group_names = defaultdict(list)
     if author_ids:
         group_pairs_qs = StudentGroup.objects.filter(students__id__in=author_ids)
-        if not superadmin:
+        if not is_elevated:
             group_pairs_qs = group_pairs_qs.filter(Q(teacher=reviewer) | Q(teachers=reviewer))
         if selected_group:
             group_pairs_qs = group_pairs_qs.filter(id=selected_group)

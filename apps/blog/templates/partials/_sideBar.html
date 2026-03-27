@@ -1,11 +1,13 @@
 {% load i18n %}
+{% url 'home' as home_url %}
 <aside class="sidebar">
   <div class="widget">
       <h3>{% trans "categories" context "blog.partial.sidebar" %}</h3>
       <ul class="category-list">
           {% for category in categories %}
               <li class="category-list__item category-list__item--depth-{{ category.tree_depth }}">
-                  <a href="{% url 'category_detail' category.slug %}" class="{% if active_category_slug == category.slug %}is-active{% endif %}">
+                  <a href="{{ home_url }}?category={{ category.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                     class="{% if active_category_slug == category.slug %}is-active{% endif %}">
                       <span class="category-list__label">{{ category.sidebar_name|default:category.localized_name }}</span>
                       <span class="category-count">({{ category.post_count }})</span>
                   </a>
@@ -21,7 +23,7 @@
           <h3>{% trans "popular_tags" context "blog.partial.sidebar" %}</h3>
           <div class="tags-container">
               {% for topic in popular_topics %}
-                  <a href="{% url 'category_detail' topic.slug %}"
+                  <a href="{{ home_url }}?category={{ topic.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                      class="tag-item{% if active_category_slug == topic.slug %} is-active{% endif %}">
                       {{ topic.localized_name }}
                   </a>

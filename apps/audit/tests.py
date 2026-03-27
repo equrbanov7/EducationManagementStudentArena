@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import connection, models
 from django.test import RequestFactory, TestCase, TransactionTestCase
 from django.test.client import Client
+from django.urls import reverse
 
 from core.constants import AuditAction
 
@@ -175,6 +176,32 @@ class AuditSignalTest(TestCase):
             AuditLog.objects.filter(action=AuditAction.LOGOUT, user=self.user).count(),
             initial_count + 1,
         )
+
+
+class AuditViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.superuser = User.objects.create_superuser(
+            username="audit_view_admin",
+            email="audit_view_admin@example.com",
+            password="StrongPass123!",
+        )
+        self.url = reverse("audit:list")
+
+    def test_audit_view_redirects_anonymous_user_to_login(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("accounts:login"), response.url)
+
+    def test_audit_view_loads_for_superuser(self):
+        AuditLog.objects.create(user=self.superuser, action=AuditAction.VIEW)
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "audit/list.html")
 
 
 class AuditLogSchemaCompatibilityTest(TransactionTestCase):

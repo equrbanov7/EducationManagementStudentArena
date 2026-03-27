@@ -18,7 +18,8 @@ from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_fi
 
 from ..forms import PostForm
 from ..models import Category, Post, PostApprovalLog
-from ..services import author_requires_post_approval, can_user_create_post_category, can_user_review_post
+from ..selectors import get_post_category_tree
+from ..services import author_requires_post_approval, can_user_review_post, resolve_post_category_selection
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,6 @@ def create_post(request):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
     requires_approval = author_requires_post_approval(request.user)
-    can_create_categories = can_user_create_post_category(request.user)
 
     if request.method == "POST":
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
@@ -44,26 +44,6 @@ def create_post(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
-
-            new_cat_name = form.cleaned_data.get("new_category")
-            selected_cat = form.cleaned_data.get("category")
-
-            if new_cat_name:
-
-                category, created = Category.objects.get_or_create(name=new_cat_name)
-                post.category = category
-
-                if created:
-                    messages.info(request, pgettext("blog.post.message", "category_created").format(name=new_cat_name))
-
-            elif selected_cat:
-                # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
-                post.category = selected_cat
-
-            else:
-                # 3. Heç nə seçməyibsə (istəyə bağlı):
-                # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
-                pass
 
             if requires_approval:
                 post.requires_approval = True
@@ -118,7 +98,7 @@ def create_post(request):
         {
             "form": form,
             "requires_approval": requires_approval,
-            "can_create_categories": can_create_categories,
+            "post_category_tree": get_post_category_tree(),
         },
     )
 
@@ -138,14 +118,25 @@ def post_edit_ajax(request, pk):
     title = request.POST.get("title", "").strip()
     content = request.POST.get("content", "").strip()
     excerpt = request.POST.get("excerpt", "").strip()
-    category_id = request.POST.get("category")  # select name="category"
+    category_id = request.POST.get("category")
+    subcategory_id = request.POST.get("subcategory")
     image_url = request.POST.get("image_url", "").strip()
     is_published = bool(request.POST.get("is_published"))  # "on" gəlir
+    legacy_new_category = (request.POST.get("new_category") or "").strip()
 
     # Sadə validasiya (istəsən form ilə də edə bilərsən)
     if not title or not content:
         return JsonResponse(
             {"success": False, "message": pgettext("blog.post.message", "title_and_content_required")},
+            status=400,
+        )
+    if legacy_new_category:
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": {"category": ["Categories are managed by SuperAdmin only."]},
+                "message": "Categories are managed by SuperAdmin only.",
+            },
             status=400,
         )
 
@@ -154,14 +145,34 @@ def post_edit_ajax(request, pk):
     post.content = content
     post.excerpt = excerpt
 
-    # Kateqoriya
-    if category_id:
-        try:
-            post.category = Category.objects.get(pk=category_id)
-        except Category.DoesNotExist:
-            post.category = None
-    else:
-        post.category = None
+    selected_root_category = (
+        Category.objects.filter(pk=category_id, parent__isnull=True).first() if category_id else None
+    )
+    selected_subcategory = (
+        Category.objects.select_related("parent").filter(pk=subcategory_id, parent__isnull=False).first()
+        if subcategory_id
+        else None
+    )
+
+    try:
+        post.category = resolve_post_category_selection(
+            category=selected_root_category,
+            subcategory=selected_subcategory,
+        )
+    except ValidationError as exc:
+        error_message = ""
+        if hasattr(exc, "message_dict"):
+            error_message = " ".join(error_list[0] for error_list in exc.message_dict.values() if error_list)
+        elif getattr(exc, "messages", None):
+            error_message = exc.messages[0]
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": getattr(exc, "message_dict", {"category": [error_message or "Invalid category selection."]}),
+                "message": error_message or "Invalid category selection.",
+            },
+            status=400,
+        )
 
     # Şəkil faylı
     image_file = request.FILES.get("image")
@@ -301,6 +312,176 @@ def delete_post(request, post_id):
         )
 
     return redirect(f"{reverse('accounts:profile')}?section=posts")
+
+
+# 3. MÜƏLLIM MODERASIYA: sil, deaktiv et, və ya yenidən aktiv et
+@login_required
+@require_POST
+def teacher_moderate_post(request, post_id):
+    """
+    Müəllim tərəfindən post moderasiyası.
+
+    POST parametrləri:
+      action   – "delete" | "deactivate" | "reactivate"
+      feedback – "delete" və "deactivate" üçün məcburi; "reactivate" üçün opsional.
+
+    Yalnız postu nəzərdən keçirə bilən müəllimlər, orq adminlər/sahiblər
+    və superadminlər bu əməliyyatı icra edə bilər.
+    """
+    post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
+
+    if not can_user_review_post(request.user, post):
+        raise PermissionDenied("Bu postu idarə etmək üçün icazəniz yoxdur.")
+
+    action = (request.POST.get("action") or "").strip().lower()
+    feedback = (request.POST.get("feedback") or "").strip()
+
+    if action not in {"delete", "deactivate", "reactivate"}:
+        messages.error(request, "Yanlış əməliyyat seçildi.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    # Feedback is mandatory for delete and deactivate so the student knows the reason.
+    if action in {"delete", "deactivate"} and not feedback:
+        messages.error(request, "Zəhmət olmasa əməliyyatın səbəbini yazın.")
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse({"success": False, "error": "Zəhmət olmasa əməliyyatın səbəbini yazın."}, status=400)
+        next_url = (request.POST.get("next") or "").strip()
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    def _redirect_next():
+        next_url = (request.POST.get("next") or "").strip()
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "delete":
+        post_title = post.title
+        post_author = post.author
+
+        # Notify the author about the deletion before removing the record.
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import create_notification
+
+            create_notification(
+                recipient=post_author,
+                title=f"Postunuz silindi: {post_title}",
+                message=(f'"{post_title}" başlıqlı postunuz müəllim tərəfindən silindi. ' f"Səbəb: {feedback}"),
+                link=f"{reverse('accounts:profile')}?section=posts",
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_title": post_title, "feedback": feedback},
+            )
+        except Exception:
+            logger.exception("Failed to notify author about post deletion title=%s", post_title)
+
+        post.delete()
+        messages.success(request, f'"{post_title}" postu silindi.')
+
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
+
+        return _redirect_next()
+
+    if action == "reactivate":
+        post.is_published = True
+        post.save(update_fields=["is_published", "updated_at"])
+
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.APPROVED,
+            feedback=feedback or "Post yenidən aktiv edildi.",
+        )
+
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import create_notification
+
+            create_notification(
+                recipient=post.author,
+                title=f"Postunuz yenidən aktiv edildi: {post.title}",
+                message=f'"{post.title}" başlıqlı postunuz müəllim tərəfindən yenidən paylaşıldı.',
+                link=reverse("article_detail", kwargs={"slug": post.slug}),
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_id": post.pk},
+            )
+        except Exception:
+            logger.exception("Failed to notify author about post reactivation pk=%s", post.pk)
+
+        messages.success(request, f'"{post.title}" postu yenidən aktiv edildi və paylaşıldı.')
+
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": f'"{post.title}" postu aktiv edildi.',
+                    "is_published": post.is_published,
+                }
+            )
+
+        return _redirect_next()
+
+    # action == "deactivate": postu gizlət, tələbəyə rəy göndər
+    post.is_published = False
+    post.approval_feedback = feedback
+    post.save(update_fields=["is_published", "approval_feedback", "updated_at"])
+
+    PostApprovalLog.objects.create(
+        post=post,
+        reviewer=request.user,
+        action=PostApprovalLog.Action.FEEDBACK,
+        feedback=feedback,
+    )
+
+    try:
+        from apps.notifications.models import NotificationType
+        from apps.notifications.services import create_notification
+
+        create_notification(
+            recipient=post.author,
+            title=f"Postunuz deaktiv edildi: {post.title}",
+            message=(
+                f'"{post.title}" başlıqlı postunuz müəllim tərəfindən gizlədildi. '
+                f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
+                f"Müəllim rəyi: {feedback}"
+            ),
+            link=f"{reverse('accounts:profile')}?section=posts",
+            notification_type=NotificationType.APPROVAL,
+            metadata={"post_id": post.pk, "feedback": feedback},
+        )
+    except Exception:
+        logger.exception("Failed to notify author about post deactivation pk=%s", post.pk)
+
+    messages.info(
+        request,
+        f'"{post.title}" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — '
+        f"tələbə düzəliş edib yenidən göndərə bilər.",
+    )
+
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    if is_ajax:
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f'"{post.title}" postu deaktiv edildi.',
+                "is_published": post.is_published,
+            }
+        )
+
+    return _redirect_next()
 
 
 def list_posts(request):

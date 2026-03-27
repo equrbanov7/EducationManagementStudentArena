@@ -156,6 +156,27 @@ class SignupAndLoginFlowTest(TestCase):
             Membership.objects.filter(user=user, organization=profile.organization, is_primary=True).exists()
         )
 
+    def test_pending_org_signup_does_not_seed_active_tenant_session(self):
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="pendingorgowner",
+                email="pendingorgowner@example.com",
+                organization_type=OrganizationType.SCHOOL,
+                institution_not_listed_name="Pending Session School",
+                initial_role=ProfileRole.TEACHER,
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+
+        user = User.objects.get(username="pendingorgowner")
+        self.assertEqual(user.profile.organization.status, "pending")
+        self.assertIsNone(self.client.session.get("active_organization"))
+
+        self._verify_latest_otp(user)
+
+        self.assertNotIn("active_organization", self.client.session)
+
     def test_course_center_signup_uses_manual_name(self):
         response = self.client.post(
             self.register_url,
@@ -1112,8 +1133,10 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
         self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
         self.assertContains(response, "js-pending-add-bulk-label")
-        self.assertContains(response, 'data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"')
-        self.assertContains(response, 'data-disabled-tooltip="Ən az 1 tələbə seçin"')
+        self.assertContains(
+            response, 'data-selected-label="Seçilən istifadəçiləri təşkilata əlavə et ({count} seçildi)"'
+        )
+        self.assertContains(response, 'data-disabled-tooltip="Ən azı 1 tələbə seçin"')
         self.assertContains(response, 'id="selectAllPendingStudents"')
 
     def test_student_org_management_defaults_to_all_filters_and_hides_superadmins(self):
