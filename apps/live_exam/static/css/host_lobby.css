@@ -383,7 +383,7 @@ body.host-live-page.host-presentation-page .present-view--lobby {
 }
 
 body.host-live-page.host-presentation-page .lobby-stage__join-board {
-    width: min(1120px, calc(100% - 240px));
+    width: min(100%, calc(100% - 80px));
 }
 
 .lobby-stage__join-copy,
@@ -891,7 +891,7 @@ body.host-live-page.host-presentation-page .lobby-stage__footer {
     }
 
     .lobby-stage__pin strong {
-        font-size: clamp(2.4rem, 14vw, 4rem);
+        font-size: clamp(2.4rem, 11vw, 4rem);
     }
 
     .lobby-stage__qr img {
