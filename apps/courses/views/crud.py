@@ -24,8 +24,10 @@ from django.views.generic import CreateView, ListView, UpdateView, View
 
 from apps.courses.forms import CourseForm
 from apps.courses.models import Course
+from apps.organizations.models import Organization
 from core.helpers import _safe_same_origin_redirect_path
-from core.tenancy import get_request_organization
+from core.permissions import is_superadmin_user
+from core.tenancy import get_request_organization, restore_request_organization_from_profile
 
 from ._helpers import IsCourseOwnerMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
 
@@ -47,11 +49,45 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
     modal_form_template_name = "courses/partials/_create_course_modal_form.html"
 
     def dispatch(self, request, *args, **kwargs):
-        _require_org_permission(request, "course.create")
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        restore_request_organization_from_profile(request)
+        if not self._can_superadmin_select_organization(request):
+            _require_org_permission(request, "course.create")
         return super().dispatch(request, *args, **kwargs)
 
     def _is_modal_request(self):
         return self.request.GET.get("modal") == "1"
+
+    def _can_superadmin_select_organization(self, request=None):
+        current_request = request or self.request
+        return (
+            is_superadmin_user(getattr(current_request, "user", None))
+            and get_request_organization(current_request) is None
+        )
+
+    def _organization_selection_queryset(self):
+        return Organization.objects.filter(is_active=True, status="active").order_by("name")
+
+    def _bind_selected_organization(self, organization):
+        self.request.organization = organization
+        self.request.org_memberships = []
+        self.request.org_permissions = list(getattr(self.request, "org_permissions", []) or [])
+        if hasattr(self.request, "session"):
+            self.request.session["active_organization"] = organization.slug
+        if hasattr(self.request.user, "set_active_organization_context"):
+            self.request.user.set_active_organization_context(
+                organization,
+                memberships=self.request.org_memberships,
+                permissions=self.request.org_permissions,
+            )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self._can_superadmin_select_organization():
+            kwargs["allow_organization_selection"] = True
+            kwargs["organization_queryset"] = self._organization_selection_queryset()
+        return kwargs
 
     def get(self, request, *args, **kwargs):
         if self._is_modal_request():
@@ -68,6 +104,10 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         organization = get_request_organization(self.request)
+        if organization is None and self._can_superadmin_select_organization():
+            organization = form.cleaned_data.get("organization")
+            if organization is not None:
+                self._bind_selected_organization(organization)
         if organization is None:
             raise PermissionDenied(pgettext("courses.view.permission", "active_organization_required"))
         form.instance.owner = self.request.user
@@ -204,7 +244,7 @@ def update_course_status(request, course_id):
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class MyCoursesListView(ListView):
+class MyCoursesListView(LoginRequiredMixin, ListView):
     """Mənim kurslarım (owner)."""
 
     template_name = "courses/my_courses.html"

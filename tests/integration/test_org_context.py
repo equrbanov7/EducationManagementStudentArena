@@ -281,6 +281,35 @@ class MultiOrgExplicitSelectionTest(TestCase):
         )
 
 
+class PendingOrgContextTest(TestCase):
+    """Pending organizations must never become an active tenant context."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="pending_ctx_user",
+            email="pending-ctx@example.com",
+            password="testpass123",
+        )
+        self.org = _make_org("Pending Org", "pending-org-ctx", self.user)
+        self.org.status = "pending"
+        self.org.save(update_fields=["status"])
+
+        role = _make_role(self.org, name="rector", level=100, permissions=["*"])
+        _assign(self.user, self.org, role)
+
+        self.middleware = OrganizationMiddleware(_dummy_view)
+
+    def test_pending_org_is_not_auto_selected(self):
+        request = _make_request(self.user)
+
+        self.middleware(request)
+
+        self.assertIsNone(request.organization)
+        self.assertEqual(request.org_memberships, [])
+        self.assertEqual(request.org_permissions, [])
+        self.assertNotIn("active_organization", request.session)
+
+
 class MembershipSourceOfTruthTest(TestCase):
     """Regression guards for membership-only organization context resolution."""
 

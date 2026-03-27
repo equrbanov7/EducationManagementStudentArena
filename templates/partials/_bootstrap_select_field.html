@@ -1,0 +1,36 @@
+<div class="bootstrap-single-select{% if field_wrapper_class %} {{ field_wrapper_class }}{% endif %}">
+    {% if field_label %}
+        <label{% if field_label_class %} class="{{ field_label_class }}"{% endif %} for="{{ field_id }}">
+            {{ field_label }}
+            {% if field_optional_label %}
+                <span class="bootstrap-single-select__badge">{{ field_optional_label }}</span>
+            {% endif %}
+        </label>
+    {% endif %}
+
+    <select
+        id="{{ field_id }}"
+        name="{{ field_name }}"
+        class="form-select bootstrap-single-select__native js-bootstrap-single-select{% if field_select_class %} {{ field_select_class }}{% endif %}"
+        data-bootstrap-select
+        {% if field_extra_attrs %}{{ field_extra_attrs|safe }}{% endif %}
+    >
+        <option value="">{{ field_placeholder }}</option>
+        {% for option in field_options %}
+            <option
+                value="{{ option.value }}"
+                {% if field_value|stringformat:'s' == option.value|stringformat:'s' %}selected{% endif %}
+                {% if option.disabled %}disabled{% endif %}
+                {% if option.attrs %}{{ option.attrs|safe }}{% endif %}
+            >
+                {{ option.label }}
+            </option>
+        {% endfor %}
+    </select>
+
+    {% if field_hint %}
+        <div class="bootstrap-single-select__hint{% if field_hint_class %} {{ field_hint_class }}{% endif %}" {% if field_hint_attrs %}{{ field_hint_attrs|safe }}{% endif %}>
+            {{ field_hint }}
+        </div>
+    {% endif %}
+</div>

@@ -8705,12 +8705,12 @@ msgstr "View result"
 #: apps/exams/templates/exams/student/exam_result.html:14
 msgctxt "exams.template.student_exam_result"
 msgid "heading_your_result"
-msgstr "Subheading posts"
+msgstr "Your result"
 
 #: apps/exams/templates/exams/student/exam_result.html:20
 msgctxt "exams.template.student_exam_result"
 msgid "exam_status"
-msgstr "Exam started! (Attempt #{attempt_number})"
+msgstr "Exam status"
 
 #: apps/exams/templates/exams/student/exam_result.html:23
 msgctxt "exams.template.student_exam_result"
@@ -8720,7 +8720,7 @@ msgstr "Submitted"
 #: apps/exams/templates/exams/student/exam_result.html:25
 msgctxt "exams.template.student_exam_result"
 msgid "status_expired"
-msgstr "Status expired"
+msgstr "Expired"
 
 #: apps/exams/templates/exams/student/exam_result.html:36
 #: apps/exams/templates/exams/student/exam_result.html:239
@@ -8731,22 +8731,22 @@ msgstr "Score"
 #: apps/exams/templates/exams/student/exam_result.html:42
 msgctxt "exams.template.student_exam_result"
 msgid "label_correct"
-msgstr "Score"
+msgstr "Correct"
 
 #: apps/exams/templates/exams/student/exam_result.html:46
 msgctxt "exams.template.student_exam_result"
 msgid "label_wrong"
-msgstr "Group"
+msgstr "Wrong"
 
 #: apps/exams/templates/exams/student/exam_result.html:54
 msgctxt "exams.template.student_exam_result"
 msgid "label_final_score"
-msgstr "Max. Honey"
+msgstr "Final score"
 
 #: apps/exams/templates/exams/student/exam_result.html:56
 msgctxt "exams.template.student_exam_result"
 msgid "label_graded_by_teacher"
-msgstr "Label primary teacher"
+msgstr "Graded by teacher"
 
 #: apps/exams/templates/exams/student/exam_result.html:59
 msgctxt "exams.template.student_exam_result"
@@ -8761,7 +8761,7 @@ msgstr "Duration"
 #: apps/exams/templates/exams/student/exam_result.html:66
 msgctxt "exams.template.student_exam_result"
 msgid "unit_seconds"
-msgstr "Example: 60 (seconds). If empty, default is used."
+msgstr "seconds"
 
 #: apps/exams/templates/exams/student/exam_result.html:73
 msgctxt "exams.template.student_exam_result"
@@ -8776,28 +8776,28 @@ msgstr "Question"
 #: apps/exams/templates/exams/student/exam_result.html:96
 msgctxt "exams.template.student_exam_result"
 msgid "video_not_supported"
-msgstr "This exam has not started yet. Start date: {start_str}"
+msgstr "Your browser does not support the video tag."
 
 #: apps/exams/templates/exams/student/exam_result.html:126
 msgctxt "exams.template.student_exam_result"
 msgid "your_selection"
-msgstr "Language selection"
+msgstr "Your selection"
 
 #: apps/exams/templates/exams/student/exam_result.html:135
 msgctxt "exams.template.student_exam_result"
 msgid "answer_correct"
-msgstr "Answer text"
+msgstr "Correct"
 
 #: apps/exams/templates/exams/student/exam_result.html:137
 msgctxt "exams.template.student_exam_result"
 msgid "answer_wrong"
-msgstr "Answer unit"
+msgstr "Incorrect"
 
 #: apps/exams/templates/exams/student/exam_result.html:140
 #: apps/exams/templates/exams/student/exam_result.html:161
 msgctxt "exams.template.student_exam_result"
 msgid "answer_not_provided"
-msgstr "Answer mode"
+msgstr "No answer provided"
 
 #: apps/exams/templates/exams/student/exam_result.html:148
 msgctxt "exams.template.student_exam_result"
@@ -10821,6 +10821,16 @@ msgctxt "exams.template.test_question_bank"
 msgid "subtitle_management_panel"
 msgstr "Manage, preview, and save questions quickly."
 
+#: apps/exams/templates/exams/teacher/test_question_bank.html:18
+msgctxt "exams.template.test_question_bank"
+msgid "action_back"
+msgstr "Back"
+
+#: apps/exams/templates/exams/teacher/test_question_bank.html:23
+msgctxt "exams.template.test_question_bank"
+msgid "action_view_questions_bank"
+msgstr "View question bank"
+
 #: apps/exams/templates/exams/teacher/test_question_bank.html:26
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
@@ -12757,6 +12767,11 @@ msgid "technology"
 msgstr "Technology"
 
 #: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "education"
+msgstr "Education"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
 msgctxt "nav"
 msgid "about"
 msgstr "About"
@@ -15757,6 +15772,14 @@ msgctxt "profile.sidebar"
 msgid "join_organization"
 msgstr "Join organization"
 
+msgctxt "profile.section"
+msgid "staff_management"
+msgstr "Staff Management"
+
+msgctxt "profile.sidebar"
+msgid "staff_management"
+msgstr "Staff Management"
+
 msgctxt "membership_request.role"
 msgid "Student"
 msgstr "Student"
@@ -16078,3 +16101,207 @@ msgstr "You do not have permission for these targets or no recipients found."
 msgctxt "profile.publish_notification"
 msgid "search_no_results"
 msgstr "No results found."
+
+msgctxt "staff.management"
+msgid "There are no active invites to withdraw."
+msgstr "There are no active invites to withdraw."
+
+msgctxt "staff.management"
+msgid "Teachers in organization"
+msgstr "Teachers in organization"
+
+msgctxt "staff.management"
+msgid "Active teacher accounts are shown here."
+msgstr "Active teacher accounts are shown here."
+
+msgctxt "staff.management"
+msgid "Search teachers..."
+msgstr "Search teachers..."
+
+msgctxt "staff.management"
+msgid "Not available"
+msgstr "Not available"
+
+msgctxt "staff.management"
+msgid "No teacher found."
+msgstr "No teacher found."
+
+msgctxt "staff.management"
+msgid "Respond to pending teacher requests here."
+msgstr "Respond to pending teacher requests here."
+
+msgctxt "staff.management"
+msgid "Search teacher requests..."
+msgstr "Search teacher requests..."
+
+msgctxt "staff.management"
+msgid "Message"
+msgstr "Message"
+
+msgctxt "staff.management"
+msgid "Request date"
+msgstr "Request date"
+
+msgctxt "staff.management"
+msgid "There are no pending teacher requests."
+msgstr "There are no pending teacher requests."
+
+msgctxt "staff.management"
+msgid "Teachers without organization"
+msgstr "Teachers without organization"
+
+msgctxt "staff.management"
+msgid "Teachers who can be invited appear here."
+msgstr "Teachers who can be invited appear here."
+
+msgctxt "staff.management"
+msgid "Invite selected teachers"
+msgstr "Invite selected teachers"
+
+msgctxt "staff.management"
+msgid "Invite selected teachers ({count} selected)"
+msgstr "Invite selected teachers ({count} selected)"
+
+msgctxt "staff.management"
+msgid "No teacher available for invitation."
+msgstr "No teacher available for invitation."
+
+msgctxt "staff.management"
+msgid "Sent teacher invites"
+msgstr "Sent teacher invites"
+
+msgctxt "staff.management"
+msgid "Withdraw pending teacher invites from here."
+msgstr "Withdraw pending teacher invites from here."
+
+msgctxt "staff.management"
+msgid "Search teacher invites..."
+msgstr "Search teacher invites..."
+
+msgctxt "staff.management"
+msgid "There are no active teacher invites to withdraw."
+msgstr "There are no active teacher invites to withdraw."
+
+msgctxt "staff.management"
+msgid "Organizations"
+msgstr "Organizations"
+
+msgctxt "staff.management"
+msgid "Superadmin organization overview and status actions."
+msgstr "Superadmin organization overview and status actions."
+
+msgctxt "staff.management"
+msgid "Search organizations..."
+msgstr "Search organizations..."
+
+msgctxt "staff.management"
+msgid "All statuses"
+msgstr "All statuses"
+
+msgctxt "staff.management"
+msgid "Active"
+msgstr "Active"
+
+msgctxt "staff.management"
+msgid "Pending"
+msgstr "Pending"
+
+msgctxt "staff.management"
+msgid "Suspended"
+msgstr "Suspended"
+
+msgctxt "staff.management"
+msgid "Inactive"
+msgstr "Inactive"
+
+msgctxt "staff.management"
+msgid "All types"
+msgstr "All types"
+
+msgctxt "staff.management"
+msgid "School"
+msgstr "School"
+
+msgctxt "staff.management"
+msgid "University"
+msgstr "University"
+
+msgctxt "staff.management"
+msgid "Course center"
+msgstr "Course center"
+
+msgctxt "staff.management"
+msgid "Individual"
+msgstr "Individual"
+
+msgctxt "staff.management"
+msgid "Apply filters"
+msgstr "Apply filters"
+
+msgctxt "staff.management"
+msgid "Type"
+msgstr "Type"
+
+msgctxt "staff.management"
+msgid "Owner"
+msgstr "Owner"
+
+msgctxt "staff.management"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "staff.management"
+msgid "Active members"
+msgstr "Active members"
+
+msgctxt "staff.management"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "staff.management"
+msgid "Manage"
+msgstr "Manage"
+
+msgctxt "staff.management"
+msgid "Code"
+msgstr "Code"
+
+msgctxt "staff.management"
+msgid "License"
+msgstr "License"
+
+msgctxt "staff.management"
+msgid "Reason"
+msgstr "Reason"
+
+msgctxt "staff.management"
+msgid "Reject reason (optional)"
+msgstr "Reject reason (optional)"
+
+msgctxt "staff.management"
+msgid "Unsuspend"
+msgstr "Unsuspend"
+
+msgctxt "staff.management"
+msgid "Suspension reason"
+msgstr "Suspension reason"
+
+msgctxt "staff.management"
+msgid "Suspend"
+msgstr "Suspend"
+
+msgctxt "staff.management"
+msgid "No organization found."
+msgstr "No organization found."
+
+msgctxt "exams.view.student.result.message"
+msgid "Result is not available yet. It will appear after the teacher review window closes."
+msgstr "Result is not available yet. It will appear after the teacher review window closes."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "hint_activate_exam_before_live"
+msgstr "Activate the exam first. It is currently inactive."
+
+msgctxt "live_exam.view.message"
+msgid "exam_must_be_active_before_live"
+msgstr "Activate the exam before starting a live session."

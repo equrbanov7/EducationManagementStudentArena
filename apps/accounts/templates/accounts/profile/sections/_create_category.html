@@ -1,0 +1,137 @@
+{% if 'create-category' in allowed_sections %}
+<section class="profile-section-panel profile-section--create-category {% if active_section == 'create-category' %}is-active{% endif %}"
+         data-profile-section-panel="create-category">
+    <div class="category-management-section">
+        <div class="toast-container toast-container--inline js-category-management-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+        <div class="card border-0 shadow-sm category-management-card">
+            <div class="card-body p-4 p-xl-5">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                    <div>
+                        <span class="category-management-eyebrow">SuperAdmin</span>
+                        <h3 class="category-management-title mb-2">Yeni kateqoriya və ya alt kateqoriya yarat</h3>
+                        <p class="text-muted mb-0">
+                            4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent seçilərsə alt kateqoriya yaradılır.
+                        </p>
+                    </div>
+                    <a href="{{ profile_base_url }}?section=category-management" class="btn btn-outline-secondary">
+                        Kateqoriyaları idarə et
+                    </a>
+                </div>
+
+                {% if category_management_create_form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in category_management_create_form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="category-management-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="profile_form" value="category-create">
+                    <input type="hidden" name="section" value="create-category">
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="category-management-select-wrap">
+                                {% include "partials/_bootstrap_select_field.html" with field_id="categoryManagementParent" field_name=category_management_create_form.parent.html_name field_label=category_management_create_form.parent.label field_placeholder=category_management_create_form.parent.empty_label field_options=category_management_create_parent_options field_value=category_management_create_selected_parent_id field_hint=category_management_create_form.parent.help_text field_select_class="category-management-parent-select" %}
+                                {% for error in category_management_create_form.parent.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="categoryManagementCreateNameAz">{{ category_management_create_form.name_az.label }}</label>
+                            <input
+                                type="text"
+                                id="categoryManagementCreateNameAz"
+                                name="{{ category_management_create_form.name_az.html_name }}"
+                                class="form-control{% if category_management_create_form.name_az.errors %} is-invalid{% endif %}"
+                                maxlength="100"
+                                value="{{ category_management_create_form.name_az.value|default_if_none:'' }}"
+                                required
+                            >
+                            {% for error in category_management_create_form.name_az.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="categoryManagementCreateNameEn">{{ category_management_create_form.name_en.label }}</label>
+                            <input
+                                type="text"
+                                id="categoryManagementCreateNameEn"
+                                name="{{ category_management_create_form.name_en.html_name }}"
+                                class="form-control{% if category_management_create_form.name_en.errors %} is-invalid{% endif %}"
+                                maxlength="100"
+                                value="{{ category_management_create_form.name_en.value|default_if_none:'' }}"
+                                required
+                            >
+                            {% for error in category_management_create_form.name_en.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="categoryManagementCreateNameRu">{{ category_management_create_form.name_ru.label }}</label>
+                            <input
+                                type="text"
+                                id="categoryManagementCreateNameRu"
+                                name="{{ category_management_create_form.name_ru.html_name }}"
+                                class="form-control{% if category_management_create_form.name_ru.errors %} is-invalid{% endif %}"
+                                maxlength="100"
+                                value="{{ category_management_create_form.name_ru.value|default_if_none:'' }}"
+                                required
+                            >
+                            {% for error in category_management_create_form.name_ru.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="categoryManagementCreateNameTr">{{ category_management_create_form.name_tr.label }}</label>
+                            <input
+                                type="text"
+                                id="categoryManagementCreateNameTr"
+                                name="{{ category_management_create_form.name_tr.html_name }}"
+                                class="form-control{% if category_management_create_form.name_tr.errors %} is-invalid{% endif %}"
+                                maxlength="100"
+                                value="{{ category_management_create_form.name_tr.value|default_if_none:'' }}"
+                                required
+                            >
+                            {% for error in category_management_create_form.name_tr.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="categoryManagementCreateSortOrder">{{ category_management_create_form.sort_order.label }}</label>
+                            <input
+                                type="number"
+                                id="categoryManagementCreateSortOrder"
+                                name="{{ category_management_create_form.sort_order.html_name }}"
+                                class="form-control{% if category_management_create_form.sort_order.errors %} is-invalid{% endif %}"
+                                min="0"
+                                step="1"
+                                value="{{ category_management_create_form.sort_order.value|default_if_none:'0' }}"
+                            >
+                            <div class="form-text">{{ category_management_create_form.sort_order.help_text }}</div>
+                            {% for error in category_management_create_form.sort_order.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn profile-action-btn profile-action-btn--indigo">
+                            Kateqoriya yarat
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}

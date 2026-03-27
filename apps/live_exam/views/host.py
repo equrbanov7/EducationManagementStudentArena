@@ -10,6 +10,7 @@ import json
 import random
 from datetime import timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
@@ -66,7 +67,8 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
     1. An active organization context exists in the request.
     2. The exam's organization matches the request's active organization.
     3. The organization is not suspended or inactive.
-    4. The requesting user holds the ``exam.manage`` permission.
+    4. The requesting user holds the ``exam.host`` permission, or the broader
+       ``exam.manage`` permission.
 
     Raises ``PermissionDenied`` on any violation.
     """
@@ -80,7 +82,7 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
     if org.is_suspended:
         raise PermissionDenied(pgettext("live_exam.view.permission", "org_suspended_or_inactive"))
 
-    if not request_has_permission(request, "exam.manage"):
+    if not (request_has_permission(request, "exam.host") or request_has_permission(request, "exam.manage")):
         raise PermissionDenied(pgettext("live_exam.view.permission", "exam_manage_required"))
 
 
@@ -93,13 +95,19 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
 def live_create_session_by_slug(request, slug):
     exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
 
-    if not getattr(request.user, "is_teacher", False):
+    is_superadmin = request.user.is_superuser or getattr(request.user, "is_superadmin", False)
+
+    if not is_superadmin and not getattr(request.user, "is_teacher", False):
         raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
 
-    if exam.author != request.user:
+    if not is_superadmin and exam.author != request.user:
         raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     _ensure_host_org_permission(request, exam.organization)
+
+    if not exam.is_active:
+        messages.warning(request, pgettext("live_exam.view.message", "exam_must_be_active_before_live"))
+        return redirect(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
     log_action(
