@@ -60,6 +60,7 @@ PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
 PROFILE_ROLE_LABELS = dict(ProfileRole.CHOICES)
 PROFILE_ROLE_NAMES = set(PROFILE_ROLE_LABELS.keys())
+PROFILE_ROLE_NAMES_MANAGEABLE = PROFILE_ROLE_NAMES - {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
 REVIEW_EDIT_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 REVIEW_EDIT_WINDOW = timedelta(minutes=REVIEW_EDIT_WINDOW_MINUTES)
 STUDENT_ORG_MANAGEMENT_MIN_LEVEL = ProfileRole.LEVELS.get(ProfileRole.HR, 65)
@@ -206,18 +207,14 @@ def _extract_profile_roles_for_user(user):
 
 
 def _assignable_profile_roles_for_user(user):
-    manageable_role_names = {
-        name for name, _display in ProfileRole.CHOICES if name not in {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
-    }
-
     if _is_superadmin_user(user):
-        return [(name, display) for name, display in ProfileRole.CHOICES if name in manageable_role_names]
+        return [(name, display) for name, display in ProfileRole.CHOICES if name in PROFILE_ROLE_NAMES_MANAGEABLE]
 
     user_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else 0
     return [
         (name, display)
         for name, display in ProfileRole.CHOICES
-        if name in manageable_role_names and ProfileRole.LEVELS.get(name, 0) < user_level
+        if name in PROFILE_ROLE_NAMES_MANAGEABLE and ProfileRole.LEVELS.get(name, 0) < user_level
     ]
 
 
@@ -229,7 +226,13 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, orga
 
     for profile in profiles:
         _bind_active_role_context(profile.user, organization)
-        current_roles = _extract_profile_roles_for_user(profile.user)
+        profile_user_is_superadmin = getattr(profile.user, "is_superuser", False) or getattr(
+            profile.user, "is_superadmin", False
+        )
+        if profile_user_is_superadmin:
+            current_roles = PROFILE_ROLE_NAMES_MANAGEABLE
+        else:
+            current_roles = _extract_profile_roles_for_user(profile.user)
         primary_role_name = None
         if current_roles:
             primary_role_name = max(current_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
@@ -499,6 +502,8 @@ def _role_capabilities(user, profile):
             "student-organization-management",
             "permission-editor",
             "manage-roles",
+            "create-category",
+            "category-management",
             "superadmin-organizations",
             "pending-post-approvals",
             "blog",
@@ -720,7 +725,12 @@ def _build_user_organization_access_rows(
         return []
 
     membership_queryset = (
-        Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
+        Membership.objects.filter(
+            user=user,
+            is_active=True,
+            organization__is_active=True,
+            organization__status="active",
+        )
         .select_related("organization", "organization__owner", "role")
         .order_by("organization__name", "-is_primary", "-role__level", "role__display_name")
     )
@@ -744,7 +754,9 @@ def _build_user_organization_access_rows(
             row["role_labels"].append(role_label)
 
     owned_organizations = (
-        Organization.objects.filter(owner=user, is_active=True).select_related("owner").order_by("name")
+        Organization.objects.filter(owner=user, is_active=True, status="active")
+        .select_related("owner")
+        .order_by("name")
     )
     for organization in owned_organizations:
         row = grouped_rows.setdefault(
@@ -768,6 +780,7 @@ def _build_user_organization_access_rows(
         and _is_superadmin_user(user)
         and active_organization is not None
         and getattr(active_organization, "is_active", False)
+        and getattr(active_organization, "status", "") == "active"
         and active_organization.id not in grouped_rows
     ):
         grouped_rows[active_organization.id] = {

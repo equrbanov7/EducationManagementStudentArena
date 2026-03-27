@@ -500,6 +500,25 @@ class ExamAccessControlTest(TestCase):
         can_start, message = self.exam.can_user_start(self.student)
         self.assertFalse(can_start)
 
+    def test_attempts_left_ignores_in_progress_attempts(self):
+        self.exam.max_attempts_per_user = 1
+        self.exam.save()
+
+        ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress", attempt_number=1)
+
+        self.assertEqual(self.exam.attempts_left_for(self.student), 1)
+
+    def test_can_user_start_allows_resume_for_in_progress_attempt(self):
+        self.exam.max_attempts_per_user = 1
+        self.exam.access_code = "ABC123"
+        self.exam.is_public = False
+        self.exam.save()
+
+        ExamAttempt.objects.create(user=self.student, exam=self.exam, status="in_progress", attempt_number=1)
+
+        can_start, _ = self.exam.can_user_start(self.student)
+        self.assertTrue(can_start)
+
     def test_exam_time_restrictions(self):
         """Test exam time-based restrictions."""
         # Exam that hasn't started yet

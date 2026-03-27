@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}Staff İdarəetməsi - EMSArena{% endblock %}
+{% block title %}{% trans "Staff Management" context "staff.management" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
@@ -12,10 +12,10 @@
     <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-users-cog"></i> Staff İdarəetməsi
+                <i class="fas fa-users-cog"></i> {% trans "Staff Management" context "staff.management" %}
             </h1>
             <a href="{% url 'accounts:profile' %}?section=student-organization-management" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Profilə qayıt
+                <i class="fas fa-arrow-left"></i> {% trans "Back to profile" context "staff.management" %}
             </a>
         </div>
 

@@ -419,6 +419,7 @@
     .btn-edit-profile {
         width: 100%;
         justify-content: center;
+        margin-bottom: 6px;
     }
     
     .info-grid {

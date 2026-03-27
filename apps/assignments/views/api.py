@@ -7,6 +7,7 @@ Contains:
 - search_students
 - search_groups
 - students_by_groups
+- remove_student_from_assignment
 """
 
 from django.contrib.auth.decorators import login_required
@@ -17,7 +18,7 @@ from django.http import JsonResponse
 from apps.courses.models import CourseMembership
 from apps.task_submission_core.access import can_user_access_course_roster
 
-from ._helpers import _get_tenant_course_or_404
+from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
 
 # ════════════════════════════════════════════════════════════════════════════
 # Search Students
@@ -163,3 +164,58 @@ def students_by_groups(request):
             )
 
     return JsonResponse({"students": students})
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Remove Student From Assignment (Manual Override)
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@login_required
+def remove_student_from_assignment(request, pk):
+    """
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │ Tələbəni tapşırıqdan çıxar (müəllim tərəfindən manual override)         │
+    │ POST /assignments/<pk>/remove-student/                                  │
+    │                                                                         │
+    │ Body: student_id=<id>                                                   │
+    │                                                                         │
+    │ Bu əməliyyat yalnız assignment.assigned_students M2M-ə təsir edir;      │
+    │ tələbənin qrupu və ya kurs üzvlüyü dəyişmir.                            │
+    └─────────────────────────────────────────────────────────────────────────┘
+    """
+    from django.contrib.auth import get_user_model
+
+    from core.permissions import request_has_permission
+
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed."}, status=405)
+
+    assignment = _get_tenant_assignment_or_404(request, pk)
+
+    # The user must own the course AND have the assignment.edit permission.
+    if (
+        not request.user.is_teacher_or_above
+        or assignment.course.owner != request.user
+        or not request_has_permission(request, "assignment.edit")
+    ):
+        raise PermissionDenied("You do not have permission to modify this assignment.")
+
+    student_id = (request.POST.get("student_id") or "").strip()
+    if not student_id or not student_id.isdigit():
+        return JsonResponse({"success": False, "error": "A valid student_id is required."}, status=400)
+
+    User = get_user_model()
+    try:
+        student = User.objects.get(pk=int(student_id))
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Student not found."}, status=404)
+
+    assignment.assigned_students.remove(student)
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": f"{student.get_full_name() or student.username} tapşırıqdan çıxarıldı.",
+        }
+    )

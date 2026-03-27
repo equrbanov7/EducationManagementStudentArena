@@ -1,95 +1,121 @@
-// 1. Debounce funksiyası (Gözləmə rejimi)
-    // Bu funksiya istifadəçi yazmağı dayandırana qədər gözləyir
+(function () {
     function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-          const later = () => {
-              clearTimeout(timeout);
-              func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-      };
-  }
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
-  // 2. Axtarış funksiyası
-  function performSearch() {
-      const searchInput = document.getElementById('searchInput');
-      const query = searchInput.value;
-      const gridContainer = document.querySelector('.home-left-column'); // Dəyişəcək hissə
+    function sanitizeContent(element) {
+        const clone = element.cloneNode(true);
 
-      // Vizual effekt: Axtarış gedərkən şəffaflığı azalt
-      gridContainer.style.opacity = '0.5';
-      gridContainer.style.transition = 'opacity 0.3s';
+        const scripts = clone.querySelectorAll("script");
+        scripts.forEach((script) => script.remove());
 
-      // URL-i hazırlayırıq (Məs: /?q=python&page=1)
-      const url = new URL(window.location.href);
-      url.searchParams.set('q', query);
-      url.searchParams.set('page', 1); // Axtarış edəndə həmişə 1-ci səhifəyə qayıt
+        const allElements = clone.querySelectorAll("*");
+        allElements.forEach((el) => {
+            Array.from(el.attributes).forEach((attr) => {
+                if (attr.name.startsWith("on")) {
+                    el.removeAttribute(attr.name);
+                }
+            });
 
-      // Brauzerin URL sətrini dəyişirik (Səhifə yenilənmədən)
-      window.history.pushState({}, '', url);
+            ["href", "src", "action", "formaction"].forEach((attrName) => {
+                const attrValue = el.getAttribute(attrName);
+                if (attrValue && attrValue.toLowerCase().trim().startsWith("javascript:")) {
+                    el.removeAttribute(attrName);
+                }
+            });
+        });
 
-      // 3. Arxa plana (Backend-ə) sorğu göndəririk
-      fetch(url)
-          .then(response => response.text())
-          .then(html => {
-              // Gələn HTML mətnini DOM-a çeviririk
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(html, 'text/html');
+        return clone;
+    }
 
-              // Təzə səhifədən bizə lazım olan hissəni tapırıq
-              const newContentElement = doc.querySelector('.home-left-column');
+    function getListingShell() {
+        return document.getElementById("homeListingShell");
+    }
 
-              if (newContentElement) {
-                  // Sanitize HTML before inserting - remove script tags and event handlers
-                  const sanitizedContent = sanitizeContent(newContentElement);
+    function setLoadingState(isLoading) {
+        const listingShell = getListingShell();
+        if (!listingShell) {
+            return;
+        }
 
-                  // Köhnə hissəni təzəsi ilə əvəz edirik
-                  gridContainer.innerHTML = '';
-                  gridContainer.appendChild(sanitizedContent);
-              }
+        listingShell.style.opacity = isLoading ? "0.5" : "1";
+        listingShell.style.transition = "opacity 0.3s";
+    }
 
-              // Vizual effekti qaytarırıq
-              gridContainer.style.opacity = '1';
-          })
-          .catch(error => {
-              console.error('Xəta:', error);
-              gridContainer.style.opacity = '1';
-          });
-  }
+    function updateListing(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const newContentElement = doc.getElementById("homeListingShell");
+        const listingShell = getListingShell();
 
-  // Helper function to sanitize HTML content
-  function sanitizeContent(element) {
-      const clone = element.cloneNode(true);
+        if (!newContentElement || !listingShell) {
+            return;
+        }
 
-      // Remove all script tags
-      const scripts = clone.querySelectorAll('script');
-      scripts.forEach(script => script.remove());
+        const sanitizedContent = sanitizeContent(newContentElement);
+        listingShell.innerHTML = sanitizedContent.innerHTML;
+    }
 
-      // Remove event handlers from all elements
-      const allElements = clone.querySelectorAll('*');
-      allElements.forEach(el => {
-          Array.from(el.attributes).forEach(attr => {
-              if (attr.name.startsWith('on')) {
-                  el.removeAttribute(attr.name);
-              }
-          });
+    function loadListing(url, { pushHistory = false } = {}) {
+        const listingShell = getListingShell();
+        if (!listingShell) {
+            return;
+        }
 
-          // Remove javascript: URLs
-          ['href', 'src', 'action', 'formaction'].forEach(attrName => {
-              const attrValue = el.getAttribute(attrName);
-              if (attrValue && attrValue.toLowerCase().trim().startsWith('javascript:')) {
-                  el.removeAttribute(attrName);
-              }
-          });
-      });
+        setLoadingState(true);
+        if (pushHistory) {
+            window.history.pushState({}, "", url);
+        }
 
-      return clone;
-  }
+        fetch(url)
+            .then((response) => response.text())
+            .then((html) => {
+                updateListing(html);
+                setLoadingState(false);
+            })
+            .catch((error) => {
+                console.error("Xəta:", error);
+                setLoadingState(false);
+            });
+    }
 
-  // 4. Inputa "dinləyici" qoşuruq
-  const searchInput = document.getElementById('searchInput');
-  
-  // 1500ms (1.5 saniyə) debounce tətbiq edirik
-  searchInput.addEventListener('input', debounce(performSearch, 1000));
+    function buildSearchUrl(searchInput) {
+        const url = new URL(window.location.href);
+        const query = searchInput.value.trim();
+
+        if (query) {
+            url.searchParams.set("q", query);
+        } else {
+            url.searchParams.delete("q");
+        }
+
+        url.searchParams.delete("page");
+        return url;
+    }
+
+    const searchInput = document.getElementById("searchInput");
+    if (!searchInput) {
+        return;
+    }
+
+    searchInput.addEventListener(
+        "input",
+        debounce(() => {
+            loadListing(buildSearchUrl(searchInput), { pushHistory: true });
+        }, 1000)
+    );
+
+    window.addEventListener("popstate", () => {
+        const url = new URL(window.location.href);
+        searchInput.value = url.searchParams.get("q") || "";
+        loadListing(url);
+    });
+})();

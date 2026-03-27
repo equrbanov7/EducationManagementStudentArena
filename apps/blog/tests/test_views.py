@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, Post
+from apps.blog.models import Category, Post, Question
 from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -89,6 +89,8 @@ class BlogRoleAccessTest(TestCase):
         session.save()
 
     def setUp(self):
+        cache.clear()
+
         self.teacher = User.objects.create_user(
             username="blog_teacher",
             email="blog_teacher@example.com",
@@ -116,11 +118,28 @@ class BlogRoleAccessTest(TestCase):
         )
         _assign_user_to_org(self.other_teacher, self.organization, ProfileRole.TEACHER)
 
+        self.tech_category = Category.objects.create(
+            name="Test Technology",
+            slug="test-technology",
+            show_in_navbar=True,
+        )
+        self.ai_category = Category.objects.create(
+            name="Test AI",
+            slug="test-ai",
+            parent=self.tech_category,
+        )
+        self.education_category = Category.objects.create(
+            name="Test Education",
+            slug="test-education",
+            show_in_navbar=True,
+        )
+
         self.teacher_post = Post.objects.create(
             author=self.teacher,
             title="Teacher Post",
             content="Teacher content",
             is_published=True,
+            category=self.ai_category,
         )
         self.student_group = StudentGroup.objects.create(
             teacher=self.teacher,
@@ -171,6 +190,56 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.context["page_obj"].paginator.count, 7)
         self.assertContains(response, "?q=Teacher&page=1")
 
+    def test_homepage_filters_posts_by_selected_category_without_leaving_home(self):
+        matching_post = Post.objects.create(
+            author=self.teacher,
+            title="Technology Filter Match",
+            content="Tech content",
+            is_published=True,
+            category=self.tech_category,
+        )
+        other_post = Post.objects.create(
+            author=self.teacher,
+            title="Education Filter Miss",
+            content="Education content",
+            is_published=True,
+            category=self.education_category,
+        )
+
+        response = self.client.get(reverse("home"), {"category": self.tech_category.slug})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["selected_category"], self.tech_category)
+        self.assertEqual(response.context["active_category_slug"], self.tech_category.slug)
+        self.assertContains(response, "Hamısını göstər")
+        self.assertIn(matching_post, response.context["page_obj"].object_list)
+        self.assertIn(self.teacher_post, response.context["page_obj"].object_list)
+        self.assertNotIn(other_post, response.context["page_obj"].object_list)
+
+    def test_homepage_combines_search_and_category_filter_in_links(self):
+        Post.objects.create(
+            author=self.teacher,
+            title="Technology Teacher Search Result",
+            content="Teacher content",
+            is_published=True,
+            category=self.tech_category,
+        )
+        Post.objects.create(
+            author=self.teacher,
+            title="Education Teacher Search Result",
+            content="Teacher content",
+            is_published=True,
+            category=self.education_category,
+        )
+
+        response = self.client.get(reverse("home"), {"q": "Teacher", "category": self.tech_category.slug})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["query"], "Teacher")
+        self.assertEqual(response.context["selected_category"], self.tech_category)
+        self.assertEqual(response.context["extra_query"], "q=Teacher&category=test-technology")
+        self.assertContains(response, "/?category=test-technology&q=Teacher")
+
     def test_legacy_blog_home_redirects_to_root(self):
         response = self.client.get("/blog/?q=Teacher&page=2")
 
@@ -182,6 +251,29 @@ class BlogRoleAccessTest(TestCase):
         response = self.client.get(reverse("create_post"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'name="new_category"')
+        self.assertContains(response, 'name="subcategory"')
+
+    def test_teacher_question_pages_render_without_server_error(self):
+        Question.objects.create(
+            author=self.teacher,
+            question_text="What is EMS Arena?",
+            answer_text="A learning platform.",
+            visible_to_all=True,
+        )
+
+        self._activate_org(self.teacher)
+
+        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertLess(response.status_code, 500)
+
+    def test_question_pages_redirect_anonymous_users_to_login(self):
+        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertEqual(response.status_code, 302)
+                self.assertIn(reverse("accounts:login"), response.url)
 
     def test_student_cannot_edit_other_users_post(self):
         self.client.force_login(self.student)
@@ -201,45 +293,29 @@ class BlogRoleAccessTest(TestCase):
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("create_post"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'name="new_category"')
+        self.assertNotContains(response, 'name="new_category"')
+        self.assertContains(response, 'name="subcategory"')
 
-    def test_student_cannot_create_new_category_when_submitting_post(self):
-        self.client.force_login(self.student)
-        response = self.client.post(
-            reverse("create_post"),
-            {
-                "title": "Student Category Attempt",
-                "content": "Student content",
-                "excerpt": "",
-                "category": "",
-                "new_category": "Unauthorized Student Category",
-                "image_url": "",
-            },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(Category.objects.filter(name="Unauthorized Student Category").exists())
-        self.assertIn("Yeni kateqoriya yaratmaq", response.json()["errors"]["new_category"][0])
-
-    def test_teacher_can_create_new_category_when_submitting_post(self):
-        self.client.force_login(self.teacher)
-        response = self.client.post(
-            reverse("create_post"),
-            {
-                "title": "Teacher Category Post",
-                "content": "Teacher content",
-                "excerpt": "",
-                "category": "",
-                "new_category": "Teacher Created Category",
-                "image_url": "",
-                "is_published": "on",
-            },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-        self.assertEqual(response.status_code, 200)
-        created_post = Post.objects.get(author=self.teacher, title="Teacher Category Post")
-        self.assertEqual(created_post.category.name, "Teacher Created Category")
-        self.assertTrue(Category.objects.filter(name="Teacher Created Category").exists())
+    def test_normal_users_cannot_submit_legacy_new_category_payload(self):
+        for user in (self.student, self.teacher):
+            with self.subTest(user=user.username):
+                self.client.force_login(user)
+                response = self.client.post(
+                    reverse("create_post"),
+                    {
+                        "title": "Legacy Category Attempt",
+                        "content": "Student content",
+                        "excerpt": "",
+                        "category": str(self.tech_category.id),
+                        "subcategory": "",
+                        "new_category": "Unauthorized Student Category",
+                        "image_url": "",
+                    },
+                    HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+                )
+                self.assertEqual(response.status_code, 400)
+                self.assertFalse(Category.objects.filter(name="Unauthorized Student Category").exists())
+                self.assertIn("SuperAdmin", response.json()["errors"]["category"][0])
 
     def test_author_can_delete_own_post_via_ajax(self):
         self.client.force_login(self.teacher)
@@ -304,8 +380,8 @@ class BlogRoleAccessTest(TestCase):
                 "title": "Ajax Created Post",
                 "content": "Ajax content",
                 "excerpt": "Ajax excerpt",
-                "category": "",
-                "new_category": "",
+                "category": str(self.tech_category.id),
+                "subcategory": str(self.ai_category.id),
                 "image_url": "",
                 "is_published": "on",
             },
@@ -313,7 +389,8 @@ class BlogRoleAccessTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '"success": true')
-        self.assertTrue(Post.objects.filter(author=self.teacher, title="Ajax Created Post").exists())
+        created_post = Post.objects.get(author=self.teacher, title="Ajax Created Post")
+        self.assertEqual(created_post.category, self.ai_category)
 
     def test_legacy_blog_create_post_ajax_endpoint_still_works(self):
         self.client.force_login(self.teacher)
@@ -323,8 +400,8 @@ class BlogRoleAccessTest(TestCase):
                 "title": "Legacy Ajax Created Post",
                 "content": "Legacy ajax content",
                 "excerpt": "Legacy ajax excerpt",
-                "category": "",
-                "new_category": "",
+                "category": str(self.education_category.id),
+                "subcategory": "",
                 "image_url": "",
                 "is_published": "on",
             },
@@ -333,7 +410,8 @@ class BlogRoleAccessTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '"success": true')
-        self.assertTrue(Post.objects.filter(author=self.teacher, title="Legacy Ajax Created Post").exists())
+        created_post = Post.objects.get(author=self.teacher, title="Legacy Ajax Created Post")
+        self.assertEqual(created_post.category, self.education_category)
 
     def test_student_created_post_stays_pending_until_approval(self):
         self.client.force_login(self.student)
@@ -343,8 +421,8 @@ class BlogRoleAccessTest(TestCase):
                 "title": "Student Pending Post",
                 "content": "Student content",
                 "excerpt": "",
-                "category": "",
-                "new_category": "",
+                "category": str(self.tech_category.id),
+                "subcategory": "",
                 "image_url": "",
                 "is_published": "on",
             },
