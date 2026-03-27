@@ -93,9 +93,12 @@
                                     <span class="badge bg-danger ms-1" style="font-size:0.7rem">{{ notif_count }}</span>
                                 {% endif %}
                             </a>
-                            <a href="{% url 'accounts:logout' %}" class="blog-header__user-menu-item">
-                                {% trans "logout" context "nav" %}
-                            </a>
+                            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0;display:contents">
+                                {% csrf_token %}
+                                <button type="submit" class="blog-header__user-menu-item">
+                                    {% trans "logout" context "nav" %}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% else %}
@@ -159,9 +162,12 @@
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:logout' %}" class="blog-header__nav-link">
-                {% trans "logout" context "nav" %}
-            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
+                {% csrf_token %}
+                <button type="submit" class="blog-header__nav-link">
+                    {% trans "logout" context "nav" %}
+                </button>
+            </form>
         </li>
     {% else %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>

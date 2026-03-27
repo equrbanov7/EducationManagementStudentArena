@@ -391,10 +391,13 @@
             </a>
         </li>
         <li class="sidebar-menu-item">
-            <a href="{% url 'accounts:logout' %}" class="sidebar-menu-link sidebar-menu-link--logout">
-                <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "logout" context "profile.sidebar" %}</span>
-            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
+                {% csrf_token %}
+                <button type="submit" class="sidebar-menu-link sidebar-menu-link--logout">
+                    <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "logout" context "profile.sidebar" %}</span>
+                </button>
+            </form>
         </li>
     </ul>
 </aside>
