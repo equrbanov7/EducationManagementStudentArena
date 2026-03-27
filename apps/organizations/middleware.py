@@ -61,6 +61,7 @@ class OrganizationMiddleware:
     def __call__(self, request):
         # Initialize organization-related attributes
         request.organization = None
+        request.blocked_organization = None
         request.org_memberships = []
         request.org_permissions = []
         setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, False)
@@ -82,7 +83,6 @@ class OrganizationMiddleware:
                 request.user.memberships.filter(
                     organization__slug=org_slug,
                     organization__is_active=True,
-                    organization__status="active",
                     is_active=True,
                 )
                 .select_related("organization", "role", "scope_unit")
@@ -93,33 +93,43 @@ class OrganizationMiddleware:
                 # All memberships share the same organization because the slug
                 # column has a UNIQUE constraint — memberships[0].organization
                 # is always the correct org object.
-                request.organization = memberships[0].organization
-                request.org_memberships = memberships
+                session_org = memberships[0].organization
+                if getattr(session_org, "status", "") == "active":
+                    request.organization = session_org
+                    request.org_memberships = memberships
+                else:
+                    request.blocked_organization = session_org
             elif is_superuser:
                 # Superusers may have no membership rows; fall back to a
                 # direct org lookup so they can still access the org.
                 try:
-                    request.organization = Organization.objects.get(slug=org_slug, is_active=True, status="active")
-                    request.org_memberships = []
+                    session_org = Organization.objects.get(slug=org_slug, is_active=True)
+                    if getattr(session_org, "status", "") == "active":
+                        request.organization = session_org
+                        request.org_memberships = []
+                    else:
+                        request.blocked_organization = session_org
                 except Organization.DoesNotExist:
                     request.session.pop("active_organization", None)
             else:
                 owner_org = Organization.objects.filter(
                     slug=org_slug,
                     is_active=True,
-                    status="active",
                     owner=request.user,
                 ).first()
                 if owner_org is not None:
-                    request.organization = owner_org
-                    request.org_memberships = []
-                    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
+                    if getattr(owner_org, "status", "") == "active":
+                        request.organization = owner_org
+                        request.org_memberships = []
+                        setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
+                    else:
+                        request.blocked_organization = owner_org
                 else:
                     # User is no longer a member of the session org — clear it.
                     request.session.pop("active_organization", None)
 
         # ── Step 2: auto-select when no session org is available ──────────
-        if request.organization is None:
+        if request.organization is None and request.blocked_organization is None:
             active_memberships = self._fetch_active_memberships(request.user)
             unique_orgs = self._unique_orgs(active_memberships)
 
@@ -161,7 +171,7 @@ class OrganizationMiddleware:
                     # even though the UI and flow allow teachers to create courses.
                     permissions_set.add("course.create")
             request.org_permissions = list(permissions_set)
-        else:
+        elif request.organization is not None:
             request.organization = None
             request.org_memberships = []
             request.org_permissions = []
