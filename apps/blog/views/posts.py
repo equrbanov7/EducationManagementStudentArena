@@ -314,7 +314,7 @@ def delete_post(request, post_id):
     return redirect(f"{reverse('accounts:profile')}?section=posts")
 
 
-# 3. MÜƏLLIM MODERASIYA: sil və ya deaktiv et (approved post-lar üçün)
+# 3. MÜƏLLIM MODERASIYA: sil, deaktiv et, və ya yenidən aktiv et
 @login_required
 @require_POST
 def teacher_moderate_post(request, post_id):
@@ -322,9 +322,8 @@ def teacher_moderate_post(request, post_id):
     Müəllim tərəfindən post moderasiyası.
 
     POST parametrləri:
-      action   – "delete" (postu sil) və ya "deactivate" (gizlət, tələbə görə bilmir)
-      feedback – Məcburi rəy — hər iki əməliyyat üçün tələb olunur;
-                 tələbəyə bildiriş kimi göndərilir.
+      action   – "delete" | "deactivate" | "reactivate"
+      feedback – "delete" və "deactivate" üçün məcburi; "reactivate" üçün opsional.
 
     Yalnız postu nəzərdən keçirə bilən müəllimlər, orq adminlər/sahiblər
     və superadminlər bu əməliyyatı icra edə bilər.
@@ -337,16 +336,26 @@ def teacher_moderate_post(request, post_id):
     action = (request.POST.get("action") or "").strip().lower()
     feedback = (request.POST.get("feedback") or "").strip()
 
-    if action not in {"delete", "deactivate"}:
+    if action not in {"delete", "deactivate", "reactivate"}:
         messages.error(request, "Yanlış əməliyyat seçildi.")
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
-    # Feedback is mandatory for every moderation action so the student knows the reason.
-    if not feedback:
+    # Feedback is mandatory for delete and deactivate so the student knows the reason.
+    if action in {"delete", "deactivate"} and not feedback:
         messages.error(request, "Zəhmət olmasa əməliyyatın səbəbini yazın.")
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         if is_ajax:
             return JsonResponse({"success": False, "error": "Zəhmət olmasa əməliyyatın səbəbini yazın."}, status=400)
+        next_url = (request.POST.get("next") or "").strip()
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    def _redirect_next():
         next_url = (request.POST.get("next") or "").strip()
         if next_url and url_has_allowed_host_and_scheme(
             next_url,
@@ -386,14 +395,47 @@ def teacher_moderate_post(request, post_id):
         if is_ajax:
             return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
 
-        next_url = (request.POST.get("next") or "").strip()
-        if next_url and url_has_allowed_host_and_scheme(
-            next_url,
-            allowed_hosts={request.get_host()},
-            require_https=request.is_secure(),
-        ):
-            return redirect(next_url)
-        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+        return _redirect_next()
+
+    if action == "reactivate":
+        post.is_published = True
+        post.save(update_fields=["is_published", "updated_at"])
+
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.APPROVED,
+            feedback=feedback or "Post yenidən aktiv edildi.",
+        )
+
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import create_notification
+
+            create_notification(
+                recipient=post.author,
+                title=f"Postunuz yenidən aktiv edildi: {post.title}",
+                message=f'"{post.title}" başlıqlı postunuz müəllim tərəfindən yenidən paylaşıldı.',
+                link=f"/articles/{post.slug}/",
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_id": post.pk},
+            )
+        except Exception:
+            logger.exception("Failed to notify author about post reactivation pk=%s", post.pk)
+
+        messages.success(request, f'"{post.title}" postu yenidən aktiv edildi və paylaşıldı.')
+
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": f'"{post.title}" postu aktiv edildi.',
+                    "is_published": post.is_published,
+                }
+            )
+
+        return _redirect_next()
 
     # action == "deactivate": postu gizlət, tələbəyə rəy göndər
     post.is_published = False
@@ -407,7 +449,6 @@ def teacher_moderate_post(request, post_id):
         feedback=feedback,
     )
 
-    # Müəllif-tələbəyə bildiriş göndər (feedback məcburidir)
     try:
         from apps.notifications.models import NotificationType
         from apps.notifications.services import create_notification
@@ -443,14 +484,7 @@ def teacher_moderate_post(request, post_id):
             }
         )
 
-    next_url = (request.POST.get("next") or "").strip()
-    if next_url and url_has_allowed_host_and_scheme(
-        next_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return redirect(next_url)
-    return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+    return _redirect_next()
 
 
 def list_posts(request):
