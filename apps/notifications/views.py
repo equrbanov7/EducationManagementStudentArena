@@ -52,8 +52,12 @@ def _safe_next_url(request):
     """Return a safe `next` URL from POST, defaulting to notification list."""
     from urllib.parse import urlparse
 
+    from django.urls import reverse
+
     next_url = request.POST.get("next", "").strip()
     if next_url:
+        if next_url.startswith("?"):
+            return f"{reverse('notifications:notification_list')}{next_url}"
         parsed = urlparse(next_url)
         # Only allow relative URLs (no scheme/netloc) for safety
         if not parsed.scheme and not parsed.netloc:

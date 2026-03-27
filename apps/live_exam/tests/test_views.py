@@ -34,11 +34,11 @@ LOCMEM_CACHE_SETTINGS = {
 
 def _create_org_role_and_membership(user, org, permissions=None):
     """
-    Create a Role with the given permissions (defaults to ['exam.manage']) and
-    a Membership linking *user* to *org* with that role.  Returns the Membership.
+    Create a Role with the given permissions (defaults to ['exam.host']) and a
+    Membership linking *user* to *org* with that role. Returns the Membership.
     """
-    permission_list = list(permissions) if permissions is not None else ["exam.manage"]
-    role_name = "instructor" if sorted(permission_list) == ["exam.manage"] else "professor"
+    permission_list = list(permissions) if permissions is not None else ["exam.host"]
+    role_name = "instructor" if sorted(permission_list) == ["exam.host"] else "professor"
     display_name = "Instructor" if role_name == "instructor" else "Professor"
     role, _created = Role.objects.update_or_create(
         organization=org,
@@ -1194,7 +1194,7 @@ class HostOrgRBACTest(TestCase):
             status="active",
             is_active=True,
         )
-        _create_org_role_and_membership(self.teacher, self.other_org, permissions=["exam.manage"])
+        _create_org_role_and_membership(self.teacher, self.other_org, permissions=["exam.host"])
 
         self.client.login(username="rbac_teacher", password="StrongPass123!")
 
@@ -1257,9 +1257,9 @@ class HostOrgRBACTest(TestCase):
                 self.assertNotEqual(response.status_code, 403, f"{url_name} should allow access with correct org")
                 self.assertNotEqual(response.status_code, 404, f"{url_name} should allow access with correct org")
 
-    def test_missing_exam_manage_permission_blocks_host_access(self):
-        """A user without exam.manage permission cannot perform host actions."""
-        # Create a user with a role that has NO exam.manage permission
+    def test_missing_exam_host_permission_blocks_host_access(self):
+        """A user without exam.host or exam.manage cannot perform host actions."""
+        # Create a user with a role that has NO host permission
         no_perm_user = User.objects.create_user("no_perm_host", "noperm@example.com", "StrongPass123!")
         no_perm_user.profile.role = ProfileRole.TEACHER
         no_perm_user.profile.save(update_fields=["role", "updated_at"])
@@ -1280,7 +1280,7 @@ class HostOrgRBACTest(TestCase):
                 self.assertEqual(
                     response.status_code,
                     403,
-                    f"{url_name} should return 403 when exam.manage is missing",
+                    f"{url_name} should return 403 when exam.host/exam.manage is missing",
                 )
 
 
