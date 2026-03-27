@@ -6,7 +6,6 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
-
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = ROOT / "output" / "pdf"
 OUTPUT_PATH = OUTPUT_DIR / "emsarena-app-summary.pdf"
@@ -285,7 +284,16 @@ def build_pdf() -> Path:
         "config/urls.py, config/asgi.py, config/celery.py, apps/live_exam/consumers.py, core/email_tasks.py."
     )
     footer_lines = wrap(footer, "Helvetica", 6.8, CONTENT_WIDTH)
-    draw_lines(pdf, footer_lines, x=MARGIN, y_top=max(y, MARGIN + 18), font_name="Helvetica", font_size=6.8, leading=8.0, color=MUTED)
+    draw_lines(
+        pdf,
+        footer_lines,
+        x=MARGIN,
+        y_top=max(y, MARGIN + 18),
+        font_name="Helvetica",
+        font_size=6.8,
+        leading=8.0,
+        color=MUTED,
+    )
 
     pdf.save()
     return OUTPUT_PATH
