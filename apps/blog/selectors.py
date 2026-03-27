@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 
 from django.core.cache import cache
-from django.db.models import Case, Count, IntegerField, Value, When
+from django.db.models import Count
 
 from .models import Category, Post
 
@@ -196,23 +196,43 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
     return result
 
 
-def get_category_assignment_choices():
-    return get_flat_category_tree(include_empty=True)
-
-
-def get_category_assignment_queryset_and_labels():
-    categories = get_category_assignment_choices()
+def get_post_category_tree(*, category_queryset=None):
+    categories = _load_categories(category_queryset)
     if not categories:
-        return Category.objects.none(), {}
+        return []
 
-    ordered_ids = [category.id for category in categories]
-    ordering = Case(
-        *[When(pk=category_id, then=Value(index)) for index, category_id in enumerate(ordered_ids)],
-        output_field=IntegerField(),
-    )
-    queryset = Category.objects.filter(pk__in=ordered_ids).select_related("parent").order_by(ordering)
-    label_map = {category.id: category.display_name for category in categories}
-    return queryset, label_map
+    children_by_parent = _build_children_map(categories)
+    root_categories = list(children_by_parent.get(None, []))
+
+    for root_category in root_categories:
+        root_category.child_categories = list(children_by_parent.get(root_category.id, []))
+
+    return root_categories
+
+
+def build_post_category_picker_options(category_tree):
+    root_options = []
+    subcategory_options = []
+
+    for root_category in category_tree:
+        root_options.append(
+            {
+                "value": str(root_category.id),
+                "label": root_category.localized_name,
+                "attrs": "",
+            }
+        )
+
+        for child_category in getattr(root_category, "child_categories", []):
+            subcategory_options.append(
+                {
+                    "value": str(child_category.id),
+                    "label": child_category.localized_name,
+                    "attrs": f'data-parent-id="{root_category.id}"',
+                }
+            )
+
+    return root_options, subcategory_options
 
 
 def get_navbar_categories():

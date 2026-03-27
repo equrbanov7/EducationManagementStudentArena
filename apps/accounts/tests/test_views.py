@@ -199,17 +199,25 @@ class LogoutViewTest(TestCase):
         self.user = User.objects.create_user("logoutuser", "logout@example.com", "StrongPass123!")
         self.logout_url = reverse("accounts:logout")
 
-    def test_logout_redirects_to_home(self):
-        """Test that logout redirects to home page."""
+    def test_logout_post_redirects_to_home(self):
+        """POST to logout must terminate the session and redirect to home."""
         self.client.login(username="logoutuser", password="StrongPass123!")
-        response = self.client.get(self.logout_url, follow=True)
+        response = self.client.post(self.logout_url, follow=True)
         # After logout, user should not be authenticated
         self.assertFalse(response.wsgi_request.user.is_authenticated)
         self.assertEqual(response.status_code, 200)
 
+    def test_logout_get_returns_405(self):
+        """GET requests to logout must be rejected with HTTP 405 to prevent CSRF forced-logout."""
+        self.client.login(username="logoutuser", password="StrongPass123!")
+        response = self.client.get(self.logout_url)
+        self.assertEqual(response.status_code, 405)
+        # The session must NOT be terminated by a GET request.
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
     def test_logout_when_not_logged_in(self):
-        """Test that logout works even when not logged in."""
-        response = self.client.get(self.logout_url, follow=True)
+        """POST to logout while not authenticated must still succeed (no crash)."""
+        response = self.client.post(self.logout_url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 

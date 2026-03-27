@@ -5,8 +5,11 @@ Model tests for blog app.
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db.models import ProtectedError
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.translation import override
 
 from apps.accounts.models import EmailOTP
 from apps.blog.models import Category, Comment, Post, Question, Subscriber
@@ -90,6 +93,8 @@ class CategoryTest(TestCase):
         """Test that Category can be created."""
         category = Category.objects.create(name="Python")
         self.assertEqual(category.name, "Python")
+        self.assertEqual(category.name_en, "Python")
+        self.assertEqual(category.name_az, "Python")
         self.assertIsNotNone(category.slug)
 
     def test_category_slug_auto_generated(self):
@@ -111,6 +116,55 @@ class CategoryTest(TestCase):
         """Test Category __str__ method."""
         category = Category.objects.create(name="JavaScript")
         self.assertEqual(str(category), "JavaScript")
+
+    def test_category_localized_name_uses_active_language_fields(self):
+        category = Category.objects.create(
+            slug="localized-category",
+            name="Localized Category",
+            name_az="Lokallaşdırılmış Kateqoriya",
+            name_en="Localized Category",
+            name_ru="Локализованная категория",
+            name_tr="Yerelleştirilmiş kategori",
+        )
+
+        with override("ru"):
+            self.assertEqual(category.localized_name, "Локализованная категория")
+
+        with override("tr"):
+            self.assertEqual(category.localized_name, "Yerelleştirilmiş kategori")
+
+    def test_subcategory_depth_is_limited_to_one_level(self):
+        root = Category.objects.create(name="Root")
+        child = Category.objects.create(name="Child", parent=root)
+        grandchild = Category(name="Grandchild", parent=child)
+
+        with self.assertRaises(ValidationError):
+            grandchild.full_clean()
+
+    def test_category_with_children_cannot_be_reparented_under_another_root(self):
+        root = Category.objects.create(name="Root")
+        another_root = Category.objects.create(name="Another Root")
+        child = Category.objects.create(name="Child", parent=root)
+
+        root.parent = another_root
+
+        with self.assertRaises(ValidationError):
+            root.full_clean()
+
+        self.assertEqual(child.parent, root)
+
+    def test_category_with_related_posts_cannot_be_deleted(self):
+        author = User.objects.create_user("category_delete_author", "catdelete@example.com", "StrongPass123!")
+        category = Category.objects.create(name="Protected Category")
+        Post.objects.create(
+            author=author,
+            category=category,
+            title="Protected Post",
+            content="Protected content",
+        )
+
+        with self.assertRaises(ProtectedError):
+            category.delete()
 
 
 class PostTest(TestCase):

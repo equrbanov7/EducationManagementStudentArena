@@ -14,6 +14,7 @@ urlpatterns = [
     path("posts/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
     path("posts/<int:post_id>/review/", views.review_post, name="review_post"),
     path("posts/<int:post_id>/delete/", views.delete_post, name="delete_post"),
+    path("posts/<int:post_id>/moderate/", views.teacher_moderate_post, name="teacher_moderate_post"),
     # ---- Category URL-ləri ----
     path("categories/<slug:slug>/", views.category_detail, name="category_detail"),
     # ---- Question URL-ləri ----

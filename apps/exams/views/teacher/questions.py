@@ -3,6 +3,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django.http import JsonResponse
@@ -81,6 +82,19 @@ def _append_navigation_query(path, navigation_query):
     return f"{path}{separator}{navigation_query}"
 
 
+def _resequence_exam_questions(exam):
+    ordered_questions = list(exam.questions.order_by("order", "id").only("id", "order"))
+    updated_questions = []
+
+    for index, question in enumerate(ordered_questions, start=1):
+        if question.order != index:
+            question.order = index
+            updated_questions.append(question)
+
+    if updated_questions:
+        ExamQuestion.objects.bulk_update(updated_questions, ["order"])
+
+
 def _render_question_form_html(request, *, exam, form, editing=False, question=None, navigation_query=""):
     return render_to_string(
         "exams/teacher/partials/_question_form.html",
@@ -129,6 +143,7 @@ def teacher_questions_bank(request, slug):
         elif action == "delete":
             deleted = selected_count
             selected_qs.delete()
+            _resequence_exam_questions(exam)
             messages.success(
                 request,
                 pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
@@ -451,7 +466,9 @@ def delete_exam_question(request, slug, question_id):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
-        question.delete()
+        with transaction.atomic():
+            question.delete()
+            _resequence_exam_questions(exam)
         # Invalidate the cached question ID list for this exam.
         try:
             from core.cache import invalidate_exam_question_ids_cache

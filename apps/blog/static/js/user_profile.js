@@ -8,11 +8,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const deleteModal = document.getElementById("deleteModal");
   const warningModal = document.getElementById("warningModal");
   const createModal = document.getElementById("createModal");
+  const createFormContainer = document.querySelector("[data-create-post-form-container]");
 
   // Edit modal elementləri
   const editForm = document.getElementById("editForm");
   const editTitle = document.getElementById("editTitle");
   const editCategory = document.getElementById("editCategory");
+  const editSubcategory = document.getElementById("editSubcategory");
   const editExcerpt = document.getElementById("editExcerpt");
   const editContent = document.getElementById("editContent");
   const editImageUrl = document.getElementById("editImageUrl");
@@ -49,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const createForm = document.getElementById("createForm");
   const createTitle = document.getElementById("createTitle");
   const createCategory = document.getElementById("createCategory");
-  const createNewCategory = document.getElementById("createNewCategory");
+  const createSubcategory = document.getElementById("createSubcategory");
   const createExcerpt = document.getElementById("createExcerpt");
   const createContent = document.getElementById("createContent");
   const createImageUrl = document.getElementById("createImageUrl");
@@ -71,6 +73,18 @@ document.addEventListener("DOMContentLoaded", function () {
   let pendingClose = false;
   const allowedImageExtensions = new Set(["jpg", "jpeg", "jfif", "png", "gif", "webp"]);
   const maxImageSizeBytes = 25 * 1024 * 1024;
+  const createCategoryPicker = window.createPostCategoryPicker
+    ? window.createPostCategoryPicker(
+        createFormContainer
+          ? createFormContainer.querySelector(".js-post-category-picker")
+          : null
+      )
+    : null;
+  const editCategoryPicker = window.createPostCategoryPicker
+    ? window.createPostCategoryPicker(
+        editModal ? editModal.querySelector(".js-post-category-picker") : null
+      )
+    : null;
 
   function getFileExtension(fileName) {
     if (!fileName || typeof fileName !== "string") {
@@ -113,6 +127,9 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetCreateForm() {
     if (!createForm) return;
     createForm.reset();
+    if (createCategoryPicker) {
+      createCategoryPicker.reset();
+    }
     if (createIsPublished) {
       if (createFormRequiresApproval) {
         createIsPublished.checked = false;
@@ -127,17 +144,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function openCreateModal() {
     resetCreateForm();
-    showModal(createModal);
+    if (createModal) {
+      showModal(createModal);
+    }
     if (createTitle) {
       createTitle.focus();
     }
   }
 
-  if (createModal && createForm) {
-    if (createModal.parentElement !== document.body) {
-      document.body.appendChild(createModal);
-    }
-
+  if (createForm) {
     document.querySelectorAll(".js-open-create-post").forEach((btn) => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -177,7 +192,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = await response.json();
         if (data.success) {
-          hideModal(createModal);
+          if (createModal) {
+            hideModal(createModal);
+          }
           location.reload();
           return;
         }
@@ -208,11 +225,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    createModal.addEventListener("click", function (e) {
-      if (e.target === createModal) {
-        hideModal(createModal);
-      }
-    });
+    if (createModal) {
+      createModal.addEventListener("click", function (e) {
+        if (e.target === createModal) {
+          hideModal(createModal);
+        }
+      });
+    }
 
     if (createImage) {
       createImage.addEventListener("change", function () {
@@ -230,8 +249,9 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    window.openCreatePostModal = openCreateModal;
   }
+
+  window.openCreatePostModal = openCreateModal;
 
   // ============= EDIT FUNKSIONALLARI =============
 
@@ -243,7 +263,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const title = this.dataset.title || "";
       const content = this.dataset.content || "";
-      const category = this.dataset.category || "";
+      const categoryRoot = this.dataset.categoryRoot || "";
+      const subcategory = this.dataset.subcategory || "";
       const excerpt = this.dataset.excerpt || "";
       const imageUrl = this.dataset.imageUrl || "";
       const fileImage = this.dataset.fileImage || "";
@@ -258,7 +279,6 @@ document.addEventListener("DOMContentLoaded", function () {
       // Form sahələrini doldur
       editTitle.value = title;
       editContent.value = content;
-      editCategory.value = category;
       editExcerpt.value = excerpt;
       editImageUrl.value = imageUrl;
       if (editIsPublished) {
@@ -280,20 +300,14 @@ document.addEventListener("DOMContentLoaded", function () {
       editCreatedAtInfo.textContent = createdAt;
       editUpdatedAtInfo.textContent = updatedAt;
 
-      if (editCategory) {
-        const catValue = String(category);
-        let found = false;
+      if (editCategoryPicker) {
+        editCategoryPicker.setValues(categoryRoot, subcategory);
+      } else if (editCategory) {
+        editCategory.value = categoryRoot;
+      }
 
-        Array.from(editCategory.options).forEach((opt) => {
-          if (opt.value === catValue) {
-            opt.selected = true;
-            found = true;
-          }
-        });
-
-        if (!found) {
-          editCategory.selectedIndex = -1; // heç nə seçilməsin
-        }
+      if (editSubcategory && !editCategoryPicker) {
+        editSubcategory.value = subcategory;
       }
 
       // Şəkil preview
@@ -317,7 +331,8 @@ document.addEventListener("DOMContentLoaded", function () {
       originalFormData = {
         title: title,
         content: content,
-        category: category,
+        category: categoryRoot,
+        subcategory: subcategory,
         excerpt: excerpt,
         image_url: imageUrl,
         is_published: requiresApproval ? false : isPublished,
@@ -339,13 +354,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const formInputs = [
     editTitle,
     editCategory,
+    editSubcategory,
     editExcerpt,
     editContent,
     editImageUrl,
     editIsPublished,
-  ];
+  ].filter(Boolean);
   formInputs.forEach((input) => {
-    const eventName = input.type === "checkbox" ? "change" : "input";
+    const eventName =
+      input.type === "checkbox" || input.tagName === "SELECT" ? "change" : "input";
     input.addEventListener(eventName, checkForChanges);
   });
 
@@ -370,6 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
       title: editTitle.value.trim(),
       content: editContent.value.trim(),
       category: editCategory.value,
+      subcategory: editSubcategory ? editSubcategory.value : "",
       excerpt: editExcerpt.value.trim(),
       image_url: editImageUrl.value.trim(),
       is_published: editIsPublished.checked,
@@ -379,6 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
       currentData.title !== originalFormData.title ||
       currentData.content !== originalFormData.content ||
       currentData.category !== originalFormData.category ||
+      currentData.subcategory !== originalFormData.subcategory ||
       currentData.excerpt !== originalFormData.excerpt ||
       currentData.image_url !== originalFormData.image_url ||
       currentData.is_published !== originalFormData.is_published ||

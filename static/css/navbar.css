@@ -217,6 +217,14 @@
     transition: background 0.15s ease;
 }
 
+button.blog-header__user-menu-item{
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 .blog-header__user-menu-item:hover {
     background: rgba(15, 23, 42, 0.05);
 }

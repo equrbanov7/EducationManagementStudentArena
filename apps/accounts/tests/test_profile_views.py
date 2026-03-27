@@ -125,6 +125,40 @@ class ProfileViewTest(TestCase):
             html=False,
         )
 
+    def test_profile_language_switcher_inline_script_uses_csp_nonce(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<script nonce="', html=False)
+        self.assertContains(response, "document.currentScript", html=False)
+
+    def test_profile_organization_access_rows_exclude_pending_owned_orgs(self):
+        active_org = Organization.objects.create(
+            name="Visible Active Org",
+            slug="visible-active-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        Organization.objects.create(
+            name="Hidden Pending Org",
+            slug="hidden-pending-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="pending",
+            is_active=True,
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        access_rows = response.context["organization_access_rows"]
+        self.assertEqual([row["organization"].id for row in access_rows], [active_org.id])
+
     def test_join_organization_sidebar_and_section_are_translated_in_english(self):
         profile = self.user.profile
         profile.role = ProfileRole.TEACHER
@@ -141,6 +175,34 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Join organization")
         self.assertContains(response, "Search current organizations, choose one")
+
+    def test_staff_management_sidebar_and_section_are_translated_in_english(self):
+        owner = User.objects.create_user(
+            username="staff_org_owner",
+            email="staff_org_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Staff Translation Org",
+            slug="staff-translation-org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="dean")
+
+        _login_with_org(self.client, self.user, organization)
+        self.client.cookies["django_language"] = "en"
+        response = self.client.get(
+            reverse("accounts:profile") + "?section=student-organization-management",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Staff Management")
+        self.assertContains(response, "Organization students")
+        self.assertContains(response, "Student requests")
 
     def test_profile_notification_modal_keeps_real_newlines_and_internal_link_query(self):
         self.client.login(username="testuser", password="testpass123")
@@ -161,6 +223,32 @@ class ProfileViewTest(TestCase):
         )
         self.assertNotContains(response, "\\u000A", html=False)
         self.assertNotContains(response, "\\u003F", html=False)
+
+    def test_profile_notifications_search_filters_results(self):
+        self.client.login(username="testuser", password="testpass123")
+        create_notification(recipient=self.user, title="Budget update", message="Quarterly report")
+        create_notification(recipient=self.user, title="Exam reminder", message="Starts tomorrow")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications&notif_search=budget")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Budget update")
+        self.assertNotContains(response, "Exam reminder")
+        self.assertEqual(response.context["in_app_notifications_page"].paginator.count, 1)
+        self.assertEqual(
+            response.context["notif_pagination_query"],
+            "section=notifications&notif_filter=all&notif_search=budget",
+        )
+
+    def test_profile_notifications_pagination_uses_requested_page(self):
+        self.client.login(username="testuser", password="testpass123")
+        for index in range(11):
+            create_notification(recipient=self.user, title=f"Notification {index}")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications&notif_page=2")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["in_app_notifications_page"].number, 2)
 
     def test_profile_change_password_updates_password_and_keeps_session(self):
         self.client.login(username="testuser", password="testpass123")
@@ -1259,6 +1347,301 @@ class ProfileViewTest(TestCase):
             'name="next" value="/accounts/profile/?section=superadmin-organizations"',
             html=False,
         )
+
+    def test_superadmin_profile_renders_category_management_section(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_category",
+            email="profile_superadmin_category@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile") + "?section=category-management")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "?section=create-category")
+        self.assertContains(response, "?section=category-management")
+        self.assertContains(response, "Create category")
+        self.assertContains(response, "Categories")
+        self.assertContains(response, "Technology")
+        self.assertContains(response, "js-category-management-search-form")
+        self.assertContains(response, "data-category-subcategory-toggle")
+        self.assertContains(response, "data-category-delete-trigger")
+        self.assertContains(response, "js-category-management-toast-container")
+        self.assertContains(response, 'id="categoryEditModal"', html=False)
+        self.assertContains(response, 'id="categoryDeleteModal"', html=False)
+
+    def test_superadmin_category_management_link_is_positioned_with_education_items(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_category_sidebar",
+            email="profile_superadmin_category_sidebar@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode("utf-8")
+        create_post_index = content.index("?section=create-post")
+        create_category_index = content.index("?section=create-category")
+        manage_categories_index = content.index("?section=category-management")
+        my_exams_index = content.index("?section=my-exams")
+
+        self.assertLess(create_post_index, create_category_index)
+        self.assertLess(create_category_index, manage_categories_index)
+        self.assertLess(manage_categories_index, my_exams_index)
+
+    def test_profile_create_post_section_renders_inline_form(self):
+        superuser = User.objects.create_superuser(
+            username="profile_inline_create_post",
+            email="profile_inline_create_post@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+
+        response = self.client.get(reverse("accounts:profile") + "?section=create-post")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-profile-section-panel="create-post"', html=False)
+        self.assertContains(response, 'id="createForm"', html=False)
+        self.assertContains(response, 'id="createTitle"', html=False)
+        self.assertNotContains(response, "Create post action")
+
+    def test_regular_user_cannot_access_category_management_section_or_create_categories(self):
+        from apps.blog.models import Category
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "?section=create-category")
+        self.assertNotContains(response, "?section=category-management")
+
+        post_response = self.client.post(
+            reverse("accounts:profile") + "?section=create-category",
+            data={
+                "profile_form": "category-create",
+                "section": "create-category",
+                "name_az": "Test Kateqoriya",
+                "name_en": "Test Category",
+                "name_ru": "Тестовая категория",
+                "name_tr": "Test Kategori",
+            },
+        )
+
+        self.assertEqual(post_response.status_code, 302)
+        self.assertEqual(post_response.url, reverse("accounts:profile") + "?section=profile-info")
+        self.assertFalse(Category.objects.filter(name_en="Test Category").exists())
+
+    def test_superadmin_can_create_root_category_and_subcategory_from_profile(self):
+        from apps.blog.models import Category
+
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_create_category",
+            email="profile_superadmin_create_category@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        create_url = reverse("accounts:profile") + "?section=create-category"
+
+        root_response = self.client.post(
+            create_url,
+            data={
+                "profile_form": "category-create",
+                "section": "create-category",
+                "name_az": "Robototexnika",
+                "name_en": "Robotics",
+                "name_ru": "Робототехника",
+                "name_tr": "Robotik",
+                "sort_order": 25,
+            },
+        )
+
+        self.assertEqual(root_response.status_code, 302)
+        self.assertEqual(root_response.url, create_url)
+
+        root_category = Category.objects.get(name_en="Robotics")
+        self.assertIsNone(root_category.parent_id)
+
+        sub_response = self.client.post(
+            create_url,
+            data={
+                "profile_form": "category-create",
+                "section": "create-category",
+                "parent": root_category.id,
+                "name_az": "Sensor sistemləri",
+                "name_en": "Sensor Systems",
+                "name_ru": "Сенсорные системы",
+                "name_tr": "Sensör Sistemleri",
+            },
+        )
+
+        self.assertEqual(sub_response.status_code, 302)
+        self.assertEqual(sub_response.url, create_url)
+
+        subcategory = Category.objects.get(name_en="Sensor Systems")
+        self.assertEqual(subcategory.parent, root_category)
+
+    def test_superadmin_can_edit_category_from_profile(self):
+        from apps.blog.models import Category
+
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_edit_category",
+            email="profile_superadmin_edit_category@example.com",
+            password="adminpass123",
+        )
+        category = Category.objects.create(
+            name_az="Köhnə ad",
+            name_en="Old Name",
+            name_ru="Старое имя",
+            name_tr="Eski ad",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=category-management",
+            data={
+                "profile_form": "category-management-save",
+                "section": "category-management",
+                "category_id": category.id,
+                "name_az": "Yeni ad",
+                "name_en": "New Name",
+                "name_ru": "Новое имя",
+                "name_tr": "Yeni isim",
+                "sort_order": 3,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=category-management")
+
+        category.refresh_from_db()
+        self.assertEqual(category.name_en, "New Name")
+        self.assertEqual(category.name_az, "Yeni ad")
+        self.assertEqual(category.sort_order, 3)
+
+    def test_superadmin_profile_category_management_blocks_duplicate_names(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_duplicate_category",
+            email="profile_superadmin_duplicate_category@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=create-category",
+            data={
+                "profile_form": "category-create",
+                "section": "create-category",
+                "name_az": "Texnologiya",
+                "name_en": "Technology",
+                "name_ru": "Технологии",
+                "name_tr": "Teknoloji",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "başqa kateqoriya artıq mövcuddur")
+        self.assertEqual(response.context["active_section"], "create-category")
+
+    def test_superadmin_profile_category_management_search_filters_tree(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_category_search",
+            email="profile_superadmin_category_search@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "category-management",
+                "category_search": "Programming",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Technology")
+        self.assertContains(response, "Programming")
+        self.assertNotContains(response, "Web Development")
+
+    def test_superadmin_profile_category_management_paginates_roots(self):
+        from apps.blog.models import Category
+
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_category_pagination",
+            email="profile_superadmin_category_pagination@example.com",
+            password="adminpass123",
+        )
+
+        for index in range(7):
+            Category.objects.create(
+                name_az=f"Arxiv Kateqoriya {index}",
+                name_en=f"Archive Category {index}",
+                name_ru=f"Архивная категория {index}",
+                name_tr=f"Arsiv Kategori {index}",
+                sort_order=1000 + index,
+            )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "category-management",
+                "category_page": 999,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        page = response.context["category_management_page"]
+        self.assertEqual(page.number, page.paginator.num_pages)
+        self.assertTrue(page.object_list)
+        self.assertTrue(all(item.name_en.startswith("Archive Category") for item in page.object_list))
+        self.assertEqual(page.object_list[-1].name_en, "Archive Category 6")
+
+    def test_superadmin_profile_category_delete_is_blocked_when_posts_exist(self):
+        from apps.blog.models import Category, Post
+
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_delete_category",
+            email="profile_superadmin_delete_category@example.com",
+            password="adminpass123",
+        )
+        author = User.objects.create_user(
+            username="category_delete_author_profile",
+            email="category_delete_author_profile@example.com",
+            password="authorpass123",
+        )
+        category = Category.objects.create(
+            name_az="Silinməyən kateqoriya",
+            name_en="Undeletable Category",
+            name_ru="Неудаляемая категория",
+            name_tr="Silinemez kategori",
+        )
+        Post.objects.create(
+            author=author,
+            category=category,
+            title="Protected category post",
+            content="Protected category content",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=category-management",
+            data={
+                "profile_form": "category-management-delete",
+                "section": "category-management",
+                "category_id": category.id,
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bu kateqoriyanı silmək olmur")
+        self.assertTrue(Category.objects.filter(pk=category.pk).exists())
 
     def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
         from apps.accounts.models import ProfileRole

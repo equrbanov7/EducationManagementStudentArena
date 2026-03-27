@@ -188,12 +188,15 @@ else:
 
 # Email backend:
 # - If EMAIL_BACKEND is set explicitly, use it.
-# - Otherwise, use SMTP when credentials exist; fallback to console backend.
+# - Otherwise, keep local/dev on the console backend by default so browser
+#   testing and onboarding are not blocked by real SMTP quota/provider issues.
+# - Opt into real SMTP locally with LOCAL_USE_SMTP_EMAIL=1.
+LOCAL_USE_SMTP_EMAIL = _env_bool("LOCAL_USE_SMTP_EMAIL", False)
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     (
         "django.core.mail.backends.smtp.EmailBackend"
-        if os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
+        if LOCAL_USE_SMTP_EMAIL and os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
         else "django.core.mail.backends.console.EmailBackend"
     ),
 )
