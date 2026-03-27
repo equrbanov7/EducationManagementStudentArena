@@ -174,6 +174,14 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context_data["courses"].exists())
 
+    def test_my_courses_requires_login(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("courses:my_courses"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("accounts:login"), response.url)
+
     def test_course_dashboard_preserves_assigned_tasks_profile_return_context(self):
         self.client.force_login(self.student)
         session = self.client.session
@@ -340,6 +348,14 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.client.logout()
 
         response = self.client.get(reverse("courses:edit_course", kwargs={"course_id": self.course_a.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("accounts:login"), response.url)
+
+    def test_create_course_requires_login(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("courses:create_course"))
+
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("accounts:login"), response.url)
 

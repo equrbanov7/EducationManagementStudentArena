@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, Post
+from apps.blog.models import Category, Post, Question
 from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -252,6 +252,28 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'name="new_category"')
         self.assertContains(response, 'name="subcategory"')
+
+    def test_teacher_question_pages_render_without_server_error(self):
+        Question.objects.create(
+            author=self.teacher,
+            question_text="What is EMS Arena?",
+            answer_text="A learning platform.",
+            visible_to_all=True,
+        )
+
+        self._activate_org(self.teacher)
+
+        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertLess(response.status_code, 500)
+
+    def test_question_pages_redirect_anonymous_users_to_login(self):
+        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertEqual(response.status_code, 302)
+                self.assertIn(reverse("accounts:login"), response.url)
 
     def test_student_cannot_edit_other_users_post(self):
         self.client.force_login(self.student)

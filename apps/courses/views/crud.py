@@ -49,6 +49,8 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
     modal_form_template_name = "courses/partials/_create_course_modal_form.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         restore_request_organization_from_profile(request)
         if not self._can_superadmin_select_organization(request):
             _require_org_permission(request, "course.create")
@@ -242,7 +244,7 @@ def update_course_status(request, course_id):
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class MyCoursesListView(ListView):
+class MyCoursesListView(LoginRequiredMixin, ListView):
     """Mənim kurslarım (owner)."""
 
     template_name = "courses/my_courses.html"
