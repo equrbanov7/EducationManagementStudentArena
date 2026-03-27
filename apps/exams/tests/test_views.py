@@ -750,7 +750,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             answer_mode="single",
         )
 
-        response = self.client.post(reverse("exams:delete_exam_question", args=[self.exam_visible.slug, self.exam_question.id]))
+        response = self.client.post(
+            reverse("exams:delete_exam_question", args=[self.exam_visible.slug, self.exam_question.id])
+        )
 
         self.assertEqual(response.status_code, 302)
         remaining_orders = list(
