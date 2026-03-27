@@ -7,6 +7,12 @@ from django.core.exceptions import ObjectDoesNotExist
 TRUSTED_OWNER_CONTEXT_ATTR = "_owner_verified_organization_context"
 
 
+def _is_tenant_accessible_organization(organization) -> bool:
+    return bool(
+        organization and getattr(organization, "is_active", False) and getattr(organization, "status", "") == "active"
+    )
+
+
 def get_request_organization(request):
     """
     Resolve the active organization selected on this request.
@@ -22,7 +28,7 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     Return whether the request has a valid active tenant context.
     """
     organization = get_request_organization(request)
-    if organization is None:
+    if not _is_tenant_accessible_organization(organization):
         return False
 
     user = getattr(request, "user", None)
@@ -64,7 +70,7 @@ def restore_request_organization_from_profile(request, *, profile=None):
         except (AttributeError, ObjectDoesNotExist):
             resolved_profile = None
     fallback_org = getattr(resolved_profile, "organization", None)
-    if fallback_org is None or not getattr(fallback_org, "is_active", False):
+    if not _is_tenant_accessible_organization(fallback_org):
         return False
 
     from apps.organizations.models import Membership
@@ -74,6 +80,7 @@ def restore_request_organization_from_profile(request, *, profile=None):
             user=user,
             organization=fallback_org,
             organization__is_active=True,
+            organization__status="active",
             is_active=True,
         )
         .select_related("organization", "role", "scope_unit")

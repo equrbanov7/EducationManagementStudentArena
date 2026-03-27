@@ -156,6 +156,27 @@ class SignupAndLoginFlowTest(TestCase):
             Membership.objects.filter(user=user, organization=profile.organization, is_primary=True).exists()
         )
 
+    def test_pending_org_signup_does_not_seed_active_tenant_session(self):
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="pendingorgowner",
+                email="pendingorgowner@example.com",
+                organization_type=OrganizationType.SCHOOL,
+                institution_not_listed_name="Pending Session School",
+                initial_role=ProfileRole.TEACHER,
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+
+        user = User.objects.get(username="pendingorgowner")
+        self.assertEqual(user.profile.organization.status, "pending")
+        self.assertIsNone(self.client.session.get("active_organization"))
+
+        self._verify_latest_otp(user)
+
+        self.assertNotIn("active_organization", self.client.session)
+
     def test_course_center_signup_uses_manual_name(self):
         response = self.client.post(
             self.register_url,

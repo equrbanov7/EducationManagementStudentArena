@@ -722,7 +722,12 @@ def _build_user_organization_access_rows(
         return []
 
     membership_queryset = (
-        Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
+        Membership.objects.filter(
+            user=user,
+            is_active=True,
+            organization__is_active=True,
+            organization__status="active",
+        )
         .select_related("organization", "organization__owner", "role")
         .order_by("organization__name", "-is_primary", "-role__level", "role__display_name")
     )
@@ -746,7 +751,9 @@ def _build_user_organization_access_rows(
             row["role_labels"].append(role_label)
 
     owned_organizations = (
-        Organization.objects.filter(owner=user, is_active=True).select_related("owner").order_by("name")
+        Organization.objects.filter(owner=user, is_active=True, status="active")
+        .select_related("owner")
+        .order_by("name")
     )
     for organization in owned_organizations:
         row = grouped_rows.setdefault(
@@ -770,6 +777,7 @@ def _build_user_organization_access_rows(
         and _is_superadmin_user(user)
         and active_organization is not None
         and getattr(active_organization, "is_active", False)
+        and getattr(active_organization, "status", "") == "active"
         and active_organization.id not in grouped_rows
     ):
         grouped_rows[active_organization.id] = {

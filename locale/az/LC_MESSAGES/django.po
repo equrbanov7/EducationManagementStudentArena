@@ -10444,12 +10444,12 @@ msgstr "Nəticəyə bax"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "İmtahan nəticələri"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_type"
-msgstr "Type"
+msgstr "Növ"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
 msgctxt "exams.template.teacher_exam_results"
@@ -10494,7 +10494,7 @@ msgstr "Səhv"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Bal (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -16472,6 +16472,10 @@ msgstr "Dayandır"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Təşkilat tapılmadı."
+
+msgctxt "exams.view.student.result.message"
+msgid "Result is not available yet. It will appear after the teacher review window closes."
+msgstr "Nəticə hələ hazır deyil. Müəllimin baxış pəncərəsi bağlandıqdan sonra görünəcək."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"

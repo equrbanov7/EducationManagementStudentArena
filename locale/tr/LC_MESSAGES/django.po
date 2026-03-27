@@ -8710,17 +8710,17 @@ msgstr "Sonucu görün"
 #: apps/exams/templates/exams/student/exam_result.html:14
 msgctxt "exams.template.student_exam_result"
 msgid "heading_your_result"
-msgstr "Subheading posts"
+msgstr "Sonucunuz"
 
 #: apps/exams/templates/exams/student/exam_result.html:20
 msgctxt "exams.template.student_exam_result"
 msgid "exam_status"
-msgstr "Sınav başladı! (Deneme #{attempt_number})"
+msgstr "Sınav durumu"
 
 #: apps/exams/templates/exams/student/exam_result.html:23
 msgctxt "exams.template.student_exam_result"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Gönderildi"
 
 #: apps/exams/templates/exams/student/exam_result.html:25
 msgctxt "exams.template.student_exam_result"
@@ -8731,17 +8731,17 @@ msgstr "Günü geçmiş"
 #: apps/exams/templates/exams/student/exam_result.html:239
 msgctxt "exams.template.student_exam_result"
 msgid "label_score"
-msgstr "Score"
+msgstr "Puan"
 
 #: apps/exams/templates/exams/student/exam_result.html:42
 msgctxt "exams.template.student_exam_result"
 msgid "label_correct"
-msgstr "Score"
+msgstr "Doğru"
 
 #: apps/exams/templates/exams/student/exam_result.html:46
 msgctxt "exams.template.student_exam_result"
 msgid "label_wrong"
-msgstr "Grup"
+msgstr "Yanlış"
 
 #: apps/exams/templates/exams/student/exam_result.html:54
 msgctxt "exams.template.student_exam_result"
@@ -8751,7 +8751,7 @@ msgstr "Maks. Bal"
 #: apps/exams/templates/exams/student/exam_result.html:56
 msgctxt "exams.template.student_exam_result"
 msgid "label_graded_by_teacher"
-msgstr "Ana öğretmen"
+msgstr "Öğretmen tarafından değerlendirildi"
 
 #: apps/exams/templates/exams/student/exam_result.html:59
 msgctxt "exams.template.student_exam_result"
@@ -8766,7 +8766,7 @@ msgstr "Süre"
 #: apps/exams/templates/exams/student/exam_result.html:66
 msgctxt "exams.template.student_exam_result"
 msgid "unit_seconds"
-msgstr "Örn: 60 (saniye). Boşsa varsayılan kullanılır."
+msgstr "saniye"
 
 #: apps/exams/templates/exams/student/exam_result.html:73
 msgctxt "exams.template.student_exam_result"
@@ -8781,28 +8781,28 @@ msgstr "Soru"
 #: apps/exams/templates/exams/student/exam_result.html:96
 msgctxt "exams.template.student_exam_result"
 msgid "video_not_supported"
-msgstr "Bu sınav henüz başlamadı. Başlangıç: {start_str}"
+msgstr "Tarayıcınız video etiketini desteklemiyor."
 
 #: apps/exams/templates/exams/student/exam_result.html:126
 msgctxt "exams.template.student_exam_result"
 msgid "your_selection"
-msgstr "Dil seçimi"
+msgstr "Seçiminiz"
 
 #: apps/exams/templates/exams/student/exam_result.html:135
 msgctxt "exams.template.student_exam_result"
 msgid "answer_correct"
-msgstr "Yanıt metni"
+msgstr "Doğru"
 
 #: apps/exams/templates/exams/student/exam_result.html:137
 msgctxt "exams.template.student_exam_result"
 msgid "answer_wrong"
-msgstr "Answer unit"
+msgstr "Yanlış"
 
 #: apps/exams/templates/exams/student/exam_result.html:140
 #: apps/exams/templates/exams/student/exam_result.html:161
 msgctxt "exams.template.student_exam_result"
 msgid "answer_not_provided"
-msgstr "Cevap modu"
+msgstr "Cevap verilmedi"
 
 #: apps/exams/templates/exams/student/exam_result.html:148
 msgctxt "exams.template.student_exam_result"
@@ -10326,17 +10326,17 @@ msgstr "Sonucu görün"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "Sınav sonuçları"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_type"
-msgstr "Type"
+msgstr "Tür"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_status"
-msgstr "Status"
+msgstr "Durum"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
 msgctxt "exams.template.teacher_exam_results"
@@ -10376,7 +10376,7 @@ msgstr "Yanlış"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Puan (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -16204,6 +16204,10 @@ msgstr "Askıya al"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Kuruluş bulunamadı."
+
+msgctxt "exams.view.student.result.message"
+msgid "Result is not available yet. It will appear after the teacher review window closes."
+msgstr "Sonuç henüz hazır değil. Öğretmen inceleme süresi kapandıktan sonra görünecek."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"

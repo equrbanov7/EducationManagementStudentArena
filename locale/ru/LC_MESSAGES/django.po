@@ -8723,17 +8723,17 @@ msgstr "Посмотреть результат"
 #: apps/exams/templates/exams/student/exam_result.html:14
 msgctxt "exams.template.student_exam_result"
 msgid "heading_your_result"
-msgstr "Subheading posts"
+msgstr "Ваш результат"
 
 #: apps/exams/templates/exams/student/exam_result.html:20
 msgctxt "exams.template.student_exam_result"
 msgid "exam_status"
-msgstr "Экзамен начат! (Попытка #{attempt_number})"
+msgstr "Статус экзамена"
 
 #: apps/exams/templates/exams/student/exam_result.html:23
 msgctxt "exams.template.student_exam_result"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Отправлен"
 
 #: apps/exams/templates/exams/student/exam_result.html:25
 msgctxt "exams.template.student_exam_result"
@@ -8744,27 +8744,27 @@ msgstr "Истекший"
 #: apps/exams/templates/exams/student/exam_result.html:239
 msgctxt "exams.template.student_exam_result"
 msgid "label_score"
-msgstr "Score"
+msgstr "Баллы"
 
 #: apps/exams/templates/exams/student/exam_result.html:42
 msgctxt "exams.template.student_exam_result"
 msgid "label_correct"
-msgstr "Score"
+msgstr "Верно"
 
 #: apps/exams/templates/exams/student/exam_result.html:46
 msgctxt "exams.template.student_exam_result"
 msgid "label_wrong"
-msgstr "Группа"
+msgstr "Неверно"
 
 #: apps/exams/templates/exams/student/exam_result.html:54
 msgctxt "exams.template.student_exam_result"
 msgid "label_final_score"
-msgstr "Макс. Мед"
+msgstr "Итоговый балл"
 
 #: apps/exams/templates/exams/student/exam_result.html:56
 msgctxt "exams.template.student_exam_result"
 msgid "label_graded_by_teacher"
-msgstr "Главный преподаватель"
+msgstr "Проверено преподавателем"
 
 #: apps/exams/templates/exams/student/exam_result.html:59
 msgctxt "exams.template.student_exam_result"
@@ -8779,7 +8779,7 @@ msgstr "Продолжительность"
 #: apps/exams/templates/exams/student/exam_result.html:66
 msgctxt "exams.template.student_exam_result"
 msgid "unit_seconds"
-msgstr "Пример: 60 (секунд). Если пусто, используется значение по умолчанию."
+msgstr "секунд"
 
 #: apps/exams/templates/exams/student/exam_result.html:73
 msgctxt "exams.template.student_exam_result"
@@ -8794,28 +8794,28 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/student/exam_result.html:96
 msgctxt "exams.template.student_exam_result"
 msgid "video_not_supported"
-msgstr "Экзамен еще не начался. Начало: {start_str}"
+msgstr "Ваш браузер не поддерживает воспроизведение видео."
 
 #: apps/exams/templates/exams/student/exam_result.html:126
 msgctxt "exams.template.student_exam_result"
 msgid "your_selection"
-msgstr "Выбор языка"
+msgstr "Ваш выбор"
 
 #: apps/exams/templates/exams/student/exam_result.html:135
 msgctxt "exams.template.student_exam_result"
 msgid "answer_correct"
-msgstr "Текст ответа"
+msgstr "Верно"
 
 #: apps/exams/templates/exams/student/exam_result.html:137
 msgctxt "exams.template.student_exam_result"
 msgid "answer_wrong"
-msgstr "Answer unit"
+msgstr "Неверно"
 
 #: apps/exams/templates/exams/student/exam_result.html:140
 #: apps/exams/templates/exams/student/exam_result.html:161
 msgctxt "exams.template.student_exam_result"
 msgid "answer_not_provided"
-msgstr "Режим ответа"
+msgstr "Ответ не предоставлен"
 
 #: apps/exams/templates/exams/student/exam_result.html:148
 msgctxt "exams.template.student_exam_result"
@@ -10344,17 +10344,17 @@ msgstr "Посмотреть результат"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "Результаты экзамена"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_type"
-msgstr "Type"
+msgstr "Тип"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_status"
-msgstr "Status"
+msgstr "Статус"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
 msgctxt "exams.template.teacher_exam_results"
@@ -10394,7 +10394,7 @@ msgstr "Неверно"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Баллы (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -16227,6 +16227,10 @@ msgstr "Приостановить"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Организации не найдены."
+
+msgctxt "exams.view.student.result.message"
+msgid "Result is not available yet. It will appear after the teacher review window closes."
+msgstr "Результат пока недоступен. Он появится после завершения окна проверки преподавателем."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"

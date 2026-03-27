@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -53,7 +54,10 @@ def exam_result(request, slug, attempt_id):
     if not annotate_attempt_result_visibility([attempt])[0].can_view_result:
         messages.info(
             request,
-            "Nəticə hələ yekunlaşmayıb. Müəllim üçün düzəliş pəncərəsi bitdikdən sonra görünəcək.",
+            pgettext(
+                "exams.view.student.result.message",
+                "Result is not available yet. It will appear after the teacher review window closes.",
+            ),
         )
         return redirect(return_to or f"{reverse('accounts:profile')}?section=my-results")
 

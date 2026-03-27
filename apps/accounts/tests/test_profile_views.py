@@ -125,6 +125,40 @@ class ProfileViewTest(TestCase):
             html=False,
         )
 
+    def test_profile_language_switcher_inline_script_uses_csp_nonce(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<script nonce="', html=False)
+        self.assertContains(response, "document.currentScript", html=False)
+
+    def test_profile_organization_access_rows_exclude_pending_owned_orgs(self):
+        active_org = Organization.objects.create(
+            name="Visible Active Org",
+            slug="visible-active-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        Organization.objects.create(
+            name="Hidden Pending Org",
+            slug="hidden-pending-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="pending",
+            is_active=True,
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        access_rows = response.context["organization_access_rows"]
+        self.assertEqual([row["organization"].id for row in access_rows], [active_org.id])
+
     def test_join_organization_sidebar_and_section_are_translated_in_english(self):
         profile = self.user.profile
         profile.role = ProfileRole.TEACHER

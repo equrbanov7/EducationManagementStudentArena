@@ -18,6 +18,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country
+from apps.organizations.services import is_tenant_accessible_organization
 from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
@@ -219,7 +220,7 @@ def register_view(request):
 
             requested_organization_name = profile.requested_organization_name
 
-            if organization is not None:
+            if is_tenant_accessible_organization(organization):
                 request.session["active_organization"] = organization.slug
 
             request.session["pending_verify_email"] = user.email
@@ -309,7 +310,7 @@ def verify_code_view(request):
         clear_rate_limit(OTP_VERIFY_LIMIT_SCOPE, *otp_limit_key)
 
         joined_organization = activate_user_account(user)
-        if joined_organization is not None:
+        if is_tenant_accessible_organization(joined_organization):
             request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
 
@@ -342,7 +343,7 @@ def verify_email_link_view(request):
         user = User.objects.get(pk=user_id)
         EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
         joined_organization = activate_user_account(user)
-        if joined_organization is not None:
+        if is_tenant_accessible_organization(joined_organization):
             request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
