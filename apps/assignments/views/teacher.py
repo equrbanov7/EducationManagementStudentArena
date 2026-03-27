@@ -195,8 +195,8 @@ def grade_submission(request, pk):
             preserve_existing_graded_at=True,
         )
 
-        messages.success(request, pgettext("assignments.views.message", "grade_given"))
-        return JsonResponse({"success": True, "message": pgettext("assignments.views.message", "grade_given")})
+        messages.success(request, pgettext("assignment.message", "grade_given_successfully"))
+        return JsonResponse({"success": True, "message": pgettext("assignment.message", "grade_given_successfully")})
 
     except Exception:
         logger.exception("Unexpected error in grade_submission (assignments)")

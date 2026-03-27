@@ -1206,6 +1206,34 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.course_assigned_exam.attempts.filter(user=self.student).exists())
 
+    def test_in_progress_exam_resumes_from_start_route_when_attempt_limit_is_one(self):
+        self.course_assigned_exam.max_attempts_per_user = 1
+        self.course_assigned_exam.save(update_fields=["max_attempts_per_user"])
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
+
+    def test_in_progress_code_exam_resumes_without_reasking_for_code(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.code_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:take_exam", args=[self.code_assigned_exam.slug, attempt.id]))
+
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
 
@@ -1454,6 +1482,58 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "Səhv")
         self.assertNotContains(response, "Subheading posts")
         self.assertNotContains(response, "Submitted")
+
+    def test_exam_result_page_avoids_placeholder_copy_in_all_supported_languages(self):
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Localized Exam Result",
+            is_active=True,
+            is_public=False,
+            course=self.assigned_course,
+        )
+        exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=exam,
+            text="Localized question",
+            order=1,
+            points=1,
+        )
+        correct_option = ExamQuestionOption.objects.create(
+            question=question,
+            text="Correct option",
+            is_correct=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            is_correct=True,
+        )
+        answer.selected_options.add(correct_option)
+        attempt.recalculate_score()
+
+        placeholder_strings = [
+            "Subheading posts",
+            "Answer unit",
+            "Exam started! (Attempt #{attempt_number})",
+            "Example: 60 (seconds). If empty, default is used.",
+        ]
+
+        for language in ["az", "en", "ru", "tr"]:
+            with self.subTest(language=language):
+                with override(language):
+                    response = self.client.get(
+                        reverse("exams:exam_result", args=[exam.slug, attempt.id]),
+                        HTTP_ACCEPT_LANGUAGE=language,
+                    )
+
+                self.assertEqual(response.status_code, 200)
+                for placeholder in placeholder_strings:
+                    self.assertNotContains(response, placeholder)
 
     def test_filtered_exam_history_shows_only_selected_exam_attempts(self):
         selected_attempt = ExamAttempt.objects.create(

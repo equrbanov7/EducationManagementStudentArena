@@ -807,6 +807,7 @@ jobs:
       BASE_URL: "http://localhost"
       E2E_USERNAME: "ci_university_e2e"
       E2E_PASSWORD: "CiE2EUniversity2026!"
+      E2E_ROLE_PASSWORD: "CiE2ERoles2026!"
 
     steps:
       - name: 📥 Checkout code
@@ -890,6 +891,13 @@ jobs:
             --username "$E2E_USERNAME" \
             --password "$E2E_PASSWORD"
 
+      - name: 🧪 Seed CI multi-role E2E scenario
+        env:
+          E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
+        run: |
+          docker exec emsarena-app python manage.py seed_ci_e2e_scenario \
+            --password "$E2E_ROLE_PASSWORD"
+
       # ───────────────────────────────────────────────────────────────────
       # Install Python + Playwright for the E2E test runner.
       # Only the Chromium browser is installed to keep install time short.
@@ -915,17 +923,31 @@ jobs:
           BASE_URL: ${{ env.BASE_URL }}
           E2E_USERNAME: ${{ env.E2E_USERNAME }}
           E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
+          E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
         run: |
           echo "::group::🎭 Playwright E2E Smoke Tests"
           pytest tests/e2e/ \
             -v \
             --tb=short \
-            --timeout=60 || {
+            --timeout=60 \
+            --screenshot=only-on-failure \
+            --video=retain-on-failure \
+            --tracing=retain-on-failure || {
             echo "::error::❌ E2E smoke tests failed! Critical UI regression detected."
             exit 1
           }
           echo "✅ E2E smoke tests passed!"
           echo "::endgroup::"
+
+      - name: 📦 Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
 
       # ───────────────────────────────────────────────────────────────────
       # Always dump container logs and tear down, even on failure.

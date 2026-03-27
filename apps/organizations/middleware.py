@@ -20,6 +20,8 @@ Organization resolution order
 
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
+from .services import is_tenant_accessible_organization
+
 
 class OrganizationMiddleware:
     """
@@ -39,6 +41,7 @@ class OrganizationMiddleware:
         """Return all active memberships for *user* across active organizations."""
         return list(
             user.memberships.filter(is_active=True, organization__is_active=True)
+            .filter(organization__status="active")
             .select_related("organization", "role", "scope_unit")
             .order_by("-is_primary", "-role__level")
         )
@@ -79,6 +82,7 @@ class OrganizationMiddleware:
                 request.user.memberships.filter(
                     organization__slug=org_slug,
                     organization__is_active=True,
+                    organization__status="active",
                     is_active=True,
                 )
                 .select_related("organization", "role", "scope_unit")
@@ -95,7 +99,7 @@ class OrganizationMiddleware:
                 # Superusers may have no membership rows; fall back to a
                 # direct org lookup so they can still access the org.
                 try:
-                    request.organization = Organization.objects.get(slug=org_slug, is_active=True)
+                    request.organization = Organization.objects.get(slug=org_slug, is_active=True, status="active")
                     request.org_memberships = []
                 except Organization.DoesNotExist:
                     request.session.pop("active_organization", None)
@@ -103,6 +107,7 @@ class OrganizationMiddleware:
                 owner_org = Organization.objects.filter(
                     slug=org_slug,
                     is_active=True,
+                    status="active",
                     owner=request.user,
                 ).first()
                 if owner_org is not None:
@@ -146,7 +151,7 @@ class OrganizationMiddleware:
             request._all_org_memberships = self._fetch_active_memberships(request.user)
 
         # ── Step 3: finalize permissions for the resolved org ─────────────
-        if request.organization:
+        if is_tenant_accessible_organization(request.organization):
             permissions_set = set()
             for membership in request.org_memberships:
                 if membership.role.permissions:
@@ -156,6 +161,11 @@ class OrganizationMiddleware:
                     # even though the UI and flow allow teachers to create courses.
                     permissions_set.add("course.create")
             request.org_permissions = list(permissions_set)
+        else:
+            request.organization = None
+            request.org_memberships = []
+            request.org_permissions = []
+            request.session.pop("active_organization", None)
 
         if hasattr(request.user, "set_active_organization_context"):
             request.user.set_active_organization_context(

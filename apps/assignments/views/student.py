@@ -143,11 +143,11 @@ def submit_assignment(request, pk):
             attempt_number=assignment.get_user_attempts(request.user) + 1,
         )
 
-        messages.success(request, pgettext("assignments.views.message", "assignment_submitted"))
+        messages.success(request, pgettext("assignment.message", "submission_sent_successfully"))
         return JsonResponse(
             {
                 "success": True,
-                "message": pgettext("assignments.views.message", "assignment_submitted"),
+                "message": pgettext("assignment.message", "submission_sent_successfully"),
                 "submission_id": submission.id,
             }
         )
