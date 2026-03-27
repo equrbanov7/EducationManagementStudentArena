@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
+from django.urls import reverse
 
 from .models import Category, Post, Subscriber
 from .selectors import invalidate_blog_listing_cache
@@ -84,7 +85,7 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
             recipients=reviewers,
             title=f"Yeni post təsdiq gözləyir: {instance.title}",
             message=f"{author_name} tərəfindən \"{instance.title}\" başlıqlı post təsdiq üçün göndərildi.",
-            link=f"/profile/?section=pending-post-approvals",
+            link=reverse("accounts:profile") + "?section=pending-post-approvals",
             notification_type=NotificationType.APPROVAL,
             metadata={"post_id": instance.pk, "author_id": instance.author_id},
         )
@@ -118,7 +119,7 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
                 recipient=instance.author,
                 title=f"Postunuz təsdiqləndi: {instance.title}",
                 message=f"\"{instance.title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.",
-                link=f"/articles/{instance.slug}/",
+                link=reverse("article_detail", kwargs={"slug": instance.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": instance.pk},
             )
@@ -131,7 +132,7 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
                 recipient=instance.author,
                 title=f"Post düzəliş tələb edir: {instance.title}",
                 message=message,
-                link=f"/profile/?section=posts",
+                link=reverse("accounts:profile") + "?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": instance.pk, "feedback": feedback},
             )
