@@ -772,9 +772,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 5 * 60 * 1000);
 
+    let isFinishingExam = false;
+
     // Səhifədən çıxanda xəbərdarlıq
     window.addEventListener("beforeunload", function (e) {
-        if (!hasUnsavedChanges) return;
+        if (!hasUnsavedChanges || isFinishingExam) return;
         e.preventDefault();
         e.returnValue = "";
     });
@@ -819,6 +821,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmFinishBtn.addEventListener('click', () => {
+        isFinishingExam = true;
+        hasUnsavedChanges = false;
+        confirmFinishBtn.disabled = true;
+
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
         hiddenInput.name = 'submit_action';

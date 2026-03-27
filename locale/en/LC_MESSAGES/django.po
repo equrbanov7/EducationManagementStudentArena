@@ -8705,12 +8705,12 @@ msgstr "View result"
 #: apps/exams/templates/exams/student/exam_result.html:14
 msgctxt "exams.template.student_exam_result"
 msgid "heading_your_result"
-msgstr "Subheading posts"
+msgstr "Your result"
 
 #: apps/exams/templates/exams/student/exam_result.html:20
 msgctxt "exams.template.student_exam_result"
 msgid "exam_status"
-msgstr "Exam started! (Attempt #{attempt_number})"
+msgstr "Exam status"
 
 #: apps/exams/templates/exams/student/exam_result.html:23
 msgctxt "exams.template.student_exam_result"
@@ -8720,7 +8720,7 @@ msgstr "Submitted"
 #: apps/exams/templates/exams/student/exam_result.html:25
 msgctxt "exams.template.student_exam_result"
 msgid "status_expired"
-msgstr "Status expired"
+msgstr "Expired"
 
 #: apps/exams/templates/exams/student/exam_result.html:36
 #: apps/exams/templates/exams/student/exam_result.html:239
@@ -8731,22 +8731,22 @@ msgstr "Score"
 #: apps/exams/templates/exams/student/exam_result.html:42
 msgctxt "exams.template.student_exam_result"
 msgid "label_correct"
-msgstr "Score"
+msgstr "Correct"
 
 #: apps/exams/templates/exams/student/exam_result.html:46
 msgctxt "exams.template.student_exam_result"
 msgid "label_wrong"
-msgstr "Group"
+msgstr "Wrong"
 
 #: apps/exams/templates/exams/student/exam_result.html:54
 msgctxt "exams.template.student_exam_result"
 msgid "label_final_score"
-msgstr "Max. Honey"
+msgstr "Final score"
 
 #: apps/exams/templates/exams/student/exam_result.html:56
 msgctxt "exams.template.student_exam_result"
 msgid "label_graded_by_teacher"
-msgstr "Label primary teacher"
+msgstr "Graded by teacher"
 
 #: apps/exams/templates/exams/student/exam_result.html:59
 msgctxt "exams.template.student_exam_result"
@@ -8761,7 +8761,7 @@ msgstr "Duration"
 #: apps/exams/templates/exams/student/exam_result.html:66
 msgctxt "exams.template.student_exam_result"
 msgid "unit_seconds"
-msgstr "Example: 60 (seconds). If empty, default is used."
+msgstr "seconds"
 
 #: apps/exams/templates/exams/student/exam_result.html:73
 msgctxt "exams.template.student_exam_result"
@@ -8776,28 +8776,28 @@ msgstr "Question"
 #: apps/exams/templates/exams/student/exam_result.html:96
 msgctxt "exams.template.student_exam_result"
 msgid "video_not_supported"
-msgstr "This exam has not started yet. Start date: {start_str}"
+msgstr "Your browser does not support the video tag."
 
 #: apps/exams/templates/exams/student/exam_result.html:126
 msgctxt "exams.template.student_exam_result"
 msgid "your_selection"
-msgstr "Language selection"
+msgstr "Your selection"
 
 #: apps/exams/templates/exams/student/exam_result.html:135
 msgctxt "exams.template.student_exam_result"
 msgid "answer_correct"
-msgstr "Answer text"
+msgstr "Correct"
 
 #: apps/exams/templates/exams/student/exam_result.html:137
 msgctxt "exams.template.student_exam_result"
 msgid "answer_wrong"
-msgstr "Answer unit"
+msgstr "Incorrect"
 
 #: apps/exams/templates/exams/student/exam_result.html:140
 #: apps/exams/templates/exams/student/exam_result.html:161
 msgctxt "exams.template.student_exam_result"
 msgid "answer_not_provided"
-msgstr "Answer mode"
+msgstr "No answer provided"
 
 #: apps/exams/templates/exams/student/exam_result.html:148
 msgctxt "exams.template.student_exam_result"
@@ -16293,6 +16293,10 @@ msgstr "Suspend"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "No organization found."
+
+msgctxt "exams.view.student.result.message"
+msgid "Result is not available yet. It will appear after the teacher review window closes."
+msgstr "Result is not available yet. It will appear after the teacher review window closes."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"

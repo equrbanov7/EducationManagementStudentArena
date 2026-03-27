@@ -102,6 +102,9 @@ class StudentGroup(models.Model):
 
 
 class ExamAccessPolicyMixin:
+    def _user_has_active_attempt(self, user: User) -> bool:
+        return self.attempts.filter(user=user, status__in=["draft", "in_progress"]).exists()
+
     def _user_in_allowed_groups(self, user: User) -> bool:
         return self.allowed_groups.filter(students=user).exists()
 
@@ -144,6 +147,9 @@ class ExamAccessPolicyMixin:
 
         if self.is_after_end():
             return False, pgettext("exams.model.access", "exam_ended")
+
+        if self._user_has_active_attempt(user):
+            return True, None
 
         left = self.attempts_left_for(user)
         if left is not None and left <= 0:
