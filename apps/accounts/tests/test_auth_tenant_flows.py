@@ -1112,8 +1112,10 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
         self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
         self.assertContains(response, "js-pending-add-bulk-label")
-        self.assertContains(response, 'data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"')
-        self.assertContains(response, 'data-disabled-tooltip="Ən az 1 tələbə seçin"')
+        self.assertContains(
+            response, 'data-selected-label="Seçilən istifadəçiləri təşkilata əlavə et ({count} seçildi)"'
+        )
+        self.assertContains(response, 'data-disabled-tooltip="Ən azı 1 tələbə seçin"')
         self.assertContains(response, 'id="selectAllPendingStudents"')
 
     def test_student_org_management_defaults_to_all_filters_and_hides_superadmins(self):
