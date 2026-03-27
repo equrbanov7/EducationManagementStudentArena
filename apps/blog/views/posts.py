@@ -416,7 +416,7 @@ def teacher_moderate_post(request, post_id):
                 recipient=post.author,
                 title=f"Postunuz yenidən aktiv edildi: {post.title}",
                 message=f'"{post.title}" başlıqlı postunuz müəllim tərəfindən yenidən paylaşıldı.',
-                link=f"/articles/{post.slug}/",
+                link=reverse("article_detail", kwargs={"slug": post.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": post.pk},
             )
