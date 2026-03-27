@@ -196,6 +196,7 @@ def manage_roles(request):
             UserProfile.objects.filter(user=request.user)
             .select_related("user")
             .prefetch_related("user__memberships__role")
+            .distinct()
         )
         profiles = (profiles | own_profile_qs).distinct()
 
