@@ -301,6 +301,8 @@
 
 .sidebar-menu-link--logout {
     color: #ef4444 !important;
+    background: none !important;
+    border: none !important;
 }
 
 .sidebar-menu-link--logout:hover {
