@@ -1480,7 +1480,7 @@ def user_profile(request):
         "my-results": pgettext_lazy("profile.section", "my_results"),
         "pending-answers": "Pending cavablar",
         "groups": pgettext_lazy("profile.section", "groups"),
-        "pending-post-approvals": "Təsdiq gözləyən postlar",
+        "pending-post-approvals": "Postların idarəetməsi",
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),

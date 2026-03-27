@@ -4,7 +4,7 @@
     <div class="section-card pending-post-approvals-card">
         <div class="section-title">
             <i class="fas fa-user-check"></i>
-            Təsdiq gözləyən postlar ({{ pending_post_approval_count }})
+            Postların idarəetməsi ({{ pending_post_approval_count }})
         </div>
 
         <form method="get" class="search-form pending-post-approvals-filters" data-auto-filter-form>
@@ -51,9 +51,13 @@
 
                         <div class="post-info">
                             <div class="post-title">
-                                <a href="{% url 'article_detail' item.post.slug %}" class="pending-post-title-link">
-                                    {{ item.post.title }}
-                                </a>
+                                {% if item.post.is_published %}
+                                    <a href="{% url 'article_detail' item.post.slug %}" class="pending-post-title-link">
+                                        {{ item.post.title }}
+                                    </a>
+                                {% else %}
+                                    <span class="pending-post-title-link">{{ item.post.title }}</span>
+                                {% endif %}
                                 <span class="post-status-badge {{ item.status_class }}">{{ item.status_label }}</span>
                             </div>
 
@@ -112,6 +116,7 @@
                             {% endif %}
 
                             {% if item.post.approval_status != 'approved' %}
+                                {# --- Pending / needs-changes: standard review form --- #}
                                 <form method="post" action="{% url 'review_post' item.post.id %}" class="pending-post-actions">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -134,10 +139,40 @@
                                     </div>
                                 </form>
                             {% else %}
+                                {# --- Approved: show moderation actions (deactivate / delete) --- #}
                                 <div class="pending-post-approved-note">
                                     <i class="fas fa-circle-check"></i>
                                     Bu post artıq təsdiqlənib və paylaşılıb.
                                 </div>
+                                <form method="post" action="{% url 'teacher_moderate_post' item.post.id %}" class="pending-post-actions pending-post-moderate-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <label class="pending-post-feedback-label" for="moderate_reason_{{ item.post.id }}">
+                                        Səbəb <span class="text-danger">*</span> (məcburi — tələbəyə bildiriş göndəriləcək)
+                                    </label>
+                                    <textarea id="moderate_reason_{{ item.post.id }}"
+                                              name="feedback"
+                                              rows="3"
+                                              class="form-control pending-post-moderate-reason"
+                                              placeholder="Niyə deaktiv edirsiz / silirsiniz? Tələbəyə izah edin..."
+                                              aria-required="true"
+                                              required></textarea>
+                                    <div class="pending-post-buttons">
+                                        <button type="submit"
+                                                name="action"
+                                                value="deactivate"
+                                                class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-eye-slash"></i> Deaktiv et
+                                        </button>
+                                        <button type="submit"
+                                                name="action"
+                                                value="delete"
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Bu postu silmək istədiyinizdən əminsiniz?')">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
                             {% endif %}
                         </div>
                     </article>
@@ -221,6 +256,31 @@
                 ? (button.dataset.collapsedLabel || "Show more")
                 : (button.dataset.expandedLabel || "Show less");
             container.classList.toggle("is-expanded", !isExpanded);
+        });
+    });
+
+    // Client-side validation for moderation forms: require the reason textarea.
+    var moderateForms = document.querySelectorAll(".pending-post-moderate-form");
+    moderateForms.forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+            var reason = form.querySelector(".pending-post-moderate-reason");
+            if (reason && !reason.value.trim()) {
+                e.preventDefault();
+                reason.focus();
+                reason.classList.add("is-invalid");
+                var existing = form.querySelector(".moderate-reason-error");
+                if (!existing) {
+                    var msg = document.createElement("div");
+                    msg.className = "invalid-feedback moderate-reason-error";
+                    msg.style.display = "block";
+                    msg.textContent = "Zəhmət olmasa səbəbi yazın.";
+                    reason.parentNode.insertBefore(msg, reason.nextSibling);
+                }
+            } else if (reason) {
+                reason.classList.remove("is-invalid");
+                var err = form.querySelector(".moderate-reason-error");
+                if (err) err.remove();
+            }
         });
     });
 })();

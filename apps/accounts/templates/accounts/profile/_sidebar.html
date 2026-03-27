@@ -234,11 +234,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=pending-post-approvals"
                data-section="pending-post-approvals"
-               data-title="Təsdiq gözləyən postlar"
+               data-title="Postların idarəetməsi"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-post-approvals' %}active{% endif %}">
                 <i class="fas fa-user-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Təsdiq gözləyən postlar</span>
+                <span class="sidebar-menu-text">Postların idarəetməsi</span>
                 {% if pending_post_approval_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ pending_post_approval_count }}</span>
                 {% endif %}
