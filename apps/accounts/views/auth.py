@@ -320,7 +320,7 @@ def verify_code_view(request):
         next_url = request.session.pop("pending_next_url", "")
         if next_url:
             login_url = reverse("accounts:login")
-            return redirect(f"{login_url}?next={quote(next_url, safe='/:@!$&()*+,;=')}")
+            return redirect(f"{login_url}?next={quote(next_url, safe='/:@')}")
         return redirect("accounts:login")
 
     user = User.objects.filter(email=email).first()
@@ -351,7 +351,7 @@ def verify_email_link_view(request):
         next_url = request.session.pop("pending_next_url", "")
         if next_url:
             login_url = reverse("accounts:login")
-            return redirect(f"{login_url}?next={quote(next_url, safe='/:@!$&()*+,;=')}")
+            return redirect(f"{login_url}?next={quote(next_url, safe='/:@')}")
         return redirect("accounts:login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
         messages.error(request, pgettext_lazy("accounts.auth.message", "link_invalid_or_expired"))
