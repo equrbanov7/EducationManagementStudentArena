@@ -156,7 +156,7 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
-        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="hr")
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="dean")
 
         _login_with_org(self.client, self.user, organization)
         self.client.cookies["django_language"] = "en"
