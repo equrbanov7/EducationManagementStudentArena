@@ -11,7 +11,7 @@ This allows the existing urls.py to continue working with:
 # ═══════════════════════════════════════════════════════════════
 # API Views
 # ═══════════════════════════════════════════════════════════════
-from .api import search_groups, search_students, students_by_groups
+from .api import remove_student_from_assignment, search_groups, search_students, students_by_groups
 
 # ═══════════════════════════════════════════════════════════════
 # CRUD
@@ -48,4 +48,5 @@ __all__ = [
     "search_students",
     "search_groups",
     "students_by_groups",
+    "remove_student_from_assignment",
 ]

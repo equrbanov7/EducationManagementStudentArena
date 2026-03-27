@@ -33,6 +33,32 @@
     margin-top: 2rem;
 }
 
+.profile-action-btn {
+    border: 0;
+    border-radius: 16px;
+    padding: 0.88rem 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.profile-action-btn:hover,
+.profile-action-btn:focus {
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+    filter: saturate(1.04);
+}
+
+.profile-action-btn--ocean {
+    background: linear-gradient(135deg, #0f766e, #2563eb);
+}
+
+.profile-action-btn--indigo {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+}
+
 .search-form {
     display: flex;
     gap: 0.75rem;

@@ -10,7 +10,6 @@
 {% endblock %} 
 
 {% block content %}
-
 <section class="home-hero-section">
   <div class="site-main-container">
     <h1>{% trans "hero_title" context "blog.home_page" %}</h1>
@@ -18,9 +17,12 @@
   </div>
 </section>
 
-<main class="site-main-container">
+<div class="site-main-container">
   <div class="home-search-wrapper">
     <form method="get" action="{% url 'home' %}" class="search-form">
+        {% if selected_category %}
+        <input type="hidden" name="category" value="{{ selected_category.slug }}">
+        {% endif %}
         <input 
             type="text" 
             name="q" 
@@ -29,36 +31,39 @@
             class="home-search-input" 
             placeholder="{% trans 'search_placeholder' context 'blog.home_page' %}"
         />
-        </form>
-</div>
-
-  <div class="home-content-layout">
-    
-    <div class="home-left-column">
-        <section id="blogContainer" class="home-blog-grid">
-          {% for post in page_obj %}
-           {% include "partials/_blogCard.html" with post=post %} 
-          {% empty %}
-          <p class="home-no-posts-message">{% trans "no_posts" context "blog.home_page" %}</p>
-          {% endfor %}
-        </section>
-
-        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=extra_query %}
-
-
-    </div>
-
-   
-    {% include "partials/_sideBar.html" with categories=categories popular_topics=popular_topics active_category_slug=active_category_slug %}
- 
+    </form>
   </div>
-</main>
 
+  <div id="homeListingShell" class="home-listing-shell">
+    {% if selected_category %}
+    <section class="home-active-filter-bar" aria-label="Seçilmiş kateqoriya">
+      <div class="home-active-filter-copy">
+        <span class="home-active-filter-label">Seçilmiş kateqoriya</span>
+        <span class="home-active-filter-chip">{{ selected_category_display_name }}</span>
+      </div>
+      <a href="{{ clear_category_filter_url }}" class="home-clear-filter-link">Hamısını göstər</a>
+    </section>
+    {% endif %}
 
+    <div class="home-content-layout">
+      <div class="home-left-column">
+          <section id="blogContainer" class="home-blog-grid">
+            {% for post in page_obj %}
+             {% include "partials/_blogCard.html" with post=post %}
+            {% empty %}
+            <p class="home-no-posts-message">{% trans "no_posts" context "blog.home_page" %}</p>
+            {% endfor %}
+          </section>
 
+          {% include "partials/_pagination.html" with page_obj=page_obj extra_query=extra_query %}
+      </div>
+
+      {% include "partials/_sideBar.html" with categories=categories popular_topics=popular_topics active_category_slug=active_category_slug search_query=search_query %}
+    </div>
+  </div>
+</div>
+{% endblock %}
 
 {% block extraJs %}
     <script src="{% static 'js/search.js' %}"></script>
-{% endblock %}
-
 {% endblock %}

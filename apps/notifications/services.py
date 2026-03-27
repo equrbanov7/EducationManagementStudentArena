@@ -245,7 +245,7 @@ def bulk_delete_notifications(*, notification_ids: list[int], user) -> int:
 # ────────────────────────────────────────────────────────────────────────────
 
 
-def get_user_notifications(*, user, filter_by: str = "all", notification_type: str = ""):
+def get_user_notifications(*, user, filter_by: str = "all", notification_type: str = "", search_query: str = ""):
     """
     Return a QuerySet of non-deleted notifications for *user*, ordered
     newest-first.
@@ -254,6 +254,7 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
         user: The recipient user.
         filter_by: ``"all"`` | ``"unread"`` | ``"read"``
         notification_type: Optional ``NotificationType`` value to narrow results.
+        search_query: Optional search term matched against notification title/message.
     """
     qs = InAppNotification.objects.filter(
         recipient=user,
@@ -267,6 +268,10 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
 
     if notification_type:
         qs = qs.filter(notification_type=notification_type)
+
+    normalized_search_query = " ".join(str(search_query or "").split()).strip()
+    if normalized_search_query:
+        qs = qs.filter(Q(title__icontains=normalized_search_query) | Q(message__icontains=normalized_search_query))
 
     return qs
 

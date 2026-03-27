@@ -207,6 +207,20 @@
     font-weight: 700;
 }
 
+.pending-post-deactivated-note {
+    margin-top: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid #fcd34d;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
 @media (max-width: 991px) {
     .pending-post-approvals-filters {
         grid-template-columns: 1fr 1fr;

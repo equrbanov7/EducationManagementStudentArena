@@ -68,5 +68,40 @@ class OrganizationViewAccessTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200, msg=f"Expected 200 for {url}")
 
+    def test_regular_member_cannot_open_members_or_roles_pages(self):
+        self.client.force_login(self.member)
+
+        members_response = self.client.get(reverse("organizations:members", kwargs={"slug": self.organization.slug}))
+        roles_response = self.client.get(reverse("organizations:roles", kwargs={"slug": self.organization.slug}))
+
+        self.assertRedirects(members_response, reverse("organizations:select"))
+        self.assertRedirects(roles_response, reverse("organizations:select"))
+
+    def test_pending_owner_cannot_open_pending_org_dashboard(self):
+        pending_owner = User.objects.create_user(
+            username="pending_org_owner",
+            email="pending_org_owner@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Pending Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=pending_owner,
+            status="pending",
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=pending_owner,
+            organization=pending_org,
+            role=pending_org.roles.get(name="rector"),
+            is_primary=True,
+            is_active=True,
+        )
+
+        self.client.force_login(pending_owner)
+        response = self.client.get(reverse("organizations:dashboard", kwargs={"slug": pending_org.slug}))
+
+        self.assertRedirects(response, reverse("organizations:select"))
+
     def test_admin_view_site_points_to_home_route(self):
         self.assertEqual(str(admin.site.site_url), reverse("home"))

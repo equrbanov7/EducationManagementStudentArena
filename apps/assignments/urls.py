@@ -28,4 +28,5 @@ urlpatterns = [
     path("search-students/", views.search_students, name="search_students"),
     path("search-groups/", views.search_groups, name="search_groups"),
     path("students-by-groups/", views.students_by_groups, name="students_by_groups"),
+    path("<int:pk>/remove-student/", views.remove_student_from_assignment, name="remove_student_from_assignment"),
 ]

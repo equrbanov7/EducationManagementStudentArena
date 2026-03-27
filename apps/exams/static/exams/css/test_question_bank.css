@@ -47,6 +47,47 @@ body {
     margin-top: 5px;
 }
 
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.page-header-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.page-header-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid #dbe4ff;
+    background: #eef2ff;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.page-header-link--secondary {
+    border-color: #e5e7eb;
+    background: #fff;
+    color: var(--text-dark);
+}
+
+.page-header-link:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
 /* Stat Kartları Təkmilləşdirmə */
 .stats-container {
     display: flex;
@@ -133,6 +174,10 @@ body {
         width: 100%;
         overflow-x: auto;
         padding-bottom: 10px;
+    }
+
+    .title-section {
+        width: 100%;
     }
 }
 

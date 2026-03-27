@@ -40,29 +40,25 @@
             </div>
 
             <div class="post-form-group">
-                <label>{% trans "category_label" context "blog.post_form_page" %}</label>
+                <label for="id_category">{% trans "category_label" context "blog.post_form_page" %}</label>
 
-                {{ form.category }}
+                <div class="post-category-panel js-post-category-picker">
+                    <div class="post-category-grid">
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="post-category-grid__item" field_label="Category" field_label_class="post-category-grid__label" field_id="id_category" field_name="category" field_placeholder="Select a category" field_options=form.root_category_picker_options field_value=form.selected_root_category_id field_select_class="form-select-lg post-category-select" field_extra_attrs="data-post-category-root required" %}
+
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="post-category-grid__item" field_label="Subcategory" field_optional_label="Optional" field_label_class="post-category-grid__label" field_id="id_subcategory" field_name="subcategory" field_placeholder="Select a subcategory" field_options=form.subcategory_picker_options field_value=form.selected_subcategory_id field_select_class="form-select-lg post-category-select" field_extra_attrs="data-post-category-sub" field_hint="Optional: choose a more specific subcategory if it matches your post." field_hint_class="post-category-grid__hint" field_hint_attrs="data-post-category-sub-hint" %}
+                    </div>
+
+                    <div class="post-category-panel__footer">
+                        Category management is controlled by SuperAdmin. New categories cannot be created from the post form.
+                    </div>
+                </div>
+
                 {% if form.category.errors %}
                     <div class="post-form-field-error">{{ form.category.errors.0 }}</div>
                 {% endif %}
-
-                {% if can_create_categories %}
-                <div style="text-align: center; margin: 10px 0; color: #888; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">
-                    {% trans "or_create_new" context "blog.post_form_page" %}
-                </div>
-
-                {{ form.new_category }}
-                {% if form.new_category.errors %}
-                    <div class="post-form-field-error">{{ form.new_category.errors.0 }}</div>
-                {% endif %}
-                {% else %}
-                    <div style="margin-top: 10px; color: #64748b; font-size: 0.9em;">
-                        Mövcud kateqoriyalardan birini seçə bilərsiniz. Yeni kateqoriya yaratmaq yalnız müəllim və daha yüksək rollar üçündür.
-                    </div>
-                    {% if form.new_category.errors %}
-                        <div class="post-form-field-error">{{ form.new_category.errors.0 }}</div>
-                    {% endif %}
+                {% if form.subcategory.errors %}
+                    <div class="post-form-field-error">{{ form.subcategory.errors.0 }}</div>
                 {% endif %}
             </div>
 
@@ -106,4 +102,8 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'js/post_category_picker.js' %}"></script>
 {% endblock %}

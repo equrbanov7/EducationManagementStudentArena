@@ -108,15 +108,36 @@ document.addEventListener("DOMContentLoaded", function () {
     var createExamSubmitInFlight = false;
     var sidebarMenuGroups = [];
 
+    function syncSidebarMenuGroupLayout(group) {
+        if (!group) {
+            return;
+        }
+
+        var items = group.querySelector(".sidebar-menu-group-items");
+        if (!items) {
+            return;
+        }
+
+        group.style.setProperty("--sidebar-group-open-height", String(items.scrollHeight) + "px");
+    }
+
+    function syncAllSidebarMenuGroupLayouts() {
+        sidebarMenuGroups.forEach(syncSidebarMenuGroupLayout);
+    }
+
     function setSidebarMenuGroupState(group, isOpen) {
         if (!group) {
             return;
         }
+        syncSidebarMenuGroupLayout(group);
         group.classList.toggle("is-open", isOpen);
         var toggle = group.querySelector(".sidebar-menu-group-toggle");
         if (toggle) {
             toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
         }
+        window.requestAnimationFrame(function () {
+            syncSidebarMenuGroupLayout(group);
+        });
     }
 
     function openSidebarMenuGroupForSection(section) {
@@ -231,8 +252,11 @@ document.addEventListener("DOMContentLoaded", function () {
             setSidebarMenuGroupState(sidebarMenuGroups[0], true);
         }
 
+        syncAllSidebarMenuGroupLayouts();
         sidebar.setAttribute("data-accordion-ready", "1");
     }
+
+    window.addEventListener("resize", syncAllSidebarMenuGroupLayouts);
 
     function resolveSectionFromUrl() {
         try {
