@@ -322,10 +322,12 @@ def teacher_moderate_post(request, post_id):
     Müəllim tərəfindən post moderasiyası.
 
     POST parametrləri:
-      action  – "delete" (postu sil) və ya "deactivate" (gizlət, tələbə görə bilmir)
-      feedback – Opsional rəy (deactivate zamanı tələbəyə göstərilər)
+      action   – "delete" (postu sil) və ya "deactivate" (gizlət, tələbə görə bilmir)
+      feedback – Məcburi rəy — hər iki əməliyyat üçün tələb olunur;
+                 tələbəyə bildiriş kimi göndərilir.
 
-    Yalnız postu nəzərdən keçirə bilən müəllimlər bu əməliyyatı icra edə bilər.
+    Yalnız postu nəzərdən keçirə bilən müəllimlər, orq adminlər/sahiblər
+    və superadminlər bu əməliyyatı icra edə bilər.
     """
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
 
@@ -339,8 +341,44 @@ def teacher_moderate_post(request, post_id):
         messages.error(request, "Yanlış əməliyyat seçildi.")
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
+    # Feedback is mandatory for every moderation action so the student knows the reason.
+    if not feedback:
+        messages.error(request, "Zəhmət olmasa əməliyyatın səbəbini yazın.")
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse({"success": False, "error": "Zəhmət olmasa əməliyyatın səbəbini yazın."}, status=400)
+        next_url = (request.POST.get("next") or "").strip()
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
     if action == "delete":
         post_title = post.title
+        post_author = post.author
+
+        # Notify the author about the deletion before removing the record.
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import create_notification
+
+            create_notification(
+                recipient=post_author,
+                title=f"Postunuz silindi: {post_title}",
+                message=(
+                    f'"{post_title}" başlıqlı postunuz müəllim tərəfindən silindi. '
+                    f"Səbəb: {feedback}"
+                ),
+                link=f"{reverse('accounts:profile')}?section=posts",
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_title": post_title, "feedback": feedback},
+            )
+        except Exception:
+            logger.exception("Failed to notify author about post deletion title=%s", post_title)
+
         post.delete()
         messages.success(request, f'"{post_title}" postu silindi.')
 
@@ -369,26 +407,25 @@ def teacher_moderate_post(request, post_id):
         feedback=feedback,
     )
 
-    # Müəllif-tələbəyə bildiriş göndər (əgər rəy varsa)
-    if feedback:
-        try:
-            from apps.notifications.models import NotificationType
-            from apps.notifications.services import create_notification
+    # Müəllif-tələbəyə bildiriş göndər (feedback məcburidir)
+    try:
+        from apps.notifications.models import NotificationType
+        from apps.notifications.services import create_notification
 
-            create_notification(
-                recipient=post.author,
-                title=f"Postunuz deaktiv edildi: {post.title}",
-                message=(
-                    f'"{post.title}" başlıqlı postunuz müəllim tərəfindən gizlədildi. '
-                    f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
-                    f"Müəllim rəyi: {feedback}"
-                ),
-                link=f"{reverse('accounts:profile')}?section=posts",
-                notification_type=NotificationType.APPROVAL,
-                metadata={"post_id": post.pk, "feedback": feedback},
-            )
-        except Exception:
-            logger.exception("Failed to notify author about post deactivation pk=%s", post.pk)
+        create_notification(
+            recipient=post.author,
+            title=f"Postunuz deaktiv edildi: {post.title}",
+            message=(
+                f'"{post.title}" başlıqlı postunuz müəllim tərəfindən gizlədildi. '
+                f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
+                f"Müəllim rəyi: {feedback}"
+            ),
+            link=f"{reverse('accounts:profile')}?section=posts",
+            notification_type=NotificationType.APPROVAL,
+            metadata={"post_id": post.pk, "feedback": feedback},
+        )
+    except Exception:
+        logger.exception("Failed to notify author about post deactivation pk=%s", post.pk)
 
     messages.info(
         request,
