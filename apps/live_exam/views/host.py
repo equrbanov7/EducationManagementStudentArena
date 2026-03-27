@@ -95,10 +95,12 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
 def live_create_session_by_slug(request, slug):
     exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
 
-    if not getattr(request.user, "is_teacher", False):
+    is_superadmin = request.user.is_superuser or getattr(request.user, "is_superadmin", False)
+
+    if not is_superadmin and not getattr(request.user, "is_teacher", False):
         raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
 
-    if exam.author != request.user:
+    if not is_superadmin and exam.author != request.user:
         raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     _ensure_host_org_permission(request, exam.organization)

@@ -87,12 +87,13 @@ def manage_roles(request):
 
         target_user = get_object_or_404(User, id=user_id)
 
+        target_is_superadmin = target_user.is_superuser or getattr(target_user, "is_superadmin", False)
         target_has_membership = Membership.objects.filter(
             user=target_user,
             organization=user_org,
             is_active=True,
         ).exists()
-        if not target_has_membership:
+        if not target_has_membership and not target_is_superadmin:
             messages.error(request, pgettext_lazy("accounts.manage_roles.message", "manage_only_own_org_users"))
             return redirect(next_url)
 
@@ -188,6 +189,15 @@ def manage_roles(request):
         .prefetch_related("user__memberships__role")
         .distinct()
     )
+
+    # Include the requesting superadmin's own profile even if they have no formal membership
+    if is_superadmin and not profiles.filter(user=request.user).exists():
+        own_profile_qs = (
+            UserProfile.objects.filter(user=request.user)
+            .select_related("user")
+            .prefetch_related("user__memberships__role")
+        )
+        profiles = (profiles | own_profile_qs).distinct()
 
     # Search
     search = request.GET.get("search", "")

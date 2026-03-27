@@ -1269,6 +1269,15 @@ def user_profile(request):
                 .distinct()
             )
 
+            # Include the requesting superadmin's own profile even without a formal membership
+            if capabilities["is_superadmin"] and not manage_role_profiles.filter(user=request.user).exists():
+                own_profile_qs = (
+                    UserProfile.objects.filter(user=request.user)
+                    .select_related("user")
+                    .prefetch_related("user__memberships__role")
+                )
+                manage_role_profiles = (manage_role_profiles | own_profile_qs).distinct()
+
         if manage_roles_search:
             manage_role_profiles = manage_role_profiles.filter(
                 Q(user__username__icontains=manage_roles_search)
