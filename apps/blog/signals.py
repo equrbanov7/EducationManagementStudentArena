@@ -23,9 +23,9 @@ def _cache_post_approval_state(sender, instance, **kwargs):
         instance._previous_approval_status = None
         return
     try:
-        instance._previous_approval_status = Post.objects.filter(pk=instance.pk).values_list(
-            "approval_status", flat=True
-        ).first()
+        instance._previous_approval_status = (
+            Post.objects.filter(pk=instance.pk).values_list("approval_status", flat=True).first()
+        )
     except Exception:
         instance._previous_approval_status = None
 
@@ -73,8 +73,8 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
         return
 
     try:
-        from apps.notifications.services import create_notification_for_users
         from apps.notifications.models import NotificationType
+        from apps.notifications.services import create_notification_for_users
 
         reviewers = _get_reviewers_for_post(instance)
         if not reviewers:
@@ -84,7 +84,7 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
         create_notification_for_users(
             recipients=reviewers,
             title=f"Yeni post təsdiq gözləyir: {instance.title}",
-            message=f"{author_name} tərəfindən \"{instance.title}\" başlıqlı post təsdiq üçün göndərildi.",
+            message=f'{author_name} tərəfindən "{instance.title}" başlıqlı post təsdiq üçün göndərildi.',
             link=reverse("accounts:profile") + "?section=pending-post-approvals",
             notification_type=NotificationType.APPROVAL,
             metadata={"post_id": instance.pk, "author_id": instance.author_id},
@@ -118,14 +118,14 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
             create_notification(
                 recipient=instance.author,
                 title=f"Postunuz təsdiqləndi: {instance.title}",
-                message=f"\"{instance.title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.",
+                message=f'"{instance.title}" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.',
                 link=reverse("article_detail", kwargs={"slug": instance.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": instance.pk},
             )
         elif current_status == Post.ApprovalStatus.NEEDS_CHANGES:
             feedback = (instance.approval_feedback or "").strip()
-            message = f"\"{instance.title}\" başlıqlı postunuzda düzəliş tələb olunur."
+            message = f'"{instance.title}" başlıqlı postunuzda düzəliş tələb olunur.'
             if feedback:
                 message = f"{message} Müəllim rəyi: {feedback}"
             create_notification(
