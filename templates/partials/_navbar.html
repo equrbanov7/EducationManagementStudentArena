@@ -18,13 +18,13 @@
                 <li class="blog-header__nav-item">
                     <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                        class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
-                        Technology
+                        {% trans "technology" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                        class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
-                        Education
+                        {% trans "education" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
@@ -130,13 +130,13 @@
     <li class="blog-header__nav-item">
         <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
            class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
-            Technology
+            {% trans "technology" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
            class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
-            Education
+            {% trans "education" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">

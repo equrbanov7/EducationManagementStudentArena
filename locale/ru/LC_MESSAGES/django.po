@@ -10850,6 +10850,16 @@ msgctxt "exams.template.test_question_bank"
 msgid "subtitle_management_panel"
 msgstr "Панель управления вопросами"
 
+#: apps/exams/templates/exams/teacher/test_question_bank.html:18
+msgctxt "exams.template.test_question_bank"
+msgid "action_back"
+msgstr "Назад"
+
+#: apps/exams/templates/exams/teacher/test_question_bank.html:23
+msgctxt "exams.template.test_question_bank"
+msgid "action_view_questions_bank"
+msgstr "Открыть банк вопросов"
+
 #: apps/exams/templates/exams/teacher/test_question_bank.html:26
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
@@ -12755,6 +12765,11 @@ msgid "technology"
 msgstr "Технология"
 
 #: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "education"
+msgstr "Образование"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
 msgctxt "nav"
 msgid "about"
 msgstr "О нас"
@@ -16212,3 +16227,11 @@ msgstr "Приостановить"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Организации не найдены."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "hint_activate_exam_before_live"
+msgstr "Сначала активируйте экзамен. Сейчас он неактивен."
+
+msgctxt "live_exam.view.message"
+msgid "exam_must_be_active_before_live"
+msgstr "Перед запуском live-сессии сначала активируйте экзамен."
