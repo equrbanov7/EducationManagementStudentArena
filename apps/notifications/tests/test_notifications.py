@@ -423,6 +423,16 @@ class NotificationViewTest(TestCase):
         n.refresh_from_db()
         self.assertTrue(n.is_deleted)
 
+    def test_delete_notification_honors_query_only_next(self):
+        n = self._make_notification()
+        response = self.client.post(
+            reverse("notifications:notification_delete", args=[n.pk]),
+            {"next": "?filter=all&page=1"},
+        )
+        self.assertRedirects(response, reverse("notifications:notification_list") + "?filter=all&page=1")
+        n.refresh_from_db()
+        self.assertTrue(n.is_deleted)
+
     def test_delete_other_user_notification_gets_404(self):
         other_n = create_notification(recipient=self.other, title="T")
         response = self.client.post(reverse("notifications:notification_delete", args=[other_n.pk]))
@@ -439,6 +449,15 @@ class NotificationViewTest(TestCase):
         n2.refresh_from_db()
         self.assertTrue(n1.is_deleted)
         self.assertTrue(n2.is_deleted)
+
+    def test_mark_all_read_honors_query_only_next(self):
+        for i in range(2):
+            self._make_notification(title=f"R{i}")
+        response = self.client.post(
+            reverse("notifications:notification_mark_all_read"),
+            {"next": "?filter=unread&page=2"},
+        )
+        self.assertRedirects(response, reverse("notifications:notification_list") + "?filter=unread&page=2")
 
     # ── Unread count ──────────────────────────────────────────────────────
 

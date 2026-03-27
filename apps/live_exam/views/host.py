@@ -67,7 +67,8 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
     1. An active organization context exists in the request.
     2. The exam's organization matches the request's active organization.
     3. The organization is not suspended or inactive.
-    4. The requesting user holds the ``exam.manage`` permission.
+    4. The requesting user holds the ``exam.host`` permission, or the broader
+       ``exam.manage`` permission.
 
     Raises ``PermissionDenied`` on any violation.
     """
@@ -81,7 +82,7 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
     if org.is_suspended:
         raise PermissionDenied(pgettext("live_exam.view.permission", "org_suspended_or_inactive"))
 
-    if not request_has_permission(request, "exam.manage"):
+    if not (request_has_permission(request, "exam.host") or request_has_permission(request, "exam.manage")):
         raise PermissionDenied(pgettext("live_exam.view.permission", "exam_manage_required"))
 
 
