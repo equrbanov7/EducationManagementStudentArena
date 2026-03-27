@@ -1275,6 +1275,7 @@ def user_profile(request):
                     UserProfile.objects.filter(user=request.user)
                     .select_related("user")
                     .prefetch_related("user__memberships__role")
+                    .distinct()
                 )
                 manage_role_profiles = (manage_role_profiles | own_profile_qs).distinct()
 
