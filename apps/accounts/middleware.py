@@ -63,7 +63,7 @@ class SuspendedOrganizationMiddleware:
 
     def __call__(self, request):
         if request.user.is_authenticated and not request.user.is_superuser:
-            organization = getattr(request, "organization", None)
+            organization = getattr(request, "blocked_organization", None) or getattr(request, "organization", None)
 
             if organization and organization.status != "active":
                 is_superadmin = getattr(request.user, "is_superadmin", False)
