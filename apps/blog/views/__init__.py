@@ -11,6 +11,7 @@ from .posts import (
     post_edit_ajax,
     review_post,
     search_posts,
+    teacher_moderate_post,
 )
 from .questions import create_question, my_questions, questions_i_can_see
 from .subscribe import subscribe_page
@@ -25,6 +26,7 @@ __all__ = [
     "post_edit_ajax",
     "review_post",
     "delete_post",
+    "teacher_moderate_post",
     "list_posts",
     "search_posts",
     # Comments (includes post_detail)
