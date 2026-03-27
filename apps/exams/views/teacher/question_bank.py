@@ -3,6 +3,7 @@ from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.db.models import Max
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -244,7 +245,7 @@ def test_question_bank(request, slug):
 
     # yalnız test imtahanı üçün
     if exam.exam_type != "test":
-        return render(request, "404.html", status=404)
+        raise Http404()
 
     blocks = exam.question_blocks.all().order_by("order", "id")
 

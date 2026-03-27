@@ -10821,6 +10821,16 @@ msgctxt "exams.template.test_question_bank"
 msgid "subtitle_management_panel"
 msgstr "Manage, preview, and save questions quickly."
 
+#: apps/exams/templates/exams/teacher/test_question_bank.html:18
+msgctxt "exams.template.test_question_bank"
+msgid "action_back"
+msgstr "Back"
+
+#: apps/exams/templates/exams/teacher/test_question_bank.html:23
+msgctxt "exams.template.test_question_bank"
+msgid "action_view_questions_bank"
+msgstr "View question bank"
+
 #: apps/exams/templates/exams/teacher/test_question_bank.html:26
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
@@ -12757,6 +12767,11 @@ msgid "technology"
 msgstr "Technology"
 
 #: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "education"
+msgstr "Education"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
 msgctxt "nav"
 msgid "about"
 msgstr "About"
@@ -16278,3 +16293,11 @@ msgstr "Suspend"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "No organization found."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "hint_activate_exam_before_live"
+msgstr "Activate the exam first. It is currently inactive."
+
+msgctxt "live_exam.view.message"
+msgid "exam_must_be_active_before_live"
+msgstr "Activate the exam before starting a live session."

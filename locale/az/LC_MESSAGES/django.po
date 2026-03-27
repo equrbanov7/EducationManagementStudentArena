@@ -10959,25 +10959,35 @@ msgctxt "exams.template.test_question_bank"
 msgid "subtitle_management_panel"
 msgstr "Sual əlavə etmə paneli"
 
+#: apps/exams/templates/exams/teacher/test_question_bank.html:18
+msgctxt "exams.template.test_question_bank"
+msgid "action_back"
+msgstr "Geri"
+
+#: apps/exams/templates/exams/teacher/test_question_bank.html:23
+msgctxt "exams.template.test_question_bank"
+msgid "action_view_questions_bank"
+msgstr "Suallar bankına bax"
+
 #: apps/exams/templates/exams/teacher/test_question_bank.html:26
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
-msgstr "Sual"
+msgstr "Sual sayı"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:30
 msgctxt "exams.template.test_question_bank"
 msgid "label_default_points"
-msgstr "Son tarix"
+msgstr "Standart bal"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:36
 msgctxt "exams.template.test_question_bank"
 msgid "stat_total_questions"
-msgstr "Total students"
+msgstr "Ümumi sual sayı"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:45
 msgctxt "exams.template.test_question_bank"
 msgid "stat_warnings"
-msgstr "Pending"
+msgstr "Xəbərdarlıqlar"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:53
 msgctxt "exams.template.test_question_bank"
@@ -11012,7 +11022,7 @@ msgstr "Redaktə et"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:106
 msgctxt "exams.template.test_question_bank"
 msgid "action_clear"
-msgstr "Əlavə Et"
+msgstr "Təmizlə"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:111
 msgctxt "exams.template.test_question_bank"
@@ -11027,7 +11037,7 @@ msgstr "Qaydalar"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:125
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_default_a"
-msgstr "Identifier default"
+msgstr "Standart olaraq A cavabı düzgündür"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:126
 msgctxt "exams.template.test_question_bank"
@@ -11037,12 +11047,12 @@ msgstr "Standart"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:131
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_star_prefix"
-msgstr "Cavablarım"
+msgstr "* ilə işarələnən cavab düzgündür"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:132
 msgctxt "exams.template.test_question_bank"
 msgid "label_correct"
-msgstr "Score"
+msgstr "düzgündür"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:137
 msgctxt "exams.template.test_question_bank"
@@ -11062,7 +11072,7 @@ msgstr "Çoxseçimli üçün"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:144
 msgctxt "exams.template.test_question_bank"
 msgid "label_or"
-msgstr "Score"
+msgstr "və ya"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:144
 msgctxt "exams.template.test_question_bank"
@@ -11082,27 +11092,27 @@ msgstr "Yoxlanılacaq"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:161
 msgctxt "exams.template.test_question_bank"
 msgid "heading_review_result_desc"
-msgstr "Yoxlanılacaq"
+msgstr "Əlavə olunacaq sualları yoxlayın"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:165
 msgctxt "exams.template.test_question_bank"
 msgid "action_select_all"
-msgstr "Hamısını Gör"
+msgstr "Hamısını seç"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:168
 msgctxt "exams.template.test_question_bank"
 msgid "action_deselect_all"
-msgstr "Sil"
+msgstr "Seçimi sıfırla"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:191
 msgctxt "exams.template.test_question_bank"
 msgid "label_points"
-msgstr "Context"
+msgstr "Bal"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:232
 msgctxt "exams.template.test_question_bank"
 msgid "action_save_selected"
-msgstr "Sil"
+msgstr "Əlavə et"
 
 #: apps/exams/validators.py:32
 msgctxt "exams.validator.error"
@@ -12864,6 +12874,11 @@ msgid "technology"
 msgstr "Texnologiya"
 
 #: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "education"
+msgstr "Təhsil"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
 msgctxt "nav"
 msgid "about"
 msgstr "Haqqımızda"
@@ -16457,3 +16472,11 @@ msgstr "Dayandır"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Təşkilat tapılmadı."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "hint_activate_exam_before_live"
+msgstr "Öncə imtahanı aktiv edin. İmtahan hazırda passivdir."
+
+msgctxt "live_exam.view.message"
+msgid "exam_must_be_active_before_live"
+msgstr "Canlı imtahanı başlatmaq üçün öncə imtahanı aktiv edin."
