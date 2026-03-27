@@ -377,10 +377,7 @@ def teacher_moderate_post(request, post_id):
             create_notification(
                 recipient=post_author,
                 title=f"Postunuz silindi: {post_title}",
-                message=(
-                    f'"{post_title}" başlıqlı postunuz müəllim tərəfindən silindi. '
-                    f"Səbəb: {feedback}"
-                ),
+                message=(f'"{post_title}" başlıqlı postunuz müəllim tərəfindən silindi. ' f"Səbəb: {feedback}"),
                 link=f"{reverse('accounts:profile')}?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_title": post_title, "feedback": feedback},
