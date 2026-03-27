@@ -116,6 +116,22 @@
     color: var(--text-dark, #1f2937);
 }
 
+.live-start-tooltip {
+    display: inline-flex;
+    width: fit-content;
+    cursor: help;
+}
+
+.live-start-btn {
+    font-weight: 700;
+}
+
+.live-start-btn-disabled {
+    opacity: 0.58;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 /* Status Badges */
 .status-badge {
     padding: 6px 12px;

@@ -10,6 +10,7 @@ import json
 import random
 from datetime import timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
@@ -100,6 +101,10 @@ def live_create_session_by_slug(request, slug):
         raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     _ensure_host_org_permission(request, exam.organization)
+
+    if not exam.is_active:
+        messages.warning(request, pgettext("live_exam.view.message", "exam_must_be_active_before_live"))
+        return redirect(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
     log_action(

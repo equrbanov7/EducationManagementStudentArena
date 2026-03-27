@@ -12,6 +12,18 @@
     
     <header class="page-header">
         <div class="title-section">
+            <div class="page-header-links">
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}"
+                   class="page-header-link page-header-link--secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    {% trans "action_back" context "exams.template.test_question_bank" %}
+                </a>
+                <a href="{% url 'exams:teacher_questions_bank' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}"
+                   class="page-header-link">
+                    <i class="fas fa-layer-group"></i>
+                    {% trans "action_view_questions_bank" context "exams.template.test_question_bank" %}
+                </a>
+            </div>
             <h1 class="page-title">{{ exam.title }}</h1>
             <p class="page-subtitle">{% trans "subtitle_management_panel" context "exams.template.test_question_bank" %}</p>
         </div>

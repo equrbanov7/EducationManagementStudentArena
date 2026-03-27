@@ -722,6 +722,44 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_teacher_exam_detail_disables_live_start_when_exam_is_passive(self):
+        self.exam_visible.is_active = False
+        self.exam_visible.save(update_fields=["is_active"])
+
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'aria-disabled="true"', html=False)
+        self.assertContains(response, "Öncə imtahanı aktiv edin. İmtahan hazırda passivdir.")
+        self.assertNotContains(
+            response,
+            reverse("liveExam:create_session_slug", kwargs={"slug": self.exam_visible.slug}),
+        )
+
+    def test_delete_exam_question_resequences_remaining_question_orders(self):
+        second_question = ExamQuestion.objects.create(
+            exam=self.exam_visible,
+            text="Second question",
+            order=2,
+            answer_mode="single",
+        )
+        third_question = ExamQuestion.objects.create(
+            exam=self.exam_visible,
+            text="Third question",
+            order=3,
+            answer_mode="single",
+        )
+
+        response = self.client.post(reverse("exams:delete_exam_question", args=[self.exam_visible.slug, self.exam_question.id]))
+
+        self.assertEqual(response.status_code, 302)
+        remaining_orders = list(
+            ExamQuestion.objects.filter(id__in=[second_question.id, third_question.id])
+            .order_by("order", "id")
+            .values_list("order", flat=True)
+        )
+        self.assertEqual(remaining_orders, [1, 2])
+
     def test_teacher_exam_detail_falls_back_to_safe_referer_when_return_to_missing(self):
         referer = reverse("exams:teacher_exam_list")
         response = self.client.get(
@@ -1848,6 +1886,49 @@ class TeacherQuestionsBankViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_test_question_bank_view_bank_link_preserves_original_return_to(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.get(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:teacher_questions_bank", args=[self.exam.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_test_question_bank_back_link_preserves_original_return_to(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.get(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:teacher_exam_detail", args=[self.exam.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_questions_bank_bulk_delete_resequences_remaining_question_orders(self):
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "delete",
+                "selected_question_ids": str(self.questions[0].id),
+                "status": "all",
+                "q": "",
+                "sort": "newest",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        remaining_orders = list(self.exam.questions.order_by("order", "id").values_list("order", flat=True))
+        self.assertEqual(remaining_orders, list(range(1, len(remaining_orders) + 1)))
 
     def test_questions_bank_bulk_redirect_preserves_return_navigation(self):
         response = self.client.post(

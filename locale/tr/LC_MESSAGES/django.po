@@ -10832,6 +10832,16 @@ msgctxt "exams.template.test_question_bank"
 msgid "subtitle_management_panel"
 msgstr "Hızlı soru yönetim paneli"
 
+#: apps/exams/templates/exams/teacher/test_question_bank.html:18
+msgctxt "exams.template.test_question_bank"
+msgid "action_back"
+msgstr "Geri"
+
+#: apps/exams/templates/exams/teacher/test_question_bank.html:23
+msgctxt "exams.template.test_question_bank"
+msgid "action_view_questions_bank"
+msgstr "Soru bankasını görüntüle"
+
 #: apps/exams/templates/exams/teacher/test_question_bank.html:26
 msgctxt "exams.template.test_question_bank"
 msgid "label_question_count"
@@ -12736,6 +12746,11 @@ msgid "technology"
 msgstr "Teknoloji"
 
 #: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "education"
+msgstr "Eğitim"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
 msgctxt "nav"
 msgid "about"
 msgstr "Hakkımızda"
@@ -16189,3 +16204,11 @@ msgstr "Askıya al"
 msgctxt "staff.management"
 msgid "No organization found."
 msgstr "Kuruluş bulunamadı."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "hint_activate_exam_before_live"
+msgstr "Önce sınavı etkinleştirin. Sınav şu anda pasif."
+
+msgctxt "live_exam.view.message"
+msgid "exam_must_be_active_before_live"
+msgstr "Canlı oturumu başlatmadan önce sınavı etkinleştirin."

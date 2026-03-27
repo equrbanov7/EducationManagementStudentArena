@@ -214,6 +214,18 @@ class LiveSessionCreationTest(TestCase):
             f"{reverse('liveExam:host_presentation', kwargs={'pin': session.pin})}?controls=1",
         )
 
+    def test_create_session_redirects_when_exam_is_passive(self):
+        self.exam.is_active = False
+        self.exam.save(update_fields=["is_active"])
+
+        self.client.login(username="live_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+        response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam.slug}))
+        self.assertFalse(LiveSession.objects.filter(exam=self.exam, host_user=self.teacher).exists())
+
 
 class LiveJoinTest(TestCase):
     """Test player join functionality."""
