@@ -36,18 +36,30 @@ Each test method follows this pattern:
 Prerequisites
 -------------
 * PostgreSQL database (tests are skipped on SQLite).
-* Migration ``organizations.0003_rls_policies`` applied.
+* Migrations ``organizations.0003_rls_policies`` and
+  ``organizations.0004_expand_rls_scope`` applied.
 """
 
-from django.db import connection
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import DatabaseError, connection, transaction
 
 import pytest
 
 from apps.assignments.models import Assignment, Submission
-from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAttempt
+from apps.courses.models import Course, CourseGroup, CourseMembership
+from apps.exams.models import (
+    Exam,
+    ExamAnswer,
+    ExamAnswerFile,
+    ExamAttempt,
+    ExamQuestion,
+    ExamQuestionOption,
+    ProctoringLog,
+    QuestionBlock,
+    StudentGroup,
+)
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
-from apps.notifications.models import StudentOrganizationRequest
+from apps.notifications.models import InAppNotification, StudentOrganizationRequest
 from apps.organizations.models import Membership, OrgUnit, Role
 from core.constants import OrganizationType, RoleScopeType
 
@@ -75,6 +87,20 @@ def _clear_tenant():
         cur.execute("SELECT set_config('app.current_org_id', '', false)")
 
 
+def _set_user(user_id):
+    """Store *user_id* in ``app.current_user_id`` for user-scoped policies."""
+    with connection.cursor() as cur:
+        cur.execute(
+            "SELECT set_config('app.current_user_id', %s, false)",
+            [str(user_id)],
+        )
+
+
+def _clear_user():
+    with connection.cursor() as cur:
+        cur.execute("SELECT set_config('app.current_user_id', '', false)")
+
+
 def _set_bypass(enabled: bool):
     value = "on" if enabled else "off"
     with connection.cursor() as cur:
@@ -93,6 +119,7 @@ def _enable_rls():
     """
     _set_bypass(False)
     _clear_tenant()
+    _clear_user()
     with connection.cursor() as cur:
         cur.execute("SET LOCAL ROLE rls_app_role")
 
@@ -117,6 +144,7 @@ def _rls_bypass_for_tests(db):
 
     _set_bypass(True)
     _clear_tenant()
+    _clear_user()
     try:
         yield
     finally:
@@ -125,6 +153,7 @@ def _rls_bypass_for_tests(db):
         # is an extra safety measure in case a test used SET (session-level).
         _set_bypass(False)
         _clear_tenant()
+        _clear_user()
 
 
 @pytest.fixture()
@@ -526,6 +555,306 @@ class TestRLSAssignment:
         results = list(Submission.objects.all())
         assert len(results) == 1
         assert results[0].pk == sub_a.pk
+
+
+# ---------------------------------------------------------------------------
+# Newly covered join / child table tests
+# ---------------------------------------------------------------------------
+
+
+class TestRLSCourseJoinTables:
+    """RLS isolation for course-related join tables added in 0004."""
+
+    def test_course_group_member_join_isolation(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        student_a = User.objects.create_user("cg_student_a", "cgsa@rls.test", "pw")
+        student_b = User.objects.create_user("cg_student_b", "cgsb@rls.test", "pw")
+
+        course_a = Course.objects.create(
+            organization=org_a, owner=org_a.owner, title="Group Course A", status="published"
+        )
+        course_b = Course.objects.create(
+            organization=org_b, owner=org_b.owner, title="Group Course B", status="published"
+        )
+        group_a = CourseGroup.objects.create(course=course_a, name="A Group")
+        group_b = CourseGroup.objects.create(course=course_b, name="B Group")
+        group_a.members.add(student_a)
+        group_b.members.add(student_b)
+
+        through_model = CourseGroup._meta.get_field("members").remote_field.through
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+        results = list(through_model.objects.all())
+        assert len(results) == 1
+        assert results[0].coursegroup_id == group_a.id
+
+
+class TestRLSExamExpanded:
+    """RLS isolation for exam child tables and join tables added in 0004."""
+
+    @pytest.fixture()
+    def expanded_exam_graph(self, two_orgs, role_per_org):
+        org_a, org_b = two_orgs
+        role_a, role_b = role_per_org
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        teacher_a = User.objects.create_user("rls_group_teacher_a", "rgta@rls.test", "pw")
+        teacher_b = User.objects.create_user("rls_group_teacher_b", "rgtb@rls.test", "pw")
+        student_a = User.objects.create_user("rls_group_student_a", "rgsa@rls.test", "pw")
+        student_b = User.objects.create_user("rls_group_student_b", "rgsb@rls.test", "pw")
+
+        Membership.objects.create(
+            user=teacher_a,
+            organization=org_a,
+            role=role_a,
+            is_primary=True,
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=teacher_b,
+            organization=org_b,
+            role=role_b,
+            is_primary=True,
+            is_active=True,
+        )
+
+        exam_a = Exam.objects.create(organization=org_a, author=org_a.owner, title="Expanded Exam A", exam_type="test")
+        exam_b = Exam.objects.create(organization=org_b, author=org_b.owner, title="Expanded Exam B", exam_type="test")
+
+        block_a = QuestionBlock.objects.create(exam=exam_a, name="Block A")
+        block_b = QuestionBlock.objects.create(exam=exam_b, name="Block B")
+        question_a = ExamQuestion.objects.create(exam=exam_a, block=block_a, text="Question A", order=1)
+        question_b = ExamQuestion.objects.create(exam=exam_b, block=block_b, text="Question B", order=1)
+        option_a = ExamQuestionOption.objects.create(question=question_a, text="Option A")
+        option_b = ExamQuestionOption.objects.create(question=question_b, text="Option B")
+
+        group_a = StudentGroup.objects.create(teacher=teacher_a, organization=org_a, name="Tenant Group A")
+        group_b = StudentGroup.objects.create(teacher=teacher_b, organization=org_b, name="Tenant Group B")
+        group_a.students.add(student_a)
+        group_b.students.add(student_b)
+        group_a.teachers.add(teacher_a)
+        group_b.teachers.add(teacher_b)
+
+        exam_a.allowed_users.add(student_a)
+        exam_b.allowed_users.add(student_b)
+        exam_a.allowed_groups.add(group_a)
+        exam_b.allowed_groups.add(group_b)
+
+        attempt_a = ExamAttempt.objects.create(user=student_a, exam=exam_a, attempt_number=1, status="in_progress")
+        attempt_b = ExamAttempt.objects.create(user=student_b, exam=exam_b, attempt_number=1, status="in_progress")
+        answer_a = ExamAnswer.objects.create(attempt=attempt_a, question=question_a)
+        answer_b = ExamAnswer.objects.create(attempt=attempt_b, question=question_b)
+        answer_a.selected_options.add(option_a)
+        answer_b.selected_options.add(option_b)
+        answer_file_a = ExamAnswerFile.objects.create(
+            answer=answer_a,
+            file=SimpleUploadedFile("answer-a.pdf", b"%PDF-1.4\n%"),
+        )
+        ExamAnswerFile.objects.create(
+            answer=answer_b,
+            file=SimpleUploadedFile("answer-b.pdf", b"%PDF-1.4\n%"),
+        )
+        proctor_a = ProctoringLog.objects.create(exam_attempt=attempt_a, event_type="tab_switch", details={})
+        ProctoringLog.objects.create(exam_attempt=attempt_b, event_type="tab_switch", details={})
+
+        return {
+            "org_a": org_a,
+            "exam_a": exam_a,
+            "block_a": block_a,
+            "question_a": question_a,
+            "option_a": option_a,
+            "group_a": group_a,
+            "student_a": student_a,
+            "answer_a": answer_a,
+            "answer_file_a": answer_file_a,
+            "proctor_a": proctor_a,
+        }
+
+    def test_question_tree_isolation(self, expanded_exam_graph):
+        _skip_if_not_pg()
+        org_a = expanded_exam_graph["org_a"]
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+
+        assert QuestionBlock.objects.count() == 1
+        assert QuestionBlock.objects.first().pk == expanded_exam_graph["block_a"].pk
+        assert ExamQuestion.objects.count() == 1
+        assert ExamQuestion.objects.first().pk == expanded_exam_graph["question_a"].pk
+        assert ExamQuestionOption.objects.count() == 1
+        assert ExamQuestionOption.objects.first().pk == expanded_exam_graph["option_a"].pk
+
+    def test_exam_join_tables_are_isolated(self, expanded_exam_graph):
+        _skip_if_not_pg()
+        org_a = expanded_exam_graph["org_a"]
+
+        allowed_users_through = Exam._meta.get_field("allowed_users").remote_field.through
+        allowed_groups_through = Exam._meta.get_field("allowed_groups").remote_field.through
+        student_group_students = StudentGroup._meta.get_field("students").remote_field.through
+        student_group_teachers = StudentGroup._meta.get_field("teachers").remote_field.through
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+
+        assert allowed_users_through.objects.count() == 1
+        assert allowed_users_through.objects.first().exam_id == expanded_exam_graph["exam_a"].id
+        assert allowed_groups_through.objects.count() == 1
+        assert allowed_groups_through.objects.first().studentgroup_id == expanded_exam_graph["group_a"].id
+        assert student_group_students.objects.count() == 1
+        assert student_group_students.objects.first().studentgroup_id == expanded_exam_graph["group_a"].id
+        assert student_group_teachers.objects.count() == 1
+        assert student_group_teachers.objects.first().studentgroup_id == expanded_exam_graph["group_a"].id
+
+    def test_exam_answer_tree_isolation(self, expanded_exam_graph):
+        _skip_if_not_pg()
+        org_a = expanded_exam_graph["org_a"]
+        selected_options_through = ExamAnswer._meta.get_field("selected_options").remote_field.through
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+
+        assert ExamAnswer.objects.count() == 1
+        assert ExamAnswer.objects.first().pk == expanded_exam_graph["answer_a"].pk
+        assert selected_options_through.objects.count() == 1
+        assert selected_options_through.objects.first().examanswer_id == expanded_exam_graph["answer_a"].id
+        assert ExamAnswerFile.objects.count() == 1
+        assert ExamAnswerFile.objects.first().pk == expanded_exam_graph["answer_file_a"].pk
+        assert ProctoringLog.objects.count() == 1
+        assert ProctoringLog.objects.first().pk == expanded_exam_graph["proctor_a"].pk
+
+
+class TestRLSAssignmentJoinTables:
+    """RLS isolation for assignment recipient joins added in 0004."""
+
+    def test_assignment_assigned_students_join_isolation(self, two_orgs):
+        _skip_if_not_pg()
+        from django.utils import timezone
+
+        org_a, org_b = two_orgs
+        now = timezone.now()
+
+        course_a = Course.objects.create(
+            organization=org_a,
+            owner=org_a.owner,
+            title="Assigned Course A",
+            status="published",
+        )
+        course_b = Course.objects.create(
+            organization=org_b,
+            owner=org_b.owner,
+            title="Assigned Course B",
+            status="published",
+        )
+        assign_a = Assignment.objects.create(
+            course=course_a,
+            title="Assigned HW A",
+            type="homework",
+            max_score=100,
+            start_date=now,
+            due_date=now,
+        )
+        assign_b = Assignment.objects.create(
+            course=course_b,
+            title="Assigned HW B",
+            type="homework",
+            max_score=100,
+            start_date=now,
+            due_date=now,
+        )
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        student_a = User.objects.create_user("assigned_student_a", "adsa@rls.test", "pw")
+        student_b = User.objects.create_user("assigned_student_b", "adsb@rls.test", "pw")
+
+        assign_a.assigned_students.add(student_a)
+        assign_b.assigned_students.add(student_b)
+        through_model = Assignment._meta.get_field("assigned_students").remote_field.through
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+        results = list(through_model.objects.all())
+        assert len(results) == 1
+        assert results[0].assignment_id == assign_a.id
+
+
+class TestRLSNotificationInbox:
+    """RLS isolation for per-recipient notification inbox rows."""
+
+    def test_in_app_notifications_require_matching_recipient_and_tenant(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        recipient_a = User.objects.create_user("notif_recipient_a", "nra@rls.test", "pw")
+        other_user = User.objects.create_user("notif_other_user", "nou@rls.test", "pw")
+
+        tenant_note = InAppNotification.objects.create(
+            recipient=recipient_a,
+            title="Tenant A Notification",
+            metadata={"organization_id": str(org_a.id)},
+        )
+        InAppNotification.objects.create(
+            recipient=recipient_a,
+            title="Tenant B Notification",
+            metadata={"organization_id": str(org_b.id)},
+        )
+        global_note = InAppNotification.objects.create(recipient=recipient_a, title="Global Notification")
+        InAppNotification.objects.create(
+            recipient=other_user,
+            title="Other User Notification",
+            metadata={"organization_id": str(org_a.id)},
+        )
+
+        _enable_rls()
+        _set_user(recipient_a.pk)
+        _set_tenant(org_a.pk)
+
+        results = list(InAppNotification.objects.order_by("id"))
+        assert {note.pk for note in results} == {tenant_note.pk, global_note.pk}
+
+
+class TestRLSWriteProtection:
+    """RLS WITH CHECK clauses reject cross-tenant writes."""
+
+    def test_cross_tenant_course_group_member_insert_is_rejected(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        student = User.objects.create_user("write_student", "write@student.test", "pw")
+
+        course_a = Course.objects.create(
+            organization=org_a, owner=org_a.owner, title="Write Course A", status="published"
+        )
+        course_b = Course.objects.create(
+            organization=org_b, owner=org_b.owner, title="Write Course B", status="published"
+        )
+        CourseGroup.objects.create(course=course_a, name="Write Group A")
+        blocked_group = CourseGroup.objects.create(course=course_b, name="Write Group B")
+
+        through_model = CourseGroup._meta.get_field("members").remote_field.through
+
+        _enable_rls()
+        _set_tenant(org_a.pk)
+        with pytest.raises(DatabaseError):
+            # Keep the expected RLS violation inside a savepoint so the outer
+            # test transaction remains usable for fixture cleanup.
+            with transaction.atomic():
+                through_model.objects.create(coursegroup_id=blocked_group.id, user_id=student.id)
 
 
 # ---------------------------------------------------------------------------

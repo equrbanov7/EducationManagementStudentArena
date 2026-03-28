@@ -153,7 +153,7 @@ isort --profile black .
 
 # 2. Sonra Black
 black .
-#test
+
 
 # 3. Yoxla - heç bir dəyişiklik olmamalı
 isort --check --profile black .
