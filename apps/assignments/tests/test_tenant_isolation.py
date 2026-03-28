@@ -416,3 +416,56 @@ class AssignmentCreateDeleteCrossTenantTest(TestCase):
         response = self.client.post(url, {"student_id": self.student_b.id})
         self.assertIn(response.status_code, (403, 404))
         self.assertTrue(self.assignment_b.assigned_students.filter(id=self.student_b.id).exists())
+
+
+# ---------------------------------------------------------------------------
+# Test: AJAX API endpoints cross-tenant (search_groups, students_by_groups)
+# ---------------------------------------------------------------------------
+
+
+class AssignmentAjaxCrossTenantTest(TestCase):
+    """
+    search_groups and students_by_groups accept a course_id query-param.
+    Supplying a cross-tenant course_id must return 404.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="aaj_teacher_a", email="aaj_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="aaj_teacher_b", email="aaj_b@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("AAJ Org A", "aaj-org-a", self.teacher_a)
+        self.org_b = _create_org("AAJ Org B", "aaj-org-b", self.teacher_b)
+
+        self.role_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*"])
+        self.role_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_b)
+
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="AAJ Course B", status="published", organization=self.org_b
+        )
+
+    def test_search_groups_cross_tenant_blocked(self):
+        """Teacher A cannot search groups for Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(
+            reverse("assignments:search_groups"),
+            {"course_id": self.course_b.id, "q": "group"},
+        )
+        self.assertIn(response.status_code, (403, 404))
+
+    def test_students_by_groups_cross_tenant_blocked(self):
+        """Teacher A cannot list students-by-groups for Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(
+            reverse("assignments:students_by_groups"),
+            {"course_id": self.course_b.id, "groups": "GroupB"},
+        )
+        self.assertIn(response.status_code, (403, 404))
