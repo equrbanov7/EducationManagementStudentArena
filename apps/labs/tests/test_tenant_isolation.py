@@ -312,3 +312,109 @@ class LabSubmissionOwnershipTest(TestCase):
             submission = response.context.get("submission")
             if submission:
                 self.assertNotEqual(submission.assignment.student_id, self.student_1.id)
+
+
+# ---------------------------------------------------------------------------
+# Test: Cross-Tenant Create, Delete-Submissions, Block CRUD, Grade POST
+# ---------------------------------------------------------------------------
+
+
+class LabCreateBlockGradeCrossTenantTest(TestCase):
+    """
+    Endpoints that accept a cross-tenant course_id, lab_id, or submission_id
+    must reject.  Covers: create_lab via course_id tampering,
+    delete_submissions, create_block, and grade_submission_page POST.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="lcg_teacher_a", email="lcg_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="lcg_teacher_b", email="lcg_b@orgb.com", password="StrongPass123!"
+        )
+        self.student_b = User.objects.create_user(
+            username="lcg_student_b", email="lcg_sb@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("LCG Org A", "lcg-org-a", self.teacher_a)
+        self.org_b = _create_org("LCG Org B", "lcg-org-b", self.teacher_b)
+
+        self.role_teacher_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*", "grade.*"])
+        self.role_teacher_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*", "grade.*"])
+        self.role_student_b = _create_role(self.org_b, "student", level=20, permissions=["course.view"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_teacher_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_teacher_b)
+        _assign_user_to_org(self.student_b, self.org_b, ProfileRole.STUDENT, self.role_student_b)
+
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a, title="LCG Course A", status="published", organization=self.org_a
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="LCG Course B", status="published", organization=self.org_b
+        )
+
+        self.lab_b = _make_lab(self.course_b, "LCG Lab B", self.teacher_b)
+
+        CourseMembership.objects.create(course=self.course_b, user=self.student_b, role="student")
+        self.lab_b.allowed_students.add(self.student_b)
+
+    # -- Create via cross-tenant course_id ------------------------------------
+
+    def test_create_lab_with_cross_tenant_course_id_blocked(self):
+        """Teacher A cannot create a lab under Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:create_lab", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(
+            url,
+            {
+                "title": "Injected Lab",
+                "start_datetime": "2025-01-01 00:00",
+                "end_datetime": "2025-12-31 23:59",
+                "max_score": 100,
+            },
+        )
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- Delete submissions cross-tenant --------------------------------------
+
+    def test_delete_submissions_cross_tenant_blocked(self):
+        """Teacher A cannot delete submissions on Org B's lab."""
+        from apps.labs.models import LabAssignment
+
+        assignment_b = LabAssignment.objects.create(lab=self.lab_b, student=self.student_b)
+        sub = LabSubmission.objects.create(assignment=assignment_b, attempt_number=1)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:delete_submissions", kwargs={"pk": self.lab_b.id})
+        response = self.client.post(url, {"submission_ids": [sub.id]})
+        self.assertIn(response.status_code, (302, 403, 404))
+        self.assertTrue(LabSubmission.objects.filter(id=sub.id).exists())
+
+    # -- Create block cross-tenant --------------------------------------------
+
+    def test_create_block_cross_tenant_blocked(self):
+        """Teacher A cannot create a block on Org B's lab."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:create_block", kwargs={"pk": self.lab_b.id})
+        response = self.client.post(url, {"title": "Injected Block"})
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- Grade submission page POST cross-tenant ------------------------------
+
+    def test_grade_submission_post_cross_tenant_blocked(self):
+        """Teacher A cannot grade (POST) a submission from Org B's lab."""
+        from apps.labs.models import LabAssignment
+
+        assignment_b = LabAssignment.objects.create(lab=self.lab_b, student=self.student_b)
+        sub = LabSubmission.objects.create(assignment=assignment_b, attempt_number=1)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:grade_submission_page", kwargs={"pk": sub.id})
+        response = self.client.post(url, {"score": "90", "feedback": "Nice"})
+        self.assertIn(response.status_code, (302, 403, 404))
+        sub.refresh_from_db()
+        self.assertIsNone(sub.score)
