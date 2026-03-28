@@ -11,7 +11,6 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from core.constants import AuditAction
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
