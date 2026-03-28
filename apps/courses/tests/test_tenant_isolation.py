@@ -9,13 +9,10 @@ Verifies that:
 - Changing an object ID in the URL does not allow cross-tenant access
 """
 
-from datetime import timedelta
-
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
@@ -419,3 +416,82 @@ class CourseStatusResourceExamCrossTenantTest(TestCase):
         response = self.client.post(url)
         self.assertIn(response.status_code, (302, 403, 404))
         self.assertTrue(CourseMembership.objects.filter(id=member_b.id).exists())
+
+
+# ---------------------------------------------------------------------------
+# Test: AddMembersBulk, DeleteGroupFromCourse, AvailableStudents cross-tenant
+# ---------------------------------------------------------------------------
+
+
+class CourseBulkMemberGroupAvailableCrossTenantTest(TestCase):
+    """
+    AddMembersBulkView, DeleteGroupFromCourseView, and AvailableStudentsView
+    all accept a course_id in the URL.  Swapping this for a cross-tenant
+    course_id must be blocked.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="cbga_teacher_a", email="cbga_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="cbga_teacher_b", email="cbga_b@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("CBGA Org A", "cbga-org-a", self.teacher_a)
+        self.org_b = _create_org("CBGA Org B", "cbga-org-b", self.teacher_b)
+
+        self.role_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*"])
+        self.role_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_b)
+
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a, title="CBGA Course A", status="published", organization=self.org_a
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="CBGA Course B", status="published", organization=self.org_b
+        )
+        # Add a student group-member to course_b for group-delete test
+        self.student_b = User.objects.create_user(
+            username="cbga_student_b", email="cbga_sb@orgb.com", password="StrongPass123!"
+        )
+        _assign_user_to_org(
+            self.student_b,
+            self.org_b,
+            ProfileRole.STUDENT,
+            _create_role(self.org_b, "student", level=20, permissions=["course.view"]),
+        )
+        CourseMembership.objects.create(course=self.course_b, user=self.student_b, role="student", group_name="GroupB")
+
+    # -- AddMembersBulkView ---------------------------------------------------
+
+    def test_add_members_bulk_cross_tenant_blocked(self):
+        """Teacher A cannot bulk-add groups to Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:add_members_bulk", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(url, {"group_ids": ["1"]})
+        self.assertIn(response.status_code, (302, 403, 404))
+
+    # -- DeleteGroupFromCourseView --------------------------------------------
+
+    def test_delete_group_from_course_cross_tenant_blocked(self):
+        """Teacher A cannot delete a group from Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:delete_group_from_course", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(url, {"group_name": "GroupB"})
+        self.assertIn(response.status_code, (302, 403, 404))
+        # The membership in Org B's course must still exist
+        self.assertTrue(CourseMembership.objects.filter(course=self.course_b, group_name="GroupB").exists())
+
+    # -- AvailableStudentsView ------------------------------------------------
+
+    def test_available_students_cross_tenant_blocked(self):
+        """Teacher A cannot list available students for Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:available_students", kwargs={"course_id": self.course_b.id})
+        response = self.client.get(url)
+        self.assertIn(response.status_code, (302, 403, 404))

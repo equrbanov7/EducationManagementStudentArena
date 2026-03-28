@@ -418,3 +418,99 @@ class LabCreateBlockGradeCrossTenantTest(TestCase):
         self.assertIn(response.status_code, (302, 403, 404))
         sub.refresh_from_db()
         self.assertIsNone(sub.score)
+
+
+# ---------------------------------------------------------------------------
+# Test: Cross-Tenant Lab Question CRUD & API
+# ---------------------------------------------------------------------------
+
+
+class LabQuestionCrossTenantTest(TestCase):
+    """
+    create_question, edit_question, delete_question accept a block_id or
+    question pk.  Swapping these for cross-tenant IDs must be blocked.
+    Also covers api_get_students with a cross-tenant course_id.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="lqct_teacher_a", email="lqct_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="lqct_teacher_b", email="lqct_b@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("LQCT Org A", "lqct-org-a", self.teacher_a)
+        self.org_b = _create_org("LQCT Org B", "lqct-org-b", self.teacher_b)
+
+        self.role_teacher_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*"])
+        self.role_teacher_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_teacher_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_teacher_b)
+
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="LQCT Course B", status="published", organization=self.org_b
+        )
+        self.lab_b = _make_lab(self.course_b, "LQCT Lab B", self.teacher_b)
+
+        from apps.labs.models import LabBlock
+
+        self.block_b = LabBlock.objects.create(lab=self.lab_b, title="Block B", order=1)
+
+        from apps.labs.models import LabQuestion
+
+        self.question_b = LabQuestion.objects.create(
+            block=self.block_b, question_text="Q?", question_number=1, points=10
+        )
+
+    # -- create_question ------------------------------------------------------
+
+    def test_create_question_cross_tenant_blocked(self):
+        """Teacher A cannot create a question on Org B's lab block."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:create_question", kwargs={"block_id": self.block_b.id})
+        response = self.client.post(url, {"question_text": "Injected Q", "points": 5})
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- edit_question --------------------------------------------------------
+
+    def test_edit_question_cross_tenant_blocked(self):
+        """Teacher A cannot edit a question belonging to Org B's lab."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:edit_question", kwargs={"pk": self.question_b.id})
+        response = self.client.post(url, {"question_text": "Hacked Q", "points": 99})
+        self.assertIn(response.status_code, (403, 404))
+        self.question_b.refresh_from_db()
+        self.assertEqual(self.question_b.question_text, "Q?")
+
+    def test_edit_question_get_cross_tenant_blocked(self):
+        """Teacher A cannot retrieve (GET) question data from Org B's lab."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:edit_question", kwargs={"pk": self.question_b.id})
+        response = self.client.get(url)
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- delete_question ------------------------------------------------------
+
+    def test_delete_question_cross_tenant_blocked(self):
+        """Teacher A cannot delete a question belonging to Org B's lab."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:delete_question", kwargs={"pk": self.question_b.id})
+        response = self.client.post(url)
+        self.assertIn(response.status_code, (403, 404))
+
+        from apps.labs.models import LabQuestion
+
+        self.assertTrue(LabQuestion.objects.filter(id=self.question_b.id).exists())
+
+    # -- api_get_students cross-tenant course_id ------------------------------
+
+    def test_api_get_students_cross_tenant_blocked(self):
+        """Teacher A cannot list students for Org B's course via the labs API."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("labs:api_get_students", kwargs={"course_id": self.course_b.id})
+        response = self.client.get(url)
+        self.assertIn(response.status_code, (403, 404))
