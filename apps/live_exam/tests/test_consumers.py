@@ -1160,3 +1160,412 @@ class WebSocketOriginValidationTest(TransactionTestCase):
 
         message = async_to_sync(scenario)()
         self.assertEqual(message["type"], "answer_saved")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# WebSocket host-role isolation
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class WebSocketHostRoleIsolationTest(TransactionTestCase):
+    """
+    Verify that authorize_socket_connection only grants the ``host``
+    role to the actual session.host_user.  Any other authenticated user
+    — even one in the same org with valid exam.host perms — must NOT
+    receive the host role on the play websocket.
+    """
+
+    def setUp(self):
+        self.host_teacher = User.objects.create_user("ws_role_host", "ws_role_host@example.com", "StrongPass123!")
+        self.other_teacher = User.objects.create_user("ws_role_other", "ws_role_other@example.com", "StrongPass123!")
+
+        self.org = Organization.objects.create(
+            name="WS Role Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.host_teacher,
+            status="active",
+            is_active=True,
+        )
+        for u in (self.host_teacher, self.other_teacher):
+            u.profile.organization = self.org
+            u.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="WS Role Exam",
+            slug="ws-role-exam",
+            author=self.host_teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.host_teacher)
+
+    def _session_headers_for(self, user):
+        """Build WS headers carrying the Django session cookie for *user*."""
+        from django.conf import settings as django_settings
+
+        client = Client()
+        client.force_login(user)
+        cookie_value = client.cookies[django_settings.SESSION_COOKIE_NAME].value
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{django_settings.SESSION_COOKIE_NAME}={cookie_value}".encode()),
+        ]
+
+    def test_non_host_teacher_rejected_on_play_websocket(self):
+        """
+        A teacher who is NOT session.host_user must be refused connection
+        on the play websocket (authorize_socket_connection returns None
+        when allow_anonymous=False and the user isn't the host).
+        """
+        headers = self._session_headers_for(self.other_teacher)
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            if connected:
+                await communicator.disconnect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(
+            connected,
+            "A non-host teacher must NOT be allowed on the play websocket",
+        )
+
+    def test_host_ws_connection_cannot_submit_answers(self):
+        """
+        Even if the host connects to the play websocket, sending an
+        ``answer`` message must be rejected because the host has no
+        player_auth context.
+        """
+        headers = self._session_headers_for(self.host_teacher)
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected, "Host should connect to play WS")
+            try:
+                await communicator.send_json_to(
+                    {"type": "answer", "question_id": 9999, "option_id": 1, "answer_ms": 100}
+                )
+                msg = await communicator.receive_json_from(timeout=1)
+                return msg
+            finally:
+                await communicator.disconnect()
+
+        msg = async_to_sync(scenario)()
+        self.assertEqual(msg["type"], "error")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Forged websocket host commands from players
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class ForgedWebSocketCommandTest(TransactionTestCase):
+    """
+    Verify that a player sending forged host-like command types through
+    the play websocket receives no response (commands are silently
+    dropped).  This extends the single ``host_reveal`` test in
+    ``WebSocketOriginValidationTest`` to cover all plausible forgery
+    patterns.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("forge_teacher", "forge@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Forge Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Forge Exam",
+            slug="forge-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="FQ?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="FA", is_correct=True)
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = timezone.now() - timezone.timedelta(seconds=15)
+        self.session.question_ends_at = timezone.now() + timezone.timedelta(seconds=30)
+        self.session.save()
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="ForgePlayer",
+            avatar_key="avatar_1",
+            client_id="forge-client",
+        )
+        self._player_token = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def _player_headers(self):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+        ]
+
+    def _assert_forged_command_ignored(self, payload, label=""):
+        """Send *payload* from a player and assert no response arrives."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected, f"Player should connect ({label})")
+            try:
+                await communicator.send_json_to(payload)
+                nothing = await communicator.receive_nothing(timeout=0.5)
+                return nothing
+            finally:
+                await communicator.disconnect()
+
+        nothing = async_to_sync(scenario)()
+        self.assertTrue(
+            nothing,
+            f"Forged '{label}' command must be silently ignored",
+        )
+
+    def test_forged_start_game_ignored(self):
+        self._assert_forged_command_ignored({"type": "start_game"}, label="start_game")
+
+    def test_forged_next_question_ignored(self):
+        self._assert_forged_command_ignored({"type": "next_question"}, label="next_question")
+
+    def test_forged_reveal_answer_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "reveal_answer", "question_id": self.question.id},
+            label="reveal_answer",
+        )
+
+    def test_forged_finish_session_ignored(self):
+        self._assert_forged_command_ignored({"type": "finish_session"}, label="finish_session")
+
+    def test_forged_kick_player_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "kick_player", "player_id": self.player.id},
+            label="kick_player",
+        )
+
+    def test_forged_change_state_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "change_state", "state": "finished"},
+            label="change_state",
+        )
+
+    def test_forged_publish_scoreboard_ignored(self):
+        self._assert_forged_command_ignored({"type": "publish_scoreboard"}, label="publish_scoreboard")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# WebSocket rate limiting tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(
+    CHANNEL_LAYERS=TEST_CHANNEL_LAYERS,
+    LIVE_WS_CONNECT_RATE_LIMIT="2/1m",
+    LIVE_WS_MSG_RATE_LIMIT="2/1m",
+    LIVE_ANSWER_RATE_LIMIT="2/1m",
+    RATELIMIT_ENABLE=True,
+)
+class WebSocketRateLimitTest(TransactionTestCase):
+    """
+    Verify that WebSocket rate limiting is enforced for connect floods,
+    message floods, and answer submission floods.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("rl_teacher", "rl_teacher@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="RL Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="RL Exam",
+            slug="rl-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="RL?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="RA", is_correct=True)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = timezone.now() - timezone.timedelta(seconds=15)
+        self.session.question_ends_at = timezone.now() + timezone.timedelta(seconds=30)
+        self.session.save()
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="RLPlayer",
+            avatar_key="avatar_1",
+            client_id="rl-client",
+        )
+        self._player_token = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def _player_headers(self):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+        ]
+
+    def test_connect_flood_lobby_is_blocked(self):
+        """Exceeding LIVE_WS_CONNECT_RATE_LIMIT on lobby causes close with code 4429."""
+
+        async def scenario():
+            results = []
+            for _ in range(4):
+                communicator = WebsocketCommunicator(
+                    application,
+                    f"/ws/live/{self.session.pin}/lobby/",
+                    headers=[_WS_ORIGIN_HEADER],
+                )
+                connected, close_code = await communicator.connect()
+                results.append((connected, close_code))
+                await communicator.disconnect()
+            return results
+
+        results = async_to_sync(scenario)()
+        # At least the first two connections must succeed (limit is 2/1m)
+        self.assertTrue(results[0][0], "First connection should succeed")
+        self.assertTrue(results[1][0], "Second connection should succeed")
+        # Connection 3 or 4 must be rate limited (closed with 4429)
+        rate_limited = [r for r in results if not r[0] or r[1] == 4429]
+        self.assertTrue(len(rate_limited) > 0, "At least one connection should be rate limited")
+
+    def test_connect_flood_play_is_blocked(self):
+        """Exceeding LIVE_WS_CONNECT_RATE_LIMIT on play causes close with code 4429."""
+
+        async def scenario():
+            results = []
+            for _ in range(4):
+                communicator = WebsocketCommunicator(
+                    application,
+                    f"/ws/live/{self.session.pin}/play/",
+                    headers=self._player_headers(),
+                )
+                connected, close_code = await communicator.connect()
+                results.append((connected, close_code))
+                await communicator.disconnect()
+            return results
+
+        results = async_to_sync(scenario)()
+        # The play consumer uses the same connect rate limit scope (per IP+PIN).
+        # Each test method has a unique PIN (TransactionTestCase flushes the DB
+        # before setUp), so the lobby and play tests do not share a bucket.
+        self.assertTrue(results[0][0], "First connection should succeed")
+        self.assertTrue(results[1][0], "Second connection should succeed")
+        # Connection 3 or 4 must be rate limited (closed with 4429)
+        rate_limited = [r for r in results if not r[0] or r[1] == 4429]
+        self.assertTrue(len(rate_limited) > 0, "At least one connection should be rate limited")
+
+    def test_message_flood_is_blocked(self):
+        """Exceeding LIVE_WS_MSG_RATE_LIMIT causes a rate_limited error response."""
+        option_id = ExamQuestionOption.objects.filter(question=self.question).values_list("id", flat=True)[0]
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            responses = []
+            try:
+                for _ in range(4):
+                    await communicator.send_json_to(
+                        {
+                            "type": "answer",
+                            "question_id": self.question.id,
+                            "option_id": option_id,
+                            "answer_ms": 200,
+                        }
+                    )
+                    msg = await communicator.receive_json_from(timeout=1)
+                    responses.append(msg)
+            finally:
+                await communicator.disconnect()
+            return responses
+
+        responses = async_to_sync(scenario)()
+        # The first two messages should not be rate-limited by the msg limit;
+        # beyond that, we expect a rate_limited error (either from msg or answer limit).
+        error_responses = [r for r in responses if r.get("type") == "error"]
+        self.assertTrue(len(error_responses) > 0, "Excessive messages must result in a rate_limited error")
+
+    def test_answer_flood_is_blocked(self):
+        """Exceeding LIVE_ANSWER_RATE_LIMIT causes a rate_limited error response."""
+        correct_option_id = (
+            ExamQuestionOption.objects.filter(question=self.question, is_correct=True)
+            .values_list("id", flat=True)
+            .first()
+        )
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            responses = []
+            try:
+                # Submit enough answers to trigger the answer rate limit (limit=2/1m)
+                for _ in range(4):
+                    await communicator.send_json_to(
+                        {
+                            "type": "answer",
+                            "question_id": self.question.id,
+                            "option_id": correct_option_id,
+                            "answer_ms": 150,
+                        }
+                    )
+                    msg = await communicator.receive_json_from(timeout=1)
+                    responses.append(msg)
+            finally:
+                await communicator.disconnect()
+            return responses
+
+        responses = async_to_sync(scenario)()
+        # After exceeding the limit, we must see a rate_limited error
+        error_responses = [r for r in responses if r.get("type") == "error"]
+        self.assertTrue(len(error_responses) > 0, "Excessive answer submissions must trigger a rate_limited error")

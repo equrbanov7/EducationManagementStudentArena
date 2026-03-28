@@ -1,0 +1,179 @@
+"""
+Helpers for the hardened Django admin authentication flow.
+"""
+
+from __future__ import annotations
+
+import logging
+
+from django import forms
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+
+from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
+from core.utils import get_auth_otp_expiry_minutes, get_client_ip
+
+logger = logging.getLogger(__name__)
+
+ADMIN_2FA_PENDING_USER_SESSION_KEY = "admin_2fa_pending_user_id"
+ADMIN_2FA_VERIFIED_USER_SESSION_KEY = "admin_2fa_verified_user_id"
+ADMIN_2FA_NEXT_URL_SESSION_KEY = "admin_2fa_next_url"
+ADMIN_OTP_VERIFY_SCOPE = "admin.otp.verify"
+ADMIN_OTP_RESEND_SCOPE = "admin.otp.resend"
+
+
+class AdminOTPForm(forms.Form):
+    code = forms.CharField(
+        label="OTP kodu",
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "one-time-code",
+                "inputmode": "numeric",
+                "placeholder": "000000",
+            }
+        ),
+    )
+
+    def clean_code(self):
+        code = "".join(character for character in str(self.cleaned_data.get("code", "")).strip() if character.isdigit())
+        if len(code) != 6:
+            raise forms.ValidationError("6 rəqəmli OTP kodu daxil edin.")
+        return code
+
+
+def admin_2fa_required_for_user(user) -> bool:
+    return bool(
+        getattr(settings, "ADMIN_2FA_REQUIRED", False)
+        and user
+        and getattr(user, "is_authenticated", False)
+        and getattr(user, "is_active", False)
+        and getattr(user, "is_staff", False)
+    )
+
+
+def admin_2fa_verified(request) -> bool:
+    user = getattr(request, "user", None)
+    if not admin_2fa_required_for_user(user):
+        return True
+    expected_user_id = str(getattr(user, "pk", ""))
+    verified_user_id = str(request.session.get(ADMIN_2FA_VERIFIED_USER_SESSION_KEY, ""))
+    return bool(expected_user_id and verified_user_id == expected_user_id)
+
+
+def clear_admin_2fa_state(request) -> None:
+    for key in (
+        ADMIN_2FA_PENDING_USER_SESSION_KEY,
+        ADMIN_2FA_VERIFIED_USER_SESSION_KEY,
+        ADMIN_2FA_NEXT_URL_SESSION_KEY,
+    ):
+        request.session.pop(key, None)
+
+
+def mark_admin_2fa_pending(request, *, next_url: str = "") -> None:
+    user = getattr(request, "user", None)
+    clear_admin_2fa_state(request)
+    if user and getattr(user, "is_authenticated", False):
+        request.session[ADMIN_2FA_PENDING_USER_SESSION_KEY] = str(user.pk)
+    if next_url:
+        request.session[ADMIN_2FA_NEXT_URL_SESSION_KEY] = next_url
+    request.session.modified = True
+
+
+def mark_admin_2fa_verified(request) -> None:
+    user = getattr(request, "user", None)
+    if user and getattr(user, "is_authenticated", False):
+        request.session[ADMIN_2FA_VERIFIED_USER_SESSION_KEY] = str(user.pk)
+    request.session.pop(ADMIN_2FA_PENDING_USER_SESSION_KEY, None)
+    request.session.modified = True
+
+
+def admin_2fa_pending_for_request(request) -> bool:
+    user = getattr(request, "user", None)
+    if not admin_2fa_required_for_user(user):
+        return False
+    return str(request.session.get(ADMIN_2FA_PENDING_USER_SESSION_KEY, "")) == str(getattr(user, "pk", ""))
+
+
+def pop_admin_2fa_next_url(request, default_url: str) -> str:
+    next_url = str(request.session.pop(ADMIN_2FA_NEXT_URL_SESSION_KEY, "") or "").strip()
+    if not next_url.startswith("/"):
+        return default_url
+    return next_url
+
+
+def admin_otp_limit_keys(request, *, user=None) -> tuple[str, str]:
+    client_ip = get_client_ip(request) or "unknown"
+    identity = normalize_rate_identity(
+        getattr(user, "email", "") or getattr(user, "username", "") or getattr(user, "pk", "")
+    )
+    return client_ip, identity
+
+
+def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
+    from apps.accounts.services import issue_email_otp
+
+    code, expires_at = issue_email_otp(user)
+    context = {
+        "user": user,
+        "code": code,
+        "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
+        "request": request,
+    }
+    text_body = render_to_string("admin/emails/admin_otp_email.txt", context)
+    html_body = render_to_string("admin/emails/admin_otp_email.html", context)
+
+    message = EmailMultiAlternatives(
+        subject="Admin giriş təsdiqi",
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send()
+    return code, expires_at
+
+
+def log_admin_security_event(
+    *, action: str, request, user=None, reason: str, resource_type: str, resource_id: str = ""
+):
+    from apps.audit.utils import log_action
+
+    try:
+        log_action(
+            action=action,
+            user=user,
+            reason=reason,
+            request=request,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            resource_repr=resource_type.replace("_", " ").title(),
+        )
+    except Exception:
+        logger.exception("Failed to write admin security audit log for action %s", action)
+
+
+def admin_verify_rate_limited(request, *, user) -> tuple[bool, int | None]:
+    key_parts = admin_otp_limit_keys(request, user=user)
+    return is_rate_limited(ADMIN_OTP_VERIFY_SCOPE, settings.ADMIN_OTP_VERIFY_RATE_LIMIT, *key_parts)
+
+
+def record_admin_verify_failure(request, *, user) -> tuple[bool, int | None]:
+    key_parts = admin_otp_limit_keys(request, user=user)
+    return record_rate_limit_hit(ADMIN_OTP_VERIFY_SCOPE, settings.ADMIN_OTP_VERIFY_RATE_LIMIT, *key_parts)
+
+
+def clear_admin_verify_rate_limit(request, *, user) -> None:
+    clear_rate_limit(ADMIN_OTP_VERIFY_SCOPE, *admin_otp_limit_keys(request, user=user))
+
+
+def admin_resend_rate_limited(request, *, user) -> tuple[bool, int | None]:
+    key_parts = admin_otp_limit_keys(request, user=user)
+    return is_rate_limited(ADMIN_OTP_RESEND_SCOPE, settings.ADMIN_OTP_RESEND_RATE_LIMIT, *key_parts)
+
+
+def record_admin_resend_hit(request, *, user) -> tuple[bool, int | None]:
+    key_parts = admin_otp_limit_keys(request, user=user)
+    return record_rate_limit_hit(ADMIN_OTP_RESEND_SCOPE, settings.ADMIN_OTP_RESEND_RATE_LIMIT, *key_parts)
