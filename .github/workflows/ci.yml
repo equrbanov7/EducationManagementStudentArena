@@ -26,3 +26,36 @@ jobs:
     uses: ./.github/workflows/_lint.yml
     with:
       python-version: "3.11.6"
+
+  build:
+    needs: lint
+    uses: ./.github/workflows/_build.yml
+    with:
+      python-version: "3.11.6"
+
+  security:
+    needs: lint
+    uses: ./.github/workflows/_security.yml
+    with:
+      python-version: "3.11.6"
+
+  secret-scan:
+    needs: lint
+    uses: ./.github/workflows/_secret-scan.yml
+
+  ci-success:
+    name: ✅ CI Success
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - security
+      - secret-scan
+    if: always()
+    steps:
+      - name: Check status
+        run: |
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo "Secret Scan: ${{ needs.secret-scan.result }}"
