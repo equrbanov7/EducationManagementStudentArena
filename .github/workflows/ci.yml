@@ -95,6 +95,9 @@ jobs:
   # ── 5. Secret Scan (Gitleaks) ──────────────────────────────────────────
   secret-scan:
     needs: lint
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/_secret-scan.yml
 
   # ── 6. Docker Production Build ─────────────────────────────────────────
