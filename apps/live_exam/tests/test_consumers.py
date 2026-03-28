@@ -1487,13 +1487,14 @@ class WebSocketRateLimitTest(TransactionTestCase):
             return results
 
         results = async_to_sync(scenario)()
-        # At least the first two connections must succeed (limit is 2/1m)
-        # (lobby and play share the same connect rate limit bucket per IP+PIN)
-        # After lobby tests in this method use 2 slots; play may be blocked immediately.
-        # We only assert that a rate-limit block (4429) occurs at some point.
-        any_succeeded = any(r[0] for r in results)
-        any_blocked = any(not r[0] or r[1] == 4429 for r in results)
-        self.assertTrue(any_succeeded or any_blocked, "Connect rate limit must produce a result")
+        # The play consumer uses the same connect rate limit scope (per IP+PIN).
+        # Each test method has a unique PIN (TransactionTestCase flushes the DB
+        # before setUp), so the lobby and play tests do not share a bucket.
+        self.assertTrue(results[0][0], "First connection should succeed")
+        self.assertTrue(results[1][0], "Second connection should succeed")
+        # Connection 3 or 4 must be rate limited (closed with 4429)
+        rate_limited = [r for r in results if not r[0] or r[1] == 4429]
+        self.assertTrue(len(rate_limited) > 0, "At least one connection should be rate limited")
 
     def test_message_flood_is_blocked(self):
         """Exceeding LIVE_WS_MSG_RATE_LIMIT causes a rate_limited error response."""
