@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
+from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
@@ -20,6 +23,25 @@ from apps.live_exam.transport import (
     build_reveal_payload,
     parse_answer_submission,
 )
+from core.rate_limit import record_rate_limit_hit
+
+logger = logging.getLogger("live_exam.ws.rate_limit")
+
+# Rate limit scope identifiers
+_WS_CONNECT_SCOPE = "live_exam.ws.connect"
+_WS_MSG_SCOPE = "live_exam.ws.message"
+_WS_ANSWER_SCOPE = "live_exam.ws.answer"
+
+# Async wrapper for the synchronous rate limit helper
+_record_rate_limit_hit = sync_to_async(record_rate_limit_hit, thread_sensitive=False)
+
+
+def _get_scope_ip(scope) -> str:
+    """Extract client IP from the ASGI WebSocket scope."""
+    client = scope.get("client")
+    if client and isinstance(client, (list, tuple)) and len(client) >= 1:
+        return str(client[0])
+    return "unknown"
 
 
 class LiveSessionSocketAuthMixin:
@@ -51,6 +73,23 @@ class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
         self.group_name = f"live_{self.pin}_lobby"
+        client_ip = _get_scope_ip(self.scope)
+
+        # Rate-limit reconnect flooding per IP+PIN
+        is_limited, retry_after = await _record_rate_limit_hit(
+            _WS_CONNECT_SCOPE,
+            settings.LIVE_WS_CONNECT_RATE_LIMIT,
+            client_ip,
+            self.pin,
+        )
+        if is_limited:
+            logger.warning(
+                "WebSocket connect flood blocked on lobby",
+                extra={"pin": self.pin, "ip": client_ip, "retry_after": retry_after},
+            )
+            await self.close(code=4429)
+            return
+
         user = self.scope.get("user")
         user_id = user.id if getattr(user, "is_authenticated", False) else None
         token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
@@ -98,6 +137,23 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
+        client_ip = _get_scope_ip(self.scope)
+
+        # Rate-limit reconnect flooding per IP+PIN
+        is_limited, retry_after = await _record_rate_limit_hit(
+            _WS_CONNECT_SCOPE,
+            settings.LIVE_WS_CONNECT_RATE_LIMIT,
+            client_ip,
+            self.pin,
+        )
+        if is_limited:
+            logger.warning(
+                "WebSocket connect flood blocked on play",
+                extra={"pin": self.pin, "ip": client_ip, "retry_after": retry_after},
+            )
+            await self.close(code=4429)
+            return
+
         user = self.scope.get("user")
         user_id = user.id if getattr(user, "is_authenticated", False) else None
         token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
@@ -125,11 +181,46 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_discard(play_group, self.channel_name)
 
     async def receive_json(self, data, **kwargs):
+        # Per-connection general message rate limit (flood protection)
+        player_key = self._rate_limit_key()
+        is_msg_limited, msg_retry_after = await _record_rate_limit_hit(
+            _WS_MSG_SCOPE,
+            settings.LIVE_WS_MSG_RATE_LIMIT,
+            self.pin,
+            player_key,
+        )
+        if is_msg_limited:
+            logger.warning(
+                "WebSocket message flood blocked",
+                extra={"pin": self.pin, "player_key": player_key, "retry_after": msg_retry_after},
+            )
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "rate_limited")})
+            return
+
         if (data or {}).get("type") != "answer":
             return
 
         if self.player_auth is None:
             await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "auth_required")})
+            return
+
+        # Per-player answer submission rate limit
+        is_answer_limited, answer_retry_after = await _record_rate_limit_hit(
+            _WS_ANSWER_SCOPE,
+            settings.LIVE_ANSWER_RATE_LIMIT,
+            self.pin,
+            self.player_auth["player_id"],
+        )
+        if is_answer_limited:
+            logger.warning(
+                "WebSocket answer flood blocked",
+                extra={
+                    "pin": self.pin,
+                    "player_id": self.player_auth["player_id"],
+                    "retry_after": answer_retry_after,
+                },
+            )
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "rate_limited")})
             return
 
         # 1) parse payload
@@ -183,6 +274,15 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
                 f"live_{self.pin}_play_players",
                 {"type": "play_event", "data": player_reveal},
             )
+
+    def _rate_limit_key(self) -> str:
+        """Stable per-connection key for message rate limiting."""
+        if self.player_auth:
+            return f"player:{self.player_auth['player_id']}"
+        if getattr(self, "auth_context", None):
+            role = self.auth_context.get("role", "unknown")
+            return f"{role}:{self.channel_name}"
+        return self.channel_name
 
     async def play_event(self, event):
         # view -> group_send(... {"type":"play_event","data":{...}})
