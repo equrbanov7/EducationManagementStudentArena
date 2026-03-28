@@ -44,6 +44,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
+    "core.admin_security.AdminSecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -128,6 +129,25 @@ CELERY_TIMEZONE = "Asia/Baku"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
+
+# ---------------------------------------------------------------------------
+# Admin security settings
+# ---------------------------------------------------------------------------
+# URL path segment for the Django admin panel.  Change this in production to
+# avoid exposing the well-known /admin/ endpoint (set via ADMIN_URL_PREFIX
+# environment variable).  The value must end with a slash.
+ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "admin/")
+
+# IP allowlist for admin access.  When non-empty, only requests from these
+# addresses can reach the admin panel; all others receive HTTP 403.
+# Set ADMIN_ALLOWED_IPS as a comma-separated list in the environment, e.g.:
+#   ADMIN_ALLOWED_IPS=192.168.1.1,10.0.0.2
+_raw_admin_ips = os.getenv("ADMIN_ALLOWED_IPS", "")
+ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip()]
+
+# Rate limit for the admin login form (POST to /admin/login/).
+# Accepts the same "count/period" format used by other rate limits.
+ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "5/5m")
 
 # Rate limiting configuration
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed
