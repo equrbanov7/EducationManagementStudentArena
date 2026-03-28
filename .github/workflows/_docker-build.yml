@@ -42,3 +42,4 @@ jobs:
             BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
             BUILD_DATABASE_URL=sqlite:////tmp/build.db
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+            BUILD_ADMIN_ALLOWED_IPS=127.0.0.1
