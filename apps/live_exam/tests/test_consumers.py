@@ -1160,3 +1160,222 @@ class WebSocketOriginValidationTest(TransactionTestCase):
 
         message = async_to_sync(scenario)()
         self.assertEqual(message["type"], "answer_saved")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# WebSocket host-role isolation
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class WebSocketHostRoleIsolationTest(TransactionTestCase):
+    """
+    Verify that authorize_socket_connection only grants the ``host``
+    role to the actual session.host_user.  Any other authenticated user
+    — even one in the same org with valid exam.host perms — must NOT
+    receive the host role on the play websocket.
+    """
+
+    def setUp(self):
+        self.host_teacher = User.objects.create_user("ws_role_host", "ws_role_host@example.com", "StrongPass123!")
+        self.other_teacher = User.objects.create_user("ws_role_other", "ws_role_other@example.com", "StrongPass123!")
+
+        self.org = Organization.objects.create(
+            name="WS Role Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.host_teacher,
+            status="active",
+            is_active=True,
+        )
+        for u in (self.host_teacher, self.other_teacher):
+            u.profile.organization = self.org
+            u.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="WS Role Exam",
+            slug="ws-role-exam",
+            author=self.host_teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.host_teacher)
+
+    def _session_headers_for(self, user):
+        """Build WS headers carrying the Django session cookie for *user*."""
+        from django.conf import settings as django_settings
+
+        client = Client()
+        client.force_login(user)
+        cookie_value = client.cookies[django_settings.SESSION_COOKIE_NAME].value
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{django_settings.SESSION_COOKIE_NAME}={cookie_value}".encode()),
+        ]
+
+    def test_non_host_teacher_rejected_on_play_websocket(self):
+        """
+        A teacher who is NOT session.host_user must be refused connection
+        on the play websocket (authorize_socket_connection returns None
+        when allow_anonymous=False and the user isn't the host).
+        """
+        headers = self._session_headers_for(self.other_teacher)
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            if connected:
+                await communicator.disconnect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(
+            connected,
+            "A non-host teacher must NOT be allowed on the play websocket",
+        )
+
+    def test_host_ws_connection_cannot_submit_answers(self):
+        """
+        Even if the host connects to the play websocket, sending an
+        ``answer`` message must be rejected because the host has no
+        player_auth context.
+        """
+        headers = self._session_headers_for(self.host_teacher)
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected, "Host should connect to play WS")
+            try:
+                await communicator.send_json_to(
+                    {"type": "answer", "question_id": 9999, "option_id": 1, "answer_ms": 100}
+                )
+                msg = await communicator.receive_json_from(timeout=1)
+                return msg
+            finally:
+                await communicator.disconnect()
+
+        msg = async_to_sync(scenario)()
+        self.assertEqual(msg["type"], "error")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Forged websocket host commands from players
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class ForgedWebSocketCommandTest(TransactionTestCase):
+    """
+    Verify that a player sending forged host-like command types through
+    the play websocket receives no response (commands are silently
+    dropped).  This extends the single ``host_reveal`` test in
+    ``WebSocketOriginValidationTest`` to cover all plausible forgery
+    patterns.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("forge_teacher", "forge@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Forge Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Forge Exam",
+            slug="forge-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="FQ?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="FA", is_correct=True)
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = timezone.now() - timezone.timedelta(seconds=15)
+        self.session.question_ends_at = timezone.now() + timezone.timedelta(seconds=30)
+        self.session.save()
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="ForgePlayer",
+            avatar_key="avatar_1",
+            client_id="forge-client",
+        )
+        self._player_token = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def _player_headers(self):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+        ]
+
+    def _assert_forged_command_ignored(self, payload, label=""):
+        """Send *payload* from a player and assert no response arrives."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected, f"Player should connect ({label})")
+            try:
+                await communicator.send_json_to(payload)
+                nothing = await communicator.receive_nothing(timeout=0.5)
+                return nothing
+            finally:
+                await communicator.disconnect()
+
+        nothing = async_to_sync(scenario)()
+        self.assertTrue(
+            nothing,
+            f"Forged '{label}' command must be silently ignored",
+        )
+
+    def test_forged_start_game_ignored(self):
+        self._assert_forged_command_ignored({"type": "start_game"}, label="start_game")
+
+    def test_forged_next_question_ignored(self):
+        self._assert_forged_command_ignored({"type": "next_question"}, label="next_question")
+
+    def test_forged_reveal_answer_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "reveal_answer", "question_id": self.question.id},
+            label="reveal_answer",
+        )
+
+    def test_forged_finish_session_ignored(self):
+        self._assert_forged_command_ignored({"type": "finish_session"}, label="finish_session")
+
+    def test_forged_kick_player_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "kick_player", "player_id": self.player.id},
+            label="kick_player",
+        )
+
+    def test_forged_change_state_ignored(self):
+        self._assert_forged_command_ignored(
+            {"type": "change_state", "state": "finished"},
+            label="change_state",
+        )
+
+    def test_forged_publish_scoreboard_ignored(self):
+        self._assert_forged_command_ignored({"type": "publish_scoreboard"}, label="publish_scoreboard")
