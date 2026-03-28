@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Build Check
+# ═══════════════════════════════════════════════════════════════════════════
+# Runs collectstatic and checks for missing Django migrations.
+# Called by ci.yml via workflow_call.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🏗️ Build Check (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.11.6"
+
+jobs:
+  build:
+    name: 🏗️ Build Check
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: 📦 Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-build-${{ hashFiles('requirements/base.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-build-
+            ${{ runner.os }}-pip-
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/base.txt
+
+      - name: 📦 Collect static files
+        env:
+          SECRET_KEY: build-check-secret-key
+          DEBUG: "False"
+          DATABASE_URL: sqlite:///db.sqlite3
+        run: |
+          echo "::group::📦 Collecting Static Files"
+          python manage.py collectstatic --noinput --clear
+          echo "::endgroup::"
+
+      - name: 🔍 Check for missing migrations
+        env:
+          SECRET_KEY: build-check-secret-key
+          DEBUG: "False"
+          DATABASE_URL: sqlite:///db.sqlite3
+        run: |
+          echo "::group::🔍 Migration Check"
+          python manage.py makemigrations --check --dry-run || {
+            echo "::error::❌ Missing migrations detected! Run 'python manage.py makemigrations' locally."
+            exit 1
+          }
+          echo "✅ No missing migrations."
+          echo "::endgroup::"

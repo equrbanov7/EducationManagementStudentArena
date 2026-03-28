@@ -18,6 +18,7 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
+from core.rls import clear_rls_tenant, set_rls_bypass, set_rls_tenant
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .services import is_tenant_accessible_organization
@@ -184,4 +185,32 @@ class OrganizationMiddleware:
                 permissions=request.org_permissions,
             )
 
-        return self.get_response(request)
+        # ── Step 4: propagate tenant context to the PostgreSQL session ────
+        # Set the RLS context variables so that database-level Row-Level
+        # Security policies can restrict queries to the active organisation.
+        # Both ``is_superuser`` (Django's built-in staff/admin flag) and
+        # ``is_superadmin`` (a project-level synonym used by profile/auth
+        # extensions) represent full cross-tenant administrative access.
+        # Neither is a lesser privilege than the other; either flag grants the
+        # RLS bypass for operations such as admin reports and management commands.
+        is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+        if is_superuser:
+            set_rls_bypass(True)
+        elif request.organization is not None:
+            set_rls_bypass(False)
+            set_rls_tenant(request.organization.pk)
+        else:
+            # No active organisation — clear any leftover tenant context so
+            # that RLS denies all tenant-scoped rows by default.
+            set_rls_bypass(False)
+            clear_rls_tenant()
+
+        response = self.get_response(request)
+
+        # ── Cleanup: reset RLS context before connection returns to pool ──
+        # This prevents tenant state from leaking into the next request that
+        # reuses the same pooled connection.
+        clear_rls_tenant()
+        set_rls_bypass(False)
+
+        return response

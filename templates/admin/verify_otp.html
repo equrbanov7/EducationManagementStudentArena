@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+  <h1>Admin OTP təsdiqi</h1>
+  <p>Admin panelə davam etmək üçün email ünvanınıza göndərilən 6 rəqəmli kodu daxil edin.</p>
+  <p>Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.</p>
+
+  {% if form.non_field_errors %}
+    <ul class="messagelist">
+      {% for error in form.non_field_errors %}
+        <li class="error">{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <div class="form-row">
+        {{ form.code.errors }}
+        {{ form.code.label_tag }}
+        {{ form.code }}
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="Təsdiqlə">
+    </div>
+  </form>
+
+  <form method="post" action="{{ resend_url }}" style="margin-top: 1rem;">
+    {% csrf_token %}
+    <button type="submit" class="button">Kodu yenidən göndər</button>
+  </form>
+</div>
+{% endblock %}
