@@ -69,8 +69,6 @@ jobs:
     uses: ./.github/workflows/_unit-tests.yml
     with:
       python-version: "3.11"
-      is-pr: ${{ github.event_name == 'pull_request' }}
-    secrets: inherit
 
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
   unit-tests-312:
@@ -79,8 +77,6 @@ jobs:
     uses: ./.github/workflows/_unit-tests.yml
     with:
       python-version: "3.12"
-      is-pr: false
-    secrets: inherit
 
   # ── 3. Build Check (collectstatic + migration check) ───────────────────
   build:

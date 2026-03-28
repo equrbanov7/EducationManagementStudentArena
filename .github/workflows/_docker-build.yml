@@ -10,7 +10,7 @@
 name: 🐳 Docker Prod Build (reusable)
 
 on:
-  workflow_call: {}
+  workflow_call:
 
 jobs:
   docker-prod-build:

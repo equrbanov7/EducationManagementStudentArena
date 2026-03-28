@@ -15,13 +15,6 @@ on:
         description: "Python version to use"
         type: string
         default: "3.11.6"
-      is-pr:
-        description: "Whether this is a pull_request event (for coverage comment)"
-        type: boolean
-        default: false
-    secrets:
-      GITHUB_TOKEN:
-        required: false
 
 jobs:
   unit-tests:
@@ -143,10 +136,10 @@ jobs:
 
       - name: 📈 Coverage Report to PR
         uses: orgoro/coverage@v3.2
-        if: inputs.is-pr && startsWith(inputs.python-version, '3.11')
+        if: github.event_name == 'pull_request' && startsWith(inputs.python-version, '3.11')
         with:
           coverageFile: coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           thresholdAll: 0.0
           thresholdNew: 0.0
           thresholdModified: 0.0

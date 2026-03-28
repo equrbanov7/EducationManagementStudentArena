@@ -10,7 +10,7 @@
 name: 🛡️ Container Scan (reusable)
 
 on:
-  workflow_call: {}
+  workflow_call:
 
 jobs:
   container-scan:

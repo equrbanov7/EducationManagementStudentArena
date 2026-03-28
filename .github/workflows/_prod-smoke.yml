@@ -10,7 +10,7 @@
 name: 🔥 Prod Smoke Test (reusable)
 
 on:
-  workflow_call: {}
+  workflow_call:
 
 jobs:
   prod-smoke:
