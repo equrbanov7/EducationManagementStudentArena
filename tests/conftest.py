@@ -2,9 +2,50 @@
 Pytest configuration and fixtures for EMS Arena project.
 """
 
+from django.db import connection
 from django.db.models.signals import post_save
 
 import pytest
+
+# ---------------------------------------------------------------------------
+# RLS bypass — keeps existing tests green
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _rls_bypass_for_tests(db):
+    """Automatically bypass RLS for all tests that touch the database.
+
+    Row-Level Security policies are enforced at the PostgreSQL session level.
+    Existing tests were written before RLS was introduced and do not set the
+    ``app.current_org_id`` session variable.  Without a bypass those tests
+    would receive empty QuerySets for every RLS-protected table.
+
+    This fixture enables the bypass flag at the start of every database-using
+    test and clears it afterwards so that the session is clean for the next
+    test.  Tests that specifically validate RLS isolation should **opt out**
+    by overriding this fixture locally::
+
+        @pytest.fixture(autouse=True)
+        def _rls_bypass_for_tests(db):
+            # Do NOT call the base fixture — RLS must be active for this test.
+            yield
+
+    On non-PostgreSQL backends (e.g. SQLite in local development) the fixture
+    is a no-op.
+    """
+    if connection.vendor != "postgresql":
+        yield
+        return
+
+    with connection.cursor() as cur:
+        cur.execute("SELECT set_config('app.bypass_rls', 'on', false)")
+    try:
+        yield
+    finally:
+        with connection.cursor() as cur:
+            cur.execute("SELECT set_config('app.bypass_rls', 'off', false)")
+            cur.execute("SELECT set_config('app.current_org_id', '', false)")
 
 
 def _get_user_model():

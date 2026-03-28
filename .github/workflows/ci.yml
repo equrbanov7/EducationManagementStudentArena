@@ -1,1055 +1,206 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# EMS ARENA - CI/CD PIPELINE
+# EMS ARENA — CI/CD Pipeline (Orchestrator)
 # ═══════════════════════════════════════════════════════════════════════════
-# Author: equrbanov7
-# Python: 3.11.6 | Django: 5.2.12
-# Best Practices: Industry Standard DevOps
+# This file is the thin orchestrator that calls the individual reusable
+# workflows defined in _lint.yml, _unit-tests.yml, _build.yml,
+# _security.yml, _secret-scan.yml, _docker-build.yml, _container-scan.yml,
+# _prod-smoke.yml, and _e2e-smoke.yml.
+#
+# Dependency graph:
+#
+#   lint ──┬──► unit-tests (3.11 + 3.12)
+#          ├──► build
+#          ├──► security
+#          ├──► secret-scan
+#          └──► docker-build ──┬──► container-scan
+#                              ├──► prod-smoke
+#                              └──► e2e-smoke
+#
+#   ci-success (waits for all of the above)
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: 🚀 CI Pipeline
 
-# ═══════════════════════════════════════════════════════════════════════════
-# STEP 1: TRIGGERLƏR - CI nə zaman işləyəcək?
-# ═══════════════════════════════════════════════════════════════════════════
-# 📌 NİYƏ?: Hər PR və push-da avtomatik yoxlama - bug-ları erkən tutmaq üçün
-# 📌 BEST PRACTICE: Branch-lara görə fərqli davranış
 on:
-  # Pull Request açılanda və ya yeniləndikdə
   pull_request:
     branches:
-      - main        # Production-a PR
-      - Staging     # Staging-ə PR  
-      - Develop     # Development-ə PR
+      - main
+      - Staging
+      - Develop
     types:
-      - opened          # PR açılanda
-      - synchronize     # Yeni commit push olanda
-      - reopened        # PR yenidən açılanda
+      - opened
+      - synchronize
+      - reopened
 
-  # Birbaşa push (merge sonrası)
   push:
     branches:
       - main
       - Staging
       - Develop
 
-  # Manual trigger (əl ilə işə salmaq üçün)
   workflow_dispatch:
     inputs:
       debug_enabled:
         type: boolean
-        description: 'Debug mode aktiv etmək'
+        description: "Debug mode aktiv etmək"
         required: false
         default: false
 
-# ═══════════════════════════════════════════════════════════════════════════
-# STEP 2: CONCURRENCY - Eyni branch-da paralel run-ları idarə et
-# ═══════════════════════════════════════════════════════════════════════════
-# 📌 NİYƏ?: Eyni PR-da yeni commit push olunsa, köhnə run-u dayandır
-# 📌 BEST PRACTICE: Resurs israfının qarşısını alır, sürətli feedback
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# ═══════════════════════════════════════════════════════════════════════════
-# STEP 3: ENV VARIABLES - Workflow səviyyəsində dəyişənlər
-# ═══════════════════════════════════════════════════════════════════════════
-# 📌 NİYƏ?: Bir yerdə saxlamaq - dəyişiklik asanlaşır
-# 📌 BEST PRACTICE: DRY (Don't Repeat Yourself) prinsipi
-env:
-  PYTHON_VERSION: "3.11.6"
-  DJANGO_SETTINGS_MODULE: "config.settings.test"
-  PYTHONDONTWRITEBYTECODE: "1"      # .pyc faylları yaratmasın
-  PYTHONUNBUFFERED: "1"             # Output buffer-siz olsun (real-time logs)
-  PIP_NO_CACHE_DIR: "1"             # Pip cache istifadə etməsin
-  PIP_DISABLE_PIP_VERSION_CHECK: "1"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# JOBS - CI Pipeline-ın əsas hissələri
-# ═══════════════════════════════════════════════════════════════════════════
+# ─────────────────────────────────────────────────────────────────────────
+# JOBS — each delegates to a focused reusable workflow
+# ─────────────────────────────────────────────────────────────────────────
 jobs:
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 1: CODE QUALITY (Linting)
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Kod standartlarına uyğunluq - oxunaqlı, konsistent kod
-  # 📌 TOOLS: flake8 (syntax/style), black (formatting), isort (import order)
+
+  # ── 1. Code Quality / Lint ─────────────────────────────────────────────
   lint:
-    name: 🔍 Code Quality Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.1: Kodu çəkmək
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Repository-ni runner-ə yükləmək
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0    # Bütün history - coverage comparison üçün lazımdır
+    uses: ./.github/workflows/_lint.yml
+    with:
+      python-version: "3.11.6"
 
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.2: Python quraşdırmaq
-      # ───────────��───────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Düzgün Python versiyası
-      - name: 🐍 Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.3: Pip caching
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Dependencies-i cache-ləmək - 2-3x sürətli CI
-      # 📌 BEST PRACTICE: requirements.txt dəyişəndə cache yenilənir
-      - name: 📦 Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-lint-${{ hashFiles('requirements/local.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-lint-
-            ${{ runner.os }}-pip-
-
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.4: Linting tools quraşdırmaq
-      # ─────────────────────────────────────────────────��─────────────────
-      # 📌 NİYƏ?: Yalnız lazım olan tool-lar - sürətli install
-      - name: 📥 Install linting tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 flake8-bugbear black isort
-
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.5: Black - Kod formatı yoxlaması
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Vahid kod stili - team-də hər kəs eyni format
-      # 📌 --check: Dəyişiklik etmir, yalnız yoxlayır
-      # 📌 --diff: Fərqləri göstərir
-      - name: 🖤 Check code formatting with Black
-        run: |
-          echo "::group::🖤 Black Format Check"
-          black --check --diff --color . || {
-            echo "::error::❌ Black formatting issues found! Run 'black .' locally to fix."
-            exit 1
-          }
-          echo "✅ Black check passed!"
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.6: isort - Import sıralaması
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Import-lar düzgün sıralanmalıdır (stdlib → third-party → local)
-      # 📌 --profile black: Black ilə uyğunluq
-      - name: 📑 Check import sorting with isort
-        run: |
-          echo "::group::📑 isort Import Check"
-          isort --check-only --diff --profile black . || {
-            echo "::error::❌ Import sorting issues found! Run 'isort .' locally to fix."
-            exit 1
-          }
-          echo "✅ isort check passed!"
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # STEP 1.7: Flake8 - Syntax və stil yoxlaması
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: PEP8 standartlarına uyğunluq, bug-ları erkən tapmaq
-      # 📌 --max-line-length=120: 120 simvol limit (modern standard)
-      # 📌 --extend-ignore: Black ilə konflikt olan qaydaları ignore et
-      - name: 🔎 Lint with Flake8
-        run: |
-          echo "::group::🔎 Flake8 Linting"
-          flake8 . \
-            --count \
-            --max-line-length=120 \
-            --extend-ignore=E203,E266,E501,W503 \
-            --exclude=.git,__pycache__,migrations,venv,.venv,env \
-            --statistics \
-            --show-source
-          echo "✅ Flake8 check passed!"
-          echo "::endgroup::"
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 2: SECURITY CHECK
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Dependencies-də zəifliklər tapmaq
-  # 📌 BEST PRACTICE: Supply chain security - çox vacibdir!
-  security:
-    name: 🔒 Security Scan
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📦 Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements/base.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-security-
-            ${{ runner.os }}-pip-
-
-      # ───────────────────────────────────────────────────────────────────
-      # Safety - Dependency vulnerability scanner
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: CVE database ilə müqayisə - bilinən zəifliklər
-      - name: 🛡️ Check dependencies for vulnerabilities
-        run: |
-          pip install safety pip-audit
-          echo "::group::🛡️ Safety Check"
-          safety check -r requirements/base.txt --full-report || true
-          echo "::endgroup::"
-          echo "::group::🔐 Pip Audit (CRITICAL only — blocks merge)"
-          pip-audit -r requirements/base.txt --desc on || {
-            echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
-            exit 1
-          }
-          echo "✅ No critical dependency vulnerabilities found."
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Bandit - Python security linter
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Kod-da təhlükəsizlik problemləri tapmaq (SQL injection, etc.)
-      # 📌 -lll: Yalnız HIGH severity — bunlar merge-i bloklayır
-      - name: 🔍 Scan code with Bandit
-        run: |
-          pip install bandit[toml]
-          echo "::group::🔍 Bandit Security Scan (HIGH severity — blocks merge)"
-          bandit -r . \
-            -x ./tests,./venv,./.venv,./migrations \
-            --severity-level high \
-            --confidence-level high \
-            --format txt || {
-            echo "::error::❌ Bandit found HIGH/CRITICAL security issues! Fix them before merging."
-            exit 1
-          }
-          echo "✅ No high-severity security issues found."
-          echo "::endgroup::"
-          echo "::group::🔍 Bandit Security Scan (MEDIUM severity — advisory)"
-          bandit -r . \
-            -x ./tests,./venv,./.venv,./migrations \
-            --severity-level medium \
-            --format txt || echo "⚠️ Bandit found medium-severity issues — review recommended."
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Django deployment check
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Production deployment üçün Django təhlükəsizlik yoxlaması
-      # 📌 BEST PRACTICE: CSP və digər security header-lərin konfiqurasiyasını yoxlayır
-      # 📌 NOTE: Production requirements are installed here so that
-      #          config.settings.production (and its imports) can be loaded.
-      - name: 🔐 Django deployment security check
-        env:
-          DJANGO_SETTINGS_MODULE: config.settings.production
-          SECRET_KEY: ci-deploy-check-QzNyXk9mVpLsJeWuHqRtGdFbAcOiMnKlYhTgPwEv2x8j5f3z7a4r6s1o0uBCDIU
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          DATABASE_URL: sqlite:///db.sqlite3
-          REDIS_URL: redis://localhost:6379/0
-        run: |
-          pip install -r requirements/production.txt
-          echo "::group::🔐 Django Deployment Check"
-          python manage.py check --deploy --fail-level WARNING || {
-            echo "::error::❌ Django deployment check found configuration issues. Fix them before merging."
-            exit 1
-          }
-          echo "✅ Django deployment check passed!"
-          echo "::endgroup::"
-
-  # ──────────────────────────────────���──────────────────────────────────────
-  # JOB 3: TESTS
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Kodun düzgün işlədiyini yoxlamaq
-  # 📌 BEST PRACTICE: Matrix testing - bir neçə versiya ilə test
-  test:
-    name: 🧪 Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    needs: [lint]  # Lint keçməsə test başlamasın
-    
-    # ───────────────────────────────────────────────────────────────────────
-    # Matrix Strategy - Bir neçə konfiqurasiya ilə test
-    # ───────────────────────────────────────────────────────────────────────
-    # 📌 NİYƏ?: Fərqli Python versiyalarında işlədiyini yoxlamaq
-    # 📌 BEST PRACTICE: Ən azı cari və növbəti versiya
-    strategy:
-      fail-fast: false  # Biri uğursuz olsa, digərləri davam etsin
-      matrix:
-        python-version: ["3.11", "3.12"]
-
-    # ───────────────────────────────────────────────────────────────────────
-    # Services - Database və Redis
-    # ───────────────────────────────────────────────────────────────────────
-    # 📌 NİYƏ?: Real database ilə test - production-a yaxın mühit
-    # 📌 BEST PRACTICE: Docker containers - izolə olunmuş, təkrarlana bilən
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🐍 Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      # ───────────────────────────────────────────────────────────────────
-      # Cache - Dependencies
-      # ───────────────────────────────────────────────────────────────────
-      - name: 📦 Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements/test.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
-            ${{ runner.os }}-pip-
-
-      # ───────────────────────────────────────────────────────────────────
-      # Dependencies install
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Bütün project dependencies + test tools
-      - name: 📥 Install dependencies
-        run: |
-          python -m pip install --upgrade pip wheel setuptools
-          pip install -r requirements/test.txt
-
-      # ──────────────────────────────────���────────────────────────────────
-      # Django checks
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Django konfiqurasiyasının düzgünlüyünü yoxlamaq
-      - name: ✅ Django system check
-        env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key-for-ci-only-not-production
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: |
-          echo "::group::✅ Django System Checks"
-          python manage.py check --fail-level WARNING
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Run migrations
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Database schema-nın düzgün yaradıldığını yoxlamaq
-      - name: 🗃️ Run migrations
-        env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key-for-ci-only-not-production
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: |
-          echo "::group::🗃️ Database Migrations"
-          python manage.py migrate --verbosity=2
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Run tests with coverage
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Bütün testləri icra etmək və coverage hesablamaq
-      # 📌 -n auto: Paralel test (CPU core sayına görə)
-      # 📌 --cov: Coverage report yaratmaq
-      - name: 🧪 Run tests with coverage
-        env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key-for-ci-only-not-production
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: |
-          echo "::group::🧪 Running Tests"
-          pytest \
-            --ds=config.settings.test \
-            --ignore=tests/e2e \
-            --cov=. \
-            --cov-report=xml:coverage.xml \
-            --cov-report=html:htmlcov \
-            --cov-report=term-missing \
-            --cov-fail-under=60 \
-            -v \
-            --tb=short \
-            --timeout=300
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Upload coverage report
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Coverage hesabatını artifact olaraq saxlamaq
-      - name: 📊 Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-report-${{ matrix.python-version }}
-          path: |
-            coverage.xml
-            htmlcov/
-          retention-days: 7
-
-      # ───────────────────────────────────────────────────────────────────
-      # Coverage comment on PR
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: PR-da coverage göstərmək - visible feedback
-      - name: 📈 Coverage Report to PR
-        uses: orgoro/coverage@v3.2
-        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
-        with:
-          coverageFile: coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          thresholdAll: 0.0
-          thresholdNew: 0.0
-          thresholdModified: 0.0
-        continue-on-error: true
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 4: BUILD CHECK
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Static files-ın düzgün collect olduğunu yoxlamaq
-  build:
-    name: 🏗️ Build Check
-    runs-on: ubuntu-latest
-    needs: [lint]
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📦 Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-build-${{ hashFiles('requirements/base.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-build-
-            ${{ runner.os }}-pip-
-
-      - name: 📥 Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/base.txt
-
-      # ───────────────────────────────────────────────────────────────────
-      # Collect static files
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Production-da static files düzgün işləyəcəyini yoxlamaq
-      - name: 📦 Collect static files
-        env:
-          SECRET_KEY: build-check-secret-key
-          DEBUG: "False"
-          DATABASE_URL: sqlite:///db.sqlite3
-        run: |
-          echo "::group::📦 Collecting Static Files"
-          python manage.py collectstatic --noinput --clear
-          echo "::endgroup::"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Check for missing migrations
-      # ───────────────────────────────────────────────────────────────────
-      # 📌 NİYƏ?: Model dəyişiklikləri üçün migration yaradılıb-yaradılmadığını yoxlamaq
-      - name: 🔍 Check for missing migrations
-        env:
-          SECRET_KEY: build-check-secret-key
-          DEBUG: "False"
-          DATABASE_URL: sqlite:///db.sqlite3
-        run: |
-          echo "::group::🔍 Migration Check"
-          python manage.py makemigrations --check --dry-run || {
-            echo "::error::❌ Missing migrations detected! Run 'python manage.py makemigrations' locally."
-            exit 1
-          }
-          echo "✅ No missing migrations."
-          echo "::endgroup::"
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 5: DOCKER PROD BUILD
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Production image-in uğurla build olduğunu yoxlamaq
-  # 📌 BEST PRACTICE: Docker Layer Caching - CI-da sürətli build
-  docker-prod-build:
-    name: 🐳 Docker Prod Build
-    runs-on: ubuntu-latest
-    needs: [lint]
+  # ── 2a. Unit Tests (Python 3.11) ───────────────────────────────────────
+  unit-tests-311:
+    needs: lint
     permissions:
       contents: read
+      pull-requests: write
+    uses: ./.github/workflows/_unit-tests.yml
+    with:
+      python-version: "3.11"
 
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
+  # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
+  unit-tests-312:
+    needs: lint
+    uses: ./.github/workflows/_unit-tests.yml
+    with:
+      python-version: "3.12"
 
-      # ───────────────────────────────────────────────────────────────────
-      # Docker Buildx - Advanced build features + caching
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  # ── 3. Build Check (collectstatic + migration check) ───────────────────
+  build:
+    needs: lint
+    uses: ./.github/workflows/_build.yml
+    with:
+      python-version: "3.11.6"
 
-      # ───────────────────────────────────────────────────────────────────
-      # Build production image — uses GitHub Actions cache for layer caching.
-      # Build ARGs supply dummy values so collectstatic can run at build
-      # time without real runtime secrets (see Dockerfile.prod).
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🏗️ Build production Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile.prod
-          push: false
-          tags: emsarena-prod:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
-            BUILD_DATABASE_URL=sqlite:////tmp/build.db
-            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+  # ── 4. Security Scan ───────────────────────────────────────────────────
+  security:
+    needs: lint
+    uses: ./.github/workflows/_security.yml
+    with:
+      python-version: "3.11.6"
 
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 5b: SECRET SCANNING (Gitleaks)
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Repository-yə commit edilmiş gizli açarları / tokenləri tapmaq
-  # 📌 BEST PRACTICE: Hər PR-da bütün dəyişiklikləri skan et; pozitivləri
-  #    .gitleaks.toml faylında allowlist ilə idarə et
+  # ── 5. Secret Scan (Gitleaks) ──────────────────────────────────────────
   secret-scan:
-    name: 🔑 Secret Scan (Gitleaks)
-    runs-on: ubuntu-latest
-    needs: [lint]
+    needs: lint
     permissions:
       contents: read
       pull-requests: read
+    uses: ./.github/workflows/_secret-scan.yml
 
-    steps:
-      - name: 📥 Checkout code (full history for diff-aware scan)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # ── 6. Docker Production Build ─────────────────────────────────────────
+  docker-build:
+    needs: lint
+    uses: ./.github/workflows/_docker-build.yml
 
-      # ───────────────────────────────────────────────────────────────────
-      # Gitleaks — scans the current commit diff (pull_request) or the
-      # full history (push / workflow_dispatch).  The .gitleaks.toml
-      # allowlist prevents known CI placeholder values from failing the job.
-      # We install the gitleaks binary directly to avoid the license
-      # requirement of gitleaks-action@v2.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🔑 Install Gitleaks
-        run: |
-          GITLEAKS_VERSION="8.24.3"
-          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-            | tar -xz gitleaks
-          sudo mv gitleaks /usr/local/bin/gitleaks
-          gitleaks version
-
-      - name: 🔑 Run Gitleaks secret scan
-        run: |
-          echo "::group::🔑 Gitleaks Secret Scan"
-          gitleaks detect \
-            --source . \
-            --config .gitleaks.toml \
-            --redact \
-            --log-level info || {
-            echo "::error::❌ Gitleaks found secrets in the repository! Remove them before merging."
-            exit 1
-          }
-          echo "✅ No secrets detected."
-          echo "::endgroup::"
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 5c: CONTAINER IMAGE VULNERABILITY SCAN (Trivy)
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Production Docker image-dəki CVE-ləri audit etmək
-  # 📌 BEST PRACTICE: docker-prod-build job-undan sonra — eyni GHA cache-dən
-  #    image-i yükləyərək Trivy ilə skan edirik.  ignore-unfixed: true ilə
-  #    yalnız fix mövcud olan HIGH/CRITICAL CVE-lər build-u bloklayır.
+  # ── 7. Container CVE Scan (Trivy) ──────────────────────────────────────
   container-scan:
-    name: 🛡️ Container Scan (Trivy)
-    runs-on: ubuntu-latest
-    needs: [docker-prod-build]
+    needs: docker-build
     permissions:
       actions: read
       contents: read
-      security-events: write   # SARIF upload to Security tab
+      security-events: write
+    uses: ./.github/workflows/_container-scan.yml
 
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      # ───────────────────────────────────────────────────────────────────
-      # Rebuild from the GHA layer cache and load into local Docker daemon.
-      # This avoids a full rebuild; only changed layers are fetched.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: 🏗️ Load production image from cache
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile.prod
-          push: false
-          load: true
-          tags: emsarena-prod:ci
-          cache-from: type=gha
-          build-args: |
-            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
-            BUILD_DATABASE_URL=sqlite:////tmp/build.db
-            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
-
-      # ───────────────────────────────────────────────────────────────────
-      # Trivy — scan the local image for OS and library CVEs.
-      # ignore-unfixed: true  — only CVEs that HAVE a fix block the build;
-      #   unavoidable upstream-unfixed CVEs are not a blocker.
-      # Results are also uploaded as a SARIF artifact to the Security tab.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🛡️ Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@v0.35.0
-        with:
-          version: v0.69.3
-          image-ref: emsarena-prod:ci
-          format: sarif
-          output: trivy-results.sarif
-          severity: HIGH,CRITICAL
-          exit-code: "0"
-          ignore-unfixed: true
-
-      - name: 📤 Upload Trivy SARIF to Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        if: always() && hashFiles('trivy-results.sarif') != ''
-        continue-on-error: true
-        with:
-          sarif_file: trivy-results.sarif
-          category: trivy-container-scan
-
-      - name: 📊 Print Trivy table report (for log readability)
-        if: always()
-        uses: aquasecurity/trivy-action@v0.35.0
-        with:
-          version: v0.69.3
-          image-ref: emsarena-prod:ci
-          format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "0"
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 6: PROD SMOKE TEST
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Production stack-in ayağa qalxdığını və traffic serve etdiyini yoxlamaq
-  # 📌 BEST PRACTICE: /health/ və /ping/ endpoint-lərini poll et
+  # ── 8. Production Smoke Test ───────────────────────────────────────────
   prod-smoke:
-    name: 🔥 Prod Smoke Test
-    runs-on: ubuntu-latest
-    needs: [docker-prod-build]
-    permissions:
-      contents: read
+    needs: docker-build
+    uses: ./.github/workflows/_prod-smoke.yml
 
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      # ───────────────────────────────────────────────────────────────────
-      # Docker Buildx (required to reuse the GHA layer cache)
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # ───────────────────────────────────────────────────────────────────
-      # Rebuild from cache so docker compose can reference the local image.
-      # load: true exports the image to the local docker daemon.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🏗️ Load production image from cache
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile.prod
-          push: false
-          load: true
-          tags: emsarena-prod:ci
-          cache-from: type=gha
-          build-args: |
-            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
-            BUILD_DATABASE_URL=sqlite:////tmp/build.db
-            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
-
-      # ───────────────────────────────────────────────────────────────────
-      # Spin up the production stack with CI-safe dummy secrets.
-      # SECURE_SSL_REDIRECT=False: avoids HTTPS redirect inside plain HTTP CI.
-      # APP_IMAGE points compose to the pre-built local image.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🚀 Start production stack
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-          SECURE_SSL_REDIRECT: "False"
-          SESSION_COOKIE_SECURE: "False"
-          CSRF_COOKIE_SECURE: "False"
-        run: |
-          docker compose -f docker-compose.prod.yml up -d --no-build
-
-      # ───────────────────────────────────────────────────────────────────
-      # Poll /health/ and /ping/ with retries (up to 120 s)
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🩺 Poll health and ping endpoints
-        run: |
-          echo "Waiting for the stack to be ready..."
-          MAX=24
-          for i in $(seq 1 $MAX); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ping/ 2>/dev/null || echo "000")
-            if [[ "$STATUS" == "200" ]]; then
-              echo "✅ /ping/ returned HTTP 200 after $((i * 5))s"
-              break
-            fi
-            echo "Attempt $i/$MAX — /ping/ returned HTTP $STATUS. Retrying in 5s..."
-            sleep 5
-            if [[ $i -eq $MAX ]]; then
-              echo "::error::❌ /ping/ did not return 200 within 120 s."
-              exit 1
-            fi
-          done
-
-          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health/ 2>/dev/null || echo "000")
-          if [[ "$HEALTH" != "200" && "$HEALTH" != "207" ]]; then
-            echo "::error::❌ /health/ returned unexpected status: $HEALTH"
-            exit 1
-          fi
-          echo "✅ /health/ returned HTTP $HEALTH — stack is serving traffic."
-
-      # ───────────────────────────────────────────────────────────────────
-      # Always dump container logs for debugging, then tear down
-      # ───────────────────────────────────────────────────────────────────
-      - name: 📋 Dump container logs
-        if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-        run: |
-          echo "=== Container logs ==="
-          docker compose -f docker-compose.prod.yml logs --no-color || true
-
-      - name: 🧹 Tear down production stack
-        if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-        run: |
-          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 6b: E2E SMOKE TESTS (Playwright)
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Kritik UI axınlarında reqressiyaları tutmaq (login, dashboard,
-  #           exam list)
-  # 📌 BEST PRACTICE: Production-a yaxın Docker stack-ə qarşı sınaq —
-  #    prod-smoke stack-dan istifadə edir (artıq ayağa qaldırılıb).
+  # ── 9. E2E Smoke Tests (Playwright) ────────────────────────────────────
   e2e-smoke:
-    name: 🎭 E2E Smoke Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: [docker-prod-build]
-    permissions:
-      contents: read
-    env:
-      BASE_URL: "http://localhost"
-      E2E_USERNAME: "ci_university_e2e"
-      E2E_PASSWORD: "CiE2EUniversity2026!"
-      E2E_ROLE_PASSWORD: "CiE2ERoles2026!"
+    needs: docker-build
+    uses: ./.github/workflows/_e2e-smoke.yml
+    with:
+      python-version: "3.11.6"
 
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      # ───────────────────────────────────────────────────────────────────
-      # Rebuild from cache and load into local daemon (same pattern as
-      # prod-smoke).
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: 🏗️ Load production image from cache
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile.prod
-          push: false
-          load: true
-          tags: emsarena-prod:ci
-          cache-from: type=gha
-          build-args: |
-            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
-            BUILD_DATABASE_URL=sqlite:////tmp/build.db
-            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
-
-      # ───────────────────────────────────────────────────────────────────
-      # Start the production stack (same CI-safe secrets as prod-smoke).
-      # SECURE_SSL_REDIRECT=False prevents HTTPS redirects inside plain-HTTP
-      # CI so Playwright can reach the app on http://localhost.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🚀 Start production stack
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-          SECURE_SSL_REDIRECT: "False"
-          SESSION_COOKIE_SECURE: "False"
-          CSRF_COOKIE_SECURE: "False"
-        run: |
-          docker compose -f docker-compose.prod.yml up -d --no-build
-
-      # ───────────────────────────────────────────────────────────────────
-      # Wait for the stack to become healthy before running tests.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🩺 Wait for stack to be ready
-        run: |
-          MAX=24
-          for i in $(seq 1 $MAX); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ping/ 2>/dev/null || echo "000")
-            if [[ "$STATUS" == "200" ]]; then
-              echo "✅ Stack ready after $((i * 5))s"
-              break
-            fi
-            echo "Attempt $i/$MAX — /ping/ = $STATUS. Retrying in 5s..."
-            sleep 5
-            if [[ $i -eq $MAX ]]; then
-              echo "::error::❌ Stack did not become ready within 120 s."
-              exit 1
-            fi
-          done
-
-      # ───────────────────────────────────────────────────────────────────
-      # Seed a deterministic university user inside the running app
-      # container so the authenticated smoke tests always run in CI.
-      # The user is intentionally NOT a Django superuser; access comes from
-      # the university RBAC memberships that the seed command attaches.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 👤 Seed CI university E2E user
-        env:
-          E2E_USERNAME: ${{ env.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
-        run: |
-          docker exec emsarena-app python manage.py seed_ci_e2e_user \
-            --username "$E2E_USERNAME" \
-            --password "$E2E_PASSWORD"
-
-      - name: 🧪 Seed CI multi-role E2E scenario
-        env:
-          E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
-        run: |
-          docker exec emsarena-app python manage.py seed_ci_e2e_scenario \
-            --password "$E2E_ROLE_PASSWORD"
-
-      # ───────────────────────────────────────────────────────────────────
-      # Install Python + Playwright for the E2E test runner.
-      # Only the Chromium browser is installed to keep install time short.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: 📥 Install E2E test dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/test.txt
-          pip install pytest-playwright playwright
-          playwright install chromium --with-deps
-
-      # ───────────────────────────────────────────────────────────────────
-      # Run the E2E smoke suite using the seeded university user so both
-      # unauthenticated and authenticated Playwright flows are exercised.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 🎭 Run E2E smoke tests
-        env:
-          BASE_URL: ${{ env.BASE_URL }}
-          E2E_USERNAME: ${{ env.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
-          E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
-        run: |
-          echo "::group::🎭 Playwright E2E Smoke Tests"
-          pytest tests/e2e/ \
-            -v \
-            --tb=short \
-            --timeout=60 \
-            --screenshot=only-on-failure \
-            --video=retain-on-failure \
-            --tracing=retain-on-failure || {
-            echo "::error::❌ E2E smoke tests failed! Critical UI regression detected."
-            exit 1
-          }
-          echo "✅ E2E smoke tests passed!"
-          echo "::endgroup::"
-
-      - name: 📦 Upload E2E artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-playwright-results
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: ignore
-
-      # ───────────────────────────────────────────────────────────────────
-      # Always dump container logs and tear down, even on failure.
-      # ───────────────────────────────────────────────────────────────────
-      - name: 📋 Dump container logs
-        if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-        run: |
-          docker compose -f docker-compose.prod.yml logs --no-color || true
-
-      - name: 🧹 Tear down production stack
-        if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-        run: |
-          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # JOB 7: CI SUCCESS (Final status)
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📌 NİYƏ?: Bütün job-ların uğurla bitdiyini bir yerdə göstərmək
-  # 📌 BEST PRACTICE: Branch protection üçün bu job-u istifadə et
+  # ── Final gate — branch-protection check ───────────────────────────────
   ci-success:
     name: ✅ CI Success
     runs-on: ubuntu-latest
-    needs: [lint, security, test, build, docker-prod-build, prod-smoke, secret-scan, container-scan, e2e-smoke]
+    needs:
+      - lint
+      - unit-tests-311
+      - unit-tests-312
+      - build
+      - security
+      - secret-scan
+      - docker-build
+      - container-scan
+      - prod-smoke
+      - e2e-smoke
     if: always()
-    
+
     steps:
       - name: 📋 Check all jobs status
         run: |
           echo "=== CI Pipeline Summary ==="
           echo "Lint:             ${{ needs.lint.result }}"
-          echo "Security:         ${{ needs.security.result }}"
-          echo "Test:             ${{ needs.test.result }}"
+          echo "Unit Tests 3.11:  ${{ needs.unit-tests-311.result }}"
+          echo "Unit Tests 3.12:  ${{ needs.unit-tests-312.result }}"
           echo "Build:            ${{ needs.build.result }}"
-          echo "Docker Prod Build:${{ needs.docker-prod-build.result }}"
-          echo "Prod Smoke:       ${{ needs.prod-smoke.result }}"
+          echo "Security:         ${{ needs.security.result }}"
           echo "Secret Scan:      ${{ needs.secret-scan.result }}"
+          echo "Docker Build:     ${{ needs.docker-build.result }}"
           echo "Container Scan:   ${{ needs.container-scan.result }}"
+          echo "Prod Smoke:       ${{ needs.prod-smoke.result }}"
           echo "E2E Smoke:        ${{ needs.e2e-smoke.result }}"
           echo "=========================="
-          
+
           if [[ "${{ needs.lint.result }}" == "failure" ]]; then
             echo "❌ Lint job failed!"
             exit 1
           fi
 
-          if [[ "${{ needs.security.result }}" == "failure" ]]; then
-            echo "❌ Security scan failed! Critical vulnerabilities or HIGH-severity code issues must be resolved."
+          if [[ "${{ needs.unit-tests-311.result }}" == "failure" || "${{ needs.unit-tests-312.result }}" == "failure" ]]; then
+            echo "❌ Unit Tests failed!"
             exit 1
           fi
-          
-          if [[ "${{ needs.test.result }}" == "failure" ]]; then
-            echo "❌ Test job failed! All tests must pass and coverage must meet the minimum threshold."
-            exit 1
-          fi
-          
+
           if [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "❌ Build job failed! Missing migrations or build errors must be resolved."
+            echo "❌ Build job failed!"
             exit 1
           fi
 
-          if [[ "${{ needs.docker-prod-build.result }}" == "failure" ]]; then
-            echo "❌ Docker Prod Build job failed! The production image must build successfully."
-            exit 1
-          fi
-
-          if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
-            echo "❌ Prod Smoke Test failed! The production stack must start and serve traffic."
+          if [[ "${{ needs.security.result }}" == "failure" ]]; then
+            echo "❌ Security scan failed!"
             exit 1
           fi
 
           if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
-            echo "❌ Secret Scan failed! Plaintext secrets were detected in the commit. Remove them before merging."
+            echo "❌ Secret Scan failed!"
+            exit 1
+          fi
+
+          if [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
+            echo "❌ Docker Build job failed!"
             exit 1
           fi
 
           if [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
-            echo "⚠️ Container Scan reported issues. Review the Trivy SARIF report in the Security tab for details."
+            echo "⚠️ Container Scan reported issues. Review Trivy SARIF report."
+          fi
+
+          if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
+            echo "❌ Prod Smoke Test failed!"
+            exit 1
           fi
 
           if [[ "${{ needs.e2e-smoke.result }}" == "failure" ]]; then
-            echo "❌ E2E Smoke Test failed! Critical UI breakage detected. Fix before merging."
+            echo "❌ E2E Smoke Test failed!"
             exit 1
           fi
-          
+
           echo "✅ All critical jobs passed!"
