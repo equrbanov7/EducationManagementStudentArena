@@ -13,6 +13,9 @@ import dj_database_url
 from dotenv import load_dotenv
 
 from .base import (
+    ADMIN_ALLOWED_IPS,
+    ADMIN_LOGIN_RATE_LIMIT,
+    ADMIN_URL_PREFIX,
     ASGI_APPLICATION,
     AUTH_OTP_EXPIRY_SECONDS,
     AUTH_PASSWORD_VALIDATORS,
