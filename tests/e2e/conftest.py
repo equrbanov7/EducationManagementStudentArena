@@ -225,6 +225,22 @@ def _role_page(browser: Browser, role: str) -> Iterator[Page]:
 
 
 @pytest.fixture(autouse=True)
+def _rls_bypass_for_tests():
+    """Override the root conftest ``_rls_bypass_for_tests(db)`` fixture.
+
+    E2E tests are pure Playwright/HTTP tests that never touch the Django
+    database directly.  The root-level fixture is ``autouse=True`` and
+    depends on the ``db`` fixture, which triggers a PostgreSQL connection.
+    In the E2E CI step the database runs inside Docker with no host-port
+    binding, so that connection attempt fails with *Connection refused*.
+
+    This no-op override removes the ``db`` dependency and prevents 212
+    ``OperationalError`` collection errors.
+    """
+    yield
+
+
+@pytest.fixture(autouse=True)
 def require_reachable_base_url() -> None:  # type: ignore[return]
     """
     Skip every test in the E2E suite when BASE_URL is not reachable.

@@ -20,6 +20,9 @@ def log_action(
     changes=None,
     reason="",
     request=None,
+    resource_type="",
+    resource_id="",
+    resource_repr="",
 ):
     """
     Create an audit log entry.
@@ -46,6 +49,9 @@ def log_action(
         "new_values": new_values,
         "changes": changes,
         "reason": reason,
+        "resource_type": resource_type,
+        "resource_id": resource_id,
+        "resource_repr": resource_repr,
     }
 
     # Add object information if provided
@@ -57,6 +63,9 @@ def log_action(
     if request:
         log_data["ip_address"] = get_client_ip(request)
         log_data["user_agent"] = request.META.get("HTTP_USER_AGENT", "")[:500]
+        request_id = getattr(request, "request_id", None)
+        if request_id:
+            log_data["request_id"] = request_id
 
     return AuditLog.objects.create(**log_data)
 
