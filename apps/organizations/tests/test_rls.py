@@ -41,7 +41,7 @@ Prerequisites
 """
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import DatabaseError, connection
+from django.db import DatabaseError, connection, transaction
 
 import pytest
 
@@ -851,7 +851,10 @@ class TestRLSWriteProtection:
         _enable_rls()
         _set_tenant(org_a.pk)
         with pytest.raises(DatabaseError):
-            through_model.objects.create(coursegroup_id=blocked_group.id, user_id=student.id)
+            # Keep the expected RLS violation inside a savepoint so the outer
+            # test transaction remains usable for fixture cleanup.
+            with transaction.atomic():
+                through_model.objects.create(coursegroup_id=blocked_group.id, user_id=student.id)
 
 
 # ---------------------------------------------------------------------------
