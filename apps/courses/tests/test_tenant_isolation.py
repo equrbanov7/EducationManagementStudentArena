@@ -287,14 +287,13 @@ class CourseNoOrgContextTest(TestCase):
         self.org = _create_org("NoOrg A", "noorg-a", self.teacher)
         self.role = _create_role(self.org, "teacher", level=60, permissions=["course.*"])
         _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER, self.role)
-        Course.objects.create(
-            owner=self.teacher, title="NoOrg Course", status="published", organization=self.org
-        )
+        Course.objects.create(owner=self.teacher, title="NoOrg Course", status="published", organization=self.org)
 
     def test_my_courses_empty_without_active_org(self):
         """my_courses returns empty list when no active_organization is in the session."""
-        from apps.courses.views.crud import MyCoursesListView
         from django.test import RequestFactory
+
+        from apps.courses.views.crud import MyCoursesListView
 
         factory = RequestFactory()
         request = factory.get(reverse("courses:my_courses"))
@@ -308,3 +307,115 @@ class CourseNoOrgContextTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context_data["courses"].exists())
+
+
+# ---------------------------------------------------------------------------
+# Test: Cross-Tenant Course Status, Resource & Exam Operations
+# ---------------------------------------------------------------------------
+
+
+class CourseStatusResourceExamCrossTenantTest(TestCase):
+    """
+    Endpoints that accept a course_id (status update, resource add/delete,
+    link/unlink exam, delete member) must reject cross-tenant requests.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="csre_teacher_a", email="csre_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="csre_teacher_b", email="csre_b@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("CSRE Org A", "csre-org-a", self.teacher_a)
+        self.org_b = _create_org("CSRE Org B", "csre-org-b", self.teacher_b)
+
+        self.role_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*"])
+        self.role_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_b)
+
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a, title="CSRE Course A", status="published", organization=self.org_a
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="CSRE Course B", status="published", organization=self.org_b
+        )
+
+    # -- Status update -------------------------------------------------------
+
+    def test_cross_tenant_update_course_status_blocked(self):
+        """Teacher A cannot change the status of Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:update_course_status", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(url, {"status": "draft"})
+        self.assertIn(response.status_code, (403, 404))
+        self.course_b.refresh_from_db()
+        self.assertEqual(self.course_b.status, "published")
+
+    # -- Resource operations --------------------------------------------------
+
+    def test_cross_tenant_add_resource_blocked(self):
+        """Teacher A cannot add a resource to Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:add_resource", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(url, {"title": "Injected", "url": "http://evil.com"})
+        self.assertIn(response.status_code, (302, 403, 404))
+
+    def test_cross_tenant_delete_resource_blocked(self):
+        """Teacher A cannot delete a resource belonging to Org B's course."""
+        from apps.courses.models import CourseResource
+
+        resource_b = CourseResource.objects.create(
+            course=self.course_b, title="Org B Resource", resource_type="link", url="http://b.com"
+        )
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse(
+            "courses:delete_resource",
+            kwargs={"course_id": self.course_b.id, "resource_id": resource_b.id},
+        )
+        response = self.client.post(url)
+        self.assertIn(response.status_code, (302, 403, 404))
+        self.assertTrue(CourseResource.objects.filter(id=resource_b.id).exists())
+
+    # -- Link/Unlink exam -----------------------------------------------------
+
+    def test_cross_tenant_link_exam_blocked(self):
+        """Teacher A cannot link an exam to Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:link_exam", kwargs={"pk": self.course_b.id})
+        response = self.client.post(
+            url,
+            '{"exam_id": 99999}',
+            content_type="application/json",
+        )
+        self.assertIn(response.status_code, (403, 404))
+
+    def test_cross_tenant_unlink_exam_blocked(self):
+        """Teacher A cannot unlink an exam from Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("courses:unlink_exam", kwargs={"pk": self.course_b.id})
+        response = self.client.post(
+            url,
+            '{"exam_id": 99999}',
+            content_type="application/json",
+        )
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- Delete member ---------------------------------------------------------
+
+    def test_cross_tenant_delete_member_blocked(self):
+        """Teacher A cannot remove a member from Org B's course."""
+        member_b = CourseMembership.objects.create(course=self.course_b, user=self.teacher_b, role="owner")
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse(
+            "courses:delete_member",
+            kwargs={"course_id": self.course_b.id, "member_id": member_b.id},
+        )
+        response = self.client.post(url)
+        self.assertIn(response.status_code, (302, 403, 404))
+        self.assertTrue(CourseMembership.objects.filter(id=member_b.id).exists())

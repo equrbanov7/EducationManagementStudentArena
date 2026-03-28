@@ -332,3 +332,87 @@ class SubmissionOwnershipIsolationTest(TestCase):
             user_subs = response.context.get("user_submissions", [])
             for sub in user_subs:
                 self.assertEqual(sub.user_id, self.student_2.id)
+
+
+# ---------------------------------------------------------------------------
+# Test: Cross-Tenant Create, Delete-Submissions, Remove-Student
+# ---------------------------------------------------------------------------
+
+
+class AssignmentCreateDeleteCrossTenantTest(TestCase):
+    """
+    Endpoints that accept a cross-tenant course_id or assignment_id must reject.
+    Covers: create_assignment via course_id tampering, delete_submissions,
+    and remove_student_from_assignment.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_a = User.objects.create_user(
+            username="acd_teacher_a", email="acd_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_b = User.objects.create_user(
+            username="acd_teacher_b", email="acd_b@orgb.com", password="StrongPass123!"
+        )
+        self.student_b = User.objects.create_user(
+            username="acd_student_b", email="acd_sb@orgb.com", password="StrongPass123!"
+        )
+
+        self.org_a = _create_org("ACD Org A", "acd-org-a", self.teacher_a)
+        self.org_b = _create_org("ACD Org B", "acd-org-b", self.teacher_b)
+
+        self.role_teacher_a = _create_role(self.org_a, "teacher", level=60, permissions=["course.*", "assignment.*"])
+        self.role_teacher_b = _create_role(self.org_b, "teacher", level=60, permissions=["course.*", "assignment.*"])
+        self.role_student_b = _create_role(self.org_b, "student", level=20, permissions=["course.view"])
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER, self.role_teacher_a)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER, self.role_teacher_b)
+        _assign_user_to_org(self.student_b, self.org_b, ProfileRole.STUDENT, self.role_student_b)
+
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a, title="ACD Course A", status="published", organization=self.org_a
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="ACD Course B", status="published", organization=self.org_b
+        )
+
+        self.assignment_b = _make_assignment(self.course_b, "ACD Assignment B", self.teacher_b)
+
+        CourseMembership.objects.create(course=self.course_b, user=self.student_b, role="student")
+        self.assignment_b.assigned_students.add(self.student_b)
+
+    # -- Create via cross-tenant course_id ------------------------------------
+
+    def test_create_assignment_with_cross_tenant_course_id_blocked(self):
+        """Teacher A cannot create an assignment under Org B's course."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("assignments:create_assignment", kwargs={"course_id": self.course_b.id})
+        response = self.client.post(url, {"title": "Injected", "start_date": "2025-01-01", "deadline": "2025-12-31"})
+        self.assertIn(response.status_code, (403, 404))
+
+    # -- Delete submissions cross-tenant --------------------------------------
+
+    def test_delete_submissions_cross_tenant_blocked(self):
+        """Teacher A cannot delete submissions on Org B's assignment."""
+        sub = Submission.objects.create(
+            assignment=self.assignment_b,
+            user=self.student_b,
+            content="Org B answer",
+            attempt_number=1,
+        )
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("assignments:delete_assignment_submissions", kwargs={"pk": self.assignment_b.id})
+        response = self.client.post(url, {"submission_ids": [sub.id]})
+        self.assertIn(response.status_code, (302, 403, 404))
+        self.assertTrue(Submission.objects.filter(id=sub.id).exists())
+
+    # -- Remove student cross-tenant ------------------------------------------
+
+    def test_remove_student_cross_tenant_blocked(self):
+        """Teacher A cannot remove a student from Org B's assignment."""
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        url = reverse("assignments:remove_student_from_assignment", kwargs={"pk": self.assignment_b.id})
+        response = self.client.post(url, {"student_id": self.student_b.id})
+        self.assertIn(response.status_code, (403, 404))
+        self.assertTrue(self.assignment_b.assigned_students.filter(id=self.student_b.id).exists())
