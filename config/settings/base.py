@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "apps.audit.apps.AuditConfig",
     "daphne",
     "apps.exams",
-    "django.contrib.admin",
+    "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -148,6 +148,9 @@ ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip(
 # Rate limit for the admin login form (POST to /admin/login/).
 # Accepts the same "count/period" format used by other rate limits.
 ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "5/5m")
+ADMIN_2FA_REQUIRED = os.getenv("ADMIN_2FA_REQUIRED", "False").strip().lower() in {"1", "true", "yes", "on"}
+ADMIN_OTP_VERIFY_RATE_LIMIT = os.getenv("ADMIN_OTP_VERIFY_RATE_LIMIT", "5/10m")
+ADMIN_OTP_RESEND_RATE_LIMIT = os.getenv("ADMIN_OTP_RESEND_RATE_LIMIT", "3/10m")
 
 # Rate limiting configuration
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed

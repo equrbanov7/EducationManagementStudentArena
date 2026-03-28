@@ -86,6 +86,8 @@ before running any `docker compose` command.  Never commit this file.
 | `ALLOWED_HOSTS` | `emsarena.com,www.emsarena.com` | Comma-separated list of valid `Host` headers |
 | `CSRF_TRUSTED_ORIGINS` | `https://emsarena.com` | Comma-separated origins for CSRF validation |
 | `SITE_URL` | `https://emsarena.com` | Canonical site URL (used in emails, WebSocket CSP) |
+| `ADMIN_URL_PREFIX` | `manage/` | Non-default Django admin path. Must not be `admin/` in production. |
+| `ADMIN_ALLOWED_IPS` | `203.0.113.10,198.51.100.20` | Comma-separated allowlist of source IPs permitted to access the admin panel. |
 
 ### Optional / feature variables
 
@@ -112,6 +114,10 @@ before running any `docker compose` command.  Never commit this file.
 | `SECURE_HSTS_SECONDS` | `31536000` | HSTS max-age in seconds. Set to `0` only during initial TLS testing |
 | `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `True` | Include `includeSubDomains` in HSTS header |
 | `SECURE_HSTS_PRELOAD` | `True` | Include `preload` in HSTS header |
+| `ADMIN_LOGIN_RATE_LIMIT` | `3/15m` | Rate limit for admin password login attempts |
+| `ADMIN_2FA_REQUIRED` | `True` | Keep admin OTP-based 2FA enabled in production |
+| `ADMIN_OTP_VERIFY_RATE_LIMIT` | `5/10m` | Rate limit for admin OTP verification attempts |
+| `ADMIN_OTP_RESEND_RATE_LIMIT` | `3/10m` | Rate limit for resending admin OTP codes |
 
 ### Build-time vs. Runtime variables
 
@@ -166,6 +172,12 @@ CSRF_TRUSTED_ORIGINS=https://emsarena.com,https://www.emsarena.com
 SITE_URL=https://emsarena.com
 LAN_HOST=emsarena.com
 LIVE_EXAM_PUBLIC_HOST=emsarena.com
+ADMIN_URL_PREFIX=manage/
+ADMIN_ALLOWED_IPS=203.0.113.10,198.51.100.20
+ADMIN_LOGIN_RATE_LIMIT=3/15m
+ADMIN_2FA_REQUIRED=True
+ADMIN_OTP_VERIFY_RATE_LIMIT=5/10m
+ADMIN_OTP_RESEND_RATE_LIMIT=3/10m
 ```
 
 ### Step 2 — Build the production image
