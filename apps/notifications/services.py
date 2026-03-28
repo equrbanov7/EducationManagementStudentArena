@@ -518,6 +518,7 @@ def notify_task_assignment(*, task, user_ids, task_kind: str) -> list[InAppNotif
             "task_kind": task_kind,
             "task_id": task.id,
             "course_id": getattr(task, "course_id", None),
+            "organization_id": _task_organization_id(task),
         },
     )
 
@@ -573,6 +574,7 @@ def notify_teacher_about_submission(*, task, student, task_kind: str) -> InAppNo
             "task_kind": task_kind,
             "task_id": task.id,
             "student_id": getattr(student, "id", None),
+            "organization_id": _task_organization_id(task),
         },
     )
 
@@ -586,6 +588,7 @@ def notify_student_about_feedback(*, task, student, task_kind: str, extra_metada
         "task_kind": task_kind,
         "task_id": task.id,
         "student_id": getattr(student, "id", None),
+        "organization_id": _task_organization_id(task),
     }
     if extra_metadata:
         metadata.update(extra_metadata)
@@ -608,6 +611,18 @@ def notify_student_about_feedback(*, task, student, task_kind: str, extra_metada
 def _assert_owner(notification: InAppNotification, user) -> None:
     if notification.recipient_id != user.pk:
         raise PermissionError("You can only manage your own notifications.")
+
+
+def _task_organization_id(task):
+    org_id = getattr(task, "organization_id", None)
+    if org_id:
+        return org_id
+
+    course = getattr(task, "course", None)
+    if course is not None:
+        return getattr(course, "organization_id", None)
+
+    return None
 
 
 def _serialize_metadata(value):
