@@ -14,8 +14,13 @@ from core.views import health_check, metrics_view, ping, test_error
 
 admin.site.site_url = reverse_lazy("home")
 
+# Allow the admin URL to be relocated away from the default /admin/ path via
+# the ADMIN_URL_PREFIX setting (e.g. set to "manage/" in production to avoid
+# exposing the well-known endpoint).
+_admin_prefix = getattr(settings, "ADMIN_URL_PREFIX", "admin/").lstrip("/")
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(_admin_prefix, admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
     path("blog/", include("apps.blog.legacy_urls")),
     path("", include("apps.blog.urls")),
