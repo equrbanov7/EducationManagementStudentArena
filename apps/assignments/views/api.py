@@ -184,8 +184,6 @@ def remove_student_from_assignment(request, pk):
     │ tələbənin qrupu və ya kurs üzvlüyü dəyişmir.                            │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    from django.contrib.auth import get_user_model
-
     from core.permissions import request_has_permission
 
     if request.method != "POST":
@@ -205,12 +203,15 @@ def remove_student_from_assignment(request, pk):
     if not student_id or not student_id.isdigit():
         return JsonResponse({"success": False, "error": "A valid student_id is required."}, status=400)
 
-    User = get_user_model()
-    try:
-        student = User.objects.get(pk=int(student_id))
-    except User.DoesNotExist:
+    membership = (
+        CourseMembership.objects.filter(course=assignment.course, user_id=int(student_id))
+        .select_related("user")
+        .first()
+    )
+    if not membership:
         return JsonResponse({"success": False, "error": "Student not found."}, status=404)
 
+    student = membership.user
     assignment.assigned_students.remove(student)
 
     return JsonResponse(

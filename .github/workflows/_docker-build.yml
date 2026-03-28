@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Docker Production Build
+# ═══════════════════════════════════════════════════════════════════════════
+# Builds the production Docker image and caches the layers in GitHub Actions
+# cache so downstream jobs (container-scan, prod-smoke, e2e-smoke) can
+# restore it without a full rebuild.
+# Called by ci.yml via workflow_call.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🐳 Docker Prod Build (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+  docker-prod-build:
+    name: 🐳 Docker Prod Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build and push to GHA layer cache only (push: false).
+      # Build ARGs supply dummy values so collectstatic can run at build
+      # time without real runtime secrets (see Dockerfile.prod).
+      - name: 🏗️ Build production Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+            BUILD_ADMIN_ALLOWED_IPS=127.0.0.1
