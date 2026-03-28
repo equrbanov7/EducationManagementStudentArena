@@ -9,6 +9,8 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils.translation import gettext as _
 
+from apps.audit.utils import log_action
+from core.constants import AuditAction
 from core.rate_limit import record_rate_limit_hit
 from core.utils import get_client_ip
 
@@ -71,6 +73,14 @@ class AdminSecurityMiddleware:
                 client_ip,
                 extra={"admin_path": path},
             )
+            log_action(
+                action=AuditAction.DENY,
+                reason="Admin access denied because the client IP is not allowlisted.",
+                request=request,
+                resource_type="admin_ip_deny",
+                resource_id=client_ip,
+                resource_repr="Admin IP deny",
+            )
             return HttpResponseForbidden("Admin access is not permitted from this address.")
 
         # ── 2. Rate-limit the admin login form ───────────────────────────────
@@ -85,6 +95,14 @@ class AdminSecurityMiddleware:
                 logger.warning(
                     "Admin login rate-limit exceeded for IP %s",
                     client_ip,
+                )
+                log_action(
+                    action=AuditAction.DENY,
+                    reason="Admin login blocked because the rate limit was exceeded.",
+                    request=request,
+                    resource_type="admin_login_rate_limit",
+                    resource_id=client_ip,
+                    resource_repr="Admin login rate limit",
                 )
                 response = HttpResponse(
                     _("Too many login attempts. Please try again later."),

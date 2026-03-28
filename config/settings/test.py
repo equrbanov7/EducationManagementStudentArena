@@ -10,6 +10,9 @@ from django.core.management.utils import get_random_secret_key
 import dj_database_url
 
 from .base import (
+    ADMIN_2FA_REQUIRED,
+    ADMIN_OTP_RESEND_RATE_LIMIT,
+    ADMIN_OTP_VERIFY_RATE_LIMIT,
     ASGI_APPLICATION,
     AUTH_OTP_EXPIRY_SECONDS,
     AUTH_PASSWORD_VALIDATORS,
