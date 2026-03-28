@@ -18,7 +18,7 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
-from core.rls import clear_rls_tenant, set_rls_bypass, set_rls_tenant
+from core.rls import clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .services import is_tenant_accessible_organization
@@ -70,147 +70,150 @@ class OrganizationMiddleware:
         # processor to build the org-switcher list without extra DB queries.
         request._all_org_memberships = []
 
-        if not request.user.is_authenticated:
-            return self.get_response(request)
+        try:
+            if not request.user.is_authenticated:
+                return self.get_response(request)
 
-        from .models import Organization
+            from .models import Organization
 
-        # ── Step 1: restore org from session ──────────────────────────────
-        org_slug = request.session.get("active_organization")
-        if org_slug:
-            # Single query: join memberships → organization to avoid a
-            # separate Organization.objects.get() round-trip.
-            memberships = list(
-                request.user.memberships.filter(
-                    organization__slug=org_slug,
-                    organization__is_active=True,
-                    is_active=True,
+            # ── Step 1: restore org from session ──────────────────────────────
+            org_slug = request.session.get("active_organization")
+            if org_slug:
+                # Single query: join memberships → organization to avoid a
+                # separate Organization.objects.get() round-trip.
+                memberships = list(
+                    request.user.memberships.filter(
+                        organization__slug=org_slug,
+                        organization__is_active=True,
+                        is_active=True,
+                    )
+                    .select_related("organization", "role", "scope_unit")
+                    .order_by("-is_primary", "-role__level")
                 )
-                .select_related("organization", "role", "scope_unit")
-                .order_by("-is_primary", "-role__level")
-            )
-            is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-            if memberships:
-                # All memberships share the same organization because the slug
-                # column has a UNIQUE constraint — memberships[0].organization
-                # is always the correct org object.
-                session_org = memberships[0].organization
-                if getattr(session_org, "status", "") == "active":
-                    request.organization = session_org
-                    request.org_memberships = memberships
-                else:
-                    request.blocked_organization = session_org
-            elif is_superuser:
-                # Superusers may have no membership rows; fall back to a
-                # direct org lookup so they can still access the org.
-                try:
-                    session_org = Organization.objects.get(slug=org_slug, is_active=True)
+                is_superuser = getattr(request.user, "is_superuser", False) or getattr(
+                    request.user, "is_superadmin", False
+                )
+                if memberships:
+                    # All memberships share the same organization because the slug
+                    # column has a UNIQUE constraint — memberships[0].organization
+                    # is always the correct org object.
+                    session_org = memberships[0].organization
                     if getattr(session_org, "status", "") == "active":
                         request.organization = session_org
-                        request.org_memberships = []
+                        request.org_memberships = memberships
                     else:
                         request.blocked_organization = session_org
-                except Organization.DoesNotExist:
-                    request.session.pop("active_organization", None)
-            else:
-                owner_org = Organization.objects.filter(
-                    slug=org_slug,
-                    is_active=True,
-                    owner=request.user,
-                ).first()
-                if owner_org is not None:
-                    if getattr(owner_org, "status", "") == "active":
-                        request.organization = owner_org
-                        request.org_memberships = []
-                        setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
-                    else:
-                        request.blocked_organization = owner_org
+                elif is_superuser:
+                    # Superusers may have no membership rows; fall back to a
+                    # direct org lookup so they can still access the org.
+                    try:
+                        session_org = Organization.objects.get(slug=org_slug, is_active=True)
+                        if getattr(session_org, "status", "") == "active":
+                            request.organization = session_org
+                            request.org_memberships = []
+                        else:
+                            request.blocked_organization = session_org
+                    except Organization.DoesNotExist:
+                        request.session.pop("active_organization", None)
                 else:
-                    # User is no longer a member of the session org — clear it.
-                    request.session.pop("active_organization", None)
+                    owner_org = Organization.objects.filter(
+                        slug=org_slug,
+                        is_active=True,
+                        owner=request.user,
+                    ).first()
+                    if owner_org is not None:
+                        if getattr(owner_org, "status", "") == "active":
+                            request.organization = owner_org
+                            request.org_memberships = []
+                            setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
+                        else:
+                            request.blocked_organization = owner_org
+                    else:
+                        # User is no longer a member of the session org — clear it.
+                        request.session.pop("active_organization", None)
 
-        # ── Step 2: auto-select when no session org is available ──────────
-        if request.organization is None and request.blocked_organization is None:
-            active_memberships = self._fetch_active_memberships(request.user)
-            unique_orgs = self._unique_orgs(active_memberships)
+            # ── Step 2: auto-select when no session org is available ──────────
+            if request.organization is None and request.blocked_organization is None:
+                active_memberships = self._fetch_active_memberships(request.user)
+                unique_orgs = self._unique_orgs(active_memberships)
 
-            if len(unique_orgs) == 1:
-                # Single org — auto-select for convenience.
-                request.organization = next(iter(unique_orgs.values()))
-                request.session["active_organization"] = request.organization.slug
-                request.org_memberships = [
-                    m for m in active_memberships if m.organization_id == request.organization.id
-                ]
+                if len(unique_orgs) == 1:
+                    # Single org — auto-select for convenience.
+                    request.organization = next(iter(unique_orgs.values()))
+                    request.session["active_organization"] = request.organization.slug
+                    request.org_memberships = [
+                        m for m in active_memberships if m.organization_id == request.organization.id
+                    ]
 
-            elif len(unique_orgs) == 0:
-                # No active memberships: deny by default until an organization
-                # context can be established via real membership data.
-                pass
+                elif len(unique_orgs) == 0:
+                    # No active memberships: deny by default until an organization
+                    # context can be established via real membership data.
+                    pass
 
-            # len >= 2  → multi-org user; explicit selection required.
-            # request.organization stays None; the org-picker view handles this.
+                # len >= 2  → multi-org user; explicit selection required.
+                # request.organization stays None; the org-picker view handles this.
 
-            # Preserve the full membership list for the context processor so it
-            # can build the org-switcher without issuing another query.
-            request._all_org_memberships = active_memberships
+                # Preserve the full membership list for the context processor so it
+                # can build the org-switcher without issuing another query.
+                request._all_org_memberships = active_memberships
 
-        else:
-            # Session org path: fetch all memberships for the org-switcher list
-            # only if the user belongs to more than one org.  Re-use the already
-            # fetched current-org memberships as a starting point; a second query
-            # is issued only when there are known multiple orgs (rare case).
-            request._all_org_memberships = self._fetch_active_memberships(request.user)
+            else:
+                # Session org path: fetch all memberships for the org-switcher list
+                # only if the user belongs to more than one org.  Re-use the already
+                # fetched current-org memberships as a starting point; a second query
+                # is issued only when there are known multiple orgs (rare case).
+                request._all_org_memberships = self._fetch_active_memberships(request.user)
 
-        # ── Step 3: finalize permissions for the resolved org ─────────────
-        if is_tenant_accessible_organization(request.organization):
-            permissions_set = set()
-            for membership in request.org_memberships:
-                if membership.role.permissions:
-                    permissions_set.update(membership.role.permissions)
-                if getattr(membership.role, "name", "") == "teacher":
-                    # Back-compat: older default teacher roles missed course.create
-                    # even though the UI and flow allow teachers to create courses.
-                    permissions_set.add("course.create")
-            request.org_permissions = list(permissions_set)
-        elif request.organization is not None:
-            request.organization = None
-            request.org_memberships = []
-            request.org_permissions = []
-            request.session.pop("active_organization", None)
+            # ── Step 3: finalize permissions for the resolved org ─────────────
+            if is_tenant_accessible_organization(request.organization):
+                permissions_set = set()
+                for membership in request.org_memberships:
+                    if membership.role.permissions:
+                        permissions_set.update(membership.role.permissions)
+                    if getattr(membership.role, "name", "") == "teacher":
+                        # Back-compat: older default teacher roles missed course.create
+                        # even though the UI and flow allow teachers to create courses.
+                        permissions_set.add("course.create")
+                request.org_permissions = list(permissions_set)
+            elif request.organization is not None:
+                request.organization = None
+                request.org_memberships = []
+                request.org_permissions = []
+                request.session.pop("active_organization", None)
 
-        if hasattr(request.user, "set_active_organization_context"):
-            request.user.set_active_organization_context(
-                request.organization,
-                memberships=request.org_memberships,
-                permissions=request.org_permissions,
-            )
+            if hasattr(request.user, "set_active_organization_context"):
+                request.user.set_active_organization_context(
+                    request.organization,
+                    memberships=request.org_memberships,
+                    permissions=request.org_permissions,
+                )
 
-        # ── Step 4: propagate tenant context to the PostgreSQL session ────
-        # Set the RLS context variables so that database-level Row-Level
-        # Security policies can restrict queries to the active organisation.
-        # Both ``is_superuser`` (Django's built-in staff/admin flag) and
-        # ``is_superadmin`` (a project-level synonym used by profile/auth
-        # extensions) represent full cross-tenant administrative access.
-        # Neither is a lesser privilege than the other; either flag grants the
-        # RLS bypass for operations such as admin reports and management commands.
-        is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-        if is_superuser:
-            set_rls_bypass(True)
-        elif request.organization is not None:
-            set_rls_bypass(False)
-            set_rls_tenant(request.organization.pk)
-        else:
-            # No active organisation — clear any leftover tenant context so
-            # that RLS denies all tenant-scoped rows by default.
-            set_rls_bypass(False)
-            clear_rls_tenant()
+            # ── Step 4: propagate tenant context to the PostgreSQL session ────
+            # Set the RLS context variables so that database-level Row-Level
+            # Security policies can restrict queries to the active organisation.
+            # User-scoped policies (for example notification inbox rows) also
+            # receive the current authenticated user id.
+            # Both ``is_superuser`` (Django's built-in staff/admin flag) and
+            # ``is_superadmin`` (a project-level synonym used by profile/auth
+            # extensions) represent full cross-tenant administrative access.
+            # Neither is a lesser privilege than the other; either flag grants the
+            # RLS bypass for operations such as admin reports and management commands.
+            set_rls_user(request.user.pk)
+            is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+            if is_superuser:
+                set_rls_bypass(True)
+            elif request.organization is not None:
+                set_rls_bypass(False)
+                set_rls_tenant(request.organization.pk)
+            else:
+                # No active organisation — clear any leftover tenant context so
+                # that RLS denies all tenant-scoped rows by default.
+                set_rls_bypass(False)
+                clear_rls_tenant()
 
-        response = self.get_response(request)
-
-        # ── Cleanup: reset RLS context before connection returns to pool ──
-        # This prevents tenant state from leaking into the next request that
-        # reuses the same pooled connection.
-        clear_rls_tenant()
-        set_rls_bypass(False)
-
-        return response
+            return self.get_response(request)
+        finally:
+            # ── Cleanup: reset RLS context before connection returns to pool ──
+            # This prevents tenant state from leaking into the next request that
+            # reuses the same pooled connection, even if the view raises.
+            reset_rls_context(only_if_connection_open=True)
