@@ -1,0 +1,101 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Security Scan
+# ═══════════════════════════════════════════════════════════════════════════
+# Runs Safety / pip-audit, Bandit, and Django deployment security checks.
+# Called by ci.yml via workflow_call.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🔒 Security Scan (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.11.6"
+
+jobs:
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: 📦 Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements/base.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-security-
+            ${{ runner.os }}-pip-
+
+      # ── Dependency vulnerability scanner ──────────────────────────────
+      - name: 🛡️ Check dependencies for vulnerabilities
+        run: |
+          pip install safety pip-audit
+          echo "::group::🛡️ Safety Check"
+          safety check -r requirements/base.txt --full-report || true
+          echo "::endgroup::"
+          echo "::group::🔐 Pip Audit (CRITICAL only — blocks merge)"
+          pip-audit -r requirements/base.txt --desc on || {
+            echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
+            exit 1
+          }
+          echo "✅ No critical dependency vulnerabilities found."
+          echo "::endgroup::"
+
+      # ── Bandit — Python static security linter ────────────────────────
+      - name: 🔍 Scan code with Bandit
+        run: |
+          pip install bandit[toml]
+          echo "::group::🔍 Bandit Security Scan (HIGH severity — blocks merge)"
+          bandit -r . \
+            -x ./tests,./venv,./.venv,./migrations \
+            --severity-level high \
+            --confidence-level high \
+            --format txt || {
+            echo "::error::❌ Bandit found HIGH/CRITICAL security issues! Fix them before merging."
+            exit 1
+          }
+          echo "✅ No high-severity security issues found."
+          echo "::endgroup::"
+          echo "::group::🔍 Bandit Security Scan (MEDIUM severity — advisory)"
+          bandit -r . \
+            -x ./tests,./venv,./.venv,./migrations \
+            --severity-level medium \
+            --format txt || echo "⚠️ Bandit found medium-severity issues — review recommended."
+          echo "::endgroup::"
+
+      # ── Django deployment security check ──────────────────────────────
+      - name: 🔐 Django deployment security check
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.production
+          SECRET_KEY: ci-deploy-check-QzNyXk9mVpLsJeWuHqRtGdFbAcOiMnKlYhTgPwEv2x8j5f3z7a4r6s1o0uBCDIU
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          DATABASE_URL: sqlite:///db.sqlite3
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          pip install -r requirements/production.txt
+          echo "::group::🔐 Django Deployment Check"
+          python manage.py check --deploy --fail-level WARNING || {
+            echo "::error::❌ Django deployment check found configuration issues. Fix them before merging."
+            exit 1
+          }
+          echo "✅ Django deployment check passed!"
+          echo "::endgroup::"
