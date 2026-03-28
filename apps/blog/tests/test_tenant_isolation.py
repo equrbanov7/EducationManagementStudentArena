@@ -339,3 +339,72 @@ class BlogQuestionIsolationTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 302, f"{url_name} should redirect anon")
             self.assertIn("login", response.url, f"{url_name} should redirect to login")
+
+
+# ---------------------------------------------------------------------------
+# Test: Blog Question visible_to_all – intentional cross-org visibility
+# ---------------------------------------------------------------------------
+
+
+class BlogQuestionVisibleToAllCrossOrgTest(TestCase):
+    """
+    Document / verify that ``visible_to_all=True`` intentionally makes a
+    Question visible across organizations.
+
+    The Question model has no organization FK; visibility is controlled
+    solely by the ``visible_to_all`` flag and the ``visible_users`` M2M.
+    This is by design – the blog / Q&A subsystem is a global, non-tenant-
+    scoped feature.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher_org_a = User.objects.create_user(
+            username="bqva_teacher_a", email="bqva_a@orga.com", password="StrongPass123!"
+        )
+        self.teacher_org_a.profile.role = "teacher"
+        self.teacher_org_a.profile.save(update_fields=["role", "updated_at"])
+
+        self.teacher_org_b = User.objects.create_user(
+            username="bqva_teacher_b", email="bqva_b@orgb.com", password="StrongPass123!"
+        )
+        self.teacher_org_b.profile.role = "teacher"
+        self.teacher_org_b.profile.save(update_fields=["role", "updated_at"])
+
+        from apps.blog.models import Question
+
+        self.public_question = Question.objects.create(
+            author=self.teacher_org_a,
+            question_text="Cross-org public question",
+            answer_text="Visible everywhere",
+            visible_to_all=True,
+        )
+        self.private_question = Question.objects.create(
+            author=self.teacher_org_a,
+            question_text="Cross-org private question",
+            answer_text="Only for author",
+            visible_to_all=False,
+        )
+
+    def test_visible_to_all_question_seen_by_other_org_teacher(self):
+        """
+        A question with visible_to_all=True is intentionally shown to
+        users from any organization.  This is expected behaviour — the
+        blog Question model is not org-scoped.
+        """
+        self.client.force_login(self.teacher_org_b)
+        url = reverse("questions_i_can_see")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        returned_ids = [q.id for q in response.context["questions"]]
+        self.assertIn(self.public_question.id, returned_ids)
+
+    def test_private_question_hidden_from_other_org_teacher(self):
+        """A private question is not visible to teachers in other orgs."""
+        self.client.force_login(self.teacher_org_b)
+        url = reverse("questions_i_can_see")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        returned_ids = [q.id for q in response.context["questions"]]
+        self.assertNotIn(self.private_question.id, returned_ids)
