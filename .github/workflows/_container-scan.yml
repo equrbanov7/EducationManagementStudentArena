@@ -1,0 +1,77 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Container Scan (Trivy)
+# ═══════════════════════════════════════════════════════════════════════════
+# Restores the production Docker image from the GHA layer cache built by
+# _docker-build.yml and scans it for HIGH/CRITICAL CVEs using Trivy.
+# Results are uploaded as a SARIF artifact to the Security tab.
+# Called by ci.yml via workflow_call (after docker-build).
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🛡️ Container Scan (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+  container-scan:
+    name: 🛡️ Container Scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write   # SARIF upload to Security tab
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Rebuild from the GHA layer cache and load into local Docker daemon.
+      # Only changed layers are fetched; unchanged layers come from cache.
+      - name: 🏗️ Load production image from cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          load: true
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+      # Trivy — scan the local image for OS and library CVEs.
+      # ignore-unfixed: true — only CVEs that HAVE a fix block the build.
+      - name: 🛡️ Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          version: v0.69.3
+          image-ref: emsarena-prod:ci
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+          ignore-unfixed: true
+
+      - name: 📤 Upload Trivy SARIF to Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container-scan
+
+      - name: 📊 Print Trivy table report (for log readability)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          version: v0.69.3
+          image-ref: emsarena-prod:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"

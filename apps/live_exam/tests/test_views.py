@@ -1698,3 +1698,211 @@ class LiveExamHostActionHardeningTest(TestCase):
         """Anonymous users cannot finish a host session."""
         response = self.client.post(reverse("liveExam:host_finish", kwargs={"pin": self.session.pin}))
         self.assertIn(response.status_code, (302, 403))  # redirect to login or 403
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Host ownership enforcement — non-host org member with valid permissions
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class HostOwnershipEnforcementTest(TestCase):
+    """
+    A user who belongs to the same org, has valid exam.host permissions,
+    and is logged in with the correct org context must still be blocked
+    from all host-only actions if they are NOT the session.host_user.
+
+    This covers the gap between the HostOrgRBACTest (which tests RBAC
+    permissions) and LiveExamHostActionHardeningTest (which tests an
+    outsider without org membership).
+    """
+
+    def setUp(self):
+        self.client = Client()
+        cache.clear()
+
+        # The actual host
+        self.host = User.objects.create_user("own_host", "own_host@example.com", "StrongPass123!")
+        self.host.profile.role = ProfileRole.TEACHER
+        self.host.profile.save(update_fields=["role", "updated_at"])
+
+        # Another teacher in the SAME org with exam.host permission
+        self.colleague = User.objects.create_user("own_colleague", "own_coll@example.com", "StrongPass123!")
+        self.colleague.profile.role = ProfileRole.TEACHER
+        self.colleague.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Ownership Enforcement Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.host,
+            status="active",
+            is_active=True,
+        )
+
+        for user in (self.host, self.colleague):
+            user.profile.organization = self.org
+            user.profile.organization_type = self.org.org_type
+            user.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+            _create_org_role_and_membership(user, self.org)
+
+        self.exam = Exam.objects.create(
+            title="Ownership Exam",
+            slug="ownership-exam",
+            author=self.host,
+            is_active=True,
+        )
+        ExamQuestion.objects.create(exam=self.exam, text="Q1?", order=1)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.host)
+
+        # Login the colleague (not the host)
+        self.client.login(username="own_colleague", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+    def _all_host_post_urls(self):
+        pin = self.session.pin
+        return [
+            ("liveExam:host_start_game", {"pin": pin}),
+            ("liveExam:host_next_question", {"pin": pin}),
+            ("liveExam:host_skip_question_intro", {"pin": pin}),
+            ("liveExam:host_reveal", {"pin": pin}),
+            ("liveExam:host_finish", {"pin": pin}),
+            ("liveExam:host_toggle_lock", {"pin": pin}),
+            ("liveExam:host_remove_player", {"pin": pin}),
+            ("liveExam:host_update_settings", {"pin": pin}),
+        ]
+
+    def test_non_host_colleague_blocked_from_all_host_post_actions(self):
+        """
+        An org member with valid exam.host permissions who is NOT the
+        session.host_user must receive 404 on every host POST endpoint.
+        """
+        for url_name, kwargs in self._all_host_post_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(
+                    response.status_code,
+                    404,
+                    f"{url_name}: non-host colleague must get 404 (got {response.status_code})",
+                )
+
+    def test_non_host_colleague_blocked_from_host_lobby(self):
+        """Non-host colleague cannot access the host lobby page."""
+        response = self.client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_non_host_colleague_blocked_from_host_presentation(self):
+        """Non-host colleague cannot access the host presentation page."""
+        response = self.client.get(reverse("liveExam:host_presentation", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 404)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# State transition guards
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class StateTransitionGuardTest(TestCase):
+    """
+    Verify that host game-control endpoints reject requests that would
+    cause invalid state transitions.  All guards return 409 Conflict.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+
+        self.teacher = User.objects.create_user("stg_teacher", "stg@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="State Guard Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        _create_org_role_and_membership(self.teacher, self.org)
+
+        self.exam = Exam.objects.create(
+            title="State Guard Exam",
+            slug="state-guard-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="SG Q1?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="A", is_correct=True)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+        self.client.login(username="stg_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+    def _set_state(self, state):
+        self.session.state = state
+        self.session.save(update_fields=["state"])
+
+    # ── host_start_game ──
+
+    def test_start_game_rejected_when_already_in_question(self):
+        """start_game from QUESTION state → 409."""
+        self._set_state(LiveSession.STATE_QUESTION)
+        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    def test_start_game_rejected_when_in_reveal(self):
+        """start_game from REVEAL state → 409."""
+        self._set_state(LiveSession.STATE_REVEAL)
+        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    def test_start_game_rejected_when_finished(self):
+        """start_game from FINISHED state → 409."""
+        self._set_state(LiveSession.STATE_FINISHED)
+        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    # ── host_reveal ──
+
+    def test_reveal_rejected_from_lobby(self):
+        """reveal from LOBBY state → 409."""
+        self._set_state(LiveSession.STATE_LOBBY)
+        response = self.client.post(reverse("liveExam:host_reveal", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    def test_reveal_rejected_from_reveal(self):
+        """reveal from REVEAL state (double-reveal) → 409."""
+        self._set_state(LiveSession.STATE_REVEAL)
+        response = self.client.post(reverse("liveExam:host_reveal", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    def test_reveal_rejected_from_finished(self):
+        """reveal from FINISHED state → 409."""
+        self._set_state(LiveSession.STATE_FINISHED)
+        response = self.client.post(reverse("liveExam:host_reveal", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    # ── host_next_question ──
+
+    def test_next_question_rejected_from_lobby(self):
+        """next_question from LOBBY state → 409."""
+        self._set_state(LiveSession.STATE_LOBBY)
+        response = self.client.post(reverse("liveExam:host_next_question", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    def test_next_question_rejected_from_finished(self):
+        """next_question from FINISHED state → 409."""
+        self._set_state(LiveSession.STATE_FINISHED)
+        response = self.client.post(reverse("liveExam:host_next_question", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)
+
+    # ── host_finish ──
+
+    def test_finish_rejected_when_already_finished(self):
+        """finish from FINISHED state (double-finish) → 409."""
+        self._set_state(LiveSession.STATE_FINISHED)
+        response = self.client.post(reverse("liveExam:host_finish", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 409)

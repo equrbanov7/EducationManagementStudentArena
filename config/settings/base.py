@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "apps.audit.apps.AuditConfig",
     "daphne",
     "apps.exams",
-    "django.contrib.admin",
+    "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -44,6 +44,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
+    "core.admin_security.AdminSecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -129,6 +130,28 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
+# ---------------------------------------------------------------------------
+# Admin security settings
+# ---------------------------------------------------------------------------
+# URL path segment for the Django admin panel.  Change this in production to
+# avoid exposing the well-known /admin/ endpoint (set via ADMIN_URL_PREFIX
+# environment variable).  The value must end with a slash.
+ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "admin/")
+
+# IP allowlist for admin access.  When non-empty, only requests from these
+# addresses can reach the admin panel; all others receive HTTP 403.
+# Set ADMIN_ALLOWED_IPS as a comma-separated list in the environment, e.g.:
+#   ADMIN_ALLOWED_IPS=192.168.1.1,10.0.0.2
+_raw_admin_ips = os.getenv("ADMIN_ALLOWED_IPS", "")
+ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip()]
+
+# Rate limit for the admin login form (POST to /admin/login/).
+# Accepts the same "count/period" format used by other rate limits.
+ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "5/5m")
+ADMIN_2FA_REQUIRED = os.getenv("ADMIN_2FA_REQUIRED", "False").strip().lower() in {"1", "true", "yes", "on"}
+ADMIN_OTP_VERIFY_RATE_LIMIT = os.getenv("ADMIN_OTP_VERIFY_RATE_LIMIT", "5/10m")
+ADMIN_OTP_RESEND_RATE_LIMIT = os.getenv("ADMIN_OTP_RESEND_RATE_LIMIT", "3/10m")
+
 # Rate limiting configuration
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed
 RATELIMIT_USE_CACHE = "default"
@@ -139,6 +162,10 @@ SUBSCRIBE_RATE_LIMIT = os.getenv("SUBSCRIBE_RATE_LIMIT", "3/10m")
 LIVE_EXAM_JOIN_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_RATE_LIMIT", "20/5m")
 LIVE_STATE_RATE_LIMIT = os.getenv("LIVE_STATE_RATE_LIMIT", "120/1m")
 LIVE_REACTION_RATE_LIMIT = os.getenv("LIVE_REACTION_RATE_LIMIT", "3/10s")
+# WebSocket-specific rate limits
+LIVE_WS_CONNECT_RATE_LIMIT = os.getenv("LIVE_WS_CONNECT_RATE_LIMIT", "20/1m")
+LIVE_ANSWER_RATE_LIMIT = os.getenv("LIVE_ANSWER_RATE_LIMIT", "10/1m")
+LIVE_WS_MSG_RATE_LIMIT = os.getenv("LIVE_WS_MSG_RATE_LIMIT", "60/1m")
 AUTH_OTP_EXPIRY_SECONDS = int(os.getenv("AUTH_OTP_EXPIRY_SECONDS", "180"))
 
 # Password validation

@@ -16,6 +16,12 @@ import sentry_sdk
 from dotenv import load_dotenv
 
 from .base import (
+    ADMIN_2FA_REQUIRED,
+    ADMIN_ALLOWED_IPS,
+    ADMIN_LOGIN_RATE_LIMIT,
+    ADMIN_OTP_RESEND_RATE_LIMIT,
+    ADMIN_OTP_VERIFY_RATE_LIMIT,
+    ADMIN_URL_PREFIX,
     ASGI_APPLICATION,
     AUTH_OTP_EXPIRY_SECONDS,
     AUTH_PASSWORD_VALIDATORS,
@@ -47,9 +53,12 @@ from .base import (
     LANGUAGE_COOKIE_HTTPONLY,
     LANGUAGE_COOKIE_SAMESITE,
     LANGUAGES,
+    LIVE_ANSWER_RATE_LIMIT,
     LIVE_EXAM_JOIN_RATE_LIMIT,
     LIVE_REACTION_RATE_LIMIT,
     LIVE_STATE_RATE_LIMIT,
+    LIVE_WS_CONNECT_RATE_LIMIT,
+    LIVE_WS_MSG_RATE_LIMIT,
     LOCALE_PATHS,
     LOGIN_RATE_LIMIT,
     LOGIN_REDIRECT_URL,
@@ -127,6 +136,22 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
+
+ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "manage/")
+if ADMIN_URL_PREFIX.strip("/").lower() == "admin":
+    raise ImproperlyConfigured("ADMIN_URL_PREFIX must not expose the default /admin/ path in production.")
+
+_raw_admin_ips = os.getenv("ADMIN_ALLOWED_IPS", "")
+ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip()]
+if not ADMIN_ALLOWED_IPS:
+    raise ImproperlyConfigured("ADMIN_ALLOWED_IPS must contain at least one address in production.")
+
+ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "3/15m")
+ADMIN_2FA_REQUIRED = _env_bool("ADMIN_2FA_REQUIRED", True)
+if not ADMIN_2FA_REQUIRED:
+    raise ImproperlyConfigured("ADMIN_2FA_REQUIRED must remain enabled in production.")
+ADMIN_OTP_VERIFY_RATE_LIMIT = os.getenv("ADMIN_OTP_VERIFY_RATE_LIMIT", "5/10m")
+ADMIN_OTP_RESEND_RATE_LIMIT = os.getenv("ADMIN_OTP_RESEND_RATE_LIMIT", "3/10m")
 
 # ALLOWED_HOSTS must be properly configured
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]

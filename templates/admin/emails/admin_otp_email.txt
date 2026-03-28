@@ -1,0 +1,9 @@
+Salam {{ user.get_username }},
+
+EMS Arena admin panelinə giriş üçün OTP kodunuz:
+
+{{ code }}
+
+Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+
+Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.

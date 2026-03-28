@@ -188,6 +188,13 @@ def host_start_game(request, pin):
 
     _ensure_host_org_permission(request, session.exam.organization)
 
+    # ── State guard: game can only be started from LOBBY ──
+    if session.state != LiveSession.STATE_LOBBY:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "game_already_started")},
+            status=409,
+        )
+
     # 1) Host neçə sual istəyir? (form input name="question_count")
     raw = (request.POST.get("question_count") or "").strip()
 
@@ -319,6 +326,13 @@ def host_next_question(request, pin):
 
     _ensure_host_org_permission(request, session.exam.organization)
 
+    # ── State guard: next question only from QUESTION or REVEAL ──
+    if session.state not in (LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL):
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "invalid_state_for_next")},
+            status=409,
+        )
+
     # Kahoot axını:
     # Reveal mərhələsindən sonra növbəti sual üçün index++ edirik
     if session.state == LiveSession.STATE_REVEAL:
@@ -428,6 +442,13 @@ def host_reveal(request, pin):
 
     _ensure_host_org_permission(request, session.exam.organization)
 
+    # ── State guard: reveal only from QUESTION state ──
+    if session.state != LiveSession.STATE_QUESTION:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "not_in_question_state")},
+            status=409,
+        )
+
     idx = int(session.current_index or 0)
     eq = get_question_by_index(session, idx)
     if not eq:
@@ -459,6 +480,13 @@ def host_finish(request, pin):
         raise Http404()
 
     _ensure_host_org_permission(request, session.exam.organization)
+
+    # ── State guard: cannot finish an already-finished session ──
+    if session.state == LiveSession.STATE_FINISHED:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "session_already_finished")},
+            status=409,
+        )
 
     session.state = LiveSession.STATE_FINISHED
     session.current_question_id = None
