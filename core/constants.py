@@ -307,6 +307,9 @@ class AuditAction:
     LOGOUT = "logout"
     VIEW = "view"
     EXPORT = "export"
+    VERIFY = "verify"
+    DENY = "deny"
+    CHALLENGE = "challenge"
 
     CHOICES = [
         (CREATE, "Create"),
@@ -316,4 +319,7 @@ class AuditAction:
         (LOGOUT, "Logout"),
         (VIEW, "View"),
         (EXPORT, "Export"),
+        (VERIFY, "Verify"),
+        (DENY, "Deny"),
+        (CHALLENGE, "Challenge"),
     ]

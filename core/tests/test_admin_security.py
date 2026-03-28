@@ -10,7 +10,9 @@ Covers:
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 
+from apps.audit.models import AuditLog
 from core.admin_security import AdminSecurityMiddleware
+from core.constants import AuditAction
 
 _LOCMEM_CACHE = {
     "default": {
@@ -49,6 +51,13 @@ class AdminIPRestrictionTest(TestCase):
         request = self.factory.get("/admin/", REMOTE_ADDR="1.2.3.4")
         response = self.middleware(request)
         self.assertEqual(response.status_code, 403)
+        self.assertTrue(
+            AuditLog.objects.filter(
+                action=AuditAction.DENY,
+                resource_type="admin_ip_deny",
+                resource_id="1.2.3.4",
+            ).exists()
+        )
 
     @override_settings(ADMIN_URL_PREFIX="admin/", ADMIN_ALLOWED_IPS=[])
     def test_empty_allowlist_permits_all_ips(self):
@@ -129,6 +138,13 @@ class AdminLoginRateLimitTest(TestCase):
         response = self.middleware(blocked)
         self.assertEqual(response.status_code, 429)
         self.assertIn("Retry-After", response)
+        self.assertTrue(
+            AuditLog.objects.filter(
+                action=AuditAction.DENY,
+                resource_type="admin_login_rate_limit",
+                resource_id="192.168.1.52",
+            ).exists()
+        )
 
     def test_get_to_login_is_not_rate_limited(self):
         # Exhaust POST quota first
