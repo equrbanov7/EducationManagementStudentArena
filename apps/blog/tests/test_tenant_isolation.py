@@ -249,3 +249,93 @@ class BlogPostReadIsolationTest(TestCase):
         response = self.client.get(url)
         # Unpublished posts should not be served to other users (404 or redirect)
         self.assertIn(response.status_code, (302, 403, 404))
+
+
+# ---------------------------------------------------------------------------
+# Test: Question ownership & visibility isolation
+# ---------------------------------------------------------------------------
+
+
+class BlogQuestionIsolationTest(TestCase):
+    """
+    Teachers author questions; students must not create questions, and
+    a user must not see private questions they were not granted access to.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher = User.objects.create_user(
+            username="q_teacher", email="q_teacher@example.com", password="StrongPass123!"
+        )
+        self.teacher.profile.role = "teacher"
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.student = User.objects.create_user(
+            username="q_student", email="q_student@example.com", password="StrongPass123!"
+        )
+        # student profile role stays default (student)
+
+        self.other_teacher = User.objects.create_user(
+            username="q_other_teacher", email="q_other@example.com", password="StrongPass123!"
+        )
+        self.other_teacher.profile.role = "teacher"
+        self.other_teacher.profile.save(update_fields=["role", "updated_at"])
+
+        from apps.blog.models import Question
+
+        self.private_question = Question.objects.create(
+            author=self.teacher,
+            question_text="Private question from teacher",
+            answer_text="Secret answer",
+            visible_to_all=False,
+        )
+
+    def test_student_cannot_create_question(self):
+        """Students are denied access to create_question (teacher_only guard)."""
+        self.client.force_login(self.student)
+        url = reverse("create_question")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_student_cannot_post_create_question(self):
+        """Students cannot create a question via POST."""
+        self.client.force_login(self.student)
+        url = reverse("create_question")
+        response = self.client.post(url, {"question_text": "injected", "answer_text": "hack"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_my_questions_shows_only_own(self):
+        """my_questions returns only the current user's questions."""
+        self.client.force_login(self.other_teacher)
+        url = reverse("my_questions")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        for q in response.context["questions"]:
+            self.assertEqual(q.author_id, self.other_teacher.id)
+
+    def test_private_question_not_visible_to_unauthorised_user(self):
+        """A private question is not returned in questions_i_can_see for a non-granted user."""
+        self.client.force_login(self.other_teacher)
+        url = reverse("questions_i_can_see")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        returned_ids = [q.id for q in response.context["questions"]]
+        self.assertNotIn(self.private_question.id, returned_ids)
+
+    def test_private_question_visible_to_author(self):
+        """A private question is visible in questions_i_can_see for its author."""
+        self.client.force_login(self.teacher)
+        url = reverse("questions_i_can_see")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        returned_ids = [q.id for q in response.context["questions"]]
+        self.assertIn(self.private_question.id, returned_ids)
+
+    def test_anonymous_cannot_access_questions(self):
+        """Anonymous users are redirected to login for question pages."""
+        for url_name in ("create_question", "my_questions", "questions_i_can_see"):
+            url = reverse(url_name)
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 302, f"{url_name} should redirect anon")
+            self.assertIn("login", response.url, f"{url_name} should redirect to login")
