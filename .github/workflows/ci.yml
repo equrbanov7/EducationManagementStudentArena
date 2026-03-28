@@ -27,6 +27,12 @@ jobs:
     with:
       python-version: "3.11.6"
 
+  build:
+    needs: lint
+    uses: ./.github/workflows/_build.yml
+    with:
+      python-version: "3.11.6"
+
   security:
     needs: lint
     uses: ./.github/workflows/_security.yml
