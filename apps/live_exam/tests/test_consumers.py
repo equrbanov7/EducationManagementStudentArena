@@ -1498,6 +1498,10 @@ class WebSocketRateLimitTest(TransactionTestCase):
 
     def test_message_flood_is_blocked(self):
         """Exceeding LIVE_WS_MSG_RATE_LIMIT causes a rate_limited error response."""
+        option_id = (
+            ExamQuestionOption.objects.filter(question=self.question)
+            .values_list("id", flat=True)[0]
+        )
 
         async def scenario():
             communicator = WebsocketCommunicator(
@@ -1514,9 +1518,7 @@ class WebSocketRateLimitTest(TransactionTestCase):
                         {
                             "type": "answer",
                             "question_id": self.question.id,
-                            "option_id": ExamQuestionOption.objects.filter(question=self.question).values_list(
-                                "id", flat=True
-                            )[0],
+                            "option_id": option_id,
                             "answer_ms": 200,
                         }
                     )

@@ -39,6 +39,7 @@ jobs:
             BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
             BUILD_DATABASE_URL=sqlite:////tmp/build.db
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+            BUILD_ADMIN_ALLOWED_IPS=127.0.0.1
 
       # Spin up the production stack with CI-safe dummy secrets.
       # SECURE_SSL_REDIRECT=False avoids HTTPS redirect inside plain HTTP CI.
@@ -51,6 +52,7 @@ jobs:
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
           SECURE_SSL_REDIRECT: "False"
@@ -96,6 +98,7 @@ jobs:
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
         run: |
@@ -112,6 +115,7 @@ jobs:
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
         run: |
