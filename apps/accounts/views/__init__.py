@@ -21,8 +21,11 @@ from .auth import (
     logout_view,
     register_view,
     resend_code_view,
+    resend_otp_api_view,
+    send_otp_api_view,
     verify_code_view,
     verify_email_link_view,
+    verify_otp_api_view,
 )
 
 # Dashboard views
@@ -79,6 +82,9 @@ __all__ = [
     "verify_code_view",
     "verify_email_link_view",
     "resend_code_view",
+    "send_otp_api_view",
+    "verify_otp_api_view",
+    "resend_otp_api_view",
     "logout_view",
     # Profile
     "user_profile",

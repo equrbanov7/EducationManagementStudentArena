@@ -81,7 +81,7 @@ def take_exam(request, slug, attempt_id):
 
     # Sualları Attempt-ə bağlanmış cavablardan götürürük
     answers_qs = (
-        attempt.answers.select_related("question")
+        attempt.answers.select_related("question", "question__exam", "question__block")
         .prefetch_related("question__options", "selected_options", "files")
         .order_by("id")
     )
@@ -89,14 +89,14 @@ def take_exam(request, slug, attempt_id):
     if not answers_qs.exists():
         generate_random_questions_for_attempt(attempt)
         answers_qs = (
-            attempt.answers.select_related("question")
+            attempt.answers.select_related("question", "question__exam", "question__block")
             .prefetch_related("question__options", "selected_options", "files")
             .order_by("id")
         )
 
     if not answers_qs.exists():
         answers_qs = (
-            attempt.answers.select_related("question")
+            attempt.answers.select_related("question", "question__exam", "question__block")
             .prefetch_related("question__options", "selected_options", "files")
             .order_by("id")
         )
@@ -225,10 +225,11 @@ def take_exam(request, slug, attempt_id):
                 paint_clear = request.POST.get(f"paint_clear_{q.id}") == "1"
                 paint_data_url = (request.POST.get(f"paint_data_{q.id}") or "").strip()
 
-                if paint_clear:
+                if not q.paint_enabled_effective:
                     _clear_paint_from_answer(ans)
-
-                if paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
+                elif paint_clear:
+                    _clear_paint_from_answer(ans)
+                elif paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
                     _save_paint_png_to_answer(ans, paint_data_url)
                 elif not paint_enabled:
                     _clear_paint_from_answer(ans)
