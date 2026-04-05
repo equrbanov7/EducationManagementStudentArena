@@ -69,25 +69,25 @@
                     <g class="live-avatar__accessory live-avatar__accessory--bowtie">
                         <path d="M52 108l-14 10 3-18 14 4z" fill="#ef4444"></path>
                         <path d="M88 108l14 10-3-18-14 4z" fill="#ef4444"></path>
-                        <circle cx="70" cy="108" r="7" fill="#7c3aed"></circle>
+                        <circle cx="70" cy="108" r="7" fill="#2563eb"></circle>
                     </g>
                 `;
             case "headphones":
                 return `
                     <g class="live-avatar__accessory live-avatar__accessory--headphones" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M34 66c0-24 14-40 36-40s36 16 36 40" stroke="#1f2937" stroke-width="6"></path>
-                        <rect x="24" y="62" width="14" height="30" rx="7" fill="#8b5cf6" stroke="#1f2937" stroke-width="4"></rect>
-                        <rect x="102" y="62" width="14" height="30" rx="7" fill="#8b5cf6" stroke="#1f2937" stroke-width="4"></rect>
+                        <rect x="24" y="62" width="14" height="30" rx="7" fill="#38bdf8" stroke="#1f2937" stroke-width="4"></rect>
+                        <rect x="102" y="62" width="14" height="30" rx="7" fill="#38bdf8" stroke="#1f2937" stroke-width="4"></rect>
                     </g>
                 `;
             case "flower":
                 return `
                     <g class="live-avatar__accessory live-avatar__accessory--flower">
                         <circle cx="102" cy="28" r="7" fill="#facc15"></circle>
-                        <circle cx="94" cy="28" r="6" fill="#f472b6"></circle>
-                        <circle cx="110" cy="28" r="6" fill="#f472b6"></circle>
-                        <circle cx="102" cy="20" r="6" fill="#f472b6"></circle>
-                        <circle cx="102" cy="36" r="6" fill="#f472b6"></circle>
+                        <circle cx="94" cy="28" r="6" fill="#2dd4bf"></circle>
+                        <circle cx="110" cy="28" r="6" fill="#2dd4bf"></circle>
+                        <circle cx="102" cy="20" r="6" fill="#2dd4bf"></circle>
+                        <circle cx="102" cy="36" r="6" fill="#2dd4bf"></circle>
                         <path d="M100 36c-5 5-8 10-9 16" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round"></path>
                     </g>
                 `;
