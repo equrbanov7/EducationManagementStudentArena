@@ -33,7 +33,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
 }
 
 .summary-header {
@@ -316,35 +316,35 @@
 .teacher-feedback-box {
     margin-top: 25px;
     background: #fff;
-    border: 1px solid #c7d2fe;
+    border: 1px solid #bfdbfe;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .tf-header {
-    background: #eef2ff;
+    background: #eff6ff;
     padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e0e7ff;
+    border-bottom: 1px solid #dbeafe;
 }
 .tf-avatar {
     width: 32px; height: 32px;
-    background: #4f46e5;
+    background: #2563eb;
     color: white;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
 }
-.tf-title { color: #3730a3; font-weight: 700; margin-left: 8px; }
+.tf-title { color: #1d4ed8; font-weight: 700; margin-left: 8px; }
 .tf-score {
     background: #fff;
-    color: #4338ca;
+    color: #1d4ed8;
     padding: 4px 12px;
     border-radius: 20px;
     font-weight: 700;
-    border: 1px solid #c7d2fe;
+    border: 1px solid #bfdbfe;
 }
 .tf-body { padding: 20px; color: #1f2937; line-height: 1.6; }
 

@@ -52,7 +52,7 @@
 /* Siyahı maddələrinin qarşısındakı kiçik ikonlar üçün */
 .subscribe-benefits li::before {
     content: '✓'; 
-    color: #4f46e5; /* Əsas rəng */
+    color: #2563eb; /* Əsas rəng */
     font-weight: bold;
     margin-right: 10px;
     font-size: 1.2rem;
@@ -80,8 +80,8 @@
 }
 
 .form-group input[type="email"]:focus {
-    border-color: #4f46e5; /* Focus olanda rəng dəyişsin */
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    border-color: #2563eb; /* Focus olanda rəng dəyişsin */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .subscribe-form-error {
@@ -95,7 +95,7 @@
 .btn-subscribe {
     width: 100%;
     padding: 15px;
-    background-color: #4f46e5;
+    background-color: #2563eb;
     color: white;
     border: none;
     border-radius: 8px;
@@ -106,7 +106,7 @@
 }
 
 .btn-subscribe:hover {
-    background-color: #3730a3;
+    background-color: #1d4ed8;
 }
 
 /* Spam xəbərdarlığı */

@@ -1,8 +1,8 @@
 /* static/css/createAndEditExam.css */
 
 :root {
-    --primary-color: #4f46e5; /* Modern İndigo */
-    --primary-hover: #4338ca;
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
     --text-dark: #111827;
     --text-medium: #374151;
     --text-light: #6b7280;
@@ -11,7 +11,7 @@
     --border-color: #e5e7eb;
     --error-color: #ef4444;
     --success-color: #10b981;
-    --focus-ring: rgba(79, 70, 229, 0.25);
+    --focus-ring: rgba(37, 99, 235, 0.25);
 }
 
 /* =========================================
@@ -282,7 +282,7 @@
 
 .date-card:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .date-card-header {
@@ -458,7 +458,7 @@
     background-color: var(--primary-color);
     color: white;
     border: none;
-    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
 }
 
 .btn-submit:hover {

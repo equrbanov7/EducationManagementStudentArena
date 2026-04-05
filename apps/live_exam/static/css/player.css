@@ -1,16 +1,16 @@
 :root {
-    --player-bg-1: #2b0751;
-    --player-bg-2: #5c239a;
-    --player-bg-3: #7e3af2;
-    --player-bg-4: #1a082f;
+    --player-bg-1: #0b2a52;
+    --player-bg-2: #0f4c81;
+    --player-bg-3: #2563eb;
+    --player-bg-4: #081427;
     --player-surface: rgba(255, 255, 255, 0.16);
     --player-surface-strong: rgba(255, 255, 255, 0.94);
     --player-border: rgba(255, 255, 255, 0.22);
     --player-text: #ffffff;
     --player-text-muted: rgba(255, 255, 255, 0.72);
-    --player-ink: #261342;
-    --player-ink-soft: #6c5a8f;
-    --player-shadow: 0 30px 80px rgba(14, 7, 37, 0.35);
+    --player-ink: #10284a;
+    --player-ink-soft: #5f7796;
+    --player-shadow: 0 30px 80px rgba(8, 23, 55, 0.35);
     --player-green: #63c438;
     --player-red: #ff3f6c;
     --player-blue: #2b8fff;
@@ -30,7 +30,7 @@ body.live-player-page {
     background:
         radial-gradient(circle at 18% 18%, rgba(251, 191, 36, 0.16), transparent 20%),
         radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.12), transparent 20%),
-        radial-gradient(circle at 50% 80%, rgba(167, 139, 250, 0.2), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(96, 165, 250, 0.2), transparent 30%),
         linear-gradient(150deg, var(--player-bg-4) 0%, var(--player-bg-1) 25%, var(--player-bg-2) 60%, var(--player-bg-3) 100%);
     overflow-x: hidden;
 }
@@ -189,7 +189,7 @@ body.live-player-page {
     background: rgba(255, 255, 255, 0.18);
     font-weight: 800;
     letter-spacing: -0.02em;
-    box-shadow: 0 16px 40px rgba(14, 7, 37, 0.14);
+    box-shadow: 0 16px 40px rgba(8, 23, 55, 0.14);
 }
 
 .live-player-title {
@@ -204,7 +204,7 @@ body.live-player-page {
     font-family: "Space Grotesk", "Manrope", sans-serif;
     font-size: clamp(1.05rem, 2vw, 1.4rem);
     font-weight: 700;
-    box-shadow: 0 20px 50px rgba(14, 7, 37, 0.16);
+    box-shadow: 0 20px 50px rgba(8, 23, 55, 0.16);
 }
 
 .live-player-title__icon {
@@ -374,7 +374,7 @@ body.live-player-page {
     border-bottom: 0;
     border-radius: 120px 120px 0 0;
     animation: archBounce 1.2s ease-in-out infinite;
-    filter: drop-shadow(0 18px 35px rgba(14, 7, 37, 0.25));
+    filter: drop-shadow(0 18px 35px rgba(8, 23, 55, 0.25));
 }
 
 .phase-arch::after {
@@ -439,7 +439,7 @@ body.live-player-page {
     width: 100%;
     height: 14px;
     border-radius: 999px;
-    background: rgba(92, 35, 154, 0.14);
+    background: rgba(14, 165, 233, 0.14);
 }
 
 .intro-progress__meter,
@@ -447,7 +447,7 @@ body.live-player-page {
     height: 100%;
     width: 0;
     border-radius: inherit;
-    background: linear-gradient(90deg, #7c3aed 0%, #5b21b6 100%);
+    background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
     transition: width 0.14s linear;
 }
 
@@ -488,7 +488,7 @@ body.live-player-page {
     text-align: left;
     cursor: pointer;
     overflow: hidden;
-    box-shadow: 0 20px 38px rgba(14, 7, 37, 0.22);
+    box-shadow: 0 20px 38px rgba(8, 23, 55, 0.22);
     transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -518,8 +518,8 @@ body.live-player-page {
 .option-btn.opt-1 { background: linear-gradient(135deg, #2b8fff, #1d4ed8); }
 .option-btn.opt-2 { background: linear-gradient(135deg, #ffb703, #f97316); }
 .option-btn.opt-3 { background: linear-gradient(135deg, #35c982, #0f9f74); }
-.option-btn.opt-4 { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
-.option-btn.opt-5 { background: linear-gradient(135deg, #f472b6, #db2777); }
+.option-btn.opt-4 { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.option-btn.opt-5 { background: linear-gradient(135deg, #2dd4bf, #0f766e); }
 
 .option-letter {
     position: relative;
@@ -543,7 +543,7 @@ body.live-player-page {
 }
 
 .option-btn.selected {
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 22px 42px rgba(14, 7, 37, 0.24);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 22px 42px rgba(8, 23, 55, 0.24);
     transform: translateY(-2px);
 }
 
@@ -589,13 +589,13 @@ body.live-player-page {
     border-radius: 18px;
     padding: 14px 24px;
     background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 100%);
-    color: #2b0751;
+    color: #0b2a52;
     font: inherit;
     font-weight: 900;
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 20px 40px rgba(14, 7, 37, 0.18);
+    box-shadow: 0 20px 40px rgba(8, 23, 55, 0.18);
     cursor: pointer;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
@@ -637,7 +637,7 @@ body.live-player-page {
     font-weight: 900;
     color: #ffffff;
     border: 10px solid rgba(255, 255, 255, 0.92);
-    box-shadow: 0 28px 55px rgba(14, 7, 37, 0.22);
+    box-shadow: 0 28px 55px rgba(8, 23, 55, 0.22);
 }
 
 .result-shell.is-correct .result-shell__icon {
@@ -671,7 +671,7 @@ body.live-player-page {
     border-radius: 24px;
     background: rgba(15, 17, 42, 0.36);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 22px 46px rgba(14, 7, 37, 0.18);
+    box-shadow: 0 22px 46px rgba(8, 23, 55, 0.18);
     display: grid;
     gap: 8px;
 }
@@ -732,14 +732,14 @@ body.live-player-page {
     border-radius: 24px;
     background: rgba(15, 17, 42, 0.34);
     border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 18px 36px rgba(14, 7, 37, 0.14);
+    box-shadow: 0 18px 36px rgba(8, 23, 55, 0.14);
     will-change: transform;
 }
 
 .leaderboard-row.is-self {
-    background: linear-gradient(135deg, rgba(123, 63, 228, 0.46), rgba(76, 29, 149, 0.5));
-    border-color: rgba(196, 181, 253, 0.58);
-    box-shadow: 0 20px 42px rgba(91, 33, 182, 0.22);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.46), rgba(30, 64, 175, 0.5));
+    border-color: rgba(147, 197, 253, 0.58);
+    box-shadow: 0 20px 42px rgba(30, 64, 175, 0.22);
 }
 
 .leaderboard-row__left,
@@ -831,7 +831,7 @@ body.live-player-page {
 
 .final-shell__trophy {
     font-size: clamp(4rem, 12vw, 6rem);
-    filter: drop-shadow(0 16px 30px rgba(14, 7, 37, 0.24));
+    filter: drop-shadow(0 16px 30px rgba(8, 23, 55, 0.24));
 }
 
 .final-leaderboard {
@@ -888,9 +888,9 @@ body.live-player-page {
     width: min(1040px, calc(100vw - 36px));
     padding: 14px 18px;
     border-radius: 28px;
-    background: rgba(69, 19, 131, 0.52);
+    background: rgba(30, 64, 175, 0.52);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 24px 60px rgba(14, 7, 37, 0.28);
+    box-shadow: 0 24px 60px rgba(8, 23, 55, 0.28);
     display: flex;
     align-items: center;
     justify-content: flex-start;
