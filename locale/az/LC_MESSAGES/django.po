@@ -9277,6 +9277,46 @@ msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
 msgstr "Rəsm cavabını aktiv et"
 
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:123
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_current_state"
+msgstr "Hazırkı vəziyyət"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:126
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_active"
+msgstr "Aktivdir"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:128
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_inactive"
+msgstr "Deaktivdir"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:132
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_source"
+msgstr "Tətbiq olunan mənbə"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:135
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_question"
+msgstr "Bu sualın öz ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:137
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_block"
+msgstr "Mövzu bloku ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:139
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_exam"
+msgstr "Ümumi imtahan ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:143
+msgctxt "exams.template.add_exam_question"
+msgid "paint_priority_order"
+msgstr "Prioritet: sualın öz ayarı > mövzu bloku > ümumi imtahan."
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:168
 msgctxt "exams.template.add_exam_question"
 msgid "label_topic_block_subject_section"
@@ -9587,32 +9627,46 @@ msgstr "Yadda saxla"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:4
 msgctxt "exams.template.create_question_bank"
 msgid "title_question_bank"
-msgstr "Sual"
+msgstr "Yazılı sual bankı"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:229
 msgctxt "exams.template.create_question_bank"
 msgid "heading_question_bank"
-msgstr "Invalid link"
+msgstr "yazılı sual bankı"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:238
 msgctxt "exams.template.create_question_bank"
 msgid "label_total_question_count"
-msgstr "Sual"
+msgstr "İmtahanda göstəriləcək sual sayı"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:243
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_all_questions"
-msgstr "Məkan daxil edin"
+msgstr "0 = bütün suallar"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Sual"
+msgstr "Tələbəyə neçə aktiv sual göstəriləcəyini yazın. 0 daxil etsəniz bütün suallar göstəriləcək."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:289
+#: apps/exams/templates/exams/teacher/create_question_bank.html:334
+#: apps/exams/templates/exams/teacher/create_question_bank.html:395
+msgctxt "exams.template.create_question_bank"
+msgid "label_block_enable_paint"
+msgstr "Bu bölmədə rəsm cavabını aktiv et"
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:290
+#: apps/exams/templates/exams/teacher/create_question_bank.html:335
+#: apps/exams/templates/exams/teacher/create_question_bank.html:396
+msgctxt "exams.template.create_question_bank"
+msgid "help_block_enable_paint"
+msgstr "Bu seçim bölmədəki suallar üçün paint-i default aktiv edir. Hər hansı sualda ayrıca söndürsəniz, həmin sualda paint görünməyəcək."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
 msgid "block_existing"
-msgstr "Bu tip fayl təhlükəli ola bilər və yüklənməsi qadağandır."
+msgstr "Mövcud bölmə"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:259
 #: apps/exams/templates/exams/teacher/create_question_bank.html:295
@@ -9626,46 +9680,48 @@ msgstr "Sil"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:355
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_name"
-msgstr "Qrup adı / nömrəsi"
+msgstr "Bölmə adı / nömrəsi"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:274
 #: apps/exams/templates/exams/teacher/create_question_bank.html:306
 #: apps/exams/templates/exams/teacher/create_question_bank.html:356
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_time_minutes"
-msgstr ""
-"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli "
-"adlardan istifadə edin."
+msgstr "Bölmə müddəti (dəqiqə)"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:279
 #: apps/exams/templates/exams/teacher/create_question_bank.html:307
 #: apps/exams/templates/exams/teacher/create_question_bank.html:357
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_unlimited"
-msgstr "Məs: Lab 1"
+msgstr "Məhdudsuz üçün boş saxlayın"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:283
 #: apps/exams/templates/exams/teacher/create_question_bank.html:311
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions"
-msgstr "Sual"
+msgstr "Suallar"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:292
 #: apps/exams/templates/exams/teacher/create_question_bank.html:302
 #: apps/exams/templates/exams/teacher/create_question_bank.html:361
 msgctxt "exams.template.create_question_bank"
 msgid "block_default"
-msgstr "Search default"
+msgstr "Bölmə"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:312
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_line"
-msgstr "Məs: Lab 1"
+msgstr ""
+"Məsələn:\n"
+"1. Fotosintez prosesini izah edin.\n"
+"2) Mitoxondriyanın funksiyasını yazın.\n"
+"3. Bərpa olunan enerji mənbələrinə nümunələr verin."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:320
 msgctxt "exams.template.create_question_bank"
 msgid "action_add_new_block"
-msgstr "Yeni Mövzu Əlavə Et"
+msgstr "Yeni bölmə əlavə et"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:325
 msgctxt "exams.template.create_question_bank"
@@ -9680,44 +9736,55 @@ msgstr "Yadda saxla"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:340
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_title"
-msgstr "Silinməni təsdiqlə"
+msgstr "Silməni təsdiqlə"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:342
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "Bu kursu silmək istədiniz?"
+msgstr "Bu bölmə və içindəki suallar bankdan silinəcək. Davam etmək istəyirsiniz?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_no_cancel"
-msgstr "Ləğv et"
+msgstr "Xeyr, saxla"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:346
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_yes_delete"
-msgstr "Silmək istədiyinizə əminsiniz?"
+msgstr "Bəli, sil"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:353
 msgctxt "exams.template.create_question_bank"
 msgid "block_new"
-msgstr "Mövzu Bloku"
+msgstr "Yeni bölmə"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:358
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions_copy_paste"
-msgstr "Sual"
+msgstr "Sualları buraya yapışdırın"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:359
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_text"
-msgstr "Məs: Lab 1"
+msgstr ""
+"Məsələn:\n"
+"1. Fotosintez prosesini izah edin.\n"
+"2) Mitoxondriyanın funksiyasını yazın.\n"
+"3. Bərpa olunan enerji mənbələrinə nümunələr verin."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:360
+msgctxt "exams.template.create_question_bank"
+msgid "help_question_formats"
+msgstr ""
+"Hər sualı yeni sətirdən başlayın. Dəstəklənən nömrələmə formatları: 1. Sual "
+"mətni və ya 1) Sual mətni."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:360
 msgctxt "exams.template.create_question_bank"
 msgid "alert_duplicate_block_name"
 msgstr ""
-"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli "
-"adlardan istifadə edin."
+"Diqqət: '{block_name}' adlı bölmə artıq mövcuddur. Zəhmət olmasa fərqli ad "
+"seçin."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:4
 msgctxt "exams.template.create_student_group"
@@ -11245,13 +11312,13 @@ msgstr "Qrup silindi."
 msgctxt "exams.view.question_bank.message"
 msgid "duplicate_block_name_request"
 msgstr ""
-"Bu adda blok artıq bu imtahanda mövcuddur.Diqqət: '{block_name}' adlı blok "
-"artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin."
+"'{block_name}' adlı bölmə artıq bu imtahanda mövcuddur. Zəhmət olmasa "
+"fərqli ad seçin."
 
 #: apps/exams/views/teacher/question_bank.py:97
 msgctxt "exams.view.question_bank.message"
 msgid "block_name_exists_db"
-msgstr "'{block_name}' adlı blok artıq bazada mövcuddur."
+msgstr "'{block_name}' adlı bölmə artıq bu imtahanda mövcuddur."
 
 #: apps/exams/views/teacher/question_bank.py:144
 msgctxt "exams.view.question_bank.message"

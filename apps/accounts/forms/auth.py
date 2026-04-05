@@ -15,7 +15,7 @@ from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
-from ..models import ProfileRole
+from ..models import EmailOTP, ProfileRole
 from ..services import issue_email_otp, purge_stale_pending_registration
 
 User = get_user_model()
@@ -640,7 +640,7 @@ class CustomPasswordResetForm(PasswordResetForm):
     ):
         email = self.cleaned_data["email"]
         for user in self.get_users(email):
-            code, expires_at = issue_email_otp(user)
+            code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.PASSWORD_RESET)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
             reset_url = build_absolute_url(

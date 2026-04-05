@@ -36,8 +36,11 @@ from .base import (
     CSRF_COOKIE_HTTPONLY,
     CSRF_COOKIE_SAMESITE,
     DEFAULT_AUTO_FIELD,
+    DEFAULT_FROM_EMAIL,
     EMAIL_BACKEND,
     EMAIL_HOST,
+    EMAIL_HOST_PASSWORD,
+    EMAIL_HOST_USER,
     EMAIL_PORT,
     EMAIL_USE_SSL,
     EMAIL_USE_TLS,
@@ -198,21 +201,28 @@ else:
 #   testing and onboarding are not blocked by real SMTP quota/provider issues.
 # - Opt into real SMTP locally with LOCAL_USE_SMTP_EMAIL=1.
 LOCAL_USE_SMTP_EMAIL = _env_bool("LOCAL_USE_SMTP_EMAIL", False)
+_resolved_local_email_user = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
+_resolved_local_email_password = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     (
         "django.core.mail.backends.smtp.EmailBackend"
-        if LOCAL_USE_SMTP_EMAIL and os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
+        if LOCAL_USE_SMTP_EMAIL and _resolved_local_email_user and _resolved_local_email_password
         else "django.core.mail.backends.console.EmailBackend"
     ),
 )
 EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", EMAIL_PORT))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() == "true"
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() == "true"
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or EMAIL_HOST_USER or "noreply@emsarena.local"
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", str(EMAIL_USE_TLS)).lower() in {"1", "true", "yes", "on"}
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", str(EMAIL_USE_SSL)).lower() in {"1", "true", "yes", "on"}
+EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", EMAIL_HOST_USER)
+EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", EMAIL_HOST_PASSWORD)
+DEFAULT_FROM_EMAIL = (
+    os.getenv("DEFAULT_FROM_EMAIL")
+    or os.getenv("BREVO_FROM_EMAIL")
+    or os.getenv("BREVO_EMAIL")
+    or "no-reply@emsarena.com"
+)
 
 # Static files storage - Simple for development
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"

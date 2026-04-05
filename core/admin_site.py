@@ -16,6 +16,7 @@ from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 
+from apps.accounts.models import EmailOTP
 from apps.accounts.services import verify_otp_code
 from core.admin_auth import (
     AdminOTPForm,
@@ -161,7 +162,11 @@ class EMSArenaAdminSite(admin.AdminSite):
                 )
                 form.add_error(None, "Çox sayda yalnış OTP cəhdi edildi. Bir az sonra yenidən cəhd edin.")
             elif form.is_valid():
-                success, otp = verify_otp_code(user, form.cleaned_data["code"])
+                success, otp = verify_otp_code(
+                    user,
+                    form.cleaned_data["code"],
+                    purpose=EmailOTP.Purpose.ADMIN_LOGIN,
+                )
                 if not success or otp is None:
                     retry_limited, retry_after = record_admin_verify_failure(request, user=user)
                     log_admin_security_event(
@@ -177,7 +182,8 @@ class EMSArenaAdminSite(admin.AdminSite):
                         form.add_error(None, "Çox sayda yalnış OTP cəhdi edildi. Bir az sonra yenidən cəhd edin.")
                 else:
                     otp.is_used = True
-                    otp.save(update_fields=["is_used"])
+                    otp.is_verified = True
+                    otp.save(update_fields=["is_used", "is_verified"])
                     clear_admin_verify_rate_limit(request, user=user)
                     mark_admin_2fa_verified(request)
                     log_admin_security_event(
