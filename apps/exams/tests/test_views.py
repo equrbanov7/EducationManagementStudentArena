@@ -2,6 +2,7 @@
 View tests for exams app.
 """
 
+import re
 from datetime import timedelta
 from urllib.parse import urlencode
 
@@ -14,7 +15,7 @@ from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -2062,6 +2063,169 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("from_section=my-courses", response.url)
         self.assertIn("return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-courses", response.url)
+
+
+class WrittenExamPaintInheritanceTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="written_paint_teacher",
+            email="written_paint_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.student = User.objects.create_user(
+            username="written_paint_student",
+            email="written_paint_student@example.com",
+            password="StrongPass123!",
+        )
+
+        self.organization = Organization.objects.create(
+            name="Written Paint Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
+
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Paint Exam",
+            exam_type="written",
+            is_active=True,
+            enable_paint=True,
+        )
+        self.block = QuestionBlock.objects.create(
+            exam=self.exam,
+            name="Bölmə 1",
+            order=1,
+            enable_paint=True,
+        )
+        self.hidden_question = ExamQuestion.objects.create(
+            exam=self.exam,
+            block=self.block,
+            text="Paint gizli qalsın",
+            order=1,
+            answer_mode="single",
+            disable_paint=True,
+        )
+        self.visible_question = ExamQuestion.objects.create(
+            exam=self.exam,
+            block=self.block,
+            text="Paint görünsün",
+            order=2,
+            answer_mode="single",
+        )
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        self.hidden_answer = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=self.hidden_question,
+            has_paint=True,
+            paint_data_url="stale",
+        )
+        ExamAnswer.objects.create(attempt=self.attempt, question=self.visible_question)
+
+    def test_take_exam_hides_paint_for_question_with_explicit_disable(self):
+        _login_with_org(self.client, self.student, self.organization)
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.exam.slug, self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, f'name="paint_enabled_{self.hidden_question.id}"', html=False)
+        self.assertContains(response, f'name="paint_enabled_{self.visible_question.id}"', html=False)
+
+    def test_take_exam_post_clears_hidden_question_paint_even_if_payload_forces_it(self):
+        _login_with_org(self.client, self.student, self.organization)
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[self.exam.slug, self.attempt.id]),
+            {
+                f"q_{self.hidden_question.id}": "Cavab",
+                f"paint_enabled_{self.hidden_question.id}": "1",
+                f"paint_data_{self.hidden_question.id}": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB",
+                f"q_{self.visible_question.id}": "Digər cavab",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.hidden_answer.refresh_from_db()
+        self.assertFalse(self.hidden_answer.has_paint)
+        self.assertFalse(bool(self.hidden_answer.paint_data_url))
+
+    def test_edit_question_unchecked_paint_creates_question_level_disable(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.post(
+            reverse("exams:edit_exam_question", args=[self.exam.slug, self.visible_question.id]),
+            {
+                "text": self.visible_question.text,
+                "block": str(self.block.id),
+                "time_limit_seconds": "",
+                "correct_answer": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.visible_question.refresh_from_db()
+        self.assertTrue(self.visible_question.disable_paint)
+        self.assertFalse(self.visible_question.paint_enabled_effective)
+
+    def test_edit_question_form_shows_checked_paint_checkbox_when_state_comes_from_block(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.get(
+            reverse("exams:edit_exam_question", args=[self.exam.slug, self.visible_question.id]) + "?modal=1",
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertRegex(response.content.decode(), r'name="enable_paint"[^>]*checked')
+        self.assertContains(response, "Mövzu bloku ayarı")
+
+    def test_edit_question_form_shows_question_source_when_question_override_disables_paint(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.get(
+            reverse("exams:edit_exam_question", args=[self.exam.slug, self.hidden_question.id]) + "?modal=1",
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotRegex(response.content.decode(), r'name="enable_paint"[^>]*checked')
+        self.assertContains(response, "Bu sualın öz ayarı")
+
+    def test_process_question_bank_preserves_question_override_and_saves_block_paint(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.post(
+            reverse("exams:process_question_bank", args=[self.exam.slug]),
+            {
+                "random_question_count": "0",
+                "block_name_1": self.block.name,
+                "block_time_1": "",
+                "block_enable_paint_1": "on",
+                "block_content_1": "1. Yenilənmiş 1\n2) Yenilənmiş 2",
+                "block_db_id_1": str(self.block.id),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.block.refresh_from_db()
+        self.hidden_question.refresh_from_db()
+        self.visible_question.refresh_from_db()
+
+        self.assertTrue(self.block.enable_paint)
+        self.assertEqual(self.hidden_question.text, "Yenilənmiş 1")
+        self.assertTrue(self.hidden_question.disable_paint)
+        self.assertFalse(self.hidden_question.paint_enabled_effective)
+        self.assertEqual(self.visible_question.text, "Yenilənmiş 2")
 
 
 # ════════════════════════════════════════════════════════════════════════════

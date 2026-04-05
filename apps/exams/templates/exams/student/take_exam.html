@@ -137,7 +137,7 @@
                             <br>
                                 
                             {# --- PAINT CAVABI --- #}
-                            {% if exam.enable_paint or q.enable_paint %}
+                            {% if q.paint_enabled_effective %}
                                 {% include "exams/components/_paint_answer.html" with q=q ans=ans_data.answer %}
                             {% endif %}
                         

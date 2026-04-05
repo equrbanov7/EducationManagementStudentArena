@@ -89,7 +89,7 @@ def get_auth_otp_expiry_seconds():
     """
     Return the configured OTP validity window in seconds.
     """
-    return max(60, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 180)))
+    return max(60, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 300)))
 
 
 def get_auth_otp_expiry_minutes():
@@ -98,6 +98,34 @@ def get_auth_otp_expiry_minutes():
     """
     seconds = get_auth_otp_expiry_seconds()
     return max(1, (seconds + 59) // 60)
+
+
+def get_auth_otp_resend_cooldown_seconds():
+    """
+    Return the minimum wait time before a new OTP can be resent.
+    """
+    return max(30, int(getattr(settings, "AUTH_OTP_RESEND_COOLDOWN_SECONDS", 60)))
+
+
+def get_auth_otp_max_attempts():
+    """
+    Return the maximum allowed verification attempts per OTP.
+    """
+    return max(1, int(getattr(settings, "AUTH_OTP_MAX_ATTEMPTS", 5)))
+
+
+def get_auth_otp_max_sends_per_hour():
+    """
+    Return the maximum number of OTP sends allowed per email per rolling hour.
+    """
+    return max(1, int(getattr(settings, "AUTH_OTP_MAX_SENDS_PER_HOUR", 5)))
+
+
+def get_auth_pending_signup_ttl_seconds():
+    """
+    Return how long pending signup data may remain in server-side cache.
+    """
+    return max(get_auth_otp_expiry_seconds(), int(getattr(settings, "AUTH_PENDING_SIGNUP_TTL_SECONDS", 86400)))
 
 
 def generate_unique_slug(model_class, title, slug_field="slug"):

@@ -235,6 +235,12 @@ class QuestionBlock(models.Model):
         blank=True,
         help_text=pgettext_lazy("exams.model.question_block.help", "time_limit_minutes"),
     )
+    enable_paint = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text=pgettext_lazy("exams.model.question_block.help", "enable_paint"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.question_block.meta", "singular")
