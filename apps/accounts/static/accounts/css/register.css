@@ -249,7 +249,7 @@
 }
 
 .register-bootstrap-select__option.is-selected {
-    background: #e0e7ff;
+    background: #dbeafe;
     color: #1d4ed8;
     font-weight: 600;
 }
@@ -456,7 +456,7 @@
 
 .register-search-option:hover,
 .register-search-option.is-selected {
-    background: #eef2ff;
+    background: #eff6ff;
 }
 
 .register-search-empty {

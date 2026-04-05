@@ -856,7 +856,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(matching_item["action_label"], "Bax")
         self.assertContains(response, self.student.username)
 
-    def test_teacher_exam_results_hides_written_student_name_for_first_five_minutes(self):
+    def test_teacher_exam_results_keeps_written_student_name_hidden_until_review_is_completed(self):
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Pending Written Exam",
@@ -877,20 +877,24 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
         self.assertFalse(matching_item["can_view_name"])
         self.assertEqual(matching_item["action_label"], "Yoxla")
-        self.assertGreater(matching_item["countdown_seconds"], 0)
+        self.assertEqual(matching_item["countdown_seconds"], 0)
         self.assertContains(response, "Yoxla")
         self.assertContains(response, "Anonim görünüş")
+        self.assertContains(response, "<th>Bal</th>", html=True)
+        self.assertContains(response, "<strong>0</strong>", html=True)
+        self.assertNotContains(response, "<strong>0%</strong>", html=True)
 
         attempt.finished_at = timezone.now() - timedelta(minutes=6)
         attempt.save(update_fields=["finished_at"])
 
-        revealed_response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
-        revealed_item = next(
-            item for item in revealed_response.context["attempts_data"] if item["attempt"].id == attempt.id
+        still_hidden_response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
+        still_hidden_item = next(
+            item for item in still_hidden_response.context["attempts_data"] if item["attempt"].id == attempt.id
         )
-        self.assertTrue(revealed_item["can_view_name"])
-        self.assertEqual(revealed_item["action_label"], "Yoxla")
-        self.assertContains(revealed_response, self.student.username)
+        self.assertFalse(still_hidden_item["can_view_name"])
+        self.assertEqual(still_hidden_item["action_label"], "Yoxla")
+        self.assertContains(still_hidden_response, "Anonim görünüş")
+        self.assertNotContains(still_hidden_response, self.student.username)
 
     def test_teacher_exam_results_shows_recheck_then_view_for_written_attempts(self):
         written_exam = Exam.objects.create(
@@ -927,6 +931,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertTrue(locked_item["can_view_name"])
         self.assertEqual(locked_item["action_label"], "Bax")
         self.assertContains(locked_response, "Bax")
+        self.assertContains(locked_response, "<th>Bal</th>", html=True)
+        self.assertContains(locked_response, "<strong>74</strong>", html=True)
+        self.assertNotContains(locked_response, "<strong>74%</strong>", html=True)
 
     def test_teacher_exam_results_reveals_student_name_when_written_grade_is_visible_without_timestamp(self):
         written_exam = Exam.objects.create(
@@ -970,6 +977,29 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
         self.assertNotContains(response, "Profile geri dön")
+
+    def test_teacher_view_attempt_keeps_written_student_name_anonymous_before_review(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Anonymous View Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+            finished_at=timezone.now() - timedelta(minutes=20),
+        )
+
+        response = self.client.get(reverse("exams:teacher_view_attempt", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["can_view_student_identity"])
+        self.assertContains(response, response.context["student_display"])
+        self.assertIn("#", response.context["student_display"])
+        self.assertNotContains(response, self.student.username)
+        self.assertNotContains(response, "Qalan vaxt:")
 
     def test_teacher_check_attempt_includes_confirm_modal_and_integer_score_input(self):
         written_exam = Exam.objects.create(

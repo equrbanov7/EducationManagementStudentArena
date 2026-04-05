@@ -55,8 +55,8 @@
     background: linear-gradient(135deg, #0f766e, #2563eb);
 }
 
-.profile-action-btn--indigo {
-    background: linear-gradient(135deg, #4f46e5, #2563eb);
+.profile-action-btn--primary {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
 }
 
 .search-form {
