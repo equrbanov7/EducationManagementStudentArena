@@ -87,7 +87,7 @@ before running any `docker compose` command.  Never commit this file.
 | `CSRF_TRUSTED_ORIGINS` | `https://emsarena.com` | Comma-separated origins for CSRF validation |
 | `SITE_URL` | `https://emsarena.com` | Canonical site URL (used in emails, WebSocket CSP) |
 | `ADMIN_URL_PREFIX` | `manage/` | Non-default Django admin path. Must not be `admin/` in production. |
-| `ADMIN_ALLOWED_IPS` | `203.0.113.10,198.51.100.20` | Comma-separated allowlist of source IPs permitted to access the admin panel. |
+| `ADMIN_ALLOWED_IPS` | `203.0.113.10,198.51.100.20` or blank | Comma-separated allowlist of source IPs permitted to access the admin panel. Leave blank to disable the IP restriction entirely. |
 
 ### Optional / feature variables
 
@@ -173,12 +173,16 @@ SITE_URL=https://emsarena.com
 LAN_HOST=emsarena.com
 LIVE_EXAM_PUBLIC_HOST=emsarena.com
 ADMIN_URL_PREFIX=manage/
-ADMIN_ALLOWED_IPS=203.0.113.10,198.51.100.20
+ADMIN_ALLOWED_IPS=
 ADMIN_LOGIN_RATE_LIMIT=3/15m
 ADMIN_2FA_REQUIRED=True
 ADMIN_OTP_VERIFY_RATE_LIMIT=5/10m
 ADMIN_OTP_RESEND_RATE_LIMIT=3/10m
 ```
+
+Leaving `ADMIN_ALLOWED_IPS` empty disables the admin IP allowlist, so
+superadmins can sign in from any source address while still keeping the
+custom admin URL, OTP challenge, and rate limits enabled.
 
 ### Step 2 — Build the production image
 
@@ -237,13 +241,65 @@ docker compose -f docker-compose.prod.yml up -d --no-deps app nginx
 The `prod-entrypoint.sh` script automatically runs `python manage.py migrate`
 before starting Daphne, so database migrations are applied on every restart.
 
+## 5.1 GitHub Actions CD to Linode
+
+The repository now includes a reusable deployment workflow at
+`.github/workflows/_deploy-linode.yml`, wired into `.github/workflows/ci.yml`.
+When a push to `main` passes the full CI pipeline, GitHub Actions will SSH
+into the Linode host, sync the checked-out repository snapshot into
+`/opt/emsarena/app` over SSH, install production Python dependencies into
+`/opt/emsarena/venv`, run migrations, collect static files, restart
+`emsarena.service`, and verify `/ping/` plus `/health/` through the local
+Daphne upstream.
+
+### Required GitHub secrets
+
+Add these repository secrets before enabling automatic deploys:
+
+| Secret | Required | Notes |
+|--------|----------|-------|
+| `SSH_HOST` | Yes | Example: `170.187.154.194` |
+| `SSH_USERNAME` | Yes | Example: `root` |
+| `SSH_PASSWORD` | Yes, unless using key auth | Password-based fallback supported for first setup |
+| `SSH_PRIVATE_KEY` | Optional | Preferred over `SSH_PASSWORD` once a deploy key exists |
+
+If both `SSH_PRIVATE_KEY` and `SSH_PASSWORD` are present, the workflow uses
+the private key.
+
+### First-time server setup
+
+Automatic deploys expect these items to exist once on the server:
+
+- `/opt/emsarena/app` — the repository checkout
+- `/opt/emsarena/venv` — the Python virtualenv used by the live app
+- `/opt/emsarena/app/.env` — persistent runtime environment variables
+- `emsarena.service` — the Daphne `systemd` service used in production
+- Nginx configured to proxy to `127.0.0.1:8001`
+
+The workflow never overwrites the application `.env`, so you only need to
+set it up once. The live app environment file should remain at:
+
+```bash
+/opt/emsarena/app/.env
+```
+
+If this Linode was created from the Django One-Click app, make sure the old
+duplicate `daphne.service` is disabled and only `emsarena.service` remains
+responsible for port `8001`. The deploy script will also try to disable the
+legacy `daphne.service` automatically as a safeguard.
+
+The SSH sync step excludes runtime data such as `.env`, `media/`, and
+`staticfiles/`, so user uploads and server-side secrets are preserved across
+deployments without requiring Git access from the Linode host.
+
 ### Zero-downtime update checklist
 
-1. `git pull origin main`
-2. `docker compose -f docker-compose.prod.yml build`
-3. `docker compose -f docker-compose.prod.yml up -d --no-deps app`
-4. Wait for the new `app` container to pass its health check (see Step 7).
-5. `docker compose -f docker-compose.prod.yml up -d --no-deps nginx` (if nginx config changed).
+1. Sync the latest application code into `/opt/emsarena/app`
+2. `/opt/emsarena/venv/bin/pip install -r requirements/production.txt`
+3. `DJANGO_SETTINGS_MODULE=config.settings.production /opt/emsarena/venv/bin/python manage.py migrate --noinput`
+4. `DJANGO_SETTINGS_MODULE=config.settings.production /opt/emsarena/venv/bin/python manage.py collectstatic --noinput`
+5. `systemctl restart emsarena.service`
+6. Verify `/ping/` and `/health/` before considering the rollout complete.
 
 ---
 
