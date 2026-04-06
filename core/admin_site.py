@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 
 from django.contrib import admin, messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseNotAllowed
@@ -46,60 +47,12 @@ class EMSArenaAdminSite(admin.AdminSite):
     site_title = "EMS Arena Admin"
     index_title = "Platform administration"
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path("verify-otp/", self.verify_otp_view, name="verify-otp"),
-            path("resend-otp/", self.resend_otp_view, name="resend-otp"),
-        ]
-        return custom_urls + urls
-
-    def has_permission(self, request):
-        base_allowed = super().has_permission(request)
-        if not base_allowed:
-            return False
-        return admin_2fa_verified(request)
-
-    @method_decorator(never_cache)
-    @method_decorator(login_not_required)
-    def login(self, request, extra_context=None):
-        user = getattr(request, "user", None)
-        if admin_2fa_pending_for_request(request):
-            request.current_app = self.name
-            return redirect(reverse("admin:verify-otp", current_app=self.name))
-
-        response = super().login(request, extra_context=extra_context)
-
-        if request.method != "POST":
-            return response
-
-        user = getattr(request, "user", None)
-        if not getattr(user, "is_authenticated", False):
-            submitted_identity = str(request.POST.get("username", "")).strip()
-            if submitted_identity:
-                log_admin_security_event(
-                    action=AuditAction.DENY,
-                    request=request,
-                    reason="Admin login failed because the submitted credentials were rejected.",
-                    resource_type="admin_login_failed",
-                    resource_id=submitted_identity,
-                )
-            return response
-
-        if not admin_2fa_required_for_user(user):
-            return response
-
-        next_url = response.headers.get("Location", "")
-        default_admin_url = reverse("admin:index", current_app=self.name)
-        if not next_url or next_url == "/":
-            next_url = default_admin_url
+    def _begin_admin_otp_challenge(self, request, user, *, next_url: str):
         try:
             send_admin_otp_email(user, request=request)
         except Exception:
             logger.exception("Admin OTP delivery failed for user %s", user.pk)
             clear_admin_2fa_state(request)
-            from django.contrib.auth import logout
-
             logout(request)
             messages.error(
                 request,
@@ -126,6 +79,61 @@ class EMSArenaAdminSite(admin.AdminSite):
         )
         messages.info(request, "Admin giriş üçün OTP kodu email ünvanınıza göndərildi.")
         return redirect(reverse("admin:verify-otp", current_app=self.name))
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("verify-otp/", self.verify_otp_view, name="verify-otp"),
+            path("resend-otp/", self.resend_otp_view, name="resend-otp"),
+        ]
+        return custom_urls + urls
+
+    def has_permission(self, request):
+        base_allowed = super().has_permission(request)
+        if not base_allowed:
+            return False
+        return admin_2fa_verified(request)
+
+    @method_decorator(never_cache)
+    @method_decorator(login_not_required)
+    def login(self, request, extra_context=None):
+        user = getattr(request, "user", None)
+        if admin_2fa_pending_for_request(request):
+            request.current_app = self.name
+            return redirect(reverse("admin:verify-otp", current_app=self.name))
+
+        if request.method == "GET" and admin_2fa_required_for_user(user) and not admin_2fa_verified(request):
+            next_url = request.GET.get("next") or reverse("admin:index", current_app=self.name)
+            request.current_app = self.name
+            return self._begin_admin_otp_challenge(request, user, next_url=next_url)
+
+        response = super().login(request, extra_context=extra_context)
+
+        if request.method != "POST":
+            return response
+
+        user = getattr(request, "user", None)
+        if not getattr(user, "is_authenticated", False):
+            submitted_identity = str(request.POST.get("username", "")).strip()
+            if submitted_identity:
+                log_admin_security_event(
+                    action=AuditAction.DENY,
+                    request=request,
+                    reason="Admin login failed because the submitted credentials were rejected.",
+                    resource_type="admin_login_failed",
+                    resource_id=submitted_identity,
+                )
+            return response
+
+        if not admin_2fa_required_for_user(user):
+            return response
+
+        next_url = response.headers.get("Location", "")
+        default_admin_url = reverse("admin:index", current_app=self.name)
+        if not next_url or next_url == "/":
+            next_url = default_admin_url
+        request.current_app = self.name
+        return self._begin_admin_otp_challenge(request, user, next_url=next_url)
 
     @method_decorator(never_cache)
     def verify_otp_view(self, request):
