@@ -120,20 +120,20 @@
 }
 
 .sidebar-menu-link--accent-admin {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(59, 130, 246, 0.18));
-    border-color: rgba(99, 102, 241, 0.16);
-    color: #3346a0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(14, 165, 233, 0.18));
+    border-color: rgba(37, 99, 235, 0.16);
+    color: #1d4ed8;
 }
 
 .sidebar-menu-link--accent-admin:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.24));
-    color: #2f3f95;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(14, 165, 233, 0.24));
+    color: #1e40af;
 }
 
 .sidebar-menu-link--accent-admin.active {
-    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
     color: #ffffff;
-    box-shadow: 0 14px 28px rgba(79, 70, 229, 0.22);
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
 }
 
 .sidebar-menu-icon {

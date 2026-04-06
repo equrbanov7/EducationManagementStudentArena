@@ -270,6 +270,46 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertContains(response, reverse("exams:edit_exam", args=[self.course_exam.slug]))
         self.assertContains(response, "Detallı imtahana bax")
 
+    def test_course_dashboard_renders_assignment_and_project_modals_for_org_owner(self):
+        owner = User.objects.create_user(
+            username="org_owner_modal",
+            email="org_owner_modal@example.com",
+            password="StrongPass123!",
+        )
+        organization = Organization.objects.create(
+            name="Org Owner Modal Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(
+            owner,
+            organization,
+            ProfileRole.ORG_OWNER,
+        )
+        course = Course.objects.create(
+            owner=owner,
+            title="Org Owner Modal Course",
+            status="published",
+            organization=organization,
+        )
+
+        self.client.force_login(owner)
+        session = self.client.session
+        session["active_organization"] = organization.slug
+        session.save()
+
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": course.id}),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-bs-target="#addAssignmentModal"')
+        self.assertContains(response, 'id="addAssignmentModal"')
+        self.assertContains(response, 'data-bs-target="#addProjectModal"')
+        self.assertContains(response, 'id="addProjectModal"')
+
     def test_course_dashboard_exam_links_return_back_to_current_dashboard_path(self):
         self.client.force_login(self.owner)
         session = self.client.session

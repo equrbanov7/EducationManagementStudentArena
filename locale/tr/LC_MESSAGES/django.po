@@ -9257,7 +9257,47 @@ msgstr "Yeni kategori"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
-msgstr "Cevap"
+msgstr "Çizim cevabını etkinleştir"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:123
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_current_state"
+msgstr "Mevcut durum"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:126
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_active"
+msgstr "Aktif"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:128
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_inactive"
+msgstr "Pasif"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:132
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_source"
+msgstr "Uygulanan kaynak"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:135
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_question"
+msgstr "Bu sorunun kendi ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:137
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_block"
+msgstr "Konu bloğu ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:139
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_exam"
+msgstr "Genel sınav ayarı"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:143
+msgctxt "exams.template.add_exam_question"
+msgid "paint_priority_order"
+msgstr "Öncelik: soru ayarı > konu bloğu > genel sınav."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:168
 msgctxt "exams.template.add_exam_question"
@@ -9554,84 +9594,101 @@ msgstr "Kaydet"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:4
 msgctxt "exams.template.create_question_bank"
 msgid "title_question_bank"
-msgstr "Soru"
+msgstr "Yazılı sınav soru bankası"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:229
 msgctxt "exams.template.create_question_bank"
 msgid "heading_question_bank"
-msgstr "Invalid link"
+msgstr "yazılı sınav soru bankası"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:238
 msgctxt "exams.template.create_question_bank"
 msgid "label_total_question_count"
-msgstr "Soru"
+msgstr "Sınavda gösterilecek soru sayısı"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:243
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_all_questions"
-msgstr "Konumu girin"
+msgstr "0 = tüm soruları göster"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Soru"
+msgstr "Öğrencinin göreceği aktif soru sayısını girin. Tüm soruları göstermek için 0 yazın."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:289
+#: apps/exams/templates/exams/teacher/create_question_bank.html:334
+#: apps/exams/templates/exams/teacher/create_question_bank.html:395
+msgctxt "exams.template.create_question_bank"
+msgid "label_block_enable_paint"
+msgstr "Bu bölüm için çizim cevabını etkinleştir"
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:290
+#: apps/exams/templates/exams/teacher/create_question_bank.html:335
+#: apps/exams/templates/exams/teacher/create_question_bank.html:396
+msgctxt "exams.template.create_question_bank"
+msgid "help_block_enable_paint"
+msgstr "Bu ayar, bu bölümdeki sorular için paint özelliğini varsayılan olarak açar. Sonradan belirli bir soruda kapatırsanız, o soruda paint görünmez."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
 msgid "block_existing"
-msgstr "Bu dosya türü tehlikeli olabilir ve yüklenmesi engellendi."
+msgstr "Mevcut bölüm"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:259
 #: apps/exams/templates/exams/teacher/create_question_bank.html:295
 #: apps/exams/templates/exams/teacher/create_question_bank.html:354
 msgctxt "exams.template.create_question_bank"
 msgid "action_delete"
-msgstr "Silmek"
+msgstr "Sil"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:265
 #: apps/exams/templates/exams/teacher/create_question_bank.html:301
 #: apps/exams/templates/exams/teacher/create_question_bank.html:355
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_name"
-msgstr "Grup adı / numarası"
+msgstr "Bölüm adı / numarası"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:274
 #: apps/exams/templates/exams/teacher/create_question_bank.html:306
 #: apps/exams/templates/exams/teacher/create_question_bank.html:356
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_time_minutes"
-msgstr ""
-"Uyarı: '{block_name}' adlı blok zaten mevcut. Lütfen farklı bir ad kullanın."
+msgstr "Bölüm süresi (dakika)"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:279
 #: apps/exams/templates/exams/teacher/create_question_bank.html:307
 #: apps/exams/templates/exams/teacher/create_question_bank.html:357
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_unlimited"
-msgstr "Örn: Laboratuvar 1"
+msgstr "Sınırsız için boş bırakın"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:283
 #: apps/exams/templates/exams/teacher/create_question_bank.html:311
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions"
-msgstr "Soru"
+msgstr "Sorular"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:292
 #: apps/exams/templates/exams/teacher/create_question_bank.html:302
 #: apps/exams/templates/exams/teacher/create_question_bank.html:361
 msgctxt "exams.template.create_question_bank"
 msgid "block_default"
-msgstr "Search default"
+msgstr "Bölüm"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:312
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_line"
-msgstr "Örn: Laboratuvar 1"
+msgstr ""
+"Örnek:\n"
+"1. Fotosentez sürecini açıklayın.\n"
+"2) Mitoz ile mayoz arasındaki farkı yazın.\n"
+"3. Yenilenebilir enerji kaynaklarına örnek verin."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:320
 msgctxt "exams.template.create_question_bank"
 msgid "action_add_new_block"
-msgstr "Yeni Konu Ekle"
+msgstr "Yeni bölüm ekle"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:325
 msgctxt "exams.template.create_question_bank"
@@ -9651,38 +9708,49 @@ msgstr "Silmeyi onayla"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:342
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "Bu kursu silmek mi istediniz?"
+msgstr "Bu bölüm ve içindeki sorular bankadan silinecek. Devam etmek istiyor musunuz?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_no_cancel"
-msgstr "İptal et"
+msgstr "Vazgeç"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:346
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_yes_delete"
-msgstr "Silmek istediğinizden emin misiniz?"
+msgstr "Evet, sil"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:353
 msgctxt "exams.template.create_question_bank"
 msgid "block_new"
-msgstr "Konu bloğu"
+msgstr "Yeni bölüm"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:358
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions_copy_paste"
-msgstr "Soru"
+msgstr "Soruları buraya yapıştırın"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:359
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_text"
-msgstr "Örn: Laboratuvar 1"
+msgstr ""
+"Örnek:\n"
+"1. Fotosentez sürecini açıklayın.\n"
+"2) Mitoz ile mayoz arasındaki farkı yazın.\n"
+"3. Yenilenebilir enerji kaynaklarına örnek verin."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:360
+msgctxt "exams.template.create_question_bank"
+msgid "help_question_formats"
+msgstr ""
+"Her soruyu yeni satırdan başlatın. Desteklenen numaralandırma biçimleri: 1. "
+"Soru metni veya 1) Soru metni."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:360
 msgctxt "exams.template.create_question_bank"
 msgid "alert_duplicate_block_name"
 msgstr ""
-"Uyarı: '{block_name}' adlı blok zaten mevcut. Lütfen farklı bir ad kullanın."
+"Uyarı: '{block_name}' adlı bir bölüm zaten var. Lütfen farklı bir ad seçin."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:4
 msgctxt "exams.template.create_student_group"
@@ -11118,13 +11186,13 @@ msgstr "Grup silindi."
 msgctxt "exams.view.question_bank.message"
 msgid "duplicate_block_name_request"
 msgstr ""
-"Bu isimde bir blok bu sınavda zaten mevcut.Uyarı: '{block_name}' adlı blok "
-"zaten mevcut. Lütfen farklı bir ad kullanın."
+"'{block_name}' adlı bir bölüm bu sınavda zaten var. Lütfen farklı bir ad "
+"seçin."
 
 #: apps/exams/views/teacher/question_bank.py:97
 msgctxt "exams.view.question_bank.message"
 msgid "block_name_exists_db"
-msgstr "'{block_name}' adlı blok veritabanında zaten mevcut."
+msgstr "'{block_name}' adlı bölüm bu sınavda zaten var."
 
 #: apps/exams/views/teacher/question_bank.py:144
 msgctxt "exams.view.question_bank.message"

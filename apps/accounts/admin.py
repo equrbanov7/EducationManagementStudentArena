@@ -44,10 +44,10 @@ class SuperadminBypassAdminMixin:
 class EmailOTPAdmin(admin.ModelAdmin):
     """Admin interface for EmailOTP model."""
 
-    list_display = ["user", "created_at", "expires_at", "is_used"]
-    list_filter = ["is_used", "created_at"]
-    search_fields = ["user__username", "user__email"]
-    readonly_fields = ["created_at", "expires_at", "code"]
+    list_display = ["email", "purpose", "user", "created_at", "expires_at", "is_verified", "attempts_count", "is_used"]
+    list_filter = ["purpose", "is_verified", "is_used", "created_at"]
+    search_fields = ["email", "user__username", "user__email"]
+    readonly_fields = ["created_at", "expires_at", "code", "otp_hash"]
 
 
 @admin.register(UserProfile)

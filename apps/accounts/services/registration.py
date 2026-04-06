@@ -54,10 +54,9 @@ def purge_stale_pending_registration(username: str, email: str) -> None:
 
     for stale in stale_users:
         logger.info(
-            "Purging stale pending registration for user pk=%s username=%s email=%s",
+            "Purging stale pending registration for user pk=%s username=%s email=[REDACTED]",
             stale.pk,
             stale.username,
-            stale.email,
         )
         # Remove owned organizations before deleting the user to satisfy PROTECT.
         Organization.objects.filter(owner=stale).delete()
@@ -75,6 +74,7 @@ def create_user_with_organization(
     organization_type,
     country_code,
     country_name,
+    password_is_hashed=False,
     join_organization=None,
     institution_not_listed_name="",
     organization_identifier="",
@@ -85,6 +85,7 @@ def create_user_with_organization(
     group_number="",
     department="",
     staff_position="",
+    create_join_request=True,
 ):
     """Create a user, profile, request, and optional organization membership."""
     del country_code
@@ -98,8 +99,12 @@ def create_user_with_organization(
         last_name=last_name,
         is_active=False,
     )
-    user.set_password(password)
-    user.save()
+    if password_is_hashed:
+        user.password = password
+        user.save(update_fields=["password"])
+    else:
+        user.set_password(password)
+        user.save()
 
     organization = None
     requested_organization = None
@@ -187,7 +192,7 @@ def create_user_with_organization(
 
     profile.save()
 
-    if (
+    if create_join_request and (
         organization is None
         and requested_organization is not None
         and signup_mode in {"student_join", "teacher_join", "staff_join"}

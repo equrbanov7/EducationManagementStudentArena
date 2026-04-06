@@ -42,7 +42,7 @@
 
 .category-back-link:hover {
     color: var(--primary-color);
-    border-color: rgba(79, 70, 229, 0.25);
+    border-color: rgba(37, 99, 235, 0.25);
 }
 
 .category-breadcrumbs {
