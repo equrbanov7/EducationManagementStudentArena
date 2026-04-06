@@ -67,7 +67,7 @@ body {
     padding: 10px 16px;
     border-radius: 999px;
     border: 1px solid #dbe4ff;
-    background: #eef2ff;
+    background: #eff6ff;
     color: var(--primary);
     font-size: 0.95rem;
     font-weight: 700;
@@ -181,7 +181,7 @@ body {
     }
 }
 
-.stat-icon.blue { background: #eef2ff; color: var(--primary); }
+.stat-icon.blue { background: #eff6ff; color: var(--primary); }
 .stat-icon.yellow { background: #fff9db; color: var(--warning); }
 .stat-icon.red { background: #fff5f5; color: var(--danger); }
 
@@ -532,7 +532,7 @@ body {
     padding: 1px 5px;
     border-radius: 4px;
     font-family: monospace;
-    color: #d63384; /* Kod rəngi */
+    color: #2563eb; /* Kod rəngi */
     font-weight: 600;
 }
 

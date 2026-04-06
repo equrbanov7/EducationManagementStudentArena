@@ -19,7 +19,7 @@
 
     {% if assigned_tasks_count > 0 %}
     <div class="stat-card">
-        <div class="stat-icon stat-icon--purple"><i class="fas fa-clipboard-list"></i></div>
+        <div class="stat-icon stat-icon--sky"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ assigned_tasks_count }}</div>
             <div class="stat-label">{% trans "assigned_tasks" context "profile.stats" %}</div>
@@ -39,7 +39,7 @@
 
     {% if can_manage_blog %}
     <div class="stat-card">
-        <div class="stat-icon stat-icon--purple"><i class="fas fa-newspaper"></i></div>
+        <div class="stat-icon stat-icon--sky"><i class="fas fa-newspaper"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ posts_count|default:0 }}</div>
             <div class="stat-label">{% trans "posts" context "profile.stats" %}</div>

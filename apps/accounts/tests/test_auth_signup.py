@@ -4,13 +4,17 @@ Auth sign-up tests: user registration flow.
 Extracted from test_views.py to keep individual test modules focused.
 """
 
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from apps.accounts.models import ProfileRole
+from apps.accounts.models import EmailOTP, ProfileRole
+from apps.accounts.services import get_pending_registration
 from apps.organizations.models import Country, Organization
 from core.constants import OrganizationType
 
@@ -60,7 +64,7 @@ class RegisterViewTest(TestCase):
         self.assertContains(response, "Azərbaycan")
 
     def test_register_creates_user_and_profile(self):
-        """Test that registration creates both user and profile."""
+        """Registration should stay pending until OTP verification completes."""
         response = self.client.post(
             self.register_url,
             {
@@ -81,14 +85,9 @@ class RegisterViewTest(TestCase):
                 "accept_privacy_policy": "on",
             },
         )
-        # Registration might redirect or show success
-        self.assertIn(response.status_code, [200, 302])
-
-        # Check if user was created
-        if User.objects.filter(username="newuser").exists():
-            user = User.objects.get(username="newuser")
-            self.assertTrue(hasattr(user, "profile"))
-            self.assertIsNotNone(user.profile)
+        self.assertRedirects(response, reverse("accounts:verify_code"))
+        self.assertFalse(User.objects.filter(username="newuser").exists())
+        self.assertIsNotNone(get_pending_registration("newuser@example.com"))
 
     def test_register_with_organization_selection(self):
         """Test registration with organization selection."""
@@ -157,10 +156,7 @@ class RegisterViewTest(TestCase):
         """If both sync and async email sending fail, no user must remain in DB."""
         import unittest.mock as mock
 
-        with (
-            mock.patch("apps.accounts.services.auth.send_verify_email", side_effect=Exception("SMTP error")),
-            mock.patch("core.email_tasks.send_verification_otp_email.delay", side_effect=Exception("Celery error")),
-        ):
+        with mock.patch("apps.accounts.services.auth._send_otp_message", side_effect=Exception("SMTP error")):
             response = self.client.post(self.register_url, self._base_payload())
 
         # Form re-rendered with an error message (no redirect)
@@ -176,6 +172,8 @@ class RegisterViewTest(TestCase):
         self.assertRedirects(response, reverse("accounts:verify_code"))
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("newuser@example.com", mail.outbox[0].to)
+        self.assertFalse(User.objects.filter(username="newuser").exists())
+        self.assertIsNotNone(get_pending_registration("newuser@example.com"))
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_resend_otp_sends_new_code(self):
@@ -184,8 +182,11 @@ class RegisterViewTest(TestCase):
         self.client.post(self.register_url, self._base_payload())
         self.assertEqual(len(mail.outbox), 1)
         mail.outbox.clear()
+        EmailOTP.objects.filter(email="newuser@example.com", is_used=False).update(
+            created_at=timezone.now() - timedelta(seconds=61)
+        )
 
-        response = self.client.get(reverse("accounts:resend_code"))
-        self.assertIn(response.status_code, [200, 302])
+        response = self.client.post(reverse("accounts:resend_code"))
+        self.assertEqual(response.status_code, 302)
         # A new email must have been sent
         self.assertEqual(len(mail.outbox), 1)

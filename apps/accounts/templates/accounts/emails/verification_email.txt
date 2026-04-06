@@ -1,7 +1,8 @@
-Salam {{ user.username }},
+Salam {{ recipient_name }},
 
-EMSArena hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
+{% if verification_link %}EMSArena hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
 {{ verification_link }}
+{% endif %}
 
 OTP kodu:
 {{ code }}

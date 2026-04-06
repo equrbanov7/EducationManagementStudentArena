@@ -2,36 +2,44 @@
 Authentication views: registration, verification, login, logout.
 """
 
+import json
 import logging
 from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
+from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, SignatureExpired
-from django.db import transaction
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext_lazy
+from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
-from apps.organizations.models import Country
 from apps.organizations.services import is_tenant_accessible_organization
 from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
+from core.tenancy import restore_request_organization_from_profile
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
-from ..models import ProfileRole
 from ..queries import get_signup_lookup_payload
 from ..services import (
+    OTPRateLimitError,
+    OTPResendCooldownError,
     activate_user_account,
-    create_user_with_organization,
+    clear_pending_registration,
+    finalize_pending_registration,
     get_otp_timer_context,
+    get_pending_registration,
+    send_login_otp,
+    send_otp_email,
     send_verification_otp,
-    verify_otp_code,
+    store_pending_registration,
+    verify_email_otp,
 )
 from ._helpers import signer
 
@@ -78,6 +86,43 @@ def _sanitize_auth_redirect_target(request, candidate_url):
         return ""
 
     return safe_path
+
+
+def _load_request_payload(request):
+    if request.content_type == "application/json":
+        try:
+            return json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError):
+            return {}
+    return request.POST
+
+
+def _validate_otp_email(value):
+    email = EmailOTP.normalize_email(value)
+    if not email or "@" not in email:
+        raise ValidationError("Etibarlı email ünvanı daxil edin.")
+    return email
+
+
+def _resolve_otp_purpose(value, *, default=EmailOTP.Purpose.LOGIN):
+    candidate = str(value or "").strip().lower()
+    allowed = {
+        EmailOTP.Purpose.SIGNUP,
+        EmailOTP.Purpose.LOGIN,
+        EmailOTP.Purpose.PASSWORD_RESET,
+    }
+    if candidate in allowed:
+        return candidate
+    return default
+
+
+def _json_error(message, *, status=400, retry_after=None, **extra):
+    payload = {"success": False, "detail": message}
+    payload.update(extra)
+    response = JsonResponse(payload, status=status)
+    if retry_after:
+        response.headers["Retry-After"] = str(retry_after)
+    return response
 
 
 class CustomLoginView(LoginView):
@@ -153,7 +198,7 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if getattr(self, "user", None) is not None and getattr(self.user, "is_authenticated", False):
-            context.update(get_otp_timer_context(self.user))
+            context.update(get_otp_timer_context(self.user, purpose=EmailOTP.Purpose.PASSWORD_RESET))
         else:
             context["otp_expires_at"] = None
             context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
@@ -162,49 +207,37 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 
 
 def register_view(request):
-    """User registration with organization bootstrap and email verification.
-
-    The user record and the OTP email are created inside a single database
-    savepoint.  If email delivery fails the savepoint is rolled back so no
-    half-created user record is left behind.
-    """
+    """Start registration by caching the payload and sending a signup OTP."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            country_code = form.cleaned_data.get("country", "")
-            country_obj = Country.objects.filter(code=country_code).first()
-            country_name = country_obj.name if country_obj else country_code
-
-            # Wrap user creation + OTP issue inside a savepoint so we can
-            # roll back cleanly when email delivery fails.
             try:
-                with transaction.atomic():
-                    user, organization, _, profile = create_user_with_organization(
-                        username=form.cleaned_data["username"],
-                        email=form.cleaned_data["email"],
-                        password=form.cleaned_data["password"],
-                        first_name=form.cleaned_data["first_name"],
-                        last_name=form.cleaned_data["last_name"],
-                        signup_mode=form.cleaned_data.get("signup_mode", "individual"),
-                        organization_type=form.cleaned_data["organization_type"],
-                        country_code=country_code,
-                        country_name=country_name,
-                        join_organization=form.cleaned_data.get("join_organization"),
-                        institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
-                        organization_identifier=form.cleaned_data.get("organization_identifier", ""),
-                        organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
-                        initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
-                        phone=form.cleaned_data.get("phone", ""),
-                        specialization=form.cleaned_data.get("specialization", ""),
-                        group_number=form.cleaned_data.get("group_number", ""),
-                        department=form.cleaned_data.get("department", ""),
-                        staff_position=form.cleaned_data.get("staff_position", ""),
-                    )
-                    # OTP generation + email send; raises on failure so the
-                    # atomic block is rolled back and no orphaned user remains.
-                    send_verification_otp(user, request=request)
+                pending_registration = store_pending_registration(form.cleaned_data)
+                send_otp_email(
+                    pending_registration["email"],
+                    purpose=EmailOTP.Purpose.SIGNUP,
+                    request=request,
+                )
+            except OTPRateLimitError as exc:
+                logger.warning(
+                    "Signup OTP throttled for %s with retry_after=%s",
+                    form.cleaned_data.get("email"),
+                    exc.retry_after,
+                )
+                messages.error(request, "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.")
+                response = render(
+                    request,
+                    "accounts/register.html",
+                    {
+                        "form": form,
+                        "lookup_payload": get_signup_lookup_payload(),
+                    },
+                    status=429,
+                )
+                response.headers["Retry-After"] = str(exc.retry_after)
+                return response
             except Exception:
-                logger.exception("Registration failed during user creation or OTP delivery")
+                logger.exception("Registration failed during pending signup OTP delivery")
                 messages.error(
                     request,
                     pgettext_lazy("accounts.auth.message", "registration_email_send_failed"),
@@ -217,13 +250,7 @@ def register_view(request):
                         "lookup_payload": get_signup_lookup_payload(),
                     },
                 )
-
-            requested_organization_name = profile.requested_organization_name
-
-            if is_tenant_accessible_organization(organization):
-                request.session["active_organization"] = organization.slug
-
-            request.session["pending_verify_email"] = user.email
+            request.session["pending_verify_email"] = pending_registration["email"]
 
             # Preserve any ?next= parameter so it can be forwarded to the
             # login redirect after OTP verification completes (BUG-04 fix).
@@ -231,16 +258,10 @@ def register_view(request):
             if next_url:
                 request.session["pending_next_url"] = next_url
 
-            if organization is None and requested_organization_name:
-                messages.success(
-                    request,
-                    pgettext_lazy("accounts.auth.message", "registration_completed_request_recorded"),
-                )
-            else:
-                messages.success(
-                    request,
-                    pgettext_lazy("accounts.auth.message", "registration_completed_you_can_login_now"),
-                )
+            messages.success(
+                request,
+                pgettext_lazy("accounts.auth.message", "registration_completed_you_can_login_now"),
+            )
             messages.success(request, pgettext_lazy("accounts.auth.message", "new_code_sent"))
             return redirect("accounts:verify_code")
     else:
@@ -267,9 +288,11 @@ def verify_code_view(request):
         code = request.POST.get("code", "").strip()
 
         user = User.objects.filter(email=email).first()
+        pending_registration = get_pending_registration(email)
         if not user:
-            messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
-            return redirect("accounts:register")
+            if not pending_registration:
+                messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
+                return redirect("accounts:register")
 
         otp_limit_key = _otp_limit_key(request, email)
         is_limited, retry_after = is_rate_limited(
@@ -279,7 +302,7 @@ def verify_code_view(request):
         )
         context = {
             "email": email,
-            **get_otp_timer_context(user),
+            **get_otp_timer_context(user, email=email, purpose=EmailOTP.Purpose.SIGNUP),
         }
         if is_limited:
             messages.error(request, AUTH_RATE_LIMIT_MESSAGE)
@@ -288,8 +311,13 @@ def verify_code_view(request):
                 response.headers["Retry-After"] = str(retry_after)
             return response
 
-        _, otp = verify_otp_code(user, code)
-        if not otp or otp.is_expired():
+        verification = verify_email_otp(
+            email=email,
+            code=code,
+            user=user,
+            purpose=EmailOTP.Purpose.SIGNUP,
+        )
+        if not verification.success or verification.otp is None:
             record_rate_limit_hit(
                 OTP_VERIFY_LIMIT_SCOPE,
                 settings.OTP_VERIFY_RATE_LIMIT,
@@ -301,18 +329,27 @@ def verify_code_view(request):
                 "accounts/verify_code.html",
                 {
                     "email": email,
-                    **get_otp_timer_context(user),
+                    **get_otp_timer_context(user, email=email, purpose=EmailOTP.Purpose.SIGNUP),
                 },
             )
 
-        otp.is_used = True
-        otp.save()
         clear_rate_limit(OTP_VERIFY_LIMIT_SCOPE, *otp_limit_key)
 
-        joined_organization = activate_user_account(user)
-        if is_tenant_accessible_organization(joined_organization):
-            request.session["active_organization"] = joined_organization.slug
+        if user is None:
+            try:
+                user, organization, _requested_organization, _profile = finalize_pending_registration(email)
+            except Exception:
+                logger.exception("Failed to finalize pending registration for %s after OTP verification", email)
+                messages.error(request, "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin.")
+                return redirect("accounts:register")
+            if is_tenant_accessible_organization(organization):
+                request.session["active_organization"] = organization.slug
+        else:
+            joined_organization = activate_user_account(user)
+            if is_tenant_accessible_organization(joined_organization):
+                request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
+        clear_pending_registration(email)
 
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
 
@@ -330,7 +367,7 @@ def verify_code_view(request):
         "accounts/verify_code.html",
         {
             "email": email,
-            **get_otp_timer_context(user),
+            **get_otp_timer_context(user, email=email, purpose=EmailOTP.Purpose.SIGNUP),
         },
     )
 
@@ -341,7 +378,11 @@ def verify_email_link_view(request):
     try:
         user_id = signer.unsign(token, max_age=settings.AUTH_OTP_EXPIRY_SECONDS)
         user = User.objects.get(pk=user_id)
-        EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+        EmailOTP.objects.filter(
+            user=user,
+            purpose=EmailOTP.Purpose.SIGNUP,
+            is_used=False,
+        ).update(is_used=True, is_verified=True)
         joined_organization = activate_user_account(user)
         if is_tenant_accessible_organization(joined_organization):
             request.session["active_organization"] = joined_organization.slug
@@ -359,6 +400,7 @@ def verify_email_link_view(request):
         return redirect("accounts:register")
 
 
+@require_POST
 def resend_code_view(request):
     """Resend email verification code."""
     email = request.session.get("pending_verify_email")
@@ -367,10 +409,11 @@ def resend_code_view(request):
         return redirect("accounts:register")
 
     user = User.objects.filter(email=email).first()
-    if not user:
+    pending_registration = get_pending_registration(email)
+    if not user and not pending_registration:
         messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
         return redirect("accounts:register")
-    if user.is_active:
+    if user and user.is_active:
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
         return redirect("accounts:login")
 
@@ -387,10 +430,262 @@ def resend_code_view(request):
             response.headers["Retry-After"] = str(retry_after)
         return response
 
-    send_verification_otp(user, request=request)
+    try:
+        if user is not None:
+            send_verification_otp(user, request=request, enforce_cooldown=True)
+        else:
+            send_otp_email(
+                email,
+                purpose=EmailOTP.Purpose.SIGNUP,
+                request=request,
+                enforce_cooldown=True,
+            )
+    except OTPResendCooldownError as exc:
+        messages.error(request, f"Yeni OTP kodu üçün {exc.retry_after} saniyə gözləyin.")
+        response = render(
+            request,
+            "accounts/verify_code.html",
+            {
+                "email": email,
+                **get_otp_timer_context(user, email=email, purpose=EmailOTP.Purpose.SIGNUP),
+            },
+            status=429,
+        )
+        response.headers["Retry-After"] = str(exc.retry_after)
+        return response
+    except OTPRateLimitError as exc:
+        messages.error(request, "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.")
+        response = render(
+            request,
+            "accounts/verify_code.html",
+            {
+                "email": email,
+                **get_otp_timer_context(user, email=email, purpose=EmailOTP.Purpose.SIGNUP),
+            },
+            status=429,
+        )
+        response.headers["Retry-After"] = str(exc.retry_after)
+        return response
 
     messages.success(request, pgettext_lazy("accounts.auth.message", "new_code_sent"))
     return redirect("accounts:verify_code")
+
+
+@require_POST
+def send_otp_api_view(request):
+    """JSON endpoint to issue login/signup OTP emails without exposing the OTP code."""
+
+    payload = _load_request_payload(request)
+    purpose = _resolve_otp_purpose(payload.get("purpose"), default=EmailOTP.Purpose.LOGIN)
+
+    try:
+        email = _validate_otp_email(payload.get("email", ""))
+    except ValidationError as exc:
+        return _json_error(str(exc.messages[0]))
+
+    user = User.objects.filter(email__iexact=email).first()
+    pending_registration = get_pending_registration(email)
+
+    if purpose == EmailOTP.Purpose.LOGIN:
+        if user is None or not user.is_active:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "detail": "Əgər bu email qeydiyyatdan keçibsə, OTP göndərildi.",
+                },
+                status=202,
+            )
+        try:
+            send_login_otp(email, request=request, user=user, enforce_cooldown=True)
+        except OTPResendCooldownError as exc:
+            return _json_error(
+                "Yeni OTP kodu üçün bir az gözləyin.",
+                status=429,
+                retry_after=exc.retry_after,
+                resend_available_in=exc.retry_after,
+            )
+        except OTPRateLimitError as exc:
+            return _json_error(
+                "Bu email üçün saatlıq OTP limiti dolub.",
+                status=429,
+                retry_after=exc.retry_after,
+            )
+        return JsonResponse(
+            {
+                "success": True,
+                "detail": "OTP emailə göndərildi.",
+                "expires_in": settings.AUTH_OTP_EXPIRY_SECONDS,
+            },
+            status=202,
+        )
+
+    if user is None and not pending_registration:
+        return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
+
+    if purpose == EmailOTP.Purpose.SIGNUP and user is not None and user.is_active:
+        return _json_error("Bu email artıq təsdiqlənib.", status=409)
+
+    try:
+        if user is not None:
+            send_verification_otp(user, request=request, enforce_cooldown=True)
+        else:
+            send_otp_email(
+                email,
+                purpose=EmailOTP.Purpose.SIGNUP,
+                request=request,
+                enforce_cooldown=True,
+            )
+    except OTPResendCooldownError as exc:
+        return _json_error(
+            "Yeni OTP kodu üçün bir az gözləyin.",
+            status=429,
+            retry_after=exc.retry_after,
+            resend_available_in=exc.retry_after,
+        )
+    except OTPRateLimitError as exc:
+        return _json_error(
+            "Bu email üçün saatlıq OTP limiti dolub.",
+            status=429,
+            retry_after=exc.retry_after,
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "detail": "OTP emailə göndərildi.",
+            "expires_in": settings.AUTH_OTP_EXPIRY_SECONDS,
+        },
+        status=202,
+    )
+
+
+@require_POST
+def verify_otp_api_view(request):
+    """JSON endpoint for verifying signup/login OTP codes."""
+
+    payload = _load_request_payload(request)
+    purpose = _resolve_otp_purpose(payload.get("purpose"), default=EmailOTP.Purpose.LOGIN)
+
+    try:
+        email = _validate_otp_email(payload.get("email", ""))
+    except ValidationError as exc:
+        return _json_error(str(exc.messages[0]))
+
+    code = str(payload.get("otp", "")).strip()
+    user = User.objects.filter(email__iexact=email).first()
+    pending_registration = get_pending_registration(email)
+    verification = verify_email_otp(
+        email=email,
+        code=code,
+        user=user,
+        purpose=purpose,
+    )
+
+    if not verification.success or verification.otp is None:
+        return _json_error(
+            "OTP yanlışdır, vaxtı bitib və ya maksimum cəhd limiti dolub.",
+            status=400,
+            remaining_attempts=verification.remaining_attempts,
+            reason=verification.reason,
+        )
+
+    if purpose == EmailOTP.Purpose.SIGNUP:
+        if user is None and pending_registration:
+            user, organization, _requested_organization, _profile = finalize_pending_registration(email)
+            if is_tenant_accessible_organization(organization):
+                request.session["active_organization"] = organization.slug
+        elif user is not None and not user.is_active:
+            joined_organization = activate_user_account(user)
+            if is_tenant_accessible_organization(joined_organization):
+                request.session["active_organization"] = joined_organization.slug
+
+    if purpose == EmailOTP.Purpose.LOGIN and user is not None and user.is_active:
+        backend = settings.AUTHENTICATION_BACKENDS[0]
+        login(request, user, backend=backend)
+        restore_request_organization_from_profile(request, profile=getattr(user, "profile", None))
+
+    request.session.pop("pending_verify_email", None)
+
+    return JsonResponse(
+        {
+            "success": True,
+            "detail": "OTP uğurla təsdiqləndi.",
+            "verified": True,
+            "authenticated": bool(purpose == EmailOTP.Purpose.LOGIN and user and user.is_active),
+        }
+    )
+
+
+@require_POST
+def resend_otp_api_view(request):
+    """JSON endpoint to resend an OTP after the cooldown window."""
+
+    payload = _load_request_payload(request)
+    purpose = _resolve_otp_purpose(payload.get("purpose"), default=EmailOTP.Purpose.LOGIN)
+
+    try:
+        email = _validate_otp_email(payload.get("email", ""))
+    except ValidationError as exc:
+        return _json_error(str(exc.messages[0]))
+
+    user = User.objects.filter(email__iexact=email).first()
+    pending_registration = get_pending_registration(email)
+
+    if purpose == EmailOTP.Purpose.LOGIN:
+        if user is None or not user.is_active:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "detail": "Əgər bu email qeydiyyatdan keçibsə, OTP göndərildi.",
+                },
+                status=202,
+            )
+
+        def send_callable():
+            return send_login_otp(email, request=request, user=user, enforce_cooldown=True)
+
+    else:
+        if user is None and not pending_registration:
+            return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
+        if user is not None:
+
+            def send_callable():
+                return send_verification_otp(user, request=request, enforce_cooldown=True)
+
+        else:
+
+            def send_callable():
+                return send_otp_email(
+                    email,
+                    purpose=EmailOTP.Purpose.SIGNUP,
+                    request=request,
+                    enforce_cooldown=True,
+                )
+
+    try:
+        send_callable()
+    except OTPResendCooldownError as exc:
+        return _json_error(
+            "Resend üçün gözləmə vaxtı hələ bitməyib.",
+            status=429,
+            retry_after=exc.retry_after,
+            resend_available_in=exc.retry_after,
+        )
+    except OTPRateLimitError as exc:
+        return _json_error(
+            "Bu email üçün saatlıq OTP limiti dolub.",
+            status=429,
+            retry_after=exc.retry_after,
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "detail": "Yeni OTP göndərildi.",
+            "expires_in": settings.AUTH_OTP_EXPIRY_SECONDS,
+        },
+        status=202,
+    )
 
 
 def logout_view(request):

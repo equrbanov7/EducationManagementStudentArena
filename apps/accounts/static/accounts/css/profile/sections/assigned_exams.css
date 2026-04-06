@@ -5,8 +5,8 @@
     --task-border: #bfdbfe;
 }
 
-.text-indigo { color: var(--task-primary) !important; }
-.icon-indigo-light { background: var(--task-light) !important; color: var(--task-primary) !important; }
+.text-sky { color: var(--task-primary) !important; }
+.icon-sky-light { background: var(--task-light) !important; color: var(--task-primary) !important; }
 
 .profile-section--assigned-exams .assigned-task-tabs {
     margin-bottom: 1.5rem;
@@ -95,8 +95,8 @@
 }
 
 .profile-section--assigned-exams .assigned-task-icon--labs {
-    background: #ede9fe;
-    color: #6d28d9;
+    background: #e0f2fe;
+    color: #0284c7;
 }
 
 .profile-section--assigned-exams .assigned-task-icon--independent {
@@ -193,7 +193,7 @@
 }
 
 .profile-section--assigned-exams .btn-task-secondary:hover {
-    background: #eef2ff;
+    background: #eff6ff;
     border-color: #bfdbfe;
     color: #1e3a8a;
 }
@@ -350,7 +350,7 @@
 }
 
 .assigned-exam-info-actions .btn-task-secondary:hover {
-    background: #eef2ff;
+    background: #eff6ff;
     border-color: #bfdbfe;
     color: #1e3a8a;
 }
