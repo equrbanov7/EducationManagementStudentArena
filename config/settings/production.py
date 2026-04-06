@@ -12,8 +12,12 @@ from urllib.parse import urlsplit
 from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
-import sentry_sdk
 from dotenv import load_dotenv
+
+try:
+    import sentry_sdk
+except ModuleNotFoundError:  # pragma: no cover - optional in non-prod test envs
+    sentry_sdk = None
 
 from .base import (
     ADMIN_2FA_REQUIRED,
@@ -278,6 +282,8 @@ LOGGING = {
 
 sentry_dsn = (os.getenv("SENTRY_DSN") or "").strip()
 if sentry_dsn:
+    if sentry_sdk is None:
+        raise ImproperlyConfigured("SENTRY_DSN is set but sentry_sdk is not installed.")
     sentry_sdk.init(
         dsn=sentry_dsn,
         send_default_pii=False,
