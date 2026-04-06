@@ -68,5 +68,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
             user=user,
             purpose=EmailOTP.Purpose.PASSWORD_RESET,
             is_used=False,
-        ).exclude(pk=getattr(matched_otp, "pk", None)).update(is_used=True)
+        ).exclude(
+            pk=getattr(matched_otp, "pk", None)
+        ).update(is_used=True)
         return user
