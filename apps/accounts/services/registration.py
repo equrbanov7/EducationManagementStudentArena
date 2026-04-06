@@ -192,13 +192,10 @@ def create_user_with_organization(
 
     profile.save()
 
-    if (
-        create_join_request
-        and (
+    if create_join_request and (
         organization is None
         and requested_organization is not None
         and signup_mode in {"student_join", "teacher_join", "staff_join"}
-        )
     ):
         if signup_mode == "teacher_join":
             req_role_type = MembershipRequestRoleType.TEACHER

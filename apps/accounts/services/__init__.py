@@ -43,6 +43,7 @@ from .organization_requests import (
     set_student_org_request_status,
     sync_profile_pending_request_snapshot,
 )
+from .parsing import parse_decimal_score
 from .pending_registration import (
     PendingRegistrationError,
     PendingRegistrationNotFound,
@@ -51,7 +52,6 @@ from .pending_registration import (
     get_pending_registration,
     store_pending_registration,
 )
-from .parsing import parse_decimal_score
 from .profile import update_user_profile, update_user_role
 from .registration import create_user_with_organization, purge_stale_pending_registration
 
