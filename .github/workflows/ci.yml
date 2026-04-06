@@ -204,3 +204,23 @@ jobs:
           fi
 
           echo "✅ All critical jobs passed!"
+
+  # ── 10. Production deploy (main only) ──────────────────────────────────
+  deploy-production:
+    needs: ci-success
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_deploy-linode.yml
+    with:
+      app-dir: "/opt/emsarena/app"
+      venv-dir: "/opt/emsarena/venv"
+      service-name: "emsarena.service"
+      app-base-url: "http://127.0.0.1:8001"
+      healthcheck-host: "emsarena.com"
+      deploy-timeout-seconds: "180"
+    secrets:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
