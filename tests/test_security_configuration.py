@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, SimpleTestCase, TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 User = get_user_model()
@@ -199,7 +199,7 @@ class DebugEnvParsingTest(TestCase):
         self.assertFalse(self._env_bool("VAR", True, {"VAR": "0"}))
 
 
-class ProductionAdminAllowlistSettingsTest(SimpleTestCase):
+class ProductionAdminAllowlistSettingsTest(TestCase):
     """Guard production imports so an empty admin allowlist stays supported."""
 
     @staticmethod
@@ -223,3 +223,21 @@ class ProductionAdminAllowlistSettingsTest(SimpleTestCase):
     def test_empty_admin_allowlist_is_allowed_in_production(self):
         module = self._load_production_settings(ADMIN_ALLOWED_IPS="")
         self.assertEqual(module.ADMIN_ALLOWED_IPS, [])
+
+    def test_brevo_login_email_does_not_override_default_sender(self):
+        module = self._load_production_settings(
+            ADMIN_ALLOWED_IPS="",
+            BREVO_EMAIL="equrbanov@gmail.com",
+            BREVO_FROM_EMAIL="",
+            DEFAULT_FROM_EMAIL="",
+        )
+        self.assertEqual(module.DEFAULT_FROM_EMAIL, "no-reply@emsarena.com")
+
+    def test_brevo_smtp_login_is_used_for_smtp_auth(self):
+        module = self._load_production_settings(
+            ADMIN_ALLOWED_IPS="",
+            BREVO_SMTP_LOGIN="a7359d001@smtp-brevo.com",
+            BREVO_EMAIL="no-reply@emsarena.com",
+            EMAIL_HOST_USER="legacy-user@example.com",
+        )
+        self.assertEqual(module.EMAIL_HOST_USER, "a7359d001@smtp-brevo.com")
