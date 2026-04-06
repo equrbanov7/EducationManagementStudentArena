@@ -5,7 +5,9 @@ Pending registration cache services.
 from __future__ import annotations
 
 from django.contrib.auth.hashers import make_password
-from django.core.cache import cache
+from django.core.cache import caches
+from django.core.cache.backends.dummy import DummyCache
+from django.core.cache.backends.locmem import LocMemCache
 from django.db import transaction
 
 from apps.accounts.models import EmailOTP
@@ -21,6 +23,17 @@ class PendingRegistrationError(Exception):
 
 class PendingRegistrationNotFound(PendingRegistrationError):
     """Raised when cached signup data cannot be found."""
+
+
+_PENDING_REGISTRATION_FALLBACK_CACHE = LocMemCache("pending-registration-fallback", {})
+
+
+def _pending_registration_cache():
+    cache = caches["default"]
+    # DummyCache discards state entirely, so use a process-local cache in tests/dev.
+    if isinstance(cache, DummyCache):
+        return _PENDING_REGISTRATION_FALLBACK_CACHE
+    return cache
 
 
 def _pending_registration_cache_key(email: str) -> str:
@@ -53,7 +66,7 @@ def build_pending_registration_payload(cleaned_data: dict) -> dict:
 
 def store_pending_registration(cleaned_data: dict) -> dict:
     payload = build_pending_registration_payload(cleaned_data)
-    cache.set(
+    _pending_registration_cache().set(
         _pending_registration_cache_key(payload["email"]),
         payload,
         timeout=get_auth_pending_signup_ttl_seconds(),
@@ -62,11 +75,11 @@ def store_pending_registration(cleaned_data: dict) -> dict:
 
 
 def get_pending_registration(email: str) -> dict | None:
-    return cache.get(_pending_registration_cache_key(email))
+    return _pending_registration_cache().get(_pending_registration_cache_key(email))
 
 
 def clear_pending_registration(email: str) -> None:
-    cache.delete(_pending_registration_cache_key(email))
+    _pending_registration_cache().delete(_pending_registration_cache_key(email))
 
 
 @transaction.atomic
