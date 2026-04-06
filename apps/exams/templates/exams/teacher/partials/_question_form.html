@@ -121,6 +121,31 @@
                             <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
                         {% endif %}
                     </div>
+                    {% if editing and question %}
+                        <div class="mt-2 p-2 rounded" style="background:#f8fbff; border:1px solid #d9e7ff;">
+                            <div class="small" style="color:#2f3a4c;">
+                                <strong>{% trans "label_paint_current_state" context "exams.template.add_exam_question" %}:</strong>
+                                {% if question.paint_enabled_effective %}
+                                    {% trans "paint_state_active" context "exams.template.add_exam_question" %}
+                                {% else %}
+                                    {% trans "paint_state_inactive" context "exams.template.add_exam_question" %}
+                                {% endif %}
+                            </div>
+                            <div class="small mt-1" style="color:#4f5d75;">
+                                <strong>{% trans "label_paint_source" context "exams.template.add_exam_question" %}:</strong>
+                                {% if question.paint_priority_source == "question" %}
+                                    {% trans "paint_source_question" context "exams.template.add_exam_question" %}
+                                {% elif question.paint_priority_source == "block" %}
+                                    {% trans "paint_source_block" context "exams.template.add_exam_question" %}
+                                {% else %}
+                                    {% trans "paint_source_exam" context "exams.template.add_exam_question" %}
+                                {% endif %}
+                            </div>
+                            <div class="small mt-1" style="color:#4f5d75;">
+                                {% trans "paint_priority_order" context "exams.template.add_exam_question" %}
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

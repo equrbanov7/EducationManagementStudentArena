@@ -16,6 +16,8 @@ from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
+WRITTEN_QUESTION_PREFIX_RE = re.compile(r"^\s*\d+\s*[\.\)]\s*", re.MULTILINE)
+
 
 def _safe_same_origin_redirect_path(request, candidate_url):
     raw_url = (candidate_url or "").strip()
@@ -75,6 +77,66 @@ def _append_navigation_query(path, navigation_query):
     return f"{path}{separator}{navigation_query}"
 
 
+def _parse_written_questions(content_text):
+    text = (content_text or "").strip()
+    if not text:
+        return []
+
+    matches = list(WRITTEN_QUESTION_PREFIX_RE.finditer(text))
+    if not matches:
+        return [text]
+
+    questions = []
+    for idx, match in enumerate(matches):
+        start = match.end()
+        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        question_text = text[start:end].strip()
+        if question_text:
+            questions.append(question_text)
+
+    return questions
+
+
+def _sync_written_block_questions(block, question_texts):
+    existing_questions = list(block.questions.order_by("order", "id"))
+    normalized_texts = [text for text in question_texts if text]
+
+    for index, q_text in enumerate(normalized_texts, start=1):
+        if index <= len(existing_questions):
+            question = existing_questions[index - 1]
+            update_fields = []
+
+            if question.text != q_text:
+                question.text = q_text
+                update_fields.append("text")
+            if question.order != index:
+                question.order = index
+                update_fields.append("order")
+            if question.block_id != block.id:
+                question.block = block
+                update_fields.append("block")
+            if question.exam_id != block.exam_id:
+                question.exam = block.exam
+                update_fields.append("exam")
+            if question.answer_mode != "single":
+                question.answer_mode = "single"
+                update_fields.append("answer_mode")
+
+            if update_fields:
+                question.save(update_fields=update_fields)
+        else:
+            ExamQuestion.objects.create(
+                exam=block.exam,
+                block=block,
+                text=q_text,
+                order=index,
+                answer_mode="single",
+            )
+
+    for stale_question in existing_questions[len(normalized_texts) :]:
+        stale_question.delete()
+
+
 @login_required
 def create_question_bank(request, slug):
     _ensure_teacher(request.user)
@@ -92,7 +154,13 @@ def create_question_bank(request, slug):
         # Sualları "1. Sual mətni" formatında birləşdiririk
         text_content = "\n".join([f"{q.order}. {q.text}" for q in questions])
 
-        blocks_data.append({"obj": block, "text_content": text_content})
+        blocks_data.append(
+            {
+                "obj": block,
+                "text_content": text_content,
+                "paint_enabled": block.enable_paint if block.enable_paint is not None else exam.enable_paint,
+            }
+        )
 
     return render(
         request,
@@ -158,6 +226,7 @@ def process_question_bank(request, slug):
                 content_text = request.POST.get(content_key, "")
                 time_key = f"block_time_{ui_id}"
                 time_val = request.POST.get(time_key)
+                block_paint_enabled = request.POST.get(f"block_enable_paint_{ui_id}") == "on"
                 db_id_key = f"block_db_id_{ui_id}"
                 db_id = request.POST.get(db_id_key)
 
@@ -184,15 +253,14 @@ def process_question_bank(request, slug):
                     # Blok Yaradılması/Yenilənməsi
                     if db_id:
                         # Bazada yoxlayırıq ki, silinməyibsə (concurrency üçün)
-                        block_qs = QuestionBlock.objects.filter(id=db_id)
+                        block_qs = QuestionBlock.objects.filter(id=db_id, exam=exam)
                         if block_qs.exists():
                             block = block_qs.first()
                             block.name = block_name
                             block.time_limit_minutes = int(time_val) if time_val else None
+                            block.enable_paint = block_paint_enabled
                             block.order = current_order  # ✅ Düzgün order
                             block.save()
-                            # Sualları yeniləyirik
-                            block.questions.all().delete()
                         else:
                             continue  # Blok tapılmadısa keçirik
                     else:
@@ -200,6 +268,7 @@ def process_question_bank(request, slug):
                             exam=exam,
                             name=block_name,
                             time_limit_minutes=int(time_val) if time_val else None,
+                            enable_paint=block_paint_enabled,
                             order=current_order,  # ✅ Düzgün order (ui_id deyil)
                         )
 
@@ -207,19 +276,8 @@ def process_question_bank(request, slug):
                     current_order += 1
 
                     # Sualların Parse edilməsi
-                    if content_text.strip():
-                        pattern = r"(?:\n|^)\s*\d+[\.\)]\s+"
-                        questions = re.split(pattern, content_text)
-                        questions = [q.strip() for q in questions if q.strip()]
-
-                        for index, q_text in enumerate(questions, start=1):
-                            ExamQuestion.objects.create(
-                                exam=exam,
-                                block=block,
-                                text=q_text,
-                                order=index,
-                                answer_mode="single",
-                            )
+                    questions = _parse_written_questions(content_text) if content_text.strip() else []
+                    _sync_written_block_questions(block, questions)
 
         messages.success(request, pgettext_lazy("exams.view.question_bank.message", "bank_saved"))
         return redirect(

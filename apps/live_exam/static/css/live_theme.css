@@ -92,32 +92,32 @@ body[data-live-theme="aurora"] {
 }
 
 body[data-live-theme="sweet"] {
-    --pin-bg-1: #4a0422;
-    --pin-bg-2: #831843;
-    --pin-bg-3: #db2777;
-    --pin-bg-4: #fb7185;
-    --pin-secondary: #f9a8d4;
-    --pin-accent: #f472b6;
-    --pin-accent-strong: #db2777;
+    --pin-bg-1: #052e2b;
+    --pin-bg-2: #0f766e;
+    --pin-bg-3: #14b8a6;
+    --pin-bg-4: #5eead4;
+    --pin-secondary: #a7f3d0;
+    --pin-accent: #2dd4bf;
+    --pin-accent-strong: #14b8a6;
 
-    --join-bg-1: #4a0422;
-    --join-bg-2: #831843;
-    --join-bg-3: #db2777;
-    --join-bg-4: #fb7185;
-    --join-accent: #f472b6;
-    --join-accent-strong: #db2777;
-    --join-accent-soft: #fce7f3;
+    --join-bg-1: #052e2b;
+    --join-bg-2: #0f766e;
+    --join-bg-3: #14b8a6;
+    --join-bg-4: #5eead4;
+    --join-accent: #2dd4bf;
+    --join-accent-strong: #14b8a6;
+    --join-accent-soft: #ccfbf1;
 
-    --wait-room-bg-1: #4a0422;
-    --wait-room-bg-2: #831843;
-    --wait-room-bg-3: #db2777;
-    --wait-room-bg-4: #fb7185;
-    --wait-room-accent: #f472b6;
-    --wait-room-accent-strong: #db2777;
-    --wait-room-accent-soft: #fce7f3;
+    --wait-room-bg-1: #052e2b;
+    --wait-room-bg-2: #0f766e;
+    --wait-room-bg-3: #14b8a6;
+    --wait-room-bg-4: #5eead4;
+    --wait-room-accent: #2dd4bf;
+    --wait-room-accent-strong: #14b8a6;
+    --wait-room-accent-soft: #ccfbf1;
 
-    --player-bg-1: #831843;
-    --player-bg-2: #db2777;
-    --player-bg-3: #fb7185;
-    --player-bg-4: #4a0422;
+    --player-bg-1: #0f766e;
+    --player-bg-2: #14b8a6;
+    --player-bg-3: #5eead4;
+    --player-bg-4: #052e2b;
 }

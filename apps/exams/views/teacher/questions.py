@@ -264,7 +264,13 @@ def add_exam_question(request, slug):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
-        form = ExamQuestionCreateForm(request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks)
+        form = ExamQuestionCreateForm(
+            request.POST,
+            request.FILES,
+            exam_type=exam.exam_type,
+            subject_blocks=blocks,
+            exam=exam,
+        )
         if form.is_valid():
             # Sualı yaradıq
             last_q = exam.questions.order_by("-order").first()
@@ -277,6 +283,7 @@ def add_exam_question(request, slug):
             # Yazılı imtahan üçün answer_mode-u zorla "single" edə bilərik
             if exam.exam_type == "written":
                 question.answer_mode = "single"
+                question.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
             question.save()
 
@@ -326,7 +333,7 @@ def add_exam_question(request, slug):
                 status=400,
             )
     else:
-        form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks)
+        form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks, exam=exam)
 
     if is_modal_request:
         return render(
@@ -375,6 +382,7 @@ def edit_exam_question(request, slug, question_id):
             request.FILES,
             instance=question,
             exam_type=exam.exam_type,
+            exam=exam,
             subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
         )
         if form.is_valid():
@@ -383,6 +391,7 @@ def edit_exam_question(request, slug, question_id):
 
             if exam.exam_type == "written":
                 q.answer_mode = "single"
+                q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
             q.save()
 
@@ -424,6 +433,7 @@ def edit_exam_question(request, slug, question_id):
         form = ExamQuestionCreateForm(
             instance=question,
             exam_type=exam.exam_type,
+            exam=exam,
             subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
         )
 

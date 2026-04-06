@@ -1,17 +1,17 @@
 :root {
-    --pin-bg-1: #1a082f;
-    --pin-bg-2: #2b0751;
-    --pin-bg-3: #5c239a;
-    --pin-bg-4: #7e3af2;
-    --pin-surface: rgba(43, 7, 81, 0.5);
+    --pin-bg-1: #081427;
+    --pin-bg-2: #0b2a52;
+    --pin-bg-3: #0f4c81;
+    --pin-bg-4: #2563eb;
+    --pin-surface: rgba(11, 42, 82, 0.5);
     --pin-surface-strong: rgba(255, 255, 255, 0.92);
     --pin-line: rgba(255, 255, 255, 0.14);
     --pin-text: #f8f7ff;
     --pin-muted: rgba(237, 233, 254, 0.8);
-    --pin-accent: #8b5cf6;
-    --pin-accent-strong: #6d28d9;
-    --pin-secondary: #a78bfa;
-    --pin-shadow: 0 28px 80px rgba(14, 7, 37, 0.4);
+    --pin-accent: #38bdf8;
+    --pin-accent-strong: #1d4ed8;
+    --pin-secondary: #93c5fd;
+    --pin-shadow: 0 28px 80px rgba(8, 23, 55, 0.4);
 }
 
 * {
@@ -95,7 +95,7 @@ body.pin-entry-page {
     gap: 16px;
     border: 1px solid var(--pin-line);
     border-radius: 22px;
-    background: rgba(26, 8, 47, 0.42);
+    background: rgba(8, 20, 39, 0.42);
     backdrop-filter: blur(18px);
     box-shadow: var(--pin-shadow);
     z-index: 10;
@@ -120,7 +120,7 @@ body.pin-entry-page {
     font-weight: 700;
     background: linear-gradient(135deg, var(--pin-accent), var(--pin-accent-strong));
     color: #fff7ed;
-    box-shadow: 0 14px 32px rgba(109, 40, 217, 0.26);
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.26);
 }
 
 .pin-entry-brand__text {
@@ -171,7 +171,7 @@ body.pin-entry-page {
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #e9d5ff;
+    color: #dbeafe;
 }
 
 .pin-entry-copy__eyebrow::before {
@@ -260,7 +260,7 @@ body.pin-entry-page {
     width: 88px;
     height: 88px;
     border-radius: 24px;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(167, 139, 250, 0.16));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(96, 165, 250, 0.16));
     filter: blur(0.4px);
 }
 
@@ -276,7 +276,7 @@ body.pin-entry-page {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #e9d5ff;
+    color: #dbeafe;
 }
 
 .pin-entry-panel__header h2 {
@@ -315,7 +315,7 @@ body.pin-entry-page {
 
 .pin-entry-input-wrap:focus-within {
     border-color: var(--pin-accent);
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
     transform: translateY(-1px);
 }
 
@@ -369,14 +369,14 @@ body.pin-entry-page {
     color: #fff9f5;
     font-size: 1rem;
     font-weight: 800;
-    box-shadow: 0 18px 28px rgba(109, 40, 217, 0.24);
+    box-shadow: 0 18px 28px rgba(37, 99, 235, 0.24);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .pin-entry-submit:hover {
     transform: translateY(-2px);
     filter: brightness(1.04);
-    box-shadow: 0 22px 32px rgba(109, 40, 217, 0.28);
+    box-shadow: 0 22px 32px rgba(37, 99, 235, 0.28);
 }
 
 .pin-entry-submit:disabled {
