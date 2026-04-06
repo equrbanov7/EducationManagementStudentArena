@@ -221,12 +221,7 @@ EMAIL_HOST_USER = (
     os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", EMAIL_HOST_USER)
 )
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", EMAIL_HOST_PASSWORD)
-DEFAULT_FROM_EMAIL = (
-    os.getenv("DEFAULT_FROM_EMAIL")
-    or os.getenv("BREVO_FROM_EMAIL")
-    or os.getenv("BREVO_EMAIL")
-    or "no-reply@emsarena.com"
-)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@emsarena.com"
 
 # Static files storage - Simple for development
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
