@@ -99,7 +99,7 @@ class OTPServicesTest(TestCase):
 
         otp = EmailOTP.objects.filter(user=self.user, is_used=False).first()
         self.assertIsNotNone(otp)
-        self.assertNotEqual(otp.code, code)
+        self.assertNotEqual(otp.otp_hash, code)
         self.assertTrue(otp.matches_code(code))
 
     def test_verify_otp_code_success(self):
@@ -184,7 +184,7 @@ class OTPDeliveryServiceTest(TestCase):
         """issue_email_otp must create an EmailOTP record that matches the returned code."""
         from apps.accounts.services import issue_email_otp
 
-        code, expires_at = issue_email_otp(self.user)
+        code, expires_at, _otp = issue_email_otp(self.user)
 
         self.assertIsNotNone(code)
         self.assertEqual(len(code), 6)
@@ -216,7 +216,7 @@ class OTPDeliveryServiceTest(TestCase):
         """verify_otp_code returns True and the OTP object for a valid code."""
         from apps.accounts.services import issue_email_otp, verify_otp_code
 
-        code, _ = issue_email_otp(self.user)
+        code, _expires_at, _otp = issue_email_otp(self.user)
         is_valid, otp = verify_otp_code(self.user, code)
 
         self.assertTrue(is_valid)

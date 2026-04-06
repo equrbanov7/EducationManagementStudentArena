@@ -63,6 +63,7 @@ def _save_paint_png_to_answer(ans, data_url: str):
     ans.paint_image.save(filename, ContentFile(binary), save=False)
     ans.paint_updated_at = timezone.now()
     ans.has_paint = True
+    ans.paint_data_url = data_url
     return True
 
 
@@ -74,4 +75,5 @@ def _clear_paint_from_answer(ans):
         ans.paint_image.delete(save=False)
     ans.paint_image = None
     ans.has_paint = False
+    ans.paint_data_url = None
     ans.paint_updated_at = timezone.now()

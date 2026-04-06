@@ -1,0 +1,8 @@
+Salam {{ recipient_name }},
+
+{{ otp_intro_action|capfirst }} üçün OTP kodunuz:
+{{ code }}
+
+Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+
+Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.

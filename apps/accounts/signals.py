@@ -28,8 +28,5 @@ def save_user_profile(sender, instance, **kwargs):
     """
     from apps.accounts.models import UserProfile
 
-    if hasattr(instance, "profile"):
-        instance.profile.save()
-    else:
-        # Profile doesn't exist, create it now
-        UserProfile.objects.get_or_create(user=instance)
+    profile, _created = UserProfile.objects.get_or_create(user=instance)
+    profile.save()

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMSArena | {{ headline }}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 40px rgba(15,23,42,0.10);">
+            <tr>
+              <td style="background:linear-gradient(135deg,#111827,#0f766e);padding:28px 32px;color:#ffffff;">
+                <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">EMSArena</div>
+                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">{{ headline }}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px;">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam <strong>{{ recipient_name }}</strong>, {{ otp_intro_action }} üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin.</p>
+
+                <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #99f6e4;border-radius:16px;background:#f0fdfa;text-align:center;">
+                  <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0f766e;margin-bottom:8px;">OTP kodu</div>
+                  <div style="font-size:36px;font-weight:800;letter-spacing:0.32em;color:#0f172a;">{{ code }}</div>
+                </div>
+
+                <div style="padding:16px 18px;border-radius:16px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:14px;line-height:1.7;">
+                  Kod <strong>{{ otp_expiry_minutes }} dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
