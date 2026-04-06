@@ -2,7 +2,6 @@
 View tests for exams app.
 """
 
-import re
 from datetime import timedelta
 from urllib.parse import urlencode
 

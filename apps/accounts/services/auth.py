@@ -38,7 +38,7 @@ class OTPServiceError(Exception):
 class OTPRateLimitError(OTPServiceError):
     """Raised when an email has reached the hourly OTP send limit."""
 
-    def __init__(self, *, retry_after: int):
+    def __init__(self, retry_after: int):
         super().__init__("OTP send limit reached.")
         self.retry_after = retry_after
 
@@ -46,7 +46,7 @@ class OTPRateLimitError(OTPServiceError):
 class OTPResendCooldownError(OTPServiceError):
     """Raised when resend is attempted before the cooldown expires."""
 
-    def __init__(self, *, retry_after: int):
+    def __init__(self, retry_after: int):
         super().__init__("OTP resend cooldown active.")
         self.retry_after = retry_after
 

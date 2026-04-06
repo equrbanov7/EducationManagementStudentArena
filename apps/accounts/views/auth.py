@@ -19,7 +19,6 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
-from apps.organizations.models import Country
 from apps.organizations.services import is_tenant_accessible_organization
 from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
@@ -27,7 +26,6 @@ from core.tenancy import restore_request_organization_from_profile
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
-from ..models import ProfileRole
 from ..queries import get_signup_lookup_payload
 from ..services import (
     OTPRateLimitError,
@@ -642,19 +640,27 @@ def resend_otp_api_view(request):
                 },
                 status=202,
             )
-        send_callable = lambda: send_login_otp(email, request=request, user=user, enforce_cooldown=True)
+
+        def send_callable():
+            return send_login_otp(email, request=request, user=user, enforce_cooldown=True)
+
     else:
         if user is None and not pending_registration:
             return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
         if user is not None:
-            send_callable = lambda: send_verification_otp(user, request=request, enforce_cooldown=True)
+
+            def send_callable():
+                return send_verification_otp(user, request=request, enforce_cooldown=True)
+
         else:
-            send_callable = lambda: send_otp_email(
-                email,
-                purpose=EmailOTP.Purpose.SIGNUP,
-                request=request,
-                enforce_cooldown=True,
-            )
+
+            def send_callable():
+                return send_otp_email(
+                    email,
+                    purpose=EmailOTP.Purpose.SIGNUP,
+                    request=request,
+                    enforce_cooldown=True,
+                )
 
     try:
         send_callable()

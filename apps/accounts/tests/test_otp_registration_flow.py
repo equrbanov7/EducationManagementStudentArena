@@ -10,14 +10,12 @@ These tests cover the fixes introduced to:
 """
 
 import re
-from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone
 
 from apps.accounts.models import EmailOTP, ProfileRole
 from apps.accounts.services import get_pending_registration
