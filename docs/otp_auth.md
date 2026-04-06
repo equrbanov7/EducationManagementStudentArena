@@ -18,6 +18,11 @@ Use the variables in `.env.example`:
 `BREVO_SMTP_LOGIN` is the SMTP username Brevo expects for authentication. Keep
 `BREVO_EMAIL` / `BREVO_FROM_EMAIL` as the visible sender address.
 
+`EmailCampaignsApi` is for Brevo marketing campaigns. EMSArena OTP, login,
+admin, and other system emails should continue to use Brevo transactional SMTP
+with the settings above so delivery stays synchronous with the existing Django
+email flow.
+
 ## OTP Rules
 
 - OTP length: 6 digits

@@ -95,14 +95,16 @@ before running any `docker compose` command.  Never commit this file.
 |----------|---------|-------------|
 | `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
 | `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Email backend class. Override with `anymail` backend for SendGrid/SES |
-| `EMAIL_HOST` | `smtp.gmail.com` | SMTP server hostname |
-| `EMAIL_PORT` | `465` | SMTP server port |
-| `EMAIL_USE_SSL` | `True` | Use implicit SSL (port 465). Set `False` and `EMAIL_USE_TLS=True` for port 587 |
-| `EMAIL_USE_TLS` | `False` | Use explicit STARTTLS (port 587) |
+| `EMAIL_HOST` | `smtp-relay.brevo.com` | SMTP server hostname |
+| `EMAIL_PORT` | `587` | SMTP server port |
+| `EMAIL_USE_SSL` | `False` | Keep `False` for Brevo STARTTLS |
+| `EMAIL_USE_TLS` | `True` | Use explicit STARTTLS (port 587) |
 | `EMAIL_TIMEOUT` | `10` | SMTP connection timeout in seconds |
-| `EMAIL_HOST_USER` | _(empty)_ | SMTP username for outbound email |
-| `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
-| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.com` | From address for system emails |
+| `BREVO_SMTP_LOGIN` | _(empty)_ | Brevo SMTP login like `xxxx@smtp-brevo.com` |
+| `BREVO_SMTP_KEY` | _(empty)_ | Brevo SMTP key used as the password |
+| `BREVO_EMAIL` | `no-reply@emsarena.com` | Visible sender mailbox |
+| `BREVO_FROM_EMAIL` | `no-reply@emsarena.com` | Optional explicit sender override |
+| `DEFAULT_FROM_EMAIL` | `no-reply@emsarena.com` | From address for system emails |
 | `SENTRY_DSN` | _(empty)_ | Sentry error-tracking DSN. Leave blank to disable |
 | `LIVE_EXAM_PUBLIC_HOST` | `emsarena.com` | Publicly reachable hostname for live-exam WebSocket connections |
 | `LAN_HOST` | `emsarena.com` | Internal hostname used in certain generated links |
@@ -537,14 +539,16 @@ retries up to 3 times with exponential back-off on transient SMTP errors.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Override for SendGrid/SES via django-anymail |
-| `EMAIL_HOST` | `smtp.gmail.com` | SMTP hostname |
-| `EMAIL_PORT` | `465` | SMTP port |
-| `EMAIL_USE_SSL` | `True` | Implicit TLS (port 465) |
-| `EMAIL_USE_TLS` | `False` | Explicit STARTTLS (port 587) |
+| `EMAIL_HOST` | `smtp-relay.brevo.com` | SMTP hostname |
+| `EMAIL_PORT` | `587` | SMTP port |
+| `EMAIL_USE_SSL` | `False` | Keep `False` for Brevo STARTTLS |
+| `EMAIL_USE_TLS` | `True` | Explicit STARTTLS (port 587) |
 | `EMAIL_TIMEOUT` | `10` | Connection timeout in seconds |
-| `EMAIL_HOST_USER` | _(empty)_ | SMTP username |
-| `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
-| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.com` | Sender address |
+| `BREVO_SMTP_LOGIN` | _(empty)_ | Brevo SMTP login like `xxxx@smtp-brevo.com` |
+| `BREVO_SMTP_KEY` | _(empty)_ | Brevo SMTP key used as the password |
+| `BREVO_EMAIL` | `no-reply@emsarena.com` | Visible sender mailbox |
+| `BREVO_FROM_EMAIL` | `no-reply@emsarena.com` | Optional explicit sender override |
+| `DEFAULT_FROM_EMAIL` | `no-reply@emsarena.com` | Sender address |
 
 ---
 
