@@ -143,8 +143,9 @@ if ADMIN_URL_PREFIX.strip("/").lower() == "admin":
 
 _raw_admin_ips = os.getenv("ADMIN_ALLOWED_IPS", "")
 ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip()]
-if not ADMIN_ALLOWED_IPS:
-    raise ImproperlyConfigured("ADMIN_ALLOWED_IPS must contain at least one address in production.")
+# Empty ADMIN_ALLOWED_IPS disables the admin IP allowlist entirely. Keep the
+# middleware behaviour aligned with base.py so production deploys can opt out
+# when remote admins must sign in from changing IP addresses.
 
 ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "3/15m")
 ADMIN_2FA_REQUIRED = _env_bool("ADMIN_2FA_REQUIRED", True)

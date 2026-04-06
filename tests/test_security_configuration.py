@@ -1,6 +1,11 @@
+import importlib
+import os
+import sys
+from unittest.mock import patch
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, SimpleTestCase, TestCase
 from django.urls import reverse
 
 User = get_user_model()
@@ -192,3 +197,29 @@ class DebugEnvParsingTest(TestCase):
         self.assertTrue(self._env_bool("VAR", False, {"VAR": "1"}))
         self.assertFalse(self._env_bool("VAR", True, {"VAR": "false"}))
         self.assertFalse(self._env_bool("VAR", True, {"VAR": "0"}))
+
+
+class ProductionAdminAllowlistSettingsTest(SimpleTestCase):
+    """Guard production imports so an empty admin allowlist stays supported."""
+
+    @staticmethod
+    def _load_production_settings(**env_overrides):
+        module_name = "config.settings.production"
+        base_env = {
+            "SECRET_KEY": "test-secret-key-for-production-imports-only",
+            "DATABASE_URL": "sqlite:////tmp/emsarena-production-settings-test.sqlite3",
+            "ALLOWED_HOSTS": "example.com",
+            "ADMIN_URL_PREFIX": "manage/",
+            "ADMIN_2FA_REQUIRED": "True",
+            "SITE_URL": "https://example.com",
+        }
+
+        with patch.dict(os.environ, {**base_env, **env_overrides}, clear=False):
+            sys.modules.pop(module_name, None)
+            module = importlib.import_module(module_name)
+            sys.modules.pop(module_name, None)
+            return module
+
+    def test_empty_admin_allowlist_is_allowed_in_production(self):
+        module = self._load_production_settings(ADMIN_ALLOWED_IPS="")
+        self.assertEqual(module.ADMIN_ALLOWED_IPS, [])
