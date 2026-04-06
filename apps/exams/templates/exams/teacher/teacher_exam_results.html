@@ -173,7 +173,7 @@
                         <th>Status</th>
                         <th>Düzgün</th>
                         <th>Səhv</th>
-                        <th>Nəticə (%)</th>
+                        <th>{% if exam.exam_type == 'written' %}Bal{% else %}Nəticə (%){% endif %}</th>
                         <th>Başlama tarixi</th>
                         <th>Bitirmə vaxtı</th>
                         <th>Müddət (san.)</th>
@@ -218,8 +218,8 @@
                             <td>{{ att.correct_count }}</td>
                             <td>{{ att.wrong_count }}</td>
                             <td>
-                                {% if att.teacher_score is not None %}
-                                    <strong>{{ att.teacher_score }}%</strong>
+                                {% if exam.exam_type == 'written' %}
+                                    <strong>{{ att.teacher_score|default:0 }}</strong>
                                 {% else %}
                                     <strong>{{ att.score_percent }}%</strong>
                                 {% endif %}

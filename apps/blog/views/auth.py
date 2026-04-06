@@ -41,7 +41,7 @@ def register_view(request):
             user.is_active = False
             user.save()
 
-            code, expires_at = issue_email_otp(user)
+            code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.SIGNUP)
             try:
                 send_verify_email(user, code, request=request, expires_at=expires_at)
             except Exception:
@@ -74,13 +74,14 @@ def verify_code_view(request):
             messages.error(request, pgettext("blog.verify.message", "user_not_found"))
             return redirect("register")
 
-        otp = EmailOTP.get_matching_otp(user=user, code=code)
+        otp = EmailOTP.get_matching_otp(user=user, code=code, purpose=EmailOTP.Purpose.SIGNUP)
         if not otp or otp.is_expired():
             messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_code"))
             return render(request, "blog/verify_code.html", {"email": email})
 
         otp.is_used = True
-        otp.save()
+        otp.is_verified = True
+        otp.save(update_fields=["is_used", "is_verified"])
 
         user.is_active = True
         user.save()
@@ -116,7 +117,7 @@ def resend_code_view(request):
         messages.error(request, pgettext("blog.verify.message", "user_not_found"))
         return redirect("register")
 
-    code, expires_at = issue_email_otp(user)
+    code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.SIGNUP)
     send_verify_email(user, code, request=request, expires_at=expires_at)
 
     messages.success(request, pgettext("blog.verify.message", "new_code_sent"))

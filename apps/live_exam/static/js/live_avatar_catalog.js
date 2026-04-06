@@ -65,12 +65,12 @@
             species: "pig",
             bgStart: "#5eead4",
             bgEnd: "#3b82f6",
-            shell: "#f9a8d4",
-            shellAlt: "#f472b6",
+            shell: "#a7f3d0",
+            shellAlt: "#2dd4bf",
             shellLight: "#fbcfe8",
-            accent: "#be185d",
-            outline: "#9d174d",
-            mouth: "#9d174d"
+            accent: "#0f766e",
+            outline: "#0f766e",
+            mouth: "#0f766e"
         },
         avatar_7: {
             label: "Frog",
@@ -89,12 +89,12 @@
             species: "octopus",
             bgStart: "#60a5fa",
             bgEnd: "#2dd4bf",
-            shell: "#a78bfa",
-            shellAlt: "#8b5cf6",
-            shellLight: "#ddd6fe",
-            accent: "#5b21b6",
-            outline: "#6d28d9",
-            mouth: "#5b21b6"
+            shell: "#93c5fd",
+            shellAlt: "#38bdf8",
+            shellLight: "#dbeafe",
+            accent: "#1e40af",
+            outline: "#1d4ed8",
+            mouth: "#1e40af"
         },
         avatar_9: {
             label: "Monkey",
@@ -114,11 +114,11 @@
             bgStart: "#67e8f9",
             bgEnd: "#22c55e",
             shell: "#f8fafc",
-            shellAlt: "#e9d5ff",
+            shellAlt: "#dbeafe",
             shellLight: "#ffffff",
-            accent: "#7c3aed",
-            outline: "#7c3aed",
-            mouth: "#6d28d9"
+            accent: "#2563eb",
+            outline: "#2563eb",
+            mouth: "#1d4ed8"
         },
         avatar_11: {
             label: "Rabbit",
@@ -126,9 +126,9 @@
             bgStart: "#6ee7b7",
             bgEnd: "#38bdf8",
             shell: "#f8fafc",
-            shellAlt: "#e9d5ff",
+            shellAlt: "#dbeafe",
             shellLight: "#ffffff",
-            accent: "#7c3aed",
+            accent: "#2563eb",
             outline: "#475569",
             mouth: "#64748b"
         },

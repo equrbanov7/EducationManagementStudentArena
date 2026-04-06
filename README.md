@@ -158,7 +158,7 @@ black .
 # 3. Yoxla - heç bir dəyişiklik olmamalı
 isort --check --profile black .
 black --check .
-
+ 
 ---
 
 ### **5. Set Up Environment Variables**

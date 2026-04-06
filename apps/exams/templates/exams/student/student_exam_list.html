@@ -26,15 +26,20 @@
         </div>
     
         <div class="filter-box">
-            <select name="type" class="form-select" data-submit-on-change>
-                <option value="">{% trans "filter_all_types" context "exams.template.student_exam_list" %}</option>
-                <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
-                    {% trans "filter_test" context "exams.template.student_exam_list" %}
-                </option>
-                <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
-                    {% trans "filter_written_practical" context "exams.template.student_exam_list" %}
-                </option>
-            </select>
+            <div class="bootstrap-single-select">
+                <select name="type"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select
+                        data-submit-on-change>
+                    <option value="">{% trans "filter_all_types" context "exams.template.student_exam_list" %}</option>
+                    <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
+                        {% trans "filter_test" context "exams.template.student_exam_list" %}
+                    </option>
+                    <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
+                        {% trans "filter_written_practical" context "exams.template.student_exam_list" %}
+                    </option>
+                </select>
+            </div>
         </div>
     
         <button type="submit" class="btn btn-primary search-btn">{% trans "action_search" context "exams.template.student_exam_list" %}</button>

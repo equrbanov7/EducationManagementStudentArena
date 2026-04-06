@@ -194,7 +194,7 @@ def superadmin_organizations(request):
     status_filter = request.GET.get("status", "").strip().lower()
 
     organizations = (
-        Organization.objects.all()
+        Organization.objects.filter(owner__is_active=True)
         .select_related("owner")
         .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
         .order_by("-created_at")
@@ -223,7 +223,7 @@ def superadmin_organizations(request):
         organizations = organizations.filter(is_active=False)
 
     # Always annotate pending count for the badge in navigation.
-    pending_count = Organization.objects.filter(status="pending").count()
+    pending_count = Organization.objects.filter(status="pending", owner__is_active=True).count()
 
     paginator = Paginator(organizations, 20)
     page_number = request.GET.get("page")

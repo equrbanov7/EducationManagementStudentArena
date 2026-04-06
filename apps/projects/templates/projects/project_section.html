@@ -20,7 +20,7 @@
 
             {% if is_owner %}
                 <div class="mb-3 text-end">
-                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                    <button class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#addProjectModal">
                         <i class="fa-solid fa-plus-circle me-1"></i> {% trans "add_project_button" context "projects.section" %}
                     </button>
                 </div>
@@ -93,7 +93,7 @@
                     <div class="alert alert-light text-center py-4">
                         <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "projects.section" %}</p>
-                        <button class="btn btn-info btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                        <button class="btn btn-info btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addProjectModal">
                             <i class="fa-solid fa-plus-circle"></i> {% trans "add_first_project" context "projects.section" %}
                         </button>
                     </div>

@@ -7,12 +7,12 @@ body.host-live-page {
     --host-sidebar-width: minmax(290px, 320px);
     --theme-stage-bg:
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%),
-        linear-gradient(135deg, #22054c 0%, #41106f 42%, #7c3aed 100%);
+        linear-gradient(135deg, #081427 0%, #0f3b6b 42%, #2563eb 100%);
     --theme-body-bg:
         radial-gradient(circle at 18% 16%, rgba(250, 204, 21, 0.12), transparent 20%),
         radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.08), transparent 18%),
-        radial-gradient(circle at 50% 74%, rgba(168, 85, 247, 0.22), transparent 30%),
-        linear-gradient(150deg, #1a082f 0%, #2b0751 28%, #5c239a 62%, #7e3af2 100%);
+        radial-gradient(circle at 50% 74%, rgba(96, 165, 250, 0.22), transparent 30%),
+        linear-gradient(150deg, #081427 0%, #0b2a52 28%, #0f4c81 62%, #2563eb 100%);
 }
 
 body.host-live-page {
@@ -46,11 +46,11 @@ body.host-live-page[data-live-theme="aurora"] {
 body.host-live-page[data-live-theme="sweet"] {
     --theme-stage-bg:
         linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 30%),
-        linear-gradient(135deg, #5b0b31 0%, #9d174d 38%, #fb7185 100%);
+        linear-gradient(135deg, #0b4f4a 0%, #0f766e 38%, #5eead4 100%);
     --theme-body-bg:
         radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.12), transparent 18%),
-        radial-gradient(circle at 75% 20%, rgba(253, 164, 175, 0.18), transparent 20%),
-        linear-gradient(155deg, #4a0422 0%, #831843 40%, #fb7185 100%);
+        radial-gradient(circle at 75% 20%, rgba(94, 234, 212, 0.18), transparent 20%),
+        linear-gradient(155deg, #052e2b 0%, #0f766e 40%, #5eead4 100%);
 }
 
 body.host-live-page.live-high-contrast {
@@ -311,7 +311,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-drawer__eyebrow {
-    color: #6d28d9;
+    color: #1d4ed8;
 }
 
 .host-settings-drawer__body {
@@ -329,7 +329,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-group__title {
-    color: #5b4d80;
+    color: #4b6385;
 }
 
 .host-settings-item {
@@ -355,7 +355,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-item__copy span {
-    color: #685b83;
+    color: #5b7287;
     line-height: 1.4;
 }
 
@@ -419,7 +419,7 @@ body.host-settings-open .host-settings-drawer {
     flex-direction: column;
     gap: 10px;
     font-weight: 800;
-    color: #24163f;
+    color: #102a44;
 }
 
 .theme-card.is-active {
@@ -435,7 +435,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .theme-card__swatch--standard {
-    background: linear-gradient(135deg, #2b0751 0%, #7e3af2 100%);
+    background: linear-gradient(135deg, #0b2a52 0%, #2563eb 100%);
 }
 
 .theme-card__swatch--winter {
@@ -447,7 +447,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .theme-card__swatch--sweet {
-    background: linear-gradient(135deg, #831843 0%, #fb7185 100%);
+    background: linear-gradient(135deg, #0f766e 0%, #5eead4 100%);
 }
 
 .host-live-page .player-chip {
@@ -472,7 +472,7 @@ body.host-settings-open .host-settings-drawer {
     max-width: 100%;
     font-size: 0.92rem;
     font-weight: 800;
-    color: #1f1635;
+    color: #13253b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

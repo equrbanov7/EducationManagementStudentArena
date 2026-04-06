@@ -9254,6 +9254,46 @@ msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
 msgstr "Enable drawing answer"
 
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:123
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_current_state"
+msgstr "Current state"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:126
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_active"
+msgstr "Active"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:128
+msgctxt "exams.template.add_exam_question"
+msgid "paint_state_inactive"
+msgstr "Inactive"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:132
+msgctxt "exams.template.add_exam_question"
+msgid "label_paint_source"
+msgstr "Applied source"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:135
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_question"
+msgstr "This question's own setting"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:137
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_block"
+msgstr "Topic block setting"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:139
+msgctxt "exams.template.add_exam_question"
+msgid "paint_source_exam"
+msgstr "Global exam setting"
+
+#: apps/exams/templates/exams/teacher/partials/_question_form.html:143
+msgctxt "exams.template.add_exam_question"
+msgid "paint_priority_order"
+msgstr "Priority: question setting > topic block > global exam."
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:168
 msgctxt "exams.template.add_exam_question"
 msgid "label_topic_block_subject_section"
@@ -9549,32 +9589,46 @@ msgstr "Save"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:4
 msgctxt "exams.template.create_question_bank"
 msgid "title_question_bank"
-msgstr "Question"
+msgstr "Written question bank"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:229
 msgctxt "exams.template.create_question_bank"
 msgid "heading_question_bank"
-msgstr "Invalid link"
+msgstr "written question bank"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:238
 msgctxt "exams.template.create_question_bank"
 msgid "label_total_question_count"
-msgstr "Question"
+msgstr "Number of questions shown in the exam"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:243
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_all_questions"
-msgstr "Placeholder location"
+msgstr "0 = show all questions"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Question"
+msgstr "Enter how many active questions students should see. Use 0 to show all questions."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:289
+#: apps/exams/templates/exams/teacher/create_question_bank.html:334
+#: apps/exams/templates/exams/teacher/create_question_bank.html:395
+msgctxt "exams.template.create_question_bank"
+msgid "label_block_enable_paint"
+msgstr "Enable paint answers for this section"
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:290
+#: apps/exams/templates/exams/teacher/create_question_bank.html:335
+#: apps/exams/templates/exams/teacher/create_question_bank.html:396
+msgctxt "exams.template.create_question_bank"
+msgid "help_block_enable_paint"
+msgstr "This sets paint as the default for questions in this section. If you disable paint on a specific question later, it will stay hidden for that question."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
 msgid "block_existing"
-msgstr "This file type may be dangerous and is blocked."
+msgstr "Existing section"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:259
 #: apps/exams/templates/exams/teacher/create_question_bank.html:295
@@ -9588,51 +9642,53 @@ msgstr "Delete"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:355
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_name"
-msgstr "Label group name"
+msgstr "Section name / number"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:274
 #: apps/exams/templates/exams/teacher/create_question_bank.html:306
 #: apps/exams/templates/exams/teacher/create_question_bank.html:356
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_time_minutes"
-msgstr ""
-"Warning: A block named '{block_name}' already exists. Please use a different"
-" name."
+msgstr "Section time limit (minutes)"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:279
 #: apps/exams/templates/exams/teacher/create_question_bank.html:307
 #: apps/exams/templates/exams/teacher/create_question_bank.html:357
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_unlimited"
-msgstr "Ex: Lab 1"
+msgstr "Leave blank for unlimited"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:283
 #: apps/exams/templates/exams/teacher/create_question_bank.html:311
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions"
-msgstr "Question"
+msgstr "Questions"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:292
 #: apps/exams/templates/exams/teacher/create_question_bank.html:302
 #: apps/exams/templates/exams/teacher/create_question_bank.html:361
 msgctxt "exams.template.create_question_bank"
 msgid "block_default"
-msgstr "Search default"
+msgstr "Section"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:312
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_line"
-msgstr "Ex: Lab 1"
+msgstr ""
+"Example:\n"
+"1. Explain the process of photosynthesis.\n"
+"2) Write the difference between mitosis and meiosis.\n"
+"3. Give examples of renewable energy sources."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:320
 msgctxt "exams.template.create_question_bank"
 msgid "action_add_new_block"
-msgstr "Add New Topic"
+msgstr "Add new section"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:325
 msgctxt "exams.template.create_question_bank"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:329
 msgctxt "exams.template.create_question_bank"
@@ -9642,44 +9698,55 @@ msgstr "Save"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:340
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_title"
-msgstr "Confirm delete title"
+msgstr "Confirm deletion"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:342
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "Did you want to delete this course?"
+msgstr "This section and its questions will be removed from the bank. Do you want to continue?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_no_cancel"
-msgstr "Cancel it"
+msgstr "Keep it"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:346
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_yes_delete"
-msgstr "Confirm delete"
+msgstr "Yes, delete"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:353
 msgctxt "exams.template.create_question_bank"
 msgid "block_new"
-msgstr "Topic block"
+msgstr "New section"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:358
 msgctxt "exams.template.create_question_bank"
 msgid "label_questions_copy_paste"
-msgstr "Question"
+msgstr "Paste questions here"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:359
 msgctxt "exams.template.create_question_bank"
 msgid "placeholder_question_text"
-msgstr "Ex: Lab 1"
+msgstr ""
+"Example:\n"
+"1. Explain the process of photosynthesis.\n"
+"2) Write the difference between mitosis and meiosis.\n"
+"3. Give examples of renewable energy sources."
+
+#: apps/exams/templates/exams/teacher/create_question_bank.html:360
+msgctxt "exams.template.create_question_bank"
+msgid "help_question_formats"
+msgstr ""
+"Start each question on a new line. Supported numbering formats: 1. Question "
+"text or 1) Question text."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:360
 msgctxt "exams.template.create_question_bank"
 msgid "alert_duplicate_block_name"
 msgstr ""
-"Warning: A block named '{block_name}' already exists. Please use a different"
-" name."
+"Warning: A section named '{block_name}' already exists. Please choose a "
+"different name."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:4
 msgctxt "exams.template.create_student_group"
@@ -11138,13 +11205,13 @@ msgstr "The group has been deleted."
 msgctxt "exams.view.question_bank.message"
 msgid "duplicate_block_name_request"
 msgstr ""
-"A block with this name already exists in this exam.Warning: A block named "
-"'{block_name}' already exists. Please use a different name."
+"A section named '{block_name}' already exists in this exam. Please choose a "
+"different name."
 
 #: apps/exams/views/teacher/question_bank.py:97
 msgctxt "exams.view.question_bank.message"
 msgid "block_name_exists_db"
-msgstr "A block named '{block_name}' already exists in the database."
+msgstr "A section named '{block_name}' already exists in this exam."
 
 #: apps/exams/views/teacher/question_bank.py:144
 msgctxt "exams.view.question_bank.message"

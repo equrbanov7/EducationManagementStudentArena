@@ -269,6 +269,57 @@
       isPublicCheckbox.addEventListener("change", syncAccessBlock);
     }
 
+    function initExamTypePicker(form) {
+      var nativeSelect = form.querySelector('select[name="exam_type"]');
+      var picker = form.querySelector("[data-create-exam-type-picker]");
+      if (!nativeSelect || !picker) {
+        return;
+      }
+
+      var typeOptions = picker.querySelectorAll(".js-create-exam-type-option");
+      var paintCheckbox = form.querySelector('input[name="enable_paint"]');
+      var paintLabel = paintCheckbox ? paintCheckbox.closest(".modal-check-label--paint") : null;
+
+      function syncPaintAvailability(examType) {
+        if (!paintCheckbox) {
+          return;
+        }
+
+        var isWritten = examType === "written";
+        if (!isWritten) {
+          paintCheckbox.checked = false;
+        }
+        paintCheckbox.disabled = !isWritten;
+
+        if (paintLabel) {
+          paintLabel.classList.toggle("is-disabled", !isWritten);
+        }
+      }
+
+      function syncPickerFromSelect() {
+        var selectedType = nativeSelect.value || "test";
+        typeOptions.forEach(function (option) {
+          option.checked = option.value === selectedType;
+        });
+        syncPaintAvailability(selectedType);
+      }
+
+      typeOptions.forEach(function (option) {
+        option.addEventListener("change", function () {
+          if (!option.checked) {
+            return;
+          }
+
+          nativeSelect.value = option.value;
+          syncPaintAvailability(option.value);
+          nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      });
+
+      nativeSelect.addEventListener("change", syncPickerFromSelect);
+      syncPickerFromSelect();
+    }
+
     function bindEditorForm() {
       if (!editorModalBody) {
         return;
@@ -285,6 +336,7 @@
         return;
       }
 
+      initExamTypePicker(form);
       initAccessToggle(form);
       var groupSelector = initSearchableSelect(form, {
         selectName: "allowed_groups",

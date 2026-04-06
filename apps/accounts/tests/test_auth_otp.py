@@ -11,6 +11,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import EmailOTP
+from core.utils import get_auth_otp_expiry_minutes
 
 User = get_user_model()
 
@@ -70,4 +71,4 @@ class OTPRateLimitViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "data-otp-expires-at")
-        self.assertContains(response, "Kod 3 dəqiqə etibarlıdır.")
+        self.assertContains(response, f"Kod {get_auth_otp_expiry_minutes()} dəqiqə etibarlıdır.")
