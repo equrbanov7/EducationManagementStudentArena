@@ -201,7 +201,9 @@ else:
 #   testing and onboarding are not blocked by real SMTP quota/provider issues.
 # - Opt into real SMTP locally with LOCAL_USE_SMTP_EMAIL=1.
 LOCAL_USE_SMTP_EMAIL = _env_bool("LOCAL_USE_SMTP_EMAIL", False)
-_resolved_local_email_user = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
+_resolved_local_email_user = (
+    os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
+)
 _resolved_local_email_password = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
@@ -215,7 +217,9 @@ EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", EMAIL_PORT))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", str(EMAIL_USE_TLS)).lower() in {"1", "true", "yes", "on"}
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", str(EMAIL_USE_SSL)).lower() in {"1", "true", "yes", "on"}
-EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", EMAIL_HOST_USER)
+EMAIL_HOST_USER = (
+    os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", EMAIL_HOST_USER)
+)
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", EMAIL_HOST_PASSWORD)
 DEFAULT_FROM_EMAIL = (
     os.getenv("DEFAULT_FROM_EMAIL")

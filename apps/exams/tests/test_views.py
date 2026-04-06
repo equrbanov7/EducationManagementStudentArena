@@ -15,7 +15,15 @@ from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
+from apps.exams.models import (
+    Exam,
+    ExamAnswer,
+    ExamAttempt,
+    ExamQuestion,
+    ExamQuestionOption,
+    QuestionBlock,
+    StudentGroup,
+)
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
