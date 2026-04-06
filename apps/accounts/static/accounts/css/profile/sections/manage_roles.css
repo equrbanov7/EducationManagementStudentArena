@@ -73,7 +73,7 @@
 
 .profile-section--manage-roles .search-section {
     padding: 1.15rem 1.15rem 1rem;
-    border-bottom: 1px solid #e0e7ff;
+    border-bottom: 1px solid #dbeafe;
     background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
 }
 
@@ -250,7 +250,7 @@
     gap: 0.4rem;
     min-width: 280px;
     padding: 0.45rem;
-    border: 1px solid #c7d2fe;
+    border: 1px solid #bfdbfe;
     border-radius: 10px;
     background: #f8fbff;
 }

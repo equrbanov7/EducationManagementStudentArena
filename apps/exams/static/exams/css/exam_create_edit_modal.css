@@ -58,6 +58,59 @@
     margin-bottom: 0.35rem;
 }
 
+.create-exam-type-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.create-exam-type-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.create-exam-type-toggle > .create-exam-type-btn {
+    border-radius: 12px !important;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    padding: 0.75rem 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.create-exam-type-toggle > .create-exam-type-btn:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.create-exam-type-toggle > .btn-check:focus + .create-exam-type-btn {
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border-color: #1d4ed8;
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+}
+
+.create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    border-color: #1e40af;
+    color: #ffffff;
+}
+
+.create-exam-type-btn i {
+    font-size: 0.95rem;
+}
+
 .create-exam-modal-section-title {
     border-top: 1px solid #e2e8f0;
     padding-top: 0.7rem;
@@ -163,7 +216,7 @@
 }
 
 .create-exam-list-item:hover {
-    background: #eef2ff;
+    background: #eff6ff;
 }
 
 .create-exam-item-checkbox {
@@ -205,6 +258,15 @@
 
 .modal-check-label-text {
     line-height: 1.35;
+}
+
+.modal-check-label.is-disabled {
+    opacity: 0.55;
+    filter: saturate(0.75);
+}
+
+.modal-check-label.is-disabled .form-check-input {
+    pointer-events: none;
 }
 
 .modal-check-label--active {

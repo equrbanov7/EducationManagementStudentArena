@@ -309,11 +309,11 @@ body.error-page {
 }
 
 .error-page.error-500 {
-    --error-primary: #4f46e5;
-    --error-primary-dark: #312e81;
-    --error-accent: #818cf8;
-    --error-bg-start: #eef2ff;
-    --error-bg-end: #ddd6fe;
+    --error-primary: #2563eb;
+    --error-primary-dark: #1d4ed8;
+    --error-accent: #60a5fa;
+    --error-bg-start: #eff6ff;
+    --error-bg-end: #dbeafe;
 }
 
 @media (max-width: 760px) {

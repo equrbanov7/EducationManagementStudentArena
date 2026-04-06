@@ -145,7 +145,7 @@
 .role-badge.org_admin            { background: #fef9c3; color: #a16207;  border: 1px solid #fef08a; }
 .role-badge.teacher              { background: #eff6ff; color: #2563eb;  border: 1px solid #bfdbfe; }
 .role-badge.assistant_teacher    { background: #ecfeff; color: #0891b2;  border: 1px solid #a5f3fc; }
-.role-badge.lead_student         { background: #faf5ff; color: #9333ea;  border: 1px solid #e9d5ff; }
+.role-badge.lead_student         { background: #eff6ff; color: #2563eb;  border: 1px solid #bfdbfe; }
 .role-badge.student              { background: #dcfce7; color: #166534;  border: 1px solid #bbf7d0; }
 .role-badge.role-success         { background: #dcfce7; color: #166534;  border: 1px solid #bbf7d0; }
 
@@ -384,7 +384,7 @@
 
 .stat-icon--blue { background: #eff6ff; color: #2563eb; }
 .stat-icon--green { background: #f0fdf4; color: #16a34a; }
-.stat-icon--purple { background: #faf5ff; color: #9333ea; }
+.stat-icon--sky { background: #e0f2fe; color: #0284c7; }
 .stat-icon--orange { background: #fff7ed; color: #ea580c; }
 
 .stat-info {

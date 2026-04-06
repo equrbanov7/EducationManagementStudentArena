@@ -20,7 +20,7 @@
 
             {% if is_owner %}
                 <div class="mb-3 text-end">
-                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                    <button class="btn btn-warning btn-sm text-white" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
                         <i class="fa-solid fa-plus-circle me-1"></i> {% trans "add_new" context "assignment.section" %}
                     </button>
                 </div>
@@ -88,7 +88,7 @@
                     <div class="alert alert-light text-center py-4">
                         <i class="fa-solid fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "assignment.section" %}</p>
-                        <button class="btn btn-warning btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                        <button class="btn btn-warning btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
                             <i class="fa-solid fa-plus-circle"></i> {% trans "add_first" context "assignment.section" %}
                         </button>
                     </div>

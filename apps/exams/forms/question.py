@@ -123,11 +123,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
             "video": pgettext_lazy("exams.form.question.label", "video"),
         }
 
-    def __init__(self, *args, exam_type=None, subject_blocks=None, **kwargs):
+    def __init__(self, *args, exam_type=None, subject_blocks=None, exam=None, **kwargs):
         """
         exam_type (test / written) view-dən ötürülür.
         """
         self.exam_type = exam_type
+        self.exam = exam
         data = args[0] if args else None
         instance = kwargs.get("instance")
         self.option_indexes = self._resolve_option_indexes(data=data, instance=instance)
@@ -149,6 +150,11 @@ class ExamQuestionCreateForm(forms.ModelForm):
         # Yazılı imtahanlarda answer_mode-u məcburi etməyək
         if self.exam_type == "written":
             self.fields["answer_mode"].required = False
+            if "enable_paint" in self.fields and not self.is_bound:
+                if instance and getattr(instance, "pk", None):
+                    self.initial["enable_paint"] = instance.paint_enabled_effective
+                elif self.exam is not None:
+                    self.initial["enable_paint"] = bool(self.exam.enable_paint)
 
         # Edit zamanı mövcud variantları inputlara doldur
         instance = getattr(self, "instance", None)

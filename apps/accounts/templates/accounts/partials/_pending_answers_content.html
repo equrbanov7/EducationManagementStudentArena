@@ -39,7 +39,7 @@
         <div class="pending-answers-list">
             {% for item in pending_answer_items %}
                 <article class="post-item pending-answer-item">
-                    <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--purple{% endif %}">
+                    <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--sky{% endif %}">
                         <i class="{{ item.icon }}"></i>
                     </div>
                     <div class="post-info">

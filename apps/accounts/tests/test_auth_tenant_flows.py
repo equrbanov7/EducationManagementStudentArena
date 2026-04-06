@@ -11,6 +11,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import EmailOTP, ProfileRole
+from apps.accounts.services import get_pending_registration
 from apps.audit.models import AuditLog
 from apps.notifications.models import (
     InAppNotification,
@@ -63,34 +64,52 @@ class SignupAndLoginFlowTest(TestCase):
         payload.update(overrides)
         return payload
 
-    def _verify_latest_otp(self, user):
-        otp = EmailOTP.objects.filter(user=user, is_used=False).order_by("-created_at").first()
-        self.assertIsNotNone(otp)
+    def _extract_latest_otp_code(self):
         self.assertTrue(mail.outbox)
         match = re.search(r"(\d{6})", mail.outbox[-1].body)
         self.assertIsNotNone(match)
-        response = self.client.post(self.verify_code_url, {"code": match.group(1)})
+        return match.group(1)
+
+    def _assert_signup_is_pending(self, *, username, email):
+        self.assertFalse(User.objects.filter(username=username).exists())
+        self.assertEqual(self.client.session.get("pending_verify_email"), email)
+        self.assertIsNotNone(get_pending_registration(email))
+        self.assertTrue(EmailOTP.objects.filter(email=email, is_used=False).exists())
+
+    def _verify_latest_otp(self, *, username, email):
+        otp = EmailOTP.objects.filter(email=email, is_used=False).order_by("-created_at").first()
+        self.assertIsNotNone(otp)
+        response = self.client.post(self.verify_code_url, {"code": self._extract_latest_otp_code()})
         self.assertRedirects(response, self.login_url)
         otp.refresh_from_db()
         self.assertTrue(otp.is_used)
+        return User.objects.get(username=username)
+
+    def _register_and_verify(self, **overrides):
+        payload = self._register_payload(**overrides)
+        response = self.client.post(self.register_url, payload)
+        self.assertRedirects(response, self.verify_code_url)
+        self._assert_signup_is_pending(username=payload["username"], email=payload["email"])
+        return self._verify_latest_otp(username=payload["username"], email=payload["email"])
 
     def test_signup_user_can_login_immediately_with_username_or_email(self):
         response = self.client.post(self.register_url, self._register_payload())
         self.assertRedirects(response, self.verify_code_url)
+        self._assert_signup_is_pending(username="newuser", email="newuser@example.com")
 
-        user = User.objects.get(username="newuser")
-        self.assertFalse(user.is_active)
-        self.assertTrue(user.check_password("StrongPass123!"))
-        self.assertTrue(EmailOTP.objects.filter(user=user, is_used=False).exists())
-        self.assertEqual(self.client.session.get("pending_verify_email"), "newuser@example.com")
-        self.assertIn("/accounts/verify-email/?token=", mail.outbox[-1].body)
-
+        auth_client = Client()
         # Username login should be blocked until verification.
-        self.assertFalse(self.client.login(username="newuser", password="StrongPass123!"))
-        self.client.logout()
+        self.assertFalse(auth_client.login(username="newuser", password="StrongPass123!"))
 
         # Email login (custom backend) should also be blocked.
-        self.assertFalse(self.client.login(username="newuser@example.com", password="StrongPass123!"))
+        self.assertFalse(auth_client.login(username="newuser@example.com", password="StrongPass123!"))
+
+        user = self._verify_latest_otp(username="newuser", email="newuser@example.com")
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.check_password("StrongPass123!"))
+        self.assertTrue(auth_client.login(username="newuser", password="StrongPass123!"))
+        auth_client.logout()
+        self.assertTrue(auth_client.login(username="newuser@example.com", password="StrongPass123!"))
 
         profile = user.profile
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
@@ -104,9 +123,7 @@ class SignupAndLoginFlowTest(TestCase):
         )
 
     def test_individual_signup_creates_workspace_without_organization_selection(self):
-        response = self.client.post(self.register_url, self._register_payload(join_organization=""))
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="newuser")
+        user = self._register_and_verify(join_organization="")
         self.assertEqual(user.profile.organization.org_type, OrganizationType.INDIVIDUAL)
         self.assertEqual(user.profile.role, ProfileRole.ORG_ADMIN)
 
@@ -126,20 +143,14 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertFalse(User.objects.filter(username="newuser").exists())
 
     def test_school_signup_creates_organization_from_manual_name(self):
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="schooladmin",
-                email="schooladmin@example.com",
-                organization_type=OrganizationType.SCHOOL,
-                institution_not_listed_name="Baku School 500",
-                organization_identifier="",
-                initial_role=ProfileRole.TEACHER,
-            ),
+        user = self._register_and_verify(
+            username="schooladmin",
+            email="schooladmin@example.com",
+            organization_type=OrganizationType.SCHOOL,
+            institution_not_listed_name="Baku School 500",
+            organization_identifier="",
+            initial_role=ProfileRole.TEACHER,
         )
-        self.assertRedirects(response, self.verify_code_url)
-
-        user = User.objects.get(username="schooladmin")
         profile = user.profile
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "Baku School 500")
@@ -168,30 +179,25 @@ class SignupAndLoginFlowTest(TestCase):
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
-
-        user = User.objects.get(username="pendingorgowner")
-        self.assertEqual(user.profile.organization.status, "pending")
+        self._assert_signup_is_pending(username="pendingorgowner", email="pendingorgowner@example.com")
         self.assertIsNone(self.client.session.get("active_organization"))
 
-        self._verify_latest_otp(user)
+        user = self._verify_latest_otp(username="pendingorgowner", email="pendingorgowner@example.com")
 
+        self.assertEqual(user.profile.organization.status, "pending")
         self.assertNotIn("active_organization", self.client.session)
 
     def test_course_center_signup_uses_manual_name(self):
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="centeradmin",
-                email="centeradmin@example.com",
-                organization_type=OrganizationType.COURSE_CENTER,
-                institution_not_listed_name="My New Center",
-                organization_identifier="",
-                organization_license_identifier="TAX-991",
-                initial_role=ProfileRole.HR,
-            ),
+        user = self._register_and_verify(
+            username="centeradmin",
+            email="centeradmin@example.com",
+            organization_type=OrganizationType.COURSE_CENTER,
+            institution_not_listed_name="My New Center",
+            organization_identifier="",
+            organization_license_identifier="TAX-991",
+            initial_role=ProfileRole.HR,
         )
-        self.assertRedirects(response, self.verify_code_url)
-        profile = User.objects.get(username="centeradmin").profile
+        profile = user.profile
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "My New Center")
         self.assertEqual(profile.organization.license_identifier, "TAX-991")
@@ -202,16 +208,12 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
 
     def test_org_creator_signup_ignores_manual_initial_role_input(self):
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                organization_type=OrganizationType.SCHOOL,
-                institution_not_listed_name="Role Override School",
-                initial_role=ProfileRole.HR,
-            ),
+        user = self._register_and_verify(
+            organization_type=OrganizationType.SCHOOL,
+            institution_not_listed_name="Role Override School",
+            initial_role=ProfileRole.HR,
         )
-        self.assertRedirects(response, self.verify_code_url)
-        profile = User.objects.get(username="newuser").profile
+        profile = user.profile
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
 
     def test_university_signup_requires_identifier(self):
@@ -228,17 +230,12 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertContains(response, "Universitet üçün rəsmi identifikator")
 
     def test_student_join_without_organization_selection_is_allowed(self):
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                organization_type="school_student",
-                join_organization="",
-                specialization="Computer Science",
-                group_number="CS-101",
-            ),
+        user = self._register_and_verify(
+            organization_type="school_student",
+            join_organization="",
+            specialization="Computer Science",
+            group_number="CS-101",
         )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="newuser")
         self.assertEqual(user.profile.role, ProfileRole.STUDENT)
         self.assertIsNone(user.profile.organization)
         self.assertIsNone(user.profile.requested_organization)
@@ -327,22 +324,27 @@ class SignupAndLoginFlowTest(TestCase):
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
+        self._assert_signup_is_pending(username="school_student_user", email="school_student_user@example.com")
+        self.assertFalse(
+            StudentOrganizationRequest.objects.filter(
+                organization=school_org,
+                user__username="school_student_user",
+            ).exists()
+        )
 
-        user = User.objects.get(username="school_student_user")
-        self.assertFalse(user.is_active)
-        self.assertEqual(user.profile.role, ProfileRole.STUDENT)
-        self.assertIsNone(user.profile.organization)
-        self.assertEqual(user.profile.requested_organization, school_org)
-        self.assertFalse(Membership.objects.filter(user=user, organization=school_org, is_active=True).exists())
-
-        self._verify_latest_otp(user)
-
-        user.refresh_from_db()
+        user = self._verify_latest_otp(username="school_student_user", email="school_student_user@example.com")
         self.assertTrue(user.is_active)
         self.assertEqual(user.profile.role, ProfileRole.STUDENT)
         self.assertIsNone(user.profile.organization)
         self.assertEqual(user.profile.requested_organization, school_org)
         self.assertFalse(Membership.objects.filter(user=user, organization=school_org, is_active=True).exists())
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=user,
+                organization=school_org,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
 
         self.assertTrue(self.client.login(username="school_student_user", password="StrongPass123!"))
         response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
@@ -367,18 +369,13 @@ class SignupAndLoginFlowTest(TestCase):
 
     def test_teacher_join_without_organization_is_allowed(self):
         """University teacher can register without selecting an organization."""
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="teacher_user",
-                email="teacher_user@example.com",
-                organization_type="university_teacher",
-                join_organization="",
-                department="Faculty of Engineering",
-            ),
+        user = self._register_and_verify(
+            username="teacher_user",
+            email="teacher_user@example.com",
+            organization_type="university_teacher",
+            join_organization="",
+            department="Faculty of Engineering",
         )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="teacher_user")
         profile = user.profile
         self.assertEqual(profile.role, ProfileRole.TEACHER)
         self.assertIsNone(profile.organization)
@@ -399,18 +396,13 @@ class SignupAndLoginFlowTest(TestCase):
             status="active",
             is_active=True,
         )
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="teacher_joined",
-                email="teacher_joined@example.com",
-                organization_type="university_teacher",
-                join_organization=str(uni_org.id),
-                department="Computer Science",
-            ),
+        user = self._register_and_verify(
+            username="teacher_joined",
+            email="teacher_joined@example.com",
+            organization_type="university_teacher",
+            join_organization=str(uni_org.id),
+            department="Computer Science",
         )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="teacher_joined")
         profile = user.profile
         self.assertEqual(profile.role, ProfileRole.TEACHER)
         self.assertEqual(profile.requested_organization, uni_org)
@@ -418,19 +410,14 @@ class SignupAndLoginFlowTest(TestCase):
 
     def test_staff_join_without_organization_is_allowed(self):
         """School staff can register without selecting an organization."""
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="staff_user",
-                email="staff_user@example.com",
-                organization_type="school_staff",
-                join_organization="",
-                department="Administration",
-                staff_position="Secretary",
-            ),
+        user = self._register_and_verify(
+            username="staff_user",
+            email="staff_user@example.com",
+            organization_type="school_staff",
+            join_organization="",
+            department="Administration",
+            staff_position="Secretary",
         )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="staff_user")
         profile = user.profile
         self.assertEqual(profile.role, ProfileRole.MEMBER)
         self.assertIsNone(profile.organization)
@@ -439,18 +426,13 @@ class SignupAndLoginFlowTest(TestCase):
 
     def test_org_create_sets_pending_status(self):
         """Organizations created via signup must start with pending status."""
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(
-                username="pending_org_owner",
-                email="pending_org_owner@example.com",
-                organization_type=OrganizationType.UNIVERSITY,
-                institution_not_listed_name="New University",
-                organization_identifier="UNIV-001",
-            ),
+        user = self._register_and_verify(
+            username="pending_org_owner",
+            email="pending_org_owner@example.com",
+            organization_type=OrganizationType.UNIVERSITY,
+            institution_not_listed_name="New University",
+            organization_identifier="UNIV-001",
         )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="pending_org_owner")
         org = user.profile.organization
         self.assertIsNotNone(org)
         self.assertEqual(org.status, "pending")
@@ -458,12 +440,7 @@ class SignupAndLoginFlowTest(TestCase):
 
     def test_individual_workspace_is_active_immediately(self):
         """Personal workspaces (individual) must be active immediately after signup."""
-        response = self.client.post(
-            self.register_url,
-            self._register_payload(),
-        )
-        self.assertRedirects(response, self.verify_code_url)
-        user = User.objects.get(username="newuser")
+        user = self._register_and_verify()
         org = user.profile.organization
         self.assertIsNotNone(org)
         self.assertEqual(org.status, "active")

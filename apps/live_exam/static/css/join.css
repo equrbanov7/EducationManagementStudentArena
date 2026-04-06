@@ -1,18 +1,18 @@
 :root {
-    --join-bg-1: #1a082f;
-    --join-bg-2: #2b0751;
-    --join-bg-3: #5c239a;
-    --join-bg-4: #7e3af2;
+    --join-bg-1: #081427;
+    --join-bg-2: #0b2a52;
+    --join-bg-3: #0f4c81;
+    --join-bg-4: #2563eb;
     --join-surface: rgba(255, 255, 255, 0.94);
     --join-surface-soft: rgba(255, 255, 255, 0.14);
     --join-line: rgba(255, 255, 255, 0.18);
     --join-text: #ffffff;
-    --join-ink: #22123a;
-    --join-ink-soft: #6b5a8f;
-    --join-shadow: 0 30px 80px rgba(14, 7, 37, 0.28);
-    --join-accent: #8b5cf6;
-    --join-accent-strong: #6d28d9;
-    --join-accent-soft: #ede9fe;
+    --join-ink: #10243f;
+    --join-ink-soft: #5f7796;
+    --join-shadow: 0 30px 80px rgba(8, 23, 55, 0.28);
+    --join-accent: #38bdf8;
+    --join-accent-strong: #1d4ed8;
+    --join-accent-soft: #dbeafe;
 }
 
 * {
@@ -33,7 +33,7 @@ body.join-page {
     background:
         radial-gradient(circle at 18% 18%, rgba(251, 191, 36, 0.16), transparent 20%),
         radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.12), transparent 20%),
-        radial-gradient(circle at 50% 80%, rgba(167, 139, 250, 0.2), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(96, 165, 250, 0.2), transparent 30%),
         linear-gradient(150deg, var(--join-bg-1) 0%, var(--join-bg-2) 25%, var(--join-bg-3) 60%, var(--join-bg-4) 100%);
 }
 
@@ -190,7 +190,7 @@ body.join-page {
     gap: 12px;
     padding: 14px 16px;
     border-radius: 22px;
-    background: linear-gradient(180deg, #ede9fe, #eff6ff);
+    background: linear-gradient(180deg, #dbeafe, #eff6ff);
 }
 
 .join-preview {
@@ -255,7 +255,7 @@ body.join-page {
     font-family: "Space Grotesk", sans-serif;
     font-size: 1.14rem;
     letter-spacing: 0.18em;
-    box-shadow: 0 16px 34px rgba(109, 40, 217, 0.24);
+    box-shadow: 0 16px 34px rgba(37, 99, 235, 0.24);
 }
 
 .join-card__copy h1 {
@@ -281,7 +281,7 @@ body.join-page {
     padding: 12px 14px;
     border-radius: 20px;
     background: linear-gradient(135deg, rgba(237, 233, 254, 0.92), rgba(224, 231, 255, 0.96));
-    border: 1px solid rgba(109, 40, 217, 0.14);
+    border: 1px solid rgba(37, 99, 235, 0.14);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -316,7 +316,7 @@ body.join-page {
     flex: 0 0 auto;
     padding: 12px 16px;
     border-radius: 16px;
-    background: rgba(109, 40, 217, 0.92);
+    background: rgba(37, 99, 235, 0.92);
     color: #ffffff;
 }
 
@@ -355,8 +355,8 @@ body.join-page {
 
 .join-form__input:focus {
     outline: none;
-    border-color: rgba(109, 40, 217, 0.48);
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    border-color: rgba(37, 99, 235, 0.48);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
     transform: translateY(-1px);
 }
 
@@ -371,7 +371,7 @@ body.join-page {
     display: inline-flex;
     padding: 4px;
     border-radius: 999px;
-    background: #eef2ff;
+    background: #eff6ff;
     gap: 6px;
 }
 
@@ -389,7 +389,7 @@ body.join-page {
 .join-tabs__button.is-active {
     background: #ffffff;
     color: var(--join-ink);
-    box-shadow: 0 10px 22px rgba(109, 40, 217, 0.08);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.08);
 }
 
 .join-picker-panels {
@@ -441,14 +441,14 @@ body.join-page {
 .wait-room-picker__item:hover,
 .wait-room-picker__chip:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(109, 40, 217, 0.12);
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
 }
 
 .wait-room-picker__item.is-selected,
 .wait-room-picker__chip.is-selected {
-    border-color: rgba(109, 40, 217, 0.42);
+    border-color: rgba(37, 99, 235, 0.42);
     background: var(--join-accent-soft);
-    box-shadow: 0 16px 32px rgba(139, 92, 246, 0.14);
+    box-shadow: 0 16px 32px rgba(59, 130, 246, 0.14);
 }
 
 .wait-room-picker__chip {
@@ -469,7 +469,7 @@ body.join-page {
     width: 24px;
     height: 24px;
     border-radius: 8px;
-    background: #ede9fe;
+    background: #dbeafe;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -496,7 +496,7 @@ body.join-page {
 }
 
 .join-status.is-success {
-    color: #6d28d9;
+    color: #1d4ed8;
 }
 
 .join-btn {
@@ -510,7 +510,7 @@ body.join-page {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 20px 40px rgba(109, 40, 217, 0.24);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.24);
 }
 
 .join-btn:disabled {
@@ -582,7 +582,7 @@ body.join-page {
 }
 
 .join-modal__button--secondary {
-    background: #eef2ff;
+    background: #eff6ff;
     color: var(--join-ink);
 }
 

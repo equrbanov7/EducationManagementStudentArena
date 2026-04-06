@@ -195,6 +195,10 @@ class ExamQuestion(models.Model):
         default=False,
         help_text=pgettext_lazy("exams.model.question.help", "enable_paint"),
     )
+    disable_paint = models.BooleanField(
+        default=False,
+        help_text=pgettext_lazy("exams.model.question.help", "disable_paint"),
+    )
     is_active = models.BooleanField(
         default=True,
         db_index=True,
@@ -239,6 +243,45 @@ class ExamQuestion(models.Model):
         if not total:
             return 0
         return round(self.correct_answers_count * 100 / total, 1)
+
+    @property
+    def inherited_paint_enabled(self):
+        block = getattr(self, "block", None)
+        if block is not None and block.enable_paint is not None:
+            return bool(block.enable_paint)
+        exam = getattr(self, "exam", None)
+        return bool(getattr(exam, "enable_paint", False))
+
+    @property
+    def paint_enabled_effective(self):
+        if self.disable_paint:
+            return False
+        if self.enable_paint:
+            return True
+        return self.inherited_paint_enabled
+
+    @property
+    def paint_priority_source(self):
+        if self.disable_paint or self.enable_paint:
+            return "question"
+        block = getattr(self, "block", None)
+        if block is not None and block.enable_paint is not None:
+            return "block"
+        return "exam"
+
+    def set_paint_enabled(self, enabled):
+        desired = bool(enabled)
+        inherited_enabled = self.inherited_paint_enabled
+
+        if desired == inherited_enabled:
+            self.enable_paint = False
+            self.disable_paint = False
+        elif desired:
+            self.enable_paint = True
+            self.disable_paint = False
+        else:
+            self.enable_paint = False
+            self.disable_paint = True
 
 
 class ExamQuestionOption(models.Model):

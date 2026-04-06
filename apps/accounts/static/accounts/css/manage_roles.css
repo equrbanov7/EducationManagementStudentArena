@@ -184,7 +184,7 @@
 .role-badge-manage.role-org_admin { background: #fef3c7; color: #d97706; }
 .role-badge-manage.role-teacher { background: #dbeafe; color: #2563eb; }
 .role-badge-manage.role-assistant_teacher { background: #cffafe; color: #0891b2; }
-.role-badge-manage.role-lead_student { background: #e9d5ff; color: #9333ea; }
+.role-badge-manage.role-lead_student { background: #dbeafe; color: #2563eb; }
 .role-badge-manage.role-student { background: #d1fae5; color: #059669; }
 
 .role-badge-list {

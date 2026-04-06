@@ -29,7 +29,32 @@
 
         <div class="form-group">
             {{ form.exam_type.label_tag }}
-            {{ form.exam_type }}
+            {% with selected_exam_type=form.exam_type.value|default:"test" %}
+                <div class="create-exam-type-picker" data-create-exam-type-picker>
+                    <div class="btn-group w-100 create-exam-type-toggle" role="group" aria-label="{{ form.exam_type.label }}">
+                        {% for value, label in form.exam_type.field.choices %}
+                            <input type="radio"
+                                   class="btn-check js-create-exam-type-option"
+                                   name="create_exam_type_ui"
+                                   id="createExamTypeOption_{{ forloop.counter }}"
+                                   autocomplete="off"
+                                   value="{{ value }}"
+                                   {% if selected_exam_type == value %}checked{% endif %}>
+                            <label class="btn btn-outline-primary create-exam-type-btn" for="createExamTypeOption_{{ forloop.counter }}">
+                                {% if value == "test" %}
+                                    <i class="fas fa-list-ul" aria-hidden="true"></i>
+                                {% else %}
+                                    <i class="fas fa-pen-fancy" aria-hidden="true"></i>
+                                {% endif %}
+                                <span>{{ label|capfirst }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <div class="d-none">
+                        {{ form.exam_type }}
+                    </div>
+                </div>
+            {% endwith %}
             {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
         </div>
 

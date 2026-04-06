@@ -100,15 +100,11 @@ def _resolve_attempt_name_visibility(attempt, *, current_time=None):
     if attempt.exam.exam_type == "test":
         return True, None
 
+    # Yazılı imtahanlarda tələbə adı yoxlama tamamlanana qədər həmişə anonim
+    # qalır. 5 dəqiqəlik pəncərə yalnız müəllim ilkin yoxlamanı bitirdikdən
+    # sonra başlayır.
     if not attempt.checked_by_teacher:
-        reveal_source = attempt.finished_at or attempt.started_at
-        if not reveal_source:
-            return True, None
-        reveal_at = reveal_source + REVIEW_EDIT_LOCK_WINDOW
-        if now >= reveal_at:
-            return True, None
-        seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
-        return False, seconds_remaining
+        return False, None
 
     # Köhnə datada timestamp olmaya bilər. Bu halda tələbə balı görə bildiyi üçün
     # müəllim də real adı görə bilməlidir.
@@ -121,6 +117,21 @@ def _resolve_attempt_name_visibility(attempt, *, current_time=None):
 
     seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
     return False, seconds_remaining
+
+
+def _attempt_review_window_locked(attempt, *, current_time=None):
+    if attempt.exam.exam_type == "test":
+        return False
+
+    if not attempt.checked_by_teacher:
+        return False
+
+    if not attempt.teacher_checked_at:
+        return False
+
+    now = current_time or timezone.now()
+    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
+    return now >= reveal_at
 
 
 def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
@@ -549,16 +560,12 @@ def teacher_check_attempt(request, slug, attempt_id):
     )
 
     # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
-    if attempt.checked_by_teacher and attempt.teacher_checked_at:
-
-        minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
-
-        if minutes_passed >= 5:
-            messages.warning(
-                request,
-                pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
-            )
-            return redirect(view_attempt_url)
+    if _attempt_review_window_locked(attempt, current_time=timezone.now()):
+        messages.warning(
+            request,
+            pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+        )
+        return redirect(view_attempt_url)
 
     # YALNIZ bu attempt-ə düşən suallar
     answers_qs = (
@@ -586,15 +593,12 @@ def teacher_check_attempt(request, slug, attempt_id):
             return redirect(view_attempt_url)
 
         # ✅ DOUBLE-CHECK: POST zamanı da yoxla
-        if attempt.checked_by_teacher and attempt.teacher_checked_at:
-            minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
-
-            if minutes_passed >= 5:
-                messages.error(
-                    request,
-                    pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
-                )
-                return redirect(view_attempt_url)
+        if _attempt_review_window_locked(attempt, current_time=timezone.now()):
+            messages.error(
+                request,
+                pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+            )
+            return redirect(view_attempt_url)
 
         total_score = 0
         any_score = False

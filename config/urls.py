@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
 
+from apps.accounts import views as account_views
 from core.media_views import protected_media
 from core.views import handler400 as handler400  # noqa: F401
 from core.views import handler403 as handler403  # noqa: F401
@@ -45,6 +46,9 @@ urlpatterns = [
         "notifications/",
         include(("apps.notifications.urls", "notifications"), namespace="notifications"),
     ),
+    path("send-otp/", account_views.send_otp_api_view, name="send_otp"),
+    path("verify-otp/", account_views.verify_otp_api_view, name="verify_otp"),
+    path("resend-otp/", account_views.resend_otp_api_view, name="resend_otp"),
     # API versioned endpoints
     path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),

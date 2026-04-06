@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMSArena | Email təsdiqi</title>
+    <title>EMSArena | {{ headline|default:'Email təsdiqi' }}</title>
   </head>
   <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
@@ -13,20 +13,22 @@
             <tr>
               <td style="background:linear-gradient(135deg,#1e293b,#0ea5e9);padding:28px 32px;color:#ffffff;">
                 <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">EMSArena</div>
-                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">Email təsdiqi</h1>
+                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">{{ headline|default:"Email təsdiqi" }}</h1>
               </td>
             </tr>
             <tr>
               <td style="padding:32px;">
-                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam <strong>{{ user.username }}</strong>, hesabınızı aktivləşdirmək üçün aşağıdakı addımlardan birini istifadə edin.</p>
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam <strong>{{ recipient_name }}</strong>, {{ otp_intro_action|default:"hesabınızı aktivləşdirmək" }} üçün aşağıdakı addımlardan birini istifadə edin.</p>
 
+                {% if verification_link %}
                 <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
                   <tr>
                     <td align="center" style="border-radius:12px;background:#0f766e;">
-                      <a href="{{ verification_link }}" style="display:inline-block;padding:14px 24px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Emaili təsdiqlə</a>
+                      <a href="{{ verification_link }}" style="display:inline-block;padding:14px 24px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">{{ cta_label|default:"Emaili təsdiqlə" }}</a>
                     </td>
                   </tr>
                 </table>
+                {% endif %}
 
                 <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #bae6fd;border-radius:16px;background:#f0f9ff;">
                   <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0284c7;margin-bottom:8px;">OTP kodu</div>

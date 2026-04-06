@@ -1,5 +1,11 @@
 /* static/css/student_exam_list.css */
 
+:root {
+    --student-exam-btn-blue: #2563eb;
+    --student-exam-btn-blue-dark: #1d4ed8;
+    --student-exam-btn-blue-soft: #dbeafe;
+}
+
 /* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
 .container.my-4 {
     max-width: 900px;
@@ -69,7 +75,7 @@ li.list-group-item small {
 
 /* --- Cəhd Sayı Badgesi (Bootstrap .badge .bg-secondary override) --- */
 li.list-group-item .badge.bg-secondary {
-    background-color: #e0e7ff !important; /* Açıq mavi */
+    background-color: #dbeafe !important; /* Açıq mavi */
     color: var(--primary-color, #3b82f6);
     padding: 8px 15px;
     border-radius: 25px;
@@ -79,9 +85,12 @@ li.list-group-item .badge.bg-secondary {
     white-space: nowrap; /* Mətni bir sətirdə saxlayır */
 }
 
-/* --- İmtahana Başla Düyməsi (Bootstrap .btn .btn-primary override) --- */
-li.list-group-item .btn.btn-primary, .customBtn {
-    background-color: var(--primary-color, #3b82f6);
+/* --- İmtahana Başla / Cavablarım düymələri --- */
+li.list-group-item .btn.btn-primary,
+li.list-group-item .btn.btn-outline-primary,
+li.list-group-item .btn.btn-outline-secondary,
+li.list-group-item .customBtn {
+    background: linear-gradient(135deg, var(--student-exam-btn-blue) 0%, var(--student-exam-btn-blue-dark) 100%);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -94,16 +103,25 @@ li.list-group-item .btn.btn-primary, .customBtn {
     align-items: center;
     cursor: pointer;
     gap: 8px;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 10px 20px -12px rgba(37, 99, 235, 0.75);
     margin-left: 15px !important; /* Bootstrap ms-3-ü override edir */
 }
 
 li.list-group-item .btn.btn-primary:hover,
+li.list-group-item .btn.btn-outline-primary:hover,
+li.list-group-item .btn.btn-outline-secondary:hover,
 li.list-group-item .customBtn:hover {
-    background-color: var(--primary-dark, #1e3a8a);
+    background: linear-gradient(135deg, var(--student-exam-btn-blue-dark) 0%, #1e40af 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 14px 24px -12px rgba(29, 78, 216, 0.8);
     color: #fff;
+}
+
+li.list-group-item .btn.btn-primary:focus,
+li.list-group-item .btn.btn-outline-primary:focus,
+li.list-group-item .btn.btn-outline-secondary:focus,
+li.list-group-item .customBtn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.18);
 }
 
 li.list-group-item .status-red {
@@ -330,20 +348,85 @@ li.list-group-item .status-red {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.filter-box select {
-    padding: 10px 35px 10px 15px;
+.filter-box {
+    min-width: 170px;
+}
+
+.filter-box .bootstrap-single-select {
+    min-width: 170px;
+}
+
+.filter-box .form-select {
+    min-width: 150px;
+}
+
+.exam-toolbar .bootstrap-single-select__toggle {
+    min-height: 44px;
+    padding: 10px 14px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    outline: none;
-    cursor: pointer;
-    background-color: white;
-    min-width: 150px;
+    background: #fff;
+    box-shadow: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.exam-toolbar .bootstrap-single-select__toggle:hover {
+    border-color: #94a3b8;
+    background: #fff;
+}
+
+.exam-toolbar .bootstrap-single-select__toggle:focus,
+.exam-toolbar .bootstrap-single-select__toggle.show {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.exam-toolbar .bootstrap-single-select__label-text {
+    color: #334155;
+}
+
+.exam-toolbar .bootstrap-single-select__menu {
+    margin-top: 0.35rem;
+    border-radius: 0.85rem;
+    border-color: rgba(148, 163, 184, 0.32);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+}
+
+.exam-toolbar .bootstrap-single-select__option {
+    padding: 0.72rem 0.8rem;
+    border-radius: 0.75rem;
+    font-size: 0.94rem;
 }
 
 .search-btn {
     padding: 10px 24px;
     border-radius: 8px;
     font-weight: 600;
+}
+
+.exam-toolbar .btn.btn-primary.search-btn {
+    background: linear-gradient(135deg, var(--student-exam-btn-blue) 0%, var(--student-exam-btn-blue-dark) 100%);
+    border: none;
+    color: #fff;
+    box-shadow: 0 10px 20px -12px rgba(37, 99, 235, 0.75);
+}
+
+.exam-toolbar .btn.btn-primary.search-btn:hover {
+    background: linear-gradient(135deg, var(--student-exam-btn-blue-dark) 0%, #1e40af 100%);
+    color: #fff;
+}
+
+.exam-toolbar .btn.btn-outline-secondary {
+    border-color: #cbd5e1;
+    color: #475569;
+    background: #fff;
+}
+
+.exam-toolbar .btn.btn-outline-secondary:hover {
+    border-color: var(--student-exam-btn-blue-soft);
+    color: var(--student-exam-btn-blue-dark);
+    background: #eff6ff;
 }
 
 /* ================= SİYAHI ELEMENTLƏRİNİN DİZAYNI (UPDATED) ================= */

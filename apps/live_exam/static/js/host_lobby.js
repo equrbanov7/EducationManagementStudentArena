@@ -1304,7 +1304,7 @@ function renderPodium(top) {
 
     UI.confetti.innerHTML = "";
     const othersSection = UI.othersList?.closest(".others-section");
-    const colors = ["#fbbf24", "#fb7185", "#38bdf8", "#34d399", "#a855f7", "#f97316", "#fde047"];
+    const colors = ["#fbbf24", "#fb7185", "#38bdf8", "#34d399", "#0ea5e9", "#f97316", "#fde047"];
     const appendConfetti = (variant, styles) => {
         const piece = document.createElement("div");
         piece.className = `confetti-piece ${variant}`;
