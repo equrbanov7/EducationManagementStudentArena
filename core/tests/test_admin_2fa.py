@@ -1,22 +1,33 @@
 import re
 
 from django.core import mail
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.audit.models import AuditLog
 from core.constants import AuditAction
 
+_LOCMEM_CACHE = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "admin-2fa-tests",
+    }
+}
+
 
 @override_settings(
     ADMIN_2FA_REQUIRED=True,
     ADMIN_ALLOWED_IPS=[],
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    CACHES=_LOCMEM_CACHE,
 )
 class AdminTwoFactorFlowTest(TestCase):
     def setUp(self):
         from django.contrib.auth import get_user_model
 
+        cache.clear()
+        mail.outbox = []
         User = get_user_model()
         self.superuser = User.objects.create_superuser(
             username="admin_2fa_user",
@@ -50,12 +61,30 @@ class AdminTwoFactorFlowTest(TestCase):
             ).exists()
         )
 
+    def test_authenticated_superuser_gets_otp_before_admin_index_opens(self):
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(reverse("admin:index"), follow=True)
+
+        self.assertRedirects(response, reverse("admin:verify-otp"))
+        self.assertEqual(len(mail.outbox), 1)
+
     def test_unverified_admin_session_is_redirected_to_verify_page(self):
         self._login_with_password()
 
         response = self.client.get(reverse("admin:index"), follow=True)
 
         self.assertRedirects(response, reverse("admin:verify-otp"))
+
+    @override_settings(
+        DEFAULT_FROM_EMAIL="no-reply@emsarena.com",
+        BREVO_FROM_EMAIL="",
+        BREVO_EMAIL="equrbanov@gmail.com",
+    )
+    def test_admin_otp_uses_default_from_email_instead_of_brevo_login_email(self):
+        self._login_with_password()
+
+        self.assertEqual(mail.outbox[-1].from_email, "no-reply@emsarena.com")
 
     def test_valid_otp_grants_admin_access(self):
         self._login_with_password()
