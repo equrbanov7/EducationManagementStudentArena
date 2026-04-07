@@ -22,6 +22,8 @@ ADMIN_2FA_VERIFIED_USER_SESSION_KEY = "admin_2fa_verified_user_id"
 ADMIN_2FA_NEXT_URL_SESSION_KEY = "admin_2fa_next_url"
 ADMIN_OTP_VERIFY_SCOPE = "admin.otp.verify"
 ADMIN_OTP_RESEND_SCOPE = "admin.otp.resend"
+DEFAULT_ADMIN_OTP_VERIFY_RATE_LIMIT = "5/10m"
+DEFAULT_ADMIN_OTP_RESEND_RATE_LIMIT = "3/10m"
 
 
 class AdminOTPForm(forms.Form):
@@ -113,6 +115,14 @@ def admin_otp_limit_keys(request, *, user=None) -> tuple[str, str]:
     return client_ip, identity
 
 
+def get_admin_otp_verify_rate_limit() -> str:
+    return getattr(settings, "ADMIN_OTP_VERIFY_RATE_LIMIT", DEFAULT_ADMIN_OTP_VERIFY_RATE_LIMIT)
+
+
+def get_admin_otp_resend_rate_limit() -> str:
+    return getattr(settings, "ADMIN_OTP_RESEND_RATE_LIMIT", DEFAULT_ADMIN_OTP_RESEND_RATE_LIMIT)
+
+
 def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
     from apps.accounts.services import issue_email_otp
 
@@ -158,12 +168,12 @@ def log_admin_security_event(
 
 def admin_verify_rate_limited(request, *, user) -> tuple[bool, int | None]:
     key_parts = admin_otp_limit_keys(request, user=user)
-    return is_rate_limited(ADMIN_OTP_VERIFY_SCOPE, settings.ADMIN_OTP_VERIFY_RATE_LIMIT, *key_parts)
+    return is_rate_limited(ADMIN_OTP_VERIFY_SCOPE, get_admin_otp_verify_rate_limit(), *key_parts)
 
 
 def record_admin_verify_failure(request, *, user) -> tuple[bool, int | None]:
     key_parts = admin_otp_limit_keys(request, user=user)
-    return record_rate_limit_hit(ADMIN_OTP_VERIFY_SCOPE, settings.ADMIN_OTP_VERIFY_RATE_LIMIT, *key_parts)
+    return record_rate_limit_hit(ADMIN_OTP_VERIFY_SCOPE, get_admin_otp_verify_rate_limit(), *key_parts)
 
 
 def clear_admin_verify_rate_limit(request, *, user) -> None:
@@ -172,9 +182,9 @@ def clear_admin_verify_rate_limit(request, *, user) -> None:
 
 def admin_resend_rate_limited(request, *, user) -> tuple[bool, int | None]:
     key_parts = admin_otp_limit_keys(request, user=user)
-    return is_rate_limited(ADMIN_OTP_RESEND_SCOPE, settings.ADMIN_OTP_RESEND_RATE_LIMIT, *key_parts)
+    return is_rate_limited(ADMIN_OTP_RESEND_SCOPE, get_admin_otp_resend_rate_limit(), *key_parts)
 
 
 def record_admin_resend_hit(request, *, user) -> tuple[bool, int | None]:
     key_parts = admin_otp_limit_keys(request, user=user)
-    return record_rate_limit_hit(ADMIN_OTP_RESEND_SCOPE, settings.ADMIN_OTP_RESEND_RATE_LIMIT, *key_parts)
+    return record_rate_limit_hit(ADMIN_OTP_RESEND_SCOPE, get_admin_otp_resend_rate_limit(), *key_parts)

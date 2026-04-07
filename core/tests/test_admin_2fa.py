@@ -68,6 +68,8 @@ class AdminTwoFactorFlowTest(TestCase):
 
         self.assertRedirects(response, reverse("admin:verify-otp"))
         self.assertEqual(len(mail.outbox), 1)
+        self.assertContains(response, 'class="admin-otp-page"', html=False)
+        self.assertNotContains(response, 'id="nav-sidebar"', html=False)
 
     def test_unverified_admin_session_is_redirected_to_verify_page(self):
         self._login_with_password()
