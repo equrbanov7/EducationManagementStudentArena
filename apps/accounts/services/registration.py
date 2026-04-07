@@ -13,7 +13,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
-from apps.notifications.services import notify_org_admins_of_new_request
+from apps.notifications.services import notify_org_admins_of_new_request, notify_org_owner_pending_approval
 from core.constants import OrganizationType
 from core.rls import bypass_rls
 
@@ -152,6 +152,10 @@ def create_user_with_organization(
                 _notify_superadmins_of_pending_org(organization)
             except Exception:
                 logger.exception("Failed to notify superadmins about new pending org %s", organization.pk)
+            try:
+                notify_org_owner_pending_approval(organization=organization)
+            except Exception:
+                logger.exception("Failed to notify owner about pending org %s", organization.pk)
         else:
             # student_join / teacher_join / staff_join
             requested_organization = join_organization
