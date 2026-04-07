@@ -11,6 +11,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
+from apps.notifications.models import InAppNotification
 from apps.notifications.services import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -158,6 +159,60 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         access_rows = response.context["organization_access_rows"]
         self.assertEqual([row["organization"].id for row in access_rows], [active_org.id])
+
+    def test_pending_org_owner_profile_creates_pending_approval_notification(self):
+        self.user.profile.role = ProfileRole.ORG_OWNER
+        self.user.profile.save(update_fields=["role", "updated_at"])
+        pending_org = Organization.objects.create(
+            name="Profile Pending Org",
+            slug="profile-pending-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="pending",
+            is_active=True,
+        )
+        self.user.profile.organization = pending_org
+        self.user.profile.requested_organization = pending_org
+        self.user.profile.save(update_fields=["organization", "requested_organization", "updated_at"])
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.user,
+                metadata__event="organization_pending_approval",
+                metadata__organization_id=str(pending_org.id),
+            ).exists()
+        )
+
+    def test_approved_org_owner_profile_restores_management_ui_without_existing_membership(self):
+        self.user.profile.role = ProfileRole.ORG_OWNER
+        self.user.profile.save(update_fields=["role", "updated_at"])
+        approved_org = Organization.objects.create(
+            name="Profile Approved Org",
+            slug="profile-approved-org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        self.user.profile.organization = approved_org
+        self.user.profile.requested_organization = approved_org
+        self.user.profile.save(update_fields=["organization", "requested_organization", "updated_at"])
+
+        self.client.login(username="testuser", password="testpass123")
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("accounts:profile") + "?section=posts")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "?section=student-organization-management")
+        self.assertContains(response, "?section=role-assignment")
+        self.assertEqual(self.client.session.get("active_organization"), approved_org.slug)
 
     def test_join_organization_sidebar_and_section_are_translated_in_english(self):
         profile = self.user.profile

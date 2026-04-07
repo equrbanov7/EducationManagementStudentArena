@@ -364,6 +364,30 @@ class PendingOrganizationViewerModeTest(TestCase):
 
         self.assertFalse(responses[0], "org_pending_approval must be False for active org")
 
+    def test_active_org_owner_profile_fallback_restores_org_context_without_membership(self):
+        """Approved org owners must recover tenant context even if legacy data lacks memberships."""
+        user = _make_user("owner_profile_fallback", role=ProfileRole.ORG_OWNER)
+        org = _make_org(user, status="active", is_active=True)
+
+        user.profile.organization = org
+        user.profile.requested_organization = org
+        user.profile.save(update_fields=["organization", "requested_organization", "updated_at"])
+
+        self.client.login(username="owner_profile_fallback", password="StrongPass123!")
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("active_organization"), org.slug)
+        self.assertEqual(getattr(response.wsgi_request, "organization", None), org)
+        self.assertTrue(
+            Membership.objects.filter(user=user, organization=org, is_active=True).exists(),
+            "Owner membership should be backfilled when org context is restored.",
+        )
+
 
 class SuperadminOrgApprovalTest(TestCase):
     """Tests for superadmin approve/reject organization actions."""
@@ -408,6 +432,20 @@ class SuperadminOrgApprovalTest(TestCase):
         )
         notifications = InAppNotification.objects.filter(recipient=self.org_owner)
         self.assertTrue(notifications.exists(), "Owner notification must be created on approval")
+
+    def test_approve_pending_org_backfills_owner_membership(self):
+        """Approving a pending org should ensure the owner has an active membership."""
+        Membership.objects.filter(user=self.org_owner, organization=self.pending_org).delete()
+
+        self.client.force_login(self.superadmin)
+        self.client.post(
+            self.url,
+            {"organization_id": str(self.pending_org.id), "action": "approve"},
+        )
+
+        self.assertTrue(
+            Membership.objects.filter(user=self.org_owner, organization=self.pending_org, is_active=True).exists()
+        )
 
     def test_reject_pending_org_sets_suspended(self):
         """Rejecting a pending org must set status='suspended' and is_active=False."""
