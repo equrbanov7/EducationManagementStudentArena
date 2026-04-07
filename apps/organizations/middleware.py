@@ -18,9 +18,9 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
-from apps.accounts.models import ProfileRole
 from django.core.exceptions import ObjectDoesNotExist
 
+from apps.accounts.models import ProfileRole
 from core.rls import clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
@@ -133,9 +133,8 @@ class OrganizationMiddleware:
                         owner=request.user,
                     ).first()
                     if owner_org is not None:
-                        if (
-                            getattr(owner_org, "status", "") == "active"
-                            and self._profile_allows_owner_fallback(profile)
+                        if getattr(owner_org, "status", "") == "active" and self._profile_allows_owner_fallback(
+                            profile
                         ):
                             owner_membership = ensure_owner_membership(request.user, owner_org)
                             request.organization = owner_org
@@ -171,8 +170,7 @@ class OrganizationMiddleware:
                     owner_fallback_org = getattr(profile, "organization", None)
                     if (
                         self._profile_allows_owner_fallback(profile)
-                        and
-                        owner_fallback_org is not None
+                        and owner_fallback_org is not None
                         and getattr(owner_fallback_org, "owner_id", None) == getattr(request.user, "id", None)
                         and is_tenant_accessible_organization(owner_fallback_org)
                     ):
