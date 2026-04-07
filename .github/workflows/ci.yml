@@ -213,6 +213,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/_deploy-linode.yml
     with:
+      ssh-host: "170.187.154.194"
+      ssh-username: "root"
       app-dir: "/opt/emsarena/app"
       venv-dir: "/opt/emsarena/venv"
       service-name: "emsarena.service"
@@ -220,7 +222,5 @@ jobs:
       healthcheck-host: "emsarena.com"
       deploy-timeout-seconds: "180"
     secrets:
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}

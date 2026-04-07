@@ -3,6 +3,14 @@ name: 🚢 Deploy to Linode (reusable)
 on:
   workflow_call:
     inputs:
+      ssh-host:
+        description: "Hostname or IP address of the deployment target"
+        type: string
+        default: ""
+      ssh-username:
+        description: "SSH username for the deployment target"
+        type: string
+        default: ""
       ssh-port:
         description: "SSH port for the target host"
         type: string
@@ -32,10 +40,6 @@ on:
         type: string
         default: "180"
     secrets:
-      SSH_HOST:
-        required: true
-      SSH_USERNAME:
-        required: true
       SSH_PRIVATE_KEY:
         required: false
       SSH_PASSWORD:
@@ -60,19 +64,31 @@ jobs:
       - name: 🔐 Prepare SSH known_hosts
         shell: bash
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_HOST: ${{ inputs.ssh-host }}
           SSH_PORT: ${{ inputs.ssh-port }}
         run: |
           set -euo pipefail
+          if [ -z "${SSH_HOST:-}" ]; then
+            echo "SSH_HOST is empty. Set the reusable workflow input 'ssh-host'." >&2
+            exit 1
+          fi
           install -m 700 -d ~/.ssh
-          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          for attempt in 1 2 3; do
+            if ssh-keyscan -T 10 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts; then
+              exit 0
+            fi
+            echo "ssh-keyscan failed for ${SSH_HOST}:${SSH_PORT} (attempt ${attempt}/3)." >&2
+            sleep 2
+          done
+          echo "Unable to fetch the SSH host key for ${SSH_HOST}:${SSH_PORT}. Verify the host/port and that the server is reachable from GitHub Actions." >&2
+          exit 1
 
       - name: 🚢 Bootstrap host and deploy
         shell: bash
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_HOST: ${{ inputs.ssh-host }}
           SSH_PORT: ${{ inputs.ssh-port }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_USERNAME: ${{ inputs.ssh-username }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
           APP_DIR: ${{ inputs.app-dir }}
@@ -83,6 +99,15 @@ jobs:
           DEPLOY_TIMEOUT_SECONDS: ${{ inputs.deploy-timeout-seconds }}
         run: |
           set -euo pipefail
+
+          if [ -z "${SSH_HOST:-}" ]; then
+            echo "SSH_HOST is empty. Set the reusable workflow input 'ssh-host'." >&2
+            exit 1
+          fi
+          if [ -z "${SSH_USERNAME:-}" ]; then
+            echo "SSH_USERNAME is empty. Set the reusable workflow input 'ssh-username'." >&2
+            exit 1
+          fi
 
           if [ -n "$SSH_PRIVATE_KEY" ]; then
             printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/emsarena_deploy_key
