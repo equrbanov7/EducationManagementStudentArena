@@ -17,6 +17,7 @@ from django.utils.translation import pgettext_lazy
 from apps.notifications.models import NotificationType
 from apps.notifications.services import create_notification
 from apps.organizations.models import Organization
+from apps.organizations.services import ensure_owner_membership
 
 from ._helpers import (
     _append_query_params,
@@ -116,6 +117,7 @@ def superadmin_organizations(request):
                 organization.status = "active"
                 organization.is_active = True
                 organization.save(update_fields=["status", "is_active", "updated_at"])
+                ensure_owner_membership(organization.owner, organization)
                 _notify_org_owner_of_approval(organization, request.user, approved=True)
                 messages.success(
                     request,

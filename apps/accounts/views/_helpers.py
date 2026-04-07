@@ -617,7 +617,8 @@ def _ensure_profile_admin_membership(user, organization):
     Backfill membership for org owner/admin profiles that are missing organization membership.
     This prevents false-negative `role.assign` errors for valid tenant admins.
     """
-    from apps.organizations.models import Membership, Role
+    from apps.organizations.models import Membership
+    from apps.organizations.services import ensure_owner_membership
 
     if _is_superadmin_user(user):
         return
@@ -633,19 +634,7 @@ def _ensure_profile_admin_membership(user, organization):
         return
     if Membership.objects.filter(user=user, organization=organization, is_active=True).exists():
         return
-
-    fallback_role = Role.objects.filter(organization=organization, is_active=True).order_by("-level").first()
-    if fallback_role is None:
-        return
-
-    Membership.objects.create(
-        user=user,
-        organization=organization,
-        role=fallback_role,
-        is_primary=True,
-        is_active=True,
-        assigned_by=user,
-    )
+    ensure_owner_membership(user, organization)
 
 
 def _permission_is_grantable(permission, effective_permissions, grantable_permissions):

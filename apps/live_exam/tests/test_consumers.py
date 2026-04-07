@@ -13,7 +13,7 @@ from channels.testing import WebsocketCommunicator
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
-from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
+from apps.live_exam.auth import LIVE_CLIENT_ID_COOKIE_NAME, PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.organizations.models import Organization
@@ -1073,6 +1073,26 @@ class WebSocketOriginValidationTest(TransactionTestCase):
             (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
         ]
 
+    def _viewer_headers(self, client_id: str):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{LIVE_CLIENT_ID_COOKIE_NAME}={client_id}".encode()),
+        ]
+
+    def _player_headers_for(self, *, player_id: int, client_id: str):
+        token = build_player_token(
+            pin=self.session.pin,
+            player_id=player_id,
+            client_id=client_id,
+        )
+        return [
+            _WS_ORIGIN_HEADER,
+            (
+                b"cookie",
+                f"{LIVE_CLIENT_ID_COOKIE_NAME}={client_id}; {PLAYER_COOKIE_NAME}={token}".encode(),
+            ),
+        ]
+
     def test_foreign_origin_lobby_connection_is_rejected(self):
         """A foreign-origin WebSocket connection to the lobby must be refused."""
 
@@ -1446,6 +1466,26 @@ class WebSocketRateLimitTest(TransactionTestCase):
             (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
         ]
 
+    def _viewer_headers(self, client_id: str):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{LIVE_CLIENT_ID_COOKIE_NAME}={client_id}".encode()),
+        ]
+
+    def _player_headers_for(self, *, player_id: int, client_id: str):
+        token = build_player_token(
+            pin=self.session.pin,
+            player_id=player_id,
+            client_id=client_id,
+        )
+        return [
+            _WS_ORIGIN_HEADER,
+            (
+                b"cookie",
+                f"{LIVE_CLIENT_ID_COOKIE_NAME}={client_id}; {PLAYER_COOKIE_NAME}={token}".encode(),
+            ),
+        ]
+
     def test_connect_flood_lobby_is_blocked(self):
         """Exceeding LIVE_WS_CONNECT_RATE_LIMIT on lobby causes close with code 4429."""
 
@@ -1487,7 +1527,7 @@ class WebSocketRateLimitTest(TransactionTestCase):
             return results
 
         results = async_to_sync(scenario)()
-        # The play consumer uses the same connect rate limit scope (per IP+PIN).
+        # The play consumer uses the same connect rate limit scope.
         # Each test method has a unique PIN (TransactionTestCase flushes the DB
         # before setUp), so the lobby and play tests do not share a bucket.
         self.assertTrue(results[0][0], "First connection should succeed")
@@ -1495,6 +1535,74 @@ class WebSocketRateLimitTest(TransactionTestCase):
         # Connection 3 or 4 must be rate limited (closed with 4429)
         rate_limited = [r for r in results if not r[0] or r[1] == 4429]
         self.assertTrue(len(rate_limited) > 0, "At least one connection should be rate limited")
+
+    def test_lobby_connects_for_distinct_clients_sharing_same_ip(self):
+        """Different viewer client IDs behind one IP must not rate-limit each other."""
+
+        async def scenario():
+            results = []
+            communicators = []
+            try:
+                for idx in range(4):
+                    communicator = WebsocketCommunicator(
+                        application,
+                        f"/ws/live/{self.session.pin}/lobby/",
+                        headers=self._viewer_headers(f"viewer-{idx}"),
+                    )
+                    communicators.append(communicator)
+                    connected, close_code = await communicator.connect()
+                    results.append((connected, close_code))
+                    if connected:
+                        await communicator.receive_json_from()
+                return results
+            finally:
+                for communicator in communicators:
+                    try:
+                        await communicator.disconnect()
+                    except Exception:
+                        pass
+
+        results = async_to_sync(scenario)()
+        self.assertTrue(all(connected for connected, _close_code in results), results)
+
+    def test_play_connects_for_distinct_players_sharing_same_ip(self):
+        """Different players behind one IP must not rate-limit each other."""
+        extra_players = [
+            LivePlayer.objects.create(
+                session=self.session,
+                nickname=f"RLPlayer{idx}",
+                avatar_key="avatar_1",
+                client_id=f"rl-client-{idx}",
+            )
+            for idx in range(2, 5)
+        ]
+        player_specs = [(self.player.id, self.player.client_id)] + [
+            (player.id, player.client_id) for player in extra_players
+        ]
+
+        async def scenario():
+            results = []
+            communicators = []
+            try:
+                for player_id, client_id in player_specs:
+                    communicator = WebsocketCommunicator(
+                        application,
+                        f"/ws/live/{self.session.pin}/play/",
+                        headers=self._player_headers_for(player_id=player_id, client_id=client_id),
+                    )
+                    communicators.append(communicator)
+                    connected, close_code = await communicator.connect()
+                    results.append((connected, close_code))
+                return results
+            finally:
+                for communicator in communicators:
+                    try:
+                        await communicator.disconnect()
+                    except Exception:
+                        pass
+
+        results = async_to_sync(scenario)()
+        self.assertTrue(all(connected for connected, _close_code in results), results)
 
     def test_message_flood_is_blocked(self):
         """Exceeding LIVE_WS_MSG_RATE_LIMIT causes a rate_limited error response."""
