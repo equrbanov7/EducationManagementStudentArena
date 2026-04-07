@@ -328,13 +328,18 @@ body.pin-entry-page {
     width: 100%;
     border: 0;
     outline: 0;
-    padding: 18px 20px;
+    padding: 18px 18px;
     background: transparent;
     font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    letter-spacing: 0.38em;
+    font-size: clamp(1.55rem, 3.7vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: clamp(0.08em, 0.25vw, 0.16em);
+    line-height: 1.1;
     text-align: center;
+    text-transform: uppercase;
     color: #0f172a;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
 }
 
 .pin-entry-input::placeholder {
@@ -502,8 +507,8 @@ body.pin-entry-page {
 
     .pin-entry-input {
         padding: 16px;
-        letter-spacing: 0.24em;
-        font-size: 2rem;
+        letter-spacing: 0.08em;
+        font-size: clamp(1.4rem, 7vw, 1.9rem);
     }
 
     .pin-entry-copy {
