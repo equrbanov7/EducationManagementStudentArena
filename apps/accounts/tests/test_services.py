@@ -11,6 +11,7 @@ from django.test import TestCase
 
 from apps.accounts import services
 from apps.accounts.models import EmailOTP, ProfileRole
+from apps.notifications.models import InAppNotification, NotificationType
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -196,6 +197,33 @@ class RegistrationServicesTest(TestCase):
             )
 
         self.assertEqual(entered["count"], 1)
+
+    def test_create_user_with_organization_notifies_owner_about_pending_approval(self):
+        user, organization, _requested_organization, _profile = services.create_user_with_organization(
+            username="orgownernotify",
+            email="orgownernotify@example.com",
+            password="StrongPass123!",
+            first_name="Org",
+            last_name="Owner",
+            signup_mode="organization_create",
+            organization_type=OrganizationType.SCHOOL,
+            country_code="AZ",
+            country_name="Azerbaijan",
+            institution_not_listed_name="Pending Approval School",
+            organization_identifier="",
+            organization_license_identifier="",
+            initial_role=ProfileRole.ORG_ADMIN,
+        )
+
+        self.assertEqual(organization.owner_id, user.id)
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=user,
+                notification_type=NotificationType.APPROVAL,
+                title__icontains="baxışdadır",
+                metadata__event="organization_pending_approval",
+            ).exists()
+        )
 
 
 class OTPDeliveryServiceTest(TestCase):

@@ -14,7 +14,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.constants import ACCESSORY_KEYS, AVATAR_KEYS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
-from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.models import PIN_LENGTH, LiveAnswer, LivePlayer, LiveSession
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
 
@@ -293,6 +293,18 @@ class LiveJoinTest(TestCase):
         response = self.client.get(reverse("liveExam:pin_entry"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("copy", response.context)
+        self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
+        self.assertContains(response, 'inputmode="text"', html=False)
+
+    def test_pin_entry_normalizes_mixed_case_alphanumeric_pin(self):
+        """Mixed-case alphanumeric PIN input should normalize and redirect."""
+        self.session.pin = "O5H96FQW89"
+        self.session.save(update_fields=["pin"])
+
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": " o5h96fqw89 "})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
     def test_pin_entry_redirects_to_join_page_for_prefilled_valid_pin(self):
         """Test that a QR/link prefilled PIN skips straight to the join page."""

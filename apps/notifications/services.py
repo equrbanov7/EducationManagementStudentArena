@@ -83,6 +83,7 @@ TASK_NOTIFICATION_META = {
         "notification_type": NotificationType.EXAM,
     },
 }
+PENDING_ORG_OWNER_NOTIFICATION_EVENT = "organization_pending_approval"
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -159,6 +160,51 @@ def create_notification_for_users(
         for user in recipients
     ]
     return InAppNotification.objects.bulk_create(notifications)
+
+
+def notify_org_owner_pending_approval(*, organization) -> InAppNotification | None:
+    """
+    Ensure the organization owner sees a pending-approval notification.
+
+    The helper is idempotent: if the same pending-approval notification already
+    exists for the owner and organization, it is reused instead of duplicated.
+    """
+    owner = getattr(organization, "owner", None)
+    owner_id = getattr(organization, "owner_id", None)
+    if owner is None or owner_id is None:
+        return None
+
+    metadata = {
+        "event": PENDING_ORG_OWNER_NOTIFICATION_EVENT,
+        "organization_id": str(getattr(organization, "id", "")),
+        "organization_name": getattr(organization, "name", ""),
+        "status": "pending",
+        "link_label": "Bildirişləri aç",
+    }
+    existing = (
+        InAppNotification.objects.filter(
+            recipient=owner,
+            deleted_at__isnull=True,
+            metadata__event=PENDING_ORG_OWNER_NOTIFICATION_EVENT,
+            metadata__organization_id=str(getattr(organization, "id", "")),
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if existing is not None:
+        return existing
+
+    return create_notification(
+        recipient=owner,
+        title=f"Təşkilat müraciəti baxışdadır: {organization.name}",
+        message=(
+            f'"{organization.name}" təşkilatınız yaradıldı və hazırda superadmin tərəfindən '
+            "təsdiq gözləyir. Təsdiqdən sonra idarəetmə bölmələri aktiv olacaq."
+        ),
+        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'notifications'})}",
+        notification_type=NotificationType.APPROVAL,
+        metadata=metadata,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -641,6 +687,14 @@ def _serialize_metadata(value):
 
 
 def build_profile_notification_state(*, user, profile):
+    if (
+        profile.organization is not None
+        and getattr(profile.organization, "owner_id", None) == getattr(user, "id", None)
+        and getattr(profile.organization, "is_active", False)
+        and getattr(profile.organization, "status", "") == "pending"
+    ):
+        notify_org_owner_pending_approval(organization=profile.organization)
+
     pending_student_invites = list(
         Membership.objects.filter(
             user=user,

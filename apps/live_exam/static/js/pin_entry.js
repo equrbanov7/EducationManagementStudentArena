@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector(".pin-entry-form");
     const submitBtn = document.getElementById("pinSubmitBtn");
     const i18n = window.LIVE_PIN_ENTRY_I18N || {};
+    const pinLength = Number(i18n.pinLength || input?.getAttribute("maxlength") || 10);
     let themeSocket = null;
     let themeSocketPin = "";
 
@@ -13,7 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitLabel = submitBtn.querySelector("span");
     const defaultLabel = submitLabel ? submitLabel.textContent : "";
 
-    const sanitize = (value) => String(value || "").replace(/\D/g, "").slice(0, 8);
+    const sanitize = (value) => String(value || "")
+        .toUpperCase()
+        .replace(/[^0-9A-Z]/g, "")
+        .slice(0, pinLength);
     const applyTheme = (settings) => {
         if (!settings) return;
         document.body.dataset.liveTheme = settings.theme_key || document.body.dataset.liveTheme || "aurora";
@@ -27,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const connectThemeSocket = (pin) => {
         const normalizedPin = sanitize(pin);
-        if (normalizedPin.length !== 8) {
+        if (normalizedPin.length !== pinLength) {
             closeThemeSocket();
             return;
         }
@@ -74,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.addEventListener("submit", (event) => {
         syncValue();
-        if (input.value.length !== 8) {
+        if (input.value.length !== pinLength) {
             event.preventDefault();
             input.focus();
             input.setAttribute("aria-invalid", "true");
@@ -84,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const errorNode = document.getElementById("pinError");
             if (!errorNode) {
-                input.setCustomValidity(i18n.invalidPin || "Enter an 8-digit PIN.");
+                input.setCustomValidity(i18n.invalidPin || "Enter a valid PIN.");
                 input.reportValidity();
                 input.setCustomValidity("");
             }
@@ -100,10 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
     syncValue();
 
     const searchPin = sanitize(new URLSearchParams(window.location.search).get("pin"));
-    if (searchPin.length === 8 && input.value === searchPin) {
+    if (searchPin.length === pinLength && input.value === searchPin) {
         window.setTimeout(() => {
             syncValue();
-            if (!submitBtn.disabled && input.value.length === 8) {
+            if (!submitBtn.disabled && input.value.length === pinLength) {
                 if (typeof form.requestSubmit === "function") {
                     form.requestSubmit(submitBtn);
                 } else {
