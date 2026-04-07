@@ -206,9 +206,9 @@ class EMSArenaAdminSite(admin.AdminSite):
                     return redirect(pop_admin_2fa_next_url(request, reverse("admin:index", current_app=self.name)))
 
         context = {
-            **self.each_context(request),
+            "site_header": self.site_header,
+            "site_title": self.site_title,
             "title": "Admin OTP təsdiqi",
-            "subtitle": None,
             "form": form,
             "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
             "resend_url": reverse("admin:resend-otp", current_app=self.name),
