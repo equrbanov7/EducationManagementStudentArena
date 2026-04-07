@@ -2,7 +2,9 @@
 Service tests for accounts app.
 """
 
+from contextlib import contextmanager
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -167,6 +169,33 @@ class RegistrationServicesTest(TestCase):
                 is_active=True,
             ).exists()
         )
+
+    def test_create_user_with_organization_enters_rls_bypass(self):
+        entered = {"count": 0}
+
+        @contextmanager
+        def recording_bypass():
+            entered["count"] += 1
+            yield
+
+        with patch("apps.accounts.services.registration.bypass_rls", recording_bypass):
+            services.create_user_with_organization(
+                username="orgadminsignupbypass",
+                email="orgadminsignupbypass@example.com",
+                password="StrongPass123!",
+                first_name="Org",
+                last_name="Admin",
+                signup_mode="organization_create",
+                organization_type=OrganizationType.SCHOOL,
+                country_code="AZ",
+                country_name="Azerbaijan",
+                institution_not_listed_name="Bypass Role School",
+                organization_identifier="",
+                organization_license_identifier="",
+                initial_role=ProfileRole.ORG_ADMIN,
+            )
+
+        self.assertEqual(entered["count"], 1)
 
 
 class OTPDeliveryServiceTest(TestCase):
@@ -379,6 +408,25 @@ class TeacherStaffRequestFlowTest(TestCase):
                 title__icontains="Yeni müəllim müraciəti",
             ).exists()
         )
+
+    def test_activate_verified_membership_enters_rls_bypass(self):
+        from apps.accounts.services import organization_requests
+
+        entered = {"count": 0}
+
+        @contextmanager
+        def recording_bypass():
+            entered["count"] += 1
+            yield
+
+        user, _, _, _ = self._register_teacher(username="teacher_req_bypass")
+        with patch.dict(
+            organization_requests.activate_verified_membership.__globals__,
+            {"bypass_rls": recording_bypass},
+        ):
+            organization_requests.activate_verified_membership(user)
+
+        self.assertEqual(entered["count"], 1)
 
     def test_teacher_signup_notifies_org_owner(self):
         """Teacher join signup should notify the target organization owner."""

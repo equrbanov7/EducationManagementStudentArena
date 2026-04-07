@@ -541,6 +541,86 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertTrue(response.url.startswith(reverse("organizations:select")))
         self.assertIn("next=%2Fexams%2Fcreate%2F", response.url)
 
+    def test_superadmin_with_profile_org_can_create_exam_when_session_org_missing(self):
+        superadmin = User.objects.create_superuser(
+            username="exam_superadmin_restore",
+            email="exam_superadmin_restore@example.com",
+            password="StrongPass123!",
+        )
+        profile = superadmin.profile
+        profile.organization = self.org_a
+        profile.organization_type = self.org_a.org_type
+        profile.role = ProfileRole.SUPERADMIN
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self.client.force_login(superadmin)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.post(
+            reverse("exams:create_exam") + "?modal=1",
+            {
+                "modal": "1",
+                "title": "Superadmin Restored Exam",
+                "description": "Created after restoring organization from profile.",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Superadmin Restored Exam")
+        self.assertEqual(created_exam.organization, self.org_a)
+        self.assertEqual(created_exam.author, superadmin)
+        self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
+
+    def test_superadmin_without_profile_org_can_choose_organization_in_create_exam_modal(self):
+        superadmin = User.objects.create_superuser(
+            username="exam_superadmin_modal",
+            email="exam_superadmin_modal@example.com",
+            password="StrongPass123!",
+        )
+
+        self.client.force_login(superadmin)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        modal_response = self.client.get(
+            reverse("exams:create_exam") + "?modal=1",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(modal_response.status_code, 200)
+        self.assertContains(modal_response, 'name="organization"', html=False)
+        self.assertContains(modal_response, self.org_a.name)
+        self.assertContains(modal_response, self.org_b.name)
+
+        response = self.client.post(
+            reverse("exams:create_exam") + "?modal=1",
+            {
+                "modal": "1",
+                "organization": str(self.org_b.pk),
+                "title": "Superadmin Selected Org Exam",
+                "description": "Created by explicit organization selection.",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Superadmin Selected Org Exam")
+        self.assertEqual(created_exam.organization, self.org_b)
+        self.assertEqual(created_exam.author, superadmin)
+        self.assertEqual(self.client.session.get("active_organization"), self.org_b.slug)
+
     def test_modal_add_question_returns_partial_markup(self):
         response = self.client.get(
             reverse("exams:add_exam_question", args=[self.exam_visible.slug]),

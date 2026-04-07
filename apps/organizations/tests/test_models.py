@@ -2,6 +2,9 @@
 Model tests for organizations app.
 """
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.test import TestCase
@@ -293,6 +296,27 @@ class OrgUnitModelTest(TestCase):
 
         self.assertNotIn(child, root_a.get_descendants())
         self.assertIn(child, root_b.get_descendants())
+
+
+class OrganizationDefaultRoleSignalTest(TestCase):
+    def test_create_default_roles_uses_rls_bypass(self):
+        user = User.objects.create_user(username="signaluser", email="signal@test.com", password="testpass123")
+        entered = {"count": 0}
+
+        @contextmanager
+        def recording_bypass():
+            entered["count"] += 1
+            yield
+
+        with patch("apps.organizations.signals.bypass_rls", recording_bypass):
+            org = Organization.objects.create(
+                name="Signal School",
+                org_type=OrganizationType.SCHOOL,
+                owner=user,
+            )
+
+        self.assertEqual(entered["count"], 1)
+        self.assertTrue(org.roles.filter(name="teacher").exists())
 
 
 class RoleModelTest(TestCase):
