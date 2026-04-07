@@ -75,6 +75,19 @@ def _set_rls_setting(name: str, value: str, *, local: bool | None = None) -> Non
         )
 
 
+def _get_rls_setting(name: str, *, default: str = "") -> str:
+    """Read the current RLS setting value, falling back to *default* when unset."""
+    if not _is_postgresql():
+        return default
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT current_setting(%s, true)", [name])
+        row = cursor.fetchone()
+    value = row[0] if row else None
+    if value in (None, ""):
+        return default
+    return str(value)
+
+
 def set_rls_tenant(org_id: Any, *, local: bool | None = None) -> None:
     """Set the active tenant context for RLS policies.
 
@@ -162,8 +175,9 @@ def bypass_rls():
     if not _is_postgresql():
         yield
         return
+    previous = _get_rls_setting("app.bypass_rls", default=_BYPASS_OFF)
     try:
         set_rls_bypass(True)
         yield
     finally:
-        set_rls_bypass(False)
+        set_rls_bypass(previous == _BYPASS_ON)
