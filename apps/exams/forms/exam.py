@@ -3,6 +3,7 @@ Exam-level forms (teacher-facing).
 """
 
 from django import forms
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext_lazy
@@ -13,6 +14,13 @@ User = get_user_model()
 
 
 class ExamForm(forms.ModelForm):
+    organization = forms.ModelChoiceField(
+        queryset=apps.get_model("organizations", "Organization").objects.none(),
+        required=False,
+        label=pgettext_lazy("exams.form.exam.label", "organization"),
+        empty_label=pgettext_lazy("exams.form.exam.placeholder", "select_organization"),
+    )
+
     class Meta:
         model = Exam
         fields = [
@@ -133,9 +141,31 @@ class ExamForm(forms.ModelForm):
         Teacher-ə uyğun olaraq seçimləri filtr eləmək üçün
         view-dən ExamForm(user=request.user, ...) şəklində çağırmaq məqsədi ilə.
         """
+        allow_organization_selection = kwargs.pop("allow_organization_selection", False)
+        organization_queryset = kwargs.pop("organization_queryset", None)
+        initial_organization = kwargs.pop("initial_organization", None)
         user = kwargs.pop("user", None)
         organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
+
+        if allow_organization_selection:
+            from apps.organizations.models import Organization
+
+            self.fields["organization"].queryset = (
+                organization_queryset
+                if organization_queryset is not None
+                else Organization.objects.filter(is_active=True, status="active").order_by("name")
+            )
+            self.fields["organization"].required = True
+            self.fields["organization"].widget.attrs.update(
+                {
+                    "class": "form-control",
+                }
+            )
+            if initial_organization is not None:
+                self.fields["organization"].initial = initial_organization
+        else:
+            self.fields.pop("organization", None)
 
         self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]

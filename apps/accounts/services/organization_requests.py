@@ -16,8 +16,9 @@ from apps.notifications.services import (
     notify_org_admins_of_new_request,
 )
 from core.constants import OrganizationType
+from core.rls import bypass_rls
 
-from ..models import ProfileRole
+from ..models import ProfileRole, UserProfile
 from ..queries import pending_student_request_queryset
 
 logger = logging.getLogger(__name__)
@@ -130,7 +131,7 @@ def activate_verified_membership(user):
     The user is NOT immediately added as a member; that requires explicit
     admin approval.
     """
-    profile = getattr(user, "profile", None)
+    profile = UserProfile.objects.select_related("requested_organization").filter(user=user).first()
     if profile is None:
         return None
 
@@ -154,52 +155,53 @@ def activate_verified_membership(user):
 
     request_message = (profile.requested_organization_message or "").strip()
 
-    existing_pending = (
-        pending_student_request_queryset(
-            user=user,
-            organization=requested_organization,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
-        )
-        .filter(role_type=role_type)
-        .order_by("-created_at")
-        .first()
-    )
-    if existing_pending:
-        if existing_pending.message != request_message:
-            existing_pending.message = request_message
-            existing_pending.save(update_fields=["message", "updated_at"])
-    else:
-        request_obj = StudentOrganizationRequest.objects.create(
-            user=user,
-            organization=requested_organization,
-            role_type=role_type,
-            message=request_message,
-            status=StudentOrganizationRequestStatus.PENDING,
-        )
-        try:
-            notify_org_admins_of_new_request(request_obj=request_obj)
-        except Exception:
-            logger.exception(
-                "Failed to notify org admins about verified membership request %s",
-                request_obj.pk,
+    with bypass_rls():
+        existing_pending = (
+            pending_student_request_queryset(
+                user=user,
+                organization=requested_organization,
+                statuses=[StudentOrganizationRequestStatus.PENDING],
             )
-
-    profile.requested_organization_name = requested_organization.name
-    profile.student_university_name = requested_organization.name
-    if requested_organization.org_type == OrganizationType.SCHOOL:
-        profile.student_school_identifier = (
-            requested_organization.organization_identifier or requested_organization.license_identifier or ""
+            .filter(role_type=role_type)
+            .order_by("-created_at")
+            .first()
         )
-    else:
-        profile.student_school_identifier = ""
-    profile.save(
-        update_fields=[
-            "requested_organization_name",
-            "student_university_name",
-            "student_school_identifier",
-        ]
-    )
-    sync_profile_pending_request_snapshot(profile)
+        if existing_pending:
+            if existing_pending.message != request_message:
+                existing_pending.message = request_message
+                existing_pending.save(update_fields=["message", "updated_at"])
+        else:
+            request_obj = StudentOrganizationRequest.objects.create(
+                user=user,
+                organization=requested_organization,
+                role_type=role_type,
+                message=request_message,
+                status=StudentOrganizationRequestStatus.PENDING,
+            )
+            try:
+                notify_org_admins_of_new_request(request_obj=request_obj)
+            except Exception:
+                logger.exception(
+                    "Failed to notify org admins about verified membership request %s",
+                    request_obj.pk,
+                )
+
+        profile.requested_organization_name = requested_organization.name
+        profile.student_university_name = requested_organization.name
+        if requested_organization.org_type == OrganizationType.SCHOOL:
+            profile.student_school_identifier = (
+                requested_organization.organization_identifier or requested_organization.license_identifier or ""
+            )
+        else:
+            profile.student_school_identifier = ""
+        profile.save(
+            update_fields=[
+                "requested_organization_name",
+                "student_university_name",
+                "student_school_identifier",
+            ]
+        )
+        sync_profile_pending_request_snapshot(profile)
 
     return None
 
