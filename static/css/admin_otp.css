@@ -1,0 +1,179 @@
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body.admin-otp-page {
+    background:
+        radial-gradient(circle at top, rgba(119, 93, 255, 0.16), transparent 32%),
+        linear-gradient(180deg, #f6f7ff 0%, #eef1ff 100%);
+    color: #1f2a44;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.admin-otp-shell {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 20px;
+}
+
+.admin-otp-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(115, 128, 180, 0.18);
+    border-radius: 24px;
+    box-shadow: 0 28px 70px rgba(78, 93, 162, 0.16);
+    box-sizing: border-box;
+    max-width: 520px;
+    padding: 36px 32px 30px;
+    width: 100%;
+}
+
+.admin-otp-brand {
+    color: #5c63b0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin: 0 0 14px;
+    text-transform: uppercase;
+}
+
+.admin-otp-title {
+    color: #1e2743;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    line-height: 1.05;
+    margin: 0 0 14px;
+}
+
+.admin-otp-description {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin: 0 0 8px;
+}
+
+.admin-otp-description--muted {
+    color: #617097;
+    margin-bottom: 24px;
+}
+
+.admin-otp-messages,
+.admin-otp-errors {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+}
+
+.admin-otp-message,
+.admin-otp-errors li {
+    border-radius: 14px;
+    font-size: 0.96rem;
+    line-height: 1.5;
+    padding: 12px 14px;
+}
+
+.admin-otp-message--success {
+    background: #e7f8ee;
+    color: #17633d;
+}
+
+.admin-otp-message--info {
+    background: #edf4ff;
+    color: #1d4f91;
+}
+
+.admin-otp-message--warning {
+    background: #fff7dd;
+    color: #8d6414;
+}
+
+.admin-otp-message--danger,
+.admin-otp-message--error,
+.admin-otp-errors li {
+    background: #fff0f0;
+    color: #a32638;
+}
+
+.admin-otp-form,
+.admin-otp-resend-form {
+    margin: 0;
+}
+
+.admin-otp-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.admin-otp-form input[type="text"] {
+    background: #ffffff;
+    border: 1px solid #cfd7ee;
+    border-radius: 14px;
+    box-sizing: border-box;
+    color: #1e2743;
+    font-size: 1.15rem;
+    letter-spacing: 0.22em;
+    outline: none;
+    padding: 15px 18px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+}
+
+.admin-otp-form input[type="text"]:focus {
+    border-color: #6b71dd;
+    box-shadow: 0 0 0 4px rgba(107, 113, 221, 0.16);
+}
+
+.admin-otp-errors--field {
+    margin-top: 10px;
+}
+
+.admin-otp-retry-note {
+    color: #7a5b14;
+    font-size: 0.94rem;
+    margin: 14px 0 0;
+}
+
+.admin-otp-button {
+    background: linear-gradient(135deg, #565add 0%, #7c80f2 100%);
+    border: 0;
+    border-radius: 14px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 20px;
+    padding: 14px 18px;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+    width: 100%;
+}
+
+.admin-otp-button:hover,
+.admin-otp-button:focus-visible {
+    box-shadow: 0 16px 30px rgba(86, 90, 221, 0.22);
+    transform: translateY(-1px);
+}
+
+.admin-otp-button--secondary {
+    background: transparent;
+    border: 1px solid #ccd4f4;
+    box-shadow: none;
+    color: #33406d;
+    margin-top: 14px;
+}
+
+.admin-otp-button--secondary:hover,
+.admin-otp-button--secondary:focus-visible {
+    background: #f5f7ff;
+    box-shadow: none;
+}
+
+@media (max-width: 520px) {
+    .admin-otp-card {
+        border-radius: 20px;
+        padding: 28px 22px 24px;
+    }
+}

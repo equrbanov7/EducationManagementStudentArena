@@ -1,36 +1,66 @@
-{% extends "admin/base_site.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} | {{ site_title }}</title>
+  <link rel="stylesheet" href="{% static 'css/admin_otp.css' %}">
+</head>
+<body class="admin-otp-page">
+  <main class="admin-otp-shell">
+    <section class="admin-otp-card" aria-labelledby="admin-otp-title">
+      <p class="admin-otp-brand">{{ site_header }}</p>
+      <h1 id="admin-otp-title" class="admin-otp-title">{{ title }}</h1>
+      <p class="admin-otp-description">
+        Admin panelə keçid yalnız OTP təsdiqindən sonra açılır. Email ünvanınıza göndərilən 6 rəqəmli kodu daxil edin.
+      </p>
+      <p class="admin-otp-description admin-otp-description--muted">
+        Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+      </p>
 
-{% block content %}
-<div id="content-main">
-  <h1>Admin OTP təsdiqi</h1>
-  <p>Admin panelə davam etmək üçün email ünvanınıza göndərilən 6 rəqəmli kodu daxil edin.</p>
-  <p>Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.</p>
+      {% if messages %}
+        <ul class="admin-otp-messages" aria-label="Bildirişlər">
+          {% for message in messages %}
+            <li class="admin-otp-message admin-otp-message--{{ message.tags|default:'info' }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
-  {% if form.non_field_errors %}
-    <ul class="messagelist">
-      {% for error in form.non_field_errors %}
-        <li class="error">{{ error }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+      {% if form.non_field_errors %}
+        <ul class="admin-otp-errors" aria-label="Xəta mesajları">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    <fieldset class="module aligned">
-      <div class="form-row">
-        {{ form.code.errors }}
-        {{ form.code.label_tag }}
+      <form method="post" novalidate class="admin-otp-form">
+        {% csrf_token %}
+        <label class="admin-otp-label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
         {{ form.code }}
-      </div>
-    </fieldset>
-    <div class="submit-row">
-      <input type="submit" value="Təsdiqlə">
-    </div>
-  </form>
+        {% if form.code.errors %}
+          <ul class="admin-otp-errors admin-otp-errors--field" aria-label="OTP xətaları">
+            {% for error in form.code.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
 
-  <form method="post" action="{{ resend_url }}" style="margin-top: 1rem;">
-    {% csrf_token %}
-    <button type="submit" class="button">Kodu yenidən göndər</button>
-  </form>
-</div>
-{% endblock %}
+        {% if retry_after %}
+          <p class="admin-otp-retry-note">
+            Təkrar cəhd etməzdən əvvəl {{ retry_after }} saniyə gözləyin.
+          </p>
+        {% endif %}
+
+        <button type="submit" class="admin-otp-button">Təsdiqlə</button>
+      </form>
+
+      <form method="post" action="{{ resend_url }}" class="admin-otp-resend-form">
+        {% csrf_token %}
+        <button type="submit" class="admin-otp-button admin-otp-button--secondary">Kodu yenidən göndər</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
