@@ -10,6 +10,7 @@ from django.db.models import QuerySet
 
 from apps.accounts.models import ProfileRole
 from core.constants import ROLE_LEVELS
+from core.rls import bypass_rls
 from core.utils import get_client_ip
 
 User = get_user_model()
@@ -47,6 +48,62 @@ def get_active_memberships(user, organization=None):
     if organization is not None:
         queryset = queryset.filter(organization=organization)
     return queryset
+
+
+def ensure_owner_membership(user, organization):
+    """Backfill a primary owner membership for an active organization owner."""
+    if not user or not organization:
+        return None
+    if getattr(organization, "owner_id", None) != getattr(user, "id", None):
+        return None
+
+    from apps.organizations.models import Membership, Role
+
+    with bypass_rls():
+        active_membership = (
+            Membership.objects.filter(
+                user=user,
+                organization=organization,
+                is_active=True,
+            )
+            .select_related("organization", "role", "scope_unit")
+            .order_by("-is_primary", "-role__level", "id")
+            .first()
+        )
+        if active_membership is not None:
+            return active_membership
+
+        fallback_role = Role.objects.filter(organization=organization, is_active=True).order_by("-level", "id").first()
+        if fallback_role is None:
+            return None
+
+        membership, created = Membership.objects.get_or_create(
+            user=user,
+            organization=organization,
+            role=fallback_role,
+            scope_unit=None,
+            defaults={
+                "is_primary": True,
+                "is_active": True,
+                "assigned_by": user,
+            },
+        )
+        if created:
+            return membership
+
+        changed = False
+        if not membership.is_active:
+            membership.is_active = True
+            changed = True
+        if not membership.is_primary:
+            membership.is_primary = True
+            changed = True
+        if membership.assigned_by_id is None:
+            membership.assigned_by = user
+            changed = True
+        if changed:
+            membership.save()
+        return membership
 
 
 def _membership_role_aliases(user, membership, organization=None):

@@ -69,9 +69,11 @@
                             id="pinInput"
                             name="pin"
                             type="text"
-                            inputmode="numeric"
-                            autocomplete="one-time-code"
-                            maxlength="8"
+                            inputmode="text"
+                            autocomplete="off"
+                            autocapitalize="characters"
+                            spellcheck="false"
+                            maxlength="{{ pin_length }}"
                             class="pin-entry-input"
                             value="{{ pin_value }}"
                             placeholder="{{ copy.pin_placeholder }}"
@@ -115,7 +117,8 @@
     <script nonce="{{ request.csp_nonce }}">
         window.LIVE_PIN_ENTRY_I18N = {
             invalidPin: "{{ copy.invalid_pin|escapejs }}",
-            loading: "{{ copy.loading|escapejs }}"
+            loading: "{{ copy.loading|escapejs }}",
+            pinLength: {{ pin_length }}
         };
     </script>
     <script src="{% static 'js/pin_entry.js' %}"></script>

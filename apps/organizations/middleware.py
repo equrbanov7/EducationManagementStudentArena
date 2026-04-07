@@ -18,10 +18,12 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from core.rls import clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
-from .services import is_tenant_accessible_organization
+from .services import ensure_owner_membership, is_tenant_accessible_organization
 
 
 class OrganizationMiddleware:
@@ -123,9 +125,10 @@ class OrganizationMiddleware:
                     ).first()
                     if owner_org is not None:
                         if getattr(owner_org, "status", "") == "active":
+                            owner_membership = ensure_owner_membership(request.user, owner_org)
                             request.organization = owner_org
-                            request.org_memberships = []
-                            setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
+                            request.org_memberships = [owner_membership] if owner_membership is not None else []
+                            setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, owner_membership is None)
                         else:
                             request.blocked_organization = owner_org
                     else:
@@ -148,7 +151,22 @@ class OrganizationMiddleware:
                 elif len(unique_orgs) == 0:
                     # No active memberships: deny by default until an organization
                     # context can be established via real membership data.
-                    pass
+                    try:
+                        profile = request.user.profile
+                    except (AttributeError, ObjectDoesNotExist):
+                        profile = None
+
+                    owner_fallback_org = getattr(profile, "organization", None)
+                    if (
+                        owner_fallback_org is not None
+                        and getattr(owner_fallback_org, "owner_id", None) == getattr(request.user, "id", None)
+                        and is_tenant_accessible_organization(owner_fallback_org)
+                    ):
+                        owner_membership = ensure_owner_membership(request.user, owner_fallback_org)
+                        request.organization = owner_fallback_org
+                        request.session["active_organization"] = owner_fallback_org.slug
+                        request.org_memberships = [owner_membership] if owner_membership is not None else []
+                        setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, owner_membership is None)
 
                 # len >= 2  → multi-org user; explicit selection required.
                 # request.organization stays None; the org-picker view handles this.

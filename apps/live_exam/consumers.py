@@ -13,7 +13,12 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
-from apps.live_exam.auth import PLAYER_COOKIE_NAME, authorize_socket_connection
+from apps.live_exam.auth import (
+    LIVE_CLIENT_ID_COOKIE_NAME,
+    PLAYER_COOKIE_NAME,
+    authorize_socket_connection,
+    load_player_token_payload,
+)
 from apps.live_exam.models import LiveSession
 from apps.live_exam.scoring import get_answer_progress, save_answer_and_score
 from apps.live_exam.transport import (
@@ -42,6 +47,37 @@ def _get_scope_ip(scope) -> str:
     if client and isinstance(client, (list, tuple)) and len(client) >= 1:
         return str(client[0])
     return "unknown"
+
+
+def _get_connect_rate_identity(scope, pin: str) -> str:
+    """
+    Build a stable per-client rate-limit identity for WebSocket connects.
+
+    Using only IP+PIN is too aggressive for classrooms where many students
+    share the same NAT IP. Prefer a per-player token / live client cookie and
+    fall back to the authenticated user or source IP only when no better
+    identifier exists.
+    """
+    cookies = scope.get("cookies") or {}
+
+    token_payload = load_player_token_payload(cookies.get(PLAYER_COOKIE_NAME), pin=pin)
+    if token_payload is not None:
+        client_id = str(token_payload.get("client_id") or "").strip()
+        if client_id:
+            return f"player-client:{client_id}"
+        player_id = token_payload.get("player_id")
+        if player_id:
+            return f"player:{player_id}"
+
+    live_client_id = str(cookies.get(LIVE_CLIENT_ID_COOKIE_NAME) or "").strip()
+    if live_client_id:
+        return f"viewer-client:{live_client_id}"
+
+    user = scope.get("user")
+    if getattr(user, "is_authenticated", False):
+        return f"user:{user.id}"
+
+    return f"ip:{_get_scope_ip(scope)}"
 
 
 class LiveSessionSocketAuthMixin:
@@ -73,19 +109,19 @@ class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
         self.group_name = f"live_{self.pin}_lobby"
-        client_ip = _get_scope_ip(self.scope)
+        connect_identity = _get_connect_rate_identity(self.scope, self.pin)
 
-        # Rate-limit reconnect flooding per IP+PIN
+        # Rate-limit reconnect flooding per client identity within the PIN.
         is_limited, retry_after = await _record_rate_limit_hit(
             _WS_CONNECT_SCOPE,
             settings.LIVE_WS_CONNECT_RATE_LIMIT,
-            client_ip,
             self.pin,
+            connect_identity,
         )
         if is_limited:
             logger.warning(
                 "WebSocket connect flood blocked on lobby",
-                extra={"pin": self.pin, "ip": client_ip, "retry_after": retry_after},
+                extra={"pin": self.pin, "connect_identity": connect_identity, "retry_after": retry_after},
             )
             await self.close(code=4429)
             return
@@ -137,19 +173,19 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
-        client_ip = _get_scope_ip(self.scope)
+        connect_identity = _get_connect_rate_identity(self.scope, self.pin)
 
-        # Rate-limit reconnect flooding per IP+PIN
+        # Rate-limit reconnect flooding per client identity within the PIN.
         is_limited, retry_after = await _record_rate_limit_hit(
             _WS_CONNECT_SCOPE,
             settings.LIVE_WS_CONNECT_RATE_LIMIT,
-            client_ip,
             self.pin,
+            connect_identity,
         )
         if is_limited:
             logger.warning(
                 "WebSocket connect flood blocked on play",
-                extra={"pin": self.pin, "ip": client_ip, "retry_after": retry_after},
+                extra={"pin": self.pin, "connect_identity": connect_identity, "retry_after": retry_after},
             )
             await self.close(code=4429)
             return
