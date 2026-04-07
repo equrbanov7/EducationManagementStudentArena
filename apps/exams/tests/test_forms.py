@@ -43,6 +43,31 @@ class ExamFormDefaultStateTests(TestCase):
         form = ExamForm(instance=exam)
         self.assertFalse(bool(form["is_active"].value()))
 
+    def test_create_form_can_require_organization_selection_for_superadmin_flow(self):
+        secondary_org = Organization.objects.create(
+            name="Exam Form Secondary Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+
+        form = ExamForm(
+            allow_organization_selection=True,
+            organization_queryset=Organization.objects.filter(id__in=[self.org.id, secondary_org.id]).order_by("name"),
+        )
+
+        self.assertIn("organization", form.fields)
+        self.assertTrue(form.fields["organization"].required)
+        self.assertEqual(
+            list(form.fields["organization"].queryset.values_list("id", flat=True)),
+            list(
+                Organization.objects.filter(id__in=[self.org.id, secondary_org.id])
+                .order_by("name")
+                .values_list("id", flat=True)
+            ),
+        )
+
 
 class StudentGroupFormRoleSourceTests(TestCase):
     def setUp(self):
