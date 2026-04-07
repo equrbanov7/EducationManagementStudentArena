@@ -313,6 +313,7 @@ def live_pin_entry(request):
                 {
                     "copy": copy,
                     "pin_value": pin_value,
+                    "pin_length": PIN_LENGTH,
                     "error_message": LIVE_RATE_LIMIT_MESSAGE,
                     "theme_key": theme_key,
                 },
@@ -347,6 +348,7 @@ def live_pin_entry(request):
         {
             "copy": copy,
             "pin_value": pin_value,
+            "pin_length": PIN_LENGTH,
             "error_message": error_message,
             "theme_key": theme_key,
         },
