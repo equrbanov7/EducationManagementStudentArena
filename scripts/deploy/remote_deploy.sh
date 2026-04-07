@@ -46,24 +46,37 @@ max_attempts=$((DEPLOY_TIMEOUT_SECONDS / 5))
 attempt=1
 ping_url="${APP_BASE_URL}${PING_PATH}"
 health_url="${APP_BASE_URL}${HEALTH_PATH}"
+ping_body_file="/tmp/emsarena-ping.json"
+health_body_file="/tmp/emsarena-health.json"
+curl_headers=(
+  -H "Host: ${HEALTHCHECK_HOST}"
+  -H "X-Forwarded-Proto: https"
+)
 
-until curl -fsS -H "Host: ${HEALTHCHECK_HOST}" "$ping_url" >/dev/null 2>&1; do
+while true; do
+  ping_status="$(curl -s -o "${ping_body_file}" -w '%{http_code}' "${curl_headers[@]}" "$ping_url" || true)"
+  if [ "$ping_status" = "200" ]; then
+    break
+  fi
+
   if [ "$attempt" -ge "$max_attempts" ]; then
     echo "Application did not become ready within ${DEPLOY_TIMEOUT_SECONDS}s." >&2
+    echo "Last ping status: ${ping_status}" >&2
+    cat "${ping_body_file}" >&2 || true
     $SUDO systemctl status "$SERVICE_NAME" --no-pager || true
     journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
     exit 1
   fi
 
-  echo "Waiting for ${ping_url} (${attempt}/${max_attempts})..."
+  echo "Waiting for ${ping_url} (${attempt}/${max_attempts})... HTTP ${ping_status}"
   sleep 5
   attempt=$((attempt + 1))
 done
 
-health_status="$(curl -s -o /tmp/emsarena-health.json -w '%{http_code}' -H "Host: ${HEALTHCHECK_HOST}" "$health_url" || true)"
+health_status="$(curl -s -o "${health_body_file}" -w '%{http_code}' "${curl_headers[@]}" "$health_url" || true)"
 if [ "$health_status" != "200" ] && [ "$health_status" != "207" ]; then
   echo "Health check failed with HTTP ${health_status}." >&2
-  cat /tmp/emsarena-health.json >&2 || true
+  cat "${health_body_file}" >&2 || true
   $SUDO systemctl status "$SERVICE_NAME" --no-pager || true
   journalctl -u "$SERVICE_NAME" -n 200 --no-pager || true
   exit 1
