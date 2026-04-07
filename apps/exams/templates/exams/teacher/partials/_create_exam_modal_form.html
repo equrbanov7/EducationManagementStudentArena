@@ -15,6 +15,14 @@
     {{ group_student_map|json_script:"createExamGroupStudentMap" }}
 
     <div class="create-exam-form-grid">
+        {% if form.organization %}
+            <div class="form-group form-group-full">
+                {{ form.organization.label_tag }}
+                {{ form.organization }}
+                {% if form.organization.errors %}<div class="field-error">{{ form.organization.errors.0 }}</div>{% endif %}
+            </div>
+        {% endif %}
+
         <div class="form-group form-group-full">
             {{ form.title.label_tag }}
             {{ form.title }}
