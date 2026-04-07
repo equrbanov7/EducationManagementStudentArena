@@ -15,9 +15,14 @@ from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from apps.organizations.models import Organization
 from core.helpers import _tenant_scoped_courses
-from core.permissions import request_has_permission
-from core.tenancy import request_has_active_organization_context
+from core.permissions import is_superadmin_user, request_has_permission
+from core.tenancy import (
+    get_request_organization,
+    request_has_active_organization_context,
+    restore_request_organization_from_profile,
+)
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -113,10 +118,47 @@ def _organization_selection_redirect(request):
     return redirect(f"{reverse('organizations:select')}?{urlencode({'next': request.get_full_path()})}")
 
 
+def _restore_superadmin_profile_organization(request):
+    if not _is_superadmin(getattr(request, "user", None)):
+        return False
+    return restore_request_organization_from_profile(request)
+
+
+def _organization_selection_queryset():
+    return Organization.objects.filter(is_active=True, status="active").order_by("name")
+
+
+def _resolve_selected_superadmin_organization(request):
+    raw_organization_id = (request.POST.get("organization") or request.GET.get("organization") or "").strip()
+    if not raw_organization_id.isdigit():
+        return None
+
+    return _organization_selection_queryset().filter(id=int(raw_organization_id)).first()
+
+
+def _bind_selected_organization(request, organization):
+    request.organization = organization
+    request.org_memberships = []
+    request.org_permissions = list(getattr(request, "org_permissions", []) or [])
+    if hasattr(request, "session"):
+        request.session["active_organization"] = organization.slug
+    if hasattr(request.user, "set_active_organization_context"):
+        request.user.set_active_organization_context(
+            organization,
+            memberships=request.org_memberships,
+            permissions=request.org_permissions,
+        )
+
+
 def _resolve_required_organization(request):
     organization = get_active_organization(request)
     if organization is not None and request_has_active_organization_context(request):
         return organization
+
+    if _restore_superadmin_profile_organization(request):
+        organization = get_active_organization(request)
+        if organization is not None and request_has_active_organization_context(request):
+            return organization
 
     if not hasattr(request, "session"):
         raise PermissionDenied(
@@ -210,23 +252,45 @@ def createAndEditExamView(request, slug=None):
     slug=None -> Yeni imtahan
     slug=<value> -> Mövcud imtahanı redaktə
     """
-    organization = _resolve_required_organization(request)
-    if organization is None:
-        return _organization_selection_redirect(request)
+    is_editing = slug is not None
+    allow_organization_selection = False
+
+    if not is_editing and is_superadmin_user(request.user) and get_request_organization(request) is None:
+        _restore_superadmin_profile_organization(request)
+        organization = get_active_organization(request)
+        if organization is None or not request_has_active_organization_context(request):
+            organization = None
+            allow_organization_selection = True
+    else:
+        organization = _resolve_required_organization(request)
+        if organization is None:
+            return _organization_selection_redirect(request)
+
     _ensure_teacher(request.user)
 
     required_permission = "exam.edit" if slug else "exam.create"
-    _ensure_exam_permission(request, required_permission)
+    permission_verified = False
+    if organization is not None:
+        _ensure_exam_permission(request, required_permission)
+        permission_verified = True
 
     # Əgər slug varsa -> Edit mode
     if slug:
         exam = _get_editable_exam_or_404(request, slug)
-        is_editing = True
     else:
         exam = None
-        is_editing = False
     linked_course = None if is_editing else _get_requested_course_for_exam(request)
     is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
+    selected_organization = _resolve_selected_superadmin_organization(request) if allow_organization_selection else None
+    form_organization = organization or selected_organization
+    form_kwargs = {
+        "user": request.user,
+        "organization": form_organization,
+    }
+    if allow_organization_selection:
+        form_kwargs["allow_organization_selection"] = True
+        form_kwargs["organization_queryset"] = _organization_selection_queryset()
+        form_kwargs["initial_organization"] = selected_organization
 
     if request.method == "POST":
         previous_is_active = exam.is_active if is_editing else False
@@ -238,12 +302,32 @@ def createAndEditExamView(request, slug=None):
 
         if is_editing:
             # Edit mode
-            form = ExamForm(request.POST, instance=exam, user=request.user, organization=organization)
+            form = ExamForm(request.POST, instance=exam, **form_kwargs)
         else:
             # Create mode
-            form = ExamForm(request.POST, user=request.user, organization=organization)
+            form = ExamForm(request.POST, **form_kwargs)
 
         if form.is_valid():
+            if organization is None and allow_organization_selection:
+                organization = form.cleaned_data.get("organization")
+                if organization is not None:
+                    _bind_selected_organization(request, organization)
+                    form_organization = organization
+
+            if organization is None:
+                raise PermissionDenied(
+                    pgettext("exams.view.exams.permission", "missing_required_permission").format(
+                        permission="organization"
+                    )
+                )
+
+            if not permission_verified:
+                _ensure_exam_permission(request, required_permission)
+                permission_verified = True
+
+            if not is_editing and linked_course is None:
+                linked_course = _get_requested_course_for_exam(request)
+
             exam_instance = form.save(commit=False)
 
             # Yeni imtahanda author-u set et
@@ -319,9 +403,9 @@ def createAndEditExamView(request, slug=None):
     else:
         # GET request
         if is_editing:
-            form = ExamForm(instance=exam, user=request.user, organization=organization)
+            form = ExamForm(instance=exam, **form_kwargs)
         else:
-            form = ExamForm(user=request.user, organization=organization)
+            form = ExamForm(**form_kwargs)
     group_student_map = _build_group_student_map(form)
 
     if is_modal_request:
