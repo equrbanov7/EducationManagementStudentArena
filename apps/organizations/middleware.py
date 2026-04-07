@@ -18,6 +18,7 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
+from apps.accounts.models import ProfileRole
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.rls import clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
@@ -56,6 +57,10 @@ class OrganizationMiddleware:
         for m in memberships:
             result.setdefault(m.organization_id, m.organization)
         return result
+
+    @staticmethod
+    def _profile_allows_owner_fallback(profile) -> bool:
+        return getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
 
     # ------------------------------------------------------------------
     # Main entry-point
@@ -118,18 +123,25 @@ class OrganizationMiddleware:
                     except Organization.DoesNotExist:
                         request.session.pop("active_organization", None)
                 else:
+                    try:
+                        profile = request.user.profile
+                    except (AttributeError, ObjectDoesNotExist):
+                        profile = None
                     owner_org = Organization.objects.filter(
                         slug=org_slug,
                         is_active=True,
                         owner=request.user,
                     ).first()
                     if owner_org is not None:
-                        if getattr(owner_org, "status", "") == "active":
+                        if (
+                            getattr(owner_org, "status", "") == "active"
+                            and self._profile_allows_owner_fallback(profile)
+                        ):
                             owner_membership = ensure_owner_membership(request.user, owner_org)
                             request.organization = owner_org
                             request.org_memberships = [owner_membership] if owner_membership is not None else []
                             setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, owner_membership is None)
-                        else:
+                        elif getattr(owner_org, "status", "") != "active":
                             request.blocked_organization = owner_org
                     else:
                         # User is no longer a member of the session org — clear it.
@@ -158,6 +170,8 @@ class OrganizationMiddleware:
 
                     owner_fallback_org = getattr(profile, "organization", None)
                     if (
+                        self._profile_allows_owner_fallback(profile)
+                        and
                         owner_fallback_org is not None
                         and getattr(owner_fallback_org, "owner_id", None) == getattr(request.user, "id", None)
                         and is_tenant_accessible_organization(owner_fallback_org)
