@@ -22,6 +22,7 @@ from django.views.decorators.http import require_POST
 
 from apps.audit.utils import log_action
 from apps.exams.models import Exam, ExamQuestion
+from apps.exams.services.access_policy import is_teacher_user
 from apps.live_exam.domain.session import (
     build_question_phase_times,
     clear_question_phase_override,
@@ -97,7 +98,7 @@ def live_create_session_by_slug(request, slug):
 
     is_superadmin = request.user.is_superuser or getattr(request.user, "is_superadmin", False)
 
-    if not is_superadmin and not getattr(request.user, "is_teacher", False):
+    if not is_superadmin and not is_teacher_user(request.user):
         raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
 
     if not is_superadmin and exam.author != request.user:

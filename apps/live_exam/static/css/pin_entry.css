@@ -328,13 +328,13 @@ body.pin-entry-page {
     width: 100%;
     border: 0;
     outline: 0;
-    padding: 18px 16px;
+    padding: 16px 14px;
     background: transparent;
     font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", "Menlo", "Consolas", monospace;
-    font-size: clamp(1.15rem, 2vw, 1.9rem);
+    font-size: clamp(1rem, 1.65vw, 1.65rem);
     font-weight: 700;
-    letter-spacing: clamp(0.03em, 0.08vw, 0.08em);
-    line-height: 1.1;
+    letter-spacing: clamp(0.015em, 0.05vw, 0.05em);
+    line-height: 1.05;
     text-align: center;
     text-transform: uppercase;
     color: #0f172a;

@@ -402,6 +402,11 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             email="teacher_exam_student@example.com",
             password="StrongPass123!",
         )
+        self.org_admin = User.objects.create_user(
+            username="teacher_exam_org_admin",
+            email="teacher_exam_org_admin@example.com",
+            password="StrongPass123!",
+        )
 
         self.org_a = Organization.objects.create(
             name="Exam Org A",
@@ -421,6 +426,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         _assign_user_to_org(self.teacher, self.org_a, ProfileRole.TEACHER)
         _assign_user_to_org(self.other_teacher, self.org_a, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.org_a, ProfileRole.STUDENT)
+        _assign_user_to_org(self.org_admin, self.org_a, ProfileRole.ORG_ADMIN)
 
         self.exam_visible = Exam.objects.create(
             author=self.teacher,
@@ -528,6 +534,37 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
+
+    def test_org_admin_can_open_and_submit_create_exam_modal(self):
+        self.client.force_login(self.org_admin)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        modal_response = self.client.get(
+            reverse("exams:create_exam") + "?modal=1",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(modal_response.status_code, 200)
+
+        response = self.client.post(
+            reverse("exams:create_exam") + "?modal=1",
+            {
+                "modal": "1",
+                "title": "Org Admin Created Exam",
+                "description": "Created by organization admin.",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Org Admin Created Exam")
+        self.assertEqual(created_exam.organization, self.org_a)
+        self.assertEqual(created_exam.author, self.org_admin)
 
     def test_create_exam_redirects_to_org_selector_without_active_org_when_multiple_orgs(self):
         _assign_user_to_org(self.teacher, self.org_b, ProfileRole.TEACHER)
