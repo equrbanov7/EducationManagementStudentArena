@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 from apps.exams.services import parsing
@@ -170,6 +171,23 @@ class ExamAccessControlServicesTest(TestCase):
         self.teacher.clear_active_organization_context()
 
         self.assertFalse(services.is_teacher_user(self.teacher))
+
+    def test_is_teacher_user_allows_org_admin_level_membership(self):
+        org_admin = User.objects.create_user(username="org_admin", email="org_admin@example.com", password="pass123")
+        org_admin.profile.organization = self.org
+        org_admin.profile.organization_type = self.org.org_type
+        org_admin.profile.role = ProfileRole.ORG_ADMIN
+        org_admin.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        Membership.objects.create(
+            user=org_admin,
+            organization=self.org,
+            role=self.org.roles.get(name="deputy_director"),
+            is_primary=True,
+            is_active=True,
+        )
+        org_admin.set_active_organization_context(self.org)
+
+        self.assertTrue(services.is_teacher_user(org_admin))
 
     def test_can_user_access_exam_as_author(self):
         """Test exam access for author."""
