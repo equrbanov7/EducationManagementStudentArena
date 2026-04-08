@@ -112,10 +112,20 @@ def restore_request_organization_from_profile(request, *, profile=None):
             .select_related("organization", "role", "scope_unit")
             .order_by("-is_primary", "-role__level")
         )
+        active_org_ids = set(
+            Membership.objects.filter(
+                user=user,
+                organization__is_active=True,
+                organization__status="active",
+                is_active=True,
+            ).values_list("organization_id", flat=True)
+        )
 
     is_owner = getattr(fallback_org, "owner_id", None) == getattr(user, "id", None)
     is_superadmin = bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
     if not memberships and not is_owner and not is_superadmin:
+        return False
+    if not is_superadmin and len(active_org_ids) > 1:
         return False
 
     permissions_set = set()

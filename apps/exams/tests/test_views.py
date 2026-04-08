@@ -1355,19 +1355,6 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertNotContains(response, self.other_tenant_exam.slug)
 
     def test_student_exam_views_restore_profile_org_context_when_session_org_is_missing(self):
-        second_org = Organization.objects.create(
-            name="Student Exam Org C",
-            org_type=OrganizationType.SCHOOL,
-            owner=self.superadmin,
-            status="active",
-            is_active=True,
-        )
-        _assign_user_to_org(self.student, second_org, ProfileRole.STUDENT)
-        self.student.profile.organization = self.org_a
-        self.student.profile.organization_type = self.org_a.org_type
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
-
         session = self.client.session
         session.pop("active_organization", None)
         session.save()
