@@ -66,6 +66,7 @@ const state = {
     players: [],
     sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
     isLocked: Boolean(CONFIG.sessionLocked),
+    finalSignature: "",
 };
 
 const I18N = window.LIVE_EXAM_HOST_I18N || {};
@@ -115,6 +116,16 @@ const avatarImageMarkup = (player, size, className = "") => {
     const classes = ["host-avatar-image", className].filter(Boolean).join(" ");
     return `<img class="${esc(classes)}" src="${renderer.renderAvatarDataUrl(player || {})}" alt="${label}" width="${resolvedSize}" height="${resolvedSize}" decoding="async">`;
 };
+const topSignature = rows =>
+    (Array.isArray(rows) ? rows : [])
+        .map((player) =>
+            [
+                Number(player?.player_id || player?.id || 0),
+                String(player?.nickname || ""),
+                Number(player?.score || 0),
+            ].join(":")
+        )
+        .join("|");
 
 let debugOn = false;
 const logs = [];
@@ -634,6 +645,9 @@ function setPresentationMarkup(phase, signature, markup) {
 
 function setSessionState(nextState) {
     state.sessionState = nextState;
+    if (nextState !== "finished") {
+        state.finalSignature = "";
+    }
     UI.gameState.textContent = stateLabel(nextState);
 
     UI.startBtn.disabled = nextState !== "lobby";
@@ -1299,9 +1313,12 @@ function applyRevealState(payload, question) {
 }
 
 function renderPodium(top) {
-    const finalKey = (top || [])
-        .map((player) => `${Number(player?.player_id || player?.id || 0)}:${Number(player?.score || 0)}`)
-        .join("|") || "final";
+    const finalRows = Array.isArray(top) ? top : [];
+    const finalKey = topSignature(finalRows) || "final";
+    if (state.finalSignature === finalKey) {
+        return;
+    }
+    state.finalSignature = finalKey;
     playFinalSound(finalKey);
 
     UI.confetti.innerHTML = "";
@@ -1355,13 +1372,18 @@ function renderPodium(top) {
     }
 
     UI.podiumStage.innerHTML = "";
+    const sortedTop = finalRows.slice().sort((left, right) => {
+        const scoreDiff = Number(right?.score || 0) - Number(left?.score || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        return Number(left?.player_id || left?.id || 0) - Number(right?.player_id || right?.id || 0);
+    });
     const podiumTop = {
-        1: top[0] ? { ...top[0], place: 1, slot: "center" } : null,
-        2: top[1] ? { ...top[1], place: 2, slot: "left" } : null,
-        3: top[2] ? { ...top[2], place: 3, slot: "right" } : null,
+        1: sortedTop[0] ? { ...sortedTop[0], place: 1, slot: "center" } : null,
+        2: sortedTop[1] ? { ...sortedTop[1], place: 2, slot: "left" } : null,
+        3: sortedTop[2] ? { ...sortedTop[2], place: 3, slot: "right" } : null,
     };
-    const riseDelays = { 3: 0.35, 2: 2.35, 1: 4.35 };
-    const celebrationDelays = { 3: 1.2, 2: 3.2, 1: 5.2 };
+    const riseDelays = { 3: 0.1, 2: 0.34, 1: 0.58 };
+    const celebrationDelays = { 3: 0.8, 2: 1.02, 1: 1.24 };
     const suffix = esc(tr("pointsSuffix", "pts"));
 
     [3, 2, 1].forEach(place => {
@@ -1399,21 +1421,21 @@ function renderPodium(top) {
     });
 
     UI.othersList.innerHTML = "";
-    const others = top.slice(3, 10);
+    const others = sortedTop.slice(3);
     if (othersSection) {
         othersSection.style.display = others.length ? "" : "none";
     }
     others.forEach((player, index) => {
         const row = document.createElement("div");
         row.className = "other-row";
-        row.style.setProperty("--other-delay", `${6.35 + index * 0.12}s`);
+        row.style.setProperty("--other-delay", `${0.98 + index * 0.06}s`);
         row.innerHTML = `
             <div class="other-info">
                 <span class="other-rank">${index + 4}</span>
                 ${avatarImageMarkup(player, 44, "other-avatar-image")}
                 <span class="other-name">${esc(player.nickname || "")}</span>
             </div>
-            <span class="other-score">${Number(player.score || 0)}</span>
+            <span class="other-score">${Number(player.score || 0)} <small>${suffix}</small></span>
         `;
         UI.othersList.appendChild(row);
     });
@@ -1469,6 +1491,7 @@ function applyStateSnapshot(snapshot) {
     if (snapshot.state === "finished") {
         clearPhaseLoop();
         clearAutoTimers();
+        stopStatePolling();
         setSessionState("finished");
         renderPodium(snapshot.top || []);
         notifyHostShell();
@@ -1549,7 +1572,7 @@ function stopStatePolling() {
 function startStatePolling() {
     if (state.statePollTimer) return;
     state.statePollTimer = window.setInterval(() => {
-        if (!document.hidden) {
+        if (!document.hidden && (!playWS || playWS.readyState !== WebSocket.OPEN)) {
             syncState();
         }
     }, STATE_POLL_INTERVAL_MS);
@@ -1674,6 +1697,7 @@ playWS.onmessage = event => {
         if (data.type === "finished") {
             clearPhaseLoop();
             clearAutoTimers();
+            stopStatePolling();
             setSessionState("finished");
             renderPodium(data.top || []);
         }

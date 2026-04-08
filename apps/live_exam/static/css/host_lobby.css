@@ -3037,7 +3037,7 @@ body.host-presentation-page .scoreboard-row__score {
     position: relative;
     z-index: 5;
     opacity: 0;
-    animation: othersFadeIn 0.7s ease-out 6.15s forwards;
+    animation: othersFadeIn 0.55s ease-out 1s forwards;
 }
 
 .others-title {
@@ -3049,7 +3049,23 @@ body.host-presentation-page .scoreboard-row__score {
     text-transform: uppercase;
 }
 
-.others-list { display: flex; flex-direction: column; gap: 8px; }
+.others-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: min(28vh, 280px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.others-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.others-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+}
 
 @keyframes othersFadeIn {
     from {
@@ -3123,6 +3139,13 @@ body.host-presentation-page .scoreboard-row__score {
     font-weight: 900;
     color: var(--gold);
     font-size: 1.08rem;
+    white-space: nowrap;
+}
+
+.other-score small {
+    font-size: 0.76em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 /* ═══════════════════════════════════════════════════════════════
