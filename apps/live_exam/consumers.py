@@ -29,6 +29,7 @@ from apps.live_exam.transport import (
     parse_answer_submission,
 )
 from core.rate_limit import record_rate_limit_hit
+from core.rls import bypass_rls
 
 logger = logging.getLogger("live_exam.ws.rate_limit")
 
@@ -152,8 +153,9 @@ class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def _get_lobby_state(self, pin: str) -> dict:
-        session = LiveSession.objects.get(pin=pin)
-        return build_lobby_state_payload(session)
+        with bypass_rls():
+            session = LiveSession.objects.get(pin=pin)
+            return build_lobby_state_payload(session)
 
 
 # -------------------------
@@ -330,13 +332,15 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def _get_reveal_payload(self, pin: str, question_id: int) -> dict:
-        session = LiveSession.objects.get(pin=pin)
-        return build_reveal_payload(session, question_id, revealed_at=timezone.now())
+        with bypass_rls():
+            session = LiveSession.objects.get(pin=pin)
+            return build_reveal_payload(session, question_id, revealed_at=timezone.now())
 
     @database_sync_to_async
     def _get_player_reveal_payload(self, pin: str, question_id: int) -> dict:
-        session = LiveSession.objects.get(pin=pin)
-        return build_player_reveal_payload(session, question_id, revealed_at=timezone.now())
+        with bypass_rls():
+            session = LiveSession.objects.get(pin=pin)
+            return build_player_reveal_payload(session, question_id, revealed_at=timezone.now())
 
     @database_sync_to_async
     def _save_answer_and_score(self, pin, player_id, client_id, question_id, option_ids, answer_ms):

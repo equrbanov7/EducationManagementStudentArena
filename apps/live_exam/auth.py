@@ -11,6 +11,7 @@ from typing import Any
 from django.core import signing
 
 from apps.live_exam.models import LivePlayer, LiveSession
+from core.rls import bypass_rls
 
 PLAYER_COOKIE_NAME = "live_player_token"
 PLAYER_TOKEN_SALT = "liveExam.player"  # nosec B105
@@ -120,16 +121,17 @@ def authenticate_player_token(token: str | None, *, pin: str) -> tuple[dict[str,
     if payload is None:
         return None, None
 
-    player_qs = LivePlayer.objects.select_related("session").filter(
-        id=payload["player_id"],
-        session__pin=str(pin),
-    )
-    if payload["client_id"]:
-        player_qs = player_qs.filter(client_id=payload["client_id"])
-    else:
-        player_qs = player_qs.filter(client_id="")
+    with bypass_rls():
+        player_qs = LivePlayer.objects.select_related("session").filter(
+            id=payload["player_id"],
+            session__pin=str(pin),
+        )
+        if payload["client_id"]:
+            player_qs = player_qs.filter(client_id=payload["client_id"])
+        else:
+            player_qs = player_qs.filter(client_id="")
 
-    player = player_qs.first()
+        player = player_qs.first()
     if player is None:
         return None, None
 
@@ -152,7 +154,8 @@ def authorize_socket_connection(
     token: str | None,
     allow_anonymous: bool = False,
 ) -> dict[str, Any] | None:
-    session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
+    with bypass_rls():
+        session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
     if session is None:
         return None
 
