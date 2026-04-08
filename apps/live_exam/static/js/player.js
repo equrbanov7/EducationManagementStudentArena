@@ -34,6 +34,7 @@ const DEFAULT_RESULT_DURATION_MS = 1600;
 const DEFAULT_LEADERBOARD_DURATION_MS = 5000;
 const LEADERBOARD_LIMIT = 5;
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
+const STATE_POLL_INTERVAL_MS = 2500;
 
 const PHASES = Object.freeze({
     IDLE: "idle",
@@ -60,6 +61,7 @@ const state = {
     totalPlayers: 0,
     submitting: false,
     ticker: null,
+    pollTimer: null,
     phaseTimer: null,
     revealKey: "",
     revealPayload: null,
@@ -1004,11 +1006,13 @@ function submitAnswer() {
     }
 
     try {
-        playWS.send(JSON.stringify(payload));
+        if (playWS && playWS.readyState === WebSocket.OPEN) {
+            playWS.send(JSON.stringify(payload));
+            return;
+        }
+        submitAnswerFallback(payload);
     } catch (error) {
-        state.submitting = false;
-        renderQuestion(state.currentQuestion);
-        setRoundHint(error && error.message ? error.message : "Unable to send your answer.");
+        submitAnswerFallback(payload);
     }
 }
 
@@ -1128,17 +1132,70 @@ function applyStateSnapshot(snapshot) {
 
 async function fetchInitialState() {
     try {
-        const response = await fetch(`/live/state/${BOOTSTRAP.pin}/`, {
+        const response = await fetch(BOOTSTRAP.stateUrl || `/live/state/${BOOTSTRAP.pin}/`, {
             headers: { Accept: "application/json" },
         });
         if (!response.ok) {
+            if (!playWS || playWS.readyState !== WebSocket.OPEN) {
+                setConnection("offline");
+            }
             renderIdle();
             return;
+        }
+        if (!playWS || playWS.readyState !== WebSocket.OPEN) {
+            setConnection("online");
         }
         applyStateSnapshot(await response.json());
     } catch (error) {
         console.error("live player state fetch failed", error);
+        if (!playWS || playWS.readyState !== WebSocket.OPEN) {
+            setConnection("offline");
+        }
         renderIdle();
+    }
+}
+
+function stopStatePolling() {
+    if (state.pollTimer) {
+        window.clearInterval(state.pollTimer);
+        state.pollTimer = null;
+    }
+}
+
+function startStatePolling() {
+    if (state.pollTimer) return;
+    state.pollTimer = window.setInterval(() => {
+        if (!document.hidden) {
+            fetchInitialState();
+        }
+    }, STATE_POLL_INTERVAL_MS);
+}
+
+async function submitAnswerFallback(payload) {
+    try {
+        const response = await fetch(BOOTSTRAP.answerUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRFToken": BOOTSTRAP.csrf,
+            },
+            body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            throw new Error(data.message || "Unable to send your answer.");
+        }
+        handleAnswerSaved(data.answer || {});
+        if (data.reveal) {
+            applyRevealState(data.reveal);
+            return;
+        }
+        fetchInitialState();
+    } catch (error) {
+        state.submitting = false;
+        renderQuestion(state.currentQuestion);
+        setRoundHint(error && error.message ? error.message : "Unable to send your answer.");
     }
 }
 
@@ -1234,7 +1291,11 @@ playWS.onmessage = (event) => {
     }
 };
 
+startStatePolling();
+fetchInitialState();
+
 window.addEventListener("beforeunload", () => {
+    stopStatePolling();
     clearTicker();
     clearPhaseTimer();
     if (playWS && playWS.readyState === WebSocket.OPEN) {
