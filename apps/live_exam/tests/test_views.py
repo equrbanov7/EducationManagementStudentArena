@@ -214,6 +214,31 @@ class LiveSessionCreationTest(TestCase):
             f"{reverse('liveExam:host_presentation', kwargs={'pin': session.pin})}?controls=1",
         )
 
+    def test_org_admin_author_can_create_session(self):
+        org_admin = User.objects.create_user("live_org_admin", "live_org_admin@example.com", "StrongPass123!")
+        org_admin.profile.organization = self.org
+        org_admin.profile.organization_type = self.org.org_type
+        org_admin.profile.role = ProfileRole.ORG_ADMIN
+        org_admin.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        _create_org_role_and_membership(org_admin, self.org, permissions=["exams.*"])
+
+        admin_exam = Exam.objects.create(
+            title="Admin Live Exam",
+            slug="admin-live-exam",
+            author=org_admin,
+            organization=self.org,
+            is_active=True,
+        )
+
+        self.client.login(username="live_org_admin", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+        response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": admin_exam.slug}))
+
+        self.assertEqual(response.status_code, 302)
+        admin_session = LiveSession.objects.filter(exam=admin_exam, host_user=org_admin).first()
+        self.assertIsNotNone(admin_session)
+
     def test_create_session_redirects_when_exam_is_passive(self):
         self.exam.is_active = False
         self.exam.save(update_fields=["is_active"])
