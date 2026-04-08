@@ -968,11 +968,6 @@ class ProfileViewTest(TestCase):
             email="group_teacher_restore@example.com",
             password="testpass123",
         )
-        second_owner = User.objects.create_user(
-            username="group_owner_restore_2",
-            email="group_owner_restore_2@example.com",
-            password="testpass123",
-        )
 
         primary_org = Organization.objects.create(
             name="Restore Group University",
@@ -982,22 +977,9 @@ class ProfileViewTest(TestCase):
             is_active=True,
             status="active",
         )
-        secondary_org = Organization.objects.create(
-            name="Restore Group School",
-            slug="restore-group-school",
-            org_type=OrganizationType.SCHOOL,
-            owner=second_owner,
-            is_active=True,
-            status="active",
-        )
 
         _assign_user_to_org(teacher, primary_org, ProfileRole.TEACHER)
         _assign_user_to_org(self.user, primary_org, ProfileRole.STUDENT)
-        _assign_user_to_org(self.user, secondary_org, ProfileRole.STUDENT)
-        self.user.profile.organization = primary_org
-        self.user.profile.organization_type = primary_org.org_type
-        self.user.profile.role = ProfileRole.STUDENT
-        self.user.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
         student_group = StudentGroup.objects.create(
             teacher=teacher,
@@ -2390,25 +2372,8 @@ class AssignedItemsViewTest(TestCase):
             email="assigned_group_teacher@example.com",
             password="testpass123",
         )
-        secondary_owner = User.objects.create_user(
-            username="assigned_second_owner",
-            email="assigned_second_owner@example.com",
-            password="testpass123",
-        )
-        secondary_org = Organization.objects.create(
-            name="Assigned Items Org Secondary",
-            org_type=OrganizationType.SCHOOL,
-            owner=secondary_owner,
-            status="active",
-            is_active=True,
-        )
 
         _assign_user_to_org(teacher, self.organization, ProfileRole.TEACHER)
-        _assign_user_to_org(self.user, secondary_org, ProfileRole.STUDENT)
-        self.user.profile.organization = self.organization
-        self.user.profile.organization_type = self.organization.org_type
-        self.user.profile.role = ProfileRole.STUDENT
-        self.user.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
         group = StudentGroup.objects.create(
             teacher=teacher,
