@@ -8,6 +8,11 @@ def is_teacher_user(user):
     if user.is_superuser or getattr(user, "is_superadmin", False):
         return True
 
+    # Organization admins/owners can legitimately manage exams too. Rely on
+    # the active tenant role hierarchy instead of only the legacy teacher flags.
+    if hasattr(user, "is_teacher_or_above"):
+        return bool(getattr(user, "is_teacher_or_above", False))
+
     if hasattr(user, "has_role"):
         return user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
 

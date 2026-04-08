@@ -39,6 +39,16 @@ class PermissionSystemTest(TestCase):
         self.assertTrue(validate_permissions(["grading.*"]))
         self.assertIn("grade.input", expand_wildcard_permissions(["grading.*"]))
 
+    def test_plural_category_aliases_match_singular_permission_checks(self):
+        """Legacy plural role wildcards should satisfy current singular checks."""
+        self.assertTrue(has_permission(["courses.*"], "course.create"))
+        self.assertTrue(has_permission(["exams.*"], "exam.host"))
+        self.assertTrue(has_permission(["members.*"], "member.edit"))
+        self.assertTrue(has_permission(["roles.*"], "role.assign"))
+        self.assertTrue(validate_permissions(["courses.*", "exams.*", "members.*", "roles.*"]))
+        self.assertIn("course.create", expand_wildcard_permissions(["courses.*"]))
+        self.assertIn("exam.host", expand_wildcard_permissions(["exams.*"]))
+
     def test_empty_permissions(self):
         """Test with empty permission list."""
         user_perms = []
