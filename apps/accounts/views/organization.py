@@ -53,13 +53,14 @@ def student_organization_management(request):
     from apps.organizations.services import create_audit_log, get_user_org_role_level
 
     org = _get_active_organization(request)
-    if not org:
+    is_superadmin = _is_superadmin_user(request.user)
+    if not org and not is_superadmin:
         messages.error(request, "Aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
 
-    _ensure_profile_admin_membership(request.user, org)
+    if org is not None:
+        _ensure_profile_admin_membership(request.user, org)
 
-    is_superadmin = _is_superadmin_user(request.user)
     user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
     if not is_superadmin and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
         messages.error(
