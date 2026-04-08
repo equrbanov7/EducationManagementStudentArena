@@ -826,6 +826,64 @@ class TestRLSNotificationInbox:
         results = list(InAppNotification.objects.order_by("id"))
         assert {note.pk for note in results} == {tenant_note.pk, global_note.pk}
 
+    def test_notification_service_allows_cross_user_single_insert(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, _org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        from apps.notifications.services import create_notification
+
+        User = get_user_model()
+        recipient = User.objects.create_user("notif_service_single", "nss@rls.test", "pw")
+
+        _enable_rls()
+        _set_user(org_a.owner.pk)
+        _set_tenant(org_a.pk)
+
+        notification = create_notification(
+            recipient=recipient,
+            title="Cross-user single notification",
+            metadata={"organization_id": str(org_a.id)},
+        )
+
+        assert notification.pk is not None
+
+        _set_user(recipient.pk)
+        visible_notifications = list(InAppNotification.objects.filter(pk=notification.pk))
+        assert len(visible_notifications) == 1
+        assert visible_notifications[0].recipient_id == recipient.pk
+
+    def test_notification_service_allows_cross_user_bulk_insert(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, _org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        from apps.notifications.services import create_notification_for_users
+
+        User = get_user_model()
+        recipient_a = User.objects.create_user("notif_service_bulk_a", "nsba@rls.test", "pw")
+        recipient_b = User.objects.create_user("notif_service_bulk_b", "nsbb@rls.test", "pw")
+
+        _enable_rls()
+        _set_user(org_a.owner.pk)
+        _set_tenant(org_a.pk)
+
+        notifications = create_notification_for_users(
+            recipients=[recipient_a, recipient_b],
+            title="Cross-user bulk notification",
+            metadata={"organization_id": str(org_a.id)},
+        )
+
+        assert len(notifications) == 2
+
+        _set_user(recipient_a.pk)
+        assert InAppNotification.objects.filter(pk=notifications[0].pk, recipient=recipient_a).count() == 1
+
+        _set_user(recipient_b.pk)
+        assert InAppNotification.objects.filter(pk=notifications[1].pk, recipient=recipient_b).count() == 1
+
 
 class TestRLSWriteProtection:
     """RLS WITH CHECK clauses reject cross-tenant writes."""
