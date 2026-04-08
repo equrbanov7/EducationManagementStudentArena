@@ -78,7 +78,7 @@
                         {% endif %}
                     </div>
 
-                    <div class="form-group span-full">
+                    <div class="form-group span-full" data-exam-paint-group>
                         {% if form.enable_paint %}
                             <div class="form-check mt-2">
                                 {{ form.enable_paint }}
@@ -191,6 +191,20 @@
                         {% endif %}
                     </div>
 
+                    <div class="form-group span-full" data-test-random-question-group>
+                        {{ form.random_question_count.label_tag }}
+                        <div class="input-with-icon">
+                            {{ form.random_question_count }}
+                            <i class="fas fa-random icon"></i>
+                        </div>
+                        {% if form.random_question_count.help_text %}
+                            <small class="form-text text-muted">{{ form.random_question_count.help_text }}</small>
+                        {% endif %}
+                        {% if form.random_question_count.errors %}
+                            <div class="field-error">{{ form.random_question_count.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
                     <div class="form-group">
                         {{ form.max_attempts_per_user.label_tag }}
                         <div class="input-with-icon">
@@ -299,6 +313,41 @@
             const userList = document.getElementById("userSelector_list");
             const userCounter = document.getElementById("userSelector_count");
             const groupStudentMapScript = document.getElementById("examGroupStudentMap");
+            const examTypeSelect = document.getElementById("{{ form.exam_type.id_for_label }}");
+            const paintGroup = document.querySelector("[data-exam-paint-group]");
+            const paintCheckbox = document.getElementById("{{ form.enable_paint.id_for_label }}");
+            const randomQuestionGroup = document.querySelector("[data-test-random-question-group]");
+            const randomQuestionInput = document.getElementById("{{ form.random_question_count.id_for_label }}");
+
+            function syncExamTypeDependentFields() {
+                if (!examTypeSelect) return;
+
+                const selectedExamType = examTypeSelect.value || "test";
+                const isTest = selectedExamType === "test";
+                const isWritten = selectedExamType === "written";
+
+                if (randomQuestionGroup) {
+                    randomQuestionGroup.hidden = !isTest;
+                }
+                if (randomQuestionInput) {
+                    randomQuestionInput.disabled = !isTest;
+                }
+
+                if (paintGroup) {
+                    paintGroup.hidden = !isWritten;
+                }
+                if (paintCheckbox) {
+                    if (!isWritten) {
+                        paintCheckbox.checked = false;
+                    }
+                    paintCheckbox.disabled = !isWritten;
+                }
+            }
+
+            if (examTypeSelect) {
+                syncExamTypeDependentFields();
+                examTypeSelect.addEventListener("change", syncExamTypeDependentFields);
+            }
     
             function toggleAccessBlock() {
                 if (!isPublicCheckbox || !accessBlock) return;

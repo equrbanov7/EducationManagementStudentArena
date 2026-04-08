@@ -33,6 +33,23 @@ class ExamFormDefaultStateTests(TestCase):
         form = ExamForm()
         self.assertTrue(form.initial.get("is_active"))
 
+    def test_create_form_defaults_random_question_count_to_ten(self):
+        form = ExamForm()
+        self.assertEqual(form.initial.get("random_question_count"), 10)
+
+    def test_blank_random_question_count_falls_back_to_ten(self):
+        form = ExamForm(
+            data={
+                "title": "Random Count Default Exam",
+                "description": "",
+                "exam_type": "test",
+                "random_question_count": "",
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["random_question_count"], 10)
+
     def test_edit_form_keeps_existing_is_active_value(self):
         exam = Exam.objects.create(
             author=self.teacher,
