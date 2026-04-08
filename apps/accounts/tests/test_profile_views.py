@@ -11,7 +11,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.notifications.models import InAppNotification
+from apps.notifications.models import InAppNotification, StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.notifications.services import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -708,6 +708,53 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:student_organization_request"))
         self.assertContains(response, reverse("accounts:profile") + "?section=notifications")
 
+    def test_student_with_pending_join_request_can_open_profile_without_active_org(self):
+        owner = User.objects.create_user(
+            username="student_pending_owner",
+            email="student_pending_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Student Pending Request Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        profile = self.user.profile
+        profile.organization = None
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.role = ProfileRole.STUDENT
+        profile.requested_organization = organization
+        profile.requested_organization_name = organization.name
+        profile.requested_organization_message = "Qoşulmaq istəyirəm"
+        profile.student_university_name = organization.name
+        profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "student_university_name",
+                "updated_at",
+            ]
+        )
+        StudentOrganizationRequest.objects.create(
+            user=self.user,
+            organization=organization,
+            status=StudentOrganizationRequestStatus.PENDING,
+            message="Qoşulmaq istəyirəm",
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
+        self.assertContains(response, organization.name)
+
     def test_profile_info_shows_student_group_membership_readonly(self):
         from apps.accounts.models import ProfileRole
         from apps.exams.models import StudentGroup
@@ -1402,6 +1449,91 @@ class ProfileViewTest(TestCase):
             'name="next" value="/accounts/profile/?section=superadmin-organizations"',
             html=False,
         )
+
+    def test_superadmin_profile_staff_management_defaults_to_organizations_without_active_org(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_staff_management",
+            email="profile_superadmin_staff_management@example.com",
+            password="adminpass123",
+        )
+        owner_pending = User.objects.create_user(
+            username="staff_pending_org_owner",
+            email="staff_pending_org_owner@example.com",
+            password="testpass123",
+        )
+        owner_active = User.objects.create_user(
+            username="staff_active_org_owner",
+            email="staff_active_org_owner@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Staff Pending Profile Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_pending,
+            status="pending",
+            is_active=True,
+        )
+        active_org = Organization.objects.create(
+            name="Staff Active Profile Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner_active,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "student-organization-management",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, pending_org.name)
+        self.assertContains(response, active_org.name)
+        self.assertEqual(response.context["student_org_management_section"]["active_management_view"], "organizations")
+        self.assertEqual(response.context["student_org_management_section"]["organization_records"].paginator.count, 2)
+
+    def test_superadmin_staff_management_page_lists_organizations_without_active_org(self):
+        superuser = User.objects.create_superuser(
+            username="standalone_superadmin_staff_management",
+            email="standalone_superadmin_staff_management@example.com",
+            password="adminpass123",
+        )
+        owner_pending = User.objects.create_user(
+            username="standalone_pending_org_owner",
+            email="standalone_pending_org_owner@example.com",
+            password="testpass123",
+        )
+        owner_active = User.objects.create_user(
+            username="standalone_active_org_owner",
+            email="standalone_active_org_owner@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Standalone Pending Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_pending,
+            status="pending",
+            is_active=True,
+        )
+        active_org = Organization.objects.create(
+            name="Standalone Active Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner_active,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:student_organization_management"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, pending_org.name)
+        self.assertContains(response, active_org.name)
+        self.assertEqual(response.context["active_management_view"], "organizations")
+        self.assertEqual(response.context["organization_records"].paginator.count, 2)
 
     def test_superadmin_profile_renders_category_management_section(self):
         superuser = User.objects.create_superuser(

@@ -850,9 +850,14 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     if is_superadmin:
         allowed_management_views.add("organizations")
 
-    management_view = (request.GET.get("management_view") or default_view or "students").strip().lower()
+    fallback_management_view = default_view or (
+        "organizations" if is_superadmin and organization is None else "students"
+    )
+    management_view = (request.GET.get("management_view") or fallback_management_view).strip().lower()
     if management_view not in allowed_management_views:
-        management_view = "students"
+        management_view = (
+            fallback_management_view if fallback_management_view in allowed_management_views else "students"
+        )
 
     student_tab = (request.GET.get("student_tab") or "members").strip().lower()
     if student_tab not in {"members", "pending", "unassigned", "invites"}:
