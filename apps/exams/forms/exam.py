@@ -36,6 +36,7 @@ class ExamForm(forms.ModelForm):
             "access_code",
             "total_duration_minutes",
             "default_question_time_seconds",
+            "random_question_count",
             "max_attempts_per_user",
             "enable_paint",
         ]
@@ -113,6 +114,13 @@ class ExamForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("exams.form.exam.placeholder", "default_question_time_seconds"),
                 }
             ),
+            "random_question_count": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "random_question_count"),
+                }
+            ),
             "max_attempts_per_user": forms.NumberInput(
                 attrs={
                     "class": "form-control",
@@ -133,7 +141,11 @@ class ExamForm(forms.ModelForm):
             "access_code": pgettext_lazy("exams.form.exam.label", "access_code"),
             "total_duration_minutes": pgettext_lazy("exams.form.exam.label", "total_duration_minutes"),
             "default_question_time_seconds": pgettext_lazy("exams.form.exam.label", "default_question_time_seconds"),
+            "random_question_count": pgettext_lazy("exams.form.exam.label", "random_question_count"),
             "max_attempts_per_user": pgettext_lazy("exams.form.exam.label", "max_attempts_per_user"),
+        }
+        help_texts = {
+            "random_question_count": pgettext_lazy("exams.form.exam.help", "random_question_count"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -169,11 +181,14 @@ class ExamForm(forms.ModelForm):
 
         self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["random_question_count"].required = False
 
         # Yeni imtahan yaradılarkən "aktiv" default seçili gəlsin.
         if not self.instance.pk and not self.is_bound:
             self.fields["is_active"].initial = True
             self.initial.setdefault("is_active", True)
+            self.fields["random_question_count"].initial = 10
+            self.initial.setdefault("random_question_count", 10)
 
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.filter(is_active=True).order_by("username")
@@ -200,6 +215,14 @@ class ExamForm(forms.ModelForm):
             raise forms.ValidationError(pgettext_lazy("exams.form.exam.error", "access_code_invalid"))
 
         return code
+
+    def clean_random_question_count(self):
+        value = self.cleaned_data.get("random_question_count")
+        if value in (None, ""):
+            if self.instance.pk:
+                return self.instance.random_question_count or 10
+            return 10
+        return value
 
     def clean(self):
         cleaned_data = super().clean()
