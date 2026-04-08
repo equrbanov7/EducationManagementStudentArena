@@ -6,10 +6,13 @@ API endpoints for live exam sessions.
 
 from __future__ import annotations
 
+import json
+
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
+from django.views.decorators.http import require_POST
 
 from apps.live_exam.auth import get_request_player
 from apps.live_exam.domain.session import (
@@ -19,6 +22,7 @@ from apps.live_exam.domain.session import (
     get_total_questions,
 )
 from apps.live_exam.models import LiveSession
+from apps.live_exam.scoring import get_answer_progress, save_answer_and_score
 from apps.live_exam.serializers import (
     serialize_player_question_result,
     serialize_players,
@@ -27,11 +31,19 @@ from apps.live_exam.serializers import (
     serialize_top_before_question,
 )
 from apps.live_exam.session_settings import get_session_settings
-from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
+from apps.live_exam.transport import (
+    broadcast_host,
+    broadcast_players,
+    build_answer_progress_payload,
+    build_player_reveal_payload,
+    build_reveal_payload,
+    parse_answer_submission,
+)
 from core.rate_limit import record_rate_limit_hit
 from core.utils import get_client_ip
 
 LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
+LIVE_ANSWER_HTTP_LIMIT_SCOPE = "live_exam.answer.http"
 LIVE_STATE_RATE_LIMIT_MESSAGE = "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 
@@ -153,3 +165,86 @@ def live_state_json(request, pin):
         data["next_question_at"] = reveal_payload["next_question_at"]
 
     return JsonResponse(data)
+
+
+@require_POST
+def live_answer_submit(request, pin):
+    player = get_request_player(request, pin=pin)
+    if player is None:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+            status=403,
+        )
+
+    is_limited, retry_after = record_rate_limit_hit(
+        LIVE_ANSWER_HTTP_LIMIT_SCOPE,
+        settings.LIVE_ANSWER_RATE_LIMIT,
+        pin,
+        player.id,
+    )
+    if is_limited:
+        response = JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.consumer.error", "rate_limited")},
+            status=429,
+        )
+        if retry_after:
+            response.headers["Retry-After"] = str(retry_after)
+        return response
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        payload = {}
+    if not payload and request.POST:
+        payload = request.POST.dict()
+        if "option_ids" in request.POST:
+            payload["option_ids"] = request.POST.getlist("option_ids")
+
+    ok, parsed = parse_answer_submission(payload)
+    if not ok:
+        return JsonResponse({"ok": False, "message": parsed}, status=400)
+
+    question_id, option_ids, answer_ms = parsed
+    ok, result = save_answer_and_score(
+        pin=pin,
+        player_id=player.id,
+        client_id=str(player.client_id or ""),
+        question_id=question_id,
+        option_ids=option_ids,
+        answer_ms=answer_ms,
+    )
+    if not ok:
+        return JsonResponse({"ok": False, "message": result}, status=400)
+
+    session = get_object_or_404(LiveSession, pin=pin)
+    answer_payload = {
+        "type": "answer_saved",
+        "question_id": question_id,
+        **(result.get("answer") or {}),
+    }
+
+    progress = get_answer_progress(pin=pin, question_id=question_id)
+    progress_payload = build_answer_progress_payload(
+        question_id=question_id,
+        answered_count=progress["answered_count"],
+        total_players=progress["total_players"],
+    )
+
+    broadcast_players(pin, answer_payload)
+    broadcast_host(pin, progress_payload)
+
+    response_payload = {
+        "ok": True,
+        "answer": answer_payload,
+        "progress": progress_payload,
+    }
+
+    reveal_question_id = result.get("reveal_question_id")
+    if reveal_question_id:
+        host_reveal_payload = build_reveal_payload(session, reveal_question_id)
+        player_reveal_payload = build_player_reveal_payload(session, reveal_question_id)
+        broadcast_host(pin, host_reveal_payload)
+        broadcast_players(pin, player_reveal_payload)
+        response_payload["reveal"] = player_reveal_payload
+
+    return JsonResponse(response_payload)

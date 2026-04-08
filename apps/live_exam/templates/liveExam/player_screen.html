@@ -72,6 +72,8 @@
             pin: "{{ session.pin }}",
             csrf: "{{ csrf_token }}",
             quizTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+            stateUrl: "{% url 'liveExam:state_json' session.pin %}",
+            answerUrl: "{% url 'liveExam:answer_submit' session.pin %}",
             sessionSettings: JSON.parse(document.getElementById("playerSessionSettings").textContent),
             waitingMessages: [
                 "Easy does it!",
@@ -131,6 +133,6 @@
     </script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-    <script src="{% static 'js/player.js' %}"></script>
+    <script src="{% static 'js/player.js' %}?v=live-http-fallback-20260408"></script>
 </body>
 </html>

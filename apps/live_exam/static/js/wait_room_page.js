@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const config = window.LiveWaitRoomConfig || {};
     const i18n = window.LIVE_EXAM_WAIT_ROOM_I18N || {};
     const tr = (key, fallback) => i18n[key] || fallback;
+    const STATE_POLL_INTERVAL_MS = 2500;
 
     const state = {
         myPlayer: config.myPlayer || {},
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
         socket: null,
         reconnectTimer: null,
         reconnectAttempts: 0,
+        pollTimer: null,
         activePanel: "avatar"
     };
 
@@ -289,6 +291,49 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${protocol}//${window.location.host}${config.wsPath}`;
     }
 
+    async function syncLobbyState() {
+        if (!config.stateUrl) return null;
+        try {
+            const response = await fetch(config.stateUrl, {
+                headers: { Accept: "application/json" }
+            });
+            if (!response.ok) {
+                return null;
+            }
+            const snapshot = await response.json();
+            if (!snapshot || !snapshot.ok) {
+                return null;
+            }
+            applySessionSettings(snapshot.settings);
+            if (snapshot.state && snapshot.state !== "lobby") {
+                window.location.href = config.playerScreenUrl;
+                return snapshot;
+            }
+            state.players = Array.isArray(snapshot.players) ? snapshot.players : state.players;
+            renderPlayers(state.players, snapshot.total_players || state.players.length);
+            return snapshot;
+        } catch (error) {
+            console.error("wait room state sync failed", error);
+            return null;
+        }
+    }
+
+    function stopStatePolling() {
+        if (state.pollTimer) {
+            window.clearInterval(state.pollTimer);
+            state.pollTimer = null;
+        }
+    }
+
+    function startStatePolling() {
+        if (state.pollTimer) return;
+        state.pollTimer = window.setInterval(function () {
+            if (!document.hidden) {
+                syncLobbyState();
+            }
+        }, STATE_POLL_INTERVAL_MS);
+    }
+
     function connectWebSocket() {
         if (state.reconnectTimer) {
             window.clearTimeout(state.reconnectTimer);
@@ -366,7 +411,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     connectWebSocket();
+    syncLobbyState();
+    startStatePolling();
     window.addEventListener("beforeunload", function () {
+        stopStatePolling();
+        if (state.reconnectTimer) {
+            window.clearTimeout(state.reconnectTimer);
+            state.reconnectTimer = null;
+        }
         if (state.socket) state.socket.close();
     });
 });

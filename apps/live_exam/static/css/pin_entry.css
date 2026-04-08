@@ -328,12 +328,12 @@ body.pin-entry-page {
     width: 100%;
     border: 0;
     outline: 0;
-    padding: 16px 14px;
+    padding: 14px 12px;
     background: transparent;
     font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", "Menlo", "Consolas", monospace;
-    font-size: clamp(1rem, 1.65vw, 1.65rem);
+    font-size: clamp(0.92rem, 1.45vw, 1.42rem);
     font-weight: 700;
-    letter-spacing: clamp(0.015em, 0.05vw, 0.05em);
+    letter-spacing: clamp(0.01em, 0.035vw, 0.03em);
     line-height: 1.05;
     text-align: center;
     text-transform: uppercase;
@@ -402,7 +402,7 @@ body.pin-entry-page {
     z-index: 1;
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 10px;
 }
 
@@ -414,7 +414,7 @@ body.pin-entry-page {
     border: 1px dashed rgba(255, 255, 255, 0.18);
     color: rgba(255, 255, 255, 0.7);
     font-family: "Space Grotesk", sans-serif;
-    font-size: 1.05rem;
+    font-size: 0.92rem;
     font-weight: 700;
     background: rgba(255, 255, 255, 0.03);
 }
@@ -506,9 +506,9 @@ body.pin-entry-page {
     }
 
     .pin-entry-input {
-        padding: 16px;
-        letter-spacing: 0.03em;
-        font-size: clamp(1.05rem, 5.4vw, 1.45rem);
+        padding: 14px 12px;
+        letter-spacing: 0.02em;
+        font-size: clamp(0.96rem, 4.4vw, 1.24rem);
     }
 
     .pin-entry-copy {
