@@ -7,8 +7,8 @@ Player views for live exam sessions.
 from __future__ import annotations
 
 import io
-from itertools import product
 import secrets
+from itertools import product
 
 from django.conf import settings
 from django.http import JsonResponse
