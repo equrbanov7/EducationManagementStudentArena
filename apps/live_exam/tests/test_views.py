@@ -2,6 +2,8 @@
 View tests for live_exam app.
 """
 
+import json
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import Client, TestCase
@@ -97,6 +99,7 @@ class LiveExamViewsImportTest(TestCase):
 
         # API views
         self.assertTrue(hasattr(views, "live_state_json"))
+        self.assertTrue(hasattr(views, "live_answer_submit"))
 
     def test_helper_functions_in_helpers_module(self):
         """Verify helper functions are in _helpers module."""
@@ -325,9 +328,11 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("copy", response.context)
         self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
+        self.assertEqual(len(list(response.context["pin_slots"])), PIN_LENGTH)
         self.assertContains(response, f"minPinLength: {MIN_PIN_LENGTH}")
         self.assertContains(response, 'inputmode="text"', html=False)
-        self.assertContains(response, "js/pin_entry.js?v=live-pin-alnum-20260408")
+        self.assertContains(response, "css/pin_entry.css?v=live-pin-layout-20260408")
+        self.assertContains(response, "js/pin_entry.js?v=live-pin-layout-20260408")
 
     def test_pin_entry_page_is_never_cached(self):
         """PIN entry HTML must not be cached so stale numeric-only JS cannot linger."""
@@ -1094,6 +1099,68 @@ class LiveWaitRoomInteractionTest(TestCase):
             {"reaction_key": "boom"},
         )
         self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+
+    def test_wait_room_template_includes_state_polling_url(self):
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+    def test_player_screen_template_includes_http_fallback_urls(self):
+        question = ExamQuestion.objects.create(exam=self.exam, text="Fallback player question")
+        correct_option = ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 1
+        self.session.question_started_at = timezone.now()
+        self.session.question_ends_at = self.session.question_started_at + timezone.timedelta(seconds=60)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertContains(response, reverse("liveExam:answer_submit", kwargs={"pin": self.session.pin}))
+
+    def test_answer_submit_saves_answer_for_authenticated_player(self):
+        question = ExamQuestion.objects.create(exam=self.exam, text="HTTP fallback answer question")
+        correct_option = ExamQuestionOption.objects.create(question=question, text="Correct", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
+        started_at = timezone.now() - timezone.timedelta(seconds=12)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = started_at
+        self.session.question_ends_at = started_at + timezone.timedelta(seconds=60)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.post(
+            reverse("liveExam:answer_submit", kwargs={"pin": self.session.pin}),
+            data=json.dumps(
+                {
+                    "question_id": question.id,
+                    "option_id": correct_option.id,
+                    "answer_ms": 1200,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["answer"]["type"], "answer_saved")
+
+        answer = LiveAnswer.objects.get(session=self.session, player=self.player, question_id=question.id)
+        self.assertEqual(answer.choice_id, correct_option.id)
+
+    def test_answer_submit_requires_authenticated_player_token(self):
+        anonymous = Client()
+        response = anonymous.post(
+            reverse("liveExam:answer_submit", kwargs={"pin": self.session.pin}),
+            data=json.dumps({"question_id": 1, "option_id": 1, "answer_ms": 100}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
         self.assertFalse(response.json()["ok"])
 
 
