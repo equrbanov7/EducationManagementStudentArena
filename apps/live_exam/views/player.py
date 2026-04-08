@@ -7,6 +7,7 @@ Player views for live exam sessions.
 from __future__ import annotations
 
 import io
+from itertools import product
 import secrets
 
 from django.conf import settings
@@ -190,6 +191,14 @@ LIVE_PIN_LIMIT_SCOPE = "live_exam.pin"
 LIVE_REACTION_LIMIT_SCOPE = "live_exam.reaction"
 LIVE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 REACTION_EMOJI = dict(REACTIONS)
+_AMBIGUOUS_PIN_GLYPHS = {
+    "0": ("0", "O"),
+    "O": ("0", "O"),
+    "1": ("1", "I", "L"),
+    "I": ("1", "I", "L"),
+    "L": ("1", "I", "L"),
+}
+_MAX_AMBIGUOUS_PIN_CANDIDATES = 64
 
 
 def _pin_entry_copy() -> dict[str, str]:
@@ -198,12 +207,9 @@ def _pin_entry_copy() -> dict[str, str]:
 
 
 def _pin_entry_theme_key(pin_value: str, raw_theme: str | None = None) -> str:
-    from apps.live_exam.models import PIN_LENGTH
-
-    if len(pin_value) == PIN_LENGTH:
-        session = LiveSession.objects.filter(pin=pin_value).first()
-        if session:
-            return str(get_session_settings(session).get("theme_key") or "aurora")
+    _, session = _resolve_live_session(pin_value)
+    if session:
+        return str(get_session_settings(session).get("theme_key") or "aurora")
 
     theme_key = str(raw_theme or "").strip().lower()
     return theme_key if theme_key in THEME_KEYS else "aurora"
@@ -229,6 +235,48 @@ def _normalize_pin(raw_pin: str | None) -> str:
     from apps.live_exam.models import PIN_LENGTH
 
     return "".join(ch for ch in str(raw_pin or "").upper() if ch.isalnum())[:PIN_LENGTH]
+
+
+def _candidate_pin_variants(pin_value: str) -> tuple[str, ...]:
+    normalized = _normalize_pin(pin_value)
+    if not normalized:
+        return ()
+
+    variants: list[tuple[str, ...]] = []
+    variant_count = 1
+    for ch in normalized:
+        choices = _AMBIGUOUS_PIN_GLYPHS.get(ch, (ch,))
+        variants.append(choices)
+        variant_count *= len(choices)
+        if variant_count > _MAX_AMBIGUOUS_PIN_CANDIDATES:
+            return (normalized,)
+
+    if variant_count == 1:
+        return (normalized,)
+
+    return tuple(dict.fromkeys("".join(chars) for chars in product(*variants)))
+
+
+def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]:
+    from apps.live_exam.models import MIN_PIN_LENGTH
+
+    normalized = _normalize_pin(raw_pin)
+    if len(normalized) < MIN_PIN_LENGTH:
+        return normalized, None
+
+    exact_match = LiveSession.objects.filter(pin=normalized).first()
+    if exact_match:
+        return exact_match.pin, exact_match
+
+    candidates = _candidate_pin_variants(normalized)
+    if len(candidates) <= 1:
+        return normalized, None
+
+    matches = list(LiveSession.objects.filter(pin__in=candidates).order_by("id")[:2])
+    if len(matches) == 1:
+        return matches[0].pin, matches[0]
+
+    return normalized, None
 
 
 def _nickname_conflict_message() -> str:
@@ -289,18 +337,20 @@ def _broadcast_lobby_state(session: LiveSession) -> None:
 
 @never_cache
 def live_pin_entry(request):
-    from apps.live_exam.models import PIN_LENGTH
+    from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH
 
     copy = _pin_entry_copy()
-    pin_value = _normalize_pin(request.POST.get("pin") if request.method == "POST" else request.GET.get("pin"))
+    pin_value, matched_session = _resolve_live_session(
+        request.POST.get("pin") if request.method == "POST" else request.GET.get("pin")
+    )
     raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
     theme_key = _pin_entry_theme_key(pin_value, raw_theme)
     error_message = ""
     status_code = 200
-    session_exists = len(pin_value) == PIN_LENGTH and LiveSession.objects.filter(pin=pin_value).exists()
+    session_exists = matched_session is not None
 
     if request.method != "POST" and session_exists:
-        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=pin_value))
+        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
 
     if request.method == "POST":
         is_limited, retry_after = is_rate_limited(
@@ -316,6 +366,7 @@ def live_pin_entry(request):
                     "copy": copy,
                     "pin_value": pin_value,
                     "pin_length": PIN_LENGTH,
+                    "min_pin_length": MIN_PIN_LENGTH,
                     "error_message": LIVE_RATE_LIMIT_MESSAGE,
                     "theme_key": theme_key,
                 },
@@ -325,7 +376,7 @@ def live_pin_entry(request):
                 response.headers["Retry-After"] = str(retry_after)
             return _ensure_live_client_cookie(request, response)
 
-        if len(pin_value) != PIN_LENGTH:
+        if len(pin_value) < MIN_PIN_LENGTH:
             record_rate_limit_hit(
                 LIVE_PIN_LIMIT_SCOPE,
                 settings.LIVE_EXAM_JOIN_RATE_LIMIT,
@@ -342,7 +393,7 @@ def live_pin_entry(request):
             error_message = copy["session_not_found"]
             status_code = 404
         else:
-            return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=pin_value))
+            return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
 
     response = render(
         request,
@@ -351,6 +402,7 @@ def live_pin_entry(request):
             "copy": copy,
             "pin_value": pin_value,
             "pin_length": PIN_LENGTH,
+            "min_pin_length": MIN_PIN_LENGTH,
             "error_message": error_message,
             "theme_key": theme_key,
         },
