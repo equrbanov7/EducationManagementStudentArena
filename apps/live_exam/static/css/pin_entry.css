@@ -328,12 +328,12 @@ body.pin-entry-page {
     width: 100%;
     border: 0;
     outline: 0;
-    padding: 18px 18px;
+    padding: 18px 16px;
     background: transparent;
-    font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(1.55rem, 3.7vw, 2.5rem);
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", "Menlo", "Consolas", monospace;
+    font-size: clamp(1.15rem, 2vw, 1.9rem);
     font-weight: 700;
-    letter-spacing: clamp(0.08em, 0.25vw, 0.16em);
+    letter-spacing: clamp(0.03em, 0.08vw, 0.08em);
     line-height: 1.1;
     text-align: center;
     text-transform: uppercase;
@@ -507,8 +507,8 @@ body.pin-entry-page {
 
     .pin-entry-input {
         padding: 16px;
-        letter-spacing: 0.08em;
-        font-size: clamp(1.4rem, 7vw, 1.9rem);
+        letter-spacing: 0.03em;
+        font-size: clamp(1.05rem, 5.4vw, 1.45rem);
     }
 
     .pin-entry-copy {

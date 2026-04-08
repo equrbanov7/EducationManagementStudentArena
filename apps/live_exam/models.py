@@ -1,5 +1,4 @@
 import secrets
-import string
 
 from django.db import IntegrityError, models, transaction
 from django.utils import timezone
@@ -8,11 +7,16 @@ from django.utils.translation import pgettext_lazy
 from apps.exams.models import Exam, ExamQuestion
 from apps.live_exam.constants import DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
 
-# Minimum PIN length: 10 alphanumeric characters.
-# Entropy: 36^10 ≈ 3.6 × 10^15 combinations — brute-force resistant
-# even without rate-limiting.
+# Accept a small legacy window because older deployments may still have
+# shorter active session PINs in the database.
+MIN_PIN_LENGTH = 6
+
+# Minimum PIN length: 10 unambiguous alphanumeric characters.
+# Entropy: 32^10 ≈ 1.1 × 10^15 combinations — brute-force resistant
+# even without rate-limiting, while avoiding confusing glyph pairs like
+# 0/O and 1/I/L on the teacher screen.
 PIN_LENGTH = 10
-_PIN_ALPHABET = string.digits + string.ascii_uppercase
+_PIN_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 
 
 def generate_pin():
