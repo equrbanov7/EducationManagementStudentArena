@@ -38,15 +38,15 @@
         <div class="role-badges">
             {% if user_roles %}
                 {% for role in user_roles %}
-                <span class="role-badge {{ role }}">
+                <span class="role-badge {{ role.name }}">
                     <i class="fas fa-shield-alt"></i>
-                    {{ role|title }}
+                    {{ role.label }}
                 </span>
                 {% endfor %}
             {% else %}
-            <span class="role-badge student">
+            <span class="role-badge">
                 <i class="fas fa-user"></i>
-                {% trans "user" context "profile.info" %}
+                {{ primary_user_role_label|default:profile_default_role }}
             </span>
             {% endif %}
         </div>
@@ -157,7 +157,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label"><i class="fas fa-user-tag"></i> {% trans "role" context "profile.info" %}</div>
-                <div class="info-value">{{ profile.get_role_display|default:profile_default_role }}</div>
+                <div class="info-value">{{ primary_user_role_label|default:profile_default_role }}</div>
             </div>
             <div class="info-item">
                 <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>

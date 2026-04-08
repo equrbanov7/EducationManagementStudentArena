@@ -35,7 +35,7 @@
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
-                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
+                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
                         {% trans "exams" context "nav" %}
                     </a>
                 </li>
@@ -83,10 +83,12 @@
                         </button>
 
                         <div class="blog-header__user-menu">
-                            <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
+                            <a href="{% url 'accounts:profile' %}"
+                               class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' %}blog-header__user-menu-item--active{% endif %}">
                                 {% trans "my_profile" context "nav" %}
                             </a>
-                            <a href="{% url 'accounts:profile' %}?section=notifications" class="blog-header__user-menu-item">
+                            <a href="{% url 'accounts:profile' %}?section=notifications"
+                               class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'notifications' %}blog-header__user-menu-item--active{% endif %}">
                                 {% user_unread_notification_count request.user as notif_count %}
                                 {% trans "notifications" context "nav" %}
                                 {% if notif_count %}
@@ -150,22 +152,24 @@
     </li>
     <li class="blog-header__nav-item">
         <a href="{% url 'exams:student_exam_list' %}"
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
+           class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
             {% trans "exams" context "nav" %}
         </a>
     </li>
 
     {% if request.user.is_authenticated %}
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:profile' %}" class="blog-header__nav-link">
+            <a href="{% url 'accounts:profile' %}"
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' %}blog-header__nav-link--active{% endif %}">
                 {% trans "my_profile" context "nav" %} ({{ request.user.username }})
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
+            <form method="post" action="{% url 'accounts:logout' %}" class="blog-header__nav-form">
                 {% csrf_token %}
-                <button type="submit" class="blog-header__nav-link">
-                    {% trans "logout" context "nav" %}
+                <button type="submit" class="blog-header__nav-link blog-header__nav-link--button blog-header__nav-link--logout">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                    <span>{% trans "logout" context "nav" %}</span>
                 </button>
             </form>
         </li>

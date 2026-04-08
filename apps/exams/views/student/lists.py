@@ -8,11 +8,12 @@ from django.utils.translation import pgettext, pgettext_lazy
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
-from ._helpers import build_exam_history_url
+from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
 
 
 @login_required
 def assigned_student_exam_list(request):
+    ensure_student_exam_tenant_context(request)
     user = request.user
 
     # Annotate each exam with this user's non-draft attempt count in a single
@@ -119,6 +120,7 @@ def assigned_student_exam_list(request):
 
 @login_required
 def student_exam_list(request):
+    ensure_student_exam_tenant_context(request)
     user = request.user
     now = timezone.now()
 

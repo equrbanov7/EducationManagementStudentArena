@@ -53,6 +53,7 @@ from ._dashboard_helpers import (
 from ._helpers import (
     MAX_PROFILE_AVATAR_SIZE_BYTES,
     PROFILE_AVATAR_ALLOWED_EXTENSIONS,
+    PROFILE_ROLE_LABELS,
     REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
@@ -86,6 +87,12 @@ PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-z
 PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
 PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
 PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
+    "profile-info",
+    "courses",
+    "assigned-exams",
+    "assigned-courses",
+    "my-results",
+    "pending-answers",
     "groups",
     "my-courses",
     "my-exams",
@@ -98,6 +105,32 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "manage-roles",
     "publish-notification",
 }
+
+
+def _build_effective_user_roles(user, profile):
+    role_names = []
+
+    if getattr(user, "is_superuser", False):
+        role_names.append(ProfileRole.SUPERADMIN)
+
+    if hasattr(user, "get_all_roles"):
+        for role_name in user.get_all_roles():
+            normalized_role_name = ProfileRole.normalize_membership_role_name(role_name)
+            if normalized_role_name in PROFILE_ROLE_LABELS and normalized_role_name not in role_names:
+                role_names.append(normalized_role_name)
+
+    fallback_role_name = ProfileRole.normalize_membership_role_name(getattr(profile, "role", ""))
+    if fallback_role_name in PROFILE_ROLE_LABELS and fallback_role_name not in role_names:
+        role_names.append(fallback_role_name)
+
+    role_names.sort(key=lambda role_name: (ProfileRole.LEVELS.get(role_name, 0), role_name), reverse=True)
+    return [
+        {
+            "name": role_name,
+            "label": PROFILE_ROLE_LABELS.get(role_name, role_name.replace("_", " ").title()),
+        }
+        for role_name in role_names
+    ]
 
 
 def _normalize_public_profile_query_value(raw_value, *, max_length):
@@ -637,7 +670,8 @@ def user_profile(request):
             return redirect("accounts:profile")
 
     # Get user's roles
-    user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
+    user_roles = _build_effective_user_roles(request.user, profile)
+    primary_user_role_label = user_roles[0]["label"] if user_roles else ""
     active_organization = _get_active_organization(request)
     organization_access_rows = _build_user_organization_access_rows(
         request.user,
@@ -1523,6 +1557,7 @@ def user_profile(request):
     context = {
         "profile": profile,
         "user_roles": user_roles,
+        "primary_user_role_label": primary_user_role_label,
         "active_section": active_section,
         "active_section_title": active_section_title,
         "allowed_sections": allowed_sections,
