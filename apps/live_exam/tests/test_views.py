@@ -301,6 +301,7 @@ class LiveJoinTest(TestCase):
         self.assertIn("copy", response.context)
         self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
         self.assertContains(response, 'inputmode="text"', html=False)
+        self.assertContains(response, "js/pin_entry.js?v=live-pin-alnum-20260408")
 
     def test_pin_entry_page_is_never_cached(self):
         """PIN entry HTML must not be cached so stale numeric-only JS cannot linger."""
