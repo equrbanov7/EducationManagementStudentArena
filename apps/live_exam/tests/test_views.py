@@ -1108,7 +1108,7 @@ class LiveWaitRoomInteractionTest(TestCase):
 
     def test_player_screen_template_includes_http_fallback_urls(self):
         question = ExamQuestion.objects.create(exam=self.exam, text="Fallback player question")
-        correct_option = ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
         ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
         self.session.state = LiveSession.STATE_QUESTION
         self.session.current_index = 1
