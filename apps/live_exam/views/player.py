@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import get_language, pgettext
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 import qrcode
@@ -286,6 +287,7 @@ def _broadcast_lobby_state(session: LiveSession) -> None:
 # ════════════════════════════════════════════════════════════════════════════
 
 
+@never_cache
 def live_pin_entry(request):
     from apps.live_exam.models import PIN_LENGTH
 
@@ -357,6 +359,7 @@ def live_pin_entry(request):
     return _ensure_live_client_cookie(request, response)
 
 
+@never_cache
 def live_join_page(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
     remembered_player = get_request_player(request, pin=pin)
