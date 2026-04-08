@@ -7424,6 +7424,11 @@ msgctxt "exams.form.exam.placeholder"
 msgid "max_attempts_per_user"
 msgstr "Пример: 1, 2, 3..."
 
+#: apps/exams/forms.py:114
+msgctxt "exams.form.exam.placeholder"
+msgid "random_question_count"
+msgstr "Например: 10"
+
 #: apps/exams/forms.py:113
 msgctxt "exams.form.exam.label"
 msgid "title"
@@ -7488,6 +7493,18 @@ msgstr "Время по умолчанию на вопрос (секунды)"
 msgctxt "exams.form.exam.label"
 msgid "max_attempts_per_user"
 msgstr "Максимум попыток на пользователя"
+
+#: apps/exams/forms.py:126
+msgctxt "exams.form.exam.label"
+msgid "random_question_count"
+msgstr "Сколько вопросов увидит студент"
+
+#: apps/exams/forms.py:130
+msgctxt "exams.form.exam.help"
+msgid "random_question_count"
+msgstr ""
+"Только для тестовых экзаменов. По умолчанию 10. Введите 0, чтобы выдать все "
+"активные вопросы в случайном порядке."
 
 #: apps/exams/forms.py:164
 msgctxt "exams.form.exam.error"
