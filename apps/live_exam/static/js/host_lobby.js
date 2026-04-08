@@ -37,6 +37,7 @@ const PHASES = {
 };
 
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
+const STATE_POLL_INTERVAL_MS = 2500;
 
 const state = {
     sessionState: "lobby",
@@ -61,6 +62,7 @@ const state = {
     lastFinalSoundKey: "",
     lobbyMusicMode: "",
     lobbyMusicTimer: 0,
+    statePollTimer: 0,
     players: [],
     sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
     isLocked: Boolean(CONFIG.sessionLocked),
@@ -1537,6 +1539,22 @@ async function syncState() {
     }
 }
 
+function stopStatePolling() {
+    if (state.statePollTimer) {
+        window.clearInterval(state.statePollTimer);
+        state.statePollTimer = 0;
+    }
+}
+
+function startStatePolling() {
+    if (state.statePollTimer) return;
+    state.statePollTimer = window.setInterval(() => {
+        if (!document.hidden) {
+            syncState();
+        }
+    }, STATE_POLL_INTERVAL_MS);
+}
+
 function startGame() {
     openPresenterWindow();
     const formData = new FormData();
@@ -1734,6 +1752,17 @@ if (CONFIG.presentationOnly) {
     });
 }
 syncState();
+startStatePolling();
+
+window.addEventListener("beforeunload", () => {
+    stopStatePolling();
+    if (lobbyWS && lobbyWS.readyState <= WebSocket.OPEN) {
+        lobbyWS.close();
+    }
+    if (playWS && playWS.readyState <= WebSocket.OPEN) {
+        playWS.close();
+    }
+});
 
 window.LiveHostLobbyController = {
     subscribe(listener) {
