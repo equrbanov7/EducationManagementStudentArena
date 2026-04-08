@@ -11,7 +11,8 @@ import secrets
 from itertools import product
 
 from django.conf import settings
-from django.http import JsonResponse
+from django.db.models import Q
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -199,6 +200,11 @@ _AMBIGUOUS_PIN_GLYPHS = {
     "L": ("1", "I", "L"),
 }
 _MAX_AMBIGUOUS_PIN_CANDIDATES = 64
+_JOINABLE_SESSION_STATES = (
+    LiveSession.STATE_LOBBY,
+    LiveSession.STATE_QUESTION,
+    LiveSession.STATE_REVEAL,
+)
 
 
 def _pin_entry_copy() -> dict[str, str]:
@@ -258,7 +264,7 @@ def _candidate_pin_variants(pin_value: str) -> tuple[str, ...]:
 
 
 def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]:
-    from apps.live_exam.models import MIN_PIN_LENGTH
+    from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH
 
     normalized = _normalize_pin(raw_pin)
     if len(normalized) < MIN_PIN_LENGTH:
@@ -269,12 +275,25 @@ def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]
         return exact_match.pin, exact_match
 
     candidates = _candidate_pin_variants(normalized)
-    if len(candidates) <= 1:
-        return normalized, None
-
     matches = list(LiveSession.objects.filter(pin__in=candidates).order_by("id")[:2])
     if len(matches) == 1:
         return matches[0].pin, matches[0]
+
+    if len(normalized) < PIN_LENGTH:
+        prefix_candidates = tuple(
+            dict.fromkeys(candidate for candidate in candidates if len(candidate) >= MIN_PIN_LENGTH)
+        )
+        prefix_query = None
+        for prefix in prefix_candidates:
+            clause = Q(pin__startswith=prefix)
+            prefix_query = clause if prefix_query is None else prefix_query | clause
+
+        if prefix_query is not None:
+            prefix_matches = list(
+                LiveSession.objects.filter(prefix_query, state__in=_JOINABLE_SESSION_STATES).order_by("id")[:2]
+            )
+            if len(prefix_matches) == 1:
+                return prefix_matches[0].pin, prefix_matches[0]
 
     return normalized, None
 
@@ -413,7 +432,11 @@ def live_pin_entry(request):
 
 @never_cache
 def live_join_page(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    resolved_pin, session = _resolve_live_session(pin)
+    if session is None:
+        raise Http404()
+    if resolved_pin != pin:
+        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=resolved_pin))
     remembered_player = get_request_player(request, pin=pin)
     session_settings = get_session_settings(session)
     context = {
@@ -447,7 +470,9 @@ def live_join_enter(request, pin):
             response.headers["Retry-After"] = str(retry_after)
         return response
 
-    session = get_object_or_404(LiveSession, pin=pin)
+    resolved_pin, session = _resolve_live_session(pin)
+    if session is None:
+        raise Http404()
     session_settings = get_session_settings(session)
 
     if session.is_locked:
