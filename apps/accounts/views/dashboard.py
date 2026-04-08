@@ -19,6 +19,7 @@ from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
 from apps.labs.models import LabAnswer, LabSubmission
 from apps.projects.models import ProjectSubmission
+from core.tenancy import restore_request_organization_from_profile
 
 from ._dashboard_helpers import (
     _collect_evaluated_review_items,
@@ -264,6 +265,7 @@ def grading_queue(request):
 def assigned_exams(request):
     """Assigned exams list for the current user."""
     profile = getattr(request.user, "profile", None)
+    restore_request_organization_from_profile(request, profile=profile)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
@@ -296,6 +298,7 @@ def assigned_exams(request):
 def assigned_courses(request):
     """Assigned courses list for the current user."""
     profile = getattr(request.user, "profile", None)
+    restore_request_organization_from_profile(request, profile=profile)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
@@ -318,6 +321,7 @@ def assigned_courses(request):
 def my_results(request):
     """Unified submission/result list for students and member-level users."""
     profile = getattr(request.user, "profile", None)
+    restore_request_organization_from_profile(request, profile=profile)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
@@ -336,6 +340,7 @@ def my_results(request):
 def pending_answers(request):
     """Pending (not yet finalized) answer list for students."""
     profile = getattr(request.user, "profile", None)
+    restore_request_organization_from_profile(request, profile=profile)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))

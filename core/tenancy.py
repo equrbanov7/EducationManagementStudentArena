@@ -4,6 +4,8 @@ Shared helpers for request-scoped tenant filtering.
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from core.rls import bypass_rls, set_rls_bypass, set_rls_tenant, set_rls_user
+
 TRUSTED_OWNER_CONTEXT_ATTR = "_owner_verified_organization_context"
 
 
@@ -98,17 +100,18 @@ def restore_request_organization_from_profile(request, *, profile=None):
 
     from apps.organizations.models import Membership
 
-    memberships = list(
-        Membership.objects.filter(
-            user=user,
-            organization=fallback_org,
-            organization__is_active=True,
-            organization__status="active",
-            is_active=True,
+    with bypass_rls():
+        memberships = list(
+            Membership.objects.filter(
+                user=user,
+                organization=fallback_org,
+                organization__is_active=True,
+                organization__status="active",
+                is_active=True,
+            )
+            .select_related("organization", "role", "scope_unit")
+            .order_by("-is_primary", "-role__level")
         )
-        .select_related("organization", "role", "scope_unit")
-        .order_by("-is_primary", "-role__level")
-    )
 
     is_owner = getattr(fallback_org, "owner_id", None) == getattr(user, "id", None)
     is_superadmin = bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
@@ -138,6 +141,13 @@ def restore_request_organization_from_profile(request, *, profile=None):
             memberships=memberships,
             permissions=request.org_permissions,
         )
+
+    set_rls_user(user.pk)
+    if is_superadmin:
+        set_rls_bypass(True)
+    else:
+        set_rls_bypass(False)
+        set_rls_tenant(fallback_org.pk)
 
     return True
 
