@@ -133,9 +133,11 @@ class OrganizationMiddleware:
                         owner=request.user,
                     ).first()
                     if owner_org is not None:
-                        if getattr(owner_org, "status", "") == "active" and self._profile_allows_owner_fallback(
-                            profile
-                        ):
+                        if getattr(owner_org, "status", "") == "active":
+                            # An explicitly selected org in the session is a stronger
+                            # signal than stale profile role fields. Real org owners
+                            # must be able to recover tenant context for that selected
+                            # org even when legacy profile data still says "member".
                             owner_membership = ensure_owner_membership(request.user, owner_org)
                             request.organization = owner_org
                             request.org_memberships = [owner_membership] if owner_membership is not None else []
