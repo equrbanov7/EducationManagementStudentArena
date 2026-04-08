@@ -66,6 +66,8 @@ const state = {
     revealKey: "",
     revealPayload: null,
     lastTop: [],
+    leaderboardSignature: "",
+    finalSignature: "",
     lastRoundSoundKey: "",
     lastScoreSoundKey: "",
     lastFinalSoundKey: "",
@@ -82,6 +84,16 @@ const ts = (value) => (value ? new Date(value).getTime() : 0);
 const avatarMarkup = (player, size, className = "") =>
     window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
 const showQuestionsOnDevices = () => Boolean(SESSION_SETTINGS.show_questions_on_devices);
+const topSignature = (rows) =>
+    (Array.isArray(rows) ? rows : [])
+        .map((row) =>
+            [
+                Number(row?.player_id || row?.id || 0),
+                String(row?.nickname || ""),
+                Number(row?.score || 0),
+            ].join(":")
+        )
+        .join("|");
 
 function applySessionSettings(nextSettings) {
     Object.assign(SESSION_SETTINGS, nextSettings || {});
@@ -482,6 +494,8 @@ function renderIdle() {
     state.currentQuestion = null;
     state.currentAnswer = null;
     state.revealPayload = null;
+    state.leaderboardSignature = "";
+    state.finalSignature = "";
     hideOptions();
     setTimerState(false);
     setQuestionChip(null);
@@ -746,9 +760,16 @@ function renderLeaderboard(payload) {
     const previousRows = normalizeTopRows(
         payload && payload.previous_top && payload.previous_top.length ? payload.previous_top : state.lastTop
     );
+    const leaderboardSignature = `${revealKey}|${topSignature(previousRows)}|${topSignature(currentRows)}`;
+
+    if (state.phase === PHASES.LEADERBOARD && state.leaderboardSignature === leaderboardSignature) {
+        return;
+    }
 
     state.phase = PHASES.LEADERBOARD;
     state.revealPayload = payload;
+    state.leaderboardSignature = leaderboardSignature;
+    state.finalSignature = "";
 
     UI.phasePanelInner.innerHTML = `
         <div class="leaderboard-shell">
@@ -876,16 +897,25 @@ function renderLeaderboard(payload) {
 }
 
 function renderFinal(payload) {
+    const finalRows = normalizeTopRows(payload && payload.top);
+    const finalSignature = `${String(payload?.finished_at || "")}|${topSignature(finalRows)}`;
+    if (state.phase === PHASES.FINAL && state.finalSignature === finalSignature) {
+        return;
+    }
+
     clearTicker();
     clearPhaseTimer();
+    stopStatePolling();
     hideOptions();
     setTimerState(false);
     setQuestionChip(null);
     state.phase = PHASES.FINAL;
     state.revealPayload = null;
-    playFinalSound(String(payload?.finished_at || (payload.top || []).map((player) => `${Number(player?.player_id || player?.id || 0)}:${Number(player?.score || 0)}`).join("|") || "final"));
+    state.finalSignature = finalSignature;
+    state.leaderboardSignature = "";
+    playFinalSound(finalSignature || "final");
 
-    const rows = (payload.top || []).slice(0, 10).map((player, index) => `
+    const rows = finalRows.map((player, index) => `
         <div class="final-row">
             <div class="final-row__meta">
                 <span class="final-row__rank">${index + 1}</span>
@@ -905,7 +935,7 @@ function renderFinal(payload) {
             <div class="final-leaderboard">${rows}</div>
         </div>
     `;
-    setStoredTop(payload.top || []);
+    setStoredTop(finalRows);
     setRoundHint(tr("finalTitle", "Final results"));
 }
 
@@ -1025,6 +1055,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
     clearPhaseTimer();
     state.revealPayload = null;
     state.currentQuestion = question;
+    state.finalSignature = "";
 
     if (isNewQuestion) {
         state.selectedIds = new Set();
@@ -1033,6 +1064,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
         state.submitting = false;
         state.waitingMessage = "";
         state.phase = "";
+        state.leaderboardSignature = "";
         setQuestionChip(question);
     }
 
@@ -1054,6 +1086,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
 
 function applyRevealState(payload) {
     clearTicker();
+    state.finalSignature = "";
 
     if (payload.question) {
         state.currentQuestion = payload.question;
@@ -1165,7 +1198,7 @@ function stopStatePolling() {
 function startStatePolling() {
     if (state.pollTimer) return;
     state.pollTimer = window.setInterval(() => {
-        if (!document.hidden) {
+        if (!document.hidden && (!playWS || playWS.readyState !== WebSocket.OPEN)) {
             fetchInitialState();
         }
     }, STATE_POLL_INTERVAL_MS);
