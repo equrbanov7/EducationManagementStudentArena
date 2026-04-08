@@ -838,6 +838,18 @@ body.live-player-page {
     width: 100%;
     display: grid;
     gap: 12px;
+    max-height: min(46vh, 420px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.final-leaderboard::-webkit-scrollbar {
+    width: 8px;
+}
+
+.final-leaderboard::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
 }
 
 .final-row {
