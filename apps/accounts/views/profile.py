@@ -105,6 +105,20 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "manage-roles",
     "publish-notification",
 }
+PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
+    "groups",
+    "my-courses",
+    "my-exams",
+    "courses",
+    "pending-post-approvals",
+    "pending-review",
+    "review-results",
+    "role-assignment",
+    "student-organization-management",
+    "permission-editor",
+    "manage-roles",
+    "publish-notification",
+}
 
 
 def _build_effective_user_roles(user, profile):
@@ -175,7 +189,11 @@ def _restore_profile_org_context(request, profile, active_section):
     """
     if active_section not in PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT:
         return
-    restore_request_organization_from_profile(request, profile=profile)
+    restore_request_organization_from_profile(
+        request,
+        profile=profile,
+        allow_multi_org_restore=active_section in PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK,
+    )
 
 
 def _parse_public_profile_page_number(raw_value):
