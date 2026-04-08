@@ -14,6 +14,7 @@ from apps.exams.models import ExamQuestion, ExamQuestionOption
 from apps.live_exam.domain.session import build_question_phase_times, get_active_question
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_question_result
+from core.rls import bypass_rls
 
 
 def score_multi_fraction(chosen_ids: list[int], correct_ids: list[int], *, mode: str = "strict") -> float:
@@ -74,11 +75,12 @@ def calculate_answer_score(
 
 
 def get_answer_progress(*, pin: str, question_id: int) -> dict[str, int]:
-    session = LiveSession.objects.get(pin=pin)
-    total_players = LivePlayer.objects.filter(session=session).count()
-    answered_count = (
-        LiveAnswer.objects.filter(session=session, question_id=question_id).values("player_id").distinct().count()
-    )
+    with bypass_rls():
+        session = LiveSession.objects.get(pin=pin)
+        total_players = LivePlayer.objects.filter(session=session).count()
+        answered_count = (
+            LiveAnswer.objects.filter(session=session, question_id=question_id).values("player_id").distinct().count()
+        )
 
     return {
         "question_id": question_id,
@@ -100,115 +102,123 @@ def _save_answer_and_score_impl(
     received_at = received_at or timezone.now()
 
     try:
-        with transaction.atomic():
-            session = LiveSession.objects.select_for_update().get(pin=pin)
-            player = LivePlayer.objects.select_for_update().get(
-                id=player_id,
-                session=session,
-                client_id=client_id,
-            )
-
-            exam_question = ExamQuestion.objects.filter(id=question_id, exam_id=session.exam_id).first()
-            if exam_question is None:
-                return False, pgettext("live_exam.consumer.error", "question_not_found"), None, False
-
-            active_question = get_active_question(session)
-            if active_question is None:
-                return False, pgettext("live_exam.consumer.error", "active_question_not_found"), None, False
-
-            if int(question_id) != int(active_question.id):
-                return False, pgettext("live_exam.consumer.error", "question_not_active"), None, False
-
-            existing_answer_obj = LiveAnswer.objects.filter(
-                session=session,
-                player=player,
-                question_id=question_id,
-            ).first()
-            if existing_answer_obj is not None:
-                existing_answer = serialize_player_question_result(session, question_id, player.id) or {}
-                return (
-                    True,
-                    {
-                        "answer": {
-                            "message": pgettext("live_exam.consumer.error", "already_answered"),
-                            "score": player.score,
-                            **existing_answer,
-                        },
-                        "question_id": question_id,
-                        "reveal_question_id": None,
-                    },
-                    existing_answer_obj,
-                    False,
+        with bypass_rls():
+            with transaction.atomic():
+                session = LiveSession.objects.select_for_update().get(pin=pin)
+                player = LivePlayer.objects.select_for_update().get(
+                    id=player_id,
+                    session=session,
+                    client_id=client_id,
                 )
 
-            if (
-                session.state != LiveSession.STATE_QUESTION
-                or session.question_started_at is None
-                or session.question_ends_at is None
-            ):
-                return False, pgettext("live_exam.consumer.error", "question_not_accepting_answers"), None, False
+                exam_question = ExamQuestion.objects.filter(id=question_id, exam_id=session.exam_id).first()
+                if exam_question is None:
+                    return False, pgettext("live_exam.consumer.error", "question_not_found"), None, False
 
-            question_idx = int(session.current_index or 0)
-            _, answer_starts_at, _ = build_question_phase_times(
-                session,
-                exam_question,
-                started_at=session.question_started_at,
-                idx=question_idx,
-            )
+                active_question = get_active_question(session)
+                if active_question is None:
+                    return False, pgettext("live_exam.consumer.error", "active_question_not_found"), None, False
 
-            if not (answer_starts_at <= received_at <= session.question_ends_at):
-                return False, pgettext("live_exam.consumer.error", "submission_outside_active_window"), None, False
+                if int(question_id) != int(active_question.id):
+                    return False, pgettext("live_exam.consumer.error", "question_not_active"), None, False
 
-            correct_ids = list(
-                ExamQuestionOption.objects.filter(question_id=question_id, is_correct=True).values_list("id", flat=True)
-            )
-            if not correct_ids:
-                return False, pgettext("live_exam.consumer.error", "no_correct_options"), None, False
+                existing_answer_obj = LiveAnswer.objects.filter(
+                    session=session,
+                    player=player,
+                    question_id=question_id,
+                ).first()
+                if existing_answer_obj is not None:
+                    existing_answer = serialize_player_question_result(session, question_id, player.id) or {}
+                    return (
+                        True,
+                        {
+                            "answer": {
+                                "message": pgettext("live_exam.consumer.error", "already_answered"),
+                                "score": player.score,
+                                **existing_answer,
+                            },
+                            "question_id": question_id,
+                            "reveal_question_id": None,
+                        },
+                        existing_answer_obj,
+                        False,
+                    )
 
-            total_ms = int((session.question_ends_at - answer_starts_at).total_seconds() * 1000)
-            score = calculate_answer_score(
-                option_ids=option_ids,
-                correct_ids=correct_ids,
-                base_points=int(getattr(exam_question, "points", 1000) or 1000),
-                answer_ms=answer_ms,
-                total_ms=total_ms,
-            )
+                if (
+                    session.state != LiveSession.STATE_QUESTION
+                    or session.question_started_at is None
+                    or session.question_ends_at is None
+                ):
+                    return False, pgettext("live_exam.consumer.error", "question_not_accepting_answers"), None, False
 
-            answer = LiveAnswer.objects.create(
-                session=session,
-                player=player,
-                question_id=question_id,
-                choice_id=(option_ids[0] if option_ids else None),
-                choice_ids=option_ids,
-                is_correct=score["is_correct"],
-                answer_ms=score["answer_ms"],
-                awarded_points=score["awarded_points"],
-            )
+                question_idx = int(session.current_index or 0)
+                _, answer_starts_at, _ = build_question_phase_times(
+                    session,
+                    exam_question,
+                    started_at=session.question_started_at,
+                    idx=question_idx,
+                )
 
-            player.score = int(player.score or 0) + int(score["awarded_points"])
-            player.last_seen = received_at
-            player.save(update_fields=["score", "last_seen"])
+                if not (answer_starts_at <= received_at <= session.question_ends_at):
+                    return False, pgettext("live_exam.consumer.error", "submission_outside_active_window"), None, False
 
-            total_players = LivePlayer.objects.filter(session=session).count()
-            answered_count = (
-                LiveAnswer.objects.filter(session=session, question_id=question_id)
-                .values("player_id")
-                .distinct()
-                .count()
-            )
+                correct_ids = list(
+                    ExamQuestionOption.objects.filter(question_id=question_id, is_correct=True).values_list(
+                        "id", flat=True
+                    )
+                )
+                if not correct_ids:
+                    return False, pgettext("live_exam.consumer.error", "no_correct_options"), None, False
 
-            reveal_question_id = None
-            if total_players > 0 and answered_count >= total_players and session.state == LiveSession.STATE_QUESTION:
-                session.state = LiveSession.STATE_REVEAL
-                session.question_ends_at = received_at
-                session.save(update_fields=["state", "question_ends_at"])
-                reveal_question_id = question_id
+                total_ms = int((session.question_ends_at - answer_starts_at).total_seconds() * 1000)
+                score = calculate_answer_score(
+                    option_ids=option_ids,
+                    correct_ids=correct_ids,
+                    base_points=int(getattr(exam_question, "points", 1000) or 1000),
+                    answer_ms=answer_ms,
+                    total_ms=total_ms,
+                )
+
+                answer = LiveAnswer.objects.create(
+                    session=session,
+                    player=player,
+                    question_id=question_id,
+                    choice_id=(option_ids[0] if option_ids else None),
+                    choice_ids=option_ids,
+                    is_correct=score["is_correct"],
+                    answer_ms=score["answer_ms"],
+                    awarded_points=score["awarded_points"],
+                )
+
+                player.score = int(player.score or 0) + int(score["awarded_points"])
+                player.last_seen = received_at
+                player.save(update_fields=["score", "last_seen"])
+
+                total_players = LivePlayer.objects.filter(session=session).count()
+                answered_count = (
+                    LiveAnswer.objects.filter(session=session, question_id=question_id)
+                    .values("player_id")
+                    .distinct()
+                    .count()
+                )
+
+                reveal_question_id = None
+                if (
+                    total_players > 0
+                    and answered_count >= total_players
+                    and session.state == LiveSession.STATE_QUESTION
+                ):
+                    session.state = LiveSession.STATE_REVEAL
+                    session.question_ends_at = received_at
+                    session.save(update_fields=["state", "question_ends_at"])
+                    reveal_question_id = question_id
     except LiveSession.DoesNotExist:
         return False, pgettext("live_exam.consumer.error", "session_not_found"), None, False
     except LivePlayer.DoesNotExist:
         return False, pgettext("live_exam.consumer.error", "player_not_found"), None, False
 
-    personal_result = serialize_player_question_result(session, question_id, player.id) or {}
+    with bypass_rls():
+        personal_result = serialize_player_question_result(session, question_id, player.id) or {}
 
     return (
         True,
