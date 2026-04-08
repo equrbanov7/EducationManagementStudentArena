@@ -172,6 +172,7 @@
         window.LiveWaitRoomConfig = {
             csrf: "{{ csrf_token }}",
             wsPath: `/ws/live/{{ session.pin }}/lobby/`,
+            stateUrl: "{% url 'liveExam:state_json' session.pin %}",
             profileUrl: "{% url 'liveExam:wait_room_profile' session.pin %}",
             reactionUrl: "{% url 'liveExam:wait_room_reaction' session.pin %}",
             playerScreenUrl: "{{ player_screen_url }}",
@@ -205,6 +206,6 @@
     <script src="{% static 'js/wait_room_avatar_picker.js' %}"></script>
     <script src="{% static 'js/wait_room_accessory_picker.js' %}"></script>
     <script src="{% static 'js/wait_room_reaction_panel.js' %}"></script>
-    <script src="{% static 'js/wait_room_page.js' %}"></script>
+    <script src="{% static 'js/wait_room_page.js' %}?v=live-http-fallback-20260408"></script>
 </body>
 </html>
