@@ -9,7 +9,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from apps.exams.models import Exam
-from apps.live_exam.models import PIN_LENGTH, LiveSession, generate_pin
+from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH, LiveSession, generate_pin
 
 User = get_user_model()
 
@@ -28,15 +28,19 @@ class GeneratePinTest(TestCase):
         pin = generate_pin()
         self.assertEqual(len(pin), 10)
 
-    def test_pin_contains_only_digits(self):
-        """Generated PINs must consist of uppercase alphanumeric characters (digits + A-Z)."""
-        import string
-
-        allowed = set(string.digits + string.ascii_uppercase)
+    def test_pin_contains_only_allowed_characters(self):
+        """Generated PINs must consist of unambiguous uppercase alphanumeric characters."""
+        allowed = set("23456789ABCDEFGHJKMNPQRSTUVWXYZ")
         for _ in range(50):
             pin = generate_pin()
             invalid = set(pin) - allowed
             self.assertFalse(invalid, f"Unexpected characters in PIN: {invalid!r} (PIN={pin!r})")
+
+    def test_pin_avoids_ambiguous_characters(self):
+        """New PINs should never include easily-confused glyphs like 0/O or 1/I/L."""
+        disallowed = set("01IOL")
+        for _ in range(50):
+            self.assertTrue(disallowed.isdisjoint(generate_pin()))
 
     def test_pin_uses_secrets_module(self):
         """generate_pin() must not rely on the non-cryptographic random module."""
@@ -127,6 +131,10 @@ class LiveSessionPinFieldTest(TestCase):
         # Verify the saved row is retrievable (no silent DB truncation).
         reloaded = LiveSession.objects.get(pk=session.pk)
         self.assertEqual(reloaded.pin, session.pin)
+
+    def test_legacy_shorter_pin_still_fits_field(self):
+        """The DB field stays wide enough to preserve shorter legacy session PINs too."""
+        self.assertLess(MIN_PIN_LENGTH, PIN_LENGTH)
 
 
 class LiveSessionPinIntegrityRetryTest(TestCase):

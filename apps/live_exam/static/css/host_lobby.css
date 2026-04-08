@@ -447,8 +447,10 @@ body.host-live-page.host-presentation-page .lobby-stage__join-board {
 }
 
 .lobby-stage__pin strong {
-    font-size: clamp(2.7rem, 6vw, 5.4rem);
-    line-height: 0.92;
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", "Menlo", "Consolas", monospace;
+    font-size: clamp(1.7rem, 3vw, 3rem);
+    line-height: 1;
+    letter-spacing: clamp(0.03em, 0.08vw, 0.08em);
 }
 
 .lobby-stage__pin small {

@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("pinSubmitBtn");
     const i18n = window.LIVE_PIN_ENTRY_I18N || {};
     const pinLength = Number(i18n.pinLength || input?.getAttribute("maxlength") || 10);
+    const minPinLength = Math.max(1, Number(i18n.minPinLength || 6));
     let themeSocket = null;
     let themeSocketPin = "";
 
@@ -63,12 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const syncValue = () => {
         input.value = sanitize(input.value);
+        input.dataset.pinChars = String(input.value.length || pinLength);
         const wrapper = input.closest(".pin-entry-input-wrap");
         if (wrapper) {
             wrapper.classList.remove("has-error");
         }
         input.setAttribute("aria-invalid", "false");
-        connectThemeSocket(input.value);
+        if (input.value.length === pinLength) {
+            connectThemeSocket(input.value);
+        } else {
+            closeThemeSocket();
+        }
     };
 
     input.addEventListener("input", syncValue);
@@ -78,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.addEventListener("submit", (event) => {
         syncValue();
-        if (input.value.length !== pinLength) {
+        if (input.value.length < minPinLength) {
             event.preventDefault();
             input.focus();
             input.setAttribute("aria-invalid", "true");
@@ -104,10 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
     syncValue();
 
     const searchPin = sanitize(new URLSearchParams(window.location.search).get("pin"));
-    if (searchPin.length === pinLength && input.value === searchPin) {
+    if (searchPin.length >= minPinLength && input.value === searchPin) {
         window.setTimeout(() => {
             syncValue();
-            if (!submitBtn.disabled && input.value.length === pinLength) {
+            if (!submitBtn.disabled && input.value.length >= minPinLength) {
                 if (typeof form.requestSubmit === "function") {
                     form.requestSubmit(submitBtn);
                 } else {
