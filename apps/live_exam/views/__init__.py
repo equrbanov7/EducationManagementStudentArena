@@ -11,7 +11,7 @@ This allows the existing urls.py to continue working with:
 # ═══════════════════════════════════════════════════════════════
 # API Views
 # ═══════════════════════════════════════════════════════════════
-from .api import live_state_json
+from .api import live_answer_submit, live_state_json
 
 # ═══════════════════════════════════════════════════════════════
 # Host Views
@@ -71,4 +71,5 @@ __all__ = [
     "live_player_screen",
     # API
     "live_state_json",
+    "live_answer_submit",
 ]
