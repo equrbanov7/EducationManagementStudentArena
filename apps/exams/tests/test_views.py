@@ -481,6 +481,12 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'name="course_id"')
         self.assertContains(response, f'value="{self.course.id}"')
 
+    def test_create_exam_form_includes_random_question_count_with_default_ten(self):
+        response = self.client.get(reverse("exams:create_exam"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="10"')
+
     def test_modal_create_exam_links_new_exam_to_requested_course(self):
         response = self.client.post(
             reverse("exams:create_exam") + f"?modal=1&course={self.course.id}",
@@ -502,6 +508,26 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(created_exam.author, self.teacher)
         self.assertEqual(created_exam.course, self.course)
         self.assertEqual(created_exam.organization, self.org_a)
+
+    def test_modal_create_exam_persists_custom_random_question_count(self):
+        response = self.client.post(
+            reverse("exams:create_exam") + "?modal=1",
+            {
+                "modal": "1",
+                "title": "Custom Random Count Exam",
+                "description": "Created with a custom student question count.",
+                "exam_type": "test",
+                "random_question_count": "20",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Custom Random Count Exam")
+        self.assertEqual(created_exam.random_question_count, 20)
 
     def test_create_exam_requires_active_organization(self):
         from apps.exams.views.teacher.exams import createAndEditExamView
@@ -800,6 +826,23 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
     def test_edit_other_tenant_exam_is_not_found(self):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
         self.assertEqual(response.status_code, 404)
+
+    def test_edit_exam_updates_random_question_count(self):
+        response = self.client.post(
+            reverse("exams:edit_exam", args=[self.exam_visible.slug]),
+            {
+                "title": self.exam_visible.title,
+                "description": "Updated random draw count.",
+                "exam_type": "test",
+                "is_active": "on",
+                "is_public": "on",
+                "random_question_count": "25",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.exam_visible.refresh_from_db()
+        self.assertEqual(self.exam_visible.random_question_count, 25)
 
     def test_teacher_exam_detail_defaults_to_generic_back_with_profile_fallback(self):
         response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
