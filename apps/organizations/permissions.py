@@ -7,6 +7,14 @@ from typing import List, Set
 PERMISSION_PREFIX_ALIASES = {
     "grade": "grading",
     "grading": "grade",
+    "course": "courses",
+    "courses": "course",
+    "exam": "exams",
+    "exams": "exam",
+    "member": "members",
+    "members": "member",
+    "role": "roles",
+    "roles": "role",
 }
 
 
