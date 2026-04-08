@@ -23,6 +23,7 @@ from ._helpers import (
     build_exam_history_url,
     build_exam_result_url,
     current_return_to,
+    ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
 )
 
@@ -48,6 +49,7 @@ def start_exam(request, slug):
     """
     İmtahan başlatma view-ı
     """
+    ensure_student_exam_tenant_context(request)
     exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.filter(is_active=True)), slug=slug)
 
     # İcazə yoxlaması
@@ -65,6 +67,7 @@ def start_exam(request, slug):
 
 @login_required
 def take_exam(request, slug, attempt_id):
+    ensure_student_exam_tenant_context(request)
     attempt = get_object_or_404(
         ExamAttempt,
         id=attempt_id,

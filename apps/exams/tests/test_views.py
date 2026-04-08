@@ -1295,12 +1295,39 @@ class StudentExamVisibilityFilteringTest(TestCase):
             is_active=True,
             is_public=True,
         )
+        ExamQuestion.objects.create(
+            exam=self.unassigned_public_exam,
+            text="Public exam question",
+            order=1,
+            points=1,
+        )
 
         self.unassigned_private_exam = Exam.objects.create(
             author=self.teacher,
             title="Unassigned Private Exam",
             is_active=True,
             is_public=False,
+        )
+
+        self.student_group = StudentGroup.objects.create(
+            teacher=self.teacher,
+            organization=self.org_a,
+            name="Visibility Group A",
+        )
+        self.student_group.students.add(self.student)
+
+        self.group_assigned_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Group Assigned Exam",
+            is_active=True,
+            is_public=False,
+        )
+        self.group_assigned_exam.allowed_groups.add(self.student_group)
+        ExamQuestion.objects.create(
+            exam=self.group_assigned_exam,
+            text="Group assignment question",
+            order=1,
+            points=1,
         )
 
         self.other_tenant_exam = Exam.objects.create(
@@ -1327,6 +1354,46 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
 
+    def test_student_exam_views_restore_profile_org_context_when_session_org_is_missing(self):
+        second_org = Organization.objects.create(
+            name="Student Exam Org C",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.superadmin,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.student, second_org, ProfileRole.STUDENT)
+        self.student.profile.organization = self.org_a
+        self.student.profile.organization_type = self.org_a.org_type
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        available_response = self.client.get(
+            reverse("exams:student_exam_list"), {"q": self.unassigned_public_exam.title}
+        )
+        self.assertEqual(available_response.status_code, 200)
+        self.assertContains(available_response, self.unassigned_public_exam.title)
+        self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
+
+        grouped_available_response = self.client.get(
+            reverse("exams:student_exam_list"),
+            {"q": self.group_assigned_exam.title},
+        )
+        self.assertEqual(grouped_available_response.status_code, 200)
+        self.assertContains(grouped_available_response, self.group_assigned_exam.title)
+
+        assigned_response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.group_assigned_exam.title})
+        self.assertEqual(assigned_response.status_code, 200)
+        self.assertContains(assigned_response, self.group_assigned_exam.title)
+
+        start_response = self.client.get(reverse("exams:start_exam", args=[self.group_assigned_exam.slug]))
+        self.assertEqual(start_response.status_code, 302)
+        self.assertTrue(self.group_assigned_exam.attempts.filter(user=self.student).exists())
+
     def test_student_assigned_exam_list_shows_only_assigned_in_active_tenant(self):
         response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.assigned_exam.title})
         self.assertEqual(response.status_code, 200)
@@ -1339,6 +1406,10 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.code_assigned_exam.title})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.code_assigned_exam.title)
+
+        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.group_assigned_exam.title})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.group_assigned_exam.title)
 
         response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.assigned_public_exam.title})
         self.assertEqual(response.status_code, 200)
@@ -1585,6 +1656,12 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "İmtahana başla")
         self.assertNotContains(response, "Start exam")
         self.assertNotContains(response, "Bu resurs haqqında qısa məlumat")
+        self.assertContains(
+            response,
+            'modalAccessCodeDescriptionWithTitle: "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
+            html=False,
+        )
+        self.assertNotContains(response, 'modalAccessCodeDescriptionWithTitle: ""{title}"', html=False)
 
     def test_az_exam_result_uses_localized_strings(self):
         exam = Exam.objects.create(

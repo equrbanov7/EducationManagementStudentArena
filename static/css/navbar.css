@@ -229,6 +229,35 @@ button.blog-header__user-menu-item{
     background: rgba(15, 23, 42, 0.05);
 }
 
+.blog-header__user-menu-item--active {
+    color: var(--primary-color, #2563eb);
+    background: rgba(37, 99, 235, 0.08);
+    font-weight: 600;
+}
+
+.blog-header__nav-form {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.blog-header__nav-link--button {
+    appearance: none;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+
+.blog-header__nav-link--logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
 
 
 
@@ -276,7 +305,7 @@ button.blog-header__user-menu-item{
 
 /* Mobil menyu elementləri */
 .mobile-nav-panel .blog-header__nav-item {
-    padding: 12px 25px;
+    padding: 8px 20px;
     border-bottom: 1px solid #eee;
 }
 
@@ -285,15 +314,21 @@ button.blog-header__user-menu-item{
 }
 
 .mobile-nav-panel .blog-header__nav-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     color: var(--text-dark, #1f2937);
     font-size: 1.1rem;
     font-weight: 500;
     text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .mobile-nav-panel .blog-header__nav-link:hover {
     color: var(--primary-color, #2563eb);
+    background: rgba(37, 99, 235, 0.06);
 }
 
 .mobile-nav-panel .blog-header__nav-link--primary {
@@ -311,6 +346,28 @@ button.blog-header__user-menu-item{
 
 .mobile-nav-panel .blog-header__nav-link--primary:hover {
     background-color: #1e40af;
+}
+
+.mobile-nav-panel .blog-header__nav-link--active {
+    color: var(--primary-color, #2563eb);
+    background: rgba(37, 99, 235, 0.1);
+    box-shadow: inset 3px 0 0 var(--primary-color, #2563eb);
+    font-weight: 700;
+}
+
+.mobile-nav-panel .blog-header__nav-link--active::after {
+    display: none;
+}
+
+.mobile-nav-panel .blog-header__nav-link--logout {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.mobile-nav-panel .blog-header__nav-link--logout:hover {
+    color: #991b1b;
+    background: #fee2e2;
 }
 
 .mobile-nav-panel .blog-header__nav-item--language {

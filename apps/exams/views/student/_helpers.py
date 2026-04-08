@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+from core.tenancy import request_has_active_organization_context, restore_request_organization_from_profile
 
 
 def safe_same_origin_redirect_path(request, candidate_url):
@@ -19,6 +20,12 @@ def safe_same_origin_redirect_path(request, candidate_url):
     ):
         return ""
     return raw_url
+
+
+def ensure_student_exam_tenant_context(request):
+    if request_has_active_organization_context(request):
+        return True
+    return restore_request_organization_from_profile(request, profile=getattr(request.user, "profile", None))
 
 
 def current_return_to(request):

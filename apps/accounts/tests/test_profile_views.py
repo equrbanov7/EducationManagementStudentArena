@@ -755,6 +755,26 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
         self.assertContains(response, organization.name)
 
+    def test_profile_uses_effective_role_label_without_active_org_context(self):
+        profile = self.user.profile
+        profile.organization = None
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.role = ProfileRole.STUDENT
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertEqual(response.context["primary_user_role_label"], "Tələbə")
+        self.assertEqual(response.context["user_roles"][0]["name"], ProfileRole.STUDENT)
+        self.assertContains(response, "Tələbə")
+        self.assertIn('href="/accounts/profile/"', content)
+        self.assertIn("blog-header__nav-link--active", content)
+        self.assertIn("blog-header__nav-link--logout", content)
+        self.assertNotContains(response, ">İstifadəçi<", html=False)
+
     def test_profile_info_shows_student_group_membership_readonly(self):
         from apps.accounts.models import ProfileRole
         from apps.exams.models import StudentGroup
@@ -934,6 +954,69 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "55 qrup")
         self.assertContains(response, "+5 əlavə qrup var")
+
+    def test_profile_info_restores_group_membership_from_profile_org_when_session_org_is_missing(self):
+        from apps.exams.models import StudentGroup
+
+        owner = User.objects.create_user(
+            username="group_owner_restore",
+            email="group_owner_restore@example.com",
+            password="testpass123",
+        )
+        teacher = User.objects.create_user(
+            username="group_teacher_restore",
+            email="group_teacher_restore@example.com",
+            password="testpass123",
+        )
+        second_owner = User.objects.create_user(
+            username="group_owner_restore_2",
+            email="group_owner_restore_2@example.com",
+            password="testpass123",
+        )
+
+        primary_org = Organization.objects.create(
+            name="Restore Group University",
+            slug="restore-group-university",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            is_active=True,
+            status="active",
+        )
+        secondary_org = Organization.objects.create(
+            name="Restore Group School",
+            slug="restore-group-school",
+            org_type=OrganizationType.SCHOOL,
+            owner=second_owner,
+            is_active=True,
+            status="active",
+        )
+
+        _assign_user_to_org(teacher, primary_org, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, primary_org, ProfileRole.STUDENT)
+        _assign_user_to_org(self.user, secondary_org, ProfileRole.STUDENT)
+        self.user.profile.organization = primary_org
+        self.user.profile.organization_type = primary_org.org_type
+        self.user.profile.role = ProfileRole.STUDENT
+        self.user.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        student_group = StudentGroup.objects.create(
+            teacher=teacher,
+            organization=primary_org,
+            name="Qrup Restore 101",
+        )
+        student_group.students.add(self.user)
+
+        self.client.login(username="testuser", password="testpass123")
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Qrup Restore 101")
+        self.assertContains(response, "Restore Group University")
+        self.assertEqual(self.client.session.get("active_organization"), primary_org.slug)
 
     def test_profile_avatar_update_form_updates_avatar_and_navbar(self):
         tiny_png = (
@@ -2298,6 +2381,66 @@ class AssignedItemsViewTest(TestCase):
         self.assertContains(response, reverse("exams:start_exam", args=[course_exam.slug]))
         self.assertContains(response, reverse("exams:exam_code_check"))
         self.assertContains(response, f'data-exam-slug="{code_exam.slug}"')
+
+    def test_assigned_exams_restore_profile_org_context_when_session_org_is_missing(self):
+        from apps.exams.models import Exam, ExamQuestion, StudentGroup
+
+        teacher = User.objects.create_user(
+            username="assigned_group_teacher",
+            email="assigned_group_teacher@example.com",
+            password="testpass123",
+        )
+        secondary_owner = User.objects.create_user(
+            username="assigned_second_owner",
+            email="assigned_second_owner@example.com",
+            password="testpass123",
+        )
+        secondary_org = Organization.objects.create(
+            name="Assigned Items Org Secondary",
+            org_type=OrganizationType.SCHOOL,
+            owner=secondary_owner,
+            status="active",
+            is_active=True,
+        )
+
+        _assign_user_to_org(teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, secondary_org, ProfileRole.STUDENT)
+        self.user.profile.organization = self.organization
+        self.user.profile.organization_type = self.organization.org_type
+        self.user.profile.role = ProfileRole.STUDENT
+        self.user.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        group = StudentGroup.objects.create(
+            teacher=teacher,
+            organization=self.organization,
+            name="Assigned Route Group",
+        )
+        group.students.add(self.user)
+
+        exam = Exam.objects.create(
+            author=teacher,
+            title="Assigned Group Route Exam",
+            is_active=True,
+            is_public=False,
+        )
+        exam.allowed_groups.add(group)
+        ExamQuestion.objects.create(
+            exam=exam,
+            text="Assigned route question",
+            order=1,
+            points=1,
+        )
+
+        self._login_user()
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("accounts:assigned_exams"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, exam.title)
+        self.assertEqual(self.client.session.get("active_organization"), self.organization.slug)
 
 
 class MyResultsViewTest(TestCase):
