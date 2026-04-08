@@ -26,6 +26,7 @@ from apps.notifications.models import (
     StudentOrganizationRequestStatus,
 )
 from apps.organizations.models import Membership
+from core.rls import bypass_rls
 
 logger = logging.getLogger(__name__)
 
@@ -114,14 +115,15 @@ def create_notification(
     Returns:
         The newly created :class:`InAppNotification` instance.
     """
-    return InAppNotification.objects.create(
-        recipient=recipient,
-        title=title,
-        message=message,
-        link=link,
-        notification_type=notification_type,
-        metadata=_serialize_metadata(metadata or {}),
-    )
+    with bypass_rls():
+        return InAppNotification.objects.create(
+            recipient=recipient,
+            title=title,
+            message=message,
+            link=link,
+            notification_type=notification_type,
+            metadata=_serialize_metadata(metadata or {}),
+        )
 
 
 def create_notification_for_users(
@@ -159,7 +161,10 @@ def create_notification_for_users(
         )
         for user in recipients
     ]
-    return InAppNotification.objects.bulk_create(notifications)
+    if not notifications:
+        return []
+    with bypass_rls():
+        return InAppNotification.objects.bulk_create(notifications)
 
 
 def notify_org_owner_pending_approval(*, organization) -> InAppNotification | None:
