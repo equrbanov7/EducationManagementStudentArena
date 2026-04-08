@@ -40,6 +40,7 @@ from apps.live_exam.transport import (
     parse_answer_submission,
 )
 from core.rate_limit import record_rate_limit_hit
+from core.rls import bypass_rls
 from core.utils import get_client_ip
 
 LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
@@ -75,96 +76,93 @@ def live_state_json(request, pin):
             response.headers["Retry-After"] = str(retry_after)
         return response
 
-    session = get_object_or_404(LiveSession, pin=pin)
-    is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
-    player = None if is_host else get_request_player(request, pin=pin)
-    if not is_host and player is None:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-            status=403,
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
+        player = None if is_host else get_request_player(request, pin=pin)
+        if not is_host and player is None:
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+                status=403,
+            )
+
+        total = get_total_questions(session)
+
+        data: dict = {
+            "ok": True,
+            "pin": session.pin,
+            "state": session.state,
+            "is_locked": bool(session.is_locked),
+            "settings": get_session_settings(session),
+            "current_index": int(session.current_index or 0),
+            "total_questions": total,
+            "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
+            "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
+        }
+        if session.state == LiveSession.STATE_LOBBY:
+            players = serialize_players(session)
+            data["players"] = players
+            data["total_players"] = len(players)
+        else:
+            data["total_players"] = session.players.count()
+        if session.state == LiveSession.STATE_FINISHED:
+            data["top"] = serialize_top(session, limit=50)
+            return JsonResponse(data)
+
+        idx = int(session.current_index or 0)
+        eq = get_question_by_index(session, idx)
+        if (
+            not eq
+            or session.state not in {LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL}
+            or not session.question_started_at
+        ):
+            return JsonResponse(data)
+
+        started = session.question_started_at
+        ready_ends_at, answer_starts_at, computed_ends_at = build_question_phase_times(
+            session,
+            eq,
+            started_at=started,
+            idx=idx,
+        )
+        ends = session.question_ends_at or computed_ends_at
+
+        _, _, correct_ids = detect_multi(eq)
+        question = serialize_question(
+            session,
+            eq,
+            idx=idx,
+            total=total,
+            started_at=started,
+            ready_ends_at=ready_ends_at,
+            answer_starts_at=answer_starts_at,
+            ends_at=ends,
         )
 
-    total = get_total_questions(session)
+        data["question"] = question
+        data["answered_count"] = session.answers.filter(question_id=eq.id).values("player_id").distinct().count()
+        data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
+        if player is not None:
+            data["player_answer"] = serialize_player_question_result(session, eq.id, player.id)
 
-    data: dict = {
-        "ok": True,
-        "pin": session.pin,
-        "state": session.state,
-        "is_locked": bool(session.is_locked),
-        "settings": get_session_settings(session),
-        "current_index": int(session.current_index or 0),
-        "total_questions": total,
-        "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
-        "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
-    }
-    if session.state == LiveSession.STATE_LOBBY:
-        # Fetch player list once and derive the count from it to avoid a separate COUNT query.
-        players = serialize_players(session)
-        data["players"] = players
-        data["total_players"] = len(players)
-    else:
-        data["total_players"] = session.players.count()
-    if session.state == LiveSession.STATE_FINISHED:
-        data["top"] = serialize_top(session, limit=50)
+        data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
+        if session.state == LiveSession.STATE_REVEAL:
+            if is_host:
+                reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
+                data["results"] = reveal_payload["results"]
+            else:
+                reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
+            data["top"] = reveal_payload["top"]
+            data["previous_top"] = reveal_payload["previous_top"]
+            data["distribution"] = reveal_payload["distribution"]
+            data["revealed_at"] = reveal_payload["revealed_at"]
+            data["result_duration_ms"] = reveal_payload["result_duration_ms"]
+            data["leaderboard_duration_ms"] = reveal_payload["leaderboard_duration_ms"]
+            data["transition_duration_ms"] = reveal_payload["transition_duration_ms"]
+            data["leaderboard_starts_at"] = reveal_payload["leaderboard_starts_at"]
+            data["next_question_at"] = reveal_payload["next_question_at"]
+
         return JsonResponse(data)
-
-    idx = int(session.current_index or 0)
-    eq = get_question_by_index(session, idx)
-    if (
-        not eq
-        or session.state not in {LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL}
-        or not session.question_started_at
-    ):
-        return JsonResponse(data)
-
-    started = session.question_started_at
-    ready_ends_at, answer_starts_at, computed_ends_at = build_question_phase_times(
-        session,
-        eq,
-        started_at=started,
-        idx=idx,
-    )
-    ends = session.question_ends_at or computed_ends_at
-
-    _, _, correct_ids = detect_multi(eq)
-    question = serialize_question(
-        session,
-        eq,
-        idx=idx,
-        total=total,
-        started_at=started,
-        ready_ends_at=ready_ends_at,
-        answer_starts_at=answer_starts_at,
-        ends_at=ends,
-    )
-
-    data["question"] = question
-    data["answered_count"] = session.answers.filter(question_id=eq.id).values("player_id").distinct().count()
-    data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
-    if player is not None:
-        data["player_answer"] = serialize_player_question_result(session, eq.id, player.id)
-
-    data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
-    if session.state == LiveSession.STATE_REVEAL:
-        if is_host:
-            # Host receives the full reveal payload including per-player result details.
-            reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
-            data["results"] = reveal_payload["results"]
-        else:
-            # Players receive the player-appropriate reveal payload: correct answers and
-            # leaderboard data are included, but per-player result details are host-only.
-            reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
-        data["top"] = reveal_payload["top"]
-        data["previous_top"] = reveal_payload["previous_top"]
-        data["distribution"] = reveal_payload["distribution"]
-        data["revealed_at"] = reveal_payload["revealed_at"]
-        data["result_duration_ms"] = reveal_payload["result_duration_ms"]
-        data["leaderboard_duration_ms"] = reveal_payload["leaderboard_duration_ms"]
-        data["transition_duration_ms"] = reveal_payload["transition_duration_ms"]
-        data["leaderboard_starts_at"] = reveal_payload["leaderboard_starts_at"]
-        data["next_question_at"] = reveal_payload["next_question_at"]
-
-    return JsonResponse(data)
 
 
 @require_POST
@@ -216,35 +214,41 @@ def live_answer_submit(request, pin):
     if not ok:
         return JsonResponse({"ok": False, "message": result}, status=400)
 
-    session = get_object_or_404(LiveSession, pin=pin)
-    answer_payload = {
-        "type": "answer_saved",
-        "question_id": question_id,
-        **(result.get("answer") or {}),
-    }
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        answer_payload = {
+            "type": "answer_saved",
+            "question_id": question_id,
+            **(result.get("answer") or {}),
+        }
 
-    progress = get_answer_progress(pin=pin, question_id=question_id)
-    progress_payload = build_answer_progress_payload(
-        question_id=question_id,
-        answered_count=progress["answered_count"],
-        total_players=progress["total_players"],
-    )
+        progress = get_answer_progress(pin=pin, question_id=question_id)
+        progress_payload = build_answer_progress_payload(
+            question_id=question_id,
+            answered_count=progress["answered_count"],
+            total_players=progress["total_players"],
+        )
+
+        response_payload = {
+            "ok": True,
+            "answer": answer_payload,
+            "progress": progress_payload,
+        }
+
+        reveal_question_id = result.get("reveal_question_id")
+        if reveal_question_id:
+            host_reveal_payload = build_reveal_payload(session, reveal_question_id)
+            player_reveal_payload = build_player_reveal_payload(session, reveal_question_id)
+            response_payload["reveal"] = player_reveal_payload
+        else:
+            host_reveal_payload = None
+            player_reveal_payload = None
 
     broadcast_players(pin, answer_payload)
     broadcast_host(pin, progress_payload)
 
-    response_payload = {
-        "ok": True,
-        "answer": answer_payload,
-        "progress": progress_payload,
-    }
-
-    reveal_question_id = result.get("reveal_question_id")
-    if reveal_question_id:
-        host_reveal_payload = build_reveal_payload(session, reveal_question_id)
-        player_reveal_payload = build_player_reveal_payload(session, reveal_question_id)
+    if host_reveal_payload and player_reveal_payload:
         broadcast_host(pin, host_reveal_payload)
         broadcast_players(pin, player_reveal_payload)
-        response_payload["reveal"] = player_reveal_payload
 
     return JsonResponse(response_payload)
