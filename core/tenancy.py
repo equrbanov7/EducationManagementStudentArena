@@ -73,7 +73,7 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     return bool(memberships)
 
 
-def restore_request_organization_from_profile(request, *, profile=None):
+def restore_request_organization_from_profile(request, *, profile=None, allow_multi_org_restore=False):
     """
     Re-hydrate ``request.organization`` from the user's profile organization.
 
@@ -125,7 +125,7 @@ def restore_request_organization_from_profile(request, *, profile=None):
     is_superadmin = bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
     if not memberships and not is_owner and not is_superadmin:
         return False
-    if not is_superadmin and len(active_org_ids) > 1:
+    if not is_superadmin and len(active_org_ids) > 1 and not allow_multi_org_restore:
         return False
 
     permissions_set = set()
