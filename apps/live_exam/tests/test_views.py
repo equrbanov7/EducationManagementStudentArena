@@ -14,7 +14,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.constants import ACCESSORY_KEYS, AVATAR_KEYS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
-from apps.live_exam.models import PIN_LENGTH, LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH, LiveAnswer, LivePlayer, LiveSession
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
 
@@ -300,6 +300,7 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("copy", response.context)
         self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
+        self.assertContains(response, f"minPinLength: {MIN_PIN_LENGTH}")
         self.assertContains(response, 'inputmode="text"', html=False)
         self.assertContains(response, "js/pin_entry.js?v=live-pin-alnum-20260408")
 
@@ -315,6 +316,26 @@ class LiveJoinTest(TestCase):
         self.session.save(update_fields=["pin"])
 
         response = self.client.post(reverse("liveExam:pin_entry"), {"pin": " o5h96fqw89 "})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_pin_entry_accepts_legacy_shorter_pin(self):
+        """Existing shorter legacy PINs should still resolve after the 10-char rollout."""
+        self.session.pin = "A1B2C3D"
+        self.session.save(update_fields=["pin"])
+
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "a1b2c3d"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_pin_entry_resolves_ambiguous_glyphs_to_unique_session(self):
+        """Human-friendly lookup should forgive 0/O and 1/I/L confusion when the match is unique."""
+        self.session.pin = "O5H96FQW89"
+        self.session.save(update_fields=["pin"])
+
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "05H96FQW89"})
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
