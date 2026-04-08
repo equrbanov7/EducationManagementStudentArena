@@ -262,6 +262,12 @@ class LiveJoinTest(TestCase):
         self.assertIn("session", response.context)
         self.assertEqual(response.context["session"], self.session)
 
+    def test_join_page_is_never_cached(self):
+        """Join page HTML must not be cached so latest PIN UI ships after deploys."""
+        response = self.client.get(reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
+
     def test_join_page_exposes_remembered_player_context(self):
         """Test that join page exposes remembered player info for returning clients."""
         player = LivePlayer.objects.create(
@@ -295,6 +301,12 @@ class LiveJoinTest(TestCase):
         self.assertIn("copy", response.context)
         self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
         self.assertContains(response, 'inputmode="text"', html=False)
+
+    def test_pin_entry_page_is_never_cached(self):
+        """PIN entry HTML must not be cached so stale numeric-only JS cannot linger."""
+        response = self.client.get(reverse("liveExam:pin_entry"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
 
     def test_pin_entry_normalizes_mixed_case_alphanumeric_pin(self):
         """Mixed-case alphanumeric PIN input should normalize and redirect."""
