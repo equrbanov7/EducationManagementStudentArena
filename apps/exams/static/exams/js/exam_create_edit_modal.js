@@ -370,19 +370,39 @@
 
             var typeOptions = picker.querySelectorAll(".js-create-exam-type-option");
             var paintCheckbox = form.querySelector('input[name="enable_paint"]');
+            var paintGroup = form.querySelector("[data-exam-paint-group]");
             var paintLabel = paintCheckbox ? paintCheckbox.closest(".modal-check-label--paint") : null;
+            var randomQuestionGroup = form.querySelector("[data-test-random-question-group]");
+            var randomQuestionInput = form.querySelector('input[name="random_question_count"]');
 
-            function syncPaintAvailability(examType) {
+            function syncExamTypeVisibility(examType) {
+                var isTest = examType === "test";
                 if (!paintCheckbox) {
+                    if (randomQuestionGroup) {
+                        randomQuestionGroup.hidden = !isTest;
+                    }
+                    if (randomQuestionInput) {
+                        randomQuestionInput.disabled = !isTest;
+                    }
                     return;
                 }
 
                 var isWritten = examType === "written";
+                if (randomQuestionGroup) {
+                    randomQuestionGroup.hidden = !isTest;
+                }
+                if (randomQuestionInput) {
+                    randomQuestionInput.disabled = !isTest;
+                }
+
                 if (!isWritten) {
                     paintCheckbox.checked = false;
                 }
                 paintCheckbox.disabled = !isWritten;
 
+                if (paintGroup) {
+                    paintGroup.hidden = !isWritten;
+                }
                 if (paintLabel) {
                     paintLabel.classList.toggle("is-disabled", !isWritten);
                 }
@@ -393,7 +413,7 @@
                 typeOptions.forEach(function (option) {
                     option.checked = option.value === selectedType;
                 });
-                syncPaintAvailability(selectedType);
+                syncExamTypeVisibility(selectedType);
             }
 
             typeOptions.forEach(function (option) {
@@ -403,7 +423,7 @@
                     }
 
                     nativeSelect.value = option.value;
-                    syncPaintAvailability(option.value);
+                    syncExamTypeVisibility(option.value);
                     nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
                 });
             });
