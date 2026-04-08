@@ -10,9 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
-    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=live-host-pin-20260408">
+    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}?v=live-host-pin-20260408">
+    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}?v=live-host-pin-20260408">
 </head>
 <body class="host-live-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
     <div class="host-container host-container--host">
@@ -191,9 +191,9 @@
         }
     });
     </script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-    <script src="{% static 'js/host_lobby.js' %}"></script>
-    <script src="{% static 'js/host_lobby_shell.js' %}"></script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-pin-20260408"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-pin-20260408"></script>
+    <script src="{% static 'js/host_lobby.js' %}?v=live-host-pin-20260408"></script>
+    <script src="{% static 'js/host_lobby_shell.js' %}?v=live-host-pin-20260408"></script>
 </body>
 </html>
