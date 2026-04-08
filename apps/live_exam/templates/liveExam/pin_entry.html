@@ -118,7 +118,8 @@
         window.LIVE_PIN_ENTRY_I18N = {
             invalidPin: "{{ copy.invalid_pin|escapejs }}",
             loading: "{{ copy.loading|escapejs }}",
-            pinLength: {{ pin_length }}
+            pinLength: {{ pin_length }},
+            minPinLength: {{ min_pin_length|default:6 }}
         };
     </script>
     <script src="{% static 'js/pin_entry.js' %}?v=live-pin-alnum-20260408"></script>
