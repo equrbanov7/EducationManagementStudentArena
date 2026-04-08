@@ -9,7 +9,7 @@
 /* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
 .container.my-4 {
     max-width: 900px;
-    width: 900px;
+    width: min(100%, 900px);
     margin: 40px auto; /* Yuxarı-aşağı məsafə və mərkəzləşdirmə */
     padding: 30px;
     background: #ffffff;
@@ -556,38 +556,45 @@ li.list-group-item {
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .container.my-4 {
-        padding: 20px;
-        margin: 20px auto;
+        width: calc(100% - 24px);
+        padding: 18px;
+        margin: 16px auto 24px;
+        border-radius: 14px;
     }
     .container.my-4 h1 {
-        font-size: 1.8rem;
-        margin-bottom: 25px;
+        font-size: clamp(1.5rem, 6vw, 1.85rem);
+        margin-bottom: 22px;
     }
 
     li.list-group-item {
         flex-direction: column; /* Mobil cihazlarda sütun şəklində düzülür */
         align-items: flex-start; /* Sol tərəfə yasla */
-        padding: 18px 20px;
+        padding: 18px;
+        gap: 14px;
     }
     li.list-group-item > div:first-child {
         width: 100%; /* Məlumat bloku tam eni tutur */
-        margin-bottom: 15px;
+        margin-bottom: 0;
     }
     li.list-group-item > div:last-child {
         width: 100%; /* Düymə bloku tam eni tutur */
         display: flex; /* İçindəki elementləri yan-yana gətirir */
         flex-wrap: wrap;
-        justify-content: flex-start; /* Sol tərəfə yasla */
+        justify-content: stretch;
         gap: 10px; /* Cəhd və düymə arasında boşluq */
     }
 
     li.list-group-item .badge.bg-secondary {
         margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
         flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
+        width: 100%;
         text-align: center;
     }
-    li.list-group-item .btn.btn-primary {
-        width: auto; /* Düymə öz məzmununa uyğun ölçüdə olsun */
+    li.list-group-item .btn.btn-primary,
+    li.list-group-item .btn.btn-outline-primary,
+    li.list-group-item .btn.btn-outline-secondary,
+    li.list-group-item .customBtn {
+        width: 100%;
         flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
         margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
         justify-content: center;
@@ -600,14 +607,22 @@ li.list-group-item {
     .exam-toolbar {
         flex-direction: column;
         align-items: stretch;
+        padding: 14px;
+        gap: 12px;
     }
     
-    .search-box, .filter-box {
+    .search-box,
+    .filter-box,
+    .filter-box .bootstrap-single-select,
+    .filter-box .form-select {
         width: 100%;
+        min-width: 0;
     }
     
-    .search-btn {
+    .search-btn,
+    .exam-toolbar .btn.btn-outline-secondary {
         width: 100%;
+        justify-content: center;
     }
 
     li.list-group-item {
@@ -615,15 +630,35 @@ li.list-group-item {
         align-items: flex-start;
     }
 
+    .exam-info {
+        width: 100%;
+    }
+
     .exam-actions {
         width: 100%;
-        margin-top: 15px;
+        min-width: 0;
+        margin-top: 0;
         align-items: stretch;
     }
     
     .exam-meta {
         flex-direction: column;
         gap: 5px;
+    }
+
+    .exam-code-modal {
+        max-width: calc(100% - 24px);
+        padding: 28px 20px;
+        border-radius: 20px;
+    }
+
+    .exam-code-actions {
+        flex-direction: column-reverse;
+    }
+
+    .exam-code-close-btn {
+        top: 14px;
+        right: 14px;
     }
 }
 
@@ -635,5 +670,10 @@ li.list-group-item {
     }
     li.list-group-item small {
         font-size: 0.85rem;
+    }
+
+    .exam-code-input {
+        font-size: 1.7rem;
+        letter-spacing: 8px;
     }
 }

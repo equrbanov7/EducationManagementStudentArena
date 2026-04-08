@@ -280,8 +280,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    function findCreateCourseTrigger(target) {
+        if (!target || typeof target.closest !== "function") {
+            return null;
+        }
+        return target.closest(".js-open-create-course");
+    }
+
     document.addEventListener("click", function (event) {
-        var trigger = event.target.closest(".js-open-create-course");
+        var trigger = findCreateCourseTrigger(event.target);
         if (!trigger) {
             return;
         }
@@ -295,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.addEventListener("pointerenter", function (event) {
-        var trigger = event.target.closest(".js-open-create-course");
+        var trigger = findCreateCourseTrigger(event.target);
         if (!trigger) {
             return;
         }
@@ -304,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, true);
 
     document.addEventListener("focusin", function (event) {
-        var trigger = event.target.closest(".js-open-create-course");
+        var trigger = findCreateCourseTrigger(event.target);
         if (!trigger) {
             return;
         }
