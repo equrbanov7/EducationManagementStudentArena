@@ -59,7 +59,7 @@ jobs:
   lint:
     uses: ./.github/workflows/_lint.yml
     with:
-      python-version: "3.11.6"
+      python-version: "3.11"
 
   # ── 2a. Unit Tests (Python 3.11) ───────────────────────────────────────
   unit-tests-311:
@@ -83,14 +83,14 @@ jobs:
     needs: lint
     uses: ./.github/workflows/_build.yml
     with:
-      python-version: "3.11.6"
+      python-version: "3.11"
 
   # ── 4. Security Scan ───────────────────────────────────────────────────
   security:
     needs: lint
     uses: ./.github/workflows/_security.yml
     with:
-      python-version: "3.11.6"
+      python-version: "3.11"
 
   # ── 5. Secret Scan (Gitleaks) ──────────────────────────────────────────
   secret-scan:
@@ -124,7 +124,7 @@ jobs:
     needs: docker-build
     uses: ./.github/workflows/_e2e-smoke.yml
     with:
-      python-version: "3.11.6"
+      python-version: "3.11"
 
   # ── Final gate — branch-protection check ───────────────────────────────
   ci-success:
