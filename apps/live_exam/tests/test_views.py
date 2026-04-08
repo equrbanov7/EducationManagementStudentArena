@@ -330,12 +330,44 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
+    def test_pin_entry_resolves_unique_prefix_to_active_session(self):
+        """A uniquely identifying visible PIN prefix should redirect to the full active session PIN."""
+        self.session.pin = "8NJ3KUPQRS"
+        self.session.save(update_fields=["pin"])
+
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "8NJ3KU"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
     def test_pin_entry_resolves_ambiguous_glyphs_to_unique_session(self):
         """Human-friendly lookup should forgive 0/O and 1/I/L confusion when the match is unique."""
         self.session.pin = "O5H96FQW89"
         self.session.save(update_fields=["pin"])
 
         response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "05H96FQW89"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_pin_entry_does_not_resolve_ambiguous_prefix(self):
+        """A prefix that matches multiple active sessions must still fail closed."""
+        self.session.pin = "8NJ3KUPQRS"
+        self.session.save(update_fields=["pin"])
+        other_session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        other_session.pin = "8NJ3KUXYZA"
+        other_session.save(update_fields=["pin"])
+
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "8NJ3KU"})
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_join_page_redirects_prefix_to_canonical_full_pin(self):
+        """Direct visits to a uniquely identifying partial join URL should canonicalize to the full PIN."""
+        self.session.pin = "8NJ3KUPQRS"
+        self.session.save(update_fields=["pin"])
+
+        response = self.client.get(reverse("liveExam:join_page", kwargs={"pin": "8NJ3KU"}))
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
