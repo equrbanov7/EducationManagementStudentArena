@@ -56,6 +56,7 @@ from apps.live_exam.transport import (
     build_reaction_event_payload,
 )
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
+from core.rls import bypass_rls
 from core.utils import get_client_ip
 
 PIN_ENTRY_COPY = {
@@ -270,30 +271,33 @@ def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]
     if len(normalized) < MIN_PIN_LENGTH:
         return normalized, None
 
-    exact_match = LiveSession.objects.filter(pin=normalized).first()
-    if exact_match:
-        return exact_match.pin, exact_match
+    with bypass_rls():
+        exact_match = LiveSession.objects.select_related("exam").filter(pin=normalized).first()
+        if exact_match:
+            return exact_match.pin, exact_match
 
-    candidates = _candidate_pin_variants(normalized)
-    matches = list(LiveSession.objects.filter(pin__in=candidates).order_by("id")[:2])
-    if len(matches) == 1:
-        return matches[0].pin, matches[0]
+        candidates = _candidate_pin_variants(normalized)
+        matches = list(LiveSession.objects.select_related("exam").filter(pin__in=candidates).order_by("id")[:2])
+        if len(matches) == 1:
+            return matches[0].pin, matches[0]
 
-    if len(normalized) < PIN_LENGTH:
-        prefix_candidates = tuple(
-            dict.fromkeys(candidate for candidate in candidates if len(candidate) >= MIN_PIN_LENGTH)
-        )
-        prefix_query = None
-        for prefix in prefix_candidates:
-            clause = Q(pin__startswith=prefix)
-            prefix_query = clause if prefix_query is None else prefix_query | clause
-
-        if prefix_query is not None:
-            prefix_matches = list(
-                LiveSession.objects.filter(prefix_query, state__in=_JOINABLE_SESSION_STATES).order_by("id")[:2]
+        if len(normalized) < PIN_LENGTH:
+            prefix_candidates = tuple(
+                dict.fromkeys(candidate for candidate in candidates if len(candidate) >= MIN_PIN_LENGTH)
             )
-            if len(prefix_matches) == 1:
-                return prefix_matches[0].pin, prefix_matches[0]
+            prefix_query = None
+            for prefix in prefix_candidates:
+                clause = Q(pin__startswith=prefix)
+                prefix_query = clause if prefix_query is None else prefix_query | clause
+
+            if prefix_query is not None:
+                prefix_matches = list(
+                    LiveSession.objects.select_related("exam")
+                    .filter(prefix_query, state__in=_JOINABLE_SESSION_STATES)
+                    .order_by("id")[:2]
+                )
+                if len(prefix_matches) == 1:
+                    return prefix_matches[0].pin, prefix_matches[0]
 
     return normalized, None
 
@@ -319,12 +323,13 @@ def _nickname_is_taken(
     exclude_player_id: int | None = None,
     exclude_client_id: str | None = None,
 ) -> bool:
-    queryset = session.players.filter(nickname__iexact=nickname)
-    if exclude_player_id:
-        queryset = queryset.exclude(id=exclude_player_id)
-    if exclude_client_id:
-        queryset = queryset.exclude(client_id=exclude_client_id)
-    return queryset.exists()
+    with bypass_rls():
+        queryset = session.players.filter(nickname__iexact=nickname)
+        if exclude_player_id:
+            queryset = queryset.exclude(id=exclude_player_id)
+        if exclude_client_id:
+            queryset = queryset.exclude(client_id=exclude_client_id)
+        return queryset.exists()
 
 
 def _live_client_id_key(request) -> str:
@@ -346,7 +351,8 @@ def _ensure_live_client_cookie(request, response):
 
 
 def _broadcast_lobby_state(session: LiveSession) -> None:
-    broadcast(session.pin, build_lobby_state_payload(session), "lobby")
+    with bypass_rls():
+        broadcast(session.pin, build_lobby_state_payload(session), "lobby")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -507,42 +513,43 @@ def live_join_enter(request, pin):
 
     client_id = get_client_id(request)
     now = timezone.now()
-    player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
     max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))
 
-    if player is None and session.players.count() >= max_participants:
-        return JsonResponse(
-            {
-                "ok": False,
-                "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
-                    limit=max_participants
-                ),
-            },
-            status=403,
-        )
+    with bypass_rls():
+        player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
+        if player is None and session.players.count() >= max_participants:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
+                        limit=max_participants
+                    ),
+                },
+                status=403,
+            )
 
-    if _nickname_is_taken(session, nickname, exclude_client_id=client_id):
-        return JsonResponse(
-            {"ok": False, "message": _nickname_conflict_message()},
-            status=409,
-        )
-    if player:
-        player.nickname = nickname
-        player.avatar_key = avatar_key
-        player.accessory_key = accessory_key
-        player.is_connected = True
-        player.last_seen = now
-        player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
-    else:
-        player = LivePlayer.objects.create(
-            session=session,
-            client_id=client_id,
-            nickname=nickname,
-            avatar_key=avatar_key,
-            accessory_key=accessory_key,
-            is_connected=True,
-            last_seen=now,
-        )
+        if _nickname_is_taken(session, nickname, exclude_client_id=client_id):
+            return JsonResponse(
+                {"ok": False, "message": _nickname_conflict_message()},
+                status=409,
+            )
+        if player:
+            player.nickname = nickname
+            player.avatar_key = avatar_key
+            player.accessory_key = accessory_key
+            player.is_connected = True
+            player.last_seen = now
+            player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
+        else:
+            player = LivePlayer.objects.create(
+                session=session,
+                client_id=client_id,
+                nickname=nickname,
+                avatar_key=avatar_key,
+                accessory_key=accessory_key,
+                is_connected=True,
+                last_seen=now,
+            )
 
     token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
@@ -572,7 +579,8 @@ def live_join_enter(request, pin):
 
 
 def live_qr_png(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
 
     join_url = build_join_url(request, session)
 
@@ -587,14 +595,15 @@ def live_qr_png(request, pin):
 
 
 def live_wait_room(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
-    player = get_request_player(request, pin=pin)
-    if player is None:
-        return redirect("liveExam:join_page", pin=pin)
-    if session.state != LiveSession.STATE_LOBBY:
-        return redirect("liveExam:player_screen", pin=pin)
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        player = get_request_player(request, pin=pin)
+        if player is None:
+            return redirect("liveExam:join_page", pin=pin)
+        if session.state != LiveSession.STATE_LOBBY:
+            return redirect("liveExam:player_screen", pin=pin)
 
-    players = serialize_players(session)
+        players = serialize_players(session)
     return render(
         request,
         "liveExam/wait_room.html",
@@ -612,13 +621,14 @@ def live_wait_room(request, pin):
 
 @require_POST
 def live_wait_profile_update(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
-    player = get_request_player(request, pin=pin)
-    if player is None or player.session_id != session.id:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-            status=403,
-        )
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        player = get_request_player(request, pin=pin)
+        if player is None or player.session_id != session.id:
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+                status=403,
+            )
 
     session_settings = get_session_settings(session)
     nickname = clean_nickname(request.POST.get("nickname"))
@@ -649,12 +659,13 @@ def live_wait_profile_update(request, pin):
             status=409,
         )
 
-    player.nickname = nickname
-    player.avatar_key = avatar_key
-    player.accessory_key = accessory_key
-    player.is_connected = True
-    player.last_seen = timezone.now()
-    player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
+    with bypass_rls():
+        player.nickname = nickname
+        player.avatar_key = avatar_key
+        player.accessory_key = accessory_key
+        player.is_connected = True
+        player.last_seen = timezone.now()
+        player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
 
     _broadcast_lobby_state(session)
 
@@ -668,13 +679,14 @@ def live_wait_profile_update(request, pin):
 
 @require_POST
 def live_wait_reaction(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
-    player = get_request_player(request, pin=pin)
-    if player is None or player.session_id != session.id:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-            status=403,
-        )
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        player = get_request_player(request, pin=pin)
+        if player is None or player.session_id != session.id:
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+                status=403,
+            )
 
     if not get_session_settings(session).get("reactions_enabled", True):
         return JsonResponse(
@@ -726,10 +738,11 @@ def live_wait_reaction(request, pin):
 
 
 def live_player_screen(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
-    player = get_request_player(request, pin=pin)
-    if player is None:
-        return redirect("liveExam:join_page", pin=pin)
+    with bypass_rls():
+        session = get_object_or_404(LiveSession, pin=pin)
+        player = get_request_player(request, pin=pin)
+        if player is None:
+            return redirect("liveExam:join_page", pin=pin)
 
     return render(
         request,
