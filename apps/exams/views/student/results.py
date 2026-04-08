@@ -15,6 +15,7 @@ from ._helpers import (
     build_exam_history_url,
     build_exam_result_url,
     current_return_to,
+    ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
 )
 
@@ -46,6 +47,7 @@ def exam_result(request, slug, attempt_id):
     Student üçün konkret attempt-in nəticə səhifəsi.
     Yalnız həmin attempt üçün seçilmiş suallar göstərilir.
     """
+    ensure_student_exam_tenant_context(request)
     exam = get_object_or_404(tenant_scoped_exams(request), slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
     return_to = current_return_to(request)
@@ -107,6 +109,7 @@ def exam_result(request, slug, attempt_id):
 
 @login_required
 def student_exam_history(request):
+    ensure_student_exam_tenant_context(request)
     active_tenant_exams = tenant_scoped_exams(request)
     return_to = current_return_to(request)
     exam_slug = (request.GET.get("exam") or "").strip()

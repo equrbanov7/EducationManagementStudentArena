@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _start_or_resume_attempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -44,6 +45,7 @@ def _resolve_exam_failure_redirect(request):
 @login_required
 @require_POST
 def exam_code_check(request):
+    ensure_student_exam_tenant_context(request)
     slug = request.POST.get("exam_slug")
     code = (request.POST.get("access_code") or "").strip()
 

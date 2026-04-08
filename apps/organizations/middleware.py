@@ -21,7 +21,7 @@ Organization resolution order
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.accounts.models import ProfileRole
-from core.rls import clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
+from core.rls import bypass_rls, clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .services import ensure_owner_membership, is_tenant_accessible_organization
@@ -43,12 +43,13 @@ class OrganizationMiddleware:
     @staticmethod
     def _fetch_active_memberships(user):
         """Return all active memberships for *user* across active organizations."""
-        return list(
-            user.memberships.filter(is_active=True, organization__is_active=True)
-            .filter(organization__status="active")
-            .select_related("organization", "role", "scope_unit")
-            .order_by("-is_primary", "-role__level")
-        )
+        with bypass_rls():
+            return list(
+                user.memberships.filter(is_active=True, organization__is_active=True)
+                .filter(organization__status="active")
+                .select_related("organization", "role", "scope_unit")
+                .order_by("-is_primary", "-role__level")
+            )
 
     @staticmethod
     def _unique_orgs(memberships):
@@ -88,15 +89,16 @@ class OrganizationMiddleware:
             if org_slug:
                 # Single query: join memberships → organization to avoid a
                 # separate Organization.objects.get() round-trip.
-                memberships = list(
-                    request.user.memberships.filter(
-                        organization__slug=org_slug,
-                        organization__is_active=True,
-                        is_active=True,
+                with bypass_rls():
+                    memberships = list(
+                        request.user.memberships.filter(
+                            organization__slug=org_slug,
+                            organization__is_active=True,
+                            is_active=True,
+                        )
+                        .select_related("organization", "role", "scope_unit")
+                        .order_by("-is_primary", "-role__level")
                     )
-                    .select_related("organization", "role", "scope_unit")
-                    .order_by("-is_primary", "-role__level")
-                )
                 is_superuser = getattr(request.user, "is_superuser", False) or getattr(
                     request.user, "is_superadmin", False
                 )
