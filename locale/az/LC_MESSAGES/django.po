@@ -7428,6 +7428,11 @@ msgctxt "exams.form.exam.placeholder"
 msgid "max_attempts_per_user"
 msgstr "Məs: 1, 2, 3..."
 
+#: apps/exams/forms.py:114
+msgctxt "exams.form.exam.placeholder"
+msgid "random_question_count"
+msgstr "Məs: 10"
+
 #: apps/exams/forms.py:113
 msgctxt "exams.form.exam.label"
 msgid "title"
@@ -7492,6 +7497,18 @@ msgstr "Hər sual üçün default vaxt (saniyə)"
 msgctxt "exams.form.exam.label"
 msgid "max_attempts_per_user"
 msgstr "Bir istifadəçi üçün maksimum cəhd sayı"
+
+#: apps/exams/forms.py:126
+msgctxt "exams.form.exam.label"
+msgid "random_question_count"
+msgstr "Tələbəyə düşəcək sual sayı"
+
+#: apps/exams/forms.py:130
+msgctxt "exams.form.exam.help"
+msgid "random_question_count"
+msgstr ""
+"Yalnız test imtahanları üçündür. Default 10-dur. Bütün aktiv sualları random "
+"qaydada göstərmək üçün 0 yazın."
 
 #: apps/exams/forms.py:164
 msgctxt "exams.form.exam.error"
