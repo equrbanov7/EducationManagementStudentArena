@@ -143,6 +143,8 @@
 .role-badge.admin                { background: #fee2e2; color: #dc2626;  border: 1px solid #fecaca; }
 .role-badge.org_owner            { background: #ffedd5; color: #c2410c;  border: 1px solid #fed7aa; }
 .role-badge.org_admin            { background: #fef9c3; color: #a16207;  border: 1px solid #fef08a; }
+.role-badge.member               { background: #f8fafc; color: #475569;  border: 1px solid #cbd5e1; }
+.role-badge.hr                   { background: #fdf4ff; color: #a21caf;  border: 1px solid #f5d0fe; }
 .role-badge.teacher              { background: #eff6ff; color: #2563eb;  border: 1px solid #bfdbfe; }
 .role-badge.assistant_teacher    { background: #ecfeff; color: #0891b2;  border: 1px solid #a5f3fc; }
 .role-badge.lead_student         { background: #eff6ff; color: #2563eb;  border: 1px solid #bfdbfe; }
