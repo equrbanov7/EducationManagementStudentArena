@@ -58,7 +58,9 @@ from apps.exams.models import (
     QuestionBlock,
     StudentGroup,
 )
+from apps.live_exam.auth import build_player_token, get_player_from_token
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.views.player import _resolve_live_session
 from apps.notifications.models import InAppNotification, StudentOrganizationRequest
 from apps.organizations.models import Membership, OrgUnit, Role
 from core.constants import OrganizationType, RoleScopeType
@@ -944,6 +946,29 @@ class TestRLSLiveExam:
         results = list(LivePlayer.objects.all())
         assert len(results) == 1
         assert results[0].pk == player_a.pk
+
+    def test_public_pin_resolution_bypasses_tenant_context(self, live_sessions):
+        _skip_if_not_pg()
+        session_a, _session_b = live_sessions
+
+        _enable_rls()
+        resolved_pin, resolved_session = _resolve_live_session(session_a.pin)
+
+        assert resolved_pin == session_a.pin
+        assert resolved_session is not None
+        assert resolved_session.pk == session_a.pk
+
+    def test_player_token_lookup_bypasses_tenant_context(self, live_sessions):
+        _skip_if_not_pg()
+        session_a, _session_b = live_sessions
+        player = LivePlayer.objects.create(session=session_a, nickname="Alice", client_id="client-public")
+        token = build_player_token(pin=session_a.pin, player_id=player.id, client_id=player.client_id)
+
+        _enable_rls()
+        resolved_player = get_player_from_token(token, pin=session_a.pin)
+
+        assert resolved_player is not None
+        assert resolved_player.pk == player.pk
 
     def test_live_answer_isolation(self, two_orgs, live_sessions):
         _skip_if_not_pg()
