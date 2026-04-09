@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
-from apps.live_exam.domain.session import build_question_phase_times, get_active_question
+from apps.live_exam.domain.session import build_question_phase_times, get_active_question, question_points
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_question_result
 from core.rls import bypass_rls
@@ -175,7 +175,7 @@ def _save_answer_and_score_impl(
                 score = calculate_answer_score(
                     option_ids=option_ids,
                     correct_ids=correct_ids,
-                    base_points=int(getattr(exam_question, "points", 1000) or 1000),
+                    base_points=question_points(session, exam_question),
                     answer_ms=answer_ms,
                     total_ms=total_ms,
                 )
