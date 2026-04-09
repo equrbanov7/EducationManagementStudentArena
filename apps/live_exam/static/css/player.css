@@ -1276,3 +1276,260 @@ body.live-player-page {
         font-size: 0.86rem;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Final podium stage (player view)
+   ═══════════════════════════════════════════════════════════════ */
+
+.final-podium-stage {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 0 0;
+}
+
+.final-podium-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    animation: finalPodiumReveal 0.8s ease-out both;
+}
+
+.final-podium-block--place-1 { animation-delay: 0.5s; }
+.final-podium-block--place-2 { animation-delay: 0.3s; }
+.final-podium-block--place-3 { animation-delay: 0.1s; }
+
+@keyframes finalPodiumReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.final-podium-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 8px;
+    position: relative;
+    width: 100%;
+}
+
+.final-podium-crown {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.4));
+    animation: crownBounce 1.6s ease-in-out infinite;
+}
+
+@keyframes crownBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.final-podium-medal {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Space Grotesk", "Manrope", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.22);
+}
+
+.final-podium-block--place-2 .final-podium-medal {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.28), rgba(192, 192, 192, 0.12));
+    border-color: rgba(192, 192, 192, 0.4);
+}
+
+.final-podium-block--place-3 .final-podium-medal {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.28), rgba(205, 127, 50, 0.12));
+    border-color: rgba(205, 127, 50, 0.4);
+}
+
+.final-podium-avatar {
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.final-podium-name {
+    font-size: clamp(0.78rem, 2.5vw, 0.96rem);
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.final-podium-score {
+    font-family: "Space Grotesk", "Manrope", sans-serif;
+    font-size: clamp(0.9rem, 3vw, 1.2rem);
+    font-weight: 700;
+    color: var(--player-yellow);
+}
+
+.final-podium-stand {
+    width: 100%;
+    border-radius: 14px 14px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10px;
+    font-family: "Space Grotesk", "Manrope", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.final-podium-block--place-1 .final-podium-stand {
+    height: 90px;
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.22), rgba(255, 215, 0, 0.06));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-bottom: none;
+}
+
+.final-podium-block--place-2 .final-podium-stand {
+    height: 64px;
+    background: linear-gradient(180deg, rgba(192, 192, 192, 0.18), rgba(192, 192, 192, 0.04));
+    border: 1px solid rgba(192, 192, 192, 0.24);
+    border-bottom: none;
+}
+
+.final-podium-block--place-3 .final-podium-stand {
+    height: 46px;
+    background: linear-gradient(180deg, rgba(205, 127, 50, 0.18), rgba(205, 127, 50, 0.04));
+    border: 1px solid rgba(205, 127, 50, 0.24);
+    border-bottom: none;
+}
+
+.final-podium-stand__place {
+    opacity: 0.5;
+}
+
+.final-others-title {
+    margin-top: 18px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--player-text-muted);
+    text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive leaderboard fixes
+   ═══════════════════════════════════════════════════════════════ */
+
+.leaderboard-shell,
+.final-shell {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.leaderboard-list,
+.final-leaderboard {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.leaderboard-row,
+.final-row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.leaderboard-row__left {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+@media (max-width: 400px) {
+    .final-podium-stage {
+        gap: 6px;
+        padding: 10px 0 0;
+    }
+
+    .final-podium-card {
+        padding: 10px 4px;
+        gap: 4px;
+    }
+
+    .final-podium-crown {
+        font-size: 1.4rem;
+    }
+
+    .final-podium-medal {
+        width: 26px;
+        height: 26px;
+        font-size: 0.76rem;
+    }
+
+    .final-podium-stand {
+        border-radius: 10px 10px 0 0;
+        font-size: 1.1rem;
+        padding-top: 6px;
+    }
+
+    .final-podium-block--place-1 .final-podium-stand { height: 70px; }
+    .final-podium-block--place-2 .final-podium-stand { height: 50px; }
+    .final-podium-block--place-3 .final-podium-stand { height: 36px; }
+
+    .leaderboard-row__avatar {
+        display: none;
+    }
+
+    .leaderboard-row__left,
+    .leaderboard-row__right {
+        gap: 6px;
+    }
+
+    .leaderboard-row__movement {
+        display: none;
+    }
+
+    .final-row {
+        padding: 10px 10px;
+        gap: 8px;
+    }
+
+    .final-row__meta {
+        gap: 8px;
+    }
+
+    .final-row__rank {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        font-size: 0.76rem;
+    }
+
+    .final-row__name {
+        font-size: 0.84rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .final-row__score {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+}
