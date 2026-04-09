@@ -144,4 +144,36 @@
     .history-table {
         min-width: 780px;
     }
+    .stat-card {
+        padding: 1rem;
+    }
+    .stat-card h2 {
+        font-size: 1.3rem;
+    }
+    .history-tracking-label {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container.py-5 {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    .stat-card {
+        padding: 0.8rem;
+        border-radius: 0.75rem;
+    }
+    .stat-card h2 {
+        font-size: 1.1rem;
+    }
+    .table-modern-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    .empty-state-card {
+        padding: 2.5rem 1rem;
+    }
 }

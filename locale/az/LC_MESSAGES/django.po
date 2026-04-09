@@ -15945,9 +15945,17 @@ msgctxt "profile.section"
 msgid "staff_management"
 msgstr "Staff İdarəetməsi"
 
+msgctxt "profile.section"
+msgid "student_management"
+msgstr "Tələbə İdarəetməsi"
+
 msgctxt "profile.sidebar"
 msgid "staff_management"
 msgstr "Staff İdarəetməsi"
+
+msgctxt "profile.sidebar"
+msgid "student_management"
+msgstr "Tələbə İdarəetməsi"
 
 msgctxt "profile.notifications"
 msgid "Search notifications..."
@@ -15972,6 +15980,18 @@ msgstr "Fərqli axtarış sözü yoxlayın və ya axtarış filterini təmizləy
 msgctxt "staff.management"
 msgid "Staff Management"
 msgstr "Staff İdarəetməsi"
+
+msgctxt "staff.management"
+msgid "Student Management"
+msgstr "Tələbə İdarəetməsi"
+
+msgctxt "staff.management"
+msgid "Manage students in %(organization_name)s. You can accept requests and send invitations."
+msgstr "%(organization_name)s daxilində tələbələri idarə edin. Müraciətləri qəbul edə və dəvətlər göndərə bilərsiniz."
+
+msgctxt "staff.management"
+msgid "Teacher view"
+msgstr "Müəllim görünüşü"
 
 msgctxt "staff.management"
 msgid "Back to profile"
