@@ -566,7 +566,7 @@ def student_organization_management(request):
             request.POST = request.POST.copy()
             request.POST["invite_role_type"] = MembershipRequestRoleType.STUDENT
 
-        if teacher_student_only and action in {"revoke_sent_invites"}:
+        if teacher_student_only and action == "revoke_sent_invites":
             request.POST = request.POST.copy()
             request.POST["revoke_role_type"] = MembershipRequestRoleType.STUDENT
 
