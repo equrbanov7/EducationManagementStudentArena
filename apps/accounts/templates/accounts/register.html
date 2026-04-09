@@ -217,6 +217,27 @@
             <div class="wizard-panel" id="step3" hidden>
                 <h3 class="register-step-title">{% trans "personal_info" context "accounts.register" %}</h3>
 
+                <div class="register-selection-summary" id="signupSelectionSummary" hidden>
+                    <div class="register-selection-summary__grid">
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{{ form.country.label }}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryCountry">-</span>
+                        </div>
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{% trans "step_account_type" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryAccountType">-</span>
+                        </div>
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{% trans "choose_role" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryRole">-</span>
+                        </div>
+                        <div class="register-selection-summary__item" id="signupSummaryOrganizationItem" hidden>
+                            <span class="register-selection-summary__label">{% trans "institution_search_label" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryOrganization">-</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="register-form-field">
                     {{ form.username.label_tag }}
                     {{ form.username }}

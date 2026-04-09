@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
         university_staff: { mode: "staff_join", orgType: "university" },
         course_staff: { mode: "staff_join", orgType: "course_center" },
     };
+    var emptyRegistrationSelection = { mode: "", orgType: "" };
 
     // Org type → combined registration type value for each role
     var orgRoleCombinedMap = {
@@ -88,6 +89,12 @@ document.addEventListener("DOMContentLoaded", function () {
     var signupStepQueryKey = "signup_step";
     var signupRestoreDraftQueryKey = "signup_restore";
     var signupDraftStorageKey = "accounts.register.draft";
+    var signupSummary = document.getElementById("signupSelectionSummary");
+    var signupSummaryCountry = document.getElementById("signupSummaryCountry");
+    var signupSummaryAccountType = document.getElementById("signupSummaryAccountType");
+    var signupSummaryRole = document.getElementById("signupSummaryRole");
+    var signupSummaryOrganization = document.getElementById("signupSummaryOrganization");
+    var signupSummaryOrganizationItem = document.getElementById("signupSummaryOrganizationItem");
 
     // Step 3 persona-specific elements
     var phoneField = document.getElementById("phoneField");
@@ -101,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var lookupData = window.SIGNUP_LOOKUP_DATA || {};
     var organizations = lookupData.organizations || [];
     var enhancedSelects = [];
+    var step2bBaseTitle = step2bTitle ? step2bTitle.textContent.trim() : tr("choose_role", "Choose your role");
 
     // Track which org type the user picked in step 2a
     var _selectedOrgType = null;
@@ -211,12 +219,170 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function currentSelection() {
-        var selected = registrationTypeSelect ? registrationTypeSelect.value : "individual";
-        return registrationTypeMap[selected] || registrationTypeMap.individual;
+        var selected = registrationTypeSelect ? registrationTypeSelect.value : "";
+        if (!selected) return emptyRegistrationSelection;
+        return registrationTypeMap[selected] || emptyRegistrationSelection;
+    }
+
+    function getDraftStorage() {
+        try {
+            return window.localStorage || null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function getLegacyDraftStorage() {
+        try {
+            return window.sessionStorage || null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function migrateLegacySignupDraft() {
+        var draftStorage = getDraftStorage();
+        var legacyDraftStorage = getLegacyDraftStorage();
+        if (!draftStorage || !legacyDraftStorage) return;
+        if (draftStorage.getItem(signupDraftStorageKey)) return;
+
+        var legacyDraft = legacyDraftStorage.getItem(signupDraftStorageKey);
+        if (!legacyDraft) return;
+
+        draftStorage.setItem(signupDraftStorageKey, legacyDraft);
+        legacyDraftStorage.removeItem(signupDraftStorageKey);
     }
 
     function isJoinMode(mode) {
         return mode === "student_join" || mode === "teacher_join" || mode === "staff_join";
+    }
+
+    function selectedOptionText(select) {
+        if (!select || !select.options || select.selectedIndex < 0) return "";
+        var selectedOption = select.options[select.selectedIndex];
+        return selectedOption && selectedOption.value ? selectedOption.textContent.trim() : "";
+    }
+
+    function getRegistrationMeta(value) {
+        var selectedValue = value !== undefined ? value : registrationTypeSelect ? registrationTypeSelect.value : "";
+
+        for (var orgType in orgRoleCombinedMap) {
+            if (!Object.prototype.hasOwnProperty.call(orgRoleCombinedMap, orgType)) continue;
+
+            var roles = orgRoleCombinedMap[orgType];
+            for (var role in roles) {
+                if (!Object.prototype.hasOwnProperty.call(roles, role)) continue;
+                if (roles[role] === selectedValue) {
+                    return {
+                        value: selectedValue,
+                        orgType: orgType,
+                        role: role,
+                    };
+                }
+            }
+        }
+
+        return {
+            value: selectedValue,
+            orgType: selectedValue ? "individual" : "",
+            role: selectedValue === "individual" ? "owner" : "",
+        };
+    }
+
+    function cardTitleText(container, selector) {
+        if (!container) return "";
+        var title = container.querySelector(selector + " .register-persona-card__title");
+        return title ? title.textContent.trim() : "";
+    }
+
+    function setStep2bTitleText(orgType) {
+        if (!step2bTitle) return;
+
+        var orgTypeLabel =
+            cardTitleText(orgTypeCards, '.register-persona-card[data-org-type="' + orgType + '"]') || orgType;
+
+        step2bTitle.textContent = orgTypeLabel + " – " + step2bBaseTitle;
+    }
+
+    function syncStep2CardSelection() {
+        var meta = getRegistrationMeta();
+
+        if (orgTypeCards) {
+            orgTypeCards.querySelectorAll(".register-persona-card[data-org-type]").forEach(function (card) {
+                card.classList.toggle("is-selected", Boolean(meta.orgType) && card.dataset.orgType === meta.orgType);
+            });
+        }
+
+        if (roleCards) {
+            roleCards.querySelectorAll(".register-persona-role-card[data-role]").forEach(function (card) {
+                card.classList.toggle("is-selected", Boolean(meta.role) && card.dataset.role === meta.role);
+            });
+        }
+
+        if (!meta.value) return;
+
+        _selectedOrgType = meta.orgType || null;
+
+        if (step2a) step2a.hidden = true;
+        if (step2b) step2b.hidden = false;
+
+        if (meta.orgType === "individual") {
+            if (roleCards) roleCards.hidden = true;
+            if (step2bTitle) step2bTitle.hidden = true;
+            return;
+        }
+
+        if (roleCards) roleCards.hidden = false;
+        if (step2bTitle) step2bTitle.hidden = false;
+        setStep2bTitleText(meta.orgType);
+    }
+
+    function updateSelectionSummary() {
+        if (!signupSummary) return;
+
+        var meta = getRegistrationMeta();
+        var selection = currentSelection();
+        var countryLabel = selectedOptionText(countrySelect);
+        var accountTypeLabel = meta.orgType
+            ? cardTitleText(orgTypeCards, '.register-persona-card[data-org-type="' + meta.orgType + '"]')
+            : "";
+        var roleLabel = meta.role
+            ? cardTitleText(roleCards, '.register-persona-role-card[data-role="' + meta.role + '"]')
+            : "";
+        var organizationLabel = "";
+
+        if (selection.mode === "organization_create" && organizationNameInput) {
+            organizationLabel = organizationNameInput.value.trim();
+        } else if (isJoinMode(selection.mode)) {
+            var hasSelectedOrganization =
+                organizationSearchInput && organizationSearchInput.dataset.selectedValue
+                    ? organizationSearchInput.dataset.selectedValue
+                    : organizationSelect
+                      ? organizationSelect.value
+                      : "";
+            organizationLabel = hasSelectedOrganization
+                ? selectedOptionText(organizationSelect) || (organizationSearchInput ? organizationSearchInput.value.trim() : "")
+                : "";
+        }
+
+        if (signupSummaryCountry) {
+            signupSummaryCountry.textContent = countryLabel || "-";
+        }
+
+        if (signupSummaryAccountType) {
+            signupSummaryAccountType.textContent = accountTypeLabel || "-";
+        }
+
+        if (signupSummaryRole) {
+            signupSummaryRole.textContent = roleLabel || "-";
+        }
+
+        if (signupSummaryOrganization && signupSummaryOrganizationItem) {
+            signupSummaryOrganization.textContent = organizationLabel || "-";
+            signupSummaryOrganizationItem.hidden = !organizationLabel;
+        }
+
+        signupSummary.hidden = !(countryLabel || accountTypeLabel || roleLabel || organizationLabel);
     }
 
     // Set the combined registration type value from org type + role
@@ -254,14 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (step2bTitle) step2bTitle.hidden = false;
 
         // Update title
-        if (step2bTitle) {
-            var orgTypeLabels = {
-                school: tr("org_type_school", "School"),
-                university: tr("org_type_university", "University"),
-                course_center: tr("org_type_course_center", "Course Center"),
-            };
-            step2bTitle.textContent = (orgTypeLabels[orgType] || orgType) + " – " + tr("choose_role", "Choose your role");
-        }
+        setStep2bTitleText(orgType);
 
         // Reset combined select so no stale value
         if (registrationTypeSelect) registrationTypeSelect.value = "";
@@ -310,7 +469,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (step2a) step2a.hidden = false;
             if (step2b) step2b.hidden = true;
             _selectedOrgType = null;
-            if (registrationTypeSelect) registrationTypeSelect.value = "";
+            if (registrationTypeSelect) {
+                registrationTypeSelect.value = "";
+                registrationTypeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
         });
     }
 
@@ -381,10 +543,13 @@ document.addEventListener("DOMContentLoaded", function () {
             optionButton.addEventListener("click", function () {
                 if (organizationSelect) {
                     organizationSelect.value = String(organization.id);
+                    organizationSelect.dispatchEvent(new Event("change", { bubbles: true }));
                 }
                 organizationSearchInput.value = organizationOptionLabel(organization);
                 organizationSearchInput.dataset.selectedValue = String(organization.id);
                 hideOrganizationSearchList();
+                updateSelectionSummary();
+                saveSignupDraft();
             });
             organizationSearchList.appendChild(optionButton);
         });
@@ -599,21 +764,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function saveSignupDraft() {
-        if (!window.sessionStorage) return;
+        var draftStorage = getDraftStorage();
+        if (!draftStorage) return;
         var draft = collectSignupDraft();
         if (!draft) return;
-        window.sessionStorage.setItem(signupDraftStorageKey, JSON.stringify(draft));
+        draftStorage.setItem(signupDraftStorageKey, JSON.stringify(draft));
     }
 
     function clearSignupDraft() {
-        if (!window.sessionStorage) return;
-        window.sessionStorage.removeItem(signupDraftStorageKey);
+        var draftStorage = getDraftStorage();
+        if (draftStorage) {
+            draftStorage.removeItem(signupDraftStorageKey);
+        }
+
+        var legacyDraftStorage = getLegacyDraftStorage();
+        if (legacyDraftStorage) {
+            legacyDraftStorage.removeItem(signupDraftStorageKey);
+        }
     }
 
     function restoreSignupDraft() {
-        if (!window.sessionStorage) return;
+        var draftStorage = getDraftStorage();
+        if (!draftStorage) return;
 
-        var rawDraft = window.sessionStorage.getItem(signupDraftStorageKey);
+        var rawDraft = draftStorage.getItem(signupDraftStorageKey);
         if (!rawDraft) return;
 
         try {
@@ -650,6 +824,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             updateStep2State();
+            syncStep2CardSelection();
             restoredSelectFields.forEach(function (field) {
                 field.dispatchEvent(new Event("change", { bubbles: true }));
             });
@@ -666,15 +841,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 privacyCheckbox.checked = Boolean(values.accept_privacy_policy);
                 syncPrivacyConsentState();
             }
+
+            updateSelectionSummary();
         } catch (error) {
             clearSignupDraft();
             return;
         }
-
-        clearSignupDraft();
     }
 
     window.persistRegisterWizardStep = persistWizardStep;
+    window.saveRegisterSignupDraft = saveSignupDraft;
+
+    migrateLegacySignupDraft();
 
     [countrySelect, registrationTypeSelect].forEach(function (select) {
         enhanceBootstrapSelect(select);
@@ -774,8 +952,11 @@ document.addEventListener("DOMContentLoaded", function () {
             hideOrganizationSearchList();
         }
 
+        syncStep2CardSelection();
+
         // Also update step 3 persona fields
         updateStep3State();
+        updateSelectionSummary();
     }
 
     function updateStep3State() {
@@ -845,6 +1026,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (organizationSelect) {
         organizationSelect.addEventListener("change", function () {
             syncSearchInputWithSelectedOrganization();
+            updateSelectionSummary();
         });
     }
 
@@ -906,11 +1088,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (registerForm) {
         registerForm.addEventListener("input", function (event) {
             if (event.target && event.target.type === "password") return;
+            updateSelectionSummary();
             saveSignupDraft();
         });
 
         registerForm.addEventListener("change", function (event) {
             if (event.target && event.target.type === "password") return;
+            updateSelectionSummary();
             saveSignupDraft();
         });
     }
@@ -930,10 +1114,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updateStep2State();
     updateStep3State();
 
-    if (shouldRestoreSignupDraft()) {
-        restoreSignupDraft();
-    }
-
     // If form has errors, reveal the relevant step.
     var hasErrors = document.querySelector(".register-global-errors, .register-field-error:not([hidden])");
     if (hasErrors) {
@@ -950,6 +1130,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     var requestedStep = getRequestedWizardStep();
+    if (shouldRestoreSignupDraft() || requestedStep > 1) {
+        restoreSignupDraft();
+    }
     syncLanguageSwitcherTargets(requestedStep);
     if (requestedStep > 1) {
         wizardNext(requestedStep);
@@ -977,6 +1160,10 @@ function wizardNext(step) {
 
     if (typeof window.persistRegisterWizardStep === "function") {
         window.persistRegisterWizardStep(normalizedStep);
+    }
+
+    if (typeof window.saveRegisterSignupDraft === "function") {
+        window.saveRegisterSignupDraft();
     }
 }
 

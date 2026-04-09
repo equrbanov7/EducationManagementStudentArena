@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import EmailOTP, ProfileRole
-from apps.accounts.services import get_pending_registration
+from apps.accounts.services import clear_pending_registration, get_pending_registration
 from apps.organizations.models import Country, Organization
 from core.constants import OrganizationType
 
@@ -62,6 +62,12 @@ class RegisterViewTest(TestCase):
         country_codes = {code for code, _label in response.context["form"].fields["country"].choices}
         self.assertIn("AZ", country_codes)
         self.assertContains(response, "Azərbaycan")
+
+    def test_register_page_does_not_preselect_account_type(self):
+        response = self.client.get(self.register_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["form"].fields["organization_type"].initial, "")
 
     def test_register_creates_user_and_profile(self):
         """Registration should stay pending until OTP verification completes."""
@@ -150,6 +156,18 @@ class RegisterViewTest(TestCase):
         self.assertIn("email", response.context["form"].errors)
         self.assertIn("country", response.context["form"].errors)
         self.assertFalse(User.objects.filter(username="bad'(").exists())
+
+    def test_register_requires_explicit_account_type_selection(self):
+        clear_pending_registration("newuser@example.com")
+        response = self.client.post(
+            self.register_url,
+            self._base_payload(organization_type=""),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("organization_type", response.context["form"].errors)
+        self.assertFalse(User.objects.filter(username="newuser").exists())
+        self.assertIsNone(get_pending_registration("newuser@example.com"))
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.dummy.EmailBackend")
     def test_register_rolls_back_user_when_otp_email_fails(self):

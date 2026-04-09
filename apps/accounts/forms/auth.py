@@ -101,6 +101,7 @@ class RegisterForm(forms.ModelForm):
     organization_type = forms.ChoiceField(
         label=pgettext_lazy("accounts.form.register.label", "registration_type"),
         choices=[
+            ("", ""),
             (
                 OrganizationType.INDIVIDUAL,
                 pgettext_lazy("accounts.form.register.choice", "org_type_individual"),
@@ -160,7 +161,7 @@ class RegisterForm(forms.ModelForm):
                 "data-register-enhanced-select": "true",
             }
         ),
-        initial=OrganizationType.INDIVIDUAL,
+        initial="",
     )
 
     institution = forms.ModelChoiceField(
@@ -350,6 +351,11 @@ class RegisterForm(forms.ModelForm):
         initial_role = cleaned_data.get("initial_role")
         signup_mode = "individual"
         organization_type = selected_registration_type
+
+        if not selected_registration_type:
+            cleaned_data["organization_type"] = ""
+            cleaned_data["signup_mode"] = ""
+            return cleaned_data
 
         if p1 and p2 and p1 != p2:
             self.add_error("password2", pgettext_lazy("accounts.form.register.error", "password_mismatch"))
