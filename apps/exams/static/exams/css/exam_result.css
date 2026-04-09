@@ -410,8 +410,30 @@
   
 
 /* Mobil Uyğunluq */
+@media (max-width: 992px) {
+    .result-container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
 @media (max-width: 768px) {
-    .summary-card { padding: 20px; }
+    .result-container {
+        max-width: 100%;
+        padding-left: 14px;
+        padding-right: 14px;
+        padding-bottom: 60px;
+        margin: 20px auto;
+    }
+    .page-title {
+        font-size: 1.4rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    .summary-card {
+        padding: 20px;
+        max-width: 100%;
+    }
     .main-score .stat-value { font-size: 2.5rem; }
     .action-footer {
         flex-direction: column;
@@ -419,4 +441,57 @@
     }
     .custom-blue-btn { width: 100%; justify-content: center; }
     .question-media img, .question-media video { max-height: 250px; }
+    .q-header {
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .q-body {
+        padding: 16px;
+    }
+    .option-item {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .tf-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 12px 16px;
+    }
+    .section-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-container {
+        padding-left: 10px;
+        padding-right: 10px;
+        margin: 14px auto;
+    }
+    .page-title {
+        font-size: 1.2rem;
+    }
+    .summary-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .main-score .stat-value {
+        font-size: 2rem;
+    }
+    .q-header {
+        padding: 12px;
+    }
+    .q-body {
+        padding: 12px;
+    }
+    .custom-blue-btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+    .section-divider {
+        margin: 30px 0 20px 0;
+    }
 }

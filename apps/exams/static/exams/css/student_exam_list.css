@@ -552,41 +552,51 @@ li.list-group-item {
 
 /* --- RESPONSIVE --- */
 
+@media (max-width: 992px) {
+    .container.my-4 {
+        width: calc(100% - 32px);
+        padding: 22px;
+        margin: 24px auto;
+    }
+}
 
-/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .container.my-4 {
         width: calc(100% - 24px);
+        max-width: 100%;
         padding: 18px;
         margin: 16px auto 24px;
         border-radius: 14px;
+        overflow-x: hidden;
     }
     .container.my-4 h1 {
-        font-size: clamp(1.5rem, 6vw, 1.85rem);
+        font-size: clamp(1.3rem, 5vw, 1.85rem);
         margin-bottom: 22px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     li.list-group-item {
-        flex-direction: column; /* Mobil cihazlarda sütun şəklində düzülür */
-        align-items: flex-start; /* Sol tərəfə yasla */
-        padding: 18px;
-        gap: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 12px;
     }
     li.list-group-item > div:first-child {
-        width: 100%; /* Məlumat bloku tam eni tutur */
+        width: 100%;
         margin-bottom: 0;
     }
     li.list-group-item > div:last-child {
-        width: 100%; /* Düymə bloku tam eni tutur */
-        display: flex; /* İçindəki elementləri yan-yana gətirir */
+        width: 100%;
+        display: flex;
         flex-wrap: wrap;
         justify-content: stretch;
-        gap: 10px; /* Cəhd və düymə arasında boşluq */
+        gap: 10px;
     }
 
     li.list-group-item .badge.bg-secondary {
-        margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
-        flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
+        margin-left: 0 !important;
+        flex-grow: 1;
         width: 100%;
         text-align: center;
     }
@@ -595,8 +605,8 @@ li.list-group-item {
     li.list-group-item .btn.btn-outline-secondary,
     li.list-group-item .customBtn {
         width: 100%;
-        flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
-        margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
+        flex-grow: 1;
+        margin-left: 0 !important;
         justify-content: center;
     }
 
@@ -610,7 +620,7 @@ li.list-group-item {
         padding: 14px;
         gap: 12px;
     }
-    
+
     .search-box,
     .filter-box,
     .filter-box .bootstrap-single-select,
@@ -618,16 +628,11 @@ li.list-group-item {
         width: 100%;
         min-width: 0;
     }
-    
+
     .search-btn,
     .exam-toolbar .btn.btn-outline-secondary {
         width: 100%;
         justify-content: center;
-    }
-
-    li.list-group-item {
-        flex-direction: column;
-        align-items: flex-start;
     }
 
     .exam-info {
@@ -640,7 +645,7 @@ li.list-group-item {
         margin-top: 0;
         align-items: stretch;
     }
-    
+
     .exam-meta {
         flex-direction: column;
         gap: 5px;
@@ -660,20 +665,59 @@ li.list-group-item {
         top: 14px;
         right: 14px;
     }
-}
 
-
-
-@media (max-width: 480px) {
     li.list-group-item strong {
         font-size: 1.1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+@media (max-width: 480px) {
+    .container.my-4 {
+        width: calc(100% - 16px);
+        padding: 14px;
+        margin: 12px auto 20px;
+        border-radius: 12px;
+    }
+    .container.my-4 h1 {
+        font-size: 1.25rem;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+    }
+
+    li.list-group-item {
+        padding: 14px;
+        gap: 10px;
+        border-radius: 10px;
+    }
+    li.list-group-item strong {
+        font-size: 1.05rem;
     }
     li.list-group-item small {
         font-size: 0.85rem;
     }
 
+    .exam-toolbar {
+        padding: 12px;
+        gap: 10px;
+        border-radius: 10px;
+    }
+
     .exam-code-input {
         font-size: 1.7rem;
         letter-spacing: 8px;
+    }
+
+    .exam-code-modal {
+        max-width: calc(100% - 16px);
+        padding: 22px 16px;
+    }
+
+    .empty-state-box {
+        padding: 30px 14px;
+    }
+    .empty-icon {
+        font-size: 2.5rem;
     }
 }
