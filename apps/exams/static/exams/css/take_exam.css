@@ -597,10 +597,21 @@ body {
 
 /* Mobile Uyğunlaşdırma */
 @media (max-width: 768px) {
-    .exam-container { margin: 15px; }
+    .exam-container {
+        margin: 15px;
+        max-width: 100%;
+    }
+    .exam-header {
+        padding: 16px 20px;
+    }
+    .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
     .question-slide { padding: 25px; }
     .q-text { font-size: 1.2rem; }
-    .exam-footer { 
+    .exam-footer {
         gap: 15px;
     }
     .nav-btn {
@@ -617,4 +628,24 @@ body {
         width: 100%;
         text-align: center;
     }
+}
+
+@media (max-width: 480px) {
+    .exam-container { margin: 10px; }
+    .exam-header {
+        padding: 14px 16px;
+        border-radius: 12px;
+    }
+    .exam-title {
+        font-size: 1.2rem;
+    }
+    .timer-badge, .question-timer-badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+    .question-slide {
+        padding: 18px;
+        border-radius: 12px;
+    }
+    .q-text { font-size: 1.05rem; }
 }
