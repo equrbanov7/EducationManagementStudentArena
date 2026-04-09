@@ -33,6 +33,7 @@ const WAITING_MESSAGES = Array.isArray(BOOTSTRAP.waitingMessages) && BOOTSTRAP.w
 const DEFAULT_RESULT_DURATION_MS = 1600;
 const DEFAULT_LEADERBOARD_DURATION_MS = 5000;
 const LEADERBOARD_LIMIT = 5;
+const PODIUM_SIZE = 3;
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
 const STATE_POLL_INTERVAL_MS = 2500;
 
@@ -915,14 +916,38 @@ function renderFinal(payload) {
     state.leaderboardSignature = "";
     playFinalSound(finalSignature || "final");
 
-    const rows = finalRows.map((player, index) => `
+    const podiumPlaces = finalRows.slice(0, PODIUM_SIZE);
+    const others = finalRows.slice(PODIUM_SIZE);
+    const suffix = esc(tr("pointsSuffix", "pts"));
+
+    const podiumOrder = [
+        podiumPlaces[1] ? { ...podiumPlaces[1], place: 2, slot: "left" } : null,
+        podiumPlaces[0] ? { ...podiumPlaces[0], place: 1, slot: "center" } : null,
+        podiumPlaces[2] ? { ...podiumPlaces[2], place: 3, slot: "right" } : null,
+    ].filter(Boolean);
+
+    const podiumMarkup = podiumOrder.map(player => `
+        <div class="final-podium-block final-podium-block--place-${player.place} final-podium-block--slot-${player.slot}">
+            <div class="final-podium-card">
+                ${player.place === 1 ? '<div class="final-podium-crown">👑</div>' : `<div class="final-podium-medal">${player.place}</div>`}
+                <div class="final-podium-avatar">${avatarMarkup(player, player.place === 1 ? 80 : 64, "player-avatar")}</div>
+                <div class="final-podium-name">${esc(player.nickname || "Player")}</div>
+                <div class="final-podium-score">${Number(player.score || 0)} ${suffix}</div>
+            </div>
+            <div class="final-podium-stand">
+                <div class="final-podium-stand__place">${player.place}</div>
+            </div>
+        </div>
+    `).join("");
+
+    const othersMarkup = others.map((player, index) => `
         <div class="final-row">
             <div class="final-row__meta">
-                <span class="final-row__rank">${index + 1}</span>
-                ${avatarMarkup(player, 54, "player-avatar")}
+                <span class="final-row__rank">${index + 4}</span>
+                ${avatarMarkup(player, 44, "player-avatar")}
                 <span class="final-row__name">${esc(player.nickname || "Player")}</span>
             </div>
-            <span class="final-row__score">${Number(player.score || 0)} ${esc(tr("pointsSuffix", "pts"))}</span>
+            <span class="final-row__score">${Number(player.score || 0)} ${suffix}</span>
         </div>
     `).join("");
 
@@ -932,7 +957,9 @@ function renderFinal(payload) {
             <div class="final-shell__trophy">🏆</div>
             <h1 class="phase-title">${esc(tr("finalTitle", "Final results"))}</h1>
             <p class="phase-subtitle">${esc(tr("finalBody", "The live exam is complete."))}</p>
-            <div class="final-leaderboard">${rows}</div>
+            <div class="final-podium-stage">${podiumMarkup}</div>
+            ${others.length ? `<div class="final-others-title">${esc(tr("scoreboardTitle", "Leaderboard"))}</div>` : ""}
+            <div class="final-leaderboard">${othersMarkup}</div>
         </div>
     `;
     setStoredTop(finalRows);
@@ -1301,11 +1328,15 @@ applySessionSettings(SESSION_SETTINGS);
 renderIdle();
 setConnection("connecting");
 
+let _initialFetchDone = false;
 const playWS = new WebSocket(wsUrl(`/ws/live/${BOOTSTRAP.pin}/play/`));
 
 playWS.onopen = () => {
     setConnection("online");
-    fetchInitialState();
+    if (!_initialFetchDone) {
+        _initialFetchDone = true;
+        fetchInitialState();
+    }
 };
 
 playWS.onclose = () => {
@@ -1325,7 +1356,10 @@ playWS.onmessage = (event) => {
 };
 
 startStatePolling();
-fetchInitialState();
+if (!_initialFetchDone) {
+    _initialFetchDone = true;
+    fetchInitialState();
+}
 
 window.addEventListener("beforeunload", () => {
     stopStatePolling();

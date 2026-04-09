@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Sessiya {{ session.pin }} — {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+<style nonce="{{ request.csp_nonce }}">
+    .session-detail-page { max-width: 1080px; margin: 0 auto; padding: 24px 16px; }
+    .session-detail-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; color: #495057; text-decoration: none; font-size: 0.92rem; }
+    .session-detail-back:hover { color: #212529; }
+    .session-detail-header { margin-bottom: 24px; }
+    .session-detail-header h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 4px; }
+    .session-detail-header p { color: #6c757d; margin: 0; font-size: 0.92rem; }
+    .session-meta-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+    .meta-badge { background: #f1f3f5; border-radius: 8px; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; }
+    .meta-badge__label { font-size: 0.76rem; text-transform: uppercase; color: #6c757d; letter-spacing: 0.04em; }
+    .meta-badge__value { font-size: 1.2rem; font-weight: 700; }
+    .detail-section { margin-bottom: 32px; }
+    .detail-section h2 { font-size: 1.15rem; font-weight: 700; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .detail-table th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: #495057; border-bottom: 2px solid #dee2e6; }
+    .detail-table td { padding: 10px 12px; border-bottom: 1px solid #e9ecef; vertical-align: middle; }
+    .detail-table tbody tr:hover { background: #f8f9fa; }
+    .rank-badge { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.84rem; background: #e9ecef; }
+    .rank-badge--gold { background: #fef3cd; color: #856404; }
+    .rank-badge--silver { background: #e2e3e5; color: #383d41; }
+    .rank-badge--bronze { background: #fde5d0; color: #856404; }
+    .accuracy-bar { display: flex; align-items: center; gap: 8px; }
+    .accuracy-bar__track { flex: 1; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; min-width: 60px; max-width: 120px; }
+    .accuracy-bar__fill { height: 100%; border-radius: 4px; background: #28a745; transition: width 0.3s; }
+    .accuracy-bar__text { font-weight: 600; min-width: 42px; }
+    @media (max-width: 640px) {
+        .session-meta-row { gap: 12px; }
+        .meta-badge { padding: 10px 14px; }
+        .detail-table { font-size: 0.84rem; }
+        .detail-table th, .detail-table td { padding: 8px 8px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="session-detail-page">
+    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}" class="session-detail-back">
+        <i class="fas fa-arrow-left"></i> Bütün sessiyalar
+    </a>
+    <div class="session-detail-header">
+        <h1><i class="fas fa-chart-line" aria-hidden="true"></i> Sessiya: {{ session.pin }}</h1>
+        <p>{{ exam.title }} — {{ session.created_at|date:"d.m.Y H:i" }}</p>
+    </div>
+
+    <div class="session-meta-row">
+        <div class="meta-badge">
+            <span class="meta-badge__label">İştirakçı</span>
+            <span class="meta-badge__value">{{ players.count }}</span>
+        </div>
+        <div class="meta-badge">
+            <span class="meta-badge__label">Sual sayı</span>
+            <span class="meta-badge__value">{{ question_stats|length }}</span>
+        </div>
+        <div class="meta-badge">
+            <span class="meta-badge__label">Tarix</span>
+            <span class="meta-badge__value">{{ session.created_at|date:"d.m.Y" }}</span>
+        </div>
+    </div>
+
+    <div class="detail-section">
+        <h2><i class="fas fa-users" aria-hidden="true"></i> İştirakçı nəticələri</h2>
+        {% if players %}
+        <div class="table-responsive">
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>İştirakçı</th>
+                        <th>Bal</th>
+                        <th>Düzgün</th>
+                        <th>Cavab sayı</th>
+                        <th>Dəqiqlik</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in players %}
+                    <tr>
+                        <td>
+                            <span class="rank-badge {% if forloop.counter == 1 %}rank-badge--gold{% elif forloop.counter == 2 %}rank-badge--silver{% elif forloop.counter == 3 %}rank-badge--bronze{% endif %}">
+                                {{ forloop.counter }}
+                            </span>
+                        </td>
+                        <td><strong>{{ p.nickname }}</strong></td>
+                        <td><strong>{{ p.score }}</strong></td>
+                        <td>{{ p.correct_count }}</td>
+                        <td>{{ p.total_answers }}</td>
+                        <td>
+                            {% if p.total_answers > 0 %}
+                            {% widthratio p.correct_count p.total_answers 100 as accuracy %}
+                            <div class="accuracy-bar">
+                                <div class="accuracy-bar__track">
+                                    <div class="accuracy-bar__fill" style="width: {{ accuracy }}%"></div>
+                                </div>
+                                <span class="accuracy-bar__text">{{ accuracy }}%</span>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-muted">Bu sessiyada iştirakçı yoxdur.</p>
+        {% endif %}
+    </div>
+
+    <div class="detail-section">
+        <h2><i class="fas fa-question-circle" aria-hidden="true"></i> Sual statistikası</h2>
+        {% if question_stats %}
+        <div class="table-responsive">
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Sual</th>
+                        <th>Cavab sayı</th>
+                        <th>Düzgün</th>
+                        <th>Səhv</th>
+                        <th>Dəqiqlik</th>
+                        <th>Ort. cavab müddəti</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qs in question_stats %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ qs.question.text|truncatechars:80 }}</td>
+                        <td>{{ qs.total_answers }}</td>
+                        <td>{{ qs.correct_answers }}</td>
+                        <td>{{ qs.incorrect_answers }}</td>
+                        <td>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-bar__track">
+                                    <div class="accuracy-bar__fill" style="width: {{ qs.accuracy_percent }}%"></div>
+                                </div>
+                                <span class="accuracy-bar__text">{{ qs.accuracy_percent }}%</span>
+                            </div>
+                        </td>
+                        <td>{{ qs.avg_answer_ms }}ms</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-muted">Sual statistikası mövcud deyil.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
