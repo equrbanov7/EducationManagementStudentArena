@@ -347,9 +347,10 @@ def host_next_question(request, pin):
         # sual qurtardı -> finished
         session.state = LiveSession.STATE_FINISHED
         session.current_question_id = None
-        session.save(update_fields=["state", "current_question_id"])
+        clear_question_phase_override(session)
+        session.save(update_fields=["state", "current_question_id", "host_settings"])
 
-        broadcast_play(pin, build_finished_payload(session, limit=50))
+        broadcast_play(pin, build_finished_payload(session, finished_at=timezone.now(), limit=50))
         return JsonResponse({"ok": True, "finished": True})
 
     payload, now, ends = build_question_payload(session, eq, idx=idx, total=total)
