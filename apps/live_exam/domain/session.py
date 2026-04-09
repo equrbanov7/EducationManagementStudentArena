@@ -205,14 +205,14 @@ def build_reveal_phase_times(session: LiveSession, *, revealed_at):
 
 def question_points(session: LiveSession, exam_question: ExamQuestion) -> int:
     value = safe_int(getattr(exam_question, "points", 0), 0)
-    if value > 0:
+    if value > 1:
         return value
 
     value = safe_int(getattr(session.exam, "default_question_points", 0), 0)
     if value > 0:
         return value
 
-    return 1
+    return 1000
 
 
 def get_question_text(exam_question: ExamQuestion) -> str:
