@@ -1219,6 +1219,7 @@ def user_profile(request):
             organization=management_org,
             is_superadmin=capabilities["is_superadmin"],
             user_level=management_user_level,
+            teacher_student_only=capabilities.get("teacher_can_manage_students", False),
         )
         student_org_management_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),
