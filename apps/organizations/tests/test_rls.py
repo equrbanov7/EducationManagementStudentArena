@@ -42,9 +42,12 @@ Prerequisites
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError, connection, transaction
+from django.test import RequestFactory
 
 import pytest
 
+from apps.accounts.models import ProfileRole
+from apps.accounts.views._helpers import _build_student_org_request_section
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseGroup, CourseMembership
 from apps.exams.models import (
@@ -62,8 +65,10 @@ from apps.live_exam.auth import build_player_token, get_player_from_token
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.views.player import _resolve_live_session
 from apps.notifications.models import InAppNotification, StudentOrganizationRequest
+from apps.notifications.services import build_profile_notification_state
 from apps.organizations.models import Membership, OrgUnit, Role
 from core.constants import OrganizationType, RoleScopeType
+from core.rls import bypass_rls
 
 # ---------------------------------------------------------------------------
 # Low-level DB helpers
@@ -947,6 +952,94 @@ class TestRLSNotification:
         results = list(StudentOrganizationRequest.objects.all())
         assert len(results) == 1
         assert results[0].pk == req_a.pk
+
+
+class TestRLSProfilePendingRequests:
+    def test_profile_notification_state_reads_own_pending_request_without_active_tenant(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, _org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        student = User.objects.create_user("profile_pending_student", "pps@rls.test", "pw")
+        profile = student.profile
+        profile.organization = None
+        profile.role = ProfileRole.STUDENT
+        profile.requested_organization = org_a
+        profile.requested_organization_name = org_a.name
+        profile.requested_organization_message = "Qoşulmaq istəyirəm"
+        profile.save(
+            update_fields=[
+                "organization",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+        request_obj = StudentOrganizationRequest.objects.create(
+            user=student,
+            organization=org_a,
+            role_type="student",
+            status="pending",
+            message="Qoşulmaq istəyirəm",
+        )
+
+        _enable_rls()
+        state = build_profile_notification_state(user=student, profile=profile)
+
+        assert [item.pk for item in state["pending_student_join_requests"]] == [request_obj.pk]
+        assert state["pending_student_join_org_name"] == org_a.name
+        assert state["pending_student_join_message"] == "Qoşulmaq istəyirəm"
+
+    def test_student_org_request_section_restores_legacy_request_without_active_tenant(self, two_orgs):
+        _skip_if_not_pg()
+        org_a, _org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        student = User.objects.create_user("section_pending_student", "sps@rls.test", "pw")
+        profile = student.profile
+        profile.organization = None
+        profile.role = ProfileRole.STUDENT
+        profile.requested_organization = org_a
+        profile.requested_organization_name = org_a.name
+        profile.requested_organization_message = "Qoşulmaq istəyirəm"
+        profile.student_university_name = org_a.name
+        profile.save(
+            update_fields=[
+                "organization",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "student_university_name",
+                "updated_at",
+            ]
+        )
+
+        request = RequestFactory().get("/accounts/profile/")
+        request.user = student
+
+        _enable_rls()
+        section = _build_student_org_request_section(request=request, profile=profile)
+
+        assert len(section["pending_student_requests"]) == 1
+        assert section["pending_student_requests"][0].organization_id == org_a.id
+        assert section["pending_requested_organization"].id == org_a.id
+        with bypass_rls():
+            assert (
+                StudentOrganizationRequest.objects.filter(
+                    user=student,
+                    organization=org_a,
+                    role_type="student",
+                    status="pending",
+                ).count()
+                == 1
+            )
 
 
 # ---------------------------------------------------------------------------

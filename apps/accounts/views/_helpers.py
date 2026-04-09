@@ -25,6 +25,7 @@ from apps.notifications.models import (
 )
 from core.constants import OrganizationType
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW
+from core.rls import bypass_rls
 from core.tenancy import get_request_organization, scoped_by_organization
 
 from ..models import ProfileRole
@@ -1603,6 +1604,15 @@ def _build_student_org_request_section(*, request, profile):
         pending_invite.role_label_lower = str(pending_invite.role_label).lower()
 
     legacy_requested_org = getattr(profile, "requested_organization", None)
+    has_matching_pending_request = False
+    if legacy_requested_org is not None:
+        with bypass_rls():
+            has_matching_pending_request = StudentOrganizationRequest.objects.filter(
+                user=request.user,
+                organization=legacy_requested_org,
+                status=StudentOrganizationRequestStatus.PENDING,
+                role_type=request_role_type,
+            ).exists()
     if (
         profile.organization is None
         and legacy_requested_org is not None
@@ -1617,35 +1627,30 @@ def _build_student_org_request_section(*, request, profile):
             ProfileRole.MEMBER,
             ProfileRole.HR,
         }
-        and not _pending_student_request_queryset(
-            user=request.user,
-            organization=legacy_requested_org,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
-        )
-        .filter(role_type=request_role_type)
-        .exists()
+        and not has_matching_pending_request
     ):
-        StudentOrganizationRequest.objects.create(
-            user=request.user,
-            organization=legacy_requested_org,
-            role_type=request_role_type,
-            message=(profile.requested_organization_message or "").strip(),
-            status=StudentOrganizationRequestStatus.PENDING,
+        with bypass_rls():
+            StudentOrganizationRequest.objects.create(
+                user=request.user,
+                organization=legacy_requested_org,
+                role_type=request_role_type,
+                message=(profile.requested_organization_message or "").strip(),
+                status=StudentOrganizationRequestStatus.PENDING,
+            )
+
+    with bypass_rls():
+        pending_student_requests = list(
+            StudentOrganizationRequest.objects.filter(
+                user=request.user,
+                status=StudentOrganizationRequestStatus.PENDING,
+                role_type=request_role_type,
+                organization__is_active=True,
+                organization__status="active",
+            )
+            .select_related("organization")
+            .order_by("-created_at")
         )
 
-    pending_student_requests = list(
-        _pending_student_request_queryset(
-            user=request.user,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
-        )
-        .filter(role_type=request_role_type)
-        .filter(
-            organization__is_active=True,
-            organization__status="active",
-        )
-        .select_related("organization")
-        .order_by("-created_at")
-    )
     for pending_request in pending_student_requests:
         pending_request.role_label = request_role_label
         pending_request.role_label_lower = request_role_label_lower
