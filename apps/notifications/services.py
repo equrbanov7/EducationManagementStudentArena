@@ -732,16 +732,17 @@ def build_profile_notification_state(*, user, profile):
     pending_student_join_org_name = ""
     pending_student_join_message = ""
     if profile.organization is None:
-        pending_student_join_requests = list(
-            StudentOrganizationRequest.objects.filter(
-                user=user,
-                status=StudentOrganizationRequestStatus.PENDING,
-                organization__is_active=True,
-                organization__status="active",
+        with bypass_rls():
+            pending_student_join_requests = list(
+                StudentOrganizationRequest.objects.filter(
+                    user=user,
+                    status=StudentOrganizationRequestStatus.PENDING,
+                    organization__is_active=True,
+                    organization__status="active",
+                )
+                .select_related("organization")
+                .order_by("-created_at")
             )
-            .select_related("organization")
-            .order_by("-created_at")
-        )
 
         for pending_request in pending_student_join_requests:
             pending_request.role_label = get_membership_request_role_label(pending_request.role_type)
