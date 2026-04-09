@@ -1123,11 +1123,6 @@ function renderRevealStage(question, payload) {
                         .map((option, index) => distributionBarMarkup(option, index, distribution, correctOptionIds))
                         .join("")}
                 </div>
-                <div class="host-options-grid host-options-grid--kahoot host-options-grid--reveal">
-                    ${(question?.options || [])
-                        .map((option, index) => revealOptionMarkup(option, index, distribution, correctOptionIds))
-                        .join("")}
-                </div>
             </section>
         `
     );
