@@ -45,6 +45,11 @@ from .player import (
 )
 
 # ═══════════════════════════════════════════════════════════════
+# Results Views (Teacher)
+# ═══════════════════════════════════════════════════════════════
+from .results import teacher_live_exam_results, teacher_live_session_detail
+
+# ═══════════════════════════════════════════════════════════════
 # __all__ - Explicit exports
 # ═══════════════════════════════════════════════════════════════
 __all__ = [
@@ -72,4 +77,7 @@ __all__ = [
     # API
     "live_state_json",
     "live_answer_submit",
+    # Results
+    "teacher_live_exam_results",
+    "teacher_live_session_detail",
 ]

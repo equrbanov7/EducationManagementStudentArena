@@ -52,14 +52,15 @@ def calculate_answer_score(
     fraction = min(1.0, max(0.0, score_multi_fraction(option_ids, correct_ids, mode="partial")))
     is_perfect = selected_set == correct_set
 
-    bonus = 0
     bounded_answer_ms = int(answer_ms or 0)
     if total_ms > 0:
         bounded_answer_ms = max(0, min(bounded_answer_ms, total_ms))
-        remaining = total_ms - bounded_answer_ms
-        bonus = int((remaining / total_ms) * 500)
-
-    awarded_points = int((int(base_points) + bonus) * fraction)
+        # Kahoot-style scoring: score = base * (1 - (answer_time / total_time) / 2)
+        # Fastest correct answer gets full base_points, slowest gets half.
+        time_factor = 1.0 - (bounded_answer_ms / total_ms) / 2.0
+        awarded_points = int(int(base_points) * time_factor * fraction)
+    else:
+        awarded_points = int(int(base_points) * fraction)
 
     return {
         "is_correct": is_perfect,
@@ -69,7 +70,7 @@ def calculate_answer_score(
         "correct_total": correct_total,
         "awarded_points": awarded_points,
         "base": int(base_points),
-        "bonus": bonus,
+        "bonus": 0,
         "answer_ms": bounded_answer_ms,
     }
 

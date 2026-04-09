@@ -108,6 +108,12 @@
                     <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
                         <i class="fas fa-poll"></i> {% trans "action_view_results" context "exams.template.teacher_exam_detail" %}
                     </a>
+
+                    {% if exam.exam_type == "test" %}
+                    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}" class="action-btn secondary-btn">
+                        <i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri
+                    </a>
+                    {% endif %}
                 </div>
 
                 <div class="action-group">
