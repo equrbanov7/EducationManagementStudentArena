@@ -5,80 +5,83 @@
 
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
-    .live-results-page { max-width: 1080px; margin: 0 auto; padding: 24px 16px; }
-    .live-results-header { margin-bottom: 28px; }
-    .live-results-header h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 6px; }
-    .live-results-header p { color: #6c757d; margin: 0; }
-    .live-results-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; color: #495057; text-decoration: none; font-size: 0.92rem; }
-    .live-results-back:hover { color: #212529; }
-    .session-card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: box-shadow 0.15s; }
-    .session-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-    .session-card__header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-    .session-card__pin { font-family: "Courier New", monospace; font-weight: 700; font-size: 1.1rem; background: #f1f3f5; padding: 4px 10px; border-radius: 6px; }
-    .session-card__date { color: #6c757d; font-size: 0.88rem; }
-    .session-card__stats { display: flex; gap: 20px; flex-wrap: wrap; }
-    .session-stat { display: flex; flex-direction: column; gap: 2px; }
-    .session-stat__label { font-size: 0.78rem; color: #6c757d; text-transform: uppercase; letter-spacing: 0.04em; }
-    .session-stat__value { font-size: 1.15rem; font-weight: 700; }
-    .session-card__action { margin-top: 14px; }
-    .session-card__action a { display: inline-flex; align-items: center; gap: 6px; color: #2563eb; text-decoration: none; font-weight: 600; font-size: 0.92rem; }
-    .session-card__action a:hover { text-decoration: underline; }
-    .empty-state { text-align: center; padding: 48px 20px; color: #6c757d; }
-    .empty-state i { font-size: 2.4rem; margin-bottom: 12px; display: block; }
+.lr-page{max-width:1200px;margin:0 auto;padding:28px 20px 48px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,sans-serif}
+.lr-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;color:#4a5568;text-decoration:none;font-size:.9rem;font-weight:500;transition:color .15s}
+.lr-back:hover{color:#1a56db}
+.lr-header{margin-bottom:28px}
+.lr-header h1{font-size:1.5rem;font-weight:800;margin:0 0 6px;color:#111827}
+.lr-header h1 i{color:#1a56db;margin-right:6px}
+.lr-header p{color:#6b7280;margin:0;font-size:.9rem}
+.lr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+.lr-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.lr-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#1a56db,#059669)}
+.lr-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.lr-card__top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.lr-card__pin{font-family:"Courier New",monospace;font-weight:700;font-size:1rem;background:linear-gradient(135deg,#1a56db,#0e7490);color:#fff;padding:5px 12px;border-radius:8px;letter-spacing:.04em}
+.lr-card__date{color:#6b7280;font-size:.84rem;display:flex;align-items:center;gap:5px}
+.lr-card__stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.lr-stat{background:#f8fafc;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.lr-stat__label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280}
+.lr-stat__value{font-size:1.1rem;font-weight:800;color:#111827}
+.lr-stat--green .lr-stat__value{color:#059669}
+.lr-stat--blue .lr-stat__value{color:#1a56db}
+.lr-card__link{display:inline-flex;align-items:center;gap:6px;color:#1a56db;text-decoration:none;font-weight:700;font-size:.9rem;transition:gap .15s}
+.lr-card__link:hover{gap:10px;text-decoration:none;color:#1e40af}
+.lr-empty{text-align:center;padding:64px 20px;color:#6b7280}
+.lr-empty i{font-size:3rem;margin-bottom:14px;display:block;color:#d1d5db}
+.lr-empty p{font-size:1rem;margin:0}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="live-results-page">
-    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="live-results-back">
+<div class="lr-page">
+    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="lr-back">
         <i class="fas fa-arrow-left"></i> {{ exam.title }}
     </a>
-    <div class="live-results-header">
-        <h1><i class="fas fa-broadcast-tower" aria-hidden="true"></i> Canlı imtahan nəticələri</h1>
+    <div class="lr-header">
+        <h1><i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri</h1>
         <p>{{ exam.title }} — keçirilmiş bütün canlı sessiyalar</p>
     </div>
 
     {% if sessions %}
+    <div class="lr-grid">
         {% for s in sessions %}
-        <div class="session-card">
-            <div class="session-card__header">
-                <div>
-                    <span class="session-card__pin">PIN: {{ s.pin }}</span>
-                </div>
-                <span class="session-card__date">
+        <div class="lr-card">
+            <div class="lr-card__top">
+                <span class="lr-card__pin"><i class="fas fa-key"></i> {{ s.pin }}</span>
+                <span class="lr-card__date">
                     <i class="far fa-calendar-alt"></i> {{ s.created_at|date:"d.m.Y H:i" }}
                 </span>
             </div>
-            <div class="session-card__stats">
-                <div class="session-stat">
-                    <span class="session-stat__label">İştirakçı</span>
-                    <span class="session-stat__value">{{ s.player_count }}</span>
+            <div class="lr-card__stats">
+                <div class="lr-stat lr-stat--blue">
+                    <span class="lr-stat__label">İştirakçı</span>
+                    <span class="lr-stat__value">{{ s.player_count }}</span>
                 </div>
-                <div class="session-stat">
-                    <span class="session-stat__label">Cavab sayı</span>
-                    <span class="session-stat__value">{{ s.answer_count }}</span>
+                <div class="lr-stat">
+                    <span class="lr-stat__label">Cavab sayı</span>
+                    <span class="lr-stat__value">{{ s.answer_count }}</span>
                 </div>
-                <div class="session-stat">
-                    <span class="session-stat__label">Düzgün cavab</span>
-                    <span class="session-stat__value">{{ s.total_correct }}</span>
+                <div class="lr-stat lr-stat--green">
+                    <span class="lr-stat__label">Düzgün cavab</span>
+                    <span class="lr-stat__value">{{ s.total_correct }}</span>
                 </div>
-                <div class="session-stat">
-                    <span class="session-stat__label">Ort. bal</span>
-                    <span class="session-stat__value">{{ s.avg_score|floatformat:0|default:"0" }}</span>
+                <div class="lr-stat">
+                    <span class="lr-stat__label">Ort. bal</span>
+                    <span class="lr-stat__value">{{ s.avg_score|floatformat:0|default:"0" }}</span>
                 </div>
             </div>
-            <div class="session-card__action">
-                <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}">
-                    <i class="fas fa-chart-bar"></i> Ətraflı statistika
-                </a>
-            </div>
+            <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}" class="lr-card__link">
+                <i class="fas fa-chart-bar"></i> Ətraflı statistika <i class="fas fa-arrow-right" style="font-size:.78rem"></i>
+            </a>
         </div>
         {% endfor %}
+    </div>
     {% else %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>Bu imtahan üzrə hələ canlı sessiya keçirilməyib.</p>
-        </div>
+    <div class="lr-empty">
+        <i class="fas fa-inbox"></i>
+        <p>Bu imtahan üzrə hələ canlı sessiya keçirilməyib.</p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}
