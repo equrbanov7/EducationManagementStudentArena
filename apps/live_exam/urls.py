@@ -23,6 +23,17 @@ urlpatterns = [
     path("live/host/<str:pin>/lock/", views.host_toggle_lock, name="host_toggle_lock"),
     path("live/host/<str:pin>/settings/", views.host_update_settings, name="host_update_settings"),
     path("live/host/<str:pin>/players/remove/", views.host_remove_player, name="host_remove_player"),
+    # Teacher live results
+    path(
+        "live/results/<slug:slug>/",
+        views.teacher_live_exam_results,
+        name="teacher_live_results",
+    ),
+    path(
+        "live/results/<slug:slug>/<str:pin>/",
+        views.teacher_live_session_detail,
+        name="teacher_live_session_detail",
+    ),
     # Player (anonim)
     path("live/join/<str:pin>/", views.live_join_page, name="join_page"),
     path("live/join/<str:pin>/enter/", views.live_join_enter, name="join_enter"),
