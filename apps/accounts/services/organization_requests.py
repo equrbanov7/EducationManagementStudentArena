@@ -32,15 +32,16 @@ def set_student_org_request_status(*, request_obj, status, note="", responded_by
     request_obj.resolution_note = (note or "").strip()
     request_obj.responded_by = responded_by
     request_obj.responded_at = responded_at
-    request_obj.save(
-        update_fields=[
-            "status",
-            "resolution_note",
-            "responded_by",
-            "responded_at",
-            "updated_at",
-        ]
-    )
+    with bypass_rls():
+        request_obj.save(
+            update_fields=[
+                "status",
+                "resolution_note",
+                "responded_by",
+                "responded_at",
+                "updated_at",
+            ]
+        )
     if previous_status != status:
         try:
             notify_membership_request_resolution(request_obj=request_obj)
@@ -57,19 +58,20 @@ def sync_profile_pending_request_snapshot(profile):
     Keep the legacy profile.requested_organization* fields synchronized with the
     latest pending request so older UI sections still render the current state.
     """
-    latest_pending_request = (
-        pending_student_request_queryset(
-            user=profile.user,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
+    with bypass_rls():
+        latest_pending_request = (
+            pending_student_request_queryset(
+                user=profile.user,
+                statuses=[StudentOrganizationRequestStatus.PENDING],
+            )
+            .filter(
+                organization__is_active=True,
+                organization__status="active",
+            )
+            .select_related("organization")
+            .order_by("-created_at")
+            .first()
         )
-        .filter(
-            organization__is_active=True,
-            organization__status="active",
-        )
-        .select_related("organization")
-        .order_by("-created_at")
-        .first()
-    )
 
     if latest_pending_request:
         next_requested_org = latest_pending_request.organization
@@ -101,18 +103,19 @@ def close_other_pending_student_requests(*, user, accepted_organization, respond
     """Auto-close other pending organization requests after one has been accepted."""
     close_note = (note or "").strip() or f"İstifadəçi artıq {accepted_organization.name} təşkilatının üzvüdür."
     now = timezone.now()
-    updated = pending_student_request_queryset(
-        user=user,
-        statuses=[StudentOrganizationRequestStatus.PENDING],
-    ).exclude(organization=accepted_organization)
+    with bypass_rls():
+        updated = pending_student_request_queryset(
+            user=user,
+            statuses=[StudentOrganizationRequestStatus.PENDING],
+        ).exclude(organization=accepted_organization)
 
-    return updated.update(
-        status=StudentOrganizationRequestStatus.AUTO_CLOSED,
-        resolution_note=close_note,
-        responded_by=responded_by,
-        responded_at=now,
-        updated_at=now,
-    )
+        return updated.update(
+            status=StudentOrganizationRequestStatus.AUTO_CLOSED,
+            resolution_note=close_note,
+            responded_by=responded_by,
+            responded_at=now,
+            updated_at=now,
+        )
 
 
 def activate_verified_student_membership(user):

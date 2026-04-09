@@ -1586,17 +1586,19 @@ def _build_student_org_request_section(*, request, profile):
     if org_type_filter not in allowed_types:
         org_type_filter = ""
 
-    pending_invites = list(
-        Membership.objects.filter(
-            user=request.user,
-            is_active=False,
-            title=STUDENT_PENDING_INVITE_TITLE,
-            organization__is_active=True,
-            organization__status="active",
+    with bypass_rls():
+        pending_invites = list(
+            Membership.objects.filter(
+                user=request.user,
+                is_active=False,
+                title=STUDENT_PENDING_INVITE_TITLE,
+                organization__is_active=True,
+                organization__status="active",
+            )
+            .select_related("organization", "role", "assigned_by")
+            .order_by("organization__name")
         )
-        .select_related("organization", "role")
-        .order_by("organization__name")
-    )
+    pending_invite_org_ids = {inv.organization_id for inv in pending_invites}
     for pending_invite in pending_invites:
         invite_profile_role = _map_org_role_to_profile_role(getattr(pending_invite, "role", None))
         invite_role_type = _membership_request_role_type_for_profile_role(invite_profile_role)
@@ -1605,7 +1607,10 @@ def _build_student_org_request_section(*, request, profile):
 
     legacy_requested_org = getattr(profile, "requested_organization", None)
     has_matching_pending_request = False
-    if legacy_requested_org is not None:
+    # If the admin already sent an invite for this org, the pending request
+    # was auto-closed. Do not recreate it — the invite section handles this.
+    has_invite_for_legacy_org = legacy_requested_org is not None and legacy_requested_org.pk in pending_invite_org_ids
+    if legacy_requested_org is not None and not has_invite_for_legacy_org:
         with bypass_rls():
             has_matching_pending_request = StudentOrganizationRequest.objects.filter(
                 user=request.user,
@@ -1628,6 +1633,7 @@ def _build_student_org_request_section(*, request, profile):
             ProfileRole.HR,
         }
         and not has_matching_pending_request
+        and not has_invite_for_legacy_org
     ):
         with bypass_rls():
             StudentOrganizationRequest.objects.create(
@@ -1650,6 +1656,12 @@ def _build_student_org_request_section(*, request, profile):
             .select_related("organization")
             .order_by("-created_at")
         )
+    # If there's a pending invite for an org, suppress the pending request
+    # for the same org so the user sees only the invite accept/reject UI.
+    if pending_invite_org_ids:
+        pending_student_requests = [
+            r for r in pending_student_requests if r.organization_id not in pending_invite_org_ids
+        ]
 
     for pending_request in pending_student_requests:
         pending_request.role_label = request_role_label
@@ -1689,6 +1701,7 @@ def _build_student_org_request_section(*, request, profile):
         "pending_invites": pending_invites,
         "pending_invites_count": len(pending_invites),
         "has_pending_invites": bool(pending_invites),
+        "pending_invite_org_ids": pending_invite_org_ids,
         "pending_student_requests": pending_student_requests,
         "pending_student_requests_count": len(pending_student_requests),
         "has_pending_student_requests": bool(pending_student_requests),
