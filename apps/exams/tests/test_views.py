@@ -1022,6 +1022,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(matching_item["real_name"], self.student.username)
         self.assertEqual(matching_item["action_label"], "Bax")
         self.assertContains(response, self.student.username)
+        self.assertNotContains(response, "<th>Nəticə (%)</th>", html=True)
 
     def test_teacher_exam_results_keeps_written_student_name_hidden_until_review_is_completed(self):
         written_exam = Exam.objects.create(
