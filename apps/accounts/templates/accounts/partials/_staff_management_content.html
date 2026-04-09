@@ -4,17 +4,28 @@
     <div class="org-management-shell__header">
         <div>
             <div class="section-title">
-                <i class="fas fa-users-cog"></i> {% trans "Staff Management" context "staff.management" %}
+                <i class="fas fa-users-cog"></i>
+                {% if teacher_student_only %}
+                    {% trans "Student Management" context "staff.management" %}
+                {% else %}
+                    {% trans "Staff Management" context "staff.management" %}
+                {% endif %}
             </div>
             <p class="org-management-shell__lead">
-                {% if organization %}
+                {% if teacher_student_only and organization %}
+                {% blocktrans trimmed with organization_name=organization.name context "staff.management" %}
+                Manage students in {{ organization_name }}. You can accept requests and send invitations.
+                {% endblocktrans %}
+                {% elif organization %}
                 {% blocktrans trimmed with organization_name=organization.name context "staff.management" %}
                 Choose which group you want to view inside {{ organization_name }}.
                 {% endblocktrans %}
                 {% else %}
                 {% trans "Choose which group you want to view in superadmin mode." context "staff.management" %}
                 {% endif %}
+                {% if not teacher_student_only %}
                 {% trans "If nothing is selected, all sections stay open and panels are shown according to the filters you choose." context "staff.management" %}
+                {% endif %}
             </p>
         </div>
         <div class="org-management-shell__badges">
@@ -23,6 +34,9 @@
             {% endif %}
             {% if is_superadmin %}
             <span class="role-badge role-warning">{% trans "Superadmin view" context "staff.management" %}</span>
+            {% endif %}
+            {% if teacher_student_only %}
+            <span class="role-badge">{% trans "Teacher view" context "staff.management" %}</span>
             {% endif %}
         </div>
     </div>
@@ -60,6 +74,7 @@
             <span>{% trans "Invites" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ sent_student_invites.paginator.count }}</span>
         </button>
+        {% if not teacher_student_only %}
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-members">
@@ -108,6 +123,7 @@
             <span>{% trans "Staff invites" context "staff.management" %}</span>
             <span class="org-management-chip__count">{{ sent_staff_invites.paginator.count }}</span>
         </button>
+        {% endif %}
         {% endif %}
         {% if is_superadmin %}
         <button type="button"
@@ -611,6 +627,7 @@
 </div>
 {% endif %}
 
+{% if not teacher_student_only %}
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="teacher-members">
     <div class="section-title">
@@ -1495,6 +1512,7 @@
     </form>
     {% include "partials/_pagination.html" with page_obj=sent_staff_invites extra_query=staff_invites_pagination_query page_param=staff_invites_page_param %}
 </div>
+{% endif %}
 {% endif %}
 
 {% if is_superadmin %}
