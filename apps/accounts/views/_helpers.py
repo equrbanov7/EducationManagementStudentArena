@@ -1586,17 +1586,18 @@ def _build_student_org_request_section(*, request, profile):
     if org_type_filter not in allowed_types:
         org_type_filter = ""
 
-    pending_invites = list(
-        Membership.objects.filter(
-            user=request.user,
-            is_active=False,
-            title=STUDENT_PENDING_INVITE_TITLE,
-            organization__is_active=True,
-            organization__status="active",
+    with bypass_rls():
+        pending_invites = list(
+            Membership.objects.filter(
+                user=request.user,
+                is_active=False,
+                title=STUDENT_PENDING_INVITE_TITLE,
+                organization__is_active=True,
+                organization__status="active",
+            )
+            .select_related("organization", "role")
+            .order_by("organization__name")
         )
-        .select_related("organization", "role")
-        .order_by("organization__name")
-    )
     for pending_invite in pending_invites:
         invite_profile_role = _map_org_role_to_profile_role(getattr(pending_invite, "role", None))
         invite_role_type = _membership_request_role_type_for_profile_role(invite_profile_role)

@@ -465,6 +465,37 @@ def notify_member_removed_from_organization(
     )
 
 
+def notify_user_invited_to_organization(
+    *, invited_user, organization, invited_by=None, role_label: str = ""
+) -> InAppNotification:
+    """
+    Notify a user that they have been invited to join an organization.
+    """
+    actor_name = _display_name(invited_by) if invited_by is not None else ""
+    role_label = (role_label or "").strip() or "üzv"
+    message = (
+        f"{organization.name} təşkilatından sizə {role_label} kimi dəvət göndərildi. "
+        'Profildəki "Təşkilata qoşul" bölməsindən dəvəti qəbul edə bilərsiniz.'
+    )
+    if actor_name:
+        message = f"{message} Dəvəti göndərən: {actor_name}."
+
+    return create_notification(
+        recipient=invited_user,
+        title=f"Yeni təşkilat dəvəti: {organization.name}",
+        message=message,
+        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'student-organization-request'})}",
+        notification_type=NotificationType.APPROVAL,
+        metadata={
+            "organization_id": getattr(organization, "id", None),
+            "organization_name": getattr(organization, "name", ""),
+            "invited_by_id": getattr(invited_by, "id", None),
+            "role_label": role_label,
+            "link_label": "Dəvəti aç və cavablandır",
+        },
+    )
+
+
 def notify_course_membership_assigned(
     *, membership, created: bool, previous_group_name: str = ""
 ) -> InAppNotification | None:
