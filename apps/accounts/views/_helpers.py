@@ -485,6 +485,14 @@ def _role_capabilities(user, profile):
     can_manage_blog = getattr(user, "is_authenticated", False)
     can_approve_posts = is_superadmin or user_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
+    # Check if teacher has member.student_manage permission granted by admin
+    teacher_can_manage_students = False
+    if is_teacher and not is_org_admin and not is_superadmin and active_organization:
+        from apps.organizations.permissions import has_permission as _has_permission
+
+        actor_perms, _ = _collect_actor_permissions(user, active_organization)
+        teacher_can_manage_students = _has_permission(list(actor_perms), "member.student_manage")
+
     if is_superadmin:
         allowed_sections = {
             "profile-info",
@@ -543,6 +551,8 @@ def _role_capabilities(user, profile):
             allowed_sections.update(
                 {"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"}
             )
+            if teacher_can_manage_students:
+                allowed_sections.add("student-organization-management")
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
@@ -588,6 +598,7 @@ def _role_capabilities(user, profile):
         "can_manage_blog": can_manage_blog,
         "can_approve_posts": can_approve_posts,
         "allowed_sections": allowed_sections,
+        "teacher_can_manage_students": teacher_can_manage_students,
     }
 
 
@@ -829,7 +840,9 @@ def _build_user_organization_access_rows(
     return rows
 
 
-def _build_student_org_management_section(*, request, organization, is_superadmin, user_level, default_view=None):
+def _build_student_org_management_section(
+    *, request, organization, is_superadmin, user_level, default_view=None, teacher_student_only=False
+):
     from apps.organizations.models import Membership
     from apps.organizations.models import Organization as OrganizationModel
 
@@ -848,6 +861,8 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     )
 
     allowed_management_views = {"students", "teachers", "staff"}
+    if teacher_student_only:
+        allowed_management_views = {"students"}
     if is_superadmin:
         allowed_management_views.add("organizations")
 
@@ -875,6 +890,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     section = {
         "organization": organization,
         "is_superadmin": is_superadmin,
+        "teacher_student_only": teacher_student_only,
         "active_management_view": management_view,
         "active_student_tab": student_tab,
         "active_teacher_tab": teacher_tab,
@@ -991,7 +1007,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
         return section
 
-    if not is_superadmin and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
+    if not is_superadmin and not teacher_student_only and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
         section["access_denied_message"] = (
             "Bu bölmə üçün minimum HR, təşkilat admini və ya daha yüksək səviyyə tələb olunur."
         )
