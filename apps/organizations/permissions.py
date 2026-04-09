@@ -60,6 +60,7 @@ PERMISSION_CATEGORIES = {
         "member.invite",
         "member.edit",
         "member.remove",
+        "member.student_manage",
     ],
     "roles": [
         "role.view",

@@ -32,6 +32,7 @@ from ._helpers import (
     _build_student_org_management_section,
     _build_student_org_request_section,
     _close_other_pending_student_requests,
+    _collect_actor_permissions,
     _csv_to_int_set,
     _ensure_profile_admin_membership,
     _get_active_organization,
@@ -57,6 +58,7 @@ logger = logging.getLogger(__name__)
 def student_organization_management(request):
     """Manage student membership add/remove operations for high-level organization roles."""
     from apps.organizations.models import Membership
+    from apps.organizations.permissions import has_permission as _has_org_permission
     from apps.organizations.services import create_audit_log, get_user_org_role_level
 
     org = _get_active_organization(request)
@@ -69,12 +71,26 @@ def student_organization_management(request):
         _ensure_profile_admin_membership(request.user, org)
 
     user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
+
+    # Check if teacher has member.student_manage permission
+    teacher_student_only = False
     if not is_superadmin and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
-        messages.error(
-            request,
-            "Bu bölmədən istifadə üçün minimum HR, təşkilat admini və ya daha yüksək səlahiyyət tələb olunur.",
-        )
-        return redirect("accounts:profile")
+        if org is not None:
+            actor_perms, _ = _collect_actor_permissions(request.user, org)
+            if _has_org_permission(list(actor_perms), "member.student_manage"):
+                teacher_student_only = True
+            else:
+                messages.error(
+                    request,
+                    "Bu bölmədən istifadə üçün minimum HR, təşkilat admini və ya daha yüksək səlahiyyət tələb olunur.",
+                )
+                return redirect("accounts:profile")
+        else:
+            messages.error(
+                request,
+                "Bu bölmədən istifadə üçün minimum HR, təşkilat admini və ya daha yüksək səlahiyyət tələb olunur.",
+            )
+            return redirect("accounts:profile")
 
     student_role = _resolve_membership_role(org, ProfileRole.STUDENT)
 
@@ -527,6 +543,33 @@ def student_organization_management(request):
         action = (request.POST.get("action") or "").strip().lower()
         next_url = _resolve_next_url(request, reverse("accounts:student_organization_management"))
 
+        # Teacher with student-only access: restrict to student operations only
+        teacher_allowed_actions = {
+            "approve_requested_student",
+            "add_student",
+            "bulk_approve_requested_students",
+            "invite_student",
+            "bulk_invite_students",
+            "revoke_sent_invites",
+            "remove_student",
+            "remove_org_member",
+        }
+        if teacher_student_only and action not in teacher_allowed_actions:
+            messages.error(request, "Bu əməliyyat üçün icazəniz yoxdur.")
+            return redirect(next_url)
+
+        if teacher_student_only and action in {
+            "invite_student",
+            "bulk_invite_students",
+        }:
+            # Force role type to student for teacher student-only mode
+            request.POST = request.POST.copy()
+            request.POST["invite_role_type"] = MembershipRequestRoleType.STUDENT
+
+        if teacher_student_only and action in {"revoke_sent_invites"}:
+            request.POST = request.POST.copy()
+            request.POST["revoke_role_type"] = MembershipRequestRoleType.STUDENT
+
         if action in {"approve_requested_student", "add_student"}:
             target_user_id = request.POST.get("user_id")
             target_profile = get_object_or_404(UserProfile.objects.select_related("user"), user_id=target_user_id)
@@ -841,6 +884,7 @@ def student_organization_management(request):
         organization=org,
         is_superadmin=is_superadmin,
         user_level=user_level,
+        teacher_student_only=teacher_student_only,
     )
     return render(request, "accounts/student_organization_management.html", context)
 
