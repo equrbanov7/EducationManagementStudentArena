@@ -2,6 +2,8 @@
 Organization views: student organization management, requests, invitations.
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -48,6 +50,7 @@ from ._helpers import (
 )
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -369,7 +372,7 @@ def student_organization_management(request):
                 role_label=target_role_label,
             )
         except Exception:
-            pass
+            logger.exception("Failed to send invite notification to %s", target_user.username)
         return True, ""
 
     def _invite_student_user(target_user):
@@ -977,7 +980,7 @@ def student_organization_request(request):
                 try:
                     notify_org_admins_of_new_request(request_obj=target_request)
                 except Exception:
-                    pass
+                    logger.exception("Failed to send new request notification")
 
             # Keep one pending row per user+organization for cleaner history and UI.
             duplicate_pending = (
