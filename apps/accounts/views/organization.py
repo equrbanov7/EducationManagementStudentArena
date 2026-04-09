@@ -743,6 +743,8 @@ def student_organization_management(request):
                         # Use filter().first() + update-or-create to avoid
                         # MultipleObjectsReturned when the user already has
                         # memberships in this org with different roles/scopes.
+                        # Pick the best existing row: prefer active, primary,
+                        # then highest-level role so we upgrade that one.
                         existing_membership = (
                             Membership.objects.filter(
                                 user=ts_request.user,
@@ -760,6 +762,8 @@ def student_organization_management(request):
                             existing_membership.role = role_obj
                             existing_membership.is_active = True
                             existing_membership.is_primary = not has_other_primary
+                            # Clear the pending-invite sentinel title so the
+                            # membership is no longer treated as an invite.
                             existing_membership.title = ""
                             existing_membership.save(
                                 update_fields=[
