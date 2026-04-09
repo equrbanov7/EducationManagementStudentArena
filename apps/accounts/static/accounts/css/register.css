@@ -331,10 +331,10 @@
 }
 /* --- Registration Wizard Steps --- */
 .register-wizard-steps {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 0.9rem;
     margin: 1.5rem 0;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e5e7eb;
@@ -343,7 +343,9 @@
 .wizard-step {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    min-width: 0;
     opacity: 0.4;
     transition: opacity 0.3s;
 }
@@ -381,6 +383,10 @@
     font-size: 0.8rem;
     color: #6b7280;
     font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .wizard-step.active .wizard-step-label {
@@ -471,6 +477,52 @@
 
 .register-card--signup {
     max-width: 640px;
+}
+
+.register-selection-summary {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid #dbe4ff;
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 35%),
+        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    text-align: left;
+}
+
+.register-selection-summary__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.register-selection-summary__item {
+    min-width: 0;
+    padding: 0.85rem 0.9rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e5e7eb;
+}
+
+.register-selection-summary__label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.register-selection-summary__value {
+    display: block;
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .otp-timer-banner {
@@ -842,7 +894,7 @@
 
 .register-persona-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -851,8 +903,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1.25rem 1rem;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    min-height: 176px;
+    padding: 1.1rem 0.9rem;
     border: 2px solid var(--border-color, #dee2e6);
     border-radius: 0.75rem;
     background: #fff;
@@ -885,12 +939,24 @@
 .register-persona-card__title {
     font-weight: 600;
     font-size: 0.95rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .register-persona-card__desc {
     font-size: 0.8rem;
     color: #6b7280;
     line-height: 1.4;
+    display: -webkit-box;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
 }
 
 .register-step-subtitle {
@@ -903,7 +969,45 @@
 }
 
 @media (max-width: 480px) {
+    .register-wizard-steps {
+        gap: 0.6rem;
+    }
+
+    .wizard-step {
+        flex-direction: column;
+        gap: 0.35rem;
+        text-align: center;
+    }
+
+    .wizard-step-label {
+        font-size: 0.72rem;
+    }
+
+    .register-selection-summary__grid {
+        grid-template-columns: 1fr;
+    }
+
     .register-persona-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .register-persona-card {
+        min-height: 152px;
+        padding: 1rem 0.75rem;
+    }
+
+    .register-persona-card__icon {
+        font-size: 1.55rem;
+    }
+
+    .register-persona-card__title {
+        font-size: 0.9rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .register-persona-card__desc {
+        font-size: 0.76rem;
+        -webkit-line-clamp: 2;
     }
 }
