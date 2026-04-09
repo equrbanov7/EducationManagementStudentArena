@@ -33,6 +33,7 @@ const WAITING_MESSAGES = Array.isArray(BOOTSTRAP.waitingMessages) && BOOTSTRAP.w
 const DEFAULT_RESULT_DURATION_MS = 1600;
 const DEFAULT_LEADERBOARD_DURATION_MS = 5000;
 const LEADERBOARD_LIMIT = 5;
+const PODIUM_SIZE = 3;
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
 const STATE_POLL_INTERVAL_MS = 2500;
 
@@ -915,8 +916,8 @@ function renderFinal(payload) {
     state.leaderboardSignature = "";
     playFinalSound(finalSignature || "final");
 
-    const podiumPlaces = finalRows.slice(0, 3);
-    const others = finalRows.slice(3);
+    const podiumPlaces = finalRows.slice(0, PODIUM_SIZE);
+    const others = finalRows.slice(PODIUM_SIZE);
     const suffix = esc(tr("pointsSuffix", "pts"));
 
     const podiumOrder = [

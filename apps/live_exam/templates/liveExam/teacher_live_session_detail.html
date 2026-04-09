@@ -44,7 +44,7 @@
         <i class="fas fa-arrow-left"></i> Bütün sessiyalar
     </a>
     <div class="session-detail-header">
-        <h1><i class="fas fa-chart-line"></i> Sessiya: {{ session.pin }}</h1>
+        <h1><i class="fas fa-chart-line" aria-hidden="true"></i> Sessiya: {{ session.pin }}</h1>
         <p>{{ exam.title }} — {{ session.created_at|date:"d.m.Y H:i" }}</p>
     </div>
 
@@ -64,7 +64,7 @@
     </div>
 
     <div class="detail-section">
-        <h2><i class="fas fa-users"></i> İştirakçı nəticələri</h2>
+        <h2><i class="fas fa-users" aria-hidden="true"></i> İştirakçı nəticələri</h2>
         {% if players %}
         <div class="table-responsive">
             <table class="detail-table">
@@ -114,7 +114,7 @@
     </div>
 
     <div class="detail-section">
-        <h2><i class="fas fa-question-circle"></i> Sual statistikası</h2>
+        <h2><i class="fas fa-question-circle" aria-hidden="true"></i> Sual statistikası</h2>
         {% if question_stats %}
         <div class="table-responsive">
             <table class="detail-table">
