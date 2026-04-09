@@ -189,7 +189,7 @@
                                     id="organizationRequestChoice{{ organization.id }}"
                                     value="{{ organization.id }}"
                                     {% if selected_org_id == organization.id|stringformat:'s' %}checked{% endif %}
-                                    {% if current_organization or organization.id in pending_request_org_ids %}disabled{% endif %}
+                                    {% if current_organization or organization.id in pending_request_org_ids or organization.id in pending_invite_org_ids %}disabled{% endif %}
                                 >
                             </div>
                         </td>
@@ -201,7 +201,11 @@
                         <td>{{ organization.get_org_type_display }}</td>
                         <td>{{ organization.country|default:"-" }}</td>
                         <td>
-                            {% if organization.id in pending_request_org_ids %}
+                            {% if organization.id in pending_invite_org_ids %}
+                            <span class="badge bg-success">
+                                {% trans "invite_received" context "profile.join_org" %}
+                            </span>
+                            {% elif organization.id in pending_request_org_ids %}
                             <span class="badge bg-warning text-dark">
                                 {% blocktrans trimmed with role_label=request_role_label context "profile.join_org" %}
                                 {{ role_label }} request sent

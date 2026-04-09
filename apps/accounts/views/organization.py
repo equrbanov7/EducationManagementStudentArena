@@ -273,6 +273,8 @@ def student_organization_management(request):
         return True, ""
 
     def _invite_user_for_role(target_user, role_type):
+        from core.rls import bypass_rls as _bypass_rls
+
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
         target_profile_role = _profile_role_for_membership_request_type(role_type)
         target_role_label = _membership_request_role_label(role_type).lower()
@@ -286,53 +288,63 @@ def student_organization_management(request):
         if target_profile.organization == org:
             return False, "İstifadəçi artıq bu təşkilatdadır."
 
-        existing_invite = Membership.objects.filter(
-            user=target_user,
-            organization=org,
-            is_active=False,
-            title=STUDENT_PENDING_INVITE_TITLE,
-        ).first()
-        if existing_invite:
-            return False, "Bu istifadəçi üçün artıq dəvət göndərilib."
+        with _bypass_rls():
+            existing_invite = Membership.objects.filter(
+                user=target_user,
+                organization=org,
+                is_active=False,
+                title=STUDENT_PENDING_INVITE_TITLE,
+            ).first()
+            if existing_invite:
+                return False, "Bu istifadəçi üçün artıq dəvət göndərilib."
 
-        with transaction.atomic():
-            invite_membership, _ = Membership.objects.update_or_create(
+            # Guard: do not overwrite an existing active membership.
+            existing_active = Membership.objects.filter(
                 user=target_user,
                 organization=org,
                 role=membership_role,
                 scope_unit=None,
-                defaults={
-                    "assigned_by": request.user,
-                    "is_primary": False,
-                    "is_active": False,
-                    "title": STUDENT_PENDING_INVITE_TITLE,
-                },
-            )
+                is_active=True,
+            ).exists()
+            if existing_active:
+                return False, "İstifadəçi artıq bu təşkilatdadır."
 
-            target_profile.requested_organization = org
-            target_profile.requested_organization_name = org.name
-            target_profile.requested_organization_message = ""
-            target_profile.save(
-                update_fields=[
-                    "requested_organization",
-                    "requested_organization_name",
-                    "requested_organization_message",
-                    "updated_at",
-                ]
-            )
+            with transaction.atomic():
+                invite_membership = Membership.objects.create(
+                    user=target_user,
+                    organization=org,
+                    role=membership_role,
+                    scope_unit=None,
+                    assigned_by=request.user,
+                    is_primary=False,
+                    is_active=False,
+                    title=STUDENT_PENDING_INVITE_TITLE,
+                )
 
-            now = timezone.now()
-            _pending_student_request_queryset(
-                user=target_user,
-                organization=org,
-                statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).filter(role_type=role_type).update(
-                status=StudentOrganizationRequestStatus.AUTO_CLOSED,
-                resolution_note="Təşkilat dəvəti göndərildiyi üçün müraciət bağlandı.",
-                responded_by=request.user,
-                responded_at=now,
-                updated_at=now,
-            )
+                target_profile.requested_organization = org
+                target_profile.requested_organization_name = org.name
+                target_profile.requested_organization_message = ""
+                target_profile.save(
+                    update_fields=[
+                        "requested_organization",
+                        "requested_organization_name",
+                        "requested_organization_message",
+                        "updated_at",
+                    ]
+                )
+
+                now = timezone.now()
+                _pending_student_request_queryset(
+                    user=target_user,
+                    organization=org,
+                    statuses=[StudentOrganizationRequestStatus.PENDING],
+                ).filter(role_type=role_type).update(
+                    status=StudentOrganizationRequestStatus.AUTO_CLOSED,
+                    resolution_note="Təşkilat dəvəti göndərildiyi üçün müraciət bağlandı.",
+                    responded_by=request.user,
+                    responded_at=now,
+                    updated_at=now,
+                )
 
         create_audit_log(
             user=request.user,
