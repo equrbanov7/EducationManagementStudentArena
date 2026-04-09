@@ -173,6 +173,9 @@
                         <th>Status</th>
                         <th>Düzgün</th>
                         <th>Səhv</th>
+                        {% if exam.exam_type == 'written' %}
+                            <th>Bal</th>
+                        {% endif %}
                         <th>Başlama tarixi</th>
                         <th>Bitirmə vaxtı</th>
                         <th>Müddət (san.)</th>
@@ -216,6 +219,9 @@
                             </td>
                             <td>{{ att.correct_count }}</td>
                             <td>{{ att.wrong_count }}</td>
+                            {% if exam.exam_type == 'written' %}
+                                <td><strong>{{ att.teacher_score|default:0 }}</strong></td>
+                            {% endif %}
                             <td>{{ att.started_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if att.finished_at %}
