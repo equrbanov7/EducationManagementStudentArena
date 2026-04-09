@@ -51,9 +51,51 @@
 
     {% if has_pending_invites %}
     <div class="alert alert-success">
-        {% blocktrans trimmed with count=pending_invites_count role_label=request_role_label_lower context "profile.join_org" %}
-        You have <strong>{{ count }}</strong> organization invites. You can join from those invites as {{ role_label }}.
-        {% endblocktrans %}
+        <div class="mb-2">
+            {% blocktrans trimmed with count=pending_invites_count role_label=request_role_label_lower context "profile.join_org" %}
+            You have <strong>{{ count }}</strong> organization invites. You can join from those invites as {{ role_label }}.
+            {% endblocktrans %}
+        </div>
+        <div class="d-grid gap-2">
+            {% for pending_invite in pending_invites %}
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap {% if not forloop.last %}pb-2 border-bottom{% endif %}">
+                <div>
+                    <div>
+                        <strong>{{ pending_invite.organization.name }}</strong>
+                        {% if pending_invite.role_label %}
+                        <span class="badge bg-info text-dark ms-1">{{ pending_invite.role_label }}</span>
+                        {% endif %}
+                    </div>
+                    {% if pending_invite.assigned_by %}
+                    <small class="text-muted">
+                        {% trans "invited_by" context "profile.join_org" %}:
+                        {{ pending_invite.assigned_by.get_full_name|default:pending_invite.assigned_by.username }}
+                    </small>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="invite_id" value="{{ pending_invite.id }}">
+                        <input type="hidden" name="action" value="accept">
+                        <input type="hidden" name="next" value="{{ post_next_url }}">
+                        <button type="submit" class="btn btn-success btn-sm" {% if current_organization %}disabled title="{% trans 'leave_org_before_accept' context 'profile.join_org' %}"{% endif %}>
+                            <i class="fas fa-check"></i> {% trans "accept" context "profile.join_org" %}
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="invite_id" value="{{ pending_invite.id }}">
+                        <input type="hidden" name="action" value="reject">
+                        <input type="hidden" name="next" value="{{ post_next_url }}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times"></i> {% trans "reject" context "profile.join_org" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 
@@ -147,7 +189,7 @@
                                     id="organizationRequestChoice{{ organization.id }}"
                                     value="{{ organization.id }}"
                                     {% if selected_org_id == organization.id|stringformat:'s' %}checked{% endif %}
-                                    {% if current_organization or organization.id in pending_request_org_ids %}disabled{% endif %}
+                                    {% if current_organization or organization.id in pending_request_org_ids or organization.id in pending_invite_org_ids %}disabled{% endif %}
                                 >
                             </div>
                         </td>
@@ -159,7 +201,11 @@
                         <td>{{ organization.get_org_type_display }}</td>
                         <td>{{ organization.country|default:"-" }}</td>
                         <td>
-                            {% if organization.id in pending_request_org_ids %}
+                            {% if organization.id in pending_invite_org_ids %}
+                            <span class="badge bg-success">
+                                {% trans "invite_received" context "profile.join_org" %}
+                            </span>
+                            {% elif organization.id in pending_request_org_ids %}
                             <span class="badge bg-warning text-dark">
                                 {% blocktrans trimmed with role_label=request_role_label context "profile.join_org" %}
                                 {{ role_label }} request sent
