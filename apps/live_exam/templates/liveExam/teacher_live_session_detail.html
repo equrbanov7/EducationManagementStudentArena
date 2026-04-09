@@ -362,8 +362,7 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    ...tooltipStyle,
+                tooltip: Object.assign({}, tooltipStyle, {
                     callbacks: {
                         title: function (items) {
                             var idx = items[0].dataIndex;
@@ -371,7 +370,7 @@
                         },
                         label: function (item) { return "Dəqiqlik: " + item.raw + "%"; }
                     }
-                }
+                })
             },
             scales: {
                 y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function (v) { return v + "%"; }, font: { family: fontFamily, size: 11 } } },
@@ -428,8 +427,7 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    ...tooltipStyle,
+                tooltip: Object.assign({}, tooltipStyle, {
                     callbacks: {
                         title: function (items) {
                             var idx = items[0].dataIndex;
@@ -437,7 +435,7 @@
                         },
                         label: function (item) { return item.raw + " ms"; }
                     }
-                }
+                })
             },
             scales: {
                 y: { grid: { color: "#f1f5f9" }, ticks: { callback: function (v) { return v + "ms"; }, font: { family: fontFamily, size: 11 } } },
