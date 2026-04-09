@@ -79,7 +79,7 @@
                         <input type="hidden" name="invite_id" value="{{ pending_invite.id }}">
                         <input type="hidden" name="action" value="accept">
                         <input type="hidden" name="next" value="{{ post_next_url }}">
-                        <button type="submit" class="btn btn-success btn-sm" {% if current_organization %}disabled{% endif %}>
+                        <button type="submit" class="btn btn-success btn-sm" {% if current_organization %}disabled title="{% trans 'leave_org_before_accept' context 'profile.join_org' %}"{% endif %}>
                             <i class="fas fa-check"></i> {% trans "accept" context "profile.join_org" %}
                         </button>
                     </form>
