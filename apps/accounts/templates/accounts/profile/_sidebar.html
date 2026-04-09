@@ -278,7 +278,7 @@
         </li>
         {% endif %}
 
-        {% if can_manage_org or 'superadmin-organizations' in allowed_sections %}
+        {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_management" context "profile.sidebar" %}</span></li>
 
         {% if 'role-assignment' in allowed_sections %}
@@ -298,11 +298,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=student-organization-management"
                data-section="student-organization-management"
-               data-title="{% trans 'staff_management' context 'profile.section' %}"
+               data-title="{% if role_capabilities.teacher_can_manage_students %}{% trans 'student_management' context 'profile.section' %}{% else %}{% trans 'staff_management' context 'profile.section' %}{% endif %}"
                data-source-url="{% url 'accounts:student_organization_management' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
                 <i class="fas fa-users-cog sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "staff_management" context "profile.sidebar" %}</span>
+                <span class="sidebar-menu-text">{% if role_capabilities.teacher_can_manage_students %}{% trans "student_management" context "profile.sidebar" %}{% else %}{% trans "staff_management" context "profile.sidebar" %}{% endif %}</span>
             </a>
         </li>
         {% endif %}
