@@ -185,6 +185,9 @@ class LiveExamLowPointScoringTest(TestCase):
         self.assertEqual(score["awarded_points"], 5)
 
     def test_save_answer_and_score_does_not_keep_correct_one_point_answer_at_zero(self):
+        """When question.points=1 (the DB default) and exam.default_question_points=1
+        (the DB default), question_points() treats both as 'unset' and falls back to
+        the Kahoot-style 1000 points per question."""
         now = timezone.now()
         session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
         session.state = LiveSession.STATE_QUESTION
@@ -212,10 +215,11 @@ class LiveExamLowPointScoringTest(TestCase):
         )
 
         self.assertTrue(ok)
-        self.assertEqual(result["answer"]["awarded_points"], 1)
+        # points=1 is the DB default → treated as unset → Kahoot-style 1000
+        self.assertEqual(result["answer"]["awarded_points"], 1000)
 
         player.refresh_from_db()
-        self.assertEqual(player.score, 1)
+        self.assertEqual(player.score, 1000)
 
     def test_save_answer_and_score_awards_full_question_points(self):
         self.question.points = 5
