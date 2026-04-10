@@ -3063,6 +3063,66 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("review_items", response.context)
 
+    def test_pending_review_uses_submitted_dates_and_oldest_sort_order(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_sort_student",
+            email="pending_sort_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+
+        older_exam = Exam.objects.create(
+            author=self.user, title="Older Pending Exam", exam_type="written", is_active=True
+        )
+        newer_exam = Exam.objects.create(
+            author=self.user, title="Newer Pending Exam", exam_type="written", is_active=True
+        )
+
+        now = timezone.now()
+        older_attempt = ExamAttempt.objects.create(
+            user=student,
+            exam=older_exam,
+            status="submitted",
+            checked_by_teacher=False,
+        )
+        older_attempt.started_at = now - timedelta(hours=5)
+        older_attempt.finished_at = now - timedelta(hours=4)
+        older_attempt.save(update_fields=["started_at", "finished_at"])
+
+        newer_attempt = ExamAttempt.objects.create(
+            user=student,
+            exam=newer_exam,
+            status="submitted",
+            checked_by_teacher=False,
+        )
+        newer_attempt.started_at = now - timedelta(hours=2)
+        newer_attempt.finished_at = now - timedelta(hours=1)
+        newer_attempt.save(update_fields=["started_at", "finished_at"])
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"), {"submitted_order": "oldest"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Göndərilib:")
+        self.assertContains(response, "data-bootstrap-select", html=False)
+
+        exam_items = [
+            item
+            for item in response.context["review_items"]
+            if item["type"] == "exam" and item["title"] in {"Older Pending Exam", "Newer Pending Exam"}
+        ]
+        self.assertEqual([item["title"] for item in exam_items], ["Older Pending Exam", "Newer Pending Exam"])
+        self.assertEqual(exam_items[0]["submitted_at"], older_attempt.finished_at)
+        self.assertEqual(exam_items[1]["submitted_at"], newer_attempt.finished_at)
+
     def test_pending_review_only_includes_teacher_owned_exam_attempts(self):
         from apps.exams.models import Exam, ExamAttempt
 
@@ -3508,6 +3568,70 @@ class ReviewResultsViewTest(TestCase):
         response = self.client.get(reverse("accounts:review_results"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("evaluated_review_items", response.context)
+
+    def test_review_results_formats_exam_score_without_percent_and_sorts_by_submission_date(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="review_sort_student",
+            email="review_sort_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+
+        older_exam = Exam.objects.create(
+            author=self.user, title="Older Reviewed Exam", exam_type="test", is_active=True
+        )
+        newer_exam = Exam.objects.create(
+            author=self.user, title="Newer Reviewed Exam", exam_type="test", is_active=True
+        )
+
+        now = timezone.now()
+        older_attempt = ExamAttempt.objects.create(
+            user=student,
+            exam=older_exam,
+            status="submitted",
+            correct_count=22,
+            wrong_count=3,
+        )
+        older_attempt.started_at = now - timedelta(hours=6)
+        older_attempt.finished_at = now - timedelta(hours=5)
+        older_attempt.save(update_fields=["started_at", "finished_at"])
+
+        newer_attempt = ExamAttempt.objects.create(
+            user=student,
+            exam=newer_exam,
+            status="submitted",
+            teacher_score=91,
+        )
+        newer_attempt.started_at = now - timedelta(hours=2)
+        newer_attempt.finished_at = now - timedelta(hours=1)
+        newer_attempt.save(update_fields=["started_at", "finished_at"])
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:review_results"), {"evaluated_submitted_order": "oldest"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertNotContains(response, "88%", html=False)
+        self.assertNotContains(response, "91%", html=False)
+
+        exam_items = [
+            item
+            for item in response.context["evaluated_review_items"]
+            if item["type"] == "exam" and item["title"] in {"Older Reviewed Exam", "Newer Reviewed Exam"}
+        ]
+        self.assertEqual([item["title"] for item in exam_items], ["Older Reviewed Exam", "Newer Reviewed Exam"])
+        self.assertEqual(exam_items[0]["score_display"], "88")
+        self.assertEqual(exam_items[1]["score_display"], "91")
+        self.assertEqual(exam_items[0]["submitted_at"], older_attempt.finished_at)
+        self.assertEqual(exam_items[1]["submitted_at"], newer_attempt.finished_at)
 
     def test_review_results_exam_action_url_points_to_attempt_detail(self):
         from apps.exams.models import Exam, ExamAttempt
