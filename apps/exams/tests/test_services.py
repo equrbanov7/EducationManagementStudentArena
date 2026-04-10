@@ -12,8 +12,9 @@ from django.test import TestCase
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, QuestionBlock
 from apps.exams.services import parsing
+from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -131,6 +132,63 @@ class ExamGradingServicesTest(TestCase):
         total_score = services.calculate_attempt_score(self.attempt)
 
         self.assertEqual(total_score, Decimal("8"))
+
+
+class ExamQuestionRandomizerServicesTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(username="randomizer_teacher", email="rt@example.com", password="pass123")
+        self.student = User.objects.create_user(username="randomizer_student", email="rs@example.com", password="pass123")
+        self.org = Organization.objects.create(
+            name="Randomizer Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        self.exam = Exam.objects.create(
+            title="Randomized Block Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+            random_question_count=5,
+        )
+
+    def test_generate_random_questions_for_attempt_balances_one_question_per_block(self):
+        blocks = [
+            QuestionBlock.objects.create(exam=self.exam, name=f"Block {index + 1}", order=index + 1)
+            for index in range(5)
+        ]
+        for block in blocks:
+            for question_index in range(2):
+                ExamQuestion.objects.create(
+                    exam=self.exam,
+                    block=block,
+                    text=f"{block.name} Question {question_index + 1}",
+                    points=1,
+                    is_active=True,
+                )
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        answers = list(attempt.answers.select_related("question__block"))
+        self.assertEqual(len(answers), 5)
+        block_counts = {}
+        for answer in answers:
+            block_id = answer.question.block_id
+            block_counts[block_id] = block_counts.get(block_id, 0) + 1
+
+        self.assertEqual(set(block_counts.keys()), {block.id for block in blocks})
+        self.assertTrue(all(count == 1 for count in block_counts.values()))
 
 
 class ExamAccessControlServicesTest(TestCase):
