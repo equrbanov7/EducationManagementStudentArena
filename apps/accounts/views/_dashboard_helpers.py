@@ -2,6 +2,8 @@
 Helper functions for dashboard data collection.
 """
 
+from decimal import Decimal, InvalidOperation
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.urls import reverse
@@ -36,6 +38,7 @@ from ._helpers import (
 )
 
 User = get_user_model()
+SUBMISSION_DATE_ORDER_CHOICES = {"newest", "oldest"}
 
 
 def _standard_item_type_meta(raw_type):
@@ -76,6 +79,27 @@ def _resolve_teacher_review_action(*, is_graded=False, in_recheck_window=False):
     if is_graded:
         return "Bax"
     return "Yoxla"
+
+
+def _normalize_submission_date_order(value, *, default="newest"):
+    normalized = (value or default).lower()
+    if normalized in SUBMISSION_DATE_ORDER_CHOICES:
+        return normalized
+    return default
+
+
+def _format_score_display(value):
+    if value in (None, ""):
+        return "-"
+
+    try:
+        formatted = format(Decimal(str(value)), "f")
+    except (InvalidOperation, TypeError, ValueError):
+        return str(value)
+
+    if "." in formatted:
+        formatted = formatted.rstrip("0").rstrip(".")
+    return formatted or "0"
 
 
 def _collect_assigned_tasks(request, filter_type=None, search=None):
@@ -788,7 +812,7 @@ def _normalize_pending_review_status(value):
     return "all"
 
 
-def _collect_pending_review_items(request, search=None, filter_type=None, filter_status=None):
+def _collect_pending_review_items(request, search=None, filter_type=None, filter_status=None, submitted_order=None):
     search_query = (search if search is not None else request.GET.get("search", "")).strip()
     normalized_type = _normalize_pending_review_type(
         filter_type if filter_type is not None else request.GET.get("type", "all")
@@ -796,12 +820,17 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     normalized_status = _normalize_pending_review_status(
         filter_status if filter_status is not None else request.GET.get("status", "all")
     )
+    normalized_submitted_order = _normalize_submission_date_order(
+        submitted_order if submitted_order is not None else request.GET.get("submitted_order", "oldest"),
+        default="oldest",
+    )
     profile_return_url = _append_query_params(
         reverse("accounts:profile"),
         section="pending-review",
         search=search_query,
         type=normalized_type,
         status=normalized_status,
+        submitted_order=normalized_submitted_order,
     )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
@@ -850,6 +879,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             student_display = (
                 "Anonim tələbə" if is_identity_hidden else (attempt.user.get_full_name() or attempt.user.username)
             )
+            submitted_at = attempt.finished_at or attempt.started_at
             items.append(
                 {
                     "type": "exam",
@@ -860,7 +890,8 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
                     "status": attempt.status,
-                    "date": attempt.teacher_checked_at or attempt.started_at,
+                    "submitted_at": submitted_at,
+                    "reviewed_at": attempt.teacher_checked_at,
                     "type_label": _pending_review_type_label("exam"),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
@@ -918,7 +949,8 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.user_id), ""),
                     "status": submission.status,
-                    "date": submission.graded_at or submission.submitted_at,
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("assignment"),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
@@ -975,7 +1007,8 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.student_id), ""),
                     "status": submission.status,
-                    "date": submission.graded_at or submission.submitted_at,
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("project"),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
@@ -1032,7 +1065,8 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, student.id), ""),
                     "status": submission.status,
-                    "date": submission.graded_at or submission.submitted_at,
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("lab"),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
@@ -1055,16 +1089,28 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     if normalized_status != "all":
         items = [item for item in items if item["status"] == normalized_status]
 
-    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
-    return items, search_query, normalized_type, normalized_status
+    items.sort(
+        key=lambda item: (
+            item["submitted_at"] is None,
+            item["submitted_at"] or timezone.now(),
+        ),
+        reverse=normalized_submitted_order == "newest",
+    )
+    return items, search_query, normalized_type, normalized_status, normalized_submitted_order
 
 
-def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None):
+def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None, submitted_order=None):
     search_query = (search if search is not None else request.GET.get("evaluated_search", "")).strip()
     normalized_type = _normalize_pending_review_type(
         filter_type if filter_type is not None else request.GET.get("evaluated_type", "all")
     )
     selected_group = (filter_group if filter_group is not None else request.GET.get("evaluated_group", "")).strip()
+    normalized_submitted_order = _normalize_submission_date_order(
+        submitted_order
+        if submitted_order is not None
+        else request.GET.get("evaluated_submitted_order", "newest"),
+        default="newest",
+    )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
@@ -1098,6 +1144,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
         evaluated_search=search_query,
         evaluated_type=normalized_type,
         evaluated_group=selected_group,
+        evaluated_submitted_order=normalized_submitted_order,
     )
 
     items = []
@@ -1126,6 +1173,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
         for attempt in attempts:
             course = attempt.exam.course
             score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
+            submitted_at = attempt.finished_at or attempt.started_at
             items.append(
                 {
                     "type": "exam",
@@ -1133,8 +1181,9 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
-                    "score_display": f"{score_value}%" if score_value is not None else "-",
-                    "date": attempt.teacher_checked_at or attempt.finished_at or attempt.started_at,
+                    "score_display": _format_score_display(score_value),
+                    "submitted_at": submitted_at,
+                    "reviewed_at": attempt.teacher_checked_at,
                     "action_url": _append_query_params(
                         reverse(
                             "exams:teacher_view_attempt",
@@ -1173,8 +1222,9 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "title": submission.assignment.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, submission.user_id), "") if course else "",
-                    "score_display": submission.grade if submission.grade is not None else "-",
-                    "date": submission.graded_at or submission.submitted_at,
+                    "score_display": _format_score_display(submission.grade),
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:review_result_detail",
@@ -1212,8 +1262,9 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "title": submission.project.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, submission.student_id), "") if course else "",
-                    "score_display": submission.grade if submission.grade is not None else "-",
-                    "date": submission.graded_at or submission.submitted_at,
+                    "score_display": _format_score_display(submission.grade),
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:review_result_detail",
@@ -1252,8 +1303,9 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "title": submission.assignment.lab.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, student.id), "") if course else "",
-                    "score_display": submission.score if submission.score is not None else "-",
-                    "date": submission.graded_at or submission.submitted_at,
+                    "score_display": _format_score_display(submission.score),
+                    "submitted_at": submission.submitted_at,
+                    "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:review_result_detail",
@@ -1268,5 +1320,11 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
     if selected_group:
         items = [item for item in items if item.get("group_name") == selected_group]
 
-    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
-    return items, search_query, normalized_type, selected_group, available_groups
+    items.sort(
+        key=lambda item: (
+            item["submitted_at"] is None,
+            item["submitted_at"] or timezone.now(),
+        ),
+        reverse=normalized_submitted_order == "newest",
+    )
+    return items, search_query, normalized_type, selected_group, available_groups, normalized_submitted_order
