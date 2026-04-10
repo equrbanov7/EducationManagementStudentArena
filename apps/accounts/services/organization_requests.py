@@ -73,28 +73,28 @@ def sync_profile_pending_request_snapshot(profile):
             .first()
         )
 
-    if latest_pending_request:
-        next_requested_org = latest_pending_request.organization
-        next_requested_name = latest_pending_request.organization.name
-        next_requested_message = (latest_pending_request.message or "").strip()
-    else:
-        next_requested_org = None
-        next_requested_name = ""
-        next_requested_message = ""
+        if latest_pending_request:
+            next_requested_org = latest_pending_request.organization
+            next_requested_name = latest_pending_request.organization.name
+            next_requested_message = (latest_pending_request.message or "").strip()
+        else:
+            next_requested_org = None
+            next_requested_name = ""
+            next_requested_message = ""
 
-    changed_fields = []
-    if profile.requested_organization_id != getattr(next_requested_org, "id", None):
-        profile.requested_organization = next_requested_org
-        changed_fields.append("requested_organization")
-    if profile.requested_organization_name != next_requested_name:
-        profile.requested_organization_name = next_requested_name
-        changed_fields.append("requested_organization_name")
-    if profile.requested_organization_message != next_requested_message:
-        profile.requested_organization_message = next_requested_message
-        changed_fields.append("requested_organization_message")
+        changed_fields = []
+        if profile.requested_organization_id != getattr(next_requested_org, "id", None):
+            profile.requested_organization = next_requested_org
+            changed_fields.append("requested_organization")
+        if profile.requested_organization_name != next_requested_name:
+            profile.requested_organization_name = next_requested_name
+            changed_fields.append("requested_organization_name")
+        if profile.requested_organization_message != next_requested_message:
+            profile.requested_organization_message = next_requested_message
+            changed_fields.append("requested_organization_message")
 
-    if changed_fields:
-        profile.save(update_fields=changed_fields + ["updated_at"])
+        if changed_fields:
+            profile.save(update_fields=changed_fields + ["updated_at"])
 
     return latest_pending_request
 
