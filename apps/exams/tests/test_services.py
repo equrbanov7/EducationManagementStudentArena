@@ -136,8 +136,12 @@ class ExamGradingServicesTest(TestCase):
 
 class ExamQuestionRandomizerServicesTest(TestCase):
     def setUp(self):
-        self.teacher = User.objects.create_user(username="randomizer_teacher", email="rt@example.com", password="pass123")
-        self.student = User.objects.create_user(username="randomizer_student", email="rs@example.com", password="pass123")
+        self.teacher = User.objects.create_user(
+            username="randomizer_teacher", email="rt@example.com", password="pass123"
+        )
+        self.student = User.objects.create_user(
+            username="randomizer_student", email="rs@example.com", password="pass123"
+        )
         self.org = Organization.objects.create(
             name="Randomizer Org",
             org_type=OrganizationType.SCHOOL,
