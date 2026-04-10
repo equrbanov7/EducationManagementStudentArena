@@ -16,21 +16,38 @@
                 class="pr-form-control"
             >
 
-            <select name="type" class="pr-form-control">
-                <option value="all" {% if filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
-                <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-                <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
-                <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
-                <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
-            </select>
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="type"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="all" {% if filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
+                    <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
+                    <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
+                    <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+                    <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
+                </select>
+            </div>
 
-            <select name="status" class="pr-form-control">
-                <option value="all" {% if filter_status == 'all' %}selected{% endif %}>{% trans "status_all" context "profile.pending_review" %}</option>
-                <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>{% trans "status_submitted" context "profile.pending_review" %}</option>
-                <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>{% trans "status_expired" context "profile.pending_review" %}</option>
-                <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>{% trans "status_pending" context "profile.pending_review" %}</option>
-                <option value="late" {% if filter_status == 'late' %}selected{% endif %}>{% trans "status_late" context "profile.pending_review" %}</option>
-            </select>
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="status"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="all" {% if filter_status == 'all' %}selected{% endif %}>{% trans "status_all" context "profile.pending_review" %}</option>
+                    <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>{% trans "status_submitted" context "profile.pending_review" %}</option>
+                    <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>{% trans "status_expired" context "profile.pending_review" %}</option>
+                    <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>{% trans "status_pending" context "profile.pending_review" %}</option>
+                    <option value="late" {% if filter_status == 'late' %}selected{% endif %}>{% trans "status_late" context "profile.pending_review" %}</option>
+                </select>
+            </div>
+
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="submitted_order"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="oldest" {% if pending_review_submitted_order|default:submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
+                    <option value="newest" {% if pending_review_submitted_order|default:submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
+                </select>
+            </div>
 
             <noscript>
                 <button type="submit" class="pr-btn-review w-100">
@@ -75,9 +92,9 @@
                             <span>{% trans "group_prefix" context "profile.pending_review" %}: {{ item.group_name }}</span>
                         {% endif %}
                         
-                        {% if item.date %}
+                        {% if item.submitted_at %}
                             <span class="pr-item-meta-divider">•</span>
-                            <span><i class="far fa-clock me-1"></i>{{ item.date|date:"d M Y H:i" }}</span>
+                            <span><i class="far fa-paper-plane me-1"></i>Göndərilib: {{ item.submitted_at|date:"d.m.Y H:i" }}</span>
                         {% endif %}
                         
                         <span class="pr-item-meta-divider">•</span>

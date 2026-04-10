@@ -972,17 +972,20 @@ def user_profile(request):
     pending_review_search_query = ""
     pending_review_filter_type = "all"
     pending_review_filter_status = "all"
+    pending_review_submitted_order = "oldest"
     evaluated_review_items = []
     evaluated_review_search_query = ""
     evaluated_review_filter_type = "all"
     evaluated_review_filter_group = ""
     evaluated_review_available_groups = []
+    evaluated_review_submitted_order = "newest"
     if "pending-review" in allowed_sections or "review-results" in allowed_sections:
         (
             pending_review_items,
             pending_review_search_query,
             pending_review_filter_type,
             pending_review_filter_status,
+            pending_review_submitted_order,
         ) = _collect_pending_review_items(request)
         (
             evaluated_review_items,
@@ -990,6 +993,7 @@ def user_profile(request):
             evaluated_review_filter_type,
             evaluated_review_filter_group,
             evaluated_review_available_groups,
+            evaluated_review_submitted_order,
         ) = _collect_evaluated_review_items(request)
 
     role_assignment_section = {
@@ -1636,12 +1640,14 @@ def user_profile(request):
         "pending_review_search_query": pending_review_search_query,
         "pending_review_filter_type": pending_review_filter_type,
         "pending_review_filter_status": pending_review_filter_status,
+        "pending_review_submitted_order": pending_review_submitted_order,
         "pending_review_total_count": len(pending_review_items),
         "evaluated_review_items": evaluated_review_items,
         "evaluated_review_search_query": evaluated_review_search_query,
         "evaluated_review_filter_type": evaluated_review_filter_type,
         "evaluated_review_filter_group": evaluated_review_filter_group,
         "evaluated_review_available_groups": evaluated_review_available_groups,
+        "evaluated_review_submitted_order": evaluated_review_submitted_order,
         "evaluated_review_total_count": len(evaluated_review_items),
         "pending_student_invites": pending_student_invites,
         "pending_student_join_requests": pending_student_join_requests,
