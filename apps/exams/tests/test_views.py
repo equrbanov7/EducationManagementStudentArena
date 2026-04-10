@@ -1505,6 +1505,32 @@ class StudentExamVisibilityFilteringTest(TestCase):
             f'name="next" value="{reverse("courses:course_dashboard", args=[self.assigned_course.id])}"',
         )
 
+    def test_student_exam_list_actions_use_bootstrap_info_modal(self):
+        available_response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
+
+        self.assertEqual(available_response.status_code, 200)
+        self.assertContains(available_response, 'id="examStartModal"')
+        self.assertContains(available_response, "data-open-exam-start-modal")
+        self.assertContains(available_response, f'data-exam-slug="{self.course_assigned_exam.slug}"')
+        self.assertContains(
+            available_response,
+            f'data-start-url="{reverse("exams:start_exam", args=[self.course_assigned_exam.slug])}',
+        )
+        self.assertContains(available_response, 'data-requires-code="0"')
+        self.assertContains(available_response, 'id="examStartCodeForm"')
+        self.assertContains(available_response, 'name="next" value="')
+
+        code_response = self.client.get(reverse("exams:student_exam_list"), {"q": self.code_assigned_exam.title})
+
+        self.assertEqual(code_response.status_code, 200)
+        self.assertContains(code_response, f'data-exam-slug="{self.code_assigned_exam.slug}"')
+        self.assertContains(code_response, 'data-requires-code="1"')
+        self.assertContains(
+            code_response,
+            'modalAccessCodeDescriptionWithTitle: "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
+            html=False,
+        )
+
     def test_course_dashboard_student_history_button_shows_attempt_count(self):
         ExamAttempt.objects.create(
             user=self.student,
@@ -1693,6 +1719,29 @@ class StudentExamVisibilityFilteringTest(TestCase):
             html=False,
         )
         self.assertNotContains(response, 'modalAccessCodeDescriptionWithTitle: ""{title}"', html=False)
+
+    def test_student_exam_list_modal_strings_are_translated_for_supported_languages(self):
+        cases = (
+            ("en", "Exam details", "Access code required", "Start exam"),
+            ("tr", "Sınav bilgileri", "Erişim kodu gerekiyor", "Sınavı başlat"),
+            ("ru", "Информация об экзамене", "Требуется код доступа", "Начать экзамен"),
+        )
+
+        for language, modal_title, code_title, start_text in cases:
+            with self.subTest(language=language), override(language):
+                response = self.client.get(
+                    reverse("exams:student_exam_list"),
+                    {"q": self.code_assigned_exam.title},
+                    HTTP_ACCEPT_LANGUAGE=language,
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, modal_title)
+                self.assertContains(response, code_title)
+                self.assertContains(response, start_text)
+                self.assertNotContains(response, "modal_title_exam_info")
+                self.assertNotContains(response, "modal_label_duration")
+                self.assertNotContains(response, "modal_access_code_title")
 
     def test_az_exam_result_uses_localized_strings(self):
         exam = Exam.objects.create(

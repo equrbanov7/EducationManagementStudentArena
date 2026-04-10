@@ -9036,27 +9036,27 @@ msgstr "Посмотреть все"
 #: apps/exams/templates/exams/student/student_exam_list.html:172
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_title"
-msgstr "Добавить новую вакансию фрилансера"
+msgstr "Требуется код доступа"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:154
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description"
-msgstr "Краткая информация об этом ресурсе"
+msgstr "Введите код доступа, чтобы начать этот экзамен."
 
 #: apps/exams/templates/exams/student/student_exam_list.html:163
 msgctxt "exams.template.student_exam_list"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отменить"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:164
 msgctxt "exams.template.student_exam_list"
 msgid "action_confirm"
-msgstr "открыть"
+msgstr "Подтвердить"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:173
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description_with_title"
-msgstr "Краткая информация об этом ресурсе"
+msgstr "Введите код доступа, чтобы начать экзамен \"{title}\"."
 
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
@@ -10126,6 +10126,89 @@ msgstr "Категория"
 msgctxt "exams.template.questions_i_can_see"
 msgid "empty_no_visible_question"
 msgstr "Для этого раздела нет видимой группы."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "label_duration_unit_minutes"
+msgstr "мин."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_unlimited"
+msgstr "Без ограничений"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:206
+#: apps/exams/templates/exams/teacher/exam_section.html:209
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_always_available"
+msgstr "Доступно всегда"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:263
+msgctxt "exams.partial.exam_section"
+msgid "modal_aria_close"
+msgstr "Закрыть"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:268
+msgctxt "exams.partial.exam_section"
+msgid "modal_title_exam_info"
+msgstr "Информация об экзамене"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:273
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_type"
+msgstr "Тип"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:277
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_duration"
+msgstr "Длительность"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:281
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_start"
+msgstr "Время начала"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:285
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_end"
+msgstr "Время окончания"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:291
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_note"
+msgstr "Примечание"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:292
+#: apps/exams/templates/exams/teacher/exam_section.html:326
+msgctxt "exams.partial.exam_section"
+msgid "modal_note_empty"
+msgstr "Дополнительных примечаний нет."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:303
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_label"
+msgstr "Код доступа"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:311
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_placeholder"
+msgstr "6-значный код"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:317
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_cancel"
+msgstr "Отменить"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:322
+#: apps/exams/templates/exams/teacher/exam_section.html:328
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_start"
+msgstr "Начать экзамен"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:329
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_confirm_code"
+msgstr "Подтвердить код и начать"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
