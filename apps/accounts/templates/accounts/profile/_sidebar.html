@@ -49,6 +49,11 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-request' %}active{% endif %}">
                 <i class="fas fa-building sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "join_organization" context "profile.sidebar" %}</span>
+                {% if student_org_request_section.pending_invites_count > 0 %}
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">
+                    {{ student_org_request_section.pending_invites_count }}
+                </span>
+                {% endif %}
             </a>
         </li>
         {% endif %}
