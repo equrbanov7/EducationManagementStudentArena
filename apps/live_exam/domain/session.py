@@ -209,7 +209,7 @@ def question_points(session: LiveSession, exam_question: ExamQuestion) -> int:
         return value
 
     value = safe_int(getattr(session.exam, "default_question_points", 0), 0)
-    if value > 0:
+    if value > 1:
         return value
 
     return 1000
