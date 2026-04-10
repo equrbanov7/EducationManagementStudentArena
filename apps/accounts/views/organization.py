@@ -922,6 +922,7 @@ def student_organization_management(request):
 def student_organization_request(request):
     """Allow applicants to send or clear organization join requests."""
     from apps.organizations.models import Membership, Organization
+    from core.rls import bypass_rls
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
@@ -935,28 +936,31 @@ def student_organization_request(request):
         if action == "clear_request":
             request_id = (request.POST.get("request_id") or "").strip()
             target_request = None
-            if request_id:
-                target_request = (
-                    _pending_student_request_queryset(
-                        user=request.user,
-                        statuses=[StudentOrganizationRequestStatus.PENDING],
-                    )
-                    .filter(id=request_id)
-                    .select_related("organization")
-                    .first()
-                )
-            else:
-                organization_id = (request.POST.get("organization_id") or "").strip()
-                if organization_id:
+            # The student may not have an active org context yet, so RLS
+            # would hide StudentOrganizationRequest rows.  Bypass RLS.
+            with bypass_rls():
+                if request_id:
                     target_request = (
                         _pending_student_request_queryset(
                             user=request.user,
                             statuses=[StudentOrganizationRequestStatus.PENDING],
                         )
-                        .filter(organization_id=organization_id)
+                        .filter(id=request_id)
                         .select_related("organization")
                         .first()
                     )
+                else:
+                    organization_id = (request.POST.get("organization_id") or "").strip()
+                    if organization_id:
+                        target_request = (
+                            _pending_student_request_queryset(
+                                user=request.user,
+                                statuses=[StudentOrganizationRequestStatus.PENDING],
+                            )
+                            .filter(organization_id=organization_id)
+                            .select_related("organization")
+                            .first()
+                        )
 
             if target_request is None:
                 messages.error(request, "Ləğv ediləcək aktiv müraciət tapılmadı.")
@@ -999,12 +1003,15 @@ def student_organization_request(request):
                 messages.error(request, "Seçilən təşkilat tapılmadı və ya aktiv deyil.")
                 return redirect(next_url)
 
-            existing_pending_invite = Membership.objects.filter(
-                user=request.user,
-                organization=target_org,
-                is_active=False,
-                title=STUDENT_PENDING_INVITE_TITLE,
-            ).exists()
+            # The student may not belong to any org yet, so RLS would
+            # block Membership and StudentOrganizationRequest queries.
+            with bypass_rls():
+                existing_pending_invite = Membership.objects.filter(
+                    user=request.user,
+                    organization=target_org,
+                    is_active=False,
+                    title=STUDENT_PENDING_INVITE_TITLE,
+                ).exists()
             if existing_pending_invite:
                 messages.info(request, "Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz.")
                 return redirect(next_url)
@@ -1017,63 +1024,64 @@ def student_organization_request(request):
                 )
                 return redirect(next_url)
 
-            existing_pending = (
-                _pending_student_request_queryset(
-                    user=request.user,
-                    organization=target_org,
-                    statuses=[StudentOrganizationRequestStatus.PENDING],
+            with bypass_rls():
+                existing_pending = (
+                    _pending_student_request_queryset(
+                        user=request.user,
+                        organization=target_org,
+                        statuses=[StudentOrganizationRequestStatus.PENDING],
+                    )
+                    .filter(role_type=request_role_type)
+                    .order_by("-created_at")
+                    .first()
                 )
-                .filter(role_type=request_role_type)
-                .order_by("-created_at")
-                .first()
-            )
-            if existing_pending:
-                existing_pending.message = request_message
-                existing_pending.resolution_note = ""
-                existing_pending.responded_by = None
-                existing_pending.responded_at = None
-                existing_pending.save(
-                    update_fields=[
-                        "message",
-                        "resolution_note",
-                        "responded_by",
-                        "responded_at",
-                        "updated_at",
-                    ]
-                )
-                target_request = existing_pending
-            else:
-                target_request = StudentOrganizationRequest.objects.create(
-                    user=request.user,
-                    organization=target_org,
-                    role_type=request_role_type,
-                    message=request_message,
-                    status=StudentOrganizationRequestStatus.PENDING,
-                )
-                try:
-                    notify_org_admins_of_new_request(request_obj=target_request)
-                except Exception:
-                    logger.exception("Failed to send new request notification")
+                if existing_pending:
+                    existing_pending.message = request_message
+                    existing_pending.resolution_note = ""
+                    existing_pending.responded_by = None
+                    existing_pending.responded_at = None
+                    existing_pending.save(
+                        update_fields=[
+                            "message",
+                            "resolution_note",
+                            "responded_by",
+                            "responded_at",
+                            "updated_at",
+                        ]
+                    )
+                    target_request = existing_pending
+                else:
+                    target_request = StudentOrganizationRequest.objects.create(
+                        user=request.user,
+                        organization=target_org,
+                        role_type=request_role_type,
+                        message=request_message,
+                        status=StudentOrganizationRequestStatus.PENDING,
+                    )
+                    try:
+                        notify_org_admins_of_new_request(request_obj=target_request)
+                    except Exception:
+                        logger.exception("Failed to send new request notification")
 
-            # Keep one pending row per user+organization for cleaner history and UI.
-            duplicate_pending = (
-                _pending_student_request_queryset(
-                    user=request.user,
-                    organization=target_org,
-                    statuses=[StudentOrganizationRequestStatus.PENDING],
+                # Keep one pending row per user+organization for cleaner history and UI.
+                duplicate_pending = (
+                    _pending_student_request_queryset(
+                        user=request.user,
+                        organization=target_org,
+                        statuses=[StudentOrganizationRequestStatus.PENDING],
+                    )
+                    .filter(role_type=request_role_type)
+                    .exclude(id=target_request.id)
                 )
-                .filter(role_type=request_role_type)
-                .exclude(id=target_request.id)
-            )
-            if duplicate_pending.exists():
-                now = timezone.now()
-                duplicate_pending.update(
-                    status=StudentOrganizationRequestStatus.CANCELLED,
-                    resolution_note="Yeni müraciət göndərildiyi üçün əvvəlki pending bağlandı.",
-                    responded_by=request.user,
-                    responded_at=now,
-                    updated_at=now,
-                )
+                if duplicate_pending.exists():
+                    now = timezone.now()
+                    duplicate_pending.update(
+                        status=StudentOrganizationRequestStatus.CANCELLED,
+                        resolution_note="Yeni müraciət göndərildiyi üçün əvvəlki pending bağlandı.",
+                        responded_by=request.user,
+                        responded_at=now,
+                        updated_at=now,
+                    )
 
             profile.requested_organization = target_org
             profile.requested_organization_name = target_org.name
