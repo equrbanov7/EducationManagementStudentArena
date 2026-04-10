@@ -66,10 +66,7 @@ def calculate_answer_score(
     bounded_answer_ms = int(answer_ms or 0)
     if total_ms > 0:
         bounded_answer_ms = max(0, min(bounded_answer_ms, total_ms))
-        # Kahoot-style scoring: score = base * (1 - (answer_time / total_time) / 2)
-        # Fastest correct answer gets full base_points, slowest gets half.
-        time_factor = 1.0 - (bounded_answer_ms / total_ms) / 2.0
-        awarded_points = _round_awarded_points(int(base_points) * time_factor * fraction)
+        awarded_points = _round_awarded_points(int(base_points) * fraction)
     else:
         awarded_points = _round_awarded_points(int(base_points) * fraction)
 

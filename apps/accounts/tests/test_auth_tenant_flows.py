@@ -1702,6 +1702,104 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
+    def test_org_admin_can_reinvite_student_after_student_leaves(self):
+        student_user = User.objects.create_user(
+            username="reinvite_student",
+            email="reinvite_student@example.com",
+            password="StrongPass123!",
+        )
+        student_profile = student_user.profile
+        student_profile.organization = None
+        student_profile.organization_type = OrganizationType.INDIVIDUAL
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.requested_organization = None
+        student_profile.requested_organization_name = ""
+        student_profile.requested_organization_message = ""
+        student_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        first_invite_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "invite_student",
+                "user_id": str(student_user.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+        self.assertRedirects(first_invite_response, reverse("accounts:student_organization_management"))
+
+        invite_membership = Membership.objects.filter(
+            user=student_user,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            is_active=False,
+            title="__student_pending_invite__",
+        ).first()
+        self.assertIsNotNone(invite_membership)
+
+        self.client.force_login(student_user)
+        accept_response = self.client.post(
+            reverse("accounts:student_org_invitation_action"),
+            {
+                "invite_id": str(invite_membership.id),
+                "action": "accept",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+        self.assertRedirects(accept_response, reverse("accounts:profile") + "?section=profile-info")
+
+        leave_response = self.client.post(
+            reverse("accounts:student_leave_organization"),
+            {
+                "leave_reason": "Sonra yenidən qoşulacağam",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+        self.assertRedirects(leave_response, reverse("accounts:profile") + "?section=profile-info")
+
+        self._activate_org_session(self.admin_user, self.org_a)
+        second_invite_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "invite_student",
+                "user_id": str(student_user.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+        self.assertRedirects(second_invite_response, reverse("accounts:student_organization_management"))
+
+        student_profile.refresh_from_db()
+        self.assertIsNone(student_profile.organization)
+        self.assertEqual(student_profile.requested_organization, self.org_a)
+        self.assertEqual(
+            Membership.objects.filter(
+                user=student_user,
+                organization=self.org_a,
+                role=self.org_a_student_role,
+                scope_unit=None,
+            ).count(),
+            1,
+        )
+        reinvite_membership = Membership.objects.get(
+            user=student_user,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            scope_unit=None,
+        )
+        self.assertFalse(reinvite_membership.is_active)
+        self.assertFalse(reinvite_membership.is_primary)
+        self.assertEqual(reinvite_membership.title, "__student_pending_invite__")
+        self.assertEqual(reinvite_membership.assigned_by, self.admin_user)
+
     def test_teacher_can_cancel_request_and_resubmit(self):
         teacher_user = User.objects.create_user(
             username="teacher_resubmit",
