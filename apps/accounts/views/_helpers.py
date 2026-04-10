@@ -1181,7 +1181,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
@@ -1210,7 +1209,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
@@ -1240,7 +1238,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
