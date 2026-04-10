@@ -9023,12 +9023,12 @@ msgstr "Tümünü gör"
 #: apps/exams/templates/exams/student/student_exam_list.html:172
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_title"
-msgstr "Yeni bir serbest iş ekle"
+msgstr "Erişim kodu gerekiyor"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:154
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description"
-msgstr "Bu kaynak hakkında kısa bilgi"
+msgstr "Bu sınava başlamak için erişim kodunu girin."
 
 #: apps/exams/templates/exams/student/student_exam_list.html:163
 msgctxt "exams.template.student_exam_list"
@@ -9038,12 +9038,12 @@ msgstr "İptal et"
 #: apps/exams/templates/exams/student/student_exam_list.html:164
 msgctxt "exams.template.student_exam_list"
 msgid "action_confirm"
-msgstr "açık"
+msgstr "Onayla"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:173
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description_with_title"
-msgstr "Bu kaynak hakkında kısa bilgi"
+msgstr "\"{title}\" sınavına başlamak için erişim kodunu girin."
 
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
@@ -10109,6 +10109,89 @@ msgstr "Kategori"
 msgctxt "exams.template.questions_i_can_see"
 msgid "empty_no_visible_question"
 msgstr "Bu bölüm için görünür bir grup bulunmamaktadır."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "label_duration_unit_minutes"
+msgstr "dakika"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_unlimited"
+msgstr "Sınırsız"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:206
+#: apps/exams/templates/exams/teacher/exam_section.html:209
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_always_available"
+msgstr "Her zaman erişilebilir"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:263
+msgctxt "exams.partial.exam_section"
+msgid "modal_aria_close"
+msgstr "Kapat"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:268
+msgctxt "exams.partial.exam_section"
+msgid "modal_title_exam_info"
+msgstr "Sınav bilgileri"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:273
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_type"
+msgstr "Tür"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:277
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_duration"
+msgstr "Süre"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:281
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_start"
+msgstr "Başlangıç zamanı"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:285
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_end"
+msgstr "Bitiş zamanı"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:291
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_note"
+msgstr "Not"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:292
+#: apps/exams/templates/exams/teacher/exam_section.html:326
+msgctxt "exams.partial.exam_section"
+msgid "modal_note_empty"
+msgstr "Ek not yok."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:303
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_label"
+msgstr "Erişim kodu"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:311
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_placeholder"
+msgstr "6 haneli kod"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:317
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_cancel"
+msgstr "İptal et"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:322
+#: apps/exams/templates/exams/teacher/exam_section.html:328
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_start"
+msgstr "Sınavı başlat"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:329
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_confirm_code"
+msgstr "Kodu onayla ve başlat"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
