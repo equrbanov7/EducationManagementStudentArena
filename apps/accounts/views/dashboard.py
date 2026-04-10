@@ -561,12 +561,13 @@ def pending_review(request):
         messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
         return redirect("accounts:profile")
 
-    items, search, filter_type, filter_status = _collect_pending_review_items(request)
+    items, search, filter_type, filter_status, submitted_order = _collect_pending_review_items(request)
     context = {
         "review_items": items,
         "search_query": search,
         "filter_type": filter_type,
         "filter_status": filter_status,
+        "submitted_order": submitted_order,
         "total_count": len(items),
     }
     return render(request, "accounts/pending_review.html", context)
@@ -897,6 +898,7 @@ def review_results(request):
         evaluated_filter_type,
         evaluated_filter_group,
         evaluated_available_groups,
+        evaluated_submitted_order,
     ) = _collect_evaluated_review_items(request)
 
     context = {
@@ -905,6 +907,7 @@ def review_results(request):
         "evaluated_review_filter_type": evaluated_filter_type,
         "evaluated_review_filter_group": evaluated_filter_group,
         "evaluated_review_available_groups": evaluated_available_groups,
+        "evaluated_review_submitted_order": evaluated_submitted_order,
         "evaluated_review_total_count": len(evaluated_items),
     }
     return render(request, "accounts/review_results.html", context)
