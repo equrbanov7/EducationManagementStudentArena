@@ -4,6 +4,7 @@ Scoring and answer persistence helpers for live exams.
 
 from __future__ import annotations
 
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from django.db import transaction
@@ -35,6 +36,16 @@ def score_multi_fraction(chosen_ids: list[int], correct_ids: list[int], *, mode:
     return max(0.0, (picked_correct - picked_wrong) / float(correct_total))
 
 
+def _round_awarded_points(value: float | Decimal) -> int:
+    """
+    Round points to the nearest integer using half-up semantics.
+
+    `int(...)` truncates `0.5` down to `0`, which caused 1-point questions to
+    award zero to correct answers answered later in the timer window.
+    """
+    return max(0, int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)))
+
+
 def calculate_answer_score(
     *,
     option_ids: list[int],
@@ -58,9 +69,9 @@ def calculate_answer_score(
         # Kahoot-style scoring: score = base * (1 - (answer_time / total_time) / 2)
         # Fastest correct answer gets full base_points, slowest gets half.
         time_factor = 1.0 - (bounded_answer_ms / total_ms) / 2.0
-        awarded_points = int(int(base_points) * time_factor * fraction)
+        awarded_points = _round_awarded_points(int(base_points) * time_factor * fraction)
     else:
-        awarded_points = int(int(base_points) * fraction)
+        awarded_points = _round_awarded_points(int(base_points) * fraction)
 
     return {
         "is_correct": is_perfect,
