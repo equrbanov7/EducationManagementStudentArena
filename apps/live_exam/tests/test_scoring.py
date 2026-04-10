@@ -18,7 +18,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
-from apps.live_exam.scoring import save_answer_and_score
+from apps.live_exam.scoring import calculate_answer_score, save_answer_and_score
 from apps.live_exam.serializers import build_options, serialize_question
 from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
 from apps.organizations.models import Organization
@@ -117,6 +117,93 @@ class LiveExamPayloadSecurityTest(TestCase):
         self.assertIn("correct_option_ids", payload)
         self.assertIn(self.correct_option.id, payload["correct_option_ids"])
         self.assertIn("results", payload)
+
+
+class LiveExamLowPointScoringTest(TestCase):
+    """Ensure low-point questions never truncate correct answers down to zero."""
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("low_point_teacher", "lowpoint@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Low Point Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Low Point Exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="One point question",
+            order=1,
+            points=1,
+        )
+        self.correct_option = ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Correct",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Wrong",
+            is_correct=False,
+        )
+
+    def test_calculate_answer_score_rounds_half_up_for_one_point_question(self):
+        score = calculate_answer_score(
+            option_ids=[self.correct_option.id],
+            correct_ids=[self.correct_option.id],
+            base_points=1,
+            answer_ms=1000,
+            total_ms=1000,
+        )
+
+        self.assertTrue(score["is_correct"])
+        self.assertEqual(score["awarded_points"], 1)
+
+    def test_save_answer_and_score_does_not_keep_correct_one_point_answer_at_zero(self):
+        now = timezone.now()
+        session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        session.state = LiveSession.STATE_QUESTION
+        session.current_index = 0
+        session.question_started_at = now - timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS + 1
+        )
+        session.question_ends_at = now + timezone.timedelta(seconds=15)
+        session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        player = LivePlayer.objects.create(
+            session=session,
+            nickname="LowPointPlayer",
+            avatar_key="avatar_1",
+            client_id="low-point-client",
+        )
+
+        ok, result = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=self.question.id,
+            option_ids=[self.correct_option.id],
+            answer_ms=999999,
+        )
+
+        self.assertTrue(ok)
+        self.assertEqual(result["answer"]["awarded_points"], 1)
+
+        player.refresh_from_db()
+        self.assertEqual(player.score, 1)
 
 
 class LiveExamSaveAnswerDuplicateTest(TestCase):
