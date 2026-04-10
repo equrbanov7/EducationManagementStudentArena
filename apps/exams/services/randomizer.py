@@ -59,7 +59,19 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
         blocks = list(exam.question_blocks.all())
 
         if blocks:
+            block_question_map = {}
+            non_empty_blocks = []
+            for block in blocks:
+                block_qs = list(block.questions.filter(is_active=True))
+                random.shuffle(block_qs)
+                if block_qs:
+                    block_question_map[block.id] = block_qs
+                    non_empty_blocks.append(block)
+
+            blocks = non_empty_blocks
             blocks_count = len(blocks)
+
+        if blocks:
             base = total_needed // blocks_count
             rem = total_needed % blocks_count
 
@@ -70,9 +82,11 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
             # bloklardan payla
             for i, block in enumerate(blocks):
                 take = base + (1 if i < rem else 0)
+                if take <= 0:
+                    continue
 
-                block_qs = list(block.questions.filter(is_active=True))
-                random.shuffle(block_qs)
+                block_qs = block_question_map[block.id]
+                taken_from_block = 0
 
                 for q in block_qs:
                     if len(selected_qs) >= total_needed:
@@ -81,10 +95,9 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                         continue
                     selected_qs.append(q)
                     picked_ids.add(q.id)
-                    if len(selected_qs) >= total_needed or len(selected_qs) - len(picked_ids) >= take:
-                        # yuxarıdakı “take” limitini yumşaq saxlayırıq,
-                        # əsas məqsəd total_needed-ə çatmaqdır
-                        pass
+                    taken_from_block += 1
+                    if taken_from_block >= take:
+                        break
 
                 # blokda sual çatmadısa, problem deyil – aşağıda fill edəcəyik
 
