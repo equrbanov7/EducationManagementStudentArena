@@ -328,17 +328,46 @@ def student_organization_management(request):
             if existing_active:
                 return False, "İstifadəçi artıq bu təşkilatdadır."
 
-            with transaction.atomic():
-                invite_membership = Membership.objects.create(
+            reusable_membership = (
+                Membership.objects.filter(
                     user=target_user,
                     organization=org,
                     role=membership_role,
                     scope_unit=None,
-                    assigned_by=request.user,
-                    is_primary=False,
-                    is_active=False,
-                    title=STUDENT_PENDING_INVITE_TITLE,
                 )
+                .order_by("-updated_at")
+                .first()
+            )
+
+            with transaction.atomic():
+                if reusable_membership is not None:
+                    invite_membership = reusable_membership
+                    invite_membership.role = membership_role
+                    invite_membership.assigned_by = request.user
+                    invite_membership.is_primary = False
+                    invite_membership.is_active = False
+                    invite_membership.title = STUDENT_PENDING_INVITE_TITLE
+                    invite_membership.save(
+                        update_fields=[
+                            "role",
+                            "assigned_by",
+                            "is_primary",
+                            "is_active",
+                            "title",
+                            "updated_at",
+                        ]
+                    )
+                else:
+                    invite_membership = Membership.objects.create(
+                        user=target_user,
+                        organization=org,
+                        role=membership_role,
+                        scope_unit=None,
+                        assigned_by=request.user,
+                        is_primary=False,
+                        is_active=False,
+                        title=STUDENT_PENDING_INVITE_TITLE,
+                    )
 
                 target_profile.requested_organization = org
                 target_profile.requested_organization_name = org.name

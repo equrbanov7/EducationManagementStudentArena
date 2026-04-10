@@ -1212,6 +1212,124 @@ class ProfileViewTest(TestCase):
         self.assertLess(notifications_link, join_link)
         self.assertLess(join_link, posts_link)
 
+    def test_profile_info_shows_pending_organization_invites_for_student_without_selected_org(self):
+        owner = User.objects.create_user(
+            username="invite_owner",
+            email="invite_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Invite Ready Org",
+            slug="invite-ready-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        profile = self.user.profile
+        profile.organization = None
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.role = ProfileRole.STUDENT
+        profile.requested_organization = None
+        profile.requested_organization_name = ""
+        profile.requested_organization_message = ""
+        profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        Membership.objects.create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="student"),
+            assigned_by=owner,
+            is_primary=False,
+            is_active=False,
+            title="__student_pending_invite__",
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Təşkilat dəvətləri")
+        self.assertContains(response, "Invite Ready Org")
+        self.assertContains(response, "Qəbul et")
+        self.assertContains(response, reverse("accounts:student_org_invitation_action"))
+        self.assertContains(response, "?section=student-organization-request")
+
+    def test_student_without_selected_org_can_accept_invite_from_profile_info(self):
+        owner = User.objects.create_user(
+            username="accept_owner",
+            email="accept_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Accepted From Profile Org",
+            slug="accepted-from-profile-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        profile = self.user.profile
+        profile.organization = None
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.role = ProfileRole.STUDENT
+        profile.requested_organization = None
+        profile.requested_organization_name = ""
+        profile.requested_organization_message = ""
+        profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        invite_membership = Membership.objects.create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="student"),
+            assigned_by=owner,
+            is_primary=False,
+            is_active=False,
+            title="__student_pending_invite__",
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("accounts:student_org_invitation_action"),
+            {
+                "invite_id": str(invite_membership.id),
+                "action": "accept",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+
+        profile.refresh_from_db()
+        invite_membership.refresh_from_db()
+        self.assertEqual(profile.organization, organization)
+        self.assertEqual(profile.role, ProfileRole.STUDENT)
+        self.assertEqual(profile.requested_organization, organization)
+        self.assertTrue(invite_membership.is_active)
+        self.assertEqual(invite_membership.title, "")
+
     def test_member_profile_shows_group_navigation(self):
         owner = User.objects.create_user(
             username="member_nav_owner",
