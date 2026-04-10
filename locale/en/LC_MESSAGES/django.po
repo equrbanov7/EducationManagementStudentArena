@@ -9018,27 +9018,27 @@ msgstr "See all"
 #: apps/exams/templates/exams/student/student_exam_list.html:172
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_title"
-msgstr "Add a new freelance job"
+msgstr "Access code required"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:154
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description"
-msgstr "Brief information about this resource"
+msgstr "Enter the access code to begin this exam."
 
 #: apps/exams/templates/exams/student/student_exam_list.html:163
 msgctxt "exams.template.student_exam_list"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:164
 msgctxt "exams.template.student_exam_list"
 msgid "action_confirm"
-msgstr "open"
+msgstr "Confirm"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:173
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description_with_title"
-msgstr "Brief information about this resource"
+msgstr "Enter the access code to begin the \"{title}\" exam."
 
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
@@ -10121,6 +10121,89 @@ msgstr "Pending review"
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_question"
 msgstr "Question"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "label_duration_unit_minutes"
+msgstr "minutes"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:208
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_unlimited"
+msgstr "Unlimited"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:206
+#: apps/exams/templates/exams/teacher/exam_section.html:209
+msgctxt "exams.partial.exam_section"
+msgid "modal_value_always_available"
+msgstr "Always available"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:263
+msgctxt "exams.partial.exam_section"
+msgid "modal_aria_close"
+msgstr "Close"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:268
+msgctxt "exams.partial.exam_section"
+msgid "modal_title_exam_info"
+msgstr "Exam details"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:273
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_type"
+msgstr "Type"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:277
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_duration"
+msgstr "Duration"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:281
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_start"
+msgstr "Start time"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:285
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_end"
+msgstr "End time"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:291
+msgctxt "exams.partial.exam_section"
+msgid "modal_label_note"
+msgstr "Note"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:292
+#: apps/exams/templates/exams/teacher/exam_section.html:326
+msgctxt "exams.partial.exam_section"
+msgid "modal_note_empty"
+msgstr "No additional notes."
+
+#: apps/exams/templates/exams/teacher/exam_section.html:303
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_label"
+msgstr "Access code"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:311
+msgctxt "exams.partial.exam_section"
+msgid "modal_access_code_placeholder"
+msgstr "6-digit code"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:317
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_cancel"
+msgstr "Cancel"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:322
+#: apps/exams/templates/exams/teacher/exam_section.html:328
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_start"
+msgstr "Start exam"
+
+#: apps/exams/templates/exams/teacher/exam_section.html:329
+msgctxt "exams.partial.exam_section"
+msgid "modal_action_confirm_code"
+msgstr "Confirm code and start"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:38
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:78

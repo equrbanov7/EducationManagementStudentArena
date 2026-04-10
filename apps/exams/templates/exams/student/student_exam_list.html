@@ -110,18 +110,39 @@
                             </a>
                         {% endif %}
 
-                        {# Kod tələb olunursa – modal açan düymə #}
+                        {# Hər iki halda əvvəl info modalı açılır #}
                         {% if item.requires_code %}
                             <button type="button"
                                     class="btn btn-outline-primary customBtn"
+                                    data-open-exam-start-modal
+                                    data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
                                     data-exam-slug="{{ exam.slug }}"
                                     data-exam-title="{{ exam.title }}"
-                                    data-open-exam-code-modal>
+                                    data-exam-type="{{ exam.get_exam_type_display }}"
+                                    data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                    data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                    data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                                    data-exam-access="{{ item.access_label }}"
+                                    data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
+                                    data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                    data-requires-code="1">
                                 {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </button>
                         {% else %}
-                            {# Əks halda birbaşa start_exam #}
-                            <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary customBtn">
+                            <a href="{% url 'exams:start_exam' exam.slug %}"
+                               class="btn btn-primary customBtn"
+                               data-open-exam-start-modal
+                               data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                               data-exam-slug="{{ exam.slug }}"
+                               data-exam-title="{{ exam.title }}"
+                               data-exam-type="{{ exam.get_exam_type_display }}"
+                               data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                               data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                               data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                               data-exam-access="{{ item.access_label }}"
+                               data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
+                               data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                               data-requires-code="0">
                                 {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </a>
                         {% endif %}
@@ -153,112 +174,325 @@
     {% endif %}
 </div>
 
-{# ================= KOD MODALI (Olduğu kimi qalır) ================= #}
-<div id="exam-code-backdrop" class="exam-code-backdrop">
-    <div class="exam-code-modal">
-        <button type="button" class="exam-code-close-btn" data-close-exam-code-modal>
-            <i class="fas fa-times"></i>
-        </button>
-
-        <div class="exam-code-icon"><i class="fas fa-lock"></i></div>
-        <h3 id="exam-code-title" class="exam-code-title">{% trans "modal_access_code_title" context "exams.template.student_exam_list" %}</h3>
-        <p id="exam-code-text" class="exam-code-text">{% trans "modal_access_code_description" context "exams.template.student_exam_list" %}</p>
-
-        <form id="exam-code-form" method="post" action="{% url 'exams:exam_code_check' %}">
-            {% csrf_token %}
-            <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
-            <div class="exam-input-wrapper">
-                <input type="text" name="access_code" id="exam-code-input" class="exam-code-input" maxlength="6" placeholder="• • • • • •" autocomplete="off" inputmode="numeric" required>
+<div class="modal fade exam-start-modal" id="examStartModal" tabindex="-1" aria-labelledby="examStartModalExamName" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered exam-start-modal__dialog">
+        <div class="modal-content exam-start-modal__content">
+            <div class="modal-header exam-start-modal__topbar border-0">
+                <button type="button"
+                        class="btn-close shadow-none"
+                        data-bs-dismiss="modal"
+                        aria-label="{% trans 'modal_aria_close' context 'exams.partial.exam_section' %}"></button>
             </div>
-            <div class="exam-code-actions">
-                <button type="button" class="btn-modal btn-cancel" data-close-exam-code-modal>{% trans "action_cancel" context "exams.template.student_exam_list" %}</button>
-                <button type="submit" class="btn-modal btn-confirm">{% trans "action_confirm" context "exams.template.student_exam_list" %}</button>
+
+            <div class="modal-body exam-start-modal__body">
+                <div class="exam-start-modal__summary">
+                    <div class="exam-start-modal__summary-icon">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="exam-start-modal__summary-copy">
+                        <p class="exam-start-modal__eyebrow">
+                            {% trans "modal_title_exam_info" context "exams.partial.exam_section" %}
+                        </p>
+                        <h2 id="examStartModalExamName" class="exam-start-modal__name"></h2>
+                    </div>
+                </div>
+
+                <div class="exam-start-modal__badge-row">
+                    <span class="exam-start-modal__badge" id="examStartModalAccess">-</span>
+                    <span class="exam-start-modal__badge exam-start-modal__badge--muted" id="examStartModalAttempts">-</span>
+                </div>
+
+                <div class="exam-start-modal__grid">
+                    <div class="exam-start-modal__info-card">
+                        <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>
+                        <strong id="examStartModalType">-</strong>
+                    </div>
+                    <div class="exam-start-modal__info-card">
+                        <span class="label">{% trans "modal_label_duration" context "exams.partial.exam_section" %}</span>
+                        <strong id="examStartModalDuration">-</strong>
+                    </div>
+                    <div class="exam-start-modal__info-card">
+                        <span class="label">{% trans "modal_label_start" context "exams.partial.exam_section" %}</span>
+                        <strong id="examStartModalStart">-</strong>
+                    </div>
+                    <div class="exam-start-modal__info-card">
+                        <span class="label">{% trans "modal_label_end" context "exams.partial.exam_section" %}</span>
+                        <strong id="examStartModalEnd">-</strong>
+                    </div>
+                </div>
+
+                <div class="exam-start-modal__note">
+                    <span class="label">{% trans "modal_label_note" context "exams.partial.exam_section" %}</span>
+                    <p id="examStartModalNote">{% trans "modal_note_empty" context "exams.partial.exam_section" %}</p>
+                </div>
+
+                <form id="examStartCodeForm"
+                      method="post"
+                      action="{% url 'exams:exam_code_check' %}"
+                      class="exam-start-modal__code-form d-none">
+                    {% csrf_token %}
+                    <input type="hidden" name="exam_slug" id="examStartModalSlug">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <div class="exam-start-modal__code-head">
+                        <div class="exam-start-modal__code-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="exam-start-modal__code-copy">
+                            <span class="exam-start-modal__code-title">
+                                {% trans "modal_access_code_title" context "exams.template.student_exam_list" %}
+                            </span>
+                            <p class="exam-start-modal__code-hint" id="examStartModalCodeHint">
+                                {% trans "modal_access_code_description" context "exams.template.student_exam_list" %}
+                            </p>
+                        </div>
+                    </div>
+                    <label for="examStartModalCodeInput" class="form-label exam-start-modal__code-label">
+                        {% trans "modal_access_code_label" context "exams.partial.exam_section" %}
+                    </label>
+                    <input type="text"
+                           name="access_code"
+                           id="examStartModalCodeInput"
+                           class="form-control exam-start-modal__code-input"
+                           maxlength="6"
+                           placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}"
+                           autocomplete="off"
+                           inputmode="numeric">
+                </form>
             </div>
-        </form>
+
+            <div class="modal-footer exam-start-modal__footer border-0">
+                <button type="button"
+                        class="btn btn-outline-secondary exam-start-modal__secondary"
+                        data-bs-dismiss="modal">
+                    {% trans "modal_action_cancel" context "exams.partial.exam_section" %}
+                </button>
+                <button type="button"
+                        class="btn btn-primary exam-start-modal__primary"
+                        id="examStartModalActionBtn">
+                    {% trans "modal_action_start" context "exams.partial.exam_section" %}
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 {% trans "modal_access_code_title" context "exams.template.student_exam_list" as modal_access_code_title %}
 {% trans "modal_access_code_description_with_title" context "exams.template.student_exam_list" as modal_access_code_description_with_title %}
+{% trans "modal_access_code_description" context "exams.template.student_exam_list" as modal_access_code_description %}
+{% trans "modal_note_empty" context "exams.partial.exam_section" as modal_note_empty %}
+{% trans "modal_action_start" context "exams.partial.exam_section" as modal_action_start %}
+{% trans "modal_action_confirm_code" context "exams.partial.exam_section" as modal_action_confirm_code %}
 <script nonce="{{ request.csp_nonce }}">
     const I18N_STUDENT_EXAM_LIST = {
         modalAccessCodeTitle: "{{ modal_access_code_title|escapejs }}",
-        modalAccessCodeDescriptionWithTitle: "{{ modal_access_code_description_with_title|escapejs }}"
+        modalAccessCodeDescription: "{{ modal_access_code_description|escapejs }}",
+        modalAccessCodeDescriptionWithTitle: "{{ modal_access_code_description_with_title|escapejs }}",
+        modalNoteEmpty: "{{ modal_note_empty|escapejs }}",
+        modalActionStart: "{{ modal_action_start|escapejs }}",
+        modalActionConfirmCode: "{{ modal_action_confirm_code|escapejs }}"
     };
 
-    // ============================================================
-    // 1. MODAL MƏNTİQİ (GLOBAL SCOPE)
-    // Bu funksiyalar qlobal qalır ki, data-attribute event binder onları çağıra bilsin.
-    // ============================================================
-    const backdrop = document.getElementById("exam-code-backdrop");
-    const titleEl = document.getElementById("exam-code-title");
-    const textEl = document.getElementById("exam-code-text");
-    const slugInput = document.getElementById("exam-code-exam-slug");
-    const codeInput = document.getElementById("exam-code-input");
+    document.addEventListener("DOMContentLoaded", function() {
+        const modalElement = document.getElementById("examStartModal");
+        const modalInstance = modalElement && window.bootstrap ? new bootstrap.Modal(modalElement) : null;
+        const examNameEl = document.getElementById("examStartModalExamName");
+        const typeEl = document.getElementById("examStartModalType");
+        const accessEl = document.getElementById("examStartModalAccess");
+        const attemptsEl = document.getElementById("examStartModalAttempts");
+        const durationEl = document.getElementById("examStartModalDuration");
+        const startEl = document.getElementById("examStartModalStart");
+        const endEl = document.getElementById("examStartModalEnd");
+        const noteEl = document.getElementById("examStartModalNote");
+        const noteWrapEl = noteEl ? noteEl.closest(".exam-start-modal__note") : null;
+        const codeForm = document.getElementById("examStartCodeForm");
+        const slugInput = document.getElementById("examStartModalSlug");
+        const codeInput = document.getElementById("examStartModalCodeInput");
+        const codeHintEl = document.getElementById("examStartModalCodeHint");
+        const actionBtn = document.getElementById("examStartModalActionBtn");
 
-    function openExamCodeModal(button) {
-        const slug = button.getAttribute("data-exam-slug");
-        const title = button.getAttribute("data-exam-title");
-        
-        slugInput.value = slug;
-        titleEl.textContent = I18N_STUDENT_EXAM_LIST.modalAccessCodeTitle;
+        let startUrl = "";
+        let requiresCode = false;
 
-        // Safely build the description text with escaped title
-        textEl.textContent = '';
-        const textParts = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescriptionWithTitle.split("{title}");
-        textEl.appendChild(document.createTextNode(textParts[0]));
-        const strongEl = document.createElement('strong');
-        strongEl.textContent = `"${title}"`;
-        textEl.appendChild(strongEl);
-        if (textParts[1]) {
-            textEl.appendChild(document.createTextNode(textParts[1]));
+        function setCodeHint(title) {
+            if (!codeHintEl) {
+                return;
+            }
+
+            if (!title) {
+                codeHintEl.textContent = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescription;
+                return;
+            }
+
+            codeHintEl.textContent = "";
+            const parts = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescriptionWithTitle.split("{title}");
+            codeHintEl.appendChild(document.createTextNode(parts[0] || ""));
+
+            if (title) {
+                const strongEl = document.createElement("strong");
+                strongEl.textContent = `"${title}"`;
+                codeHintEl.appendChild(strongEl);
+            }
+
+            if (parts[1]) {
+                codeHintEl.appendChild(document.createTextNode(parts[1]));
+            }
         }
 
-        codeInput.value = "";
-        
-        // Modalı göstər
-        backdrop.style.display = "flex";
-        setTimeout(() => { 
-            backdrop.classList.add("show"); 
-            codeInput.focus(); 
-        }, 10);
-    }
+        function resetModalState() {
+            startUrl = "";
+            requiresCode = false;
 
-    function closeExamCodeModal() {
-        backdrop.classList.remove("show");
-        setTimeout(() => { 
-            backdrop.style.display = "none"; 
-        }, 300);
-    }
+            if (accessEl) {
+                accessEl.classList.remove("exam-start-modal__badge--danger", "exam-start-modal__badge--success");
+            }
+            if (noteWrapEl) {
+                noteWrapEl.classList.remove("is-empty");
+            }
+            if (codeForm) {
+                codeForm.reset();
+                codeForm.classList.add("d-none");
+            }
 
-    // Modalın arxa fonuna (boşluğa) klikləyəndə bağlansın
-    if(backdrop) {
-        backdrop.addEventListener('click', function (e) {
-            if (e.target === backdrop) closeExamCodeModal();
+            if (codeInput) {
+                codeInput.required = false;
+                codeInput.classList.remove("is-invalid");
+            }
+
+            if (actionBtn) {
+                actionBtn.textContent = I18N_STUDENT_EXAM_LIST.modalActionStart;
+            }
+        }
+
+        document.addEventListener("click", function(event) {
+            const trigger = event.target.closest("[data-open-exam-start-modal]");
+            if (!trigger || !modalInstance) {
+                return;
+            }
+
+            event.preventDefault();
+
+            startUrl = trigger.getAttribute("data-start-url") || trigger.getAttribute("href") || "";
+            requiresCode = trigger.getAttribute("data-requires-code") === "1";
+
+            if (examNameEl) {
+                examNameEl.textContent = trigger.getAttribute("data-exam-title") || "";
+            }
+            if (typeEl) {
+                typeEl.textContent = trigger.getAttribute("data-exam-type") || "-";
+            }
+            if (accessEl) {
+                accessEl.textContent = trigger.getAttribute("data-exam-access") || "-";
+                accessEl.classList.toggle("exam-start-modal__badge--danger", requiresCode);
+                accessEl.classList.toggle("exam-start-modal__badge--success", !requiresCode);
+            }
+            if (attemptsEl) {
+                attemptsEl.textContent = trigger.getAttribute("data-exam-attempts") || "-";
+            }
+            if (durationEl) {
+                durationEl.textContent = trigger.getAttribute("data-exam-duration") || "-";
+            }
+            if (startEl) {
+                startEl.textContent = trigger.getAttribute("data-exam-start") || "-";
+            }
+            if (endEl) {
+                endEl.textContent = trigger.getAttribute("data-exam-end") || "-";
+            }
+            if (noteEl) {
+                const noteText = trigger.getAttribute("data-exam-note") || I18N_STUDENT_EXAM_LIST.modalNoteEmpty;
+                noteEl.textContent = noteText;
+                if (noteWrapEl) {
+                    noteWrapEl.classList.toggle("is-empty", !trigger.getAttribute("data-exam-note"));
+                }
+            }
+            if (slugInput) {
+                slugInput.value = trigger.getAttribute("data-exam-slug") || "";
+            }
+            if (codeForm) {
+                codeForm.classList.toggle("d-none", !requiresCode);
+            }
+            if (codeInput) {
+                codeInput.required = requiresCode;
+                codeInput.value = "";
+                codeInput.classList.remove("is-invalid");
+            }
+            if (actionBtn) {
+                actionBtn.textContent = requiresCode
+                    ? I18N_STUDENT_EXAM_LIST.modalActionConfirmCode
+                    : I18N_STUDENT_EXAM_LIST.modalActionStart;
+            }
+            if (requiresCode) {
+                setCodeHint(trigger.getAttribute("data-exam-title") || "");
+            }
+
+            modalInstance.show();
+
+            if (requiresCode && codeInput) {
+                window.setTimeout(function() {
+                    codeInput.focus();
+                }, 200);
+            }
         });
-    }
 
-    // Inputa yalnız rəqəm yazılsın
-    if(codeInput) {
-        codeInput.addEventListener('input', function (e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-        });
-    }
+        if (codeInput) {
+            codeInput.addEventListener("input", function() {
+                this.value = this.value.replace(/[^0-9]/g, "");
+                this.classList.remove("is-invalid");
+            });
+        }
 
+        if (codeForm) {
+            codeForm.addEventListener("submit", function(event) {
+                if (!requiresCode) {
+                    event.preventDefault();
+                    return;
+                }
 
-    // ============================================================
-    // 2. DOM YÜKLƏNƏNDƏN SONRAKİ ƏMƏLİYYATLAR
-    // (Pagination və Live Search)
-    // ============================================================
-    document.addEventListener("DOMContentLoaded", function() {
-        
+                if (!(codeInput && codeInput.value.trim())) {
+                    event.preventDefault();
+                    if (codeInput) {
+                        codeInput.classList.add("is-invalid");
+                        codeInput.focus();
+                    }
+                }
+            });
+        }
+
+        if (actionBtn) {
+            actionBtn.addEventListener("click", function() {
+                if (requiresCode) {
+                    if (!codeForm || !codeInput || !codeInput.value.trim()) {
+                        if (codeInput) {
+                            codeInput.classList.add("is-invalid");
+                            codeInput.focus();
+                        }
+                        return;
+                    }
+
+                    if (typeof codeForm.requestSubmit === "function") {
+                        codeForm.requestSubmit();
+                    } else {
+                        codeForm.submit();
+                    }
+                    return;
+                }
+
+                if (startUrl) {
+                    window.location.href = startUrl;
+                }
+            });
+        }
+
+        if (modalElement) {
+            modalElement.addEventListener("hidden.bs.modal", resetModalState);
+        }
+
         // --- A) PAGINATION PARAMETER FIX ---
         // Səhifə dəyişəndə axtarış sözünün (q) və tipin (type) itməməsini təmin edir.
         const paginationLinks = document.querySelectorAll('.page-link');
-        
+
         if(paginationLinks.length > 0) {
             const currentUrlParams = new URLSearchParams(window.location.search);
-            
+
             paginationLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 if (href && href.startsWith('?page=')) {
@@ -277,23 +511,16 @@
             let debounceTimer;
 
             searchInput.addEventListener('input', function() {
-                // 1. Hər hərf yazılanda köhnə timer-i ləğv et (sıfırla)
                 clearTimeout(debounceTimer);
-
-                // 2. Yeni timer başlat (1000ms = 1 saniyə)
                 debounceTimer = setTimeout(() => {
-                    searchForm.submit(); // Vaxt bitəndə formu göndər
+                    searchForm.submit();
                 }, 1000);
             });
 
-            // Əgər istifadəçi "Enter" basarsa və ya düyməyə klikləyərsə,
-            // timer-i ləğv et ki, iki dəfə sorğu getməsin.
             searchForm.addEventListener('submit', function() {
                 clearTimeout(debounceTimer);
             });
-            
-            // UX: Səhifə yenilənəndə kursoru qorumaq
-            // Əgər inputda dəyər varsa, kursoru sona gətiririk
+
             if(searchInput.value) {
                 searchInput.focus();
                 const val = searchInput.value;
