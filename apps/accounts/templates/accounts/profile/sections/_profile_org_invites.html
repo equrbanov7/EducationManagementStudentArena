@@ -1,0 +1,62 @@
+{% if student_org_request_section.has_pending_invites %}
+<div class="section-card mb-4">
+    <div class="section-title">
+        <i class="fas fa-envelope-open-text"></i>
+        Təşkilat dəvətləri
+    </div>
+    <p class="text-muted mb-3">
+        Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə bilərsiniz.
+    </p>
+
+    <div class="d-grid gap-3">
+        {% for pending_invite in student_org_request_section.pending_invites %}
+        <div class="border rounded-3 p-3 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+            <div>
+                <div class="fw-semibold">
+                    {{ pending_invite.organization.name }}
+                    {% if pending_invite.role_label %}
+                    <span class="badge bg-info text-dark ms-1">{{ pending_invite.role_label }}</span>
+                    {% endif %}
+                </div>
+                {% if pending_invite.assigned_by %}
+                <div class="text-muted small mt-1">
+                    Dəvət edən:
+                    {{ pending_invite.assigned_by.get_full_name|default:pending_invite.assigned_by.username }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="invite_id" value="{{ pending_invite.id }}">
+                    <input type="hidden" name="action" value="accept">
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=profile-info">
+                    <button type="submit"
+                            class="btn btn-success btn-sm"
+                            {% if student_org_request_section.current_organization %}disabled title="Əvvəlcə mövcud təşkilatdan çıxın"{% endif %}>
+                        <i class="fas fa-check"></i> Qəbul et
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="invite_id" value="{{ pending_invite.id }}">
+                    <input type="hidden" name="action" value="reject">
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=profile-info">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times"></i> Rədd et
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ profile_base_url }}?section=student-organization-request" class="btn btn-link px-0">
+            Bütün qoşulma və dəvət bölməsini aç
+        </a>
+    </div>
+</div>
+{% endif %}
