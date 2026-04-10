@@ -12,30 +12,49 @@
             <input type="hidden" name="section" value="review-results">
         {% endif %}
 
-        <input
-            type="text"
-            name="evaluated_search"
-            value="{{ evaluated_review_search_query }}"
-            placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
-            class="form-control"
-        >
+        <div class="pending-review-results-filter-grid">
+            <input
+                type="text"
+                name="evaluated_search"
+                value="{{ evaluated_review_search_query }}"
+                placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
+                class="pr-form-control"
+            >
 
-        <select name="evaluated_type" class="form-control" style="max-width: 220px;">
-            <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
-            <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-            <option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
-            <option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
-            <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
-        </select>
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="evaluated_type"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
+                    <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
+                    <option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
+                    <option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+                    <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
+                </select>
+            </div>
 
-        <select name="evaluated_group" class="form-control" style="max-width: 220px;">
-            <option value="">Bütün qruplar</option>
-            {% for group_name in evaluated_review_available_groups %}
-                <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
-                    {{ group_name }}
-                </option>
-            {% endfor %}
-        </select>
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="evaluated_group"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="">Bütün qruplar</option>
+                    {% for group_name in evaluated_review_available_groups %}
+                        <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
+                            {{ group_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="bootstrap-single-select pending-review-select-wrap">
+                <select name="evaluated_submitted_order"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="newest" {% if evaluated_review_submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
+                    <option value="oldest" {% if evaluated_review_submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
+                </select>
+            </div>
+        </div>
 
         <noscript>
             <button type="submit" class="btn btn-primary">
@@ -85,7 +104,7 @@
                             <td>
                                 <span class="pending-review-score">{{ item.score_display }}</span>
                             </td>
-                            <td>{{ item.date|date:"d.m.Y H:i" }}</td>
+                            <td>{{ item.reviewed_at|default:item.submitted_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 <a href="{{ item.action_url }}" class="btn btn-sm btn-review-view">Bax</a>
                             </td>

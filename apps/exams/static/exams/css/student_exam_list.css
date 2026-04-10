@@ -144,164 +144,278 @@ li.list-group-item .status-red {
 
 
 /* ========================================= */
-/* YENİ MODAL DİZAYNI (Custom + Bootstrap)   */
+/* START EXAM MODAL                          */
 /* ========================================= */
 
-/* ================= MODAL DİZAYNI ================= */
+.exam-start-modal__dialog {
+    max-width: 640px;
+}
 
-/* 1. Arxa Fon (Backdrop) */
-.exam-code-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15, 23, 42, 0.65); /* Tünd mavi-boz ton */
-    backdrop-filter: blur(8px); /* Güclü bulanıqlıq effekti */
-    z-index: 1050;
-    display: none; /* JS ilə flex olacaq */
-    justify-content: center;
+.exam-start-modal__content {
+    border: none;
+    border-radius: 28px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 32px 80px rgba(15, 23, 42, 0.24);
+}
+
+.exam-start-modal__topbar {
+    justify-content: flex-end;
+    padding: 0.9rem 0.9rem 0;
+}
+
+.exam-start-modal__body {
+    padding: 0.4rem 1.3rem 1.25rem;
+}
+
+.exam-start-modal__summary {
+    display: flex;
     align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.exam-code-backdrop.show {
-    opacity: 1;
-}
-
-/* 2. Modal Qutusu */
-.exam-code-modal {
-    background: #ffffff;
-    width: 100%;
-    max-width: 400px;
-    padding: 35px 30px;
+    gap: 1rem;
+    padding: 1.1rem 1.1rem 1.15rem;
     border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    text-align: center;
-    position: relative;
-    transform: scale(0.95) translateY(10px);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%),
+        linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #38bdf8 100%);
+    color: #ffffff;
 }
 
-.exam-code-backdrop.show .exam-code-modal {
-    transform: scale(1) translateY(0);
-}
-
-/* 3. Kilid İkonu */
-.exam-code-icon {
-    width: 60px;
-    height: 60px;
-    background: #eff6ff;
-    color: #3b82f6;
-    border-radius: 50%;
-    display: flex;
+.exam-start-modal__summary-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin: 0 auto 20px auto;
+    font-size: 1.45rem;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-/* 4. Mətnlər */
-.exam-code-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 10px;
+.exam-start-modal__summary-copy {
+    min-width: 0;
 }
 
-.exam-code-text {
-    font-size: 0.95rem;
-    color: #64748b;
-    margin-bottom: 25px;
-    line-height: 1.5;
-}
-
-/* 5. Input Sahəsi (PIN Stilində) */
-.exam-input-wrapper {
-    margin-bottom: 30px;
-}
-
-.exam-code-input {
-    width: 100%;
-    padding: 15px;
-    font-size: 2rem;
+.exam-start-modal__eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.74);
     font-weight: 700;
-    color: #3b82f6;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    text-align: center;
-    letter-spacing: 12px; /* Rəqəmləri aralayır */
-    outline: none;
-    transition: all 0.2s ease;
-    font-family: monospace;
 }
 
-.exam-code-input:focus {
-    border-color: #3b82f6;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+.exam-start-modal__name {
+    margin: 0.2rem 0 0;
+    font-size: 1.45rem;
+    line-height: 1.28;
+    font-weight: 800;
+    color: #ffffff;
+    word-break: break-word;
 }
 
-.exam-code-input::placeholder {
-    color: #cbd5e1;
-    letter-spacing: 4px;
-    font-size: 1.5rem;
-    transform: translateY(-2px);
-}
-
-/* 6. Düymələr */
-.exam-code-actions {
+.exam-start-modal__badge-row {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
 }
 
-.btn-modal {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
+.exam-start-modal__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1e293b;
+    font-size: 0.87rem;
+    font-weight: 700;
+    border: 1px solid #dbeafe;
+}
+
+.exam-start-modal__badge--muted {
+    background: #ffffff;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+.exam-start-modal__badge--success {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+
+.exam-start-modal__badge--danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.exam-start-modal__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.exam-start-modal__info-card,
+.exam-start-modal__note,
+.exam-start-modal__code-form {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(148, 163, 184, 0.12);
+}
+
+.exam-start-modal__info-card {
+    padding: 0.95rem 1rem;
+    min-height: 104px;
+}
+
+.exam-start-modal__info-card .label,
+.exam-start-modal__note .label,
+.exam-start-modal__code-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.exam-start-modal__info-card strong {
+    display: block;
+    color: #0f172a;
     font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+    line-height: 1.5;
+    font-weight: 800;
+    word-break: break-word;
 }
 
-.btn-cancel {
-    background: #f1f5f9;
+.exam-start-modal__note {
+    margin-top: 1rem;
+    padding: 1rem 1.05rem;
+}
+
+.exam-start-modal__note p {
+    margin: 0;
+    color: #334155;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.exam-start-modal__note.is-empty p {
     color: #64748b;
 }
-.btn-cancel:hover {
-    background: #e2e8f0;
+
+.exam-start-modal__code-form {
+    margin-top: 1rem;
+    padding: 1rem 1.05rem 1.05rem;
+    border-color: #bfdbfe;
+    background:
+        linear-gradient(180deg, rgba(239, 246, 255, 0.96) 0%, #ffffff 100%);
+}
+
+.exam-start-modal__code-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 0.95rem;
+}
+
+.exam-start-modal__code-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1d4ed8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.exam-start-modal__code-copy {
+    min-width: 0;
+}
+
+.exam-start-modal__code-title {
+    display: block;
+    color: #0f172a;
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.exam-start-modal__code-input {
+    min-height: 50px;
+    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-align: center;
+    color: #1d4ed8;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+}
+
+.exam-start-modal__code-input:focus {
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.16);
+}
+
+.exam-start-modal__code-hint {
+    margin: 0.18rem 0 0;
     color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.55;
 }
 
-.btn-confirm {
-    background: #3b82f6;
-    color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-}
-.btn-confirm:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
-}
-
-/* 7. Bağla (X) Düyməsi */
-.exam-code-close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+.exam-start-modal__footer {
+    padding: 0 1.3rem 1.3rem;
     background: transparent;
-    border: none;
-    font-size: 1.2rem;
-    color: #94a3b8;
-    cursor: pointer;
-    transition: color 0.2s;
+    gap: 0.75rem;
 }
-.exam-code-close-btn:hover {
-    color: #ef4444;
+
+.exam-start-modal__secondary,
+.exam-start-modal__primary {
+    min-width: 168px;
+    border-radius: 14px;
+    padding: 0.8rem 1.05rem;
+    font-weight: 700;
+}
+
+.exam-start-modal__secondary {
+    border-color: #cbd5e1;
+    color: #334155;
+    background: #ffffff;
+}
+
+.exam-start-modal__secondary:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.exam-start-modal__primary {
+    border: none;
+    background: linear-gradient(135deg, var(--student-exam-btn-blue) 0%, var(--student-exam-btn-blue-dark) 100%);
+    box-shadow: 0 18px 30px -18px rgba(37, 99, 235, 0.95);
+}
+
+.exam-start-modal__primary:hover {
+    background: linear-gradient(135deg, var(--student-exam-btn-blue-dark) 0%, #1e40af 100%);
+    transform: translateY(-1px);
 }
 
 
@@ -651,19 +765,25 @@ li.list-group-item {
         gap: 5px;
     }
 
-    .exam-code-modal {
-        max-width: calc(100% - 24px);
-        padding: 28px 20px;
-        border-radius: 20px;
+    .exam-start-modal__grid {
+        grid-template-columns: 1fr;
     }
 
-    .exam-code-actions {
+    .exam-start-modal__body {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .exam-start-modal__footer {
         flex-direction: column-reverse;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
-    .exam-code-close-btn {
-        top: 14px;
-        right: 14px;
+    .exam-start-modal__secondary,
+    .exam-start-modal__primary {
+        width: 100%;
+        margin: 0;
     }
 
     li.list-group-item strong {
@@ -704,14 +824,47 @@ li.list-group-item {
         border-radius: 10px;
     }
 
-    .exam-code-input {
-        font-size: 1.7rem;
-        letter-spacing: 8px;
+    .exam-start-modal__topbar {
+        padding: 0.75rem 0.75rem 0;
     }
 
-    .exam-code-modal {
-        max-width: calc(100% - 16px);
-        padding: 22px 16px;
+    .exam-start-modal__summary {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        border-radius: 22px;
+    }
+
+    .exam-start-modal__name {
+        font-size: 1.2rem;
+    }
+
+    .exam-start-modal__badge,
+    .exam-start-modal__info-card strong,
+    .exam-start-modal__note p {
+        font-size: 0.9rem;
+    }
+
+    .exam-start-modal__badge-row {
+        gap: 0.45rem;
+    }
+
+    .exam-start-modal__badge {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .exam-start-modal__info-card {
+        min-height: unset;
+    }
+
+    .exam-start-modal__code-head {
+        flex-direction: column;
+    }
+
+    .exam-start-modal__code-input {
+        font-size: 0.98rem;
+        letter-spacing: 0.12em;
     }
 
     .empty-state-box {

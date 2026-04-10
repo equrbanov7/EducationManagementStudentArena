@@ -7,7 +7,7 @@
 
 .pr-filter-grid {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) 220px 220px;
+    grid-template-columns: minmax(280px, 1fr) repeat(3, minmax(190px, 220px));
     gap: 0.65rem;
     align-items: center;
 }
@@ -28,6 +28,37 @@
     border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
     outline: none;
+}
+
+.pending-review-select-wrap {
+    width: 100%;
+}
+
+.pending-review-select-wrap .bootstrap-single-select__toggle {
+    min-height: 42px;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    border-color: #cbdcf2;
+    background: #ffffff;
+    box-shadow: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.pending-review-select-wrap .bootstrap-single-select__toggle:hover {
+    border-color: #9ec5fe;
+    background: #ffffff;
+}
+
+.pending-review-select-wrap .bootstrap-single-select__toggle:focus,
+.pending-review-select-wrap .bootstrap-single-select__toggle.show {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.pending-review-select-wrap .bootstrap-single-select__menu {
+    margin-top: 0.35rem;
+    border-radius: 0.85rem;
 }
 
 .pr-list-container {
@@ -210,6 +241,14 @@
     .pr-filter-grid input[name="search"] {
         grid-column: 1 / -1;
     }
+
+    .pending-review-results-filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pending-review-results-filter-grid input[name="evaluated_search"] {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 768px) {
@@ -240,6 +279,13 @@
 
 .pending-review-results-filters {
     margin-bottom: 1.5rem;
+}
+
+.pending-review-results-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) repeat(3, minmax(190px, 220px));
+    gap: 0.65rem;
+    align-items: center;
 }
 
 .pending-review-results-table th {
@@ -396,6 +442,10 @@
 }
 
 @media (max-width: 768px) {
+    .pending-review-results-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
     .pending-review-results-table th,
     .pending-review-results-table td {
         white-space: nowrap;
