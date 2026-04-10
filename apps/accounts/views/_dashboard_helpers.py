@@ -1106,9 +1106,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
     )
     selected_group = (filter_group if filter_group is not None else request.GET.get("evaluated_group", "")).strip()
     normalized_submitted_order = _normalize_submission_date_order(
-        submitted_order
-        if submitted_order is not None
-        else request.GET.get("evaluated_submitted_order", "newest"),
+        submitted_order if submitted_order is not None else request.GET.get("evaluated_submitted_order", "newest"),
         default="newest",
     )
 

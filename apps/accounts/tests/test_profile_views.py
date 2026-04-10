@@ -3079,8 +3079,12 @@ class PendingReviewViewTest(TestCase):
         )
         self._set_user_role(student, ProfileRole.STUDENT)
 
-        older_exam = Exam.objects.create(author=self.user, title="Older Pending Exam", exam_type="written", is_active=True)
-        newer_exam = Exam.objects.create(author=self.user, title="Newer Pending Exam", exam_type="written", is_active=True)
+        older_exam = Exam.objects.create(
+            author=self.user, title="Older Pending Exam", exam_type="written", is_active=True
+        )
+        newer_exam = Exam.objects.create(
+            author=self.user, title="Newer Pending Exam", exam_type="written", is_active=True
+        )
 
         now = timezone.now()
         older_attempt = ExamAttempt.objects.create(
@@ -3108,7 +3112,7 @@ class PendingReviewViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Göndərilib:")
-        self.assertContains(response, 'data-bootstrap-select', html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
 
         exam_items = [
             item
@@ -3581,8 +3585,12 @@ class ReviewResultsViewTest(TestCase):
         )
         self._set_user_role(student, ProfileRole.STUDENT)
 
-        older_exam = Exam.objects.create(author=self.user, title="Older Reviewed Exam", exam_type="test", is_active=True)
-        newer_exam = Exam.objects.create(author=self.user, title="Newer Reviewed Exam", exam_type="test", is_active=True)
+        older_exam = Exam.objects.create(
+            author=self.user, title="Older Reviewed Exam", exam_type="test", is_active=True
+        )
+        newer_exam = Exam.objects.create(
+            author=self.user, title="Newer Reviewed Exam", exam_type="test", is_active=True
+        )
 
         now = timezone.now()
         older_attempt = ExamAttempt.objects.create(
@@ -3610,7 +3618,7 @@ class ReviewResultsViewTest(TestCase):
         response = self.client.get(reverse("accounts:review_results"), {"evaluated_submitted_order": "oldest"})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'data-bootstrap-select', html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
         self.assertNotContains(response, "88%", html=False)
         self.assertNotContains(response, "91%", html=False)
 
