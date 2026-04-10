@@ -120,7 +120,7 @@ class LiveExamPayloadSecurityTest(TestCase):
 
 
 class LiveExamLowPointScoringTest(TestCase):
-    """Ensure low-point questions never truncate correct answers down to zero."""
+    """Ensure live exam scoring awards the configured full points."""
 
     def setUp(self):
         self.teacher = User.objects.create_user("low_point_teacher", "lowpoint@example.com", "StrongPass123!")
@@ -172,6 +172,18 @@ class LiveExamLowPointScoringTest(TestCase):
         self.assertTrue(score["is_correct"])
         self.assertEqual(score["awarded_points"], 1)
 
+    def test_calculate_answer_score_keeps_full_points_for_slow_correct_answer(self):
+        score = calculate_answer_score(
+            option_ids=[self.correct_option.id],
+            correct_ids=[self.correct_option.id],
+            base_points=5,
+            answer_ms=1000,
+            total_ms=1000,
+        )
+
+        self.assertTrue(score["is_correct"])
+        self.assertEqual(score["awarded_points"], 5)
+
     def test_save_answer_and_score_does_not_keep_correct_one_point_answer_at_zero(self):
         now = timezone.now()
         session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
@@ -204,6 +216,42 @@ class LiveExamLowPointScoringTest(TestCase):
 
         player.refresh_from_db()
         self.assertEqual(player.score, 1)
+
+    def test_save_answer_and_score_awards_full_question_points(self):
+        self.question.points = 5
+        self.question.save(update_fields=["points"])
+
+        now = timezone.now()
+        session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        session.state = LiveSession.STATE_QUESTION
+        session.current_index = 0
+        session.question_started_at = now - timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS + 1
+        )
+        session.question_ends_at = now + timezone.timedelta(seconds=15)
+        session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        player = LivePlayer.objects.create(
+            session=session,
+            nickname="FullPointPlayer",
+            avatar_key="avatar_1",
+            client_id="full-point-client",
+        )
+
+        ok, result = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=self.question.id,
+            option_ids=[self.correct_option.id],
+            answer_ms=999999,
+        )
+
+        self.assertTrue(ok)
+        self.assertEqual(result["answer"]["awarded_points"], 5)
+
+        player.refresh_from_db()
+        self.assertEqual(player.score, 5)
 
 
 class LiveExamSaveAnswerDuplicateTest(TestCase):
