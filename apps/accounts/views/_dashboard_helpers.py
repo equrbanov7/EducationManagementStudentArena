@@ -12,6 +12,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseMembership
+from apps.exams.domain.access_policy import StudentGroup
 from apps.exams.models import Exam, ExamAttempt
 from apps.labs.models import Lab, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
@@ -39,6 +40,21 @@ from ._helpers import (
 
 User = get_user_model()
 SUBMISSION_DATE_ORDER_CHOICES = {"newest", "oldest"}
+
+
+def _build_student_group_map_and_available(teacher):
+    """Build student→group_name mapping and available groups list from StudentGroup model."""
+    teacher_groups = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
+    student_group_pairs = teacher_groups.values_list("students__id", "name")
+    student_group_map = {}
+    for student_id, group_name in student_group_pairs:
+        if student_id and group_name:
+            student_group_map[student_id] = group_name
+    available_groups = sorted(
+        {g.name for g in teacher_groups if g.name},
+        key=str.lower,
+    )
+    return student_group_map, available_groups
 
 
 def _standard_item_type_meta(raw_type):
@@ -812,7 +828,9 @@ def _normalize_pending_review_status(value):
     return "all"
 
 
-def _collect_pending_review_items(request, search=None, filter_type=None, filter_status=None, submitted_order=None):
+def _collect_pending_review_items(
+    request, search=None, filter_type=None, filter_status=None, submitted_order=None, filter_group=None
+):
     search_query = (search if search is not None else request.GET.get("search", "")).strip()
     normalized_type = _normalize_pending_review_type(
         filter_type if filter_type is not None else request.GET.get("type", "all")
@@ -820,16 +838,23 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     normalized_status = _normalize_pending_review_status(
         filter_status if filter_status is not None else request.GET.get("status", "all")
     )
+    selected_group = (filter_group if filter_group is not None else request.GET.get("pr_group", "")).strip()
     normalized_submitted_order = _normalize_submission_date_order(
         submitted_order if submitted_order is not None else request.GET.get("submitted_order", "oldest"),
         default="oldest",
     )
+
+    student_group_map, available_groups = _build_student_group_map_and_available(request.user)
+    if selected_group and selected_group not in available_groups:
+        selected_group = ""
+
     profile_return_url = _append_query_params(
         reverse("accounts:profile"),
         section="pending-review",
         search=search_query,
         type=normalized_type,
         status=normalized_status,
+        pr_group=selected_group,
         submitted_order=normalized_submitted_order,
     )
 
@@ -838,17 +863,6 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     current_time = timezone.now()
     review_cutoff = current_time - REVIEW_EDIT_WINDOW
 
-    student_memberships = []
-    if teacher_courses.exists():
-        student_memberships = CourseMembership.objects.filter(
-            course__in=teacher_courses,
-            role="student",
-        ).values("course_id", "user_id", "group_name")
-
-    group_map = {
-        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
-        for membership in student_memberships
-    }
     items = []
 
     if normalized_type in {"all", "exams"}:
@@ -888,7 +902,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "student_display": student_display,
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
+                    "group_name": student_group_map.get(attempt.user_id, ""),
                     "status": attempt.status,
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
@@ -947,7 +961,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     ),
                     "title": submission.assignment.title,
                     "course_title": course.title,
-                    "group_name": group_map.get((course.id, submission.user_id), ""),
+                    "group_name": student_group_map.get(submission.user_id, ""),
                     "status": submission.status,
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
@@ -1005,7 +1019,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     ),
                     "title": submission.project.title,
                     "course_title": course.title,
-                    "group_name": group_map.get((course.id, submission.student_id), ""),
+                    "group_name": student_group_map.get(submission.student_id, ""),
                     "status": submission.status,
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
@@ -1063,7 +1077,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     ),
                     "title": submission.assignment.lab.title,
                     "course_title": course.title,
-                    "group_name": group_map.get((course.id, student.id), ""),
+                    "group_name": student_group_map.get(student.id, ""),
                     "status": submission.status,
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
@@ -1089,6 +1103,9 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     if normalized_status != "all":
         items = [item for item in items if item["status"] == normalized_status]
 
+    if selected_group:
+        items = [item for item in items if item.get("group_name") == selected_group]
+
     items.sort(
         key=lambda item: (
             item["submitted_at"] is None,
@@ -1096,7 +1113,15 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         ),
         reverse=normalized_submitted_order == "newest",
     )
-    return items, search_query, normalized_type, normalized_status, normalized_submitted_order
+    return (
+        items,
+        search_query,
+        normalized_type,
+        normalized_status,
+        normalized_submitted_order,
+        selected_group,
+        available_groups,
+    )
 
 
 def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None, submitted_order=None):
@@ -1114,25 +1139,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
     review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
 
-    student_memberships = []
-    if teacher_courses.exists():
-        student_memberships = CourseMembership.objects.filter(
-            course__in=teacher_courses,
-            role="student",
-        ).values("course_id", "user_id", "group_name")
-
-    group_map = {
-        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
-        for membership in student_memberships
-    }
-    available_groups = sorted(
-        {
-            membership["group_name"].strip()
-            for membership in student_memberships
-            if (membership.get("group_name") or "").strip()
-        },
-        key=str.lower,
-    )
+    student_group_map, available_groups = _build_student_group_map_and_available(request.user)
     if selected_group and selected_group not in available_groups:
         selected_group = ""
 
@@ -1178,7 +1185,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "student": attempt.user,
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
+                    "group_name": student_group_map.get(attempt.user_id, ""),
                     "score_display": _format_score_display(score_value),
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
@@ -1219,7 +1226,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "student": submission.user,
                     "title": submission.assignment.title,
                     "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, submission.user_id), "") if course else "",
+                    "group_name": student_group_map.get(submission.user_id, ""),
                     "score_display": _format_score_display(submission.grade),
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
@@ -1259,7 +1266,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "student": submission.student,
                     "title": submission.project.title,
                     "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, submission.student_id), "") if course else "",
+                    "group_name": student_group_map.get(submission.student_id, ""),
                     "score_display": _format_score_display(submission.grade),
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
@@ -1300,7 +1307,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "student": student,
                     "title": submission.assignment.lab.title,
                     "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, student.id), "") if course else "",
+                    "group_name": student_group_map.get(student.id, ""),
                     "score_display": _format_score_display(submission.score),
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
