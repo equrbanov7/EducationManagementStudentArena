@@ -1925,6 +1925,41 @@ msgctxt "profile.my_exams"
 msgid "create_first_exam"
 msgstr "İlk imtahanı yarat"
 
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_placeholder"
+msgstr "İmtahan axtar..."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_all_types"
+msgstr "Bütün növlər"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_test"
+msgstr "Test"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_written"
+msgstr "Yazılı / Praktik"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_title"
+msgstr "Nəticə tapılmadı"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_description"
+msgstr "Axtarış meyarlarına uyğun imtahan tapılmadı."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "clear_filters"
+msgstr "Filtrləri təmizlə"
+
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"
 msgid "title"
