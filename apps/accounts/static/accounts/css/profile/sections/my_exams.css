@@ -31,6 +31,123 @@
     transition: background 0.2s ease;
 }
 
+/* --- Search & Filter Toolbar --- */
+.my-exams-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    background: #f8fafc;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.my-exams-search-box {
+    flex: 1;
+    position: relative;
+    min-width: 180px;
+}
+
+.my-exams-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.my-exams-search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2.2rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.my-exams-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.my-exams-filter-box {
+    min-width: 150px;
+}
+
+.my-exams-filter-box .bootstrap-single-select {
+    min-width: 150px;
+}
+
+.my-exams-toolbar .bootstrap-single-select__toggle {
+    min-height: 38px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.my-exams-toolbar .bootstrap-single-select__toggle:hover {
+    border-color: #94a3b8;
+    background: #fff;
+}
+
+.my-exams-toolbar .bootstrap-single-select__toggle:focus,
+.my-exams-toolbar .bootstrap-single-select__toggle.show {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.my-exams-toolbar .bootstrap-single-select__menu {
+    margin-top: 0.35rem;
+    border-radius: 0.75rem;
+    border-color: rgba(148, 163, 184, 0.32);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.my-exams-toolbar .bootstrap-single-select__option {
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.65rem;
+    font-size: 0.9rem;
+}
+
+.my-exams-search-btn {
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+.my-exams-search-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    color: #fff;
+}
+
+.my-exams-reset-btn {
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    font-weight: 600;
+    border-color: #cbd5e1;
+    color: #475569;
+    background: #fff;
+    font-size: 0.85rem;
+}
+
+.my-exams-reset-btn:hover {
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+    background: #eff6ff;
+}
+
 /* --- İmtahan Grid Sistemi --- */
 .exam-cards-grid {
     display: grid;
@@ -488,6 +605,26 @@
     }
     
     .btn-create-new {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .my-exams-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+        gap: 0.6rem;
+    }
+
+    .my-exams-search-box,
+    .my-exams-filter-box,
+    .my-exams-filter-box .bootstrap-single-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .my-exams-search-btn,
+    .my-exams-reset-btn {
         width: 100%;
         justify-content: center;
     }
