@@ -294,10 +294,12 @@ def student_organization_management(request):
     def _invite_user_for_role(target_user, role_type):
         from core.rls import bypass_rls as _bypass_rls
 
-        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+        with _bypass_rls():
+            target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
         target_profile_role = _profile_role_for_membership_request_type(role_type)
         target_role_label = _membership_request_role_label(role_type).lower()
-        membership_role = _resolve_membership_role(org, target_profile_role)
+        with _bypass_rls():
+            membership_role = _resolve_membership_role(org, target_profile_role)
 
         if membership_role is None:
             return False, "Bu təşkilat üçün uyğun rol tapılmadı."
@@ -472,6 +474,8 @@ def student_organization_management(request):
         return True, ""
 
     def _remove_org_member(target_user, *, remove_reason=""):
+        from core.rls import bypass_rls as _bypass_rls
+
         removable_profile_roles = {
             ProfileRole.STUDENT,
             ProfileRole.LEAD_STUDENT,
@@ -480,10 +484,11 @@ def student_organization_management(request):
             ProfileRole.MEMBER,
             ProfileRole.HR,
         }
-        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
-        active_memberships = list(
-            Membership.objects.filter(user=target_user, organization=org, is_active=True).select_related("role")
-        )
+        with _bypass_rls():
+            target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+            active_memberships = list(
+                Membership.objects.filter(user=target_user, organization=org, is_active=True).select_related("role")
+            )
         if not active_memberships and target_profile.organization != org:
             return False, "İstifadəçi bu təşkilata bağlı deyil."
 
@@ -504,68 +509,76 @@ def student_organization_management(request):
         if not is_superadmin and highest_target_level >= user_level:
             return False, "Yalnız öz səviyyənizdən aşağı istifadəçiləri idarə edə bilərsiniz."
 
-        with transaction.atomic():
-            if active_memberships:
-                membership_ids = [membership.id for membership in active_memberships]
-                Membership.objects.filter(id__in=membership_ids).update(
-                    is_active=False,
-                    is_primary=False,
+        with _bypass_rls():
+            with transaction.atomic():
+                if active_memberships:
+                    membership_ids = [membership.id for membership in active_memberships]
+                    Membership.objects.filter(id__in=membership_ids).update(
+                        is_active=False,
+                        is_primary=False,
+                    )
+
+                fallback_membership = (
+                    Membership.objects.filter(user=target_user, is_active=True)
+                    .exclude(organization=org)
+                    .select_related("organization", "role")
+                    .order_by("-is_primary", "-role__level")
+                    .first()
+                )
+                if fallback_membership:
+                    target_profile.organization = fallback_membership.organization
+                    target_profile.organization_type = fallback_membership.organization.org_type
+                    target_profile.role = _map_org_role_to_profile_role(fallback_membership.role)
+                else:
+                    target_profile.organization = None
+                    target_profile.organization_type = OrganizationType.INDIVIDUAL
+                    target_profile.role = effective_profile_role or target_profile.role
+
+                # Do not auto-create a new pending request after removal.
+                target_profile.requested_organization = None
+                target_profile.requested_organization_name = ""
+                target_profile.requested_organization_message = ""
+                target_profile.student_university_name = ""
+                target_profile.student_school_identifier = ""
+                target_profile.save(
+                    update_fields=[
+                        "organization",
+                        "organization_type",
+                        "role",
+                        "requested_organization",
+                        "requested_organization_name",
+                        "requested_organization_message",
+                        "student_university_name",
+                        "student_school_identifier",
+                        "updated_at",
+                    ]
                 )
 
-            fallback_membership = (
-                Membership.objects.filter(user=target_user, is_active=True)
-                .exclude(organization=org)
-                .select_related("organization", "role")
-                .order_by("-is_primary", "-role__level")
-                .first()
+            create_audit_log(
+                user=request.user,
+                organization=org,
+                action="update",
+                resource_type="membership",
+                resource_id=target_user.id,
+                resource_repr=f"{target_user.username} removed from {org.name}",
+                old_values={"organization": org.name},
+                new_values={"organization": "", "action": "remove_member"},
+                reason=remove_reason or None,
+                request=request,
             )
-            if fallback_membership:
-                target_profile.organization = fallback_membership.organization
-                target_profile.organization_type = fallback_membership.organization.org_type
-                target_profile.role = _map_org_role_to_profile_role(fallback_membership.role)
-            else:
-                target_profile.organization = None
-                target_profile.organization_type = OrganizationType.INDIVIDUAL
-                target_profile.role = effective_profile_role or target_profile.role
-
-            # Do not auto-create a new pending request after removal.
-            target_profile.requested_organization = None
-            target_profile.requested_organization_name = ""
-            target_profile.requested_organization_message = ""
-            target_profile.student_university_name = ""
-            target_profile.student_school_identifier = ""
-            target_profile.save(
-                update_fields=[
-                    "organization",
-                    "organization_type",
-                    "role",
-                    "requested_organization",
-                    "requested_organization_name",
-                    "requested_organization_message",
-                    "student_university_name",
-                    "student_school_identifier",
-                    "updated_at",
-                ]
-            )
-
-        create_audit_log(
-            user=request.user,
-            organization=org,
-            action="update",
-            resource_type="membership",
-            resource_id=target_user.id,
-            resource_repr=f"{target_user.username} removed from {org.name}",
-            old_values={"organization": org.name},
-            new_values={"organization": "", "action": "remove_member"},
-            reason=remove_reason or None,
-            request=request,
-        )
-        notify_member_removed_from_organization(
-            removed_user=target_user,
-            organization=org,
-            removed_by=request.user,
-            reason=remove_reason,
-        )
+            try:
+                notify_member_removed_from_organization(
+                    removed_user=target_user,
+                    organization=org,
+                    removed_by=request.user,
+                    reason=remove_reason,
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to send removal notification for user %s from org %s",
+                    target_user.username,
+                    org.name,
+                )
         return True, ""
 
     if request.method == "POST":
@@ -784,6 +797,13 @@ def student_organization_management(request):
         if action in {"remove_student", "remove_org_member"}:
             target_user_id = request.POST.get("user_id")
             remove_reason = (request.POST.get("remove_reason") or "").strip()
+            if not remove_reason:
+                messages.warning(
+                    request,
+                    "Uzaqlaşdırma üçün səbəb qeyd etmək məcburidir. "
+                    "Zəhmət olmasa səbəb yazın və yenidən cəhd edin.",
+                )
+                return redirect(next_url)
             target_user = get_object_or_404(User, id=target_user_id, is_active=True)
             is_ok, error_message = _remove_org_member(target_user, remove_reason=remove_reason)
             if not is_ok:
@@ -794,111 +814,145 @@ def student_organization_management(request):
 
         if action in {"approve_teacher_staff_request", "reject_teacher_staff_request"}:
             from apps.notifications.models import MembershipRequestRoleType as MRR
+            from core.rls import bypass_rls as _bypass_rls_ts
 
             request_id = (request.POST.get("request_id") or request.POST.get("ts_request_id") or "").strip()
             if not request_id.isdigit():
                 messages.error(request, "Keçərsiz müraciət ID-si.")
                 return redirect(next_url)
 
-            ts_request = StudentOrganizationRequest.objects.filter(
-                id=int(request_id),
-                organization=org,
-                status=StudentOrganizationRequestStatus.PENDING,
-                role_type__in=[MRR.TEACHER, MRR.STAFF],
-            ).first()
+            with _bypass_rls_ts():
+                ts_request = StudentOrganizationRequest.objects.filter(
+                    id=int(request_id),
+                    organization=org,
+                    status=StudentOrganizationRequestStatus.PENDING,
+                    role_type__in=[MRR.TEACHER, MRR.STAFF],
+                ).first()
             if ts_request is None:
                 messages.error(request, "Müraciət tapılmadı və ya artıq cavablandırılıb.")
                 return redirect(next_url)
 
             if action == "approve_teacher_staff_request":
-                with transaction.atomic():
-                    target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
-                    _set_student_org_request_status(
-                        request_obj=ts_request,
-                        status=StudentOrganizationRequestStatus.APPROVED,
-                        note="Qəbul edildi.",
-                        responded_by=request.user,
-                    )
-                    # Assign teacher/staff membership role
-                    from apps.organizations.models import Membership  # noqa: F811
+                with _bypass_rls_ts():
+                    with transaction.atomic():
+                        target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
+                        _set_student_org_request_status(
+                            request_obj=ts_request,
+                            status=StudentOrganizationRequestStatus.APPROVED,
+                            note="Qəbul edildi.",
+                            responded_by=request.user,
+                        )
+                        # Assign teacher/staff membership role
+                        from apps.organizations.models import Membership  # noqa: F811
 
-                    role_name = "teacher" if ts_request.role_type == MRR.TEACHER else "member"
-                    role_obj = org.roles.filter(name=role_name, is_active=True).first()
-                    if role_obj is None:
-                        role_obj = org.roles.filter(is_active=True).order_by("level").first()
-                    if role_obj:
-                        # Use filter().first() + update-or-create to avoid
-                        # MultipleObjectsReturned when the user already has
-                        # memberships in this org with different roles/scopes.
-                        # Pick the best existing row: prefer active, primary,
-                        # then highest-level role so we upgrade that one.
-                        existing_membership = (
-                            Membership.objects.filter(
-                                user=ts_request.user,
-                                organization=org,
+                        role_name = "teacher" if ts_request.role_type == MRR.TEACHER else "member"
+                        role_obj = org.roles.filter(name=role_name, is_active=True).first()
+                        if role_obj is None:
+                            # Fallback: try staff-like roles for staff requests
+                            if ts_request.role_type == MRR.STAFF:
+                                for fallback_name in ["staff", "hr", "member"]:
+                                    role_obj = org.roles.filter(name=fallback_name, is_active=True).first()
+                                    if role_obj:
+                                        break
+                            if role_obj is None:
+                                role_obj = org.roles.filter(is_active=True).order_by("level").first()
+                        if role_obj:
+                            existing_membership = (
+                                Membership.objects.filter(
+                                    user=ts_request.user,
+                                    organization=org,
+                                )
+                                .order_by("-is_active", "-is_primary", "-role__level")
+                                .first()
                             )
-                            .order_by("-is_active", "-is_primary", "-role__level")
-                            .first()
-                        )
-                        has_other_primary = (
-                            Membership.objects.filter(user=ts_request.user, is_active=True, is_primary=True)
-                            .exclude(organization=org)
-                            .exists()
-                        )
-                        if existing_membership:
-                            existing_membership.role = role_obj
-                            existing_membership.is_active = True
-                            existing_membership.is_primary = not has_other_primary
-                            # Clear the pending-invite sentinel title so the
-                            # membership is no longer treated as an invite.
-                            existing_membership.title = ""
-                            existing_membership.save(
+                            has_other_primary = (
+                                Membership.objects.filter(user=ts_request.user, is_active=True, is_primary=True)
+                                .exclude(organization=org)
+                                .exists()
+                            )
+                            if existing_membership:
+                                existing_membership.role = role_obj
+                                existing_membership.is_active = True
+                                existing_membership.is_primary = not has_other_primary
+                                existing_membership.title = ""
+                                existing_membership.save(
+                                    update_fields=[
+                                        "role",
+                                        "is_active",
+                                        "is_primary",
+                                        "title",
+                                        "updated_at",
+                                    ]
+                                )
+                            else:
+                                Membership.objects.create(
+                                    user=ts_request.user,
+                                    organization=org,
+                                    role=role_obj,
+                                    assigned_by=request.user,
+                                    is_active=True,
+                                    is_primary=not has_other_primary,
+                                )
+                            target_profile.organization = org
+                            target_profile.organization_type = org.org_type
+                            if ts_request.role_type == MRR.TEACHER:
+                                target_profile.role = ProfileRole.TEACHER
+                            elif ts_request.role_type == MRR.STAFF:
+                                target_profile.role = ProfileRole.MEMBER
+                            else:
+                                target_profile.role = ProfileRole.MEMBER
+                            target_profile.requested_organization = None
+                            target_profile.requested_organization_name = ""
+                            target_profile.requested_organization_message = ""
+                            target_profile.save(
                                 update_fields=[
+                                    "organization",
+                                    "organization_type",
                                     "role",
-                                    "is_active",
-                                    "is_primary",
-                                    "title",
+                                    "requested_organization",
+                                    "requested_organization_name",
+                                    "requested_organization_message",
                                     "updated_at",
                                 ]
                             )
-                        else:
-                            Membership.objects.create(
-                                user=ts_request.user,
-                                organization=org,
-                                role=role_obj,
-                                is_active=True,
-                                is_primary=not has_other_primary,
-                            )
-                        target_profile.organization = org
-                        target_profile.organization_type = org.org_type
-                        target_profile.role = (
-                            ProfileRole.TEACHER if ts_request.role_type == MRR.TEACHER else ProfileRole.MEMBER
+
+                        # Close other pending requests for this user
+                        _close_other_pending_student_requests(
+                            user=ts_request.user,
+                            accepted_organization=org,
+                            responded_by=request.user,
                         )
-                        target_profile.requested_organization = None
-                        target_profile.requested_organization_name = ""
-                        target_profile.save(
-                            update_fields=[
-                                "organization",
-                                "organization_type",
-                                "role",
-                                "requested_organization",
-                                "requested_organization_name",
-                                "updated_at",
-                            ]
-                        )
+
+                    create_audit_log(
+                        user=request.user,
+                        organization=org,
+                        action="update",
+                        resource_type="membership",
+                        resource_id=ts_request.user.id,
+                        resource_repr=f"{ts_request.user.username} approved as {role_name}",
+                        old_values={"status": "pending"},
+                        new_values={
+                            "status": "approved",
+                            "role": role_name,
+                            "action": "approve_teacher_staff_request",
+                        },
+                        request=request,
+                    )
+
                 messages.success(
                     request,
                     f"{ts_request.user.get_full_name() or ts_request.user.username} qəbul edildi.",
                 )
             else:
-                target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
-                _set_student_org_request_status(
-                    request_obj=ts_request,
-                    status=StudentOrganizationRequestStatus.REJECTED,
-                    note="Müraciət rədd edildi.",
-                    responded_by=request.user,
-                )
-                _sync_profile_pending_request_snapshot(target_profile)
+                with _bypass_rls_ts():
+                    target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
+                    _set_student_org_request_status(
+                        request_obj=ts_request,
+                        status=StudentOrganizationRequestStatus.REJECTED,
+                        note="Müraciət rədd edildi.",
+                        responded_by=request.user,
+                    )
+                    _sync_profile_pending_request_snapshot(target_profile)
                 messages.success(
                     request,
                     f"{ts_request.user.get_full_name() or ts_request.user.username} müraciəti rədd edildi.",
