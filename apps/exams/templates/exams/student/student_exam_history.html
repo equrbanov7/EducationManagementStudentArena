@@ -39,7 +39,7 @@
 
     {% if exam %}
     <div class="row mb-5 g-4">
-        <div class="col-md-3">
+        <div class="{% if history_max_score is not None %}col-md-3{% else %}col-md-4{% endif %}">
             <div class="stat-card blue">
                 <h2 class="fw-bold text-dark-blue mb-1">
                     {{ history_attempt_count }}
@@ -48,7 +48,7 @@
                 <span class="text-muted fw-medium text-uppercase small history-tracking-label">İstifadə olunmuş cəhd</span>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="{% if history_max_score is not None %}col-md-3{% else %}col-md-4{% endif %}">
             <div class="stat-card green">
                 <h2 class="fw-bold mb-1 {% if history_attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
                     {% if history_attempts_left is None %}&infin;{% else %}{{ history_attempts_left }}{% endif %}
@@ -56,15 +56,17 @@
                 <span class="text-muted fw-medium text-uppercase small history-tracking-label">Qalan cəhd</span>
             </div>
         </div>
+        {% if history_max_score is not None %}
         <div class="col-md-3">
             <div class="stat-card blue">
                 <h2 class="fw-bold mb-1 text-primary-blue">
-                    {% if history_max_score is not None %}{{ history_max_score }}{% else %}-{% endif %}
+                    {{ history_max_score }}
                 </h2>
                 <span class="text-muted fw-medium text-uppercase small history-tracking-label">Maksimum bal</span>
             </div>
         </div>
-        <div class="col-md-3">
+        {% endif %}
+        <div class="{% if history_max_score is not None %}col-md-3{% else %}col-md-4{% endif %}">
             <div class="stat-card white">
                 <div class="mb-2">
                     {% if exam.is_after_end %}
