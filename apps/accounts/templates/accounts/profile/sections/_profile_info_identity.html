@@ -242,6 +242,14 @@
                data-section="change-password" data-title="Şifrəni dəyiş">
                 <i class="fas fa-lock"></i> Şifrəni dəyiş
             </a>
+            {% if 'delete-account' in allowed_sections %}
+            <button type="button"
+                    class="btn-edit-profile btn-edit-profile--danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteAccountConfirmModal">
+                <i class="fas fa-user-times"></i> {% trans "delete_account" context "profile.sidebar" %}
+            </button>
+            {% endif %}
         </div>
     </div>
 </div>
