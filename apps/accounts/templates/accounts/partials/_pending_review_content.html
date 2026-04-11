@@ -45,8 +45,8 @@
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                         data-bootstrap-select>
                     <option value="">Bütün qruplar</option>
-                    {% for group_name in pending_review_available_groups|default:available_groups %}
-                        <option value="{{ group_name }}" {% if pending_review_filter_group|default:filter_group == group_name %}selected{% endif %}>
+                    {% for group_name in pending_review_available_groups %}
+                        <option value="{{ group_name }}" {% if pending_review_filter_group == group_name %}selected{% endif %}>
                             {{ group_name }}
                         </option>
                     {% endfor %}
@@ -57,8 +57,8 @@
                 <select name="submitted_order"
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                         data-bootstrap-select>
-                    <option value="oldest" {% if pending_review_submitted_order|default:submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
-                    <option value="newest" {% if pending_review_submitted_order|default:submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
+                    <option value="oldest" {% if pending_review_submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
+                    <option value="newest" {% if pending_review_submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
                 </select>
             </div>
 
