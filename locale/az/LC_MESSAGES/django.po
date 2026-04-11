@@ -16354,6 +16354,10 @@ msgid "Short note (optional)"
 msgstr "Qısa qeyd (opsional)"
 
 msgctxt "staff.management"
+msgid "Reason for removal (required)"
+msgstr "Uzaqlaşdırma səbəbi (məcburi)"
+
+msgctxt "staff.management"
 msgid "Reason for removal..."
 msgstr "Uzaqlaşdırma səbəbi..."
 

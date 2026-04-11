@@ -1013,6 +1013,18 @@ def _build_student_org_management_section(
         )
         return section
 
+    # Bypass RLS for all management queries.  The Membership and
+    # StudentOrganizationRequest tables are RLS-protected in PostgreSQL.
+    # Although the admin's current_org_id is set, cross-org subqueries
+    # (e.g. pending_request_user_ids_any without org filter) and Django
+    # JOIN-based .exclude() clauses return incomplete results without the
+    # bypass, causing the unassigned-users list to appear empty and
+    # invites to fail on production.  The middleware resets RLS context at
+    # end-of-request, so enabling bypass here is safe.
+    from core.rls import set_rls_bypass
+
+    set_rls_bypass(True)
+
     sent_pending_invites = list(
         Membership.objects.filter(
             organization=organization,
@@ -1089,30 +1101,31 @@ def _build_student_org_management_section(
     )
     legacy_user_ids = set(legacy_requested_profiles.values_list("user_id", flat=True))
     if legacy_user_ids:
-        existing_pending_request_keys = set(
-            _pending_student_request_queryset(
-                organization=organization,
-                statuses=[StudentOrganizationRequestStatus.PENDING],
-            )
-            .filter(user_id__in=legacy_user_ids)
-            .values_list("user_id", "role_type")
-        )
-        missing_pending_requests = []
-        for legacy_profile in legacy_requested_profiles.select_related("user"):
-            legacy_role_type = _membership_request_role_type_for_profile_role(legacy_profile.role)
-            if (legacy_profile.user_id, legacy_role_type) in existing_pending_request_keys:
-                continue
-            missing_pending_requests.append(
-                StudentOrganizationRequest(
-                    user=legacy_profile.user,
+        with bypass_rls():
+            existing_pending_request_keys = set(
+                _pending_student_request_queryset(
                     organization=organization,
-                    role_type=legacy_role_type,
-                    message=(legacy_profile.requested_organization_message or "").strip(),
-                    status=StudentOrganizationRequestStatus.PENDING,
+                    statuses=[StudentOrganizationRequestStatus.PENDING],
                 )
+                .filter(user_id__in=legacy_user_ids)
+                .values_list("user_id", "role_type")
             )
-        if missing_pending_requests:
-            StudentOrganizationRequest.objects.bulk_create(missing_pending_requests)
+            missing_pending_requests = []
+            for legacy_profile in legacy_requested_profiles.select_related("user"):
+                legacy_role_type = _membership_request_role_type_for_profile_role(legacy_profile.role)
+                if (legacy_profile.user_id, legacy_role_type) in existing_pending_request_keys:
+                    continue
+                missing_pending_requests.append(
+                    StudentOrganizationRequest(
+                        user=legacy_profile.user,
+                        organization=organization,
+                        role_type=legacy_role_type,
+                        message=(legacy_profile.requested_organization_message or "").strip(),
+                        status=StudentOrganizationRequestStatus.PENDING,
+                    )
+                )
+            if missing_pending_requests:
+                StudentOrganizationRequest.objects.bulk_create(missing_pending_requests)
 
     students = (
         UserProfile.objects.filter(user__is_active=True, organization=organization)
@@ -1162,9 +1175,12 @@ def _build_student_org_management_section(
             | Q(resolution_note__icontains=pending_search)
         )
 
-    pending_request_user_ids_any = _pending_student_request_queryset(
-        statuses=[StudentOrganizationRequestStatus.PENDING]
-    ).values_list("user_id", flat=True)
+    with bypass_rls():
+        pending_request_user_ids_any = list(
+            _pending_student_request_queryset(statuses=[StudentOrganizationRequestStatus.PENDING]).values_list(
+                "user_id", flat=True
+            )
+        )
 
     unassigned_students = (
         UserProfile.objects.filter(
@@ -1181,7 +1197,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
@@ -1210,7 +1225,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
@@ -1240,7 +1254,6 @@ def _build_student_org_management_section(
         )
         .filter(
             requested_organization__isnull=True,
-            requested_organization_name__exact="",
         )
         .select_related("user", "requested_organization")
         .distinct()
