@@ -2,6 +2,6 @@
 <section class="profile-section-panel profile-section--pending-review {% if active_section == 'pending-review' %}is-active{% endif %}"
          data-profile-section-panel="pending-review"
          data-source-url="{% url 'accounts:pending_review' %}">
-    {% include "accounts/partials/_pending_review_content.html" with review_items=pending_review_items search_query=pending_review_search_query filter_type=pending_review_filter_type filter_status=pending_review_filter_status total_count=pending_review_total_count embedded_in_profile=True %}
+    {% include "accounts/partials/_pending_review_content.html" with review_items=pending_review_items search_query=pending_review_search_query filter_type=pending_review_filter_type filter_status=pending_review_filter_status total_count=pending_review_total_count pending_review_filter_group=pending_review_filter_group pending_review_available_groups=pending_review_available_groups embedded_in_profile=True %}
 </section>
 {% endif %}

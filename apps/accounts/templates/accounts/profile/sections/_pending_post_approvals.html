@@ -7,38 +7,49 @@
             Postların idarəetməsi ({{ pending_post_approval_count }})
         </div>
 
-        <form method="get" class="search-form pending-post-approvals-filters" data-auto-filter-form>
-            <input type="hidden" name="section" value="pending-post-approvals">
+        <div class="pr-filter-card">
+            <form method="get" class="js-auto-filter-form" data-auto-filter-form>
+                <input type="hidden" name="section" value="pending-post-approvals">
 
-            <input
-                type="text"
-                name="approval_search"
-                value="{{ pending_post_approval_search_query }}"
-                placeholder="Post, tələbə və məzmun üzrə axtar"
-                class="form-control"
-            >
+                <div class="pr-filter-grid">
+                    <input
+                        type="text"
+                        name="approval_search"
+                        value="{{ pending_post_approval_search_query }}"
+                        placeholder="Post, tələbə və məzmun üzrə axtar"
+                        class="pr-form-control"
+                    >
 
-            <select name="approval_status" class="form-control pending-post-approvals-filter-select">
-                <option value="pending" {% if pending_post_approval_filter_status == 'pending' %}selected{% endif %}>Təsdiq gözləyən</option>
-                <option value="needs_changes" {% if pending_post_approval_filter_status == 'needs_changes' %}selected{% endif %}>Düzəliş tələb olunan</option>
-                <option value="approved" {% if pending_post_approval_filter_status == 'approved' %}selected{% endif %}>Təsdiqlənənlər</option>
-                <option value="all" {% if pending_post_approval_filter_status == 'all' %}selected{% endif %}>Hamısı</option>
-            </select>
+                    <div class="bootstrap-single-select pending-review-select-wrap">
+                        <select name="approval_status"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select>
+                            <option value="pending" {% if pending_post_approval_filter_status == 'pending' %}selected{% endif %}>Təsdiq gözləyən</option>
+                            <option value="needs_changes" {% if pending_post_approval_filter_status == 'needs_changes' %}selected{% endif %}>Düzəliş tələb olunan</option>
+                            <option value="approved" {% if pending_post_approval_filter_status == 'approved' %}selected{% endif %}>Təsdiqlənənlər</option>
+                            <option value="all" {% if pending_post_approval_filter_status == 'all' %}selected{% endif %}>Hamısı</option>
+                        </select>
+                    </div>
 
-            <select name="approval_group" class="form-control pending-post-approvals-filter-select">
-                <option value="">Bütün qruplar</option>
-                {% for group in pending_post_approval_available_groups %}
-                    <option value="{{ group.id }}" {% if pending_post_approval_filter_group == group.id|stringformat:'s' %}selected{% endif %}>
-                        {{ group.name }}
-                    </option>
-                {% endfor %}
-            </select>
+                    <div class="bootstrap-single-select pending-review-select-wrap">
+                        <select name="approval_group"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select>
+                            <option value="">Bütün qruplar</option>
+                            {% for group in pending_post_approval_available_groups %}
+                                <option value="{{ group.id }}" {% if pending_post_approval_filter_group == group.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
 
-            <noscript>
-                <button type="submit" class="btn btn-primary">Axtar</button>
-            </noscript>
-        </form>
-    </div>
+                <noscript>
+                    <button type="submit" class="btn btn-primary">Axtar</button>
+                </noscript>
+            </form>
+        </div>
 
     {% if pending_post_approval_items %}
         <div class="section-card pending-posts-list-card">
@@ -286,6 +297,10 @@
                 {% endfor %}
             </div>
         </div>
+
+        {% if pending_post_approval_page_obj %}
+            {% include "partials/_pagination.html" with page_obj=pending_post_approval_page_obj extra_query=pending_post_approval_pagination_query page_param="approval_page" %}
+        {% endif %}
     {% else %}
         <div class="section-card">
             <div class="empty-state">
@@ -311,7 +326,7 @@
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     /* ---- Auto-filter form ---- */
-    var filterForms = document.querySelectorAll(".pending-post-approvals-filters[data-auto-filter-form]");
+    var filterForms = document.querySelectorAll(".profile-section--pending-post-approvals [data-auto-filter-form]");
     filterForms.forEach(function (form) {
         if (!form || form.dataset.autoFilterBound === "1") return;
         form.dataset.autoFilterBound = "1";

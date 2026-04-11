@@ -12,6 +12,14 @@
     align-items: center;
 }
 
+.pr-filter-grid--5col {
+    grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
+.pr-filter-grid--5col .pr-filter-search-full {
+    grid-column: 1 / -1;
+}
+
 .pr-form-control {
     width: 100%;
     min-height: 42px;
@@ -238,7 +246,8 @@
         grid-template-columns: 1fr 1fr;
     }
 
-    .pr-filter-grid input[name="search"] {
+    .pr-filter-grid input[name="search"],
+    .pr-filter-grid .pr-filter-search-full {
         grid-column: 1 / -1;
     }
 

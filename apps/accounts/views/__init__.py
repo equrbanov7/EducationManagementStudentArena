@@ -12,6 +12,12 @@ This package contains all account-related views split into logical modules:
 All views are re-exported here for backward compatibility with existing URLs.
 """
 
+# Account management views
+from .account_management import (
+    delete_account,
+    superadmin_user_management,
+)
+
 # Authentication views
 from .auth import (
     CustomLoginView,
@@ -113,6 +119,9 @@ __all__ = [
     "student_organization_request",
     "student_org_invitation_action",
     "student_leave_organization",
+    # Account management
+    "delete_account",
+    "superadmin_user_management",
     # Superadmin
     "superadmin_organizations",
 ]
