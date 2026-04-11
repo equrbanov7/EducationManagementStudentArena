@@ -16592,3 +16592,311 @@ msgstr "Öncə imtahanı aktiv edin. İmtahan hazırda passivdir."
 msgctxt "live_exam.view.message"
 msgid "exam_must_be_active_before_live"
 msgstr "Canlı imtahanı başlatmaq üçün öncə imtahanı aktiv edin."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Account Deletion & User Management translations
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.section"
+msgid "delete_account_title"
+msgstr "Hesabı sil"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "delete_account"
+msgstr "Hesabı sil"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_warning"
+msgstr "Bu əməliyyat geri qaytarıla bilməz! Hesabınız deaktiv ediləcək."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_description"
+msgstr "Hesabınızı sildikdə aşağıdakı məlumatlar təsirlənəcək:"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_courses"
+msgstr "Bütün kurs qeydiyyatlarınız ləğv ediləcək"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_groups"
+msgstr "Qrup üzvlükləriniz silinəcək"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_memberships"
+msgstr "Təşkilat üzvlükləriniz deaktiv ediləcək"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_notifications"
+msgstr "Bildirişləriniz silinəcək"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_button"
+msgstr "Hesabımı sil"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_title"
+msgstr "Hesabı silməyi təsdiqləyin"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_message"
+msgstr "Hesabınızı silmək istədiyinizə əminsiniz? Bu əməliyyatı təsdiqləmək üçün şifrənizi daxil edin."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_label"
+msgstr "Şifrəniz"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_placeholder"
+msgstr "Cari şifrənizi daxil edin"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_button"
+msgstr "Bəli, hesabımı sil"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "processing"
+msgstr "İcra olunur..."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_required"
+msgstr "Hesabı silmək üçün şifrənizi daxil etməlisiniz."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_incorrect"
+msgstr "Şifrə yanlışdır. Zəhmət olmasa düzgün şifrəni daxil edin."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_last_admin"
+msgstr "Siz təşkilatın yeganə adminisiniz. Hesabınızı silə bilmirsiniz."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_error"
+msgstr "Hesabın silinməsində xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_success"
+msgstr "Hesabınız uğurla silindi."
+
+# Profile Edit Enhancements
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "organization_type"
+msgstr "Təşkilat tipi"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_individual"
+msgstr "Fərdi"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_school"
+msgstr "Məktəb"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_university"
+msgstr "Universitet"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_course_center"
+msgstr "Kurs Mərkəzi"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "specialization"
+msgstr "İxtisas / Fakültə"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_specialization"
+msgstr "İxtisasınızı daxil edin"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "group_number"
+msgstr "Qrup / Sinif"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_group_number"
+msgstr "Qrup nömrənizi daxil edin"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "department"
+msgstr "Departament / Kafedra"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_department"
+msgstr "Departamentinizi daxil edin"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "edit_profile_type_change_warning"
+msgstr "Təşkilat tipini dəyişmək kurs girişinizə və icazələrinizə təsir edə bilər."
+
+# Superadmin User Management
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "user_management_title"
+msgstr "İstifadəçi İdarəetməsi"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "back_to_profile"
+msgstr "Profilə qayıt"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "active_users"
+msgstr "Aktiv İstifadəçilər"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "deleted_users"
+msgstr "Silinmiş İstifadəçilər"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search_placeholder"
+msgstr "İstifadəçi adı, email və ya ad ilə axtarın..."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search"
+msgstr "Axtar"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_username"
+msgstr "İstifadəçi adı"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_email"
+msgstr "Email"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_name"
+msgstr "Ad"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_role"
+msgstr "Rol"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_organization"
+msgstr "Təşkilat"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_status"
+msgstr "Status"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_deleted_at"
+msgstr "Silinmə tarixi"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_joined"
+msgstr "Qeydiyyat tarixi"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_actions"
+msgstr "Əməliyyatlar"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_active"
+msgstr "Aktiv"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_deleted"
+msgstr "Silinmiş"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "restore"
+msgstr "Bərpa et"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete"
+msgstr "Həmişəlik sil"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete_confirm"
+msgstr "Bu istifadəçini həmişəlik silmək istəyirsiniz? Bu əməliyyat geri qaytarıla bilməz!"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_deleted_users"
+msgstr "Silinmiş istifadəçi yoxdur."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_users_found"
+msgstr "İstifadəçi tapılmadı."
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "user_management"
+msgstr "İstifadəçi İdarəetməsi"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Bu bölməyə yalnız superadminlər daxil ola bilər."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "İstifadəçi tapılmadı."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "\"%(username)s\" istifadəçisi uğurla bərpa edildi."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "Öz hesabınızı silə bilməzsiniz."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Superadmin hesabını silmək olmaz."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "\"%(username)s\" istifadəçisi həmişəlik silindi."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Naməlum əməliyyat."

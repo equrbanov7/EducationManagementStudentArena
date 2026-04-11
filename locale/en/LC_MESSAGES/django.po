@@ -16484,3 +16484,311 @@ msgstr "Activate the exam first. It is currently inactive."
 msgctxt "live_exam.view.message"
 msgid "exam_must_be_active_before_live"
 msgstr "Activate the exam before starting a live session."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Account Deletion & User Management translations
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.section"
+msgid "delete_account_title"
+msgstr "Delete Account"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "delete_account"
+msgstr "Delete Account"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_warning"
+msgstr "This action cannot be undone! Your account will be deactivated."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_description"
+msgstr "When you delete your account, the following data will be affected:"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_courses"
+msgstr "All your course enrollments will be cancelled"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_groups"
+msgstr "Your group memberships will be removed"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_memberships"
+msgstr "Your organization memberships will be deactivated"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_notifications"
+msgstr "Your notifications will be deleted"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_button"
+msgstr "Delete My Account"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_title"
+msgstr "Confirm Account Deletion"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_message"
+msgstr "Are you sure you want to delete your account? Enter your password to confirm this action."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_label"
+msgstr "Your Password"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_placeholder"
+msgstr "Enter your current password"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_button"
+msgstr "Yes, Delete My Account"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "processing"
+msgstr "Processing..."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_required"
+msgstr "You must enter your password to delete your account."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_incorrect"
+msgstr "Incorrect password. Please enter the correct password."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_last_admin"
+msgstr "You are the only admin of your organization. You cannot delete your account."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_error"
+msgstr "An error occurred while deleting the account. Please try again."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_success"
+msgstr "Your account has been successfully deleted."
+
+# Profile Edit Enhancements
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "organization_type"
+msgstr "Organization Type"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_individual"
+msgstr "Individual"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_school"
+msgstr "School"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_university"
+msgstr "University"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_course_center"
+msgstr "Course Center"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "specialization"
+msgstr "Specialization / Faculty"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_specialization"
+msgstr "Enter your specialization"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "group_number"
+msgstr "Group / Class"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_group_number"
+msgstr "Enter your group number"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "department"
+msgstr "Department"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_department"
+msgstr "Enter your department"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "edit_profile_type_change_warning"
+msgstr "Changing the organization type may affect your courses and permissions."
+
+# Superadmin User Management
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "user_management_title"
+msgstr "User Management"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "back_to_profile"
+msgstr "Back to Profile"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "active_users"
+msgstr "Active Users"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "deleted_users"
+msgstr "Deleted Users"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search_placeholder"
+msgstr "Search by username, email or name..."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search"
+msgstr "Search"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_username"
+msgstr "Username"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_email"
+msgstr "Email"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_name"
+msgstr "Name"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_role"
+msgstr "Role"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_organization"
+msgstr "Organization"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_status"
+msgstr "Status"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_deleted_at"
+msgstr "Deleted At"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_joined"
+msgstr "Joined"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_actions"
+msgstr "Actions"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_active"
+msgstr "Active"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_deleted"
+msgstr "Deleted"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "restore"
+msgstr "Restore"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete"
+msgstr "Permanently Delete"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete_confirm"
+msgstr "Are you sure you want to permanently delete this user? This action cannot be undone!"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_deleted_users"
+msgstr "No deleted users found."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_users_found"
+msgstr "No users found."
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "user_management"
+msgstr "User Management"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Only superadmins can access this section."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "User not found."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "User \"%(username)s\" has been successfully restored."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "You cannot delete your own account."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Superadmin accounts cannot be deleted."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "User \"%(username)s\" has been permanently deleted."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Unknown action."
