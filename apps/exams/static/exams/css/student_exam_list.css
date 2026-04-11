@@ -167,7 +167,7 @@ li.list-group-item .status-red {
 }
 
 .exam-start-modal__body {
-    padding: 0.4rem 1.3rem 1.25rem;
+    padding: 0.4rem 1.5rem 1.25rem;
 }
 
 .exam-start-modal__summary {
@@ -186,14 +186,16 @@ li.list-group-item .status-red {
     width: 56px;
     height: 56px;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.22);
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .exam-start-modal__summary-copy {
@@ -382,7 +384,7 @@ li.list-group-item .status-red {
 }
 
 .exam-start-modal__footer {
-    padding: 0 1.3rem 1.3rem;
+    padding: 0 1.5rem 1.3rem;
     background: transparent;
     gap: 0.75rem;
 }
