@@ -56,6 +56,7 @@ from ._helpers import (
     PROFILE_ROLE_LABELS,
     REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
+    STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
     _append_query_params,
     _assignable_profile_roles_for_user,
@@ -1223,7 +1224,19 @@ def user_profile(request):
             organization=management_org,
             is_superadmin=capabilities["is_superadmin"],
             user_level=management_user_level,
-            teacher_student_only=capabilities.get("teacher_can_manage_students", False),
+            teacher_student_only=capabilities.get("teacher_has_student_org_access", False),
+            can_manage_students=(
+                capabilities["is_superadmin"]
+                or capabilities["is_org_admin"]
+                or management_user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
+                or capabilities.get("teacher_can_manage_students", False)
+            ),
+            can_invite_members=(
+                capabilities["is_superadmin"]
+                or capabilities["is_org_admin"]
+                or management_user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
+                or capabilities.get("teacher_can_invite_members", False)
+            ),
         )
         student_org_management_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),

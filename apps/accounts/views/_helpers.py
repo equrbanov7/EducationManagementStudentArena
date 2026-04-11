@@ -485,13 +485,18 @@ def _role_capabilities(user, profile):
     can_manage_blog = getattr(user, "is_authenticated", False)
     can_approve_posts = is_superadmin or user_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
-    # Check if teacher has member.student_manage permission granted by admin
+    # Allow tenant admins to delegate either student-management or
+    # invite-only access to teachers without elevating them to full admins.
     teacher_can_manage_students = False
+    teacher_can_invite_members = False
+    teacher_has_student_org_access = False
     if is_teacher and not is_org_admin and not is_superadmin and active_organization:
         from apps.organizations.permissions import has_permission as _has_permission
 
         actor_perms, _ = _collect_actor_permissions(user, active_organization)
         teacher_can_manage_students = _has_permission(list(actor_perms), "member.student_manage")
+        teacher_can_invite_members = _has_permission(list(actor_perms), "member.invite")
+        teacher_has_student_org_access = teacher_can_manage_students or teacher_can_invite_members
 
     if is_superadmin:
         allowed_sections = {
@@ -551,7 +556,7 @@ def _role_capabilities(user, profile):
             allowed_sections.update(
                 {"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"}
             )
-            if teacher_can_manage_students:
+            if teacher_has_student_org_access:
                 allowed_sections.add("student-organization-management")
 
         if is_student:
@@ -599,6 +604,8 @@ def _role_capabilities(user, profile):
         "can_approve_posts": can_approve_posts,
         "allowed_sections": allowed_sections,
         "teacher_can_manage_students": teacher_can_manage_students,
+        "teacher_can_invite_members": teacher_can_invite_members,
+        "teacher_has_student_org_access": teacher_has_student_org_access,
     }
 
 
@@ -841,7 +848,15 @@ def _build_user_organization_access_rows(
 
 
 def _build_student_org_management_section(
-    *, request, organization, is_superadmin, user_level, default_view=None, teacher_student_only=False
+    *,
+    request,
+    organization,
+    is_superadmin,
+    user_level,
+    default_view=None,
+    teacher_student_only=False,
+    can_manage_students=True,
+    can_invite_members=True,
 ):
     from apps.organizations.models import Membership
     from apps.organizations.models import Organization as OrganizationModel
@@ -924,6 +939,7 @@ def _build_student_org_management_section(
         "post_next_url": "",
         "access_denied_message": "",
         "can_manage_students": False,
+        "can_invite_members": False,
         "pending_org_count": 0,
         "students_page_param": "student_org_members_page",
         "students_pagination_query": "",
@@ -1595,7 +1611,8 @@ def _build_student_org_management_section(
             }
         )
 
-    section["can_manage_students"] = True
+    section["can_manage_students"] = bool(can_manage_students)
+    section["can_invite_members"] = bool(can_invite_members)
     return section
 
 

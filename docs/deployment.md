@@ -202,7 +202,8 @@ docker compose -f docker-compose.prod.yml up -d
 ```
 
 Docker Compose starts the services in dependency order:
-`postgres` → `redis` → `app` (runs migrations via `prod-entrypoint.sh`) → `nginx`.
+`postgres` → `redis` → `app` (runs migrations and refreshes collected statics
+via `prod-entrypoint.sh`) → `nginx`.
 
 ### Step 4 — Create the superuser
 
@@ -241,7 +242,9 @@ docker compose -f docker-compose.prod.yml up -d --no-deps app nginx
 ```
 
 The `prod-entrypoint.sh` script automatically runs `python manage.py migrate`
-before starting Daphne, so database migrations are applied on every restart.
+and `python manage.py collectstatic --noinput` before starting Daphne, so
+database migrations and Docker-managed static assets stay current on every
+restart.
 
 ## 5.1 GitHub Actions CD to Linode
 
