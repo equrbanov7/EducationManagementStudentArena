@@ -419,6 +419,20 @@ class UserProfile(models.Model):
 
     location = models.CharField(max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan")
 
+    # Soft-delete fields for account deletion
+    is_deleted = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name="Silinib",
+        help_text="Hesab silinibsə True",
+    )
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Silinmə tarixi",
+        help_text="Hesabın silinmə tarixi",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")
 
@@ -430,6 +444,7 @@ class UserProfile(models.Model):
             models.Index(fields=["organization", "created_at"]),
             models.Index(fields=["role"]),
             models.Index(fields=["requested_organization"]),
+            models.Index(fields=["is_deleted", "deleted_at"]),
         ]
 
     def __str__(self):

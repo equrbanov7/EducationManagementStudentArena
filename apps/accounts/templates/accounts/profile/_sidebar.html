@@ -352,6 +352,13 @@
                 {% endif %}
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'accounts:superadmin_user_management' %}"
+               class="sidebar-menu-link {% if active_section == 'superadmin-users' %}active{% endif %}">
+                <i class="fas fa-users-cog sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "user_management" context "profile.sidebar" %}</span>
+            </a>
+        </li>
         {% endif %}
         {% endif %}
 
@@ -395,6 +402,18 @@
                 <span class="sidebar-menu-text">Şifrəni dəyiş</span>
             </a>
         </li>
+        {% if 'delete-account' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=delete-account"
+               data-section="delete-account"
+               data-title="{% trans 'delete_account' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'delete-account' %}active{% endif %}" style="color: var(--danger-color, #dc3545);">
+                <i class="fas fa-user-times sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "delete_account" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
         <li class="sidebar-menu-item">
             <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
                 {% csrf_token %}
