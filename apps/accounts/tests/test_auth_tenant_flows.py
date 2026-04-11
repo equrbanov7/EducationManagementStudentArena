@@ -2476,6 +2476,189 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertRedirects(response, reverse("accounts:profile"))
 
+    def test_teacher_with_member_invite_permission_can_invite_student_and_student_can_accept(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_inviter",
+            email="teacher_inviter@example.com",
+            password="StrongPass123!",
+        )
+        Membership.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            role=self.org_a_teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save()
+
+        grant_response = self.client.post(
+            reverse("accounts:permission_editor"),
+            {
+                "role_id": str(self.org_a_teacher_role.id),
+                "permission": "member.invite",
+                "action": "add",
+            },
+            follow=True,
+        )
+        self.assertEqual(grant_response.status_code, 200)
+        self.org_a_teacher_role.refresh_from_db()
+        self.assertIn("member.invite", self.org_a_teacher_role.permissions)
+
+        invited_student = User.objects.create_user(
+            username="teacher_invited_student",
+            email="teacher_invited_student@example.com",
+            password="StrongPass123!",
+        )
+        invited_profile = invited_student.profile
+        invited_profile.organization = None
+        invited_profile.organization_type = OrganizationType.INDIVIDUAL
+        invited_profile.role = ProfileRole.STUDENT
+        invited_profile.requested_organization = None
+        invited_profile.requested_organization_name = ""
+        invited_profile.requested_organization_message = ""
+        invited_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        self._activate_org_session(teacher_user, self.org_a)
+        page_response = self.client.get(reverse("accounts:student_organization_management"))
+        self.assertEqual(page_response.status_code, 200)
+        self.assertContains(page_response, invited_student.username)
+
+        invite_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "invite_student",
+                "user_id": str(invited_student.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+        self.assertRedirects(invite_response, reverse("accounts:student_organization_management"))
+
+        invite_membership = Membership.objects.filter(
+            user=invited_student,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            is_active=False,
+            title="__student_pending_invite__",
+            assigned_by=teacher_user,
+        ).first()
+        self.assertIsNotNone(invite_membership)
+
+        self.client.force_login(invited_student)
+        accept_response = self.client.post(
+            reverse("accounts:student_org_invitation_action"),
+            {
+                "invite_id": str(invite_membership.id),
+                "action": "accept",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+        self.assertRedirects(accept_response, reverse("accounts:profile") + "?section=profile-info")
+
+        invited_profile.refresh_from_db()
+        invite_membership.refresh_from_db()
+        self.assertEqual(invited_profile.organization, self.org_a)
+        self.assertEqual(invited_profile.role, ProfileRole.STUDENT)
+        self.assertTrue(invite_membership.is_active)
+        self.assertTrue(invite_membership.is_primary)
+        self.assertEqual(invite_membership.title, "")
+
+    def test_teacher_with_member_invite_permission_cannot_approve_pending_students(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_invite_only",
+            email="teacher_invite_only@example.com",
+            password="StrongPass123!",
+        )
+        Membership.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            role=self.org_a_teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save()
+
+        self.client.post(
+            reverse("accounts:permission_editor"),
+            {
+                "role_id": str(self.org_a_teacher_role.id),
+                "permission": "member.invite",
+                "action": "add",
+            },
+            follow=True,
+        )
+
+        pending_student = User.objects.create_user(
+            username="teacher_pending_student",
+            email="teacher_pending_student@example.com",
+            password="StrongPass123!",
+        )
+        pending_profile = pending_student.profile
+        pending_profile.organization = None
+        pending_profile.organization_type = OrganizationType.INDIVIDUAL
+        pending_profile.role = ProfileRole.STUDENT
+        pending_profile.requested_organization = self.org_a
+        pending_profile.requested_organization_name = self.org_a.name
+        pending_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+
+        StudentOrganizationRequest.objects.create(
+            user=pending_student,
+            organization=self.org_a,
+            role_type=MembershipRequestRoleType.STUDENT,
+            message="Teacher invite-only should not approve this.",
+            status=StudentOrganizationRequestStatus.PENDING,
+        )
+
+        self._activate_org_session(teacher_user, self.org_a)
+        approve_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "approve_requested_student",
+                "user_id": str(pending_student.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+            follow=True,
+        )
+
+        self.assertEqual(approve_response.status_code, 200)
+        self.assertContains(approve_response, "Bu əməliyyat üçün icazəniz yoxdur.")
+        pending_profile.refresh_from_db()
+        self.assertIsNone(pending_profile.organization)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=pending_student,
+                organization=self.org_a,
+                role=self.org_a_student_role,
+                is_active=True,
+            ).exists()
+        )
+
     def test_student_leave_requires_reason(self):
         student_user = User.objects.create_user(
             username="leave_no_reason",
