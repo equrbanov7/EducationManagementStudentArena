@@ -16410,3 +16410,311 @@ msgstr "Сначала активируйте экзамен. Сейчас он 
 msgctxt "live_exam.view.message"
 msgid "exam_must_be_active_before_live"
 msgstr "Перед запуском live-сессии сначала активируйте экзамен."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Account Deletion & User Management translations
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.section"
+msgid "delete_account_title"
+msgstr "Удалить аккаунт"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "delete_account"
+msgstr "Удалить аккаунт"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_warning"
+msgstr "Это действие нельзя отменить! Ваш аккаунт будет деактивирован."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_description"
+msgstr "При удалении аккаунта будут затронуты следующие данные:"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_courses"
+msgstr "Все ваши записи на курсы будут отменены"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_groups"
+msgstr "Ваше членство в группах будет удалено"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_memberships"
+msgstr "Ваше членство в организациях будет деактивировано"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_effect_notifications"
+msgstr "Ваши уведомления будут удалены"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_button"
+msgstr "Удалить мой аккаунт"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_title"
+msgstr "Подтвердите удаление аккаунта"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_message"
+msgstr "Вы уверены, что хотите удалить свой аккаунт? Введите пароль для подтверждения."
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_label"
+msgstr "Ваш пароль"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_password_placeholder"
+msgstr "Введите текущий пароль"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "delete_account_confirm_button"
+msgstr "Да, удалить мой аккаунт"
+
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+msgctxt "profile.delete_account"
+msgid "processing"
+msgstr "Обработка..."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_required"
+msgstr "Для удаления аккаунта необходимо ввести пароль."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_password_incorrect"
+msgstr "Неверный пароль. Пожалуйста, введите правильный пароль."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_last_admin"
+msgstr "Вы единственный администратор организации. Вы не можете удалить свой аккаунт."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_error"
+msgstr "Произошла ошибка при удалении аккаунта. Пожалуйста, попробуйте снова."
+
+#: apps/accounts/views/account_management.py
+msgid "delete_account_success"
+msgstr "Ваш аккаунт был успешно удалён."
+
+# Profile Edit Enhancements
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "organization_type"
+msgstr "Тип организации"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_individual"
+msgstr "Индивидуальный"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_school"
+msgstr "Школа"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_university"
+msgstr "Университет"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "org_type_course_center"
+msgstr "Учебный центр"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "specialization"
+msgstr "Специализация / Факультет"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_specialization"
+msgstr "Введите вашу специализацию"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "group_number"
+msgstr "Группа / Класс"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_group_number"
+msgstr "Введите номер группы"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "department"
+msgstr "Отдел / Кафедра"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "placeholder_department"
+msgstr "Введите ваш отдел"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+msgctxt "profile.edit"
+msgid "edit_profile_type_change_warning"
+msgstr "Изменение типа организации может повлиять на ваши курсы и разрешения."
+
+# Superadmin User Management
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "user_management_title"
+msgstr "Управление пользователями"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "back_to_profile"
+msgstr "Назад к профилю"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "active_users"
+msgstr "Активные пользователи"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "deleted_users"
+msgstr "Удалённые пользователи"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search_placeholder"
+msgstr "Поиск по имени пользователя, email или имени..."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "search"
+msgstr "Поиск"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_username"
+msgstr "Имя пользователя"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_email"
+msgstr "Email"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_name"
+msgstr "Имя"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_role"
+msgstr "Роль"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_organization"
+msgstr "Организация"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_status"
+msgstr "Статус"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_deleted_at"
+msgstr "Дата удаления"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_joined"
+msgstr "Дата регистрации"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "col_actions"
+msgstr "Действия"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_active"
+msgstr "Активный"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "status_deleted"
+msgstr "Удалён"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "restore"
+msgstr "Восстановить"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete"
+msgstr "Удалить навсегда"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "hard_delete_confirm"
+msgstr "Вы уверены, что хотите навсегда удалить этого пользователя? Это действие нельзя отменить!"
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_deleted_users"
+msgstr "Удалённых пользователей нет."
+
+#: apps/accounts/templates/accounts/superadmin_user_management.html
+msgctxt "superadmin.users"
+msgid "no_users_found"
+msgstr "Пользователи не найдены."
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html
+msgctxt "profile.sidebar"
+msgid "user_management"
+msgstr "Управление пользователями"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Только суперадмины могут получить доступ к этому разделу."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "Пользователь не найден."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "Пользователь \"%(username)s\" успешно восстановлен."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "Вы не можете удалить свой аккаунт."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Аккаунты суперадминов не могут быть удалены."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "Пользователь \"%(username)s\" был навсегда удалён."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Неизвестное действие."
