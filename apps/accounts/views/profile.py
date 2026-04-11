@@ -741,13 +741,26 @@ def user_profile(request):
 
     my_created_courses = []
     my_created_courses_count = 0
-    my_exams = []
     my_exams_count = 0
+    my_exams_search_query = ""
+    my_exams_filter_type = ""
+    my_exams_page_obj = None
     if capabilities["can_view_owned_learning"]:
         my_created_courses = list(created_courses_qs[:10])
         my_created_courses_count = created_courses_qs.count()
-        my_exams = list(my_exams_qs[:10])
+
+        # --- Search ---
+        my_exams_search_query = (request.GET.get("exam_q", "") or "").strip()
+        if my_exams_search_query:
+            my_exams_qs = my_exams_qs.filter(title__icontains=my_exams_search_query)
+
+        # --- Filter by exam type ---
+        my_exams_filter_type = (request.GET.get("exam_type", "") or "").strip()
+        if my_exams_filter_type:
+            my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
+
         my_exams_count = my_exams_qs.count()
+        my_exams_page_obj = Paginator(my_exams_qs, 6).get_page(request.GET.get("exam_page"))
 
     user_posts = None
     posts_count = 0
@@ -1683,8 +1696,10 @@ def user_profile(request):
         "post_creation_requires_approval": post_creation_requires_approval,
         "my_courses": my_courses,
         "courses_count": courses_count,
-        "my_exams": my_exams,
+        "my_exams": my_exams_page_obj,
         "my_exams_count": my_exams_count,
+        "my_exams_search_query": my_exams_search_query,
+        "my_exams_filter_type": my_exams_filter_type,
         "my_created_courses": my_created_courses,
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
