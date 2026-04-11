@@ -1374,6 +1374,34 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Təşkilat daxili rol (səviyyəli rol)")
         self.assertContains(response, "Profil rolları (multi-role / checkbox)")
 
+    def test_org_admin_profile_staff_management_marks_all_invite_forms_for_frontend(self):
+        organization = Organization.objects.create(
+            name="Org Admin Invite Binding Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.ORG_ADMIN)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=student-organization-management")
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode("utf-8")
+        self.assertRegex(
+            content,
+            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedStudents"',
+        )
+        self.assertRegex(
+            content,
+            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedTeachers"',
+        )
+        self.assertRegex(
+            content,
+            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedStaff"',
+        )
+
     def test_manage_roles_table_shows_username(self):
         superuser = User.objects.create_superuser(
             username="profile_superadmin",
