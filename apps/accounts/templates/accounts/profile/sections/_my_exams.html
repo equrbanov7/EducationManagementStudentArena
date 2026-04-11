@@ -19,6 +19,46 @@
             </a>
         </div>
 
+        {# ====== SEARCH & FILTER TOOLBAR ====== #}
+        <form method="get" class="my-exams-toolbar" data-my-exams-toolbar>
+            <input type="hidden" name="section" value="my-exams">
+            <div class="my-exams-search-box">
+                <i class="fas fa-search my-exams-search-icon"></i>
+                <input type="text"
+                       name="exam_q"
+                       class="form-control my-exams-search-input"
+                       placeholder="{% trans 'search_placeholder' context 'profile.my_exams' %}"
+                       value="{{ my_exams_search_query|default:'' }}">
+            </div>
+
+            <div class="my-exams-filter-box">
+                <div class="bootstrap-single-select">
+                    <select name="exam_type"
+                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                            data-bootstrap-select
+                            data-submit-on-change>
+                        <option value="">{% trans "filter_all_types" context "profile.my_exams" %}</option>
+                        <option value="test" {% if my_exams_filter_type == 'test' %}selected{% endif %}>
+                            {% trans "filter_test" context "profile.my_exams" %}
+                        </option>
+                        <option value="written" {% if my_exams_filter_type == 'written' %}selected{% endif %}>
+                            {% trans "filter_written" context "profile.my_exams" %}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary my-exams-search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+
+            {% if my_exams_search_query or my_exams_filter_type %}
+                <a href="{{ profile_base_url }}?section=my-exams" class="btn btn-outline-secondary my-exams-reset-btn">
+                    <i class="fas fa-times"></i>
+                </a>
+            {% endif %}
+        </form>
+
         {% if my_exams %}
         {% trans "exam" context "profile.my_exams" as profile_exam_default %}
         <div class="exam-cards-grid">
@@ -42,16 +82,39 @@
             {% endfor %}
         </div>
         
+        {# ====== PAGINATION ====== #}
+        {% if my_exams_page_obj.has_other_pages %}
+            {% with eq=my_exams_search_query et=my_exams_filter_type %}
+                {% if eq and et %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq|add:"&exam_type="|add:et %}
+                {% elif eq %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq %}
+                {% elif et %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_type="|add:et %}
+                {% else %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams" %}
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+
         {% else %}
         <div class="modern-empty-state">
             <div class="empty-icon-wrapper">
                 <i class="fas fa-file-medical"></i>
             </div>
-            <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
-            <p>{% trans "empty_description" context "profile.my_exams" %}</p>
-            <button type="button" class="btn-create-new mt-3 js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
-                <i class="fas fa-plus"></i> {% trans "create_first_exam" context "profile.my_exams" %}
-            </button>
+            {% if my_exams_search_query or my_exams_filter_type %}
+                <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
+                <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
+                <a href="{{ profile_base_url }}?section=my-exams" class="btn-create-new mt-3">
+                    <i class="fas fa-times"></i> {% trans "clear_filters" context "profile.my_exams" %}
+                </a>
+            {% else %}
+                <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
+                <p>{% trans "empty_description" context "profile.my_exams" %}</p>
+                <button type="button" class="btn-create-new mt-3 js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
+                    <i class="fas fa-plus"></i> {% trans "create_first_exam" context "profile.my_exams" %}
+                </button>
+            {% endif %}
         </div>
         {% endif %}
         
