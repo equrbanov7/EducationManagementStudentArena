@@ -65,14 +65,14 @@ def superadmin_user_management(request):
     Supports search, filtering, restore, and hard delete operations.
     """
     if not _is_superadmin_user(request.user):
-        return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
+        return HttpResponseForbidden(_("superadmin_access_only"))
 
     if request.method == "POST":
         action = (request.POST.get("action") or "").strip()
         user_id = request.POST.get("user_id")
 
         if not user_id:
-            messages.error(request, "İstifadəçi tapılmadı.")
+            messages.error(request, _("user_not_found"))
             return redirect(reverse("accounts:superadmin_user_management"))
 
         target_user = get_object_or_404(User, pk=user_id)
@@ -81,22 +81,22 @@ def superadmin_user_management(request):
             restore_account(target_user, request=request)
             messages.success(
                 request,
-                f'"{target_user.username}" istifadəçisi uğurla bərpa edildi.',
+                _("user_restored_success") % {"username": target_user.username},
             )
         elif action == "hard_delete":
             if target_user == request.user:
-                messages.error(request, "Öz hesabınızı silə bilməzsiniz.")
+                messages.error(request, _("cannot_delete_self"))
             elif target_user.is_superuser:
-                messages.error(request, "Superadmin hesabını silmək olmaz.")
+                messages.error(request, _("cannot_delete_superadmin"))
             else:
                 username = target_user.username
                 hard_delete_account(target_user, request=request)
                 messages.success(
                     request,
-                    f'"{username}" istifadəçisi həmişəlik silindi.',
+                    _("user_hard_deleted_success") % {"username": username},
                 )
         else:
-            messages.error(request, "Naməlum əməliyyat.")
+            messages.error(request, _("unknown_action"))
 
         return redirect(reverse("accounts:superadmin_user_management"))
 
