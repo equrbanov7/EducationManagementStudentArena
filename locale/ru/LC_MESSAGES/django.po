@@ -16172,6 +16172,10 @@ msgid "Short note (optional)"
 msgstr "Короткая заметка (необязательно)"
 
 msgctxt "staff.management"
+msgid "Reason for removal (required)"
+msgstr "Причина удаления (обязательно)"
+
+msgctxt "staff.management"
 msgid "Reason for removal..."
 msgstr "Причина удаления..."
 

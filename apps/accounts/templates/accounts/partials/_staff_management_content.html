@@ -1694,13 +1694,14 @@
                         <li><strong>{% trans "Organization" context "staff.management" %}:</strong> <span id="removeStudentModalOrg">-</span></li>
                         <li><strong>{% trans "Target role" context "staff.management" %}:</strong> <span id="removeStudentModalRole">-</span></li>
                     </ul>
-                    <label for="removeStudentReasonInput" class="form-label mt-3">{% trans "Short note (optional)" context "staff.management" %}</label>
+                    <label for="removeStudentReasonInput" class="form-label mt-3">{% trans "Reason for removal (required)" context "staff.management" %} <span class="text-danger">*</span></label>
                     <textarea
                         id="removeStudentReasonInput"
                         name="remove_reason"
                         class="form-control"
                         rows="3"
                         maxlength="280"
+                        required
                         placeholder="{% trans 'Reason for removal...' context 'staff.management' %}"></textarea>
                 </div>
                 <div class="modal-footer">
