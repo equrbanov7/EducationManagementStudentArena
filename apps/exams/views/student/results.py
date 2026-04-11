@@ -146,7 +146,9 @@ def student_exam_history(request):
         if exam.exam_type == "test":
             history_max_score = 100
         else:
-            history_max_score = exam.questions.aggregate(total=Sum("points")).get("total") or 0
+            has_custom_points = exam.default_question_points > 1 or exam.questions.filter(points__gt=1).exists()
+            if has_custom_points:
+                history_max_score = exam.questions.aggregate(total=Sum("points")).get("total") or 0
 
     context = {
         "attempts": attempts,
