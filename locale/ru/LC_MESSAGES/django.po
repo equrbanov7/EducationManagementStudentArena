@@ -16688,3 +16688,33 @@ msgstr "Пользователи не найдены."
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "Управление пользователями"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Только суперадмины могут получить доступ к этому разделу."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "Пользователь не найден."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "Пользователь \"%(username)s\" успешно восстановлен."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "Вы не можете удалить свой аккаунт."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Аккаунты суперадминов не могут быть удалены."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "Пользователь \"%(username)s\" был навсегда удалён."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Неизвестное действие."

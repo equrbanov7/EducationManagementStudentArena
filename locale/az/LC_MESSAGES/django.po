@@ -16870,3 +16870,33 @@ msgstr "İstifadəçi tapılmadı."
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "İstifadəçi İdarəetməsi"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Bu bölməyə yalnız superadminlər daxil ola bilər."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "İstifadəçi tapılmadı."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "\"%(username)s\" istifadəçisi uğurla bərpa edildi."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "Öz hesabınızı silə bilməzsiniz."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Superadmin hesabını silmək olmaz."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "\"%(username)s\" istifadəçisi həmişəlik silindi."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Naməlum əməliyyat."
