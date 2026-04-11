@@ -92,12 +92,10 @@ def resolve_membership_role(organization, initial_role):
         return roles.order_by("-level").first()
 
     if initial_role == ProfileRole.MEMBER:
-        member_role = roles.filter(name="member").first()
-        if member_role:
-            return member_role
-        student_role = roles.filter(name="student").first()
-        if student_role:
-            return student_role
+        for role_name in ["member", "staff", "hr"]:
+            match = roles.filter(name=role_name).first()
+            if match:
+                return match
         return roles.order_by("level").first()
 
     if initial_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
