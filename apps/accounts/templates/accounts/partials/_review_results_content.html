@@ -83,7 +83,7 @@
                 <tbody>
                     {% for item in evaluated_review_items %}
                         <tr>
-                            <td>{{ item.row_number|default:forloop.counter }}</td>
+                            <td>{{ forloop.counter }}</td>
                             <td>{{ item.student.get_full_name|default:item.student.username }}</td>
                             <td>
                                 <strong>{{ item.title }}</strong>
