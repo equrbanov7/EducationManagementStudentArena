@@ -1013,6 +1013,18 @@ def _build_student_org_management_section(
         )
         return section
 
+    # Bypass RLS for all management queries.  The Membership and
+    # StudentOrganizationRequest tables are RLS-protected in PostgreSQL.
+    # Although the admin's current_org_id is set, cross-org subqueries
+    # (e.g. pending_request_user_ids_any without org filter) and Django
+    # JOIN-based .exclude() clauses return incomplete results without the
+    # bypass, causing the unassigned-users list to appear empty and
+    # invites to fail on production.  The middleware resets RLS context at
+    # end-of-request, so enabling bypass here is safe.
+    from core.rls import set_rls_bypass
+
+    set_rls_bypass(True)
+
     sent_pending_invites = list(
         Membership.objects.filter(
             organization=organization,
