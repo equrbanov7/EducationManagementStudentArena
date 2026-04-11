@@ -524,6 +524,7 @@ def _role_capabilities(user, profile):
             "edit-profile",
             "change-password",
             "publish-notification",
+            "delete-account",
         }
     else:
         allowed_sections = {
@@ -533,6 +534,7 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
             "change-password",
+            "delete-account",
         }
         allowed_sections.add("my-results")
         if can_view_student_assignments:
