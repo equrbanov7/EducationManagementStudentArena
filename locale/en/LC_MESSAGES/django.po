@@ -16461,6 +16461,18 @@ msgctxt "staff.management"
 msgid "No organization found."
 msgstr "No organization found."
 
+msgctxt "staff.management"
+msgid "Reason for removal (required)"
+msgstr "Reason for removal (required)"
+
+msgctxt "staff.management"
+msgid "Short note (optional)"
+msgstr "Short note (optional)"
+
+msgctxt "staff.management"
+msgid "Reason for removal..."
+msgstr "Reason for removal..."
+
 msgctxt "exams.view.student.result.message"
 msgid "Result is not available yet. It will appear after the teacher review window closes."
 msgstr "Result is not available yet. It will appear after the teacher review window closes."
