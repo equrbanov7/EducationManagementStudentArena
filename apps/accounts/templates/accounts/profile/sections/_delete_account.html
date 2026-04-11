@@ -1,0 +1,92 @@
+{% load i18n %}
+{% if 'delete-account' in allowed_sections %}
+<section class="profile-section-panel profile-section--delete-account {% if active_section == 'delete-account' %}is-active{% endif %}" data-profile-section-panel="delete-account">
+    <div class="section-card">
+        <div class="section-title" style="color: var(--danger-color, #dc3545);">
+            <i class="fas fa-user-times"></i>
+            {% trans "delete_account_title" context "profile.section" %}
+        </div>
+
+        <div class="alert alert-danger mb-3" style="border-radius: 8px;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {% trans "delete_account_warning" context "profile.delete_account" %}
+        </div>
+
+        <p class="text-muted mb-3">
+            {% trans "delete_account_description" context "profile.delete_account" %}
+        </p>
+
+        <ul class="text-muted mb-4" style="padding-left: 1.5rem;">
+            <li>{% trans "delete_account_effect_courses" context "profile.delete_account" %}</li>
+            <li>{% trans "delete_account_effect_groups" context "profile.delete_account" %}</li>
+            <li>{% trans "delete_account_effect_memberships" context "profile.delete_account" %}</li>
+            <li>{% trans "delete_account_effect_notifications" context "profile.delete_account" %}</li>
+        </ul>
+
+        <button type="button"
+                class="btn btn-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteAccountConfirmModal"
+                id="deleteAccountBtn">
+            <i class="fas fa-trash-alt me-1"></i>
+            {% trans "delete_account_button" context "profile.delete_account" %}
+        </button>
+    </div>
+</section>
+
+<div class="modal fade" id="deleteAccountConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:delete_account' %}" id="deleteAccountForm">
+                {% csrf_token %}
+                <div class="modal-header" style="border-bottom-color: var(--danger-color, #dc3545);">
+                    <h5 class="modal-title" style="color: var(--danger-color, #dc3545);">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% trans "delete_account_confirm_title" context "profile.delete_account" %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">
+                        {% trans "delete_account_confirm_message" context "profile.delete_account" %}
+                    </p>
+                    <div class="mb-3">
+                        <label for="deleteAccountPassword" class="form-label">
+                            {% trans "delete_account_password_label" context "profile.delete_account" %}
+                        </label>
+                        <input type="password"
+                               class="form-control"
+                               id="deleteAccountPassword"
+                               name="password"
+                               required
+                               autocomplete="current-password"
+                               placeholder="{% trans 'delete_account_password_placeholder' context 'profile.delete_account' %}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        {% trans "cancel" context "profile.edit" %}
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="deleteAccountConfirmBtn">
+                        <i class="fas fa-trash-alt me-1"></i>
+                        {% trans "delete_account_confirm_button" context "profile.delete_account" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+    var form = document.getElementById("deleteAccountForm");
+    var confirmBtn = document.getElementById("deleteAccountConfirmBtn");
+    if (form && confirmBtn) {
+        form.addEventListener("submit", function () {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> {% trans "processing" context "profile.delete_account" %}';
+        });
+    }
+});
+</script>
+{% endif %}

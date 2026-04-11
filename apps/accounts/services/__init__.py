@@ -52,10 +52,17 @@ from .pending_registration import (
     get_pending_registration,
     store_pending_registration,
 )
+from .account_deletion import (
+    AccountDeletionError,
+    hard_delete_account,
+    restore_account,
+    soft_delete_account,
+)
 from .profile import update_user_profile, update_user_role
 from .registration import create_user_with_organization, purge_stale_pending_registration
 
 __all__ = [
+    "AccountDeletionError",
     "activate_user_account",
     "OTPRateLimitError",
     "OTPResendCooldownError",
@@ -68,6 +75,7 @@ __all__ = [
     "create_user_with_organization",
     "finalize_pending_registration",
     "get_pending_registration",
+    "hard_delete_account",
     "purge_stale_pending_registration",
     "get_assigned_courses_for_user",
     "get_assigned_exams_for_user",
@@ -85,10 +93,12 @@ __all__ = [
     "pending_student_request_queryset",
     "permission_is_grantable",
     "resolve_membership_role",
+    "restore_account",
     "send_login_otp",
     "send_otp_email",
     "send_verification_otp",
     "set_student_org_request_status",
+    "soft_delete_account",
     "store_pending_registration",
     "sync_profile_pending_request_snapshot",
     "update_user_profile",

@@ -67,6 +67,12 @@ from .roles import (
     role_assignment,
 )
 
+# Account management views
+from .account_management import (
+    delete_account,
+    superadmin_user_management,
+)
+
 # Superadmin views
 from .superadmin import (
     superadmin_organizations,
@@ -113,6 +119,9 @@ __all__ = [
     "student_organization_request",
     "student_org_invitation_action",
     "student_leave_organization",
+    # Account management
+    "delete_account",
+    "superadmin_user_management",
     # Superadmin
     "superadmin_organizations",
 ]
