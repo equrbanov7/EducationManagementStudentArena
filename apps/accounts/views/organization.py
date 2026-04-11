@@ -800,8 +800,7 @@ def student_organization_management(request):
             if not remove_reason:
                 messages.warning(
                     request,
-                    "Uzaqlaşdırma üçün səbəb qeyd etmək məcburidir. "
-                    "Zəhmət olmasa səbəb yazın və yenidən cəhd edin.",
+                    "Uzaqlaşdırma üçün səbəb qeyd etmək məcburidir. " "Zəhmət olmasa səbəb yazın və yenidən cəhd edin.",
                 )
                 return redirect(next_url)
             target_user = get_object_or_404(User, id=target_user_id, is_active=True)

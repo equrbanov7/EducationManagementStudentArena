@@ -1177,9 +1177,9 @@ def _build_student_org_management_section(
 
     with bypass_rls():
         pending_request_user_ids_any = list(
-            _pending_student_request_queryset(
-                statuses=[StudentOrganizationRequestStatus.PENDING]
-            ).values_list("user_id", flat=True)
+            _pending_student_request_queryset(statuses=[StudentOrganizationRequestStatus.PENDING]).values_list(
+                "user_id", flat=True
+            )
         )
 
     unassigned_students = (
