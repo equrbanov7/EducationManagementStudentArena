@@ -595,9 +595,9 @@ def pending_review(request):
         "search_query": search,
         "filter_type": filter_type,
         "filter_status": filter_status,
-        "submitted_order": submitted_order,
-        "filter_group": filter_group,
-        "available_groups": available_groups,
+        "pending_review_submitted_order": submitted_order,
+        "pending_review_filter_group": filter_group,
+        "pending_review_available_groups": available_groups,
         "total_count": len(items),
         "pagination_query": pagination_query,
     }
