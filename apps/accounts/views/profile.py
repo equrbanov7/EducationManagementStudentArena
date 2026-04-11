@@ -423,6 +423,8 @@ def user_profile(request):
     # Get active section from URL parameter (default: profile-info)
     allowed_sections = capabilities["allowed_sections"]
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
+    if active_section == "delete-account":
+        active_section = "profile-info"
     password_change_form = CustomPasswordChangeForm(request.user)
     category_management_create_form = None
     category_management_edit_form = None

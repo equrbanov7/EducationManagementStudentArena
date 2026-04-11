@@ -57,7 +57,7 @@
             <div class="info-grid profile-form-grid mt-3">
                 <div class="info-item">
                     <label class="info-label" for="organization_type">{% trans "organization_type" context "profile.edit" %}</label>
-                    <select class="form-control" id="organization_type" name="organization_type"
+                    <select class="form-select" id="organization_type" name="organization_type"
                             onchange="document.getElementById('editProfileTypeWarning').style.display = this.value !== '{{ profile.organization_type }}' ? 'block' : 'none';">
                         <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
                             {% trans "org_type_individual" context "profile.edit" %}

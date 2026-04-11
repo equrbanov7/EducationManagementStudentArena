@@ -103,6 +103,43 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
 
+    def test_profile_info_places_delete_account_in_action_area(self):
+        self.client.login(username="testuser", password="testpass123")
+        self.client.cookies["django_language"] = "en"
+
+        response = self.client.get(
+            reverse("accounts:profile") + "?section=profile-info",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Delete Account")
+        self.assertContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
+        self.assertNotContains(response, 'data-section="delete-account"', html=False)
+
+    def test_delete_account_section_falls_back_to_profile_info(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=delete-account")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_section"], "profile-info")
+
+    def test_edit_profile_organization_type_uses_translated_bootstrap_select(self):
+        self.client.login(username="testuser", password="testpass123")
+        self.client.cookies["django_language"] = "en"
+
+        response = self.client.get(
+            reverse("accounts:profile") + "?section=edit-profile",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="form-select" id="organization_type"', html=False)
+        self.assertContains(response, "Organization Type")
+        self.assertContains(response, "University")
+        self.assertNotContains(response, "org_type_university")
+
     def test_profile_change_password_section_renders(self):
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=change-password")
