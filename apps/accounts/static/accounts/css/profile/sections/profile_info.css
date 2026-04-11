@@ -320,7 +320,10 @@
 /* --- Redaktə Düyməsi --- */
 .profile-edit-link {
     margin-top: 30px;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .btn-edit-profile {
@@ -343,6 +346,15 @@
     background-color: var(--profile-primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-edit-profile--danger {
+    background-color: #dc2626;
+}
+
+.btn-edit-profile--danger:hover,
+.btn-edit-profile--danger:focus {
+    background-color: #b91c1c;
 }
 
 /* =========================================
@@ -415,7 +427,7 @@
     }
     
     .profile-edit-link {
-        text-align: center;
+        justify-content: center;
     }
     
     .btn-edit-profile {
