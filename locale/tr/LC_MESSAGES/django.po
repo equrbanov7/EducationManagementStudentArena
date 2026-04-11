@@ -16666,3 +16666,33 @@ msgstr "Kullanıcı bulunamadı."
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "Kullanıcı Yönetimi"
+
+# Superadmin User Management messages (i18n)
+
+#: apps/accounts/views/account_management.py
+msgid "superadmin_access_only"
+msgstr "Bu bölüme yalnızca süper yöneticiler erişebilir."
+
+#: apps/accounts/views/account_management.py
+msgid "user_not_found"
+msgstr "Kullanıcı bulunamadı."
+
+#: apps/accounts/views/account_management.py
+msgid "user_restored_success"
+msgstr "\"%(username)s\" kullanıcısı başarıyla geri yüklendi."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_self"
+msgstr "Kendi hesabınızı silemezsiniz."
+
+#: apps/accounts/views/account_management.py
+msgid "cannot_delete_superadmin"
+msgstr "Süper yönetici hesapları silinemez."
+
+#: apps/accounts/views/account_management.py
+msgid "user_hard_deleted_success"
+msgstr "\"%(username)s\" kullanıcısı kalıcı olarak silindi."
+
+#: apps/accounts/views/account_management.py
+msgid "unknown_action"
+msgstr "Bilinmeyen işlem."
