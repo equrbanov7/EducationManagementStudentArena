@@ -981,6 +981,8 @@ def user_profile(request):
     pending_post_approval_filter_status = "pending"
     pending_post_approval_filter_group = ""
     pending_post_approval_available_groups = []
+    pending_post_approval_page_obj = None
+    pending_post_approval_pagination_query = ""
     if "pending-post-approvals" in allowed_sections:
         (
             pending_post_approval_items,
@@ -995,12 +997,26 @@ def user_profile(request):
             group_id=request.GET.get("approval_group"),
         )
         pending_post_approval_count = count_pending_reviewable_posts(request.user)
+        pending_post_approval_page_obj = Paginator(pending_post_approval_items, 10).get_page(
+            request.GET.get("approval_page", 1)
+        )
+        extra = []
+        extra.append("section=pending-post-approvals")
+        if pending_post_approval_search_query:
+            extra.append(f"approval_search={pending_post_approval_search_query}")
+        if pending_post_approval_filter_status and pending_post_approval_filter_status != "pending":
+            extra.append(f"approval_status={pending_post_approval_filter_status}")
+        if pending_post_approval_filter_group:
+            extra.append(f"approval_group={pending_post_approval_filter_group}")
+        pending_post_approval_pagination_query = "&".join(extra)
 
     pending_review_items = []
     pending_review_search_query = ""
     pending_review_filter_type = "all"
     pending_review_filter_status = "all"
     pending_review_submitted_order = "oldest"
+    pending_review_filter_group = ""
+    pending_review_available_groups = []
     evaluated_review_items = []
     evaluated_review_search_query = ""
     evaluated_review_filter_type = "all"
@@ -1014,6 +1030,8 @@ def user_profile(request):
             pending_review_filter_type,
             pending_review_filter_status,
             pending_review_submitted_order,
+            pending_review_filter_group,
+            pending_review_available_groups,
         ) = _collect_pending_review_items(request)
         (
             evaluated_review_items,
@@ -1670,17 +1688,21 @@ def user_profile(request):
         "group_form": group_form,
         "can_multi_assign_group_teachers": can_multi_assign_group_teachers,
         "groups_section_return_url": groups_section_return_url,
-        "pending_post_approval_items": pending_post_approval_items,
+        "pending_post_approval_items": pending_post_approval_page_obj or pending_post_approval_items,
         "pending_post_approval_count": pending_post_approval_count,
         "pending_post_approval_search_query": pending_post_approval_search_query,
         "pending_post_approval_filter_status": pending_post_approval_filter_status,
         "pending_post_approval_filter_group": pending_post_approval_filter_group,
         "pending_post_approval_available_groups": pending_post_approval_available_groups,
+        "pending_post_approval_page_obj": pending_post_approval_page_obj,
+        "pending_post_approval_pagination_query": pending_post_approval_pagination_query,
         "pending_review_items": pending_review_items,
         "pending_review_search_query": pending_review_search_query,
         "pending_review_filter_type": pending_review_filter_type,
         "pending_review_filter_status": pending_review_filter_status,
         "pending_review_submitted_order": pending_review_submitted_order,
+        "pending_review_filter_group": pending_review_filter_group,
+        "pending_review_available_groups": pending_review_available_groups,
         "pending_review_total_count": len(pending_review_items),
         "evaluated_review_items": evaluated_review_items,
         "evaluated_review_search_query": evaluated_review_search_query,
