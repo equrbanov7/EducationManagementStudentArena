@@ -1017,12 +1017,16 @@ def user_profile(request):
     pending_review_submitted_order = "oldest"
     pending_review_filter_group = ""
     pending_review_available_groups = []
+    pending_review_page_obj = None
+    pending_review_pagination_query = ""
     evaluated_review_items = []
     evaluated_review_search_query = ""
     evaluated_review_filter_type = "all"
     evaluated_review_filter_group = ""
     evaluated_review_available_groups = []
     evaluated_review_submitted_order = "newest"
+    evaluated_review_page_obj = None
+    evaluated_review_pagination_query = ""
     if "pending-review" in allowed_sections or "review-results" in allowed_sections:
         (
             pending_review_items,
@@ -1033,6 +1037,20 @@ def user_profile(request):
             pending_review_filter_group,
             pending_review_available_groups,
         ) = _collect_pending_review_items(request)
+        pending_review_page_obj = Paginator(pending_review_items, 15).get_page(request.GET.get("pr_page", 1))
+        pr_extra = ["section=pending-review"]
+        if pending_review_search_query:
+            pr_extra.append(f"search={pending_review_search_query}")
+        if pending_review_filter_type != "all":
+            pr_extra.append(f"type={pending_review_filter_type}")
+        if pending_review_filter_status != "all":
+            pr_extra.append(f"status={pending_review_filter_status}")
+        if pending_review_submitted_order != "oldest":
+            pr_extra.append(f"submitted_order={pending_review_submitted_order}")
+        if pending_review_filter_group:
+            pr_extra.append(f"pr_group={pending_review_filter_group}")
+        pending_review_pagination_query = "&".join(pr_extra)
+
         (
             evaluated_review_items,
             evaluated_review_search_query,
@@ -1041,6 +1059,17 @@ def user_profile(request):
             evaluated_review_available_groups,
             evaluated_review_submitted_order,
         ) = _collect_evaluated_review_items(request)
+        evaluated_review_page_obj = Paginator(evaluated_review_items, 15).get_page(request.GET.get("er_page", 1))
+        er_extra = ["section=review-results"]
+        if evaluated_review_search_query:
+            er_extra.append(f"evaluated_search={evaluated_review_search_query}")
+        if evaluated_review_filter_type != "all":
+            er_extra.append(f"evaluated_type={evaluated_review_filter_type}")
+        if evaluated_review_filter_group:
+            er_extra.append(f"evaluated_group={evaluated_review_filter_group}")
+        if evaluated_review_submitted_order != "newest":
+            er_extra.append(f"evaluated_submitted_order={evaluated_review_submitted_order}")
+        evaluated_review_pagination_query = "&".join(er_extra)
 
     role_assignment_section = {
         "organization": None,
@@ -1696,7 +1725,7 @@ def user_profile(request):
         "pending_post_approval_available_groups": pending_post_approval_available_groups,
         "pending_post_approval_page_obj": pending_post_approval_page_obj,
         "pending_post_approval_pagination_query": pending_post_approval_pagination_query,
-        "pending_review_items": pending_review_items,
+        "pending_review_items": pending_review_page_obj or pending_review_items,
         "pending_review_search_query": pending_review_search_query,
         "pending_review_filter_type": pending_review_filter_type,
         "pending_review_filter_status": pending_review_filter_status,
@@ -1704,13 +1733,17 @@ def user_profile(request):
         "pending_review_filter_group": pending_review_filter_group,
         "pending_review_available_groups": pending_review_available_groups,
         "pending_review_total_count": len(pending_review_items),
-        "evaluated_review_items": evaluated_review_items,
+        "pending_review_page_obj": pending_review_page_obj,
+        "pending_review_pagination_query": pending_review_pagination_query,
+        "evaluated_review_items": evaluated_review_page_obj or evaluated_review_items,
         "evaluated_review_search_query": evaluated_review_search_query,
         "evaluated_review_filter_type": evaluated_review_filter_type,
         "evaluated_review_filter_group": evaluated_review_filter_group,
         "evaluated_review_available_groups": evaluated_review_available_groups,
         "evaluated_review_submitted_order": evaluated_review_submitted_order,
         "evaluated_review_total_count": len(evaluated_review_items),
+        "evaluated_review_page_obj": evaluated_review_page_obj,
+        "evaluated_review_pagination_query": evaluated_review_pagination_query,
         "pending_student_invites": pending_student_invites,
         "pending_student_join_requests": pending_student_join_requests,
         "notifications_unread_count": notifications_unread_count,
