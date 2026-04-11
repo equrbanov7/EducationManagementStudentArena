@@ -83,16 +83,16 @@
         </div>
         
         {# ====== PAGINATION ====== #}
-        {% if my_exams_page_obj.has_other_pages %}
-            {% with eq=my_exams_search_query et=my_exams_filter_type %}
+        {% if my_exams.has_other_pages %}
+            {% with eq=my_exams_search_query|urlencode et=my_exams_filter_type|urlencode %}
                 {% if eq and et %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq|add:"&exam_type="|add:et %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq|add:"&exam_type="|add:et %}
                 {% elif eq %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq %}
                 {% elif et %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams&exam_type="|add:et %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_type="|add:et %}
                 {% else %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams_page_obj page_param="exam_page" extra_query="section=my-exams" %}
+                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams" %}
                 {% endif %}
             {% endwith %}
         {% endif %}
