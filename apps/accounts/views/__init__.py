@@ -12,6 +12,12 @@ This package contains all account-related views split into logical modules:
 All views are re-exported here for backward compatibility with existing URLs.
 """
 
+# Account management views
+from .account_management import (
+    delete_account,
+    superadmin_user_management,
+)
+
 # Authentication views
 from .auth import (
     CustomLoginView,
@@ -65,12 +71,6 @@ from .roles import (
     manage_roles,
     permission_editor,
     role_assignment,
-)
-
-# Account management views
-from .account_management import (
-    delete_account,
-    superadmin_user_management,
 )
 
 # Superadmin views
