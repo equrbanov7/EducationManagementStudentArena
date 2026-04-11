@@ -1700,7 +1700,6 @@ def user_profile(request):
         "my_exams_count": my_exams_count,
         "my_exams_search_query": my_exams_search_query,
         "my_exams_filter_type": my_exams_filter_type,
-        "my_exams_page_obj": my_exams_page_obj,
         "my_created_courses": my_created_courses,
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
