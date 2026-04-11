@@ -72,12 +72,15 @@ def student_organization_management(request):
 
     user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
 
-    # Check if teacher has member.student_manage permission
     teacher_student_only = False
+    teacher_can_manage_students = False
+    teacher_can_invite_members = False
     if not is_superadmin and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
         if org is not None:
             actor_perms, _ = _collect_actor_permissions(request.user, org)
-            if _has_org_permission(list(actor_perms), "member.student_manage"):
+            teacher_can_manage_students = _has_org_permission(list(actor_perms), "member.student_manage")
+            teacher_can_invite_members = _has_org_permission(list(actor_perms), "member.invite")
+            if teacher_can_manage_students or teacher_can_invite_members:
                 teacher_student_only = True
             else:
                 messages.error(
@@ -585,17 +588,26 @@ def student_organization_management(request):
         action = (request.POST.get("action") or "").strip().lower()
         next_url = _resolve_next_url(request, reverse("accounts:student_organization_management"))
 
-        # Teacher with student-only access: restrict to student operations only
-        teacher_allowed_actions = {
-            "approve_requested_student",
-            "add_student",
-            "bulk_approve_requested_students",
-            "invite_student",
-            "bulk_invite_students",
-            "revoke_sent_invites",
-            "remove_student",
-            "remove_org_member",
-        }
+        teacher_allowed_actions = set()
+        if teacher_can_manage_students:
+            teacher_allowed_actions.update(
+                {
+                    "approve_requested_student",
+                    "add_student",
+                    "bulk_approve_requested_students",
+                    "remove_student",
+                    "remove_org_member",
+                }
+            )
+        if teacher_can_invite_members:
+            teacher_allowed_actions.update(
+                {
+                    "invite_student",
+                    "bulk_invite_students",
+                    "revoke_sent_invites",
+                }
+            )
+
         if teacher_student_only and action not in teacher_allowed_actions:
             messages.error(request, "Bu əməliyyat üçün icazəniz yoxdur.")
             return redirect(next_url)
@@ -967,6 +979,12 @@ def student_organization_management(request):
         is_superadmin=is_superadmin,
         user_level=user_level,
         teacher_student_only=teacher_student_only,
+        can_manage_students=is_superadmin
+        or user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
+        or teacher_can_manage_students,
+        can_invite_members=is_superadmin
+        or user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
+        or teacher_can_invite_members,
     )
     return render(request, "accounts/student_organization_management.html", context)
 
