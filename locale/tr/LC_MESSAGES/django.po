@@ -16150,6 +16150,10 @@ msgid "Short note (optional)"
 msgstr "Kısa not (isteğe bağlı)"
 
 msgctxt "staff.management"
+msgid "Reason for removal (required)"
+msgstr "Çıkarma nedeni (zorunlu)"
+
+msgctxt "staff.management"
 msgid "Reason for removal..."
 msgstr "Çıkarma nedeni..."
 
