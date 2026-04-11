@@ -24,6 +24,12 @@ from ..queries import (
     get_signup_lookup_payload,
     pending_student_request_queryset,
 )
+from .account_deletion import (
+    AccountDeletionError,
+    hard_delete_account,
+    restore_account,
+    soft_delete_account,
+)
 from .auth import (
     OTPRateLimitError,
     OTPResendCooldownError,
@@ -51,12 +57,6 @@ from .pending_registration import (
     finalize_pending_registration,
     get_pending_registration,
     store_pending_registration,
-)
-from .account_deletion import (
-    AccountDeletionError,
-    hard_delete_account,
-    restore_account,
-    soft_delete_account,
 )
 from .profile import update_user_profile, update_user_role
 from .registration import create_user_with_organization, purge_stale_pending_registration

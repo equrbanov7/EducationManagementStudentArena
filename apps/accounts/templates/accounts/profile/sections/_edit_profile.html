@@ -7,7 +7,7 @@
             {% trans "edit_profile" context "profile.section" %}
         </div>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="editProfileForm">
             {% csrf_token %}
             <input type="hidden" name="profile_form" value="edit-profile">
             <input type="hidden" name="section" value="edit-profile">
@@ -52,6 +52,50 @@
                     <input type="text" class="form-control" id="student_school_identifier" name="student_school_identifier"
                            value="{{ profile.student_school_identifier|default:'' }}" placeholder="{% trans 'placeholder_school_code' context 'profile.edit' %}">
                 </div>
+            </div>
+
+            <div class="info-grid profile-form-grid mt-3">
+                <div class="info-item">
+                    <label class="info-label" for="organization_type">{% trans "organization_type" context "profile.edit" %}</label>
+                    <select class="form-control" id="organization_type" name="organization_type"
+                            onchange="document.getElementById('editProfileTypeWarning').style.display = this.value !== '{{ profile.organization_type }}' ? 'block' : 'none';">
+                        <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
+                            {% trans "org_type_individual" context "profile.edit" %}
+                        </option>
+                        <option value="school" {% if profile.organization_type == 'school' %}selected{% endif %}>
+                            {% trans "org_type_school" context "profile.edit" %}
+                        </option>
+                        <option value="university" {% if profile.organization_type == 'university' %}selected{% endif %}>
+                            {% trans "org_type_university" context "profile.edit" %}
+                        </option>
+                        <option value="course_center" {% if profile.organization_type == 'course_center' %}selected{% endif %}>
+                            {% trans "org_type_course_center" context "profile.edit" %}
+                        </option>
+                    </select>
+                </div>
+                <div class="info-item">
+                    <label class="info-label" for="student_specialization">{% trans "specialization" context "profile.edit" %}</label>
+                    <input type="text" class="form-control" id="student_specialization" name="student_specialization"
+                           value="{{ profile.student_specialization|default:'' }}"
+                           placeholder="{% trans 'placeholder_specialization' context 'profile.edit' %}">
+                </div>
+                <div class="info-item">
+                    <label class="info-label" for="student_group_number">{% trans "group_number" context "profile.edit" %}</label>
+                    <input type="text" class="form-control" id="student_group_number" name="student_group_number"
+                           value="{{ profile.student_group_number|default:'' }}"
+                           placeholder="{% trans 'placeholder_group_number' context 'profile.edit' %}">
+                </div>
+                <div class="info-item">
+                    <label class="info-label" for="department">{% trans "department" context "profile.edit" %}</label>
+                    <input type="text" class="form-control" id="department" name="department"
+                           value="{{ profile.department|default:'' }}"
+                           placeholder="{% trans 'placeholder_department' context 'profile.edit' %}">
+                </div>
+            </div>
+
+            <div id="editProfileTypeWarning" class="alert alert-warning mt-3" style="display: none; border-radius: 8px;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {% trans "edit_profile_type_change_warning" context "profile.edit" %}
             </div>
 
             <div class="info-item profile-form-grid">

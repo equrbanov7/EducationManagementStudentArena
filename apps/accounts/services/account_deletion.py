@@ -35,8 +35,6 @@ def _is_last_org_admin(user):
         return True
 
     # Check if user is the last active admin in any org
-    from apps.accounts.models import ProfileRole
-
     admin_memberships = Membership.objects.filter(
         user=user,
         is_active=True,
@@ -182,9 +180,7 @@ def restore_account(user, *, request=None):
         if profile:
             profile.is_deleted = False
             profile.deleted_at = None
-            profile.save(
-                update_fields=["is_deleted", "deleted_at", "updated_at"]
-            )
+            profile.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
 
         # Log the action
         log_action(
