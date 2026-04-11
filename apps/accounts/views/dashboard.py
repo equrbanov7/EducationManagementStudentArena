@@ -561,14 +561,45 @@ def pending_review(request):
         messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
         return redirect("accounts:profile")
 
-    items, search, filter_type, filter_status, submitted_order = _collect_pending_review_items(request)
+    (
+        items,
+        search,
+        filter_type,
+        filter_status,
+        submitted_order,
+        filter_group,
+        available_groups,
+    ) = _collect_pending_review_items(request)
+
+    from django.core.paginator import Paginator
+
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(items, 15)
+    page_obj = paginator.get_page(page_number)
+
+    extra_parts = []
+    if search:
+        extra_parts.append(f"search={search}")
+    if filter_type and filter_type != "all":
+        extra_parts.append(f"type={filter_type}")
+    if filter_status and filter_status != "all":
+        extra_parts.append(f"status={filter_status}")
+    if submitted_order and submitted_order != "oldest":
+        extra_parts.append(f"submitted_order={submitted_order}")
+    if filter_group:
+        extra_parts.append(f"pr_group={filter_group}")
+    pagination_query = "&".join(extra_parts)
+
     context = {
-        "review_items": items,
+        "review_items": page_obj,
         "search_query": search,
         "filter_type": filter_type,
         "filter_status": filter_status,
         "submitted_order": submitted_order,
+        "filter_group": filter_group,
+        "available_groups": available_groups,
         "total_count": len(items),
+        "pagination_query": pagination_query,
     }
     return render(request, "accounts/pending_review.html", context)
 
@@ -901,14 +932,32 @@ def review_results(request):
         evaluated_submitted_order,
     ) = _collect_evaluated_review_items(request)
 
+    from django.core.paginator import Paginator
+
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(evaluated_items, 15)
+    page_obj = paginator.get_page(page_number)
+
+    extra_parts = []
+    if evaluated_search:
+        extra_parts.append(f"evaluated_search={evaluated_search}")
+    if evaluated_filter_type and evaluated_filter_type != "all":
+        extra_parts.append(f"evaluated_type={evaluated_filter_type}")
+    if evaluated_filter_group:
+        extra_parts.append(f"evaluated_group={evaluated_filter_group}")
+    if evaluated_submitted_order and evaluated_submitted_order != "newest":
+        extra_parts.append(f"evaluated_submitted_order={evaluated_submitted_order}")
+    pagination_query = "&".join(extra_parts)
+
     context = {
-        "evaluated_review_items": evaluated_items,
+        "evaluated_review_items": page_obj,
         "evaluated_review_search_query": evaluated_search,
         "evaluated_review_filter_type": evaluated_filter_type,
         "evaluated_review_filter_group": evaluated_filter_group,
         "evaluated_review_available_groups": evaluated_available_groups,
         "evaluated_review_submitted_order": evaluated_submitted_order,
         "evaluated_review_total_count": len(evaluated_items),
+        "evaluated_review_pagination_query": pagination_query,
     }
     return render(request, "accounts/review_results.html", context)
 
