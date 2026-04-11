@@ -26,6 +26,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
+from apps.audit.utils import log_action
 from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
@@ -660,6 +661,18 @@ def user_profile(request):
             profile.student_university_name = student_university_name
             profile.student_school_identifier = student_school_identifier
 
+            # Update enhanced profile fields
+            new_org_type = (request.POST.get("organization_type") or "").strip()
+            if new_org_type and new_org_type in {"individual", "school", "university", "course_center"}:
+                profile.organization_type = new_org_type
+            profile.student_specialization = (
+                request.POST.get("student_specialization", profile.student_specialization) or ""
+            ).strip()
+            profile.student_group_number = (
+                request.POST.get("student_group_number", profile.student_group_number) or ""
+            ).strip()
+            profile.department = (request.POST.get("department", profile.department) or "").strip()
+
             # Handle avatar upload
             uploaded_avatar = request.FILES.get("avatar")
             if uploaded_avatar is not None:
@@ -684,6 +697,20 @@ def user_profile(request):
                 return redirect("accounts:profile" + "?section=edit-profile")
 
             profile.save()
+
+            # Audit log for profile update
+            from core.constants import AuditAction
+
+            log_action(
+                action=AuditAction.UPDATE,
+                user=request.user,
+                obj=profile,
+                reason="Profile updated by user",
+                request=request,
+                resource_type="UserProfile",
+                resource_id=str(profile.pk),
+                resource_repr=f"{request.user.username}",
+            )
 
             messages.success(request, pgettext_lazy("accounts.profile_edit.message", "profile_updated_successfully"))
             return redirect("accounts:profile")
