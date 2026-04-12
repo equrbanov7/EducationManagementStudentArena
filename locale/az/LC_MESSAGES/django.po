@@ -3385,6 +3385,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
 msgstr "Naməlum əməliyyat."
 
+msgctxt "accounts.superadmin_ai.message"
+msgid "ai_settings_saved"
+msgstr "AI tənzimləmələri uğurla yeniləndi."
+
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
@@ -10393,6 +10397,34 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_message"
 msgstr "Bu yoxlamanı yadda saxlayıb yekunlaşdırmaq istədiyinizə əminsiniz?"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "action_ai_grade"
+msgstr "AI ilə qiymətləndir"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grading_in_progress"
+msgstr "AI qiymətləndirir..."
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grade_error"
+msgstr "AI qiymətləndirmə xətası"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_cached"
+msgstr "Keşdən"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_quota_info"
+msgstr "{remaining}/{limit} ({window})"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_no_answer_to_grade"
+msgstr "Qiymətləndirmək üçün cavab yoxdur"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_max_points"
+msgstr "maks: {points}"
+
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_back_profile"
@@ -16901,10 +16933,102 @@ msgctxt "superadmin.users"
 msgid "no_users_found"
 msgstr "İstifadəçi tapılmadı."
 
+msgctxt "superadmin.ai_settings"
+msgid "title"
+msgstr "AI Tənzimləmələri"
+
+msgctxt "superadmin.ai_settings"
+msgid "heading"
+msgstr "AI Tənzimləmələri"
+
+msgctxt "superadmin.ai_settings"
+msgid "back_to_profile"
+msgstr "Profilə qayıt"
+
+msgctxt "superadmin.ai_settings"
+msgid "section_general"
+msgstr "Ümumi"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_enabled"
+msgstr "AI funksiyaları aktiv"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_enabled"
+msgstr "Söndürüldükdə bütün AI xüsusiyyətləri (xülasə, qiymətləndirmə) deaktiv olur."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_rate_limit"
+msgstr "Limit və Büdcə"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_rate_limit"
+msgstr "Hər istifadəçi üçün limit"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_rate_limit"
+msgstr "Format: say/müddət. Məs: 100/1h = saatda 100 sorğu."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_budget"
+msgstr "Aylıq büdcə ($)"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_budget"
+msgstr "Gemini API üçün aylıq xərc limiti. Yalnız məlumat üçündür."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_models"
+msgstr "Model Seçimi"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_summary_model"
+msgstr "Statistika xülasəsi modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_summary_model"
+msgstr "Daha yüksək keyfiyyətli model daha bahadır."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_grading_model"
+msgstr "Cavab qiymətləndirmə modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_grading_model"
+msgstr "Sadə tapşırıqlar üçün Flash Lite tövsiyə olunur."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_estimates"
+msgstr "Büdcə Təxminləri"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_monthly_budget"
+msgstr "Aylıq büdcə"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_summaries"
+msgstr "Təxmini xülasə sayı"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_gradings"
+msgstr "Təxmini qiymətləndirmə sayı"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_per_user_limit"
+msgstr "İstifadəçi limiti"
+
+msgctxt "superadmin.ai_settings"
+msgid "action_save"
+msgstr "Yadda saxla"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "İstifadəçi İdarəetməsi"
+
+msgctxt "profile.sidebar"
+msgid "ai_settings"
+msgstr "AI Tənzimləmələri"
 
 # Superadmin User Management messages (i18n)
 
@@ -17187,6 +17311,14 @@ msgid "ai_error"
 msgstr "AI xülasəsi yaradıla bilmədi. Zəhmət olmasa yenidən cəhd edin."
 
 msgctxt "exams.template.exam_statistics"
+msgid "ai_quota_info"
+msgstr "AI sorğu limiti"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_cached"
+msgstr "Keşdən"
+
+msgctxt "exams.template.exam_statistics"
 msgid "chart_module_error"
 msgstr "Qrafik modulu yüklənmədi. Səhifəni yeniləyin."
 
@@ -17271,6 +17403,14 @@ msgctxt "liveExam.template.session_detail"
 msgid "ai_error"
 msgstr "AI xülasəsi yaradıla bilmədi. Yenidən cəhd edin."
 
+msgctxt "liveExam.template.session_detail"
+msgid "ai_quota_info"
+msgstr "AI sorğu limiti"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_cached"
+msgstr "Keşdən"
+
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_live_results"
 msgstr "Canlı imtahan nəticələri"
@@ -17288,12 +17428,40 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY tənzimlənməyib."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "ai_rate_limit_exceeded"
+msgstr "AI sorğu limitiniz bitib. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
 msgstr "AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra yenidən cəhd edin."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "AI xülasəsi yaradıla bilmədi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_disabled"
+msgstr "AI funksiyaları hal-hazırda deaktivdir."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_api_key_missing"
+msgstr "GEMINI_API_KEY tənzimlənməyib."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "empty_answer"
+msgstr "Qiymətləndirmək üçün cavab yoxdur."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_quota_exhausted"
+msgstr "AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra yenidən cəhd edin."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "grading_failed"
+msgstr "AI qiymətləndirmə uğursuz oldu. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "ai_disabled"
+msgstr "AI funksiyaları hal-hazırda deaktivdir."
 
 msgctxt "liveExam.template.results"
 msgid "page_title"
