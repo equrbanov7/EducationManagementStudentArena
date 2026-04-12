@@ -13,9 +13,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
-"%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: apps/accounts/forms.py:22
 msgctxt "accounts.form.register.label"
@@ -2571,7 +2571,8 @@ msgstr "Выберите тип аккаунта"
 #: apps/accounts/templates/accounts/register.html:79
 msgctxt "accounts.register"
 msgid "individual_org_required_help"
-msgstr "Для индивидуального аккаунта выбор готовой организации больше не нужен."
+msgstr ""
+"Для индивидуального аккаунта выбор готовой организации больше не нужен."
 
 #: apps/accounts/templates/accounts/register.html:86
 msgctxt "accounts.register"
@@ -3359,12 +3360,15 @@ msgstr "Настройки ИИ успешно сохранены."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Регистрация завершена, заявка в организацию сохранена. Подтвердите код из email, чтобы продолжить."
+msgstr ""
+"Регистрация завершена, заявка в организацию сохранена. Подтвердите код из "
+"email, чтобы продолжить."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
+msgstr ""
+"Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3409,7 +3413,8 @@ msgstr "Вы успешно выступили."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
+msgstr ""
+"Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
@@ -6120,7 +6125,8 @@ msgstr "Новый код отправлен."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
+msgstr ""
+"Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"
@@ -9635,7 +9641,10 @@ msgstr "Включить режим надзора за экзаменом"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
 msgid "supervision_enable_help"
-msgstr "При включении студент будет под наблюдением во время экзамена. Переключение вкладок, выход из полноэкранного режима, копирование/вставка и другие действия будут отслеживаться."
+msgstr ""
+"При включении студент будет под наблюдением во время экзамена. Переключение "
+"вкладок, выход из полноэкранного режима, копирование/вставка и другие "
+"действия будут отслеживаться."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
@@ -9665,7 +9674,9 @@ msgstr "Строгий"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
 msgid "supervision_template_help"
-msgstr "Выберите готовый шаблон для автонастройки или выберите Пользовательский для ручной настройки."
+msgstr ""
+"Выберите готовый шаблон для автонастройки или выберите Пользовательский для "
+"ручной настройки."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
@@ -9735,7 +9746,8 @@ msgstr "Период восстановления (секунды)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
 msgid "supervision_grace_period_help"
-msgstr "Время для возврата после выхода из полноэкранного режима (5-60 секунд)."
+msgstr ""
+"Время для возврата после выхода из полноэкранного режима (5-60 секунд)."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
@@ -9840,7 +9852,9 @@ msgstr "0 = показать все вопросы"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Укажите, сколько активных вопросов увидит студент. Введите 0, чтобы показать все вопросы."
+msgstr ""
+"Укажите, сколько активных вопросов увидит студент. Введите 0, чтобы показать "
+"все вопросы."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:289
 #: apps/exams/templates/exams/teacher/create_question_bank.html:334
@@ -9854,7 +9868,10 @@ msgstr "Включить графический ответ для этого р�
 #: apps/exams/templates/exams/teacher/create_question_bank.html:396
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
-msgstr "Эта настройка делает paint ответом по умолчанию для вопросов этого раздела. Если позже отключить его у конкретного вопроса, для него paint останется скрытым."
+msgstr ""
+"Эта настройка делает paint ответом по умолчанию для вопросов этого раздела. "
+"Если позже отключить его у конкретного вопроса, для него paint останется "
+"скрытым."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
@@ -9969,8 +9986,8 @@ msgstr ""
 msgctxt "exams.template.create_question_bank"
 msgid "help_question_formats"
 msgstr ""
-"Начинайте каждый вопрос с новой строки. Поддерживаемые форматы нумерации: "
-"1. Текст вопроса или 1) Текст вопроса."
+"Начинайте каждый вопрос с новой строки. Поддерживаемые форматы нумерации: 1. "
+"Текст вопроса или 1) Текст вопроса."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:360
 msgctxt "exams.template.create_question_bank"
@@ -10252,8 +10269,8 @@ msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
 "Если экзамен открыт для всех, ограничения по группам и отдельным "
-"пользователям ниже не применяются. Для закрытого экзамена выберите группы "
-"и/или студентов."
+"пользователям ниже не применяются. Для закрытого экзамена выберите группы и/"
+"или студентов."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -10849,122 +10866,6 @@ msgstr "мин"
 msgctxt "exams.template.teacher_exam_list"
 msgid "empty_no_exam"
 msgstr "Empty upcoming exams"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
-msgctxt "exams.template.teacher_exam_results"
-msgid "title_results"
-msgstr "Посмотреть результат"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_results"
-msgstr "Результаты экзамена"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_type"
-msgstr "Тип"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_status"
-msgstr "Статус"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_active_upper"
-msgstr "Активный"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_inactive"
-msgstr "Неактивный"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_participant_results"
-msgstr "Результаты участников"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:45
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_user"
-msgstr "Пользователь"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:46
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_status"
-msgstr "Статус"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_correct"
-msgstr "Верно?"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_wrong"
-msgstr "Неверно"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_score_percent"
-msgstr "Баллы (%)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_started_at"
-msgstr "Дата начала"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_finished_at"
-msgstr "Время завершения"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_duration_sec"
-msgstr "Пример: 30 (минут)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_action"
-msgstr "Операция"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_checked"
-msgstr "В архиве"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_view"
-msgstr "Посмотреть все"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_recheck"
-msgstr "Назад"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_locked"
-msgstr "Закрыто"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_check"
-msgstr "Назад"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
-msgctxt "exams.template.teacher_exam_results"
-msgid "empty_no_attempt"
-msgstr "No courses assigned yet."
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_back_to_exam"
-msgstr "Назад к экзамену"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -11971,7 +11872,9 @@ msgstr "Вы уверены, что хотите завершить?"
 #: apps/labs/templates/labs/lab_detail.html:369
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_description"
-msgstr "После завершения лабораторной работы вы не сможете вернуться и отредактировать её."
+msgstr ""
+"После завершения лабораторной работы вы не сможете вернуться и "
+"отредактировать её."
 
 #: apps/labs/templates/labs/lab_detail.html:374
 msgctxt "labs.template.lab_detail"
@@ -13465,7 +13368,8 @@ msgstr "Ошибка соединения"
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
 msgid "hero_copy"
-msgstr "Посмотрите на главный экран и убедитесь, что ваш ник виден до начала отсчёта."
+msgstr ""
+"Посмотрите на главный экран и убедитесь, что ваш ник виден до начала отсчёта."
 
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
@@ -13960,7 +13864,8 @@ msgstr "Количество вопросов должно быть больше
 #: apps/live_exam/views.py:604
 msgctxt "live_exam.view.message"
 msgid "question_count_exceeds_total"
-msgstr "В этом экзамене только {total_in_exam} вопросов. Нельзя выбрать {desired}."
+msgstr ""
+"В этом экзамене только {total_in_exam} вопросов. Нельзя выбрать {desired}."
 
 #: apps/live_exam/views.py:643
 msgctxt "live_exam.view.message"
@@ -14395,7 +14300,8 @@ msgstr "У вас нет разрешения: {permission}"
 #: apps/organizations/decorators.py:74
 msgctxt "organizations.decorators.error"
 msgid "insufficient_role_level"
-msgstr "Недостаточный уровень роли. Требуется: {required}, Ваш уровень: {current}"
+msgstr ""
+"Недостаточный уровень роли. Требуется: {required}, Ваш уровень: {current}"
 
 #: apps/organizations/decorators.py:102
 msgctxt "organizations.decorators.error"
@@ -14530,7 +14436,8 @@ msgstr "Членства"
 #: apps/organizations/models.py:387
 msgctxt "organizations.model.membership.error"
 msgid "scope_unit_must_match_org"
-msgstr "Подразделение области должно принадлежать той же организации, что и членство."
+msgstr ""
+"Подразделение области должно принадлежать той же организации, что и членство."
 
 #: apps/organizations/unit_types.py:11
 msgctxt "organizations.unit_type"
@@ -15388,12 +15295,12 @@ msgctxt "projects.review.js"
 msgid "grade_button"
 msgstr "Поставить оценку"
 
-
 # Added for auth/signup localization updates
-
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
-msgstr "Для индивидуального аккаунта роль автоматически будет администратор организации."
+msgstr ""
+"Для индивидуального аккаунта роль автоматически будет администратор "
+"организации."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student"
@@ -15401,14 +15308,16 @@ msgstr "Для этого типа аккаунта роль автоматич�
 
 msgctxt "accounts.register"
 msgid "individual_owner_help"
-msgstr "Для индивидуального аккаунта личный workspace создается автоматически, и вы становитесь администратором."
-
+msgstr ""
+"Для индивидуального аккаунта личный workspace создается автоматически, и вы "
+"становитесь администратором."
 
 # Added for updated register searchable select and org-role copy
-
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
-msgstr "Для этого типа организации роль автоматически будет администратор организации."
+msgstr ""
+"Для этого типа организации роль автоматически будет администратор "
+"организации."
 
 msgctxt "accounts.register.js"
 msgid "no_results"
@@ -15444,7 +15353,9 @@ msgstr "Выбранная организация не соответствуе�
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
-msgstr "После подтверждения email вы будете добавлены в выбранную организацию как студент."
+msgstr ""
+"После подтверждения email вы будете добавлены в выбранную организацию как "
+"студент."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "title_questions_bank"
@@ -15452,7 +15363,9 @@ msgstr "Банк вопросов"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "subtitle_questions_bank"
-msgstr "Ищите, выбирайте, активируйте, деактивируйте и управляйте вопросами, добавленными в экзамен."
+msgstr ""
+"Ищите, выбирайте, активируйте, деактивируйте и управляйте вопросами, "
+"добавленными в экзамен."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "action_back_exam_detail"
@@ -15658,9 +15571,7 @@ msgctxt "exams.template.teacher_questions_bank"
 msgid "modal_delete_question_body"
 msgstr "Вы уверены, что хотите удалить этот вопрос? {question}"
 
-
 # Added for signup privacy policy modal
-
 msgctxt "accounts.form.register.label"
 msgid "accept_privacy_policy"
 msgstr "Я прочитал(а) и принимаю Политику конфиденциальности."
@@ -15676,8 +15587,8 @@ msgstr "Конфиденциальность и обработка данных"
 msgctxt "accounts.register"
 msgid "privacy_card_description"
 msgstr ""
-"Перед созданием аккаунта ознакомьтесь с тем, как EMSArena использует персональные "
-"данные во время регистрации и учебной активности."
+"Перед созданием аккаунта ознакомьтесь с тем, как EMSArena использует "
+"персональные данные во время регистрации и учебной активности."
 
 msgctxt "accounts.register"
 msgid "privacy_open_button"
@@ -15685,7 +15596,9 @@ msgstr "Открыть политику конфиденциальности"
 
 msgctxt "accounts.register"
 msgid "privacy_accept_hint"
-msgstr "Откройте полный текст в модальном окне, ознакомьтесь с ним и затем завершите регистрацию."
+msgstr ""
+"Откройте полный текст в модальном окне, ознакомьтесь с ним и затем завершите "
+"регистрацию."
 
 msgctxt "accounts.register"
 msgid "privacy_modal_eyebrow"
@@ -15709,9 +15622,10 @@ msgstr "Краткое и понятное резюме"
 msgctxt "accounts.register"
 msgid "privacy_modal_summary"
 msgstr ""
-"Ваши данные используются для создания аккаунта, безопасного входа, управления "
-"членством в организации и работы учебных функций платформы. Ваши данные не "
-"продаются и передаются только тогда, когда это необходимо для оказания сервиса."
+"Ваши данные используются для создания аккаунта, безопасного входа, "
+"управления членством в организации и работы учебных функций платформы. Ваши "
+"данные не продаются и передаются только тогда, когда это необходимо для "
+"оказания сервиса."
 
 msgctxt "accounts.register"
 msgid "privacy_section_data_title"
@@ -15732,9 +15646,9 @@ msgstr "Как мы используем данные"
 msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
-"Эти данные используются для создания аккаунта, отправки email OTP-подтверждения, "
-"управления доступом к workspace и организации, работы учебных сценариев, показа "
-"результатов, а также для аудита и контроля безопасности."
+"Эти данные используются для создания аккаунта, отправки email OTP-"
+"подтверждения, управления доступом к workspace и организации, работы учебных "
+"сценариев, показа результатов, а также для аудита и контроля безопасности."
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
@@ -15744,9 +15658,9 @@ msgctxt "accounts.register"
 msgid "privacy_section_access_body"
 msgstr ""
 "Если вы присоединяетесь к школе, университету или учебному центру, "
-"уполномоченные администраторы и преподаватели этой организации могут видеть ваши "
-"основные профильные данные, статус членства и учебную активность, относящуюся к "
-"вашей роли."
+"уполномоченные администраторы и преподаватели этой организации могут видеть "
+"ваши основные профильные данные, статус членства и учебную активность, "
+"относящуюся к вашей роли."
 
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_title"
@@ -15756,9 +15670,9 @@ msgctxt "accounts.register"
 msgid "privacy_section_sharing_body"
 msgstr ""
 "Ваши данные не продаются. Они могут передаваться только уполномоченным "
-"руководителям выбранной вами организации, техническим провайдерам, обеспечивающим "
-"email-подтверждение или хостинг, а также соответствующим сторонам, если этого "
-"требует закон."
+"руководителям выбранной вами организации, техническим провайдерам, "
+"обеспечивающим email-подтверждение или хостинг, а также соответствующим "
+"сторонам, если этого требует закон."
 
 msgctxt "accounts.register"
 msgid "privacy_section_retention_title"
@@ -15768,9 +15682,9 @@ msgctxt "accounts.register"
 msgid "privacy_section_retention_body"
 msgstr ""
 "Информация хранится столько, сколько необходимо для работы сервиса, аудита и "
-"разбора спорных ситуаций. Чувствительные процессы, такие как OTP-подтверждение, "
-"имеют короткий срок жизни, а в системе применяются технические и организационные "
-"меры безопасности."
+"разбора спорных ситуаций. Чувствительные процессы, такие как OTP-"
+"подтверждение, имеют короткий срок жизни, а в системе применяются "
+"технические и организационные меры безопасности."
 
 msgctxt "accounts.register"
 msgid "privacy_section_rights_title"
@@ -15925,8 +15839,12 @@ msgid "reject"
 msgstr "Отклонить"
 
 msgctxt "profile.notifications"
-msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
-msgstr "Ваша заявка в организацию %(organization_name)s как %(role_label)s отправлена и сейчас ожидает ответа."
+msgid ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
+msgstr ""
+"Ваша заявка в организацию %(organization_name)s как %(role_label)s "
+"отправлена и сейчас ожидает ответа."
 
 msgctxt "profile.notifications"
 msgid "%(organization_name)s has invited you as %(role_label)s."
@@ -15937,20 +15855,38 @@ msgid "Join organization as %(role_label)s"
 msgstr "Присоединиться к организации как %(role_label)s"
 
 msgctxt "profile.join_org"
-msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
-msgstr "Найдите доступные организации, выберите одну и отправьте короткое сообщение, чтобы присоединиться как %(role_label)s."
+msgid ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
+msgstr ""
+"Найдите доступные организации, выберите одну и отправьте короткое сообщение, "
+"чтобы присоединиться как %(role_label)s."
 
 msgctxt "profile.join_org"
-msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
-msgstr "Сейчас вы связаны с организацией <strong>%(organization_name)s</strong>. После выхода вы сможете отправить новую заявку из этого раздела или принять ожидающие приглашения."
+msgid ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
+"pending invites."
+msgstr ""
+"Сейчас вы связаны с организацией <strong>%(organization_name)s</strong>. "
+"После выхода вы сможете отправить новую заявку из этого раздела или принять "
+"ожидающие приглашения."
 
 msgctxt "profile.join_org"
-msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
-msgstr "Сейчас у вас <strong>%(count)s</strong> заявок в организации, ожидающих подтверждения."
+msgid ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
+msgstr ""
+"Сейчас у вас <strong>%(count)s</strong> заявок в организации, ожидающих "
+"подтверждения."
 
 msgctxt "profile.join_org"
-msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
-msgstr "У вас есть <strong>%(count)s</strong> приглашений в организации. Вы можете присоединиться по ним как %(role_label)s."
+msgid ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
+msgstr ""
+"У вас есть <strong>%(count)s</strong> приглашений в организации. Вы можете "
+"присоединиться по ним как %(role_label)s."
 
 msgctxt "profile.join_org"
 msgid "cancel"
@@ -16014,7 +15950,9 @@ msgstr "Отправить уведомление"
 
 msgctxt "profile.publish_notification"
 msgid "description"
-msgstr "Заполните форму ниже, чтобы отправить уведомление выбранной целевой группе. Получатели увидят его в разделе уведомлений своего профиля."
+msgstr ""
+"Заполните форму ниже, чтобы отправить уведомление выбранной целевой группе. "
+"Получатели увидят его в разделе уведомлений своего профиля."
 
 msgctxt "profile.publish_notification"
 msgid "target_group_label"
@@ -16108,7 +16046,8 @@ msgid "notif_title_required"
 msgstr "Заголовок уведомления не может быть пустым."
 
 msgid "notif_link_invalid"
-msgstr "Введённая ссылка некорректна. Она должна начинаться с http:// или https://."
+msgstr ""
+"Введённая ссылка некорректна. Она должна начинаться с http:// или https://."
 
 msgid "notif_image_too_large"
 msgstr "Изображение не должно превышать 5 МБ."
@@ -16164,15 +16103,21 @@ msgstr "Вернуться в профиль"
 
 msgctxt "staff.management"
 msgid "Choose which group you want to view inside %(organization_name)s."
-msgstr "Выберите, какую группу вы хотите просмотреть в организации %(organization_name)s."
+msgstr ""
+"Выберите, какую группу вы хотите просмотреть в организации "
+"%(organization_name)s."
 
 msgctxt "staff.management"
 msgid "Choose which group you want to view in superadmin mode."
 msgstr "Выберите, какую группу вы хотите просмотреть в режиме суперадмина."
 
 msgctxt "staff.management"
-msgid "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
-msgstr "Если ничего не выбрано, все разделы останутся открытыми, а панели будут показаны согласно выбранным фильтрам."
+msgid ""
+"If nothing is selected, all sections stay open and panels are shown "
+"according to the filters you choose."
+msgstr ""
+"Если ничего не выбрано, все разделы останутся открытыми, а панели будут "
+"показаны согласно выбранным фильтрам."
 
 msgctxt "staff.management"
 msgid "Superadmin view"
@@ -16499,8 +16444,11 @@ msgid "Confirm"
 msgstr "Подтвердить"
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to remove the following user from the organization."
-msgstr "Подтвердите, что хотите удалить следующего пользователя из организации."
+msgid ""
+"Please confirm that you want to remove the following user from the "
+"organization."
+msgstr ""
+"Подтвердите, что хотите удалить следующего пользователя из организации."
 
 msgctxt "staff.management"
 msgid "Name"
@@ -16527,8 +16475,10 @@ msgid "Reason for removal..."
 msgstr "Причина удаления..."
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to add the selected user(s) to the organization."
-msgstr "Подтвердите, что хотите добавить выбранных пользователей в организацию."
+msgid ""
+"Please confirm that you want to add the selected user(s) to the organization."
+msgstr ""
+"Подтвердите, что хотите добавить выбранных пользователей в организацию."
 
 msgctxt "staff.management"
 msgid "Please confirm that you want to invite the selected user(s)."
@@ -16747,8 +16697,12 @@ msgid "No organization found."
 msgstr "Организации не найдены."
 
 msgctxt "exams.view.student.result.message"
-msgid "Result is not available yet. It will appear after the teacher review window closes."
-msgstr "Результат пока недоступен. Он появится после завершения окна проверки преподавателем."
+msgid ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
+msgstr ""
+"Результат пока недоступен. Он появится после завершения окна проверки "
+"преподавателем."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"
@@ -16761,7 +16715,6 @@ msgstr "Перед запуском live-сессии сначала актив�
 # ═══════════════════════════════════════════════════════════════════════════
 # Account Deletion & User Management translations
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.section"
 msgid "delete_account_title"
@@ -16815,7 +16768,9 @@ msgstr "Подтвердите удаление аккаунта"
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
-msgstr "Вы уверены, что хотите удалить свой аккаунт? Введите пароль для подтверждения."
+msgstr ""
+"Вы уверены, что хотите удалить свой аккаунт? Введите пароль для "
+"подтверждения."
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
@@ -16847,7 +16802,8 @@ msgstr "Неверный пароль. Пожалуйста, введите пр
 
 #: apps/accounts/views/account_management.py
 msgid "delete_account_last_admin"
-msgstr "Вы единственный администратор организации. Вы не можете удалить свой аккаунт."
+msgstr ""
+"Вы единственный администратор организации. Вы не можете удалить свой аккаунт."
 
 #: apps/accounts/views/account_management.py
 msgid "delete_account_error"
@@ -16858,7 +16814,6 @@ msgid "delete_account_success"
 msgstr "Ваш аккаунт был успешно удалён."
 
 # Profile Edit Enhancements
-
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
 msgctxt "profile.edit"
 msgid "organization_type"
@@ -16920,7 +16875,6 @@ msgid "edit_profile_type_change_warning"
 msgstr "Изменение типа организации может повлиять на ваши курсы и разрешения."
 
 # Superadmin User Management
-
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "user_management_title"
@@ -17019,7 +16973,9 @@ msgstr "Удалить навсегда"
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "hard_delete_confirm"
-msgstr "Вы уверены, что хотите навсегда удалить этого пользователя? Это действие нельзя отменить!"
+msgstr ""
+"Вы уверены, что хотите навсегда удалить этого пользователя? Это действие "
+"нельзя отменить!"
 
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
@@ -17129,7 +17085,6 @@ msgid "ai_settings"
 msgstr "Настройки ИИ"
 
 # Superadmin User Management messages (i18n)
-
 #: apps/accounts/views/account_management.py
 msgid "superadmin_access_only"
 msgstr "Только суперадмины могут получить доступ к этому разделу."
@@ -17161,7 +17116,6 @@ msgstr "Неизвестное действие."
 # ═══════════════════════════════════════════════════════════════════════════
 # EXAM STATISTICS (teacher_exam_statistics & live session AI summary)
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_statistics"
@@ -17322,7 +17276,9 @@ msgstr "Распределение баллов"
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_score_distribution_hint"
-msgstr "Для небольших групп показаны точные баллы, для больших — группировка по интервалам."
+msgstr ""
+"Для небольших групп показаны точные баллы, для больших — группировка по "
+"интервалам."
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_group_avg_score"
@@ -17398,7 +17354,9 @@ msgstr "Создать сводку"
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_initial_message"
-msgstr "Нажмите кнопку выше для создания AI-сводки. Анализ будет основан на текущих фильтрах."
+msgstr ""
+"Нажмите кнопку выше для создания AI-сводки. Анализ будет основан на текущих "
+"фильтрах."
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_loading"
@@ -17567,7 +17525,9 @@ msgstr "Вы достигли лимита AI-запросов. Пожалуйс
 
 msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
-msgstr "Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через несколько часов."
+msgstr ""
+"Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через "
+"несколько часов."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
@@ -17587,7 +17547,9 @@ msgstr "Нет ответа для оценки."
 
 msgctxt "exams.service.ai_grading.error"
 msgid "gemini_quota_exhausted"
-msgstr "Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через несколько часов."
+msgstr ""
+"Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через "
+"несколько часов."
 
 msgctxt "exams.service.ai_grading.error"
 msgid "grading_failed"
@@ -17687,7 +17649,9 @@ msgstr "Распределение баллов"
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_score_distribution_hint"
-msgstr "Для небольших сессий показываются точные баллы, а для больших — группы участников по диапазонам баллов."
+msgstr ""
+"Для небольших сессий показываются точные баллы, а для больших — группы "
+"участников по диапазонам баллов."
 
 msgctxt "liveExam.template.session_detail"
 msgid "heading_participant_results"
@@ -17739,7 +17703,8 @@ msgstr "Сред. время"
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_module_error"
-msgstr "Не удалось загрузить модуль графиков. Обновите страницу и попробуйте снова."
+msgstr ""
+"Не удалось загрузить модуль графиков. Обновите страницу и попробуйте снова."
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_label_score"
@@ -17986,7 +17951,6 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "action_confirm_delete"
 msgstr "Подтвердить удаление"
 
-
 msgctxt "exams.template.supervision_monitor"
 msgid "page_title"
 msgstr "Мониторинг экзаменов"
@@ -17997,7 +17961,9 @@ msgstr "Монитор надзора за экзаменами"
 
 msgctxt "exams.template.supervision_monitor"
 msgid "subtitle"
-msgstr "Подозрительные события и состояния студентов для всех контролируемых экзаменов"
+msgstr ""
+"Подозрительные события и состояния студентов для всех контролируемых "
+"экзаменов"
 
 msgctxt "exams.template.supervision_monitor"
 msgid "stat_total_incidents"
@@ -18149,7 +18115,9 @@ msgstr "Лёгкий режим надзора"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_desc"
-msgstr "Минимальные ограничения. Студенты сдают экзамен более свободно, отслеживается только переключение вкладок."
+msgstr ""
+"Минимальные ограничения. Студенты сдают экзамен более свободно, "
+"отслеживается только переключение вкладок."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_f1"
@@ -18173,7 +18141,9 @@ msgstr "Средний режим надзора"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_medium_desc"
-msgstr "Сбалансированный надзор. Основные меры защиты активны, с контролем преподавателя."
+msgstr ""
+"Сбалансированный надзор. Основные меры защиты активны, с контролем "
+"преподавателя."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_medium_f1"
@@ -18241,7 +18211,9 @@ msgstr "Лёгкий режим надзора"
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_light_desc"
-msgstr "Минимальные ограничения. Студенты сдают экзамен более свободно, отслеживается только переключение вкладок."
+msgstr ""
+"Минимальные ограничения. Студенты сдают экзамен более свободно, "
+"отслеживается только переключение вкладок."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_light_f1"
@@ -18265,7 +18237,9 @@ msgstr "Средний режим надзора"
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_medium_desc"
-msgstr "Сбалансированный надзор. Основные меры защиты активны, с контролем преподавателя."
+msgstr ""
+"Сбалансированный надзор. Основные меры защиты активны, с контролем "
+"преподавателя."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_medium_f1"
@@ -18398,7 +18372,8 @@ msgstr "Вы хотите возобновить экзамен этого ст�
 
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_grant_chance"
-msgstr "Вы хотите дать этому студенту дополнительный шанс и позволить ему продолжить?"
+msgstr ""
+"Вы хотите дать этому студенту дополнительный шанс и позволить ему продолжить?"
 
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_stop"
@@ -18632,7 +18607,9 @@ msgstr "Режим надзора активен"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_desc"
-msgstr "Этот экзамен проводится в <strong>режиме надзора</strong>. Применяются следующие правила:"
+msgstr ""
+"Этот экзамен проводится в <strong>режиме надзора</strong>. Применяются "
+"следующие правила:"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_fullscreen"
