@@ -7,6 +7,7 @@ or migration references that still point at ``apps.exams.models``.
 """
 
 from apps.exams.domain.access_policy import StudentGroup
+from apps.exams.domain.ai_config import AIConfiguration
 from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ProctoringLog
 from apps.exams.domain.exam_definition import Exam, QuestionBlock
 from apps.exams.domain.question_bank import (
@@ -18,6 +19,7 @@ from apps.exams.domain.question_bank import (
 )
 
 __all__ = [
+    "AIConfiguration",
     "Exam",
     "ExamAnswer",
     "ExamAnswerFile",

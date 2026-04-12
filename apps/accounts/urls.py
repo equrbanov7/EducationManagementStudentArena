@@ -101,6 +101,7 @@ urlpatterns = [
     path("permission-editor/", views.permission_editor, name="permission_editor"),
     # Superadmin oversight
     path("superadmin/organizations/", views.superadmin_organizations, name="superadmin_organizations"),
+    path("superadmin/ai-settings/", views.superadmin_ai_settings, name="superadmin_ai_settings"),
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),
