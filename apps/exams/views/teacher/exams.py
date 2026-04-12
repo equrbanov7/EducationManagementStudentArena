@@ -281,6 +281,15 @@ def createAndEditExamView(request, slug=None):
         exam = None
     linked_course = None if is_editing else _get_requested_course_for_exam(request)
     is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
+
+    # Load existing supervision config for edit mode
+    supervision_config = None
+    if is_editing and exam:
+        try:
+            supervision_config = exam.supervision_config
+        except Exception:
+            pass
+
     selected_organization = _resolve_selected_superadmin_organization(request) if allow_organization_selection else None
     form_organization = organization or selected_organization
     form_kwargs = {
@@ -401,6 +410,7 @@ def createAndEditExamView(request, slug=None):
                     "exam": exam,
                     "linked_course": linked_course,
                     "group_student_map": group_student_map,
+                    "supervision_config": supervision_config,
                 },
                 request=request,
             )
@@ -412,14 +422,6 @@ def createAndEditExamView(request, slug=None):
         else:
             form = ExamForm(**form_kwargs)
     group_student_map = _build_group_student_map(form)
-
-    # Load existing supervision config for edit mode
-    supervision_config = None
-    if is_editing and exam:
-        try:
-            supervision_config = exam.supervision_config
-        except Exception:
-            pass
 
     if is_modal_request:
         return render(
