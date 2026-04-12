@@ -110,7 +110,7 @@
                     </a>
 
                     {% if exam.exam_type == "test" %}
-                    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}" class="action-btn secondary-btn">
+                    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn secondary-btn">
                         <i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri
                     </a>
                     {% endif %}

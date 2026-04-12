@@ -890,6 +890,19 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_teacher_exam_detail_live_results_link_preserves_return_to(self):
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("liveExam:teacher_live_results", args=[self.exam_visible.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
     def test_teacher_exam_detail_disables_live_start_when_exam_is_passive(self):
         self.exam_visible.is_active = False
         self.exam_visible.save(update_fields=["is_active"])

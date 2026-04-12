@@ -7,15 +7,18 @@ Teacher-facing views for reviewing live exam session results and statistics.
 from __future__ import annotations
 
 from collections import Counter
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Max, Q, Sum
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from apps.exams.models import Exam, ExamQuestion
 from apps.exams.services.access_policy import is_teacher_user
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 
 
@@ -55,6 +58,34 @@ def _build_score_distribution(scores, bucket_limit=6):
     return labels, counts
 
 
+def _resolve_exam_navigation(request, exam, *, default_section="my-exams"):
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+        "review-results",
+    }
+    requested_profile_section = (request.GET.get("from_section") or "").strip()
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = default_section
+
+    fallback_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    return_to = _safe_same_origin_redirect_path(request, request.GET.get("return_to")) or fallback_return_url
+    navigation_query = urlencode(
+        {
+            "from_section": requested_profile_section,
+            "return_to": return_to,
+        }
+    )
+    exam_detail_url = f"{reverse('exams:teacher_exam_detail', kwargs={'slug': exam.slug})}?{navigation_query}"
+    results_url = f"{reverse('liveExam:teacher_live_results', kwargs={'slug': exam.slug})}?{navigation_query}"
+    return exam_detail_url, results_url, navigation_query
+
+
 @login_required
 def teacher_live_exam_results(request, slug):
     """
@@ -62,6 +93,7 @@ def teacher_live_exam_results(request, slug):
     """
     exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
     _ensure_teacher_access(request, exam)
+    exam_detail_url, _results_url, navigation_query = _resolve_exam_navigation(request, exam)
 
     sessions = (
         LiveSession.objects.filter(exam=exam, state=LiveSession.STATE_FINISHED)
@@ -80,6 +112,8 @@ def teacher_live_exam_results(request, slug):
         {
             "exam": exam,
             "sessions": sessions,
+            "exam_detail_url": exam_detail_url,
+            "live_results_navigation_query": navigation_query,
         },
     )
 
@@ -92,6 +126,7 @@ def teacher_live_session_detail(request, slug, pin):
     """
     exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
     _ensure_teacher_access(request, exam)
+    _exam_detail_url, live_results_url, navigation_query = _resolve_exam_navigation(request, exam)
 
     session = get_object_or_404(LiveSession, exam=exam, pin=pin, state=LiveSession.STATE_FINISHED)
 
@@ -201,5 +236,7 @@ def teacher_live_session_detail(request, slug, pin):
             "max_score": max_score_val,
             "avg_response_ms": round(avg_response_ms),
             "chart_data": chart_data,
+            "live_results_url": live_results_url,
+            "live_results_navigation_query": navigation_query,
         },
     )
