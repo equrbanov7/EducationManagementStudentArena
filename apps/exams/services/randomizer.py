@@ -22,13 +22,34 @@ def build_shuffled_options(attempt_id, question):
     return packed
 
 
+def _build_block_pick_plan(blocks, total_needed):
+    """
+    Bloklara düşəcək sual sayını blok sırasına görə sabit paylaşdırır.
+
+    Nümunə:
+    - 5 sual / 5 blok -> [1, 1, 1, 1, 1]
+    - 7 sual / 5 blok -> [2, 2, 1, 1, 1]
+    - 3 sual / 5 blok -> [1, 1, 1, 0, 0]
+    """
+    if total_needed <= 0 or not blocks:
+        return {}
+
+    base, remainder = divmod(total_needed, len(blocks))
+    plan = {block.id: base for block in blocks}
+
+    for block in blocks[:remainder]:
+        plan[block.id] += 1
+
+    return plan
+
+
 # Verilmiş attempt üçün sualları random seçir və ExamAnswer yaradır.
 def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = False):
     """
     Yeni attempt üçün sualları random seçir və ExamAnswer yaradır.
     - default: 10 sual
     - 0: hamısı (amma random order)
-    - blok varsa: bərabər pay + çatışmayanı digər suallardan doldurur
+    - blok varsa: bərabər pay + qalıq sualları blok sırasına görə paylaşdırır
     - refresh edəndə dəyişməsin deyə ExamAnswer-da sabitlənir
     """
     exam = attempt.exam
@@ -56,7 +77,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
         random.shuffle(selected_qs)  # “hamısı” olsa belə random sıra
     else:
         selected_qs = []
-        blocks = list(exam.question_blocks.all())
+        blocks = list(exam.question_blocks.order_by("order", "id"))
 
         if blocks:
             block_question_map = {}
@@ -69,19 +90,15 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                     non_empty_blocks.append(block)
 
             blocks = non_empty_blocks
-            blocks_count = len(blocks)
 
         if blocks:
-            base = total_needed // blocks_count
-            rem = total_needed % blocks_count
-
-            random.shuffle(blocks)
+            block_pick_plan = _build_block_pick_plan(blocks, total_needed)
 
             picked_ids = set()
 
             # bloklardan payla
-            for i, block in enumerate(blocks):
-                take = base + (1 if i < rem else 0)
+            for block in blocks:
+                take = block_pick_plan.get(block.id, 0)
                 if take <= 0:
                     continue
 

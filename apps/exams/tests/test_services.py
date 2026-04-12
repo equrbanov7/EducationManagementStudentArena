@@ -194,6 +194,80 @@ class ExamQuestionRandomizerServicesTest(TestCase):
         self.assertEqual(set(block_counts.keys()), {block.id for block in blocks})
         self.assertTrue(all(count == 1 for count in block_counts.values()))
 
+    def test_generate_random_questions_for_attempt_distributes_remainder_to_first_blocks_by_order(self):
+        self.exam.random_question_count = 7
+        self.exam.save(update_fields=["random_question_count"])
+
+        blocks = [
+            QuestionBlock.objects.create(exam=self.exam, name=f"Block {index + 1}", order=index + 1)
+            for index in range(5)
+        ]
+        for block in blocks:
+            for question_index in range(3):
+                ExamQuestion.objects.create(
+                    exam=self.exam,
+                    block=block,
+                    text=f"{block.name} Question {question_index + 1}",
+                    points=1,
+                    is_active=True,
+                )
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        answers = list(attempt.answers.select_related("question__block"))
+        self.assertEqual(len(answers), 7)
+
+        block_counts = {block.id: 0 for block in blocks}
+        for answer in answers:
+            block_counts[answer.question.block_id] += 1
+
+        ordered_counts = [block_counts[block.id] for block in blocks]
+        self.assertEqual(ordered_counts, [2, 2, 1, 1, 1])
+
+    def test_generate_random_questions_for_attempt_gives_extra_question_to_first_block_when_one_remainder(self):
+        self.exam.random_question_count = 5
+        self.exam.save(update_fields=["random_question_count"])
+
+        blocks = [
+            QuestionBlock.objects.create(exam=self.exam, name=f"Block {index + 1}", order=index + 1)
+            for index in range(4)
+        ]
+        for block in blocks:
+            for question_index in range(3):
+                ExamQuestion.objects.create(
+                    exam=self.exam,
+                    block=block,
+                    text=f"{block.name} Question {question_index + 1}",
+                    points=1,
+                    is_active=True,
+                )
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        answers = list(attempt.answers.select_related("question__block"))
+        self.assertEqual(len(answers), 5)
+
+        block_counts = {block.id: 0 for block in blocks}
+        for answer in answers:
+            block_counts[answer.question.block_id] += 1
+
+        ordered_counts = [block_counts[block.id] for block in blocks]
+        self.assertEqual(ordered_counts, [2, 1, 1, 1])
+
 
 class ExamAccessControlServicesTest(TestCase):
     """Test exam access control service functions."""

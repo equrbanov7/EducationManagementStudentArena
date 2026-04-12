@@ -13,6 +13,11 @@ from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
+from apps.accounts.models import ProfileRole
+from apps.exams.models import Exam
+from apps.organizations.models import Membership, Organization, Role
+from core.constants import OrganizationType, RoleScopeType
+
 User = get_user_model()
 
 LOCMEM_CACHE_SETTINGS = {
@@ -30,6 +35,25 @@ class LoginViewTest(TestCase):
         self.client = Client()
         self.user = User.objects.create_user("loginuser", "login@example.com", "StrongPass123!")
         self.login_url = reverse("accounts:login")
+
+    def _grant_exam_manage_access(self, user, organization):
+        role, _ = Role.objects.update_or_create(
+            organization=organization,
+            name=f"teacher-{organization.pk}",
+            defaults={
+                "display_name": "Teacher",
+                "level": 50,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "permissions": ["exam.manage"],
+                "is_system": False,
+                "is_active": True,
+            },
+        )
+        Membership.objects.update_or_create(
+            user=user,
+            organization=organization,
+            defaults={"role": role, "is_active": True, "is_primary": True},
+        )
 
     def test_login_page_accessible(self):
         """Test that login page is accessible."""
@@ -92,6 +116,72 @@ class LoginViewTest(TestCase):
         )
 
         self.assertRedirects(post_response, "/")
+
+    def test_login_redirects_home_when_safe_next_would_404(self):
+        response = self.client.post(
+            self.login_url,
+            {"username": "loginuser", "password": "StrongPass123!", "next": "/definitely-missing-after-login/"},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], reverse("home"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    def test_login_redirects_home_when_next_points_to_inaccessible_exam(self):
+        owner = User.objects.create_user("examowner", "examowner@example.com", "StrongPass123!")
+        owner.profile.role = ProfileRole.TEACHER
+        owner.profile.save(update_fields=["role", "updated_at"])
+
+        self.user.profile.role = ProfileRole.TEACHER
+        self.user.profile.save(update_fields=["role", "updated_at"])
+
+        owner_org = Organization.objects.create(
+            name="Owner Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        login_org = Organization.objects.create(
+            name="Login Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+
+        owner.profile.organization = owner_org
+        owner.profile.organization_type = owner_org.org_type
+        owner.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        self.user.profile.organization = login_org
+        self.user.profile.organization_type = login_org.org_type
+        self.user.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        self._grant_exam_manage_access(owner, owner_org)
+        self._grant_exam_manage_access(self.user, login_org)
+
+        protected_exam = Exam.objects.create(
+            title="Protected Exam",
+            slug="protected-exam",
+            author=owner,
+            organization=owner_org,
+            is_active=True,
+        )
+
+        response = self.client.post(
+            self.login_url,
+            {
+                "username": "loginuser",
+                "password": "StrongPass123!",
+                "next": reverse("exams:teacher_exam_detail", args=[protected_exam.slug]),
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.request["PATH_INFO"], reverse("home"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_login_reported_zap_format_string_payloads_do_not_break(self):
         for payload in ("ZAP%n%s%n%s", "ZAP%x%x%x%x"):
