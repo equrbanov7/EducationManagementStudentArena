@@ -8,10 +8,14 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+POST_LOGIN_REDIRECT_GUARD_SESSION_KEY = "post_login_redirect_guard"
 
 
 class SessionTimeoutMiddleware:
@@ -45,6 +49,60 @@ class SessionTimeoutMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class PostLoginRedirectGuardMiddleware:
+    """
+    Redirect the very first post-login 403/404 page back to a safe home URL.
+
+    This protects users from stale ``next=`` URLs that belonged to another
+    session/user and would otherwise land on a dead-end error page right after
+    successful authentication.
+    """
+
+    _REDIRECTING_STATUSES = {301, 302, 303, 307, 308}
+    _GUARDED_STATUSES = {403, 404}
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        if not self._should_guard(request, response):
+            if self._should_clear_guard(response):
+                request.session.pop(POST_LOGIN_REDIRECT_GUARD_SESSION_KEY, None)
+            return response
+
+        request.session.pop(POST_LOGIN_REDIRECT_GUARD_SESSION_KEY, None)
+        return HttpResponseRedirect(reverse("home"))
+
+    def _should_guard(self, request, response):
+        if response.status_code not in self._GUARDED_STATUSES:
+            return False
+
+        if request.method != "GET":
+            return False
+
+        if not getattr(request.user, "is_authenticated", False):
+            return False
+
+        if not request.session.get(POST_LOGIN_REDIRECT_GUARD_SESSION_KEY):
+            return False
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return False
+
+        accepted = (request.headers.get("Accept") or "").lower()
+        if accepted and "text/html" not in accepted and "*/*" not in accepted:
+            return False
+
+        return True
+
+    def _should_clear_guard(self, response):
+        if response.status_code in self._REDIRECTING_STATUSES:
+            return False
+        return response.status_code < 500
 
 
 class SuspendedOrganizationMiddleware:

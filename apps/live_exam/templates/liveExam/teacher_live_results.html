@@ -35,7 +35,7 @@
 
 {% block content %}
 <div class="lr-page">
-    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="lr-back">
+    <a href="{{ exam_detail_url }}" class="lr-back">
         <i class="fas fa-arrow-left"></i> {{ exam.title }}
     </a>
     <div class="lr-header">
@@ -71,7 +71,7 @@
                     <span class="lr-stat__value">{{ s.avg_score|floatformat:0|default:"0" }}</span>
                 </div>
             </div>
-            <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}" class="lr-card__link">
+            <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}{% if live_results_navigation_query %}?{{ live_results_navigation_query }}{% endif %}" class="lr-card__link">
                 <i class="fas fa-chart-bar"></i> Ətraflı statistika <i class="fas fa-arrow-right" style="font-size:.78rem"></i>
             </a>
         </div>
