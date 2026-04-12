@@ -16935,3 +16935,574 @@ msgstr "\"%(username)s\" istifadəçisi həmişəlik silindi."
 #: apps/accounts/views/account_management.py
 msgid "unknown_action"
 msgstr "Naməlum əməliyyat."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EXAM STATISTICS (teacher_exam_statistics & live session AI summary)
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: apps/exams/templates/exams/teacher/teacher_exam_detail.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_view_statistics"
+msgstr "Statistikaya bax"
+
+#: apps/exams/templates/exams/teacher/teacher_exam_statistics.html
+msgctxt "exams.template.exam_statistics"
+msgid "page_title"
+msgstr "İmtahan statistikası"
+
+msgctxt "exams.template.exam_statistics"
+msgid "back_to_results"
+msgstr "Nəticələrə qayıt"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_title"
+msgstr "Filtrlər"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_group"
+msgstr "Qrup"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_groups"
+msgstr "Bütün qruplar"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_student_placeholder"
+msgstr "Tələbə axtar..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_date_from"
+msgstr "Başlama tarixi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_date_to"
+msgstr "Bitmə tarixi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status"
+msgstr "Status"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_statuses"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_expired"
+msgstr "Vaxtı bitib"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_in_progress"
+msgstr "Davam edir"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_score_min"
+msgstr "Min. bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_score_max"
+msgstr "Maks. bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_pass_fail"
+msgstr "Keçdi/Kəsildi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all"
+msgstr "Hamısı"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_passed"
+msgstr "Keçdi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_failed"
+msgstr "Kəsildi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_block"
+msgstr "Bölmə"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_blocks"
+msgstr "Bütün bölmələr"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_compare_groups"
+msgstr "Qrupları müqayisə et"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_apply"
+msgstr "Tətbiq et"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_clear"
+msgstr "Sıfırla"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_total_attempts"
+msgstr "Ümumi cəhd"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_avg_score"
+msgstr "Ort. bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_max_score"
+msgstr "Ən yüksək bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_min_score"
+msgstr "Ən aşağı bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_pass_rate"
+msgstr "Keçid faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_avg_duration"
+msgstr "Ort. müddət"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_expired"
+msgstr "Vaxtı bitib"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_student_scores"
+msgstr "Tələbə balları"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_question_accuracy"
+msgstr "Sual dəqiqliyi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_correct_incorrect"
+msgstr "Düzgün / Səhv nisbəti"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_pass_fail"
+msgstr "Keçdi / Kəsildi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_score_distribution"
+msgstr "Bal paylanması"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_score_distribution_hint"
+msgstr "Kiçik qruplarda dəqiq bal, böyük qruplarda interval üzrə qruplaşdırılmış nəticə göstərilir."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_group_avg_score"
+msgstr "Qrup üzrə orta bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_group_pass_rate"
+msgstr "Qrup üzrə keçid faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_comparison"
+msgstr "Qrup müqayisəsi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_name"
+msgstr "Qrup adı"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_participants"
+msgstr "İştirakçı"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_avg"
+msgstr "Orta bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_pass_rate"
+msgstr "Keçid faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_max"
+msgstr "Maks."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_min"
+msgstr "Min."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_question_stats"
+msgstr "Sual statistikası"
+
+msgctxt "exams.template.exam_statistics"
+msgid "search_question"
+msgstr "Sual axtar..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_question"
+msgstr "Sual"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_answers"
+msgstr "Cavab"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_correct"
+msgstr "Düzgün"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_incorrect"
+msgstr "Səhv"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_accuracy"
+msgstr "Dəqiqlik"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_summary_title"
+msgstr "AI Analiz / Xülasə"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_generate_btn"
+msgstr "Xülasə yarat"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_initial_message"
+msgstr "AI xülasəsi yaratmaq üçün yuxarıdakı düyməyə klikləyin. Analiz cari filtrlərə əsaslanacaq."
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_loading"
+msgstr "AI xülasəsi yaradılır..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_error"
+msgstr "AI xülasəsi yaradıla bilmədi. Zəhmət olmasa yenidən cəhd edin."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_module_error"
+msgstr "Qrafik modulu yüklənmədi. Səhifəni yeniləyin."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_students"
+msgstr "Tələbə balı qeydə alınmayıb."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_questions"
+msgstr "Sual dəqiqliyi üçün kifayət qədər məlumat yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_correct_incorrect"
+msgstr "Düzgün və səhv cavab müqayisəsi üçün məlumat yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_pass_fail"
+msgstr "Keçdi/Kəsildi məlumatı yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_distribution"
+msgstr "Bal paylanması üçün məlumat yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_score"
+msgstr "Bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_accuracy"
+msgstr "Dəqiqlik %"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_correct"
+msgstr "Düzgün"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_incorrect"
+msgstr "Səhv"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_pass"
+msgstr "Keçdi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_fail"
+msgstr "Kəsildi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_participants"
+msgstr "İştirakçı sayı"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_avg_score"
+msgstr "Orta bal"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_pass_rate"
+msgstr "Keçid faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "pagination_results"
+msgstr "nəticə"
+
+#: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
+msgctxt "liveExam.template.session_detail"
+msgid "ai_summary_title"
+msgstr "AI Analiz / Xülasə"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_generate_btn"
+msgstr "Xülasə yarat"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_initial_message"
+msgstr "AI xülasəsi yaratmaq üçün yuxarıdakı düyməyə klikləyin."
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_loading"
+msgstr "AI xülasəsi yaradılır..."
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_error"
+msgstr "AI xülasəsi yaradıla bilmədi. Yenidən cəhd edin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_view_live_results"
+msgstr "Canlı imtahan nəticələri"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "question_create_title"
+msgstr "Yeni sual əlavə et"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "question_edit_title"
+msgstr "Sualı redaktə et"
+
+msgctxt "exams.service.ai_summary.error"
+msgid "gemini_api_key_missing"
+msgstr "GEMINI_API_KEY tənzimlənməyib."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "generation_failed"
+msgstr "AI xülasəsi yaradıla bilmədi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
+msgctxt "liveExam.template.results"
+msgid "page_title"
+msgstr "Canlı imtahan nəticələri"
+
+msgctxt "liveExam.template.results"
+msgid "page_subtitle"
+msgstr "keçirilmiş bütün canlı sessiyalar"
+
+msgctxt "liveExam.template.results"
+msgid "card_participants"
+msgstr "İştirakçı"
+
+msgctxt "liveExam.template.results"
+msgid "card_answer_count"
+msgstr "Cavab sayı"
+
+msgctxt "liveExam.template.results"
+msgid "card_correct_answers"
+msgstr "Düzgün cavab"
+
+msgctxt "liveExam.template.results"
+msgid "card_avg_score"
+msgstr "Ort. bal"
+
+msgctxt "liveExam.template.results"
+msgid "action_view_detailed_stats"
+msgstr "Ətraflı statistika"
+
+msgctxt "liveExam.template.results"
+msgid "empty_no_sessions"
+msgstr "Bu imtahan üzrə hələ canlı sessiya keçirilməyib."
+
+msgctxt "liveExam.template.session_detail"
+msgid "page_title"
+msgstr "Sessiya statistikası"
+
+msgctxt "liveExam.template.session_detail"
+msgid "back_to_all_sessions"
+msgstr "Bütün sessiyalar"
+
+msgctxt "liveExam.template.session_detail"
+msgid "label_pin"
+msgstr "PIN"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_participants"
+msgstr "İştirakçı"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_overall_accuracy"
+msgstr "Ümumi dəqiqlik"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_avg_score"
+msgstr "Ort. bal"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_highest_score"
+msgstr "Ən yüksək bal"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_question_count"
+msgstr "Sual sayı"
+
+msgctxt "liveExam.template.session_detail"
+msgid "card_total_answers"
+msgstr "Ümumi cavab"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_player_scores"
+msgstr "İştirakçı balları"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_question_accuracy"
+msgstr "Sual dəqiqliyi"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_correct_incorrect_ratio"
+msgstr "Düzgün / Səhv nisbəti"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_avg_response_ms"
+msgstr "Ort. cavab müddəti (ms)"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_score_distribution"
+msgstr "Bal paylanması"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_score_distribution_hint"
+msgstr "Kiçik sessiyalarda dəqiq bal sayı, böyük sessiyalarda isə interval üzrə qruplaşdırılmış iştirakçı sayı göstərilir."
+
+msgctxt "liveExam.template.session_detail"
+msgid "heading_participant_results"
+msgstr "İştirakçı nəticələri"
+
+msgctxt "liveExam.template.session_detail"
+msgid "search_participant_placeholder"
+msgstr "İştirakçı axtar..."
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_participant"
+msgstr "İştirakçı"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_score"
+msgstr "Bal"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_correct"
+msgstr "Düzgün"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_answers"
+msgstr "Cavab"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_accuracy"
+msgstr "Dəqiqlik"
+
+msgctxt "liveExam.template.session_detail"
+msgid "heading_question_stats"
+msgstr "Sual statistikası"
+
+msgctxt "liveExam.template.session_detail"
+msgid "search_question_placeholder"
+msgstr "Sual axtar..."
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_question"
+msgstr "Sual"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_incorrect"
+msgstr "Səhv"
+
+msgctxt "liveExam.template.session_detail"
+msgid "table_avg_duration"
+msgstr "Ort. müddət"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_module_error"
+msgstr "Qrafik modulu yüklənmədi. Səhifəni yeniləyib yenidən yoxlayın."
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_score"
+msgstr "Bal"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_empty_player_scores"
+msgstr "İştirakçı balı qeydə alınmayıb."
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_accuracy"
+msgstr "Dəqiqlik %"
+
+msgctxt "liveExam.template.session_detail"
+msgid "tooltip_question_prefix"
+msgstr "Sual"
+
+msgctxt "liveExam.template.session_detail"
+msgid "tooltip_accuracy_prefix"
+msgstr "Dəqiqlik"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_empty_question_accuracy"
+msgstr "Sual dəqiqliyi üçün kifayət qədər cavab yoxdur."
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_correct"
+msgstr "Düzgün"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_incorrect"
+msgstr "Səhv"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_empty_correct_incorrect"
+msgstr "Düzgün və səhv cavab müqayisəsi üçün məlumat yoxdur."
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_avg_duration"
+msgstr "Ort. müddət (ms)"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_empty_avg_duration"
+msgstr "Orta cavab müddəti üçün məlumat yoxdur."
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_label_participant_count"
+msgstr "İştirakçı sayı"
+
+msgctxt "liveExam.template.session_detail"
+msgid "tooltip_score_prefix"
+msgstr "Bal"
+
+msgctxt "liveExam.template.session_detail"
+msgid "tooltip_participant_count_prefix"
+msgstr "İştirakçı sayı"
+
+msgctxt "liveExam.template.session_detail"
+msgid "chart_empty_distribution"
+msgstr "Bal paylanması üçün iştirakçı məlumatı yoxdur."
+
+msgctxt "liveExam.template.session_detail"
+msgid "pagination_prev"
+msgstr "‹ Əvvəl"
+
+msgctxt "liveExam.template.session_detail"
+msgid "pagination_results"
+msgstr "nəticə"
+
+msgctxt "liveExam.template.session_detail"
+msgid "pagination_next"
+msgstr "Sonrakı ›"

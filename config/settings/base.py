@@ -295,6 +295,14 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EM
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 
+# ---------------------------------------------------------------------------
+# AI / Gemini configuration
+# ---------------------------------------------------------------------------
+# Google AI Studio / Gemini API key for AI-powered exam analytics summaries.
+# Set via GEMINI_API_KEY environment variable.  When empty, the AI summary
+# feature degrades gracefully (shows a "not configured" message).
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 # Message tags for toast notifications
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
