@@ -41,7 +41,7 @@ def serialize_players(session: LiveSession, limit: int = 200) -> list[dict[str, 
 
 
 def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
-    players = session.players.order_by("-score", "created_at").values(
+    players = session.players.order_by("-score", "created_at", "id").values(
         "id",
         "nickname",
         "avatar_key",
