@@ -159,6 +159,11 @@
                             <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_monitor" %}
                         </button>
                         {% endif %}
+                        {% if not attempt.is_finished %}
+                        <button class="btn-action btn-stop" data-stop-attempt-id="{{ attempt.id }}" title="{% trans 'action_stop' context 'exams.template.supervision_monitor' %}" style="background:#dc3545;color:#fff;margin-left:0.25rem;">
+                            <i class="fas fa-stop"></i> {% trans "action_stop" context "exams.template.supervision_monitor" %}
+                        </button>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -207,7 +212,10 @@ var SUPERVISION_I18N = {
     confirmResume: "{% filter escapejs %}{% trans 'confirm_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     resumeSuccess: "{% filter escapejs %}{% trans 'resume_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     resumeError: "{% filter escapejs %}{% trans 'resume_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
-    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_monitor' %}{% endfilter %}"
+    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    confirmStop: "{% filter escapejs %}{% trans 'confirm_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopSuccess: "{% filter escapejs %}{% trans 'stop_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopError: "{% filter escapejs %}{% trans 'stop_error' context 'exams.template.supervision_monitor' %}{% endfilter %}"
 };
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -281,11 +289,43 @@ function resumeAttempt(attemptId) {
 }
 
 document.addEventListener("click", function(event) {
-    var btn = event.target.closest("[data-resume-attempt-id]");
-    if (btn) {
+    var resumeBtn = event.target.closest("[data-resume-attempt-id]");
+    if (resumeBtn && !resumeBtn.hasAttribute("data-stop-attempt-id")) {
         event.preventDefault();
-        resumeAttempt(parseInt(btn.getAttribute("data-resume-attempt-id"), 10));
+        resumeAttempt(parseInt(resumeBtn.getAttribute("data-resume-attempt-id"), 10));
+        return;
+    }
+
+    var stopBtn = event.target.closest("[data-stop-attempt-id]");
+    if (stopBtn) {
+        event.preventDefault();
+        stopAttempt(parseInt(stopBtn.getAttribute("data-stop-attempt-id"), 10));
     }
 });
+
+function stopAttempt(attemptId) {
+    if (!confirm(SUPERVISION_I18N.confirmStop)) return;
+    fetch("/exams/supervision/api/stop/" + attemptId + "/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+                ? document.querySelector("[name=csrfmiddlewaretoken]").value
+                : "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert(SUPERVISION_I18N.stopSuccess);
+            location.reload();
+        } else {
+            alert(SUPERVISION_I18N.stopError + (data.error || ""));
+        }
+    })
+    .catch(function(e) { alert(SUPERVISION_I18N.connectionError); });
+}
 </script>
 {% endblock %}

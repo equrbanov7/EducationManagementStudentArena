@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}Nəzarət Detalı - {{ student.username }}{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.supervision_detail" %} - {{ student.username }}{% endblock %}
 
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
     .detail-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
     .detail-header { margin-bottom: 2rem; }
-    .detail-header h1 { font-size: 1.4rem; color: #333; }
+    .detail-header h1 { font-size: 1.4rem; color: #dc3545; display: flex; align-items: center; gap: 0.5rem; }
+    .detail-header h1 i { color: #dc3545; }
     .detail-header .breadcrumb { font-size: 0.85rem; color: #999; margin-bottom: 0.5rem; }
     .detail-header .breadcrumb a { color: #007bff; text-decoration: none; }
     .student-info { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
@@ -20,10 +21,11 @@
     .badge-locked { background: #f8d7da; color: #721c24; }
     .badge-removed { background: #721c24; color: #fff; }
     .badge-resumed { background: #cce5ff; color: #004085; }
-    .action-bar { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: center; }
+    .action-bar { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
     .action-bar .btn { padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
     .btn-resume-action { background: #28a745; color: #fff; }
     .btn-chance-action { background: #007bff; color: #fff; }
+    .btn-stop-action { background: #dc3545; color: #fff; }
     .btn-back { background: #6c757d; color: #fff; text-decoration: none; }
     .timeline { position: relative; padding-left: 2rem; }
     .timeline::before { content: ""; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #dee2e6; }
@@ -54,23 +56,23 @@
 <div class="detail-wrapper">
     <div class="detail-header">
         <div class="breadcrumb">
-            <a href="{% url 'exams:supervision_monitor' %}">İmtahan Nəzarəti</a> &raquo;
+            <a href="{% url 'exams:supervision_monitor' %}">{% trans "breadcrumb_monitor" context "exams.template.supervision_detail" %}</a> &raquo;
             {{ student.username }} &raquo; {{ exam.title }}
         </div>
-        <h1><i class="fas fa-user-shield"></i> Nəzarət Detalı: {{ student.get_full_name|default:student.username }}</h1>
+        <h1><i class="fas fa-user-shield"></i> {% trans "heading" context "exams.template.supervision_detail" %}: {{ student.get_full_name|default:student.username }}</h1>
     </div>
 
     <div class="student-info">
         <div class="info-item">
-            <div class="info-label">Tələbə</div>
+            <div class="info-label">{% trans "label_student" context "exams.template.supervision_detail" %}</div>
             <div class="info-value">{{ student.get_full_name|default:student.username }}</div>
         </div>
         <div class="info-item">
-            <div class="info-label">İmtahan</div>
+            <div class="info-label">{% trans "label_exam" context "exams.template.supervision_detail" %}</div>
             <div class="info-value">{{ exam.title }}</div>
         </div>
         <div class="info-item">
-            <div class="info-label">Nəzarət Statusu</div>
+            <div class="info-label">{% trans "label_supervision_status" context "exams.template.supervision_detail" %}</div>
             <div class="info-value">
                 <span class="badge-status badge-{{ attempt.supervision_status }}">
                     {{ attempt.get_supervision_status_display }}
@@ -78,46 +80,45 @@
             </div>
         </div>
         <div class="info-item">
-            <div class="info-label">Pozuntu Sayı</div>
+            <div class="info-label">{% trans "label_violation_count" context "exams.template.supervision_detail" %}</div>
             <div class="info-value" style="{% if attempt.supervision_violation_count >= 3 %}color:#dc3545;{% endif %}">
                 {{ attempt.supervision_violation_count }}
                 {% if config %} / {{ config.max_fullscreen_violations }}{% endif %}
             </div>
         </div>
         <div class="info-item">
-            <div class="info-label">İmtahan Statusu</div>
+            <div class="info-label">{% trans "label_exam_status" context "exams.template.supervision_detail" %}</div>
             <div class="info-value">{{ attempt.get_status_display }}</div>
         </div>
         <div class="info-item">
-            <div class="info-label">Əlavə Şans</div>
+            <div class="info-label">{% trans "label_extra_chances" context "exams.template.supervision_detail" %}</div>
             <div class="info-value">{{ attempt.supervision_extra_chances }}</div>
         </div>
     </div>
 
     {# Action Bar #}
-    {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
     <div class="action-bar">
-        <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> Müəllim əməliyyatları:</span>
+        <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
+        {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
         <button class="btn btn-resume-action" data-resume-attempt-id="{{ attempt.id }}" data-grant-extra-chance="false">
-            <i class="fas fa-play"></i> İmtahanı Bərpa Et
+            <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_detail" %}
         </button>
         <button class="btn btn-chance-action" data-resume-attempt-id="{{ attempt.id }}" data-grant-extra-chance="true">
-            <i class="fas fa-plus-circle"></i> Əlavə Şans Ver
+            <i class="fas fa-plus-circle"></i> {% trans "action_grant_chance" context "exams.template.supervision_detail" %}
         </button>
+        {% endif %}
+        {% if not attempt.is_finished %}
+        <button class="btn btn-stop-action" data-stop-attempt-id="{{ attempt.id }}">
+            <i class="fas fa-stop"></i> {% trans "action_stop" context "exams.template.supervision_detail" %}
+        </button>
+        {% endif %}
         <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
-            <i class="fas fa-arrow-left"></i> Geri
+            <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.supervision_detail" %}
         </a>
     </div>
-    {% else %}
-    <div class="action-bar">
-        <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
-            <i class="fas fa-arrow-left"></i> Monitorə Qayıt
-        </a>
-    </div>
-    {% endif %}
 
     {# Incident Timeline #}
-    <h2 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fas fa-stream"></i> Hadisə Xronologiyası</h2>
+    <h2 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fas fa-stream"></i> {% trans "heading_timeline" context "exams.template.supervision_detail" %}</h2>
 
     <div class="timeline">
         {% for incident in incidents %}
@@ -140,25 +141,33 @@
                 {% endif %}
                 {% if incident.teacher_action %}
                 <div class="event-teacher">
-                    <i class="fas fa-user-tie"></i> Müəllim hərəkəti: {{ incident.teacher_action }}
+                    <i class="fas fa-user-tie"></i> {% trans "label_teacher_action" context "exams.template.supervision_detail" %}: {{ incident.teacher_action }}
                 </div>
                 {% endif %}
                 <div style="font-size:0.8rem; color:#aaa; margin-top:0.3rem;">
-                    Pozuntu #{{ incident.violation_count_at_time }}
+                    {% trans "label_violation_number" context "exams.template.supervision_detail" %} #{{ incident.violation_count_at_time }}
                 </div>
             </div>
         </div>
         {% empty %}
-        <p style="color: #999; text-align: center; padding: 2rem;">Heç bir hadisə qeydə alınmayıb.</p>
+        <p style="color: #999; text-align: center; padding: 2rem;">{% trans "empty_no_incidents" context "exams.template.supervision_detail" %}</p>
         {% endfor %}
     </div>
 </div>
 
 <script nonce="{{ request.csp_nonce }}">
+var DETAIL_I18N = {
+    confirmResume: "{% filter escapejs %}{% trans 'confirm_resume' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    confirmChance: "{% filter escapejs %}{% trans 'confirm_grant_chance' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    confirmStop: "{% filter escapejs %}{% trans 'confirm_stop' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    success: "{% filter escapejs %}{% trans 'action_success' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    errorPrefix: "{% filter escapejs %}{% trans 'action_error_prefix' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    stopSuccess: "{% filter escapejs %}{% trans 'stop_success' context 'exams.template.supervision_detail' %}{% endfilter %}"
+};
+
 function resumeAttempt(attemptId, grantExtraChance) {
-    var msg = grantExtraChance
-        ? "Bu tələbəyə əlavə şans verərək imtahana davam etməyə icazə vermək istəyirsiniz?"
-        : "Bu tələbənin imtahanını bərpa etmək istəyirsiniz?";
+    var msg = grantExtraChance ? DETAIL_I18N.confirmChance : DETAIL_I18N.confirmResume;
     if (!confirm(msg)) return;
 
     fetch("/exams/supervision/api/resume/" + attemptId + "/", {
@@ -173,22 +182,53 @@ function resumeAttempt(attemptId, grantExtraChance) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (data.success) {
-            alert("Əməliyyat uğurla tamamlandı.");
+            alert(DETAIL_I18N.success);
             location.reload();
         } else {
-            alert("Xəta: " + (data.error || "Bilinməyən xəta"));
+            alert(DETAIL_I18N.errorPrefix + (data.error || ""));
         }
     })
-    .catch(function() { alert("Əlaqə xətası."); });
+    .catch(function() { alert(DETAIL_I18N.connectionError); });
+}
+
+function stopAttempt(attemptId) {
+    if (!confirm(DETAIL_I18N.confirmStop)) return;
+
+    fetch("/exams/supervision/api/stop/" + attemptId + "/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert(DETAIL_I18N.stopSuccess);
+            location.reload();
+        } else {
+            alert(DETAIL_I18N.errorPrefix + (data.error || ""));
+        }
+    })
+    .catch(function() { alert(DETAIL_I18N.connectionError); });
 }
 
 document.addEventListener("click", function(event) {
-    var btn = event.target.closest("[data-resume-attempt-id]");
-    if (btn) {
+    var resumeBtn = event.target.closest("[data-resume-attempt-id]");
+    if (resumeBtn && !resumeBtn.hasAttribute("data-stop-attempt-id")) {
         event.preventDefault();
-        var attemptId = parseInt(btn.getAttribute("data-resume-attempt-id"), 10);
-        var grantExtra = btn.getAttribute("data-grant-extra-chance") === "true";
+        var attemptId = parseInt(resumeBtn.getAttribute("data-resume-attempt-id"), 10);
+        var grantExtra = resumeBtn.getAttribute("data-grant-extra-chance") === "true";
         resumeAttempt(attemptId, grantExtra);
+        return;
+    }
+
+    var stopBtn = event.target.closest("[data-stop-attempt-id]");
+    if (stopBtn) {
+        event.preventDefault();
+        stopAttempt(parseInt(stopBtn.getAttribute("data-stop-attempt-id"), 10));
     }
 });
 </script>

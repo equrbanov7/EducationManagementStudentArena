@@ -137,6 +137,11 @@ urlpatterns = [
         views.teacher_resume_api,
         name="supervision_resume",
     ),
+    path(
+        "supervision/api/stop/<int:attempt_id>/",
+        views.teacher_stop_api,
+        name="supervision_stop",
+    ),
     # ✅ ƏN AXIRDA: Teacher exam detail (generic)
     path("<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),
 ]

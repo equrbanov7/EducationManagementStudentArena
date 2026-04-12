@@ -248,6 +248,39 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     return True
 
 
+def teacher_stop_attempt(attempt, teacher):
+    """
+    Teacher force-stops a supervised attempt, submitting it immediately.
+
+    Returns True on success, raises ValueError on invalid state.
+    """
+    if attempt.is_finished:
+        raise ValueError("Attempt is already finished.")
+
+    old_status = attempt.supervision_status
+    attempt.supervision_status = "removed"
+    attempt.mark_finished(status="submitted")
+
+    SupervisionIncident.objects.create(
+        organization=attempt.exam.organization,
+        exam=attempt.exam,
+        attempt=attempt,
+        student=attempt.user,
+        event_type="auto_submitted",
+        severity="critical",
+        metadata={
+            "teacher_id": teacher.id,
+            "teacher_username": teacher.username,
+            "previous_status": old_status,
+            "reason": "teacher_force_stopped",
+        },
+        violation_count_at_time=attempt.supervision_violation_count,
+        teacher_action="teacher_force_stopped",
+    )
+
+    return True
+
+
 def get_attempt_supervision_status(attempt):
     """Get current supervision status and details for an attempt."""
     config = get_supervision_config(attempt.exam)
