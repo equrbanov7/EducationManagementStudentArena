@@ -18637,6 +18637,14 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Öğretmenin yanıtı bekleniyor..."
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_title"
+msgstr "⚠️ Dikkat!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_msg"
+msgstr "İhlal limitinin %75'ine ulaştınız! Sadece {remaining} ihlal hakkınız kaldı. Daha dikkatli olun!"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu işlem gerçekleştirilemez."

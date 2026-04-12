@@ -27,6 +27,7 @@
         _acknowledged: false,
         _initialized: false,
         _initialStatus: "active",
+        _thresholdWarned: false,
 
         /**
          * Initialize the supervision module.
@@ -106,7 +107,7 @@
             var badge = document.createElement("div");
             badge.id = "supervision-active-badge";
             badge.style.cssText =
-                "position:fixed;top:10px;right:10px;z-index:9999;background:#dc3545;color:#fff;" +
+                "position:fixed;top:60px;right:10px;z-index:9999;background:#dc3545;color:#fff;" +
                 "padding:0.4rem 0.8rem;border-radius:20px;font-size:0.8rem;display:flex;align-items:center;gap:0.4rem;" +
                 "box-shadow:0 2px 10px rgba(220,53,69,0.3);";
             badge.innerHTML =
@@ -469,6 +470,15 @@
             this.violationCount++;
             this._updateBadge();
 
+            // Show attention-grabbing warning at 75% threshold
+            if (!this._thresholdWarned && this.maxViolations > 0) {
+                var threshold = Math.ceil(this.maxViolations * 0.75);
+                if (this.violationCount >= threshold && this.violationCount < this.maxViolations) {
+                    this._thresholdWarned = true;
+                    this._showThresholdWarning();
+                }
+            }
+
             if (this.violationCount >= this.maxViolations) {
                 this._onLimitExceeded();
             }
@@ -484,6 +494,90 @@
                 var lbl = this._violationLabel || "Pozuntu";
                 modalBadge.textContent = lbl + ": " + this.violationCount + " / " + this.maxViolations;
             }
+
+            // Change badge color to orange/warning at 75% threshold
+            var activeBadge = document.getElementById("supervision-active-badge");
+            if (activeBadge && this.maxViolations > 0) {
+                var threshold = Math.ceil(this.maxViolations * 0.75);
+                if (this.violationCount >= threshold) {
+                    activeBadge.style.background = "#ff6b00";
+                    activeBadge.style.boxShadow = "0 2px 10px rgba(255,107,0,0.4)";
+                    activeBadge.style.animation = "pulse-badge 1.5s ease-in-out infinite";
+                }
+            }
+        },
+
+        _showThresholdWarning: function () {
+            // Don't show if already locked
+            if (!this.isActive) return;
+            if (document.getElementById("supervision-threshold-banner")) return;
+
+            var i18n = (window.SUPERVISION_ACK_I18N) || {};
+            var remaining = this.maxViolations - this.violationCount;
+            var thresholdTitle = i18n.thresholdTitle || "\u26a0\ufe0f Diqq\u0259t!";
+            var thresholdMsg = i18n.thresholdMsg || "";
+            if (!thresholdMsg) {
+                thresholdMsg = "Siz art\u0131q pozuntu limitinin 75%-in\u0259 \u00e7atm\u0131s\u0131n\u0131z! Yaln\u0131z " +
+                    remaining + " pozuntuya icaz\u0259 qal\u0131b. Daha diqq\u0259tli olun!";
+            } else if (thresholdMsg.indexOf("{remaining}") !== -1) {
+                thresholdMsg = thresholdMsg.replace("{remaining}", remaining);
+            }
+
+            // Inject pulse animation if not already present
+            if (!document.getElementById("supervision-threshold-style")) {
+                var styleEl = document.createElement("style");
+                styleEl.id = "supervision-threshold-style";
+                styleEl.textContent =
+                    "@keyframes pulse-badge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}" +
+                    "@keyframes threshold-slide-in{0%{transform:translateY(-100%);opacity:0}100%{transform:translateY(0);opacity:1}}" +
+                    "@keyframes threshold-pulse{0%,100%{box-shadow:0 4px 20px rgba(255,107,0,0.3)}50%{box-shadow:0 4px 30px rgba(255,107,0,0.6)}}";
+                document.head.appendChild(styleEl);
+            }
+
+            var banner = document.createElement("div");
+            banner.id = "supervision-threshold-banner";
+            banner.style.cssText =
+                "position:fixed;top:0;left:0;width:100%;z-index:100000;background:linear-gradient(135deg,#ff6b00,#ff8c00);" +
+                "color:#fff;text-align:center;padding:1rem 1.5rem;font-size:1rem;font-weight:600;" +
+                "box-shadow:0 4px 20px rgba(255,107,0,0.3);" +
+                "animation:threshold-slide-in 0.5s ease-out,threshold-pulse 2s ease-in-out infinite;";
+            banner.innerHTML =
+                '<div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;flex-wrap:wrap;">' +
+                '<i class="fas fa-exclamation-triangle" style="font-size:1.5rem;"></i>' +
+                '<div>' +
+                '<div style="font-size:1.1rem;font-weight:700;">' + thresholdTitle + '</div>' +
+                '<div style="font-size:0.9rem;font-weight:400;opacity:0.95;margin-top:0.2rem;">' + thresholdMsg + '</div>' +
+                '</div>' +
+                '<span style="background:rgba(255,255,255,0.25);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.85rem;">' +
+                (this._violationLabel || "Pozuntu") + ": " + this.violationCount + " / " + this.maxViolations +
+                '</span>' +
+                '<button id="supervision-threshold-dismiss" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);' +
+                'color:#fff;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;">OK</button>' +
+                '</div>';
+            document.body.appendChild(banner);
+
+            document.getElementById("supervision-threshold-dismiss").addEventListener("click", function () {
+                banner.style.animation = "none";
+                banner.style.transition = "transform 0.3s ease-in, opacity 0.3s ease-in";
+                banner.style.transform = "translateY(-100%)";
+                banner.style.opacity = "0";
+                setTimeout(function () {
+                    if (banner.parentNode) banner.remove();
+                }, 350);
+            });
+
+            // Auto-dismiss after 10 seconds
+            setTimeout(function () {
+                if (banner.parentNode) {
+                    banner.style.animation = "none";
+                    banner.style.transition = "transform 0.3s ease-in, opacity 0.3s ease-in";
+                    banner.style.transform = "translateY(-100%)";
+                    banner.style.opacity = "0";
+                    setTimeout(function () {
+                        if (banner.parentNode) banner.remove();
+                    }, 350);
+                }
+            }, 10000);
         },
 
         _onLimitExceeded: function () {

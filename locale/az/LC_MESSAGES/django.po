@@ -18909,6 +18909,14 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Müəllim cavabını gözləyirik..."
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_title"
+msgstr "⚠️ Diqqət!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_msg"
+msgstr "Siz artıq pozuntu limitinin 75%-inə çatmısınız! Yalnız {remaining} pozuntuya icazə qalıb. Daha diqqətli olun!"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu əməliyyat icra edilə bilməz."
