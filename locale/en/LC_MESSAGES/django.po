@@ -18218,3 +18218,198 @@ msgstr "✅ Text selection blocked"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_f6"
 msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Supervision Detail"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "Exam Supervision"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Supervision Detail"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Student"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "Exam"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Supervision Status"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "Violation Count"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "Exam Status"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Extra Chances"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Teacher actions"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "Resume Exam"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Grant Extra Chance"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Stop"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Back"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Incident Timeline"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Teacher action"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "Violation"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "No incidents have been recorded."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Do you want to resume this student's exam?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr "Do you want to grant this student an extra chance and allow them to continue?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr "Do you want to stop this student's exam? The exam will be submitted."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "Operation completed successfully."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Error: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Connection error."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "Exam has been stopped."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Stop"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr "Do you want to stop this student's exam? The exam will be submitted."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "Exam has been stopped."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Stop error: "
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Supervision Mode Active"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr "This exam is conducted in <strong>supervision mode</strong>. The following rules apply:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Fullscreen mode is required"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Tab switching is monitored"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Copy/paste is blocked"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Right-click is disabled"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Keyboard shortcuts are restricted"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Maximum violations allowed."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "I understand, continue"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Supervision active"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Warning"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "You have left the exam area. Please return."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "If time runs out, this will be recorded as a violation."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "Violation"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Return to fullscreen"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "Exam Suspended"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "You have reached the maximum violation limit."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr "Your exam has been suspended. Please wait until the teacher makes a decision."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Waiting for teacher's response..."

@@ -18122,3 +18122,198 @@ msgstr "✅ Metin seçimi engellenir"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_f6"
 msgstr "⚙️ Maksimum 2 ihlal, otomatik teslim, ikinci şans yok"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Gözetim Detayı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "Sınav Gözetimi"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Gözetim Detayı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Öğrenci"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "Sınav"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Gözetim Durumu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "İhlal Sayısı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "Sınav Durumu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Ek Şans"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Öğretmen işlemleri"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "Sınavı Devam Ettir"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Ek Şans Ver"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Durdur"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Geri"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Olay Kronolojisi"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Öğretmen eylemi"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "İhlal"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "Hiçbir olay kaydedilmedi."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Bu öğrencinin sınavını devam ettirmek istiyor musunuz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr "Bu öğrenciye ek şans vererek devam etmesine izin vermek istiyor musunuz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr "Bu öğrencinin sınavını durdurmak istiyor musunuz? Sınav teslim edilecek."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "İşlem başarıyla tamamlandı."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Hata: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Bağlantı hatası."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "Sınav durduruldu."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Durdur"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr "Bu öğrencinin sınavını durdurmak istiyor musunuz? Sınav teslim edilecek."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "Sınav durduruldu."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Durdurma hatası: "
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Gözetim Modu Aktif"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr "Bu sınav <strong>gözetim modunda</strong> yapılmaktadır. Aşağıdaki kurallar geçerlidir:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Tam ekran modu gereklidir"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Sekme değiştirme izleniyor"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Kopyala/yapıştır engellendi"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Sağ tıklama devre dışı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Klavye kısayolları kısıtlı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Maksimum ihlale izin verilir."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "Anladım, devam et"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Gözetim aktif"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Uyarı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "Sınav alanından ayrıldınız. Lütfen geri dönün."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "Süre dolarsa, bu ihlal olarak kaydedilecek."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "İhlal"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Tam ekrana dön"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "Sınav Askıya Alındı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "Maksimum ihlal limitine ulaştınız."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr "Sınavınız askıya alındı. Öğretmen karar verene kadar bekleyin."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Öğretmenin yanıtı bekleniyor..."
