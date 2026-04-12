@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}İmtahan Nəzarəti - Monitor{% endblock %}
+
+{% block extraCss %}
+<style nonce="{{ request.csp_nonce }}">
+    .monitor-wrapper { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .monitor-header { margin-bottom: 2rem; }
+    .monitor-header h1 { font-size: 1.5rem; color: #333; display: flex; align-items: center; gap: 0.5rem; }
+    .monitor-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-align: center; }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+    .stat-card .stat-label { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
+    .stat-card.danger .stat-value { color: #dc3545; }
+    .stat-card.warning .stat-value { color: #ffc107; }
+    .stat-card.info .stat-value { color: #17a2b8; }
+    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+    .filter-bar input, .filter-bar select { padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; }
+    .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
+    .monitor-table { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+    .monitor-table table { width: 100%; border-collapse: collapse; }
+    .monitor-table th { background: #f8f9fa; padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.85rem; color: #555; border-bottom: 2px solid #dee2e6; }
+    .monitor-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .monitor-table tr:hover { background: #f8f9fa; }
+    .badge-status { padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-warned { background: #fff3cd; color: #856404; }
+    .badge-locked { background: #f8d7da; color: #721c24; }
+    .badge-removed { background: #721c24; color: #fff; }
+    .badge-resumed { background: #cce5ff; color: #004085; }
+    .severity-high, .severity-critical { color: #dc3545; font-weight: 600; }
+    .severity-medium { color: #ffc107; font-weight: 600; }
+    .severity-low { color: #28a745; }
+    .severity-info { color: #17a2b8; }
+    .chart-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .chart-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .chart-card h3 { font-size: 1rem; color: #333; margin-bottom: 1rem; }
+    .pagination-wrapper { display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem; }
+    .pagination-wrapper a, .pagination-wrapper span { padding: 0.4rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+    .pagination-wrapper a { background: #f0f0f0; color: #333; }
+    .pagination-wrapper a:hover { background: #007bff; color: #fff; }
+    .pagination-wrapper .current { background: #007bff; color: #fff; }
+    .btn-action { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; border: none; cursor: pointer; }
+    .btn-detail { background: #007bff; color: #fff; }
+    .btn-resume { background: #28a745; color: #fff; }
+    .empty-state { text-align: center; padding: 3rem; color: #999; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; }
+    @media (max-width: 768px) {
+        .chart-section { grid-template-columns: 1fr; }
+        .filter-bar { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="monitor-wrapper">
+    <div class="monitor-header">
+        <h1><i class="fas fa-shield-alt text-danger"></i> İmtahan Nəzarəti Monitoru</h1>
+        <p style="color: #666;">Bütün nəzarət altındakı imtahanlar üçün şübhəli hadisələr və tələbə vəziyyətləri</p>
+    </div>
+
+    {# Stats Cards #}
+    <div class="monitor-stats">
+        <div class="stat-card danger">
+            <div class="stat-value">{{ total_incidents }}</div>
+            <div class="stat-label">Ümumi Pozuntu</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-value">{{ page_obj.paginator.count }}</div>
+            <div class="stat-label">Bayraqlanmış Tələbə</div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-value">{{ supervised_exams|length }}</div>
+            <div class="stat-label">Nəzarətli İmtahan</div>
+        </div>
+    </div>
+
+    {# Charts #}
+    <div class="chart-section">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie"></i> Ciddilik Paylanması</h3>
+            <canvas id="severityChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-bar"></i> Pozuntu Növləri</h3>
+            <canvas id="violationTypeChart" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Filters #}
+    <form method="get" class="filter-bar">
+        <input type="text" name="q" placeholder="Tələbə və ya imtahan axtar..." value="{{ search_query }}">
+        <select name="exam">
+            <option value="">Bütün imtahanlar</option>
+            {% for eid, etitle in supervised_exams %}
+            <option value="{{ eid }}" {% if selected_exam_id == eid|stringformat:"s" %}selected{% endif %}>{{ etitle }}</option>
+            {% endfor %}
+        </select>
+        <select name="status">
+            <option value="">Bütün statuslar</option>
+            <option value="active" {% if status_filter == "active" %}selected{% endif %}>Aktiv</option>
+            <option value="warned" {% if status_filter == "warned" %}selected{% endif %}>Xəbərdarlıq</option>
+            <option value="locked" {% if status_filter == "locked" %}selected{% endif %}>Kilidli</option>
+            <option value="removed" {% if status_filter == "removed" %}selected{% endif %}>Çıxarılmış</option>
+            <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>Bərpa edilmiş</option>
+        </select>
+        <button type="submit" class="btn-action btn-detail"><i class="fas fa-search"></i> Axtar</button>
+    </form>
+
+    {# Table #}
+    <div class="monitor-table">
+        {% if page_obj.object_list %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Tələbə</th>
+                    <th>İmtahan</th>
+                    <th>Pozuntu Sayı</th>
+                    <th>Status</th>
+                    <th>Başlama Vaxtı</th>
+                    <th>Əməliyyatlar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in page_obj %}
+                <tr>
+                    <td>
+                        <strong>{{ attempt.user.get_full_name|default:attempt.user.username }}</strong>
+                        <br><small style="color:#999;">{{ attempt.user.username }}</small>
+                    </td>
+                    <td>{{ attempt.exam.title }}</td>
+                    <td>
+                        <span style="font-weight:700; {% if attempt.supervision_violation_count >= 3 %}color:#dc3545;{% elif attempt.supervision_violation_count >= 1 %}color:#ffc107;{% endif %}">
+                            {{ attempt.supervision_violation_count }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge-status badge-{{ attempt.supervision_status }}">
+                            {{ attempt.get_supervision_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ attempt.started_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'exams:supervision_detail' attempt.id %}" class="btn-action btn-detail" title="Detallar">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
+                        <button class="btn-action btn-resume" onclick="resumeAttempt({{ attempt.id }})" title="Bərpa et">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <p>Hələlik heç bir pozuntu qeydə alınmayıb.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Pagination #}
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-wrapper">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">&laquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?page={{ num }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{{ severity_counts|json_script:"severity-data" }}
+{{ violation_type_counts|json_script:"violation-type-data" }}
+
+<script src="{% static 'vendor/chartjs/chart.min.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function() {
+    // Severity Chart
+    try {
+        var severityData = JSON.parse(document.getElementById("severity-data").textContent);
+        var sevLabels = Object.keys(severityData);
+        var sevValues = Object.values(severityData);
+        var sevColors = {"info":"#17a2b8","low":"#28a745","medium":"#ffc107","high":"#fd7e14","critical":"#dc3545"};
+        new Chart(document.getElementById("severityChart"), {
+            type: "doughnut",
+            data: {
+                labels: sevLabels.map(function(l) {
+                    return {"info":"Məlumat","low":"Aşağı","medium":"Orta","high":"Yüksək","critical":"Kritik"}[l] || l;
+                }),
+                datasets: [{
+                    data: sevValues,
+                    backgroundColor: sevLabels.map(function(l){ return sevColors[l] || "#ccc"; })
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+        });
+    } catch(e) {}
+
+    // Violation Type Chart
+    try {
+        var vtData = JSON.parse(document.getElementById("violation-type-data").textContent);
+        var vtLabels = Object.keys(vtData);
+        var vtValues = Object.values(vtData);
+        new Chart(document.getElementById("violationTypeChart"), {
+            type: "bar",
+            data: {
+                labels: vtLabels.map(function(l){ return l.replace(/_/g, " "); }),
+                datasets: [{
+                    label: "Sayı",
+                    data: vtValues,
+                    backgroundColor: "#007bff"
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    } catch(e) {}
+});
+
+function resumeAttempt(attemptId) {
+    if (!confirm("Bu tələbəyə imtahana davam etməyə icazə vermək istəyirsiniz?")) return;
+    fetch("/exams/supervision/api/resume/" + attemptId + "/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+                ? document.querySelector("[name=csrfmiddlewaretoken]").value
+                : "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({ grant_extra_chance: true })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert("Tələbəyə icazə verildi. Tələbənin imtahanı bərpa edildi.");
+            location.reload();
+        } else {
+            alert("Xəta: " + (data.error || "Bilinməyən xəta"));
+        }
+    })
+    .catch(function(e) { alert("Əlaqə xətası."); });
+}
+</script>
+{% endblock %}
