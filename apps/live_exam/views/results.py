@@ -211,14 +211,13 @@ def teacher_live_session_detail(request, slug, pin):
                 }
                 for qs in question_stats[:20]
             ],
-            "top_players": [
-                {"nickname": p.nickname, "score": p.score, "correct": p.correct_count} for p in players[:10]
-            ],
+            "players": [{"nickname": p.nickname, "score": p.score, "correct": p.correct_count} for p in players],
         }
         result = generate_exam_statistics_summary(
             exam_title=exam.title,
             exam_type="Live Exam",
             stats=ai_stats,
+            user_id=request.user.pk,
         )
         return JsonResponse(result)
 
