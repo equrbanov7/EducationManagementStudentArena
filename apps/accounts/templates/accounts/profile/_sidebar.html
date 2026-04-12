@@ -359,6 +359,13 @@
                 <span class="sidebar-menu-text">{% trans "user_management" context "profile.sidebar" %}</span>
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'accounts:superadmin_ai_settings' %}"
+               class="sidebar-menu-link {% if active_section == 'superadmin-ai' %}active{% endif %}">
+                <i class="fas fa-robot sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "ai_settings" context "profile.sidebar" %}</span>
+            </a>
+        </li>
         {% endif %}
         {% endif %}
 

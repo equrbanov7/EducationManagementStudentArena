@@ -309,6 +309,7 @@ def teacher_exam_statistics(request, slug):
             exam_title=exam.title,
             exam_type=exam.get_exam_type_display(),
             stats=ai_stats,
+            user_id=request.user.pk,
         )
         return JsonResponse(result)
 

@@ -3352,6 +3352,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
 msgstr "Неизвестная транзакция."
 
+msgctxt "accounts.superadmin_ai.message"
+msgid "ai_settings_saved"
+msgstr "Настройки ИИ успешно сохранены."
+
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
@@ -10341,6 +10345,34 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_message"
 msgstr "Вы уверены, что хотите сохранить и завершить эту проверку?"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "action_ai_grade"
+msgstr "Оценить с ИИ"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grading_in_progress"
+msgstr "ИИ оценивает..."
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grade_error"
+msgstr "Ошибка оценки ИИ"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_cached"
+msgstr "Из кэша"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_quota_info"
+msgstr "{remaining}/{limit} ({window})"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_no_answer_to_grade"
+msgstr "Нет ответа для оценки"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_max_points"
+msgstr "макс: {points}"
+
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_back_profile"
@@ -16684,10 +16716,102 @@ msgctxt "superadmin.users"
 msgid "no_users_found"
 msgstr "Пользователи не найдены."
 
+msgctxt "superadmin.ai_settings"
+msgid "title"
+msgstr "Настройки ИИ"
+
+msgctxt "superadmin.ai_settings"
+msgid "heading"
+msgstr "Настройки ИИ"
+
+msgctxt "superadmin.ai_settings"
+msgid "back_to_profile"
+msgstr "Вернуться в профиль"
+
+msgctxt "superadmin.ai_settings"
+msgid "section_general"
+msgstr "Общие"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_enabled"
+msgstr "ИИ-функции включены"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_enabled"
+msgstr "При отключении все функции ИИ (сводки, оценки) будут деактивированы."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_rate_limit"
+msgstr "Лимиты и бюджет"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_rate_limit"
+msgstr "Лимит на пользователя"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_rate_limit"
+msgstr "Формат: количество/период. Напр.: 100/1h = 100 запросов в час."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_budget"
+msgstr "Ежемесячный бюджет ($)"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_budget"
+msgstr "Лимит расходов на Gemini API. Только для информации."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_models"
+msgstr "Выбор модели"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_summary_model"
+msgstr "Модель для статистических сводок"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_summary_model"
+msgstr "Модели более высокого качества стоят дороже."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_grading_model"
+msgstr "Модель для оценки ответов"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_grading_model"
+msgstr "Flash Lite рекомендуется для простых задач оценки."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_estimates"
+msgstr "Оценка бюджета"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_monthly_budget"
+msgstr "Ежемесячный бюджет"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_summaries"
+msgstr "Примерно сводок"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_gradings"
+msgstr "Примерно оценок"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_per_user_limit"
+msgstr "Лимит пользователя"
+
+msgctxt "superadmin.ai_settings"
+msgid "action_save"
+msgstr "Сохранить"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "Управление пользователями"
+
+msgctxt "profile.sidebar"
+msgid "ai_settings"
+msgstr "Настройки ИИ"
 
 # Superadmin User Management messages (i18n)
 
@@ -16970,6 +17094,14 @@ msgid "ai_error"
 msgstr "Не удалось создать AI-сводку. Попробуйте ещё раз."
 
 msgctxt "exams.template.exam_statistics"
+msgid "ai_quota_info"
+msgstr "Квота AI"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_cached"
+msgstr "Из кэша"
+
+msgctxt "exams.template.exam_statistics"
 msgid "chart_module_error"
 msgstr "Модуль графиков не загружен. Обновите страницу."
 
@@ -17054,6 +17186,14 @@ msgctxt "liveExam.template.session_detail"
 msgid "ai_error"
 msgstr "Не удалось создать AI-сводку. Попробуйте ещё раз."
 
+msgctxt "liveExam.template.session_detail"
+msgid "ai_quota_info"
+msgstr "Квота AI"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_cached"
+msgstr "Из кэша"
+
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_live_results"
 msgstr "Результаты живого экзамена"
@@ -17071,12 +17211,40 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY не настроен."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "ai_rate_limit_exceeded"
+msgstr "Вы достигли лимита AI-запросов. Пожалуйста, повторите попытку позже."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
 msgstr "Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через несколько часов."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "Не удалось создать AI-сводку. Пожалуйста, попробуйте позже."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_disabled"
+msgstr "Функции ИИ в настоящее время отключены."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_api_key_missing"
+msgstr "GEMINI_API_KEY не настроен."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "empty_answer"
+msgstr "Нет ответа для оценки."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_quota_exhausted"
+msgstr "Дневная квота AI-сервиса исчерпана. Пожалуйста, повторите попытку через несколько часов."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "grading_failed"
+msgstr "Не удалось выполнить AI-оценку. Пожалуйста, попробуйте позже."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "ai_disabled"
+msgstr "Функции ИИ в настоящее время отключены."
 
 msgctxt "liveExam.template.results"
 msgid "page_title"

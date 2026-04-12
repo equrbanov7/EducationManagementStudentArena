@@ -3343,6 +3343,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
 msgstr "Bilinmeyen işlem."
 
+msgctxt "accounts.superadmin_ai.message"
+msgid "ai_settings_saved"
+msgstr "AI ayarları başarıyla kaydedildi."
+
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
@@ -10324,6 +10328,34 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_message"
 msgstr "Bu değerlendirmeyi kaydedip tamamlamak istediğinize emin misiniz?"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "action_ai_grade"
+msgstr "AI ile değerlendir"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grading_in_progress"
+msgstr "AI değerlendiriyor..."
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grade_error"
+msgstr "AI değerlendirme hatası"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_cached"
+msgstr "Önbellekten"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_quota_info"
+msgstr "{remaining}/{limit} ({window})"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_no_answer_to_grade"
+msgstr "Değerlendirilecek cevap yok"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_max_points"
+msgstr "maks: {points}"
+
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_back_profile"
@@ -16662,10 +16694,102 @@ msgctxt "superadmin.users"
 msgid "no_users_found"
 msgstr "Kullanıcı bulunamadı."
 
+msgctxt "superadmin.ai_settings"
+msgid "title"
+msgstr "AI Ayarları"
+
+msgctxt "superadmin.ai_settings"
+msgid "heading"
+msgstr "AI Ayarları"
+
+msgctxt "superadmin.ai_settings"
+msgid "back_to_profile"
+msgstr "Profile geri dön"
+
+msgctxt "superadmin.ai_settings"
+msgid "section_general"
+msgstr "Genel"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_enabled"
+msgstr "AI özellikleri aktif"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_enabled"
+msgstr "Kapatıldığında tüm AI özellikleri (özetler, değerlendirmeler) devre dışı kalır."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_rate_limit"
+msgstr "Limitler ve Bütçe"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_rate_limit"
+msgstr "Kullanıcı başına limit"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_rate_limit"
+msgstr "Format: sayı/süre. Örn: 100/1h = saatte 100 istek."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_budget"
+msgstr "Aylık bütçe ($)"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_budget"
+msgstr "Gemini API için aylık harcama limiti. Yalnızca bilgilendirme amaçlıdır."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_models"
+msgstr "Model Seçimi"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_summary_model"
+msgstr "İstatistik özet modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_summary_model"
+msgstr "Daha yüksek kaliteli modeller istek başına daha pahalıdır."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_grading_model"
+msgstr "Cevap değerlendirme modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_grading_model"
+msgstr "Basit değerlendirme görevleri için Flash Lite önerilir."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_estimates"
+msgstr "Bütçe Tahminleri"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_monthly_budget"
+msgstr "Aylık bütçe"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_summaries"
+msgstr "Tahmini özet sayısı"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_gradings"
+msgstr "Tahmini değerlendirme sayısı"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_per_user_limit"
+msgstr "Kullanıcı limiti"
+
+msgctxt "superadmin.ai_settings"
+msgid "action_save"
+msgstr "Kaydet"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "Kullanıcı Yönetimi"
+
+msgctxt "profile.sidebar"
+msgid "ai_settings"
+msgstr "AI Ayarları"
 
 # Superadmin User Management messages (i18n)
 
@@ -16948,6 +17072,14 @@ msgid "ai_error"
 msgstr "AI özeti oluşturulamadı. Lütfen tekrar deneyin."
 
 msgctxt "exams.template.exam_statistics"
+msgid "ai_quota_info"
+msgstr "AI istek kotası"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_cached"
+msgstr "Önbellekten"
+
+msgctxt "exams.template.exam_statistics"
 msgid "chart_module_error"
 msgstr "Grafik modülü yüklenemedi. Sayfayı yenileyin."
 
@@ -17032,6 +17164,14 @@ msgctxt "liveExam.template.session_detail"
 msgid "ai_error"
 msgstr "AI özeti oluşturulamadı. Tekrar deneyin."
 
+msgctxt "liveExam.template.session_detail"
+msgid "ai_quota_info"
+msgstr "AI istek kotası"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_cached"
+msgstr "Önbellekten"
+
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_live_results"
 msgstr "Canlı Sınav Sonuçları"
@@ -17049,12 +17189,40 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY yapılandırılmamış."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "ai_rate_limit_exceeded"
+msgstr "AI özet limitinize ulaştınız. Lütfen daha sonra tekrar deneyin."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
 msgstr "AI hizmetinin günlük kotası doldu. Lütfen birkaç saat sonra tekrar deneyin."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "AI özeti oluşturulamadı. Lütfen daha sonra tekrar deneyin."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_disabled"
+msgstr "AI özellikleri şu anda devre dışı."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_api_key_missing"
+msgstr "GEMINI_API_KEY yapılandırılmamış."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "empty_answer"
+msgstr "Değerlendirilecek cevap yok."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_quota_exhausted"
+msgstr "AI hizmetinin günlük kotası doldu. Lütfen birkaç saat sonra tekrar deneyin."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "grading_failed"
+msgstr "AI değerlendirmesi başarısız oldu. Lütfen daha sonra tekrar deneyin."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "ai_disabled"
+msgstr "AI özellikleri şu anda devre dışı."
 
 msgctxt "liveExam.template.results"
 msgid "page_title"
