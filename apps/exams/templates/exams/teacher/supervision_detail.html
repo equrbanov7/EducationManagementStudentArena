@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Nəzarət Detalı - {{ student.username }}{% endblock %}
+
+{% block extraCss %}
+<style nonce="{{ request.csp_nonce }}">
+    .detail-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .detail-header { margin-bottom: 2rem; }
+    .detail-header h1 { font-size: 1.4rem; color: #333; }
+    .detail-header .breadcrumb { font-size: 0.85rem; color: #999; margin-bottom: 0.5rem; }
+    .detail-header .breadcrumb a { color: #007bff; text-decoration: none; }
+    .student-info { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .student-info .info-item { text-align: center; }
+    .student-info .info-label { font-size: 0.8rem; color: #999; margin-bottom: 0.25rem; }
+    .student-info .info-value { font-size: 1.1rem; font-weight: 600; }
+    .badge-status { padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-warned { background: #fff3cd; color: #856404; }
+    .badge-locked { background: #f8d7da; color: #721c24; }
+    .badge-removed { background: #721c24; color: #fff; }
+    .badge-resumed { background: #cce5ff; color: #004085; }
+    .action-bar { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: center; }
+    .action-bar .btn { padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
+    .btn-resume-action { background: #28a745; color: #fff; }
+    .btn-chance-action { background: #007bff; color: #fff; }
+    .btn-back { background: #6c757d; color: #fff; text-decoration: none; }
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ""; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #dee2e6; }
+    .timeline-item { position: relative; margin-bottom: 1.5rem; }
+    .timeline-dot { position: absolute; left: -1.65rem; top: 0.3rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 2px #dee2e6; }
+    .timeline-dot.severity-info { background: #17a2b8; box-shadow: 0 0 0 2px #17a2b8; }
+    .timeline-dot.severity-low { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+    .timeline-dot.severity-medium { background: #ffc107; box-shadow: 0 0 0 2px #ffc107; }
+    .timeline-dot.severity-high { background: #fd7e14; box-shadow: 0 0 0 2px #fd7e14; }
+    .timeline-dot.severity-critical { background: #dc3545; box-shadow: 0 0 0 2px #dc3545; }
+    .timeline-content { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+    .timeline-content .event-type { font-weight: 600; font-size: 0.95rem; }
+    .timeline-content .event-time { font-size: 0.8rem; color: #999; margin-top: 0.2rem; }
+    .timeline-content .event-meta { font-size: 0.85rem; color: #666; margin-top: 0.5rem; }
+    .timeline-content .event-teacher { font-size: 0.85rem; color: #007bff; margin-top: 0.3rem; }
+    .severity-badge { padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; }
+    .sev-info { background: #d1ecf1; color: #0c5460; }
+    .sev-low { background: #d4edda; color: #155724; }
+    .sev-medium { background: #fff3cd; color: #856404; }
+    .sev-high { background: #f8d7da; color: #721c24; }
+    .sev-critical { background: #721c24; color: #fff; }
+    .event-type-labels { }
+    @media (max-width: 768px) { .student-info { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper">
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="{% url 'exams:supervision_monitor' %}">İmtahan Nəzarəti</a> &raquo;
+            {{ student.username }} &raquo; {{ exam.title }}
+        </div>
+        <h1><i class="fas fa-user-shield"></i> Nəzarət Detalı: {{ student.get_full_name|default:student.username }}</h1>
+    </div>
+
+    <div class="student-info">
+        <div class="info-item">
+            <div class="info-label">Tələbə</div>
+            <div class="info-value">{{ student.get_full_name|default:student.username }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">İmtahan</div>
+            <div class="info-value">{{ exam.title }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Nəzarət Statusu</div>
+            <div class="info-value">
+                <span class="badge-status badge-{{ attempt.supervision_status }}">
+                    {{ attempt.get_supervision_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Pozuntu Sayı</div>
+            <div class="info-value" style="{% if attempt.supervision_violation_count >= 3 %}color:#dc3545;{% endif %}">
+                {{ attempt.supervision_violation_count }}
+                {% if config %} / {{ config.max_fullscreen_violations }}{% endif %}
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">İmtahan Statusu</div>
+            <div class="info-value">{{ attempt.get_status_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Əlavə Şans</div>
+            <div class="info-value">{{ attempt.supervision_extra_chances }}</div>
+        </div>
+    </div>
+
+    {# Action Bar #}
+    {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
+    <div class="action-bar">
+        <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> Müəllim əməliyyatları:</span>
+        <button class="btn btn-resume-action" onclick="resumeAttempt({{ attempt.id }}, false)">
+            <i class="fas fa-play"></i> İmtahanı Bərpa Et
+        </button>
+        <button class="btn btn-chance-action" onclick="resumeAttempt({{ attempt.id }}, true)">
+            <i class="fas fa-plus-circle"></i> Əlavə Şans Ver
+        </button>
+        <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Geri
+        </a>
+    </div>
+    {% else %}
+    <div class="action-bar">
+        <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Monitorə Qayıt
+        </a>
+    </div>
+    {% endif %}
+
+    {# Incident Timeline #}
+    <h2 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fas fa-stream"></i> Hadisə Xronologiyası</h2>
+
+    <div class="timeline">
+        {% for incident in incidents %}
+        <div class="timeline-item">
+            <div class="timeline-dot severity-{{ incident.severity }}"></div>
+            <div class="timeline-content">
+                <div class="event-type-labels">
+                    <span class="event-type">{{ incident.get_event_type_display }}</span>
+                    <span class="severity-badge sev-{{ incident.severity }}">{{ incident.get_severity_display }}</span>
+                </div>
+                <div class="event-time">{{ incident.timestamp|date:"d.m.Y H:i:s" }}</div>
+                {% if incident.metadata %}
+                <div class="event-meta">
+                    {% for key, value in incident.metadata.items %}
+                        <span style="background:#f0f0f0;padding:0.1rem 0.4rem;border-radius:4px;margin-right:0.3rem;font-size:0.8rem;">
+                            {{ key }}: {{ value }}
+                        </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if incident.teacher_action %}
+                <div class="event-teacher">
+                    <i class="fas fa-user-tie"></i> Müəllim hərəkəti: {{ incident.teacher_action }}
+                </div>
+                {% endif %}
+                <div style="font-size:0.8rem; color:#aaa; margin-top:0.3rem;">
+                    Pozuntu #{{ incident.violation_count_at_time }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; text-align: center; padding: 2rem;">Heç bir hadisə qeydə alınmayıb.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+function resumeAttempt(attemptId, grantExtraChance) {
+    var msg = grantExtraChance
+        ? "Bu tələbəyə əlavə şans verərək imtahana davam etməyə icazə vermək istəyirsiniz?"
+        : "Bu tələbənin imtahanını bərpa etmək istəyirsiniz?";
+    if (!confirm(msg)) return;
+
+    fetch("/exams/supervision/api/resume/" + attemptId + "/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({ grant_extra_chance: grantExtraChance })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            alert("Əməliyyat uğurla tamamlandı.");
+            location.reload();
+        } else {
+            alert("Xəta: " + (data.error || "Bilinməyən xəta"));
+        }
+    })
+    .catch(function() { alert("Əlaqə xətası."); });
+}
+</script>
+{% endblock %}

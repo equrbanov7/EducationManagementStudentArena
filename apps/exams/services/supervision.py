@@ -5,10 +5,7 @@ Handles business logic for exam supervision: logging incidents,
 enforcing violation limits, and managing recovery flows.
 """
 
-from django.utils import timezone
-
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
-
 
 # Event types that count as violations for limit enforcement
 VIOLATION_EVENT_TYPES = frozenset(
@@ -123,37 +120,53 @@ def _apply_violation_action(attempt, config, violation_count):
     if action == "auto_submit":
         attempt.supervision_status = "removed"
         attempt.mark_finished(status="submitted")
-        _log_system_incident(attempt, "auto_submitted", {
-            "reason": "violation_limit_exceeded",
-            "violation_count": violation_count,
-        })
+        _log_system_incident(
+            attempt,
+            "auto_submitted",
+            {
+                "reason": "violation_limit_exceeded",
+                "violation_count": violation_count,
+            },
+        )
         return "auto_submitted"
 
     elif action == "lock_exam":
         attempt.supervision_status = "locked"
         attempt.save(update_fields=["supervision_status"])
-        _log_system_incident(attempt, "auto_locked", {
-            "reason": "violation_limit_exceeded",
-            "violation_count": violation_count,
-        })
+        _log_system_incident(
+            attempt,
+            "auto_locked",
+            {
+                "reason": "violation_limit_exceeded",
+                "violation_count": violation_count,
+            },
+        )
         return "locked"
 
     elif action == "remove_student":
         attempt.supervision_status = "removed"
         attempt.save(update_fields=["supervision_status"])
-        _log_system_incident(attempt, "auto_locked", {
-            "reason": "student_removed",
-            "violation_count": violation_count,
-        })
+        _log_system_incident(
+            attempt,
+            "auto_locked",
+            {
+                "reason": "student_removed",
+                "violation_count": violation_count,
+            },
+        )
         return "removed"
 
     elif action == "mark_suspicious":
         attempt.supervision_status = "warned"
         attempt.save(update_fields=["supervision_status"])
-        _log_system_incident(attempt, "suspicious_repeated", {
-            "reason": "marked_suspicious",
-            "violation_count": violation_count,
-        })
+        _log_system_incident(
+            attempt,
+            "suspicious_repeated",
+            {
+                "reason": "marked_suspicious",
+                "violation_count": violation_count,
+            },
+        )
         return "marked_suspicious"
 
     return ""
@@ -205,12 +218,14 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
         attempt.supervision_violation_count = max(0, attempt.supervision_violation_count - 1)
 
     attempt.status = "in_progress"
-    attempt.save(update_fields=[
-        "supervision_status",
-        "supervision_extra_chances",
-        "supervision_violation_count",
-        "status",
-    ])
+    attempt.save(
+        update_fields=[
+            "supervision_status",
+            "supervision_extra_chances",
+            "supervision_violation_count",
+            "status",
+        ]
+    )
 
     action_type = "teacher_granted_chance" if grant_extra_chance else "teacher_resumed"
     SupervisionIncident.objects.create(
