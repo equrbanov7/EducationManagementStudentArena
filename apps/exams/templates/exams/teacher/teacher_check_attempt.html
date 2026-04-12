@@ -53,6 +53,10 @@
                                id="hidden_score_{{ q.id }}"
                                name="score_{{ q.id }}" 
                                value="{% if ans and ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
+                        <input type="hidden"
+                               id="hidden_max_points_{{ q.id }}"
+                               name="max_points_{{ q.id }}"
+                               value="{{ q.points }}">
                         
                         {# ---- GİZLİ FEEDBACK TEXTAREA ---- #}
                         <textarea style="display:none;"
@@ -181,7 +185,14 @@
                     <label for="modalScoreInput">{% trans "label_score" context "exams.template.teacher_check_attempt" %}</label>
                     <div class="score-input-wrap">
                         <input type="number" id="modalScoreInput" class="form-control" step="1" min="0" inputmode="numeric">
-                        <span class="score-max-badge" id="maxPointsHint"></span>
+                        <span class="score-max-divider" aria-hidden="true">/</span>
+                        <input type="number"
+                               id="modalMaxPointsInput"
+                               class="form-control score-max-input"
+                               step="1"
+                               min="1"
+                               inputmode="numeric"
+                               aria-label="Max points">
                     </div>
                 </div>
                 <div class="grading-field grading-field--feedback">
@@ -230,8 +241,7 @@
             aiError: "{% filter escapejs %}{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             aiCached: "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             aiQuotaInfo: "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            maxPointsLabel: "{% filter escapejs %}{% trans 'label_max_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
+            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
         };
         window.AI_GRADE_URL = "{% url 'exams:ai_grade_answer' slug=exam.slug attempt_id=attempt.id %}";
     </script>
