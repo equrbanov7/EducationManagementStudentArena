@@ -38,6 +38,7 @@ from .teacher.results import (
     teacher_pending_attempts,
     teacher_view_attempt,
 )
+from .teacher.statistics import teacher_exam_statistics
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Export ediləcək bütün funksiyalar
@@ -72,6 +73,8 @@ __all__ = [
     "teacher_view_attempt",
     "teacher_check_attempt",
     "teacher_pending_attempts",
+    # Teacher - Statistics
+    "teacher_exam_statistics",
     # Student - Results
     "exam_result",
     "student_exam_history",

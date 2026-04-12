@@ -301,6 +301,21 @@
         </div>
         <div class="sd-pagination" id="questionPagination"></div>
     </div>
+
+    <!-- ═══════════ AI Summary ═══════════ -->
+    <div style="background:linear-gradient(135deg,#f0f9ff 0%,#faf5ff 100%);border-radius:16px;border:1px solid #c7d2fe;padding:24px;margin-bottom:28px" id="aiSummaryPanel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="font-size:1.08rem;font-weight:700;color:#4338ca;display:flex;align-items:center;gap:8px">
+                <i class="fas fa-robot"></i> {% trans "ai_summary_title" context "liveExam.template.session_detail" %}
+            </div>
+            <button type="button" id="aiSummaryBtn" style="padding:8px 18px;background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+                <i class="fas fa-magic"></i> {% trans "ai_generate_btn" context "liveExam.template.session_detail" %}
+            </button>
+        </div>
+        <div id="aiSummaryContent" style="font-size:.92rem;line-height:1.7;color:#1e1b4b">
+            <p style="color:#6b7280;font-style:italic">{% trans "ai_initial_message" context "liveExam.template.session_detail" %}</p>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -627,6 +642,51 @@
 
     setupTable("playerTbody", "playerSearch", "playerPagination");
     setupTable("questionTbody", "questionSearch", "questionPagination");
+
+    /* ═══════════ AI Summary ═══════════ */
+    var aiBtn = document.getElementById("aiSummaryBtn");
+    var aiContent = document.getElementById("aiSummaryContent");
+    if (aiBtn && aiContent) {
+        aiBtn.addEventListener("click", function() {
+            aiBtn.disabled = true;
+            aiBtn.style.opacity = "0.6";
+            aiContent.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:#6366f1;font-weight:600;font-size:.9rem"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "liveExam.template.session_detail" %}</div>';
+
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set("ai_summary", "1");
+
+            fetch(currentUrl.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.ok) {
+                        aiContent.innerHTML = formatMd(data.summary);
+                    } else {
+                        aiContent.innerHTML = '<div style="color:#dc2626;font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:6px"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || "{% trans 'ai_error' context 'liveExam.template.session_detail' %}") + '</div>';
+                    }
+                    aiBtn.disabled = false;
+                    aiBtn.style.opacity = "1";
+                })
+                .catch(function() {
+                    aiContent.innerHTML = '<div style="color:#dc2626;font-weight:600"><i class="fas fa-exclamation-triangle"></i> {% trans "ai_error" context "liveExam.template.session_detail" %}</div>';
+                    aiBtn.disabled = false;
+                    aiBtn.style.opacity = "1";
+                });
+        });
+    }
+
+    function formatMd(text) {
+        var html = text
+            .replace(/### (.*)/g, '<h3 style="color:#4338ca;margin:16px 0 8px;font-size:1rem">$1</h3>')
+            .replace(/## (.*)/g, '<h2 style="color:#4338ca;margin:16px 0 8px;font-size:1.05rem">$1</h2>')
+            .replace(/# (.*)/g, '<h1 style="color:#4338ca;margin:16px 0 8px;font-size:1.1rem">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#312e81">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^- (.*)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul style="padding-left:20px;margin:8px 0">$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        return '<p>' + html + '</p>';
+    }
 })();
 </script>
 {% endblock %}

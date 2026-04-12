@@ -16718,3 +16718,338 @@ msgstr "Пользователь \"%(username)s\" был навсегда уда
 #: apps/accounts/views/account_management.py
 msgid "unknown_action"
 msgstr "Неизвестное действие."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EXAM STATISTICS (teacher_exam_statistics & live session AI summary)
+# ═══════════════════════════════════════════════════════════════════════════
+
+#: apps/exams/templates/exams/teacher/teacher_exam_detail.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_view_statistics"
+msgstr "Статистика"
+
+#: apps/exams/templates/exams/teacher/teacher_exam_statistics.html
+msgctxt "exams.template.exam_statistics"
+msgid "page_title"
+msgstr "Статистика экзамена"
+
+msgctxt "exams.template.exam_statistics"
+msgid "back_to_results"
+msgstr "Назад к результатам"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_title"
+msgstr "Фильтры"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_group"
+msgstr "Группа"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_groups"
+msgstr "Все группы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_student"
+msgstr "Студент"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_student_placeholder"
+msgstr "Поиск студента..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_date_from"
+msgstr "Дата с"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_date_to"
+msgstr "Дата по"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status"
+msgstr "Статус"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_statuses"
+msgstr "Все статусы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_submitted"
+msgstr "Отправлено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_expired"
+msgstr "Время истекло"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_status_in_progress"
+msgstr "В процессе"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_score_min"
+msgstr "Мин. балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_score_max"
+msgstr "Макс. балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_pass_fail"
+msgstr "Сдал/Не сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all"
+msgstr "Все"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_passed"
+msgstr "Сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_failed"
+msgstr "Не сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_block"
+msgstr "Раздел"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_all_blocks"
+msgstr "Все разделы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_compare_groups"
+msgstr "Сравнить группы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_apply"
+msgstr "Применить"
+
+msgctxt "exams.template.exam_statistics"
+msgid "filter_clear"
+msgstr "Сбросить"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_total_attempts"
+msgstr "Всего попыток"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_avg_score"
+msgstr "Ср. балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_max_score"
+msgstr "Макс. балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_min_score"
+msgstr "Мин. балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_pass_rate"
+msgstr "Процент сдачи"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_avg_duration"
+msgstr "Ср. время"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_submitted"
+msgstr "Отправлено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_expired"
+msgstr "Время истекло"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_student_scores"
+msgstr "Баллы студентов"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_question_accuracy"
+msgstr "Точность ответов"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_correct_incorrect"
+msgstr "Правильные / Неправильные"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_pass_fail"
+msgstr "Сдал / Не сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_score_distribution"
+msgstr "Распределение баллов"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_score_distribution_hint"
+msgstr "Для небольших групп показаны точные баллы, для больших — группировка по интервалам."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_group_avg_score"
+msgstr "Средний балл по группам"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_group_pass_rate"
+msgstr "Процент сдачи по группам"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_comparison"
+msgstr "Сравнение групп"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_name"
+msgstr "Название группы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_participants"
+msgstr "Участники"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_avg"
+msgstr "Средний"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_pass_rate"
+msgstr "% сдачи"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_max"
+msgstr "Макс."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_group_min"
+msgstr "Мин."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_question_stats"
+msgstr "Статистика вопросов"
+
+msgctxt "exams.template.exam_statistics"
+msgid "search_question"
+msgstr "Поиск вопроса..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_question"
+msgstr "Вопрос"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_answers"
+msgstr "Ответы"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_correct"
+msgstr "Правильно"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_incorrect"
+msgstr "Неправильно"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_accuracy"
+msgstr "Точность"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_summary_title"
+msgstr "AI Анализ / Сводка"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_generate_btn"
+msgstr "Создать сводку"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_initial_message"
+msgstr "Нажмите кнопку выше для создания AI-сводки. Анализ будет основан на текущих фильтрах."
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_loading"
+msgstr "Генерация AI-сводки..."
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_error"
+msgstr "Не удалось создать AI-сводку. Попробуйте ещё раз."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_module_error"
+msgstr "Модуль графиков не загружен. Обновите страницу."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_students"
+msgstr "Баллы студентов не зафиксированы."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_questions"
+msgstr "Недостаточно данных для точности вопросов."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_correct_incorrect"
+msgstr "Нет данных для сравнения правильных и неправильных ответов."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_pass_fail"
+msgstr "Нет данных о сдаче/несдаче."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_distribution"
+msgstr "Нет данных для распределения баллов."
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_score"
+msgstr "Балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_accuracy"
+msgstr "Точность %"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_correct"
+msgstr "Правильно"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_incorrect"
+msgstr "Неправильно"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_pass"
+msgstr "Сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_fail"
+msgstr "Не сдал"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_participants"
+msgstr "Кол-во участников"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_avg_score"
+msgstr "Средний балл"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_pass_rate"
+msgstr "% сдачи"
+
+msgctxt "exams.template.exam_statistics"
+msgid "pagination_results"
+msgstr "результатов"
+
+#: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
+msgctxt "liveExam.template.session_detail"
+msgid "ai_summary_title"
+msgstr "AI Анализ / Сводка"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_generate_btn"
+msgstr "Создать сводку"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_initial_message"
+msgstr "Нажмите кнопку выше для создания AI-сводки."
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_loading"
+msgstr "Генерация AI-сводки..."
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_error"
+msgstr "Не удалось создать AI-сводку. Попробуйте ещё раз."

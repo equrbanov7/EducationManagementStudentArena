@@ -109,6 +109,10 @@
                         <i class="fas fa-poll"></i> {% trans "action_view_results" context "exams.template.teacher_exam_detail" %}
                     </a>
 
+                    <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
+                        <i class="fas fa-chart-line"></i> {% trans "action_view_statistics" context "exams.template.teacher_exam_detail" %}
+                    </a>
+
                     {% if exam.exam_type == "test" %}
                     <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn secondary-btn">
                         <i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri
