@@ -116,7 +116,7 @@
 
 {% block content %}
 <div class="sd-page">
-    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}" class="sd-back">
+    <a href="{{ live_results_url }}" class="sd-back">
         <i class="fas fa-arrow-left"></i> Bütün sessiyalar
     </a>
 
