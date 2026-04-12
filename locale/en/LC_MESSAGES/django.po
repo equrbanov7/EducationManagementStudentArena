@@ -17145,6 +17145,10 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY is not configured."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "gemini_quota_exhausted"
+msgstr "AI service daily quota exceeded. Please try again in a few hours."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "AI summary generation failed. Please try again later."
 
