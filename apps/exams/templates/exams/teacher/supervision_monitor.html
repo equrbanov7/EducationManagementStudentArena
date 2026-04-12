@@ -242,7 +242,26 @@ var SUPERVISION_I18N = {
     stopError: "{% filter escapejs %}{% trans 'stop_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     resumeTitle: "{% filter escapejs %}{% trans 'action_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     stopTitle: "{% filter escapejs %}{% trans 'action_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
-    btnConfirm: "{% filter escapejs %}{% trans 'action_search' context 'exams.template.supervision_monitor' %}{% endfilter %}"
+    btnConfirm: "{% filter escapejs %}{% trans 'action_search' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtFullscreenExited: "{% filter escapejs %}{% trans 'vt_fullscreen_exited' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtFullscreenRestored: "{% filter escapejs %}{% trans 'vt_fullscreen_restored' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTabSwitched: "{% filter escapejs %}{% trans 'vt_tab_switched' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtWindowBlurred: "{% filter escapejs %}{% trans 'vt_window_blurred' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtWindowFocused: "{% filter escapejs %}{% trans 'vt_window_focused' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtCopyAttempt: "{% filter escapejs %}{% trans 'vt_copy_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtPasteAttempt: "{% filter escapejs %}{% trans 'vt_paste_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtCutAttempt: "{% filter escapejs %}{% trans 'vt_cut_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtRightClickAttempt: "{% filter escapejs %}{% trans 'vt_right_click_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtKeyboardShortcut: "{% filter escapejs %}{% trans 'vt_keyboard_shortcut' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTextSelectAttempt: "{% filter escapejs %}{% trans 'vt_text_select_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtSuspiciousRepeated: "{% filter escapejs %}{% trans 'vt_suspicious_repeated' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtGracePeriodExpired: "{% filter escapejs %}{% trans 'vt_grace_period_expired' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtAutoLocked: "{% filter escapejs %}{% trans 'vt_auto_locked' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtAutoSubmitted: "{% filter escapejs %}{% trans 'vt_auto_submitted' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTeacherResumed: "{% filter escapejs %}{% trans 'vt_teacher_resumed' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTeacherGrantedChance: "{% filter escapejs %}{% trans 'vt_teacher_granted_chance' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtExamStartedSupervised: "{% filter escapejs %}{% trans 'vt_exam_started_supervised' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtStudentAcknowledged: "{% filter escapejs %}{% trans 'vt_student_acknowledged' context 'exams.template.supervision_monitor' %}{% endfilter %}"
 };
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -273,12 +292,33 @@ document.addEventListener("DOMContentLoaded", function() {
         var vtData = JSON.parse(document.getElementById("violation-type-data").textContent);
         var vtLabels = Object.keys(vtData);
         var vtValues = Object.values(vtData);
+        var vtI18n = {
+            "fullscreen_exited": SUPERVISION_I18N.vtFullscreenExited,
+            "fullscreen_restored": SUPERVISION_I18N.vtFullscreenRestored,
+            "tab_switched": SUPERVISION_I18N.vtTabSwitched,
+            "window_blurred": SUPERVISION_I18N.vtWindowBlurred,
+            "window_focused": SUPERVISION_I18N.vtWindowFocused,
+            "copy_attempt": SUPERVISION_I18N.vtCopyAttempt,
+            "paste_attempt": SUPERVISION_I18N.vtPasteAttempt,
+            "cut_attempt": SUPERVISION_I18N.vtCutAttempt,
+            "right_click_attempt": SUPERVISION_I18N.vtRightClickAttempt,
+            "keyboard_shortcut": SUPERVISION_I18N.vtKeyboardShortcut,
+            "text_select_attempt": SUPERVISION_I18N.vtTextSelectAttempt,
+            "suspicious_repeated": SUPERVISION_I18N.vtSuspiciousRepeated,
+            "grace_period_expired": SUPERVISION_I18N.vtGracePeriodExpired,
+            "auto_locked": SUPERVISION_I18N.vtAutoLocked,
+            "auto_submitted": SUPERVISION_I18N.vtAutoSubmitted,
+            "teacher_resumed": SUPERVISION_I18N.vtTeacherResumed,
+            "teacher_granted_chance": SUPERVISION_I18N.vtTeacherGrantedChance,
+            "exam_started_supervised": SUPERVISION_I18N.vtExamStartedSupervised,
+            "student_acknowledged": SUPERVISION_I18N.vtStudentAcknowledged
+        };
 
         if (vtValues.some(function(v) { return v > 0; })) {
             new Chart(document.getElementById("violationTypeChart"), {
                 type: "bar",
                 data: {
-                    labels: vtLabels.map(function(l){ return l.replace(/_/g, " "); }),
+                    labels: vtLabels.map(function(l){ return vtI18n[l] || l.replace(/_/g, " "); }),
                     datasets: [{
                         label: SUPERVISION_I18N.chartCount,
                         data: vtValues,

@@ -18341,6 +18341,186 @@ msgctxt "exams.template.supervision_monitor"
 msgid "action_cancel"
 msgstr "Cancel"
 
+#: supervision_monitor chart violation type labels
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_exited"
+msgstr "Fullscreen exited"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_restored"
+msgstr "Fullscreen restored"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_tab_switched"
+msgstr "Tab switched"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_blurred"
+msgstr "Window lost focus"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_focused"
+msgstr "Window regained focus"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_copy_attempt"
+msgstr "Copy attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_paste_attempt"
+msgstr "Paste attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_cut_attempt"
+msgstr "Cut attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_right_click_attempt"
+msgstr "Right-click attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_keyboard_shortcut"
+msgstr "Keyboard shortcut"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_text_select_attempt"
+msgstr "Text selection attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_suspicious_repeated"
+msgstr "Suspicious repeated action"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_grace_period_expired"
+msgstr "Grace period expired"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_locked"
+msgstr "Auto-locked"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_submitted"
+msgstr "Auto-submitted"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_resumed"
+msgstr "Resumed by teacher"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_granted_chance"
+msgstr "Extra chance granted by teacher"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_exam_started_supervised"
+msgstr "Supervised exam started"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_student_acknowledged"
+msgstr "Student acknowledged"
+
+#: SupervisionIncident model event_type choices
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_exited"
+msgstr "Fullscreen exited"
+
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_restored"
+msgstr "Fullscreen restored"
+
+msgctxt "supervision.incident.choice.event"
+msgid "tab_switched"
+msgstr "Tab switched"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_blurred"
+msgstr "Window lost focus"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_focused"
+msgstr "Window regained focus"
+
+msgctxt "supervision.incident.choice.event"
+msgid "copy_attempt"
+msgstr "Copy attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "paste_attempt"
+msgstr "Paste attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "cut_attempt"
+msgstr "Cut attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "right_click_attempt"
+msgstr "Right-click attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "keyboard_shortcut"
+msgstr "Keyboard shortcut"
+
+msgctxt "supervision.incident.choice.event"
+msgid "text_select_attempt"
+msgstr "Text selection attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "suspicious_repeated"
+msgstr "Suspicious repeated action"
+
+msgctxt "supervision.incident.choice.event"
+msgid "grace_period_expired"
+msgstr "Grace period expired"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_locked"
+msgstr "Auto-locked"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_submitted"
+msgstr "Auto-submitted"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_resumed"
+msgstr "Resumed by teacher"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_granted_chance"
+msgstr "Extra chance granted by teacher"
+
+msgctxt "supervision.incident.choice.event"
+msgid "exam_started_supervised"
+msgstr "Supervised exam started"
+
+msgctxt "supervision.incident.choice.event"
+msgid "student_acknowledged"
+msgstr "Student acknowledged"
+
+#: SupervisionIncident model severity choices
+msgctxt "supervision.incident.choice.severity"
+msgid "info"
+msgstr "Info"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "low"
+msgstr "Low"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "medium"
+msgstr "Medium"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "high"
+msgstr "High"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "critical"
+msgstr "Critical"
+
+#: SupervisionIncident model field labels
+msgctxt "supervision.incident.field"
+msgid "event_type"
+msgstr "Event type"
+
 msgctxt "exams.template.supervision_detail"
 msgid "action_cancel"
 msgstr "Cancel"
