@@ -9,11 +9,18 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 
 from django.conf import settings
 from django.utils.translation import get_language, pgettext
 
 logger = logging.getLogger(__name__)
+
+# Model fallback chain: try each in order until one succeeds.
+_MODEL_CHAIN = ("gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash")
+
+_MAX_RETRIES = 2
+_RETRY_BASE_DELAY = 2  # seconds
 
 
 def _get_api_key() -> str | None:
@@ -79,10 +86,37 @@ def generate_exam_statistics_summary(
         import google.generativeai as genai
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(prompt)
-        text = response.text or ""
-        return {"ok": True, "summary": text.strip()}
+
+        last_exc = None
+        for model_name in _MODEL_CHAIN:
+            for attempt in range(_MAX_RETRIES + 1):
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content(prompt)
+                    text = response.text or ""
+                    return {"ok": True, "summary": text.strip()}
+                except Exception as exc:
+                    last_exc = exc
+                    exc_name = type(exc).__name__
+                    if "ResourceExhausted" in exc_name or "429" in str(exc):
+                        if attempt < _MAX_RETRIES:
+                            time.sleep(_RETRY_BASE_DELAY * (attempt + 1))
+                            continue
+                        # All retries exhausted for this model — try next
+                        logger.warning("Gemini rate limit on %s after %d retries", model_name, _MAX_RETRIES)
+                        break
+                    # Non-rate-limit error — try next model immediately
+                    logger.warning("Gemini error on %s: %s", model_name, exc_name)
+                    break
+
+        # All models failed
+        exc_str = str(last_exc) if last_exc else ""
+        if "ResourceExhausted" in type(last_exc).__name__ or "429" in exc_str:
+            logger.error("Gemini quota exhausted across all models")
+            return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "gemini_quota_exhausted")}
+
+        logger.exception("Gemini AI summary generation failed", exc_info=last_exc)
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "generation_failed")}
     except Exception:
         logger.exception("Gemini AI summary generation failed")
         return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "generation_failed")}
