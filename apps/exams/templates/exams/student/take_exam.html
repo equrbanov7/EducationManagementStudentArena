@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Show time-up notification
                 var timeUpMsg = (I18N_TAKE_EXAM.timeUpMessage || "").trim();
-                if (!timeUpMsg) timeUpMsg = "\u23F0 Vaxt\u0131n\u0131z bitdi!";
+                if (!timeUpMsg) timeUpMsg = "\u23F0 Time is up!";
                 showNotification(timeUpMsg, "error", 0);
 
                 const hiddenInput = document.createElement("input");
