@@ -688,6 +688,53 @@ document.addEventListener("DOMContentLoaded", function () {
         syncPickerFromSelect();
     }
 
+    function initCreateExamSupervisionToggle(form) {
+        if (!form) {
+            return;
+        }
+
+        var enabledCheckbox = form.querySelector('input[name="supervision_enabled"]');
+        var settingsBlock = form.querySelector("#modalSupervisionSettings");
+        var templateSelect = form.querySelector('select[name="supervision_template"]');
+        var customBlock = form.querySelector("#modalSupervisionCustomSettings");
+
+        if (!enabledCheckbox || !settingsBlock) {
+            return;
+        }
+
+        function syncSupervisionSettings() {
+            if (enabledCheckbox.checked) {
+                settingsBlock.style.display = "block";
+                settingsBlock.removeAttribute("hidden");
+            } else {
+                settingsBlock.style.display = "none";
+            }
+        }
+
+        function syncSupervisionCustom() {
+            if (!templateSelect || !customBlock) {
+                return;
+            }
+            customBlock.style.display = templateSelect.value === "custom" ? "block" : "none";
+        }
+
+        syncSupervisionSettings();
+        enabledCheckbox.addEventListener("change", syncSupervisionSettings);
+        enabledCheckbox.addEventListener("click", function () {
+            setTimeout(syncSupervisionSettings, 0);
+        });
+
+        if (templateSelect) {
+            syncSupervisionCustom();
+            templateSelect.addEventListener("change", syncSupervisionCustom);
+        }
+
+        // Initialize Bootstrap selects inside supervision settings
+        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.init === "function") {
+            window.EMSBootstrapSelect.init(settingsBlock);
+        }
+    }
+
     function bindCreateExamModalForm() {
         if (!createExamModalBody) {
             return;
@@ -707,6 +754,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         initCreateExamTypePicker(form);
         initCreateExamAccessToggle(form);
+        initCreateExamSupervisionToggle(form);
         var groupSelector = initCreateExamSearchableSelect(form, {
             selectName: "allowed_groups",
             listSelector: "#createExamGroupsList",
