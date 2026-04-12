@@ -17049,6 +17049,10 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY yapılandırılmamış."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "gemini_quota_exhausted"
+msgstr "AI hizmetinin günlük kotası doldu. Lütfen birkaç saat sonra tekrar deneyin."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "AI özeti oluşturulamadı. Lütfen daha sonra tekrar deneyin."
 
