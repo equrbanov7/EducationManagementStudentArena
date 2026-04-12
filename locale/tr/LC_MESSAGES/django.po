@@ -17791,6 +17791,180 @@ msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Sonraki ›"
 
+#: teacher_exam_results translations
+msgctxt "exams.template.teacher_exam_results"
+msgid "page_title_suffix"
+msgstr "Sınav sonuçları"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_type"
+msgstr "Tür:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_status"
+msgstr "Durum:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_active"
+msgstr "AKTİF"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_inactive"
+msgstr "Deaktif"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "search_placeholder"
+msgstr "Kullanıcı ara..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_label"
+msgstr "Durum"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_statuses"
+msgstr "Tüm durumlar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Taslak"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "Devam ediyor"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Gönderildi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Süresi doldu"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_label"
+msgstr "Kontrol edildi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_checks"
+msgstr "Kontrol: tümü"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked"
+msgstr "Kontrol edildi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_unchecked"
+msgstr "Kontrol edilmedi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_from"
+msgstr "Başlangıç tarihi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_to"
+msgstr "Bitiş tarihi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_apply_filter"
+msgstr "Uygula"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_reset_filter"
+msgstr "Sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_selected"
+msgstr "Seçilen:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Tümünü seç"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear_selection"
+msgstr "Seçimi temizle"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Seçilenleri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "heading_participant_results"
+msgstr "Katılımcı sonuçları"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_user"
+msgstr "Kullanıcı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_status"
+msgstr "Durum"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_correct"
+msgstr "Doğru"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_wrong"
+msgstr "Yanlış"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_score"
+msgstr "Puan"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_start_time"
+msgstr "Başlangıç tarihi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_end_time"
+msgstr "Bitiş zamanı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_duration"
+msgstr "Süre (sn.)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_action"
+msgstr "İşlem"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_anonymous_view"
+msgstr "Anonim görünüm"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_checked"
+msgstr "Kontrol edildi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "empty_no_attempts"
+msgstr "Bu sınav için henüz deneme yok."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_title"
+msgstr "Denemeleri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_message"
+msgstr "Seçilen sonuçlar silinecek."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_warning"
+msgstr "Bu işlem geri alınamaz."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_close"
+msgstr "Kapat"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_confirm_delete"
+msgstr "Silmeyi onayla"
+
+
 msgctxt "exams.template.supervision_monitor"
 msgid "page_title"
 msgstr "Sınav Denetimi - Monitor"

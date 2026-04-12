@@ -17813,6 +17813,180 @@ msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Далее ›"
 
+#: teacher_exam_results translations
+msgctxt "exams.template.teacher_exam_results"
+msgid "page_title_suffix"
+msgstr "Результаты экзамена"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_type"
+msgstr "Тип:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_status"
+msgstr "Статус:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_active"
+msgstr "АКТИВЕН"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_inactive"
+msgstr "Неактивен"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "search_placeholder"
+msgstr "Поиск пользователя..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_label"
+msgstr "Статус"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_statuses"
+msgstr "Все статусы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Черновик"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "В процессе"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Отправлено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Истёк"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_label"
+msgstr "Проверено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_checks"
+msgstr "Проверка: все"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked"
+msgstr "Проверено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_unchecked"
+msgstr "Не проверено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_from"
+msgstr "Дата начала"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_to"
+msgstr "Дата окончания"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_apply_filter"
+msgstr "Применить"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_reset_filter"
+msgstr "Сбросить"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_selected"
+msgstr "Выбрано:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Выбрать все"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear_selection"
+msgstr "Очистить выбор"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "heading_participant_results"
+msgstr "Результаты участников"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_user"
+msgstr "Пользователь"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_status"
+msgstr "Статус"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_correct"
+msgstr "Правильно"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_wrong"
+msgstr "Неправильно"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_score"
+msgstr "Балл"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_start_time"
+msgstr "Дата начала"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_end_time"
+msgstr "Время окончания"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_duration"
+msgstr "Длительность (сек.)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_action"
+msgstr "Действие"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_anonymous_view"
+msgstr "Анонимный просмотр"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_checked"
+msgstr "Проверено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Удалить"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "empty_no_attempts"
+msgstr "По этому экзамену пока нет попыток."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_title"
+msgstr "Удалить попытки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_message"
+msgstr "Выбранные результаты будут удалены."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_warning"
+msgstr "Это действие нельзя отменить."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_close"
+msgstr "Закрыть"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_confirm_delete"
+msgstr "Подтвердить удаление"
+
+
 msgctxt "exams.template.supervision_monitor"
 msgid "page_title"
 msgstr "Мониторинг экзаменов"

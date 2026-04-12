@@ -17887,6 +17887,180 @@ msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Next ›"
 
+#: teacher_exam_results translations
+msgctxt "exams.template.teacher_exam_results"
+msgid "page_title_suffix"
+msgstr "Exam results"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_type"
+msgstr "Type:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_status"
+msgstr "Status:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_active"
+msgstr "ACTIVE"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_inactive"
+msgstr "Inactive"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "search_placeholder"
+msgstr "Search user..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_label"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_statuses"
+msgstr "All statuses"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Draft"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "In progress"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Submitted"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Expired"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_label"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_checks"
+msgstr "Check: all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_unchecked"
+msgstr "Unchecked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_from"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_to"
+msgstr "End date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_apply_filter"
+msgstr "Apply"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_reset_filter"
+msgstr "Reset"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_selected"
+msgstr "Selected:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Select all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear_selection"
+msgstr "Clear selection"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Delete selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "heading_participant_results"
+msgstr "Participant results"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_user"
+msgstr "User"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_correct"
+msgstr "Correct"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_wrong"
+msgstr "Wrong"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_score"
+msgstr "Score"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_start_time"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_end_time"
+msgstr "End time"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_duration"
+msgstr "Duration (sec.)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_action"
+msgstr "Action"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_anonymous_view"
+msgstr "Anonymous view"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Delete"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "empty_no_attempts"
+msgstr "No attempts for this exam yet."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_title"
+msgstr "Delete attempts"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_message"
+msgstr "Selected results will be deleted."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_warning"
+msgstr "This action cannot be undone."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_close"
+msgstr "Close"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_confirm_delete"
+msgstr "Confirm deletion"
+
+
 msgctxt "exams.template.supervision_monitor"
 msgid "page_title"
 msgstr "Exam Supervision - Monitor"
