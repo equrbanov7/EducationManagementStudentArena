@@ -234,7 +234,10 @@ def teacher_resume_api(request, attempt_id):
     try:
         teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
     except ValueError:
-        return JsonResponse({"error": "Bu əməliyyat icra edilə bilməz."}, status=400)
+        return JsonResponse(
+            {"error": pgettext("supervision.view.api", "operation_not_allowed")},
+            status=400,
+        )
 
     # Audit log
     from apps.audit.utils import log_action
@@ -281,7 +284,10 @@ def teacher_stop_api(request, attempt_id):
     try:
         teacher_stop_attempt(attempt, request.user)
     except ValueError:
-        return JsonResponse({"error": "Bu əməliyyat icra edilə bilməz."}, status=400)
+        return JsonResponse(
+            {"error": pgettext("supervision.view.api", "operation_not_allowed")},
+            status=400,
+        )
 
     # Audit log
     from apps.audit.utils import log_action

@@ -18339,3 +18339,7 @@ msgstr "Ваш экзамен приостановлен. Дождитесь р�
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Ждём ответа преподавателя..."
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "Эта операция не может быть выполнена."

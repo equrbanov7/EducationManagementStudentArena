@@ -161,8 +161,12 @@
                         el.webkitRequestFullscreen();
                     }
                     if (fsPromise && typeof fsPromise.catch === "function") {
-                        fsPromise.catch(function () {
-                            // Fullscreen was denied by browser - exam still proceeds
+                        fsPromise.catch(function (err) {
+                            // Fullscreen was denied by browser - log for diagnostics
+                            ExamSupervision._logEvent("fullscreen_exited", {
+                                reason: "fullscreen_denied_by_browser",
+                                error: err ? err.message || String(err) : "unknown"
+                            });
                         });
                     }
                 }

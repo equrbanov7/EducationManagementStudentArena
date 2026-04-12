@@ -18413,3 +18413,7 @@ msgstr "Your exam has been suspended. Please wait until the teacher makes a deci
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Waiting for teacher's response..."
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "This operation cannot be performed."
