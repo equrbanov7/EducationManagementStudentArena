@@ -18337,6 +18337,14 @@ msgctxt "exams.template.supervision_monitor"
 msgid "stop_error"
 msgstr "Stop error: "
 
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "Cancel"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "Cancel"
+
 #: take_exam supervision JS i18n
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_title"
@@ -18368,7 +18376,7 @@ msgstr "Keyboard shortcuts are restricted"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_max_violation"
-msgstr "Maximum violations allowed."
+msgstr "Maximum {count} violations allowed."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_btn"

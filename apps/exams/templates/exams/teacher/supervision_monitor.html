@@ -46,8 +46,19 @@
     .btn-action { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; text-decoration: none; }
     .btn-detail { background: #007bff; color: #fff; }
     .btn-resume { background: #28a745; color: #fff; }
+    .btn-stop { background: #dc3545; color: #fff; }
     .empty-state { text-align: center; padding: 3rem; color: #999; }
     .empty-state i { font-size: 3rem; margin-bottom: 1rem; }
+    /* Confirmation modal */
+    .confirm-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; justify-content:center; align-items:center; }
+    .confirm-overlay.show { display:flex; }
+    .confirm-box { background:#fff; border-radius:12px; padding:2rem; max-width:450px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+    .confirm-box h3 { margin-bottom:1rem; font-size:1.15rem; }
+    .confirm-box p { color:#555; margin-bottom:1.5rem; font-size:0.95rem; }
+    .confirm-box .confirm-actions { display:flex; gap:0.75rem; justify-content:center; }
+    .confirm-box .btn-cancel { padding:0.5rem 1.25rem; border-radius:8px; border:1px solid #dee2e6; background:#fff; color:#333; cursor:pointer; font-size:0.9rem; }
+    .confirm-box .btn-confirm-danger { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#dc3545; color:#fff; cursor:pointer; font-size:0.9rem; }
+    .confirm-box .btn-confirm-success { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#28a745; color:#fff; cursor:pointer; font-size:0.9rem; }
     @media (max-width: 768px) {
         .chart-section { grid-template-columns: 1fr; }
         .filter-bar { flex-direction: column; }
@@ -78,21 +89,9 @@
         </div>
     </div>
 
-    {# Charts #}
-    <div class="chart-section">
-        <div class="chart-card">
-            <h3><i class="fas fa-chart-pie"></i> {% trans "chart_severity_distribution" context "exams.template.supervision_monitor" %}</h3>
-            <canvas id="severityChart" height="200"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3><i class="fas fa-chart-bar"></i> {% trans "chart_violation_types" context "exams.template.supervision_monitor" %}</h3>
-            <canvas id="violationTypeChart" height="200"></canvas>
-        </div>
-    </div>
-
     {# Filters #}
-    <form method="get" class="filter-bar">
-        <input type="text" name="q" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
+    <form method="get" class="filter-bar" id="monitorFilterForm">
+        <input type="text" name="q" id="monitorSearchInput" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
         <div class="bootstrap-single-select">
             <select name="exam" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
                 <option value="">{% trans "filter_all_exams" context "exams.template.supervision_monitor" %}</option>
@@ -160,7 +159,7 @@
                         </button>
                         {% endif %}
                         {% if not attempt.is_finished %}
-                        <button class="btn-action btn-stop" data-stop-attempt-id="{{ attempt.id }}" title="{% trans 'action_stop' context 'exams.template.supervision_monitor' %}" style="background:#dc3545;color:#fff;margin-left:0.25rem;">
+                        <button class="btn-action btn-stop" data-stop-attempt-id="{{ attempt.id }}" title="{% trans 'action_stop' context 'exams.template.supervision_monitor' %}" style="margin-left:0.25rem;">
                             <i class="fas fa-stop"></i> {% trans "action_stop" context "exams.template.supervision_monitor" %}
                         </button>
                         {% endif %}
@@ -195,12 +194,36 @@
         {% endif %}
     </div>
     {% endif %}
+
+    {# Charts (below table) #}
+    <div class="chart-section" style="margin-top:2rem;">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie"></i> {% trans "chart_severity_distribution" context "exams.template.supervision_monitor" %}</h3>
+            <canvas id="severityChart" height="200"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-bar"></i> {% trans "chart_violation_types" context "exams.template.supervision_monitor" %}</h3>
+            <canvas id="violationTypeChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+{# Confirmation Modal #}
+<div class="confirm-overlay" id="confirmModal">
+    <div class="confirm-box">
+        <h3 id="confirmModalTitle"></h3>
+        <p id="confirmModalMessage"></p>
+        <div class="confirm-actions">
+            <button type="button" class="btn-cancel" id="confirmModalCancel">{% trans "action_cancel" context "exams.template.supervision_monitor" %}</button>
+            <button type="button" class="btn-confirm-success" id="confirmModalOk"></button>
+        </div>
+    </div>
 </div>
 
 {{ severity_counts|json_script:"severity-data" }}
 {{ violation_type_counts|json_script:"violation-type-data" }}
 
-<script src="{% static 'vendor/chartjs/chart.min.js' %}"></script>
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}">
 var SUPERVISION_I18N = {
     sevInfo: "{% filter escapejs %}{% trans 'sev_info' context 'exams.template.supervision_monitor' %}{% endfilter %}",
@@ -215,117 +238,180 @@ var SUPERVISION_I18N = {
     connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     confirmStop: "{% filter escapejs %}{% trans 'confirm_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
     stopSuccess: "{% filter escapejs %}{% trans 'stop_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
-    stopError: "{% filter escapejs %}{% trans 'stop_error' context 'exams.template.supervision_monitor' %}{% endfilter %}"
+    stopError: "{% filter escapejs %}{% trans 'stop_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeTitle: "{% filter escapejs %}{% trans 'action_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopTitle: "{% filter escapejs %}{% trans 'action_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    btnConfirm: "{% filter escapejs %}{% trans 'action_search' context 'exams.template.supervision_monitor' %}{% endfilter %}"
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Severity Chart
+    // --- Charts ---
     try {
         var severityData = JSON.parse(document.getElementById("severity-data").textContent);
         var sevLabels = Object.keys(severityData);
         var sevValues = Object.values(severityData);
         var sevColors = {"info":"#17a2b8","low":"#28a745","medium":"#ffc107","high":"#fd7e14","critical":"#dc3545"};
         var sevI18n = {"info":SUPERVISION_I18N.sevInfo,"low":SUPERVISION_I18N.sevLow,"medium":SUPERVISION_I18N.sevMedium,"high":SUPERVISION_I18N.sevHigh,"critical":SUPERVISION_I18N.sevCritical};
-        new Chart(document.getElementById("severityChart"), {
-            type: "doughnut",
-            data: {
-                labels: sevLabels.map(function(l) { return sevI18n[l] || l; }),
-                datasets: [{
-                    data: sevValues,
-                    backgroundColor: sevLabels.map(function(l){ return sevColors[l] || "#ccc"; })
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { position: "bottom" } } }
-        });
-    } catch(e) {}
 
-    // Violation Type Chart
+        if (sevValues.some(function(v) { return v > 0; })) {
+            new Chart(document.getElementById("severityChart"), {
+                type: "doughnut",
+                data: {
+                    labels: sevLabels.map(function(l) { return sevI18n[l] || l; }),
+                    datasets: [{
+                        data: sevValues,
+                        backgroundColor: sevLabels.map(function(l){ return sevColors[l] || "#ccc"; })
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+            });
+        }
+    } catch(e) { console.warn("Severity chart error:", e); }
+
     try {
         var vtData = JSON.parse(document.getElementById("violation-type-data").textContent);
         var vtLabels = Object.keys(vtData);
         var vtValues = Object.values(vtData);
-        new Chart(document.getElementById("violationTypeChart"), {
-            type: "bar",
-            data: {
-                labels: vtLabels.map(function(l){ return l.replace(/_/g, " "); }),
-                datasets: [{
-                    label: SUPERVISION_I18N.chartCount,
-                    data: vtValues,
-                    backgroundColor: "#007bff"
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-            }
+
+        if (vtValues.some(function(v) { return v > 0; })) {
+            new Chart(document.getElementById("violationTypeChart"), {
+                type: "bar",
+                data: {
+                    labels: vtLabels.map(function(l){ return l.replace(/_/g, " "); }),
+                    datasets: [{
+                        label: SUPERVISION_I18N.chartCount,
+                        data: vtValues,
+                        backgroundColor: "#007bff"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+    } catch(e) { console.warn("Violation type chart error:", e); }
+
+    // --- Debounced search ---
+    var searchInput = document.getElementById("monitorSearchInput");
+    var debounceTimer = null;
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                document.getElementById("monitorFilterForm").submit();
+            }, 500);
         });
-    } catch(e) {}
-});
-
-function resumeAttempt(attemptId) {
-    if (!confirm(SUPERVISION_I18N.confirmResume)) return;
-    fetch("/exams/supervision/api/resume/" + attemptId + "/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
-                ? document.querySelector("[name=csrfmiddlewaretoken]").value
-                : "{{ csrf_token }}",
-            "X-Requested-With": "XMLHttpRequest"
-        },
-        body: JSON.stringify({ grant_extra_chance: true })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            alert(SUPERVISION_I18N.resumeSuccess);
-            location.reload();
-        } else {
-            alert(SUPERVISION_I18N.resumeError + (data.error || ""));
-        }
-    })
-    .catch(function(e) { alert(SUPERVISION_I18N.connectionError); });
-}
-
-document.addEventListener("click", function(event) {
-    var resumeBtn = event.target.closest("[data-resume-attempt-id]");
-    if (resumeBtn && !resumeBtn.hasAttribute("data-stop-attempt-id")) {
-        event.preventDefault();
-        resumeAttempt(parseInt(resumeBtn.getAttribute("data-resume-attempt-id"), 10));
-        return;
     }
 
-    var stopBtn = event.target.closest("[data-stop-attempt-id]");
-    if (stopBtn) {
-        event.preventDefault();
-        stopAttempt(parseInt(stopBtn.getAttribute("data-stop-attempt-id"), 10));
-    }
-});
+    // --- Confirmation modal ---
+    var confirmModal = document.getElementById("confirmModal");
+    var confirmTitle = document.getElementById("confirmModalTitle");
+    var confirmMsg = document.getElementById("confirmModalMessage");
+    var confirmOk = document.getElementById("confirmModalOk");
+    var confirmCancel = document.getElementById("confirmModalCancel");
+    var pendingAction = null;
 
-function stopAttempt(attemptId) {
-    if (!confirm(SUPERVISION_I18N.confirmStop)) return;
-    fetch("/exams/supervision/api/stop/" + attemptId + "/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
-                ? document.querySelector("[name=csrfmiddlewaretoken]").value
-                : "{{ csrf_token }}",
-            "X-Requested-With": "XMLHttpRequest"
-        },
-        body: JSON.stringify({})
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            alert(SUPERVISION_I18N.stopSuccess);
-            location.reload();
-        } else {
-            alert(SUPERVISION_I18N.stopError + (data.error || ""));
+    function showConfirmModal(title, message, btnText, btnClass, onConfirm) {
+        confirmTitle.textContent = title;
+        confirmMsg.textContent = message;
+        confirmOk.textContent = btnText;
+        confirmOk.className = btnClass;
+        pendingAction = onConfirm;
+        confirmModal.classList.add("show");
+    }
+
+    function hideConfirmModal() {
+        confirmModal.classList.remove("show");
+        pendingAction = null;
+    }
+
+    confirmCancel.addEventListener("click", hideConfirmModal);
+    confirmModal.addEventListener("click", function(e) {
+        if (e.target === confirmModal) hideConfirmModal();
+    });
+    confirmOk.addEventListener("click", function() {
+        if (pendingAction) pendingAction();
+        hideConfirmModal();
+    });
+
+    // --- Resume / Stop actions ---
+    function getCSRFToken() {
+        var el = document.querySelector("[name=csrfmiddlewaretoken]");
+        return el ? el.value : "{{ csrf_token }}";
+    }
+
+    function resumeAttempt(attemptId) {
+        fetch("/exams/supervision/api/resume/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ grant_extra_chance: true })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(SUPERVISION_I18N.resumeError + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(SUPERVISION_I18N.connectionError); });
+    }
+
+    function stopAttempt(attemptId) {
+        fetch("/exams/supervision/api/stop/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(SUPERVISION_I18N.stopError + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(SUPERVISION_I18N.connectionError); });
+    }
+
+    document.addEventListener("click", function(event) {
+        var resumeBtn = event.target.closest("[data-resume-attempt-id]");
+        if (resumeBtn && !resumeBtn.hasAttribute("data-stop-attempt-id")) {
+            event.preventDefault();
+            var aid = parseInt(resumeBtn.getAttribute("data-resume-attempt-id"), 10);
+            showConfirmModal(
+                SUPERVISION_I18N.resumeTitle,
+                SUPERVISION_I18N.confirmResume,
+                SUPERVISION_I18N.resumeTitle,
+                "btn-confirm-success",
+                function() { resumeAttempt(aid); }
+            );
+            return;
         }
-    })
-    .catch(function(e) { alert(SUPERVISION_I18N.connectionError); });
-}
+
+        var stopBtn = event.target.closest("[data-stop-attempt-id]");
+        if (stopBtn) {
+            event.preventDefault();
+            var sid = parseInt(stopBtn.getAttribute("data-stop-attempt-id"), 10);
+            showConfirmModal(
+                SUPERVISION_I18N.stopTitle,
+                SUPERVISION_I18N.confirmStop,
+                SUPERVISION_I18N.stopTitle,
+                "btn-confirm-danger",
+                function() { stopAttempt(sid); }
+            );
+        }
+    });
+});
 </script>
 {% endblock %}

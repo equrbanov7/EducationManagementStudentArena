@@ -18241,6 +18241,14 @@ msgctxt "exams.template.supervision_monitor"
 msgid "stop_error"
 msgstr "Durdurma hatası: "
 
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "İptal"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "İptal"
+
 #: take_exam supervision JS i18n
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_title"
@@ -18272,7 +18280,7 @@ msgstr "Klavye kısayolları kısıtlı"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_max_violation"
-msgstr "Maksimum ihlale izin verilir."
+msgstr "Maksimum {count} ihlale izin verilir."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_btn"

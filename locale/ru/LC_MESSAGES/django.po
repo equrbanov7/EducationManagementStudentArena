@@ -18263,6 +18263,14 @@ msgctxt "exams.template.supervision_monitor"
 msgid "stop_error"
 msgstr "Ошибка остановки: "
 
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "Отмена"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "Отмена"
+
 #: take_exam supervision JS i18n
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_title"
@@ -18294,7 +18302,7 @@ msgstr "Горячие клавиши ограничены"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_max_violation"
-msgstr "Максимально допустимых нарушений."
+msgstr "Максимально допустимых нарушений: {count}."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_btn"

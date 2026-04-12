@@ -11,7 +11,7 @@
 (function (window) {
     "use strict";
 
-    const ExamSupervision = {
+    var ExamSupervision = {
         config: null,
         attemptId: null,
         csrfToken: "",
@@ -24,6 +24,8 @@
         warningModal: null,
         isActive: false,
         isFullscreen: false,
+        _acknowledged: false,
+        _initialStatus: "active",
 
         /**
          * Initialize the supervision module.
@@ -38,28 +40,32 @@
             this.violationCount = opts.violationCount || 0;
             this.maxViolations = opts.maxViolations || 3;
             this.gracePeriodSeconds = this.config.grace_period_seconds || 15;
+            this._initialStatus = opts.supervisionStatus || "active";
             this.isActive = true;
+            this._acknowledged = false;
 
             this._createWarningModal();
             this._createSupervisionBadge();
-            this._bindEvents();
 
-            // Log exam start
-            this._logEvent("exam_started_supervised", { timestamp: new Date().toISOString() });
-
-            // If fullscreen is required, show acknowledgment
-            if (this.config.force_fullscreen) {
-                this._showAcknowledgment();
+            // If attempt is already locked/removed, show locked overlay immediately
+            if (this._initialStatus === "locked" || this._initialStatus === "removed") {
+                this._acknowledged = true;
+                this._bindEvents();
+                this._onLimitExceeded();
+                return;
             }
+
+            // Show acknowledgment overlay - events bind AFTER student acknowledges
+            this._showAcknowledgment();
         },
 
         _createWarningModal: function () {
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var warningTitle = i18n.warningTitle || "⚠️ Xəbərdarlıq";
-            var warningMsg = i18n.warningMsg || "İmtahan sahəsindən çıxdınız. Zəhmət olmasa geri qayıdın.";
-            var warningTimeout = i18n.warningTimeout || "Vaxt bitərsə, bu pozuntu kimi qeyd olunacaq.";
+            var warningTitle = i18n.warningTitle || "\u26a0\ufe0f X\u0259b\u0259rdarliq";
+            var warningMsg = i18n.warningMsg || "\u0130mtahan sah\u0259sind\u0259n \u00e7\u0131xd\u0131n\u0131z. Z\u0259hm\u0259t olmasa geri qay\u0131d\u0131n.";
+            var warningTimeout = i18n.warningTimeout || "Vaxt bit\u0259rs\u0259, bu pozuntu kimi qeyd olunacaq.";
             var warningViolation = i18n.warningViolation || "Pozuntu";
-            var warningReturn = i18n.warningReturn || "Tam ekrana qayıt";
+            var warningReturn = i18n.warningReturn || "Tam ekrana qay\u0131t";
 
             var modal = document.createElement("div");
             modal.id = "supervision-warning-modal";
@@ -75,7 +81,7 @@
                 '<p style="color:#666;font-size:0.9rem;">' + warningTimeout + '</p>' +
                 '<div style="margin-top:1rem;">' +
                 '<span style="background:#ffeeba;color:#856404;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.85rem;" id="supervision-violation-badge">' +
-                warningViolation + ": 0 / 3</span></div>" +
+                warningViolation + ": 0 / " + this.maxViolations + "</span></div>" +
                 '<button id="supervision-return-btn" style="margin-top:1.5rem;padding:0.75rem 2rem;background:#28a745;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;">' +
                 '<i class="fas fa-expand"></i> ' + warningReturn + '</button>' +
                 "</div>";
@@ -91,7 +97,7 @@
 
         _createSupervisionBadge: function () {
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var badgeText = i18n.badgeActive || "Nəzarət aktiv";
+            var badgeText = i18n.badgeActive || "N\u0259zar\u0259t aktiv";
 
             var badge = document.createElement("div");
             badge.id = "supervision-active-badge";
@@ -101,23 +107,31 @@
                 "box-shadow:0 2px 10px rgba(220,53,69,0.3);";
             badge.innerHTML =
                 '<i class="fas fa-shield-alt"></i> <span>' + badgeText + '</span>' +
-                ' <span id="supervision-badge-count" style="background:rgba(255,255,255,0.2);padding:0.1rem 0.4rem;border-radius:10px;font-size:0.75rem;">0/' +
-                this.maxViolations +
-                "</span>";
+                ' <span id="supervision-badge-count" style="background:rgba(255,255,255,0.2);padding:0.1rem 0.4rem;border-radius:10px;font-size:0.75rem;">' +
+                this.violationCount + '/' + this.maxViolations + "</span>";
             document.body.appendChild(badge);
         },
 
         _showAcknowledgment: function () {
+            var self = this;
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var titleText = i18n.title || "Nəzarət Rejimi Aktiv";
-            var descText = i18n.desc || "Bu imtahan <strong>nəzarət rejimində</strong> keçirilir. Aşağıdakı qaydalar tətbiq olunur:";
-            var ruleFullscreen = i18n.ruleFullscreen || "Tam ekran rejimi tələb olunur";
-            var ruleTab = i18n.ruleTab || "Tab dəyişmə izlənilir";
-            var ruleCopy = i18n.ruleCopy || "Kopyala/yapışdır bloklanıb";
-            var ruleRightClick = i18n.ruleRightClick || "Sağ klik deaktivdir";
-            var ruleKeyboard = i18n.ruleKeyboard || "Klaviatura qısa yolları məhduddur";
-            var maxViolationText = i18n.maxViolation || ("Maksimum " + this.maxViolations + " pozuntuya icazə verilir.");
-            var btnText = i18n.btnText || "Başa düşdüm, davam et";
+            var titleText = i18n.title || "N\u0259zar\u0259t Rejimi Aktiv";
+            var descText = i18n.desc || "Bu imtahan <strong>n\u0259zar\u0259t rejimind\u0259</strong> ke\u00e7irilir. A\u015fa\u011f\u0131dak\u0131 qaydalar t\u0259tbiq olunur:";
+            var ruleFullscreen = i18n.ruleFullscreen || "Tam ekran rejimi t\u0259l\u0259b olunur";
+            var ruleTab = i18n.ruleTab || "Tab d\u0259yi\u015fm\u0259 izl\u0259nilir";
+            var ruleCopy = i18n.ruleCopy || "Kopyala/yap\u0131\u015fd\u0131r bloklan\u0131b";
+            var ruleRightClick = i18n.ruleRightClick || "Sa\u011f klik deaktivdir";
+            var ruleKeyboard = i18n.ruleKeyboard || "Klaviatura q\u0131sa yollar\u0131 m\u0259hduddur";
+
+            // Build max violation text with actual count
+            var maxViolationText = i18n.maxViolation || "";
+            if (maxViolationText && maxViolationText.indexOf("{count}") !== -1) {
+                maxViolationText = maxViolationText.replace("{count}", this.maxViolations);
+            } else {
+                maxViolationText = "Maksimum " + this.maxViolations + " pozuntuya icaz\u0259 verilir.";
+            }
+
+            var btnText = i18n.btnText || "Ba\u015fa d\u00fc\u015fd\u00fcm, davam et";
 
             var overlay = document.createElement("div");
             overlay.id = "supervision-acknowledgment";
@@ -136,88 +150,97 @@
                 (this.config.disable_right_click ? "<li>" + ruleRightClick + "</li>" : "") +
                 (this.config.restrict_keyboard_shortcuts ? "<li>" + ruleKeyboard + "</li>" : "") +
                 "</ul>" +
-                '<p style="color:#dc3545;font-weight:bold;">' + maxViolationText + "</p>" +
+                '<p style="color:#dc3545;font-weight:bold;font-size:1.05rem;">' + maxViolationText + "</p>" +
                 '<button id="supervision-acknowledge-btn" style="margin-top:1.5rem;padding:0.75rem 2rem;background:#007bff;color:#fff;border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;min-width:250px;">' +
                 '<i class="fas fa-check"></i> ' + btnText + "</button>" +
                 "</div>";
             document.body.appendChild(overlay);
 
             document.getElementById("supervision-acknowledge-btn").addEventListener("click", function () {
+                var btn = this;
                 // Disable button to prevent double-clicks
-                this.disabled = true;
-                this.style.opacity = "0.7";
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+                btn.disabled = true;
+                btn.style.opacity = "0.7";
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
 
-                // Remove overlay first so exam content is accessible
+                // Mark as acknowledged
+                self._acknowledged = true;
+
+                // Remove overlay so exam content is accessible
                 overlay.remove();
 
-                // Request fullscreen - exam works even if this fails
-                if (ExamSupervision.config.force_fullscreen) {
-                    var el = document.documentElement;
-                    var fsPromise = null;
-                    if (el.requestFullscreen) {
-                        fsPromise = el.requestFullscreen();
-                    } else if (el.webkitRequestFullscreen) {
-                        el.webkitRequestFullscreen();
-                    }
-                    if (fsPromise && typeof fsPromise.catch === "function") {
-                        fsPromise.catch(function (err) {
-                            // Fullscreen was denied by browser - log for diagnostics
-                            ExamSupervision._logEvent("fullscreen_exited", {
-                                reason: "fullscreen_denied_by_browser",
-                                error: err ? err.message || String(err) : "unknown"
+                // Bind violation detection events
+                self._bindEvents();
+
+                // Log exam start and acknowledgment
+                self._logEvent("exam_started_supervised", { timestamp: new Date().toISOString() });
+                self._logEvent("student_acknowledged");
+
+                // Request fullscreen (optional - exam works even if this fails)
+                if (self.config.force_fullscreen) {
+                    try {
+                        var el = document.documentElement;
+                        if (el.requestFullscreen) {
+                            el.requestFullscreen().catch(function () {
+                                // Fullscreen denied - this is expected on non-HTTPS origins
                             });
-                        });
+                        } else if (el.webkitRequestFullscreen) {
+                            el.webkitRequestFullscreen();
+                        }
+                    } catch (e) {
+                        // Fullscreen API not available
                     }
                 }
-
-                ExamSupervision._logEvent("student_acknowledged");
             });
         },
 
         _bindEvents: function () {
+            var self = this;
+
             // Fullscreen change
-            document.addEventListener("fullscreenchange", this._onFullscreenChange.bind(this));
-            document.addEventListener("webkitfullscreenchange", this._onFullscreenChange.bind(this));
+            document.addEventListener("fullscreenchange", function () { self._onFullscreenChange(); });
+            document.addEventListener("webkitfullscreenchange", function () { self._onFullscreenChange(); });
 
             // Visibility / focus
             if (this.config.detect_tab_switch) {
-                document.addEventListener("visibilitychange", this._onVisibilityChange.bind(this));
-                window.addEventListener("blur", this._onWindowBlur.bind(this));
-                window.addEventListener("focus", this._onWindowFocus.bind(this));
+                document.addEventListener("visibilitychange", function () { self._onVisibilityChange(); });
+                window.addEventListener("blur", function () { self._onWindowBlur(); });
+                window.addEventListener("focus", function () { self._onWindowFocus(); });
             }
 
             // Copy/Paste
             if (this.config.block_copy_paste) {
-                document.addEventListener("copy", this._onCopy.bind(this));
-                document.addEventListener("paste", this._onPaste.bind(this));
-                document.addEventListener("cut", this._onCut.bind(this));
+                document.addEventListener("copy", function (e) { self._onCopy(e); });
+                document.addEventListener("paste", function (e) { self._onPaste(e); });
+                document.addEventListener("cut", function (e) { self._onCut(e); });
             }
 
             // Right click
             if (this.config.disable_right_click) {
-                document.addEventListener("contextmenu", this._onContextMenu.bind(this));
+                document.addEventListener("contextmenu", function (e) { self._onContextMenu(e); });
             }
 
             // Text selection
             if (this.config.disable_text_selection) {
-                document.addEventListener("selectstart", this._onSelectStart.bind(this));
-                document.addEventListener("dragstart", this._onDragStart.bind(this));
+                document.addEventListener("selectstart", function (e) { self._onSelectStart(e); });
+                document.addEventListener("dragstart", function (e) { self._onDragStart(e); });
             }
 
             // Keyboard shortcuts
             if (this.config.restrict_keyboard_shortcuts) {
-                document.addEventListener("keydown", this._onKeyDown.bind(this));
+                document.addEventListener("keydown", function (e) { self._onKeyDown(e); });
             }
         },
 
         _onFullscreenChange: function () {
-            const isFS =
+            if (!this._acknowledged) return;
+
+            var isFS =
                 !!document.fullscreenElement || !!document.webkitFullscreenElement;
             this.isFullscreen = isFS;
 
             if (!isFS && this.config.force_fullscreen && this.isActive) {
-                this._showWarning("Tam ekrandan çıxdınız!", "Zəhmət olmasa tam ekrana qayıdın.");
+                this._showWarning();
                 this._logEvent("fullscreen_exited");
                 this._startGraceTimer();
             } else if (isFS) {
@@ -228,6 +251,7 @@
         },
 
         _onVisibilityChange: function () {
+            if (!this._acknowledged) return;
             if (document.hidden && this.isActive) {
                 this._logEvent("tab_switched");
                 this._incrementViolation();
@@ -235,12 +259,14 @@
         },
 
         _onWindowBlur: function () {
+            if (!this._acknowledged) return;
             if (this.isActive) {
                 this._logEvent("window_blurred");
             }
         },
 
         _onWindowFocus: function () {
+            if (!this._acknowledged) return;
             if (this.isActive) {
                 this._logEvent("window_focused");
                 this._checkSupervisionStatus();
@@ -287,7 +313,7 @@
         },
 
         _onKeyDown: function (e) {
-            const blocked = [
+            var blocked = [
                 { ctrl: true, key: "c" },
                 { ctrl: true, key: "v" },
                 { ctrl: true, key: "x" },
@@ -300,13 +326,13 @@
                 { key: "PrintScreen" },
             ];
 
-            for (const combo of blocked) {
-                const ctrlMatch = combo.ctrl ? e.ctrlKey || e.metaKey : true;
-                const shiftMatch = combo.shift === undefined || combo.shift === e.shiftKey;
-                const keyMatch = e.key && e.key.toLowerCase() === combo.key.toLowerCase();
+            for (var idx = 0; idx < blocked.length; idx++) {
+                var combo = blocked[idx];
+                var ctrlMatch = combo.ctrl ? e.ctrlKey || e.metaKey : true;
+                var shiftMatch = combo.shift === undefined || combo.shift === e.shiftKey;
+                var keyMatch = e.key && e.key.toLowerCase() === combo.key.toLowerCase();
 
                 if (ctrlMatch && shiftMatch && keyMatch) {
-                    // Allow Ctrl+C/V/X in input fields
                     if (
                         (combo.key === "c" || combo.key === "v" || combo.key === "x") &&
                         this._isEditableField(e.target)
@@ -327,20 +353,25 @@
         },
 
         _requestFullscreen: function () {
-            const el = document.documentElement;
-            if (el.requestFullscreen) {
-                el.requestFullscreen().catch(function () {});
-            } else if (el.webkitRequestFullscreen) {
-                el.webkitRequestFullscreen();
-            }
+            try {
+                var el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(function () {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                }
+            } catch (e) {}
         },
 
         _showWarning: function (title, message) {
             if (!this.warningModal) return;
-            document.getElementById("supervision-warning-title").textContent = title;
-            document.getElementById("supervision-warning-message").textContent = message;
+            var i18n = (window.SUPERVISION_ACK_I18N) || {};
+            var defaultTitle = i18n.warningTitle || "\u26a0\ufe0f X\u0259b\u0259rdarliq";
+            var defaultMsg = i18n.warningMsg || "\u0130mtahan sah\u0259sind\u0259n \u00e7\u0131xd\u0131n\u0131z. Z\u0259hm\u0259t olmasa geri qay\u0131d\u0131n.";
+            document.getElementById("supervision-warning-title").textContent = title || defaultTitle;
+            document.getElementById("supervision-warning-message").textContent = message || defaultMsg;
             document.getElementById("supervision-violation-badge").textContent =
-                "Pozuntu: " + this.violationCount + " / " + this.maxViolations;
+                (this._violationLabel || "Pozuntu") + ": " + this.violationCount + " / " + this.maxViolations;
             this.warningModal.style.display = "flex";
         },
 
@@ -352,8 +383,8 @@
 
         _startGraceTimer: function () {
             this._clearGraceTimer();
-            let remaining = this.gracePeriodSeconds;
-            const countdownEl = document.getElementById("supervision-countdown");
+            var remaining = this.gracePeriodSeconds;
+            var countdownEl = document.getElementById("supervision-countdown");
             if (countdownEl) countdownEl.textContent = remaining;
 
             this.graceTimer = setInterval(
@@ -407,11 +438,14 @@
             this.isActive = false;
             this._hideWarning();
 
+            // Don't create duplicate locked overlays
+            if (document.getElementById("supervision-locked-overlay")) return;
+
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var lockedTitle = i18n.lockedTitle || "İmtahan Dayandırıldı";
-            var lockedMsg = i18n.lockedMsg || ("Maksimum pozuntu limitinə çatdınız (" + this.maxViolations + " pozuntu).");
-            var lockedWait = i18n.lockedWait || "İmtahanınız dayandırılıb. Müəllim qərar qəbul edənə qədər gözləyin.";
-            var lockedWaiting = i18n.lockedWaiting || "Müəllim cavabını gözləyirik...";
+            var lockedTitle = i18n.lockedTitle || "\u0130mtahan Dayand\u0131r\u0131ld\u0131";
+            var lockedMsg = i18n.lockedMsg || ("Maksimum pozuntu limitin\u0259 \u00e7atd\u0131n\u0131z (" + this.maxViolations + " pozuntu).");
+            var lockedWait = i18n.lockedWait || "\u0130mtahan\u0131n\u0131z dayand\u0131r\u0131l\u0131b. M\u00fc\u0259llim q\u0259rar q\u0259bul ed\u0259n\u0259 q\u0259d\u0259r g\u00f6zl\u0259yin.";
+            var lockedWaiting = i18n.lockedWaiting || "M\u00fc\u0259llim cavab\u0131n\u0131 g\u00f6zl\u0259yirik...";
 
             var overlay = document.createElement("div");
             overlay.id = "supervision-locked-overlay";
@@ -434,11 +468,11 @@
         },
 
         _startStatusPolling: function () {
-            const poll = setInterval(function () {
+            var poll = setInterval(function () {
                 ExamSupervision._checkSupervisionStatus(function (data) {
                     if (data.supervision_status === "resumed" || data.supervision_status === "active") {
                         clearInterval(poll);
-                        const overlay = document.getElementById("supervision-locked-overlay");
+                        var overlay = document.getElementById("supervision-locked-overlay");
                         if (overlay) overlay.remove();
                         ExamSupervision.isActive = true;
                         ExamSupervision.violationCount = data.violation_count || 0;
