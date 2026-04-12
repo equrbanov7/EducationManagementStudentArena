@@ -3337,6 +3337,10 @@ msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
 msgstr "Unknown action"
 
+msgctxt "accounts.superadmin_ai.message"
+msgid "ai_settings_saved"
+msgstr "AI settings saved successfully."
+
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
@@ -10320,6 +10324,34 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_message"
 msgstr "Are you sure you want to save and finalize this review?"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "action_ai_grade"
+msgstr "Grade with AI"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grading_in_progress"
+msgstr "AI is grading..."
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_grade_error"
+msgstr "AI grading error"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_cached"
+msgstr "Cached"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_quota_info"
+msgstr "{remaining}/{limit} ({window})"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "ai_no_answer_to_grade"
+msgstr "No answer to grade"
+
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_max_points"
+msgstr "max: {points}"
+
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_back_profile"
@@ -16758,10 +16790,102 @@ msgctxt "superadmin.users"
 msgid "no_users_found"
 msgstr "No users found."
 
+msgctxt "superadmin.ai_settings"
+msgid "title"
+msgstr "AI Settings"
+
+msgctxt "superadmin.ai_settings"
+msgid "heading"
+msgstr "AI Settings"
+
+msgctxt "superadmin.ai_settings"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+msgctxt "superadmin.ai_settings"
+msgid "section_general"
+msgstr "General"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_enabled"
+msgstr "AI features enabled"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_enabled"
+msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_rate_limit"
+msgstr "Limits & Budget"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_rate_limit"
+msgstr "Per-user rate limit"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_rate_limit"
+msgstr "Format: count/period. E.g.: 100/1h = 100 requests per hour."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_budget"
+msgstr "Monthly budget ($)"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_budget"
+msgstr "Monthly spend limit for Gemini API. Informational only."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_models"
+msgstr "Model Selection"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_summary_model"
+msgstr "Statistics summary model"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_summary_model"
+msgstr "Higher quality models cost more per request."
+
+msgctxt "superadmin.ai_settings"
+msgid "label_grading_model"
+msgstr "Answer grading model"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_grading_model"
+msgstr "Flash Lite is recommended for simple grading tasks."
+
+msgctxt "superadmin.ai_settings"
+msgid "section_estimates"
+msgstr "Budget Estimates"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_monthly_budget"
+msgstr "Monthly budget"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_summaries"
+msgstr "Est. summaries"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_max_gradings"
+msgstr "Est. gradings"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_per_user_limit"
+msgstr "Per-user limit"
+
+msgctxt "superadmin.ai_settings"
+msgid "action_save"
+msgstr "Save"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html
 msgctxt "profile.sidebar"
 msgid "user_management"
 msgstr "User Management"
+
+msgctxt "profile.sidebar"
+msgid "ai_settings"
+msgstr "AI Settings"
 
 # Superadmin User Management messages (i18n)
 
@@ -17044,6 +17168,14 @@ msgid "ai_error"
 msgstr "Failed to generate AI summary. Please try again."
 
 msgctxt "exams.template.exam_statistics"
+msgid "ai_quota_info"
+msgstr "AI quota"
+
+msgctxt "exams.template.exam_statistics"
+msgid "ai_cached"
+msgstr "Cached"
+
+msgctxt "exams.template.exam_statistics"
 msgid "chart_module_error"
 msgstr "Chart module failed to load. Please refresh the page."
 
@@ -17128,6 +17260,14 @@ msgctxt "liveExam.template.session_detail"
 msgid "ai_error"
 msgstr "Failed to generate AI summary. Please try again."
 
+msgctxt "liveExam.template.session_detail"
+msgid "ai_quota_info"
+msgstr "AI quota"
+
+msgctxt "liveExam.template.session_detail"
+msgid "ai_cached"
+msgstr "Cached"
+
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_live_results"
 msgstr "Live Exam Results"
@@ -17145,12 +17285,40 @@ msgid "gemini_api_key_missing"
 msgstr "GEMINI_API_KEY is not configured."
 
 msgctxt "exams.service.ai_summary.error"
+msgid "ai_rate_limit_exceeded"
+msgstr "You have reached your AI summary limit. Please try again later."
+
+msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
 msgstr "AI service daily quota exceeded. Please try again in a few hours."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
 msgstr "AI summary generation failed. Please try again later."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_disabled"
+msgstr "AI features are currently disabled."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_api_key_missing"
+msgstr "GEMINI_API_KEY is not configured."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "empty_answer"
+msgstr "No answer to grade."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "gemini_quota_exhausted"
+msgstr "AI service daily quota exceeded. Please try again in a few hours."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "grading_failed"
+msgstr "AI grading failed. Please try again later."
+
+msgctxt "exams.service.ai_grading.error"
+msgid "ai_disabled"
+msgstr "AI features are currently disabled."
 
 msgctxt "liveExam.template.results"
 msgid "page_title"
