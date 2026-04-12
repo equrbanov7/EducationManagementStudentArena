@@ -128,7 +128,11 @@ def teacher_exam_statistics(request, slug):
     if status_filter in allowed_statuses:
         attempts = attempts.filter(status=status_filter)
 
-    pass_threshold = 50  # percent
+    pass_threshold = 50  # percent — configurable per exam via settings JSON
+    custom_threshold = (exam.settings or {}).get("pass_threshold")
+    if isinstance(custom_threshold, (int, float)) and 0 < custom_threshold <= 100:
+        pass_threshold = custom_threshold
+
     if exam.exam_type == "test":
         if score_min is not None:
             attempts = attempts.filter(correct_count__gte=score_min)
@@ -144,14 +148,14 @@ def teacher_exam_statistics(request, slug):
     attempts_list = list(attempts.order_by("-started_at"))
     total_attempts = len(attempts_list)
 
-    if exam.exam_type == "test":
-        scores = []
-        for a in attempts_list:
+    def _attempt_score(a):
+        """Return a normalised score for the attempt."""
+        if exam.exam_type == "test":
             total_q = a.correct_count + a.wrong_count
-            pct = round(a.correct_count * 100 / total_q, 1) if total_q else 0
-            scores.append(pct)
-    else:
-        scores = [a.teacher_score or 0 for a in attempts_list]
+            return round(a.correct_count * 100 / total_q, 1) if total_q else 0
+        return a.teacher_score or 0
+
+    scores = [_attempt_score(a) for a in attempts_list]
 
     avg_score = round(sum(scores) / len(scores), 1) if scores else 0
     max_score_val = max(scores) if scores else 0
@@ -160,29 +164,11 @@ def teacher_exam_statistics(request, slug):
     fail_count = total_attempts - pass_count
     pass_rate = round(pass_count * 100 / total_attempts, 1) if total_attempts else 0
 
-    # Pass/fail filter (applied after computing for chart data)
+    # Pass/fail filter (applied after computing chart data)
     if pass_fail == "pass":
-        if exam.exam_type == "test":
-            filtered = []
-            for a in attempts_list:
-                total_q = a.correct_count + a.wrong_count
-                pct = round(a.correct_count * 100 / total_q, 1) if total_q else 0
-                if pct >= pass_threshold:
-                    filtered.append(a)
-            attempts_list = filtered
-        else:
-            attempts_list = [a for a in attempts_list if (a.teacher_score or 0) >= pass_threshold]
+        attempts_list = [a for a in attempts_list if _attempt_score(a) >= pass_threshold]
     elif pass_fail == "fail":
-        if exam.exam_type == "test":
-            filtered = []
-            for a in attempts_list:
-                total_q = a.correct_count + a.wrong_count
-                pct = round(a.correct_count * 100 / total_q, 1) if total_q else 0
-                if pct < pass_threshold:
-                    filtered.append(a)
-            attempts_list = filtered
-        else:
-            attempts_list = [a for a in attempts_list if (a.teacher_score or 0) < pass_threshold]
+        attempts_list = [a for a in attempts_list if _attempt_score(a) < pass_threshold]
 
     # Duration stats
     durations = [a.duration_seconds for a in attempts_list if a.duration_seconds]
@@ -242,13 +228,7 @@ def teacher_exam_statistics(request, slug):
                 grp_attempts = grp_attempts.filter(started_at__date__lte=date_to)
 
             grp_list = list(grp_attempts)
-            if exam.exam_type == "test":
-                grp_scores = []
-                for a in grp_list:
-                    t = a.correct_count + a.wrong_count
-                    grp_scores.append(round(a.correct_count * 100 / t, 1) if t else 0)
-            else:
-                grp_scores = [a.teacher_score or 0 for a in grp_list]
+            grp_scores = [_attempt_score(a) for a in grp_list]
 
             grp_avg = round(sum(grp_scores) / len(grp_scores), 1) if grp_scores else 0
             grp_pass = sum(1 for s in grp_scores if s >= pass_threshold)
@@ -276,11 +256,7 @@ def teacher_exam_statistics(request, slug):
     for a in attempts_list[:30]:
         name = a.user.get_full_name() or a.user.username
         student_labels.append(name[:25])
-        if exam.exam_type == "test":
-            t = a.correct_count + a.wrong_count
-            student_scores_chart.append(round(a.correct_count * 100 / t, 1) if t else 0)
-        else:
-            student_scores_chart.append(a.teacher_score or 0)
+        student_scores_chart.append(_attempt_score(a))
 
     q_labels = [
         (q["question"].text[:40] + "..." if len(q["question"].text) > 40 else q["question"].text)
