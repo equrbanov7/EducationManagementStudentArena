@@ -17,9 +17,10 @@
     .stat-card.danger .stat-value { color: #dc3545; }
     .stat-card.warning .stat-value { color: #ffc107; }
     .stat-card.info .stat-value { color: #17a2b8; }
-    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: stretch; }
     .filter-bar input { padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; }
     .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
+    .filter-bar .btn-search { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
     .monitor-table { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
     .monitor-table table { width: 100%; border-collapse: collapse; }
     .monitor-table th { background: #f8f9fa; padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.85rem; color: #555; border-bottom: 2px solid #dee2e6; }
@@ -110,7 +111,7 @@
                 <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>{% trans "status_resumed" context "exams.template.supervision_monitor" %}</option>
             </select>
         </div>
-        <button type="submit" class="btn-action btn-detail"><i class="fas fa-search"></i> {% trans "action_search" context "exams.template.supervision_monitor" %}</button>
+        <button type="submit" class="btn-search"><i class="fas fa-search"></i> {% trans "action_search" context "exams.template.supervision_monitor" %}</button>
     </form>
 
     {# Table #}
