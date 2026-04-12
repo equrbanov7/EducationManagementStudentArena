@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
+from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
     get_attempt_supervision_status,
@@ -20,7 +20,7 @@ from apps.exams.services.supervision import (
     log_supervision_incident,
     teacher_resume_attempt,
 )
-from apps.exams.views.shared.tenant import get_active_organization, tenant_scoped_exams
+from apps.exams.views.shared.tenant import get_active_organization
 from core.tenancy import request_has_active_organization_context
 
 
@@ -28,9 +28,7 @@ def _ensure_organization_context(request):
     """Ensure request has active organization context. Returns organization."""
     org = get_active_organization(request)
     if org is None or not request_has_active_organization_context(request):
-        raise PermissionDenied(
-            pgettext("supervision.view.permission", "active_org_required")
-        )
+        raise PermissionDenied(pgettext("supervision.view.permission", "active_org_required"))
     return org
 
 
@@ -77,14 +75,16 @@ def log_incident_api(request, attempt_id):
     if result is None:
         return JsonResponse({"supervised": False})
 
-    return JsonResponse({
-        "supervised": True,
-        "violation_count": result["violation_count"],
-        "max_violations": result["max_violations"],
-        "limit_exceeded": result["limit_exceeded"],
-        "action_taken": result["action_taken"],
-        "supervision_status": result["supervision_status"],
-    })
+    return JsonResponse(
+        {
+            "supervised": True,
+            "violation_count": result["violation_count"],
+            "max_violations": result["max_violations"],
+            "limit_exceeded": result["limit_exceeded"],
+            "action_taken": result["action_taken"],
+            "supervision_status": result["supervision_status"],
+        }
+    )
 
 
 @login_required
@@ -131,14 +131,11 @@ def supervision_monitor(request):
 
     # Apply search filter
     if search_query:
-        flagged = flagged.filter(
-            user__username__icontains=search_query
-        ) | flagged.filter(
-            user__first_name__icontains=search_query
-        ) | flagged.filter(
-            user__last_name__icontains=search_query
-        ) | flagged.filter(
-            exam__title__icontains=search_query
+        flagged = (
+            flagged.filter(user__username__icontains=search_query)
+            | flagged.filter(user__first_name__icontains=search_query)
+            | flagged.filter(user__last_name__icontains=search_query)
+            | flagged.filter(exam__title__icontains=search_query)
         )
         flagged = flagged.distinct()
 
@@ -191,10 +188,7 @@ def supervision_detail(request, attempt_id):
         exam__organization=org,
     )
 
-    incidents = (
-        SupervisionIncident.objects.filter(attempt=attempt)
-        .order_by("timestamp")
-    )
+    incidents = SupervisionIncident.objects.filter(attempt=attempt).order_by("timestamp")
 
     config = None
     try:
@@ -257,8 +251,10 @@ def teacher_resume_api(request, attempt_id):
         request=request,
     )
 
-    return JsonResponse({
-        "success": True,
-        "supervision_status": attempt.supervision_status,
-        "violation_count": attempt.supervision_violation_count,
-    })
+    return JsonResponse(
+        {
+            "success": True,
+            "supervision_status": attempt.supervision_status,
+            "violation_count": attempt.supervision_violation_count,
+        }
+    )
