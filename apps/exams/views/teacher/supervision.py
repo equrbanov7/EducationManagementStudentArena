@@ -7,6 +7,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import pgettext
@@ -148,16 +149,16 @@ def supervision_monitor(request):
     paginator = Paginator(flagged, 20)
     page_obj = paginator.get_page(page_number)
 
-    # Severity distribution for charts
-    severity_counts = {}
-    for sev in ["info", "low", "medium", "high", "critical"]:
-        severity_counts[sev] = data["incidents_qs"].filter(severity=sev).count()
+    # Severity distribution for charts (single aggregation query)
+    severity_agg = dict(
+        data["incidents_qs"].values("severity").annotate(count=Count("id")).values_list("severity", "count")
+    )
+    severity_counts = {sev: severity_agg.get(sev, 0) for sev in ["info", "low", "medium", "high", "critical"]}
 
-    # Violation type distribution
-    violation_type_counts = {}
-    for inc in data["incidents_qs"].values("event_type").distinct():
-        et = inc["event_type"]
-        violation_type_counts[et] = data["incidents_qs"].filter(event_type=et).count()
+    # Violation type distribution (single aggregation query)
+    violation_type_counts = dict(
+        data["incidents_qs"].values("event_type").annotate(count=Count("id")).values_list("event_type", "count")
+    )
 
     context = {
         "page_obj": page_obj,
@@ -231,8 +232,8 @@ def teacher_resume_api(request, attempt_id):
 
     try:
         teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
-    except ValueError as e:
-        return JsonResponse({"error": str(e)}, status=400)
+    except ValueError:
+        return JsonResponse({"error": "Bu əməliyyat icra edilə bilməz."}, status=400)
 
     # Audit log
     from apps.audit.utils import log_action
