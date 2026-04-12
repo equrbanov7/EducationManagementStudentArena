@@ -524,6 +524,11 @@
             initAccessToggle(form);
             initSupervisionToggle(form);
 
+            // Initialize Bootstrap selects for dynamically loaded form content
+            if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.init === "function") {
+                window.EMSBootstrapSelect.init(form);
+            }
+
             var groupSelector = initSearchableSelect(form, {
                 selectName: "allowed_groups",
                 listSelector: "#createExamGroupsList",

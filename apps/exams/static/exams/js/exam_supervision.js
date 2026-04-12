@@ -138,8 +138,11 @@
             overlay.style.cssText =
                 "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);" +
                 "z-index:100000;display:flex;justify-content:center;align-items:center;";
-            overlay.innerHTML =
-                '<div style="background:#fff;border-radius:12px;padding:2.5rem;max-width:550px;width:90%;text-align:center;">' +
+
+            var contentDiv = document.createElement("div");
+            contentDiv.style.cssText =
+                "background:#fff;border-radius:12px;padding:2.5rem;max-width:550px;width:90%;text-align:center;";
+            contentDiv.innerHTML =
                 '<div style="font-size:3rem;color:#007bff;margin-bottom:1rem;"><i class="fas fa-shield-alt"></i></div>' +
                 '<h2 style="color:#333;">' + titleText + "</h2>" +
                 '<p style="color:#555;margin:1rem 0;">' + descText + "</p>" +
@@ -150,18 +153,22 @@
                 (this.config.disable_right_click ? "<li>" + ruleRightClick + "</li>" : "") +
                 (this.config.restrict_keyboard_shortcuts ? "<li>" + ruleKeyboard + "</li>" : "") +
                 "</ul>" +
-                '<p style="color:#dc3545;font-weight:bold;font-size:1.05rem;">' + maxViolationText + "</p>" +
-                '<button id="supervision-acknowledge-btn" style="margin-top:1.5rem;padding:0.75rem 2rem;background:#007bff;color:#fff;border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;min-width:250px;">' +
-                '<i class="fas fa-check"></i> ' + btnText + "</button>" +
-                "</div>";
-            document.body.appendChild(overlay);
+                '<p style="color:#dc3545;font-weight:bold;font-size:1.05rem;">' + maxViolationText + "</p>";
 
-            document.getElementById("supervision-acknowledge-btn").addEventListener("click", function () {
-                var btn = this;
+            // Create button via DOM API for reliable event binding
+            var acknowledgeBtn = document.createElement("button");
+            acknowledgeBtn.type = "button";
+            acknowledgeBtn.id = "supervision-acknowledge-btn";
+            acknowledgeBtn.style.cssText =
+                "margin-top:1.5rem;padding:0.75rem 2rem;background:#007bff;color:#fff;" +
+                "border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;min-width:250px;";
+            acknowledgeBtn.innerHTML = '<i class="fas fa-check"></i> ' + btnText;
+
+            acknowledgeBtn.onclick = function () {
                 // Disable button to prevent double-clicks
-                btn.disabled = true;
-                btn.style.opacity = "0.7";
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+                acknowledgeBtn.disabled = true;
+                acknowledgeBtn.style.opacity = "0.7";
+                acknowledgeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
 
                 // Mark as acknowledged
                 self._acknowledged = true;
@@ -181,9 +188,7 @@
                     try {
                         var el = document.documentElement;
                         if (el.requestFullscreen) {
-                            el.requestFullscreen().catch(function () {
-                                // Fullscreen denied - this is expected on non-HTTPS origins
-                            });
+                            el.requestFullscreen().catch(function () {});
                         } else if (el.webkitRequestFullscreen) {
                             el.webkitRequestFullscreen();
                         }
@@ -191,7 +196,11 @@
                         // Fullscreen API not available
                     }
                 }
-            });
+            };
+
+            contentDiv.appendChild(acknowledgeBtn);
+            overlay.appendChild(contentDiv);
+            document.body.appendChild(overlay);
         },
 
         _bindEvents: function () {
