@@ -609,7 +609,21 @@ def teacher_check_attempt(request, slug, attempt_id):
             q = a.question
 
             score_raw = (request.POST.get(f"score_{q.id}") or "").strip()
+            max_points_raw = (request.POST.get(f"max_points_{q.id}") or "").strip()
             feedback = (request.POST.get(f"feedback_{q.id}") or "").strip()
+
+            if max_points_raw:
+                try:
+                    max_points_val = int(max_points_raw)
+                except ValueError:
+                    max_points_val = q.points
+                max_points_val = max(1, max_points_val)
+            else:
+                max_points_val = q.points
+
+            if q.points != max_points_val:
+                q.points = max_points_val
+                q.save(update_fields=["points"])
 
             if score_raw == "":
                 a.teacher_score = None
@@ -618,6 +632,7 @@ def teacher_check_attempt(request, slug, attempt_id):
                     score_val = int(score_raw)
                 except ValueError:
                     score_val = 0
+                score_val = max(0, min(score_val, max_points_val))
                 a.teacher_score = score_val
                 total_score += score_val
                 any_score = True
@@ -677,7 +692,11 @@ def ai_grade_answer(request, slug, attempt_id):
         return JsonResponse({"ok": False, "error": "Answer not found"}, status=404)
 
     q = answer.question
-    max_points = data.get("max_points", q.points) or q.points
+    try:
+        max_points = int(data.get("max_points", q.points) or q.points)
+    except (TypeError, ValueError):
+        max_points = q.points
+    max_points = max(1, max_points)
 
     result = grade_written_answer(
         question_text=q.text,
