@@ -255,6 +255,123 @@ class LiveSessionCreationTest(TestCase):
         self.assertFalse(LiveSession.objects.filter(exam=self.exam, host_user=self.teacher).exists())
 
 
+class LiveSessionResultsViewTest(TestCase):
+    """Regression coverage for the teacher-facing live session results page."""
+
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("results_teacher", "results@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Results Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        _create_org_role_and_membership(self.teacher, self.org, permissions=["exam.manage"])
+
+        self.exam = Exam.objects.create(
+            title="Results Live Exam",
+            slug="results-live-exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
+        self.question_one = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Airway assessment question",
+            order=1,
+            points=50,
+        )
+        self.question_two = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Trauma protocol question",
+            order=2,
+            points=40,
+        )
+        self.session = LiveSession.objects.create(
+            exam=self.exam,
+            host_user=self.teacher,
+            state=LiveSession.STATE_FINISHED,
+            selected_question_ids=[self.question_one.id, self.question_two.id],
+        )
+
+        self.player_one = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Aysel",
+            client_id="results-client-1",
+            score=90,
+        )
+        self.player_two = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Murad",
+            client_id="results-client-2",
+            score=40,
+        )
+
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=self.player_one,
+            question_id=self.question_one.id,
+            is_correct=True,
+            answer_ms=800,
+            awarded_points=50,
+        )
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=self.player_two,
+            question_id=self.question_one.id,
+            is_correct=False,
+            answer_ms=1200,
+            awarded_points=0,
+        )
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=self.player_one,
+            question_id=self.question_two.id,
+            is_correct=True,
+            answer_ms=600,
+            awarded_points=40,
+        )
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=self.player_two,
+            question_id=self.question_two.id,
+            is_correct=True,
+            answer_ms=900,
+            awarded_points=40,
+        )
+
+    def test_session_detail_uses_local_chart_bundle_and_distribution_data(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+        response = self.client.get(
+            reverse(
+                "liveExam:teacher_live_session_detail",
+                kwargs={"slug": self.exam.slug, "pin": self.session.pin},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "vendor/chartjs/chart.umd.min.js")
+        self.assertNotContains(response, "cdn.jsdelivr.net/npm/chart.js")
+        self.assertContains(response, 'id="sessionChartData"', html=False)
+        self.assertContains(response, 'id="scoreDistributionChart"', html=False)
+
+        chart_data = response.context["chart_data"]
+        self.assertEqual(chart_data["player_labels"], ["Aysel", "Murad"])
+        self.assertEqual(chart_data["score_distribution_labels"], ["40", "90"])
+        self.assertEqual(chart_data["score_distribution_counts"], [1, 1])
+
+
 class LiveJoinTest(TestCase):
     """Test player join functionality."""
 

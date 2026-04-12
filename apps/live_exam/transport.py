@@ -210,7 +210,7 @@ def build_reveal_payload(
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
-    revealed_at = revealed_at or timezone.now()
+    revealed_at = revealed_at or session.question_ends_at or timezone.now()
     leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
     _, _, correct_ids = detect_multi(exam_question)
     payload = {
@@ -253,7 +253,7 @@ def build_player_reveal_payload(
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
-    revealed_at = revealed_at or timezone.now()
+    revealed_at = revealed_at or session.question_ends_at or timezone.now()
     leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
     _, _, correct_ids = detect_multi(exam_question)
     return {
