@@ -6,7 +6,7 @@ Teacher-facing views for reviewing live exam session results and statistics.
 
 from __future__ import annotations
 
-import json
+from collections import Counter
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Max, Q, Sum
@@ -28,6 +28,31 @@ def _ensure_teacher_access(request, exam):
     org = getattr(request, "organization", None)
     if org is None or exam.organization_id != org.id:
         raise Http404
+
+
+def _build_score_distribution(scores, bucket_limit=6):
+    """Build score-distribution labels/counts for chart-friendly rendering."""
+    normalized_scores = sorted(max(0, int(score or 0)) for score in scores)
+    if not normalized_scores:
+        return [], []
+
+    score_counts = Counter(normalized_scores)
+    if len(score_counts) <= bucket_limit:
+        items = sorted(score_counts.items())
+        return [str(score) for score, _ in items], [count for _, count in items]
+
+    max_score = normalized_scores[-1]
+    bucket_size = max(1, -(-(max_score + 1) // bucket_limit))
+    labels = []
+    counts = []
+    start = 0
+    while start <= max_score:
+        end = min(max_score, start + bucket_size - 1)
+        labels.append(f"{start}" if start == end else f"{start}-{end}")
+        counts.append(sum(start <= score <= end for score in normalized_scores))
+        start = end + 1
+
+    return labels, counts
 
 
 @login_required
@@ -111,10 +136,13 @@ def teacher_live_session_detail(request, slug, pin):
     max_score_val = players.aggregate(mx=Max("score"))["mx"] or 0
     avg_response_ms = LiveAnswer.objects.filter(session=session).aggregate(avg=Avg("answer_ms"))["avg"] or 0
 
-    # JSON data for charts
+    player_scores = [int(p.score or 0) for p in players]
+    score_distribution_labels, score_distribution_counts = _build_score_distribution(player_scores)
+
+    # JSON-safe data for charts
     chart_data = {
         "player_labels": [p.nickname for p in players],
-        "player_scores": [p.score for p in players],
+        "player_scores": player_scores,
         "question_labels": [
             (qs["question"].text[:40] + "...") if len(qs["question"].text) > 40 else qs["question"].text
             for qs in question_stats
@@ -123,6 +151,8 @@ def teacher_live_session_detail(request, slug, pin):
         "question_correct": [qs["correct_answers"] for qs in question_stats],
         "question_incorrect": [qs["incorrect_answers"] for qs in question_stats],
         "question_avg_ms": [qs["avg_answer_ms"] for qs in question_stats],
+        "score_distribution_labels": score_distribution_labels,
+        "score_distribution_counts": score_distribution_counts,
     }
 
     if request.headers.get("Accept") == "application/json":
@@ -170,6 +200,6 @@ def teacher_live_session_detail(request, slug, pin):
             "avg_score": round(avg_score_val),
             "max_score": max_score_val,
             "avg_response_ms": round(avg_response_ms),
-            "chart_data_json": json.dumps(chart_data),
+            "chart_data": chart_data,
         },
     )

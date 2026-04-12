@@ -46,6 +46,21 @@ def _round_awarded_points(value: float | Decimal) -> int:
     return max(0, int(Decimal(str(value)).quantize(Decimal("1"), rounding=ROUND_HALF_UP)))
 
 
+def _kahoot_time_factor(*, answer_ms: int, total_ms: int) -> float:
+    """
+    Kahoot-style speed multiplier.
+
+    A correct answer can earn between 100% and 50% of its base score depending
+    on how quickly it was submitted during the active answer window.
+    """
+    if total_ms <= 0:
+        return 1.0
+
+    bounded_answer_ms = max(0, min(int(answer_ms or 0), int(total_ms)))
+    progress = bounded_answer_ms / float(total_ms)
+    return max(0.5, 1.0 - (progress * 0.5))
+
+
 def calculate_answer_score(
     *,
     option_ids: list[int],
@@ -66,13 +81,19 @@ def calculate_answer_score(
     bounded_answer_ms = int(answer_ms or 0)
     if total_ms > 0:
         bounded_answer_ms = max(0, min(bounded_answer_ms, total_ms))
-        awarded_points = _round_awarded_points(int(base_points) * fraction)
     else:
-        awarded_points = _round_awarded_points(int(base_points) * fraction)
+        bounded_answer_ms = max(0, bounded_answer_ms)
+
+    time_factor = _kahoot_time_factor(answer_ms=bounded_answer_ms, total_ms=total_ms)
+    if fraction <= 0:
+        awarded_points = 0
+    else:
+        awarded_points = _round_awarded_points(int(base_points) * fraction * time_factor)
 
     return {
         "is_correct": is_perfect,
         "fraction": round(float(fraction), 4),
+        "time_factor": round(float(time_factor), 4),
         "picked_correct": picked_correct,
         "picked_wrong": picked_wrong,
         "correct_total": correct_total,
