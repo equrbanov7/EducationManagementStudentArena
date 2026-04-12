@@ -190,7 +190,12 @@ def supervision_detail(request, attempt_id):
         exam__organization=org,
     )
 
-    incidents = SupervisionIncident.objects.filter(attempt=attempt).order_by("timestamp")
+    incidents_qs = SupervisionIncident.objects.filter(attempt=attempt).order_by("-timestamp")
+
+    # Pagination for incidents
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(incidents_qs, 20)
+    incidents_page = paginator.get_page(page_number)
 
     config = None
     try:
@@ -200,7 +205,8 @@ def supervision_detail(request, attempt_id):
 
     context = {
         "attempt": attempt,
-        "incidents": incidents,
+        "incidents": incidents_page,
+        "incidents_page": incidents_page,
         "config": config,
         "student": attempt.user,
         "exam": attempt.exam,
