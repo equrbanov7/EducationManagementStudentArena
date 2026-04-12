@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveButtonDirty: i18n.saveButtonDirty || "Save",
         confirmTitle: i18n.confirmTitle || "Save review",
         confirmMessage: i18n.confirmMessage || "Are you sure you want to save and finalize this review?",
+        aiGrading: i18n.aiGrading || "AI is grading...",
+        aiGradeBtn: i18n.aiGradeBtn || "Grade with AI",
+        aiError: i18n.aiError || "AI grading error",
+        aiCached: i18n.aiCached || "Cached",
+        aiQuotaInfo: i18n.aiQuotaInfo || "{remaining}/{limit} ({window})",
+        aiNoAnswer: i18n.aiNoAnswer || "No answer to grade",
+        maxPointsLabel: i18n.maxPointsLabel || "max: {points}",
     };
 
     // Elementlər
@@ -38,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(qId) {
         const currentScore = document.getElementById(`hidden_score_${qId}`).value;
         const currentFeedback = document.getElementById(`hidden_feedback_${qId}`).value;
-        
+
         const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
         const dataStore = card.querySelector('.data-store');
-        
+
         document.getElementById('modalTitle').textContent = `${t.modalTitleDetails} #${qId}`;
         document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
 
@@ -63,10 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('currentQuestionId').value = qId;
         normalizeIntegerInput(modalScoreInput);
 
+        // Show max points hint
+        const maxPoints = dataStore.getAttribute('data-q-points') || '';
+        const maxHint = document.getElementById('maxPointsHint');
+        if (maxHint && maxPoints) {
+            maxHint.textContent = t.maxPointsLabel.replace('{points}', maxPoints);
+        }
+
+        // Reset AI grade button state
+        const aiBtn = document.getElementById('aiGradeBtn');
+        const aiStatus = document.getElementById('aiGradeStatus');
+        if (aiBtn) {
+            aiBtn.disabled = !ansText;
+            aiBtn.innerHTML = `<i class="fas fa-robot"></i> ${t.aiGradeBtn}`;
+        }
+        if (aiStatus) aiStatus.textContent = '';
+
         backdrop.style.display = 'block';
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-        
+
         isModalDirty = false;
     }
 
@@ -184,6 +207,98 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalSaveBtn) modalSaveBtn.addEventListener('click', saveFromModal);
     if (warningCancelBtn) warningCancelBtn.addEventListener('click', closeWarningModal);
     if (warningConfirmBtn) warningConfirmBtn.addEventListener('click', forceCloseModal);
+
+    // ===============================================
+    // AI Grade Button
+    // ===============================================
+    const aiGradeBtn = document.getElementById('aiGradeBtn');
+    const aiGradeStatus = document.getElementById('aiGradeStatus');
+
+    if (aiGradeBtn) {
+        aiGradeBtn.addEventListener('click', () => {
+            const qId = document.getElementById('currentQuestionId').value;
+            if (!qId) return;
+
+            const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
+            const dataStore = card.querySelector('.data-store');
+            const ansText = dataStore.getAttribute('data-ans-text');
+
+            if (!ansText) {
+                if (aiGradeStatus) {
+                    aiGradeStatus.textContent = t.aiNoAnswer;
+                    aiGradeStatus.className = 'ai-grade-status ai-grade-error';
+                }
+                return;
+            }
+
+            const maxPoints = parseInt(dataStore.getAttribute('data-q-points') || '10', 10);
+            const aiUrl = window.AI_GRADE_URL;
+            if (!aiUrl) return;
+
+            // Loading state
+            aiGradeBtn.disabled = true;
+            aiGradeBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t.aiGrading}`;
+            if (aiGradeStatus) {
+                aiGradeStatus.textContent = '';
+                aiGradeStatus.className = 'ai-grade-status';
+            }
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(aiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    question_id: parseInt(qId, 10),
+                    max_points: maxPoints,
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                aiGradeBtn.disabled = false;
+                aiGradeBtn.innerHTML = `<i class="fas fa-robot"></i> ${t.aiGradeBtn}`;
+
+                if (data.ok) {
+                    document.getElementById('modalScoreInput').value = data.score;
+                    document.getElementById('modalFeedbackInput').value = data.explanation;
+                    isModalDirty = true;
+
+                    // Show quota info
+                    let statusParts = [];
+                    if (data.cached) {
+                        statusParts.push(t.aiCached);
+                    }
+                    if (data.remaining !== undefined && data.limit !== undefined) {
+                        const quotaText = t.aiQuotaInfo
+                            .replace('{remaining}', data.remaining)
+                            .replace('{limit}', data.limit)
+                            .replace('{window}', data.window || '');
+                        statusParts.push(quotaText);
+                    }
+                    if (aiGradeStatus) {
+                        aiGradeStatus.textContent = statusParts.join(' · ');
+                        aiGradeStatus.className = 'ai-grade-status ai-grade-success';
+                    }
+                } else {
+                    if (aiGradeStatus) {
+                        aiGradeStatus.textContent = data.error || t.aiError;
+                        aiGradeStatus.className = 'ai-grade-status ai-grade-error';
+                    }
+                }
+            })
+            .catch(() => {
+                aiGradeBtn.disabled = false;
+                aiGradeBtn.innerHTML = `<i class="fas fa-robot"></i> ${t.aiGradeBtn}`;
+                if (aiGradeStatus) {
+                    aiGradeStatus.textContent = t.aiError;
+                    aiGradeStatus.className = 'ai-grade-status ai-grade-error';
+                }
+            });
+        });
+    }
 
     // 6. Əsas Form statusu
     function markFormAsDirty() {
