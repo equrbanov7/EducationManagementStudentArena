@@ -17165,6 +17165,42 @@ msgctxt "exams.template.exam_statistics"
 msgid "pagination_results"
 msgstr "результатов"
 
+msgctxt "exams.template.exam_statistics"
+msgid "chart_avg_score_percent"
+msgstr "Средний балл %"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_checked_unchecked"
+msgstr "Проверено / Не проверено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_checked"
+msgstr "Проверено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_unchecked"
+msgstr "Не проверено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_checked"
+msgstr "Нет данных о проверке."
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_checked"
+msgstr "Проверено"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_avg_score"
+msgstr "СРЕДНИЙ БАЛЛ"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_max_points"
+msgstr "МАКС БАЛЛ"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_score_percent"
+msgstr "БАЛЛ %"
+
 #: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
 msgctxt "liveExam.template.session_detail"
 msgid "ai_summary_title"

@@ -17239,6 +17239,42 @@ msgctxt "exams.template.exam_statistics"
 msgid "pagination_results"
 msgstr "results"
 
+msgctxt "exams.template.exam_statistics"
+msgid "chart_avg_score_percent"
+msgstr "Average Score %"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_checked_unchecked"
+msgstr "Checked / Unchecked"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_unchecked"
+msgstr "Unchecked"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_checked"
+msgstr "No grading data available."
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_avg_score"
+msgstr "AVG SCORE"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_max_points"
+msgstr "MAX POINTS"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_score_percent"
+msgstr "SCORE %"
+
 #: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
 msgctxt "liveExam.template.session_detail"
 msgid "ai_summary_title"

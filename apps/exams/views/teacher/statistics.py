@@ -147,12 +147,25 @@ def teacher_exam_statistics(request, slug):
     # ── Compute statistics ────────────────────────────────────────────
     attempts_list = list(attempts.order_by("-started_at"))
     total_attempts = len(attempts_list)
+    is_written = exam.exam_type == "written"
+
+    # For written exams: max possible score = sum of question points
+    all_questions = ExamQuestion.objects.filter(exam=exam)
+    max_possible_score = sum(q.points for q in all_questions) if is_written else 0
 
     def _attempt_score(a):
-        """Return a normalised score for the attempt."""
-        if exam.exam_type == "test":
+        """Return a normalised percentage score for the attempt."""
+        if not is_written:
             total_q = a.correct_count + a.wrong_count
             return round(a.correct_count * 100 / total_q, 1) if total_q else 0
+        # Written: normalise teacher_score to percentage
+        raw = a.teacher_score or 0
+        return round(raw * 100 / max_possible_score, 1) if max_possible_score else 0
+
+    def _attempt_raw_score(a):
+        """Return the raw (absolute) score for display."""
+        if not is_written:
+            return a.correct_count
         return a.teacher_score or 0
 
     scores = [_attempt_score(a) for a in attempts_list]
@@ -163,6 +176,18 @@ def teacher_exam_statistics(request, slug):
     pass_count = sum(1 for s in scores if s >= pass_threshold)
     fail_count = total_attempts - pass_count
     pass_rate = round(pass_count * 100 / total_attempts, 1) if total_attempts else 0
+
+    # Raw score stats for written exams (for display)
+    if is_written:
+        raw_scores = [_attempt_raw_score(a) for a in attempts_list]
+        avg_raw_score = round(sum(raw_scores) / len(raw_scores), 1) if raw_scores else 0
+        max_raw_score = max(raw_scores) if raw_scores else 0
+        min_raw_score = min(raw_scores) if raw_scores else 0
+        checked_count = sum(1 for a in attempts_list if a.checked_by_teacher)
+        unchecked_count = total_attempts - checked_count
+    else:
+        avg_raw_score = max_raw_score = min_raw_score = 0
+        checked_count = unchecked_count = 0
 
     # Pass/fail filter (applied after computing chart data)
     if pass_fail == "pass":
@@ -182,29 +207,50 @@ def teacher_exam_statistics(request, slug):
     dist_labels, dist_counts = _build_score_distribution(scores)
 
     # ── Question statistics ───────────────────────────────────────────
-    questions = ExamQuestion.objects.filter(exam=exam).order_by("order")
+    questions = all_questions.order_by("order")
     if block_id:
         questions = questions.filter(block_id=block_id)
 
     question_stats = []
+    attempt_ids = [a.id for a in attempts_list] if attempts_list else []
     for q in questions:
         ans_qs = ExamAnswer.objects.filter(question=q, attempt__exam=exam)
-        if attempts_list:
-            attempt_ids = [a.id for a in attempts_list]
+        if attempt_ids:
             ans_qs = ans_qs.filter(attempt_id__in=attempt_ids)
         total_a = ans_qs.count()
-        correct_a = ans_qs.filter(is_correct=True).count()
-        incorrect_a = total_a - correct_a
-        accuracy = round(correct_a * 100 / total_a, 1) if total_a else 0
-        question_stats.append(
-            {
-                "question": q,
-                "total_answers": total_a,
-                "correct_answers": correct_a,
-                "incorrect_answers": incorrect_a,
-                "accuracy_percent": accuracy,
-            }
-        )
+
+        if is_written:
+            # Written: compute average teacher_score per question
+            graded = list(ans_qs.filter(teacher_score__isnull=False).values_list("teacher_score", flat=True))
+            graded_count = len(graded)
+            avg_q_score = round(sum(graded) / graded_count, 1) if graded_count else 0
+            score_pct = round(avg_q_score * 100 / q.points, 1) if q.points else 0
+            question_stats.append(
+                {
+                    "question": q,
+                    "total_answers": total_a,
+                    "graded_count": graded_count,
+                    "avg_score": avg_q_score,
+                    "max_points": q.points,
+                    "accuracy_percent": score_pct,
+                    # Keep these for chart compatibility (unused in written template)
+                    "correct_answers": 0,
+                    "incorrect_answers": 0,
+                }
+            )
+        else:
+            correct_a = ans_qs.filter(is_correct=True).count()
+            incorrect_a = total_a - correct_a
+            accuracy = round(correct_a * 100 / total_a, 1) if total_a else 0
+            question_stats.append(
+                {
+                    "question": q,
+                    "total_answers": total_a,
+                    "correct_answers": correct_a,
+                    "incorrect_answers": incorrect_a,
+                    "accuracy_percent": accuracy,
+                }
+            )
 
     # ── Group comparison ──────────────────────────────────────────────
     compare_group_ids = request.GET.getlist("compare_groups")
@@ -256,7 +302,8 @@ def teacher_exam_statistics(request, slug):
     for a in attempts_list[:30]:
         name = a.user.get_full_name() or a.user.username
         student_labels.append(name[:25])
-        student_scores_chart.append(_attempt_score(a))
+        # For written exams show raw score; for tests show percentage
+        student_scores_chart.append(_attempt_raw_score(a) if is_written else _attempt_score(a))
 
     q_labels = [
         (q["question"].text[:40] + "..." if len(q["question"].text) > 40 else q["question"].text)
@@ -283,18 +330,20 @@ def teacher_exam_statistics(request, slug):
 
     # ── AI Summary (AJAX) ─────────────────────────────────────────────
     if request.GET.get("ai_summary") == "1":
-        ai_stats = {
-            "total_attempts": total_attempts,
-            "avg_score": avg_score,
-            "max_score": max_score_val,
-            "min_score": min_score_val,
-            "pass_rate": pass_rate,
-            "pass_count": pass_count,
-            "fail_count": fail_count,
-            "avg_duration_seconds": avg_duration,
-            "submitted_count": submitted_count,
-            "expired_count": expired_count,
-            "question_stats": [
+        if is_written:
+            q_stats_ai = [
+                {
+                    "text": qs["question"].text[:80],
+                    "avg_score": qs.get("avg_score", 0),
+                    "max_points": qs.get("max_points", 0),
+                    "score_percent": qs["accuracy_percent"],
+                    "graded": qs.get("graded_count", 0),
+                    "total": qs["total_answers"],
+                }
+                for qs in question_stats[:20]
+            ]
+        else:
+            q_stats_ai = [
                 {
                     "text": qs["question"].text[:80],
                     "accuracy": qs["accuracy_percent"],
@@ -302,9 +351,28 @@ def teacher_exam_statistics(request, slug):
                     "correct": qs["correct_answers"],
                 }
                 for qs in question_stats[:20]
-            ],
+            ]
+
+        ai_stats = {
+            "total_attempts": total_attempts,
+            "exam_type": exam.exam_type,
+            "avg_score_percent": avg_score,
+            "max_score_percent": max_score_val,
+            "min_score_percent": min_score_val,
+            "pass_rate": pass_rate,
+            "pass_count": pass_count,
+            "fail_count": fail_count,
+            "avg_duration_seconds": avg_duration,
+            "submitted_count": submitted_count,
+            "expired_count": expired_count,
+            "question_stats": q_stats_ai,
             "group_comparison": compare_groups_data,
         }
+        if is_written:
+            ai_stats["max_possible_score"] = max_possible_score
+            ai_stats["avg_raw_score"] = avg_raw_score
+            ai_stats["checked_count"] = checked_count
+            ai_stats["unchecked_count"] = unchecked_count
         result = generate_exam_statistics_summary(
             exam_title=exam.title,
             exam_type=exam.get_exam_type_display(),
@@ -341,6 +409,7 @@ def teacher_exam_statistics(request, slug):
         "exams/teacher/teacher_exam_statistics.html",
         {
             "exam": exam,
+            "is_written": is_written,
             "exam_detail_url": exam_detail_url,
             "results_url": results_url,
             "nav_query": nav_query,
@@ -356,6 +425,13 @@ def teacher_exam_statistics(request, slug):
             "submitted_count": submitted_count,
             "expired_count": expired_count,
             "in_progress_count": in_progress_count,
+            # Written-specific
+            "max_possible_score": max_possible_score,
+            "avg_raw_score": avg_raw_score,
+            "max_raw_score": max_raw_score,
+            "min_raw_score": min_raw_score,
+            "checked_count": checked_count,
+            "unchecked_count": unchecked_count,
             # Charts
             "chart_data": chart_data,
             # Question stats
