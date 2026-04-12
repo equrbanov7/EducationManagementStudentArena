@@ -98,10 +98,10 @@
     {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
     <div class="action-bar">
         <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> Müəllim əməliyyatları:</span>
-        <button class="btn btn-resume-action" onclick="resumeAttempt({{ attempt.id }}, false)">
+        <button class="btn btn-resume-action" data-resume-attempt-id="{{ attempt.id }}" data-grant-extra-chance="false">
             <i class="fas fa-play"></i> İmtahanı Bərpa Et
         </button>
-        <button class="btn btn-chance-action" onclick="resumeAttempt({{ attempt.id }}, true)">
+        <button class="btn btn-chance-action" data-resume-attempt-id="{{ attempt.id }}" data-grant-extra-chance="true">
             <i class="fas fa-plus-circle"></i> Əlavə Şans Ver
         </button>
         <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
@@ -181,5 +181,15 @@ function resumeAttempt(attemptId, grantExtraChance) {
     })
     .catch(function() { alert("Əlaqə xətası."); });
 }
+
+document.addEventListener("click", function(event) {
+    var btn = event.target.closest("[data-resume-attempt-id]");
+    if (btn) {
+        event.preventDefault();
+        var attemptId = parseInt(btn.getAttribute("data-resume-attempt-id"), 10);
+        var grantExtra = btn.getAttribute("data-grant-extra-chance") === "true";
+        resumeAttempt(attemptId, grantExtra);
+    }
+});
 </script>
 {% endblock %}
