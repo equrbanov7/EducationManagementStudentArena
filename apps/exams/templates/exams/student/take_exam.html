@@ -873,6 +873,29 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
     {% if supervision.supervised %}
     {{ supervision.config|json_script:"supervision-config-data" }}
+    <script nonce="{{ request.csp_nonce }}">
+    window.SUPERVISION_ACK_I18N = {
+        title: "{% filter escapejs %}{% trans 'supervision_ack_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        desc: "{% filter escapejs %}{% trans 'supervision_ack_desc' context 'exams.template.take_exam' %}{% endfilter %}",
+        ruleFullscreen: "{% filter escapejs %}{% trans 'supervision_ack_rule_fullscreen' context 'exams.template.take_exam' %}{% endfilter %}",
+        ruleTab: "{% filter escapejs %}{% trans 'supervision_ack_rule_tab' context 'exams.template.take_exam' %}{% endfilter %}",
+        ruleCopy: "{% filter escapejs %}{% trans 'supervision_ack_rule_copy' context 'exams.template.take_exam' %}{% endfilter %}",
+        ruleRightClick: "{% filter escapejs %}{% trans 'supervision_ack_rule_right_click' context 'exams.template.take_exam' %}{% endfilter %}",
+        ruleKeyboard: "{% filter escapejs %}{% trans 'supervision_ack_rule_keyboard' context 'exams.template.take_exam' %}{% endfilter %}",
+        maxViolation: "{% filter escapejs %}{% trans 'supervision_ack_max_violation' context 'exams.template.take_exam' %}{% endfilter %}",
+        btnText: "{% filter escapejs %}{% trans 'supervision_ack_btn' context 'exams.template.take_exam' %}{% endfilter %}",
+        badgeActive: "{% filter escapejs %}{% trans 'supervision_badge_active' context 'exams.template.take_exam' %}{% endfilter %}",
+        warningTitle: "{% filter escapejs %}{% trans 'supervision_warning_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        warningMsg: "{% filter escapejs %}{% trans 'supervision_warning_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        warningTimeout: "{% filter escapejs %}{% trans 'supervision_warning_timeout' context 'exams.template.take_exam' %}{% endfilter %}",
+        warningViolation: "{% filter escapejs %}{% trans 'supervision_warning_violation' context 'exams.template.take_exam' %}{% endfilter %}",
+        warningReturn: "{% filter escapejs %}{% trans 'supervision_warning_return' context 'exams.template.take_exam' %}{% endfilter %}",
+        lockedTitle: "{% filter escapejs %}{% trans 'supervision_locked_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        lockedMsg: "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
+        lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}"
+    };
+    </script>
     <script src="{% static 'exams/js/exam_supervision.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function() {
