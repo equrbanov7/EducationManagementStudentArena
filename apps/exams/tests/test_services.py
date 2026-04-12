@@ -14,8 +14,8 @@ from django.utils.translation import override
 from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, QuestionBlock
-from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services import parsing
+from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
