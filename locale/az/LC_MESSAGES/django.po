@@ -9203,6 +9203,11 @@ msgctxt "exams.template.take_exam"
 msgid "confirm_finish_all_answered"
 msgstr "Bütün suallar cavablandırılıb."
 
+#: apps/exams/templates/exams/student/take_exam.html
+msgctxt "exams.template.take_exam"
+msgid "time_up_auto_submit"
+msgstr "⏰ Vaxtınız bitdi! Cavablarınız göndərilir..."
+
 #: apps/exams/templates/exams/student/take_exam.html:227
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
@@ -10423,7 +10428,7 @@ msgstr "Qiymətləndirmək üçün cavab yoxdur"
 
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_max_points"
-msgstr "maks: {points}"
+msgstr "/ {points}"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"
@@ -17381,6 +17386,42 @@ msgstr "Keçid faizi"
 msgctxt "exams.template.exam_statistics"
 msgid "pagination_results"
 msgstr "nəticə"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_avg_score_percent"
+msgstr "Orta bal faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_checked_unchecked"
+msgstr "Yoxlanılıb / Yoxlanılmayıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_checked"
+msgstr "Yoxlanılıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_unchecked"
+msgstr "Yoxlanılmayıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_checked"
+msgstr "Yoxlanma məlumatı yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_checked"
+msgstr "Yoxlanılıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_avg_score"
+msgstr "ORTA BAL"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_max_points"
+msgstr "MAKS BAL"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_score_percent"
+msgstr "BAL FAİZİ"
 
 #: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
 msgctxt "liveExam.template.session_detail"
