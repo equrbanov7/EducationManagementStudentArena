@@ -1,5 +1,5 @@
 """
-Superadmin views for organization oversight.
+Superadmin views for organization oversight and AI settings.
 """
 
 import logging
@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -93,8 +94,6 @@ def superadmin_organizations(request):
     Superadmin-only view showing all organizations with filtering, search and bulk operations.
     """
     if not _is_superadmin_user(request.user):
-        from django.http import HttpResponseForbidden
-
         return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
 
     profile_next_url = _append_query_params(
@@ -246,3 +245,91 @@ def superadmin_organizations(request):
         "post_next_url": profile_next_url,
     }
     return render(request, "accounts/superadmin_organizations.html", context)
+
+
+@login_required
+def superadmin_ai_settings(request):
+    """SuperAdmin page for managing platform-wide AI configuration."""
+    if not _is_superadmin_user(request.user):
+        return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
+
+    from apps.exams.domain.ai_config import AIConfiguration
+
+    config = AIConfiguration.load()
+
+    if request.method == "POST":
+        action = request.POST.get("action", "save")
+
+        if action == "save":
+            config.enabled = request.POST.get("enabled") == "on"
+            config.rate_limit = (request.POST.get("rate_limit") or "100/1h").strip()
+            config.summary_model = request.POST.get("summary_model", config.summary_model)
+            config.grading_model = request.POST.get("grading_model", config.grading_model)
+
+            budget_raw = request.POST.get("monthly_budget", "5.00")
+            try:
+                config.monthly_budget = max(0, float(budget_raw))
+            except (ValueError, TypeError):
+                pass
+
+            config.save()
+            messages.success(
+                request,
+                pgettext_lazy("accounts.superadmin_ai.message", "ai_settings_saved"),
+            )
+
+        return redirect("accounts:superadmin_ai_settings")
+
+    # Build quota info for all users from rate limit
+    from apps.exams.services.ai_summary import _get_rate_limit
+    from core.rate_limit import parse_rate
+
+    parsed = parse_rate(_get_rate_limit())
+    rate_info = {
+        "limit": parsed.limit if parsed else 0,
+        "window_seconds": parsed.window_seconds if parsed else 0,
+    }
+
+    # Cost estimates based on current model selection
+    cost_estimates = _estimate_monthly_cost(config)
+
+    context = {
+        "config": config,
+        "model_choices": AIConfiguration.MODEL_CHOICES,
+        "rate_info": rate_info,
+        "cost_estimates": cost_estimates,
+    }
+    return render(request, "accounts/superadmin_ai_settings.html", context)
+
+
+def _estimate_monthly_cost(config):
+    """Rough cost estimate based on model selection and rate limit.
+
+    Based on Google AI Studio Paid Tier 1 pricing (April 2026):
+        - gemini-2.5-flash:       $0.15 / 1M input,  $0.60 / 1M output
+        - gemini-2.5-flash-lite:  $0.075 / 1M input,  $0.30 / 1M output
+        - gemini-2.5-pro:         $1.25 / 1M input,  $10.00 / 1M output
+    """
+    pricing = {
+        "gemini-2.5-flash": {"input": 0.15, "output": 0.60},
+        "gemini-2.5-flash-lite": {"input": 0.075, "output": 0.30},
+        "gemini-2.5-pro": {"input": 1.25, "output": 10.00},
+    }
+
+    summary_price = pricing.get(config.summary_model, pricing["gemini-2.5-flash"])
+    grading_price = pricing.get(config.grading_model, pricing["gemini-2.5-flash-lite"])
+
+    # Estimate: ~2K input + ~1K output tokens per summary, ~500 input + ~200 output per grade
+    summary_cost_per_req = (2000 * summary_price["input"] + 1000 * summary_price["output"]) / 1_000_000
+    grading_cost_per_req = (500 * grading_price["input"] + 200 * grading_price["output"]) / 1_000_000
+
+    budget = float(config.monthly_budget)
+    max_summaries = int(budget / summary_cost_per_req) if summary_cost_per_req > 0 else 0
+    max_gradings = int(budget / grading_cost_per_req) if grading_cost_per_req > 0 else 0
+
+    return {
+        "summary_cost": round(summary_cost_per_req * 1000, 2),  # per 1K requests
+        "grading_cost": round(grading_cost_per_req * 1000, 2),
+        "max_summaries": max_summaries,
+        "max_gradings": max_gradings,
+    }

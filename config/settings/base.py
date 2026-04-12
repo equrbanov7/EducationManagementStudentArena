@@ -167,6 +167,10 @@ LIVE_REACTION_RATE_LIMIT = os.getenv("LIVE_REACTION_RATE_LIMIT", "3/10s")
 LIVE_WS_CONNECT_RATE_LIMIT = os.getenv("LIVE_WS_CONNECT_RATE_LIMIT", "20/1m")
 LIVE_ANSWER_RATE_LIMIT = os.getenv("LIVE_ANSWER_RATE_LIMIT", "10/1m")
 LIVE_WS_MSG_RATE_LIMIT = os.getenv("LIVE_WS_MSG_RATE_LIMIT", "60/1m")
+# AI per-user rate limit (protects shared Gemini API quota).
+# Paid Tier 1: 10K RPD / 1K RPM on gemini-2.5-flash.  100 req/h is safe
+# for a platform with <50 teachers sharing a $5/mo budget.
+AI_RATE_LIMIT = os.getenv("AI_RATE_LIMIT", "100/1h")
 AUTH_OTP_EXPIRY_SECONDS = int(os.getenv("AUTH_OTP_EXPIRY_SECONDS", "300"))
 AUTH_OTP_RESEND_COOLDOWN_SECONDS = int(os.getenv("AUTH_OTP_RESEND_COOLDOWN_SECONDS", "60"))
 AUTH_OTP_MAX_ATTEMPTS = int(os.getenv("AUTH_OTP_MAX_ATTEMPTS", "5"))
