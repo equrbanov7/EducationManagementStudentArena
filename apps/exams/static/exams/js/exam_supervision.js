@@ -25,6 +25,7 @@
         isActive: false,
         isFullscreen: false,
         _acknowledged: false,
+        _initialized: false,
         _initialStatus: "active",
 
         /**
@@ -32,6 +33,10 @@
          * @param {Object} opts - Configuration from server
          */
         init: function (opts) {
+            // Prevent double initialization
+            if (this._initialized) return;
+            this._initialized = true;
+
             this.config = opts.config || {};
             this.attemptId = opts.attemptId;
             this.csrfToken = opts.csrfToken;
@@ -77,7 +82,7 @@
                 '<div style="font-size:3rem;color:#dc3545;margin-bottom:1rem;"><i class="fas fa-exclamation-triangle"></i></div>' +
                 '<h2 style="color:#dc3545;margin-bottom:0.5rem;" id="supervision-warning-title">' + warningTitle + '</h2>' +
                 '<p id="supervision-warning-message" style="color:#333;margin-bottom:1rem;">' + warningMsg + '</p>' +
-                '<div style="font-size:2.5rem;font-weight:bold;color:#dc3545;margin:1rem 0;" id="supervision-countdown">15</div>' +
+                '<div style="font-size:2.5rem;font-weight:bold;color:#dc3545;margin:1rem 0;" id="supervision-countdown">' + this.gracePeriodSeconds + '</div>' +
                 '<p style="color:#666;font-size:0.9rem;">' + warningTimeout + '</p>' +
                 '<div style="margin-top:1rem;">' +
                 '<span style="background:#ffeeba;color:#856404;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.85rem;" id="supervision-violation-badge">' +
@@ -91,7 +96,6 @@
 
             document.getElementById("supervision-return-btn").addEventListener("click", function () {
                 ExamSupervision._requestFullscreen();
-                ExamSupervision._hideWarning();
             });
         },
 
@@ -113,6 +117,9 @@
         },
 
         _showAcknowledgment: function () {
+            // Prevent duplicate acknowledgment overlays
+            if (document.getElementById("supervision-acknowledgment")) return;
+
             var self = this;
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
             var titleText = i18n.title || "N\u0259zar\u0259t Rejimi Aktiv";
@@ -166,41 +173,67 @@
 
             acknowledgeBtn.onclick = function () {
                 // Disable button to prevent double-clicks
+                if (acknowledgeBtn.disabled) return;
                 acknowledgeBtn.disabled = true;
                 acknowledgeBtn.style.opacity = "0.7";
                 acknowledgeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
 
-                // Mark as acknowledged
-                self._acknowledged = true;
-
-                // Remove overlay so exam content is accessible
-                overlay.remove();
-
-                // Bind violation detection events
-                self._bindEvents();
-
-                // Log exam start and acknowledgment
-                self._logEvent("exam_started_supervised", { timestamp: new Date().toISOString() });
-                self._logEvent("student_acknowledged");
-
-                // Request fullscreen (optional - exam works even if this fails)
+                // Request fullscreen FIRST (required before allowing exam)
                 if (self.config.force_fullscreen) {
                     try {
                         var el = document.documentElement;
+                        var fsPromise;
                         if (el.requestFullscreen) {
-                            el.requestFullscreen().catch(function () {});
+                            fsPromise = el.requestFullscreen();
                         } else if (el.webkitRequestFullscreen) {
                             el.webkitRequestFullscreen();
+                        }
+                        if (fsPromise && typeof fsPromise.then === "function") {
+                            fsPromise.then(function () {
+                                self._completeAcknowledgment(overlay);
+                            }).catch(function () {
+                                // Fullscreen failed - still allow but enforce later
+                                self._completeAcknowledgment(overlay);
+                            });
+                            return;
                         }
                     } catch (e) {
                         // Fullscreen API not available
                     }
                 }
+                self._completeAcknowledgment(overlay);
             };
 
             contentDiv.appendChild(acknowledgeBtn);
             overlay.appendChild(contentDiv);
             document.body.appendChild(overlay);
+        },
+
+        _completeAcknowledgment: function (overlay) {
+            // Mark as acknowledged
+            this._acknowledged = true;
+
+            // Remove overlay so exam content is accessible
+            if (overlay && overlay.parentNode) overlay.remove();
+
+            // Bind violation detection events
+            this._bindEvents();
+
+            // Log exam start and acknowledgment
+            this._logEvent("exam_started_supervised", { timestamp: new Date().toISOString() });
+            this._logEvent("student_acknowledged");
+
+            // Update badge immediately with current violation count
+            this._updateBadge();
+
+            // If fullscreen is required but not active, show warning immediately
+            if (this.config.force_fullscreen) {
+                var isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
+                if (!isFS) {
+                    this._showWarning();
+                    this._startGraceTimer();
+                }
+            }
         },
 
         _bindEvents: function () {
@@ -249,9 +282,12 @@
             this.isFullscreen = isFS;
 
             if (!isFS && this.config.force_fullscreen && this.isActive) {
-                this._showWarning();
-                this._logEvent("fullscreen_exited");
-                this._startGraceTimer();
+                // Only start grace timer if not already running
+                if (!this.graceTimer) {
+                    this._showWarning();
+                    this._logEvent("fullscreen_exited");
+                    this._startGraceTimer();
+                }
             } else if (isFS) {
                 this._hideWarning();
                 this._clearGraceTimer();
@@ -420,6 +456,13 @@
             this._logEvent("grace_period_expired");
             this._incrementViolation();
             this._hideWarning();
+            // If fullscreen required and still not in fullscreen, lock the exam
+            if (this.config.force_fullscreen && this.isActive) {
+                var isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
+                if (!isFS) {
+                    this._onLimitExceeded();
+                }
+            }
         },
 
         _incrementViolation: function () {

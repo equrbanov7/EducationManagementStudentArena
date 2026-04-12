@@ -372,7 +372,12 @@
             }
 
             function syncSupervisionSettings() {
-                settingsBlock.style.display = enabledCheckbox.checked ? "block" : "none";
+                if (enabledCheckbox.checked) {
+                    settingsBlock.style.display = "block";
+                    settingsBlock.removeAttribute("hidden");
+                } else {
+                    settingsBlock.style.display = "none";
+                }
             }
 
             function syncSupervisionCustom() {
@@ -384,6 +389,9 @@
 
             syncSupervisionSettings();
             enabledCheckbox.addEventListener("change", syncSupervisionSettings);
+            enabledCheckbox.addEventListener("click", function () {
+                setTimeout(syncSupervisionSettings, 0);
+            });
 
             if (templateSelect) {
                 syncSupervisionCustom();
