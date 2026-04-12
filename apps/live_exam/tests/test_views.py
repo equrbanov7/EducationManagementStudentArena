@@ -371,6 +371,50 @@ class LiveSessionResultsViewTest(TestCase):
         self.assertEqual(chart_data["score_distribution_labels"], ["40", "90"])
         self.assertEqual(chart_data["score_distribution_counts"], [1, 1])
 
+    def test_live_results_back_and_detail_links_preserve_original_return_to(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+        return_to = "/accounts/profile/?section=my-exams"
+
+        response = self.client.get(
+            reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug}),
+            {"from_section": "my-exams", "return_to": return_to},
+        )
+
+        expected_query = "from_section=my-exams&amp;return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-exams"
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'{reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam.slug})}?{expected_query}',
+            html=False,
+        )
+        self.assertContains(
+            response,
+            f'{reverse("liveExam:teacher_live_session_detail", kwargs={"slug": self.exam.slug, "pin": self.session.pin})}?{expected_query}',
+            html=False,
+        )
+
+    def test_live_session_detail_back_link_preserves_original_return_to(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+        return_to = "/accounts/profile/?section=my-exams"
+
+        response = self.client.get(
+            reverse(
+                "liveExam:teacher_live_session_detail",
+                kwargs={"slug": self.exam.slug, "pin": self.session.pin},
+            ),
+            {"from_section": "my-exams", "return_to": return_to},
+        )
+
+        expected_query = "from_section=my-exams&amp;return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-exams"
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'{reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug})}?{expected_query}',
+            html=False,
+        )
+
 
 class LiveJoinTest(TestCase):
     """Test player join functionality."""

@@ -26,6 +26,7 @@ from core.tenancy import restore_request_organization_from_profile
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
+from ..middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ..queries import get_signup_lookup_payload
 from ..services import (
     OTPRateLimitError,
@@ -161,6 +162,11 @@ class CustomLoginView(LoginView):
         for scope, *key_parts in limit_keys:
             record_rate_limit_hit(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
         return self.form_invalid(form)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
+        return response
 
 
 class NamespacedPasswordResetView(PasswordResetView):
@@ -603,6 +609,7 @@ def verify_otp_api_view(request):
         backend = settings.AUTHENTICATION_BACKENDS[0]
         login(request, user, backend=backend)
         restore_request_organization_from_profile(request, profile=getattr(user, "profile", None))
+        request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
 
     request.session.pop("pending_verify_email", None)
 
