@@ -18556,3 +18556,7 @@ msgstr "İmtahanınız dayandırılıb. Müəllim qərar qəbul edənə qədər 
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Müəllim cavabını gözləyirik..."
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "Bu əməliyyat icra edilə bilməz."

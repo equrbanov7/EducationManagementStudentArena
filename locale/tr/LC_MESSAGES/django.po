@@ -18317,3 +18317,7 @@ msgstr "Sınavınız askıya alındı. Öğretmen karar verene kadar bekleyin."
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Öğretmenin yanıtı bekleniyor..."
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "Bu işlem gerçekleştirilemez."
