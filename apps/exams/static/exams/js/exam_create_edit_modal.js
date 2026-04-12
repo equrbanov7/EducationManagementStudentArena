@@ -357,6 +357,40 @@
             isPublicCheckbox.addEventListener("change", syncAccessBlock);
         }
 
+        function initSupervisionToggle(form) {
+            if (!form) {
+                return;
+            }
+
+            var enabledCheckbox = form.querySelector('input[name="supervision_enabled"]');
+            var settingsBlock = form.querySelector("#modalSupervisionSettings");
+            var templateSelect = form.querySelector('select[name="supervision_template"]');
+            var customBlock = form.querySelector("#modalSupervisionCustomSettings");
+
+            if (!enabledCheckbox || !settingsBlock) {
+                return;
+            }
+
+            function syncSupervisionSettings() {
+                settingsBlock.style.display = enabledCheckbox.checked ? "block" : "none";
+            }
+
+            function syncSupervisionCustom() {
+                if (!templateSelect || !customBlock) {
+                    return;
+                }
+                customBlock.style.display = templateSelect.value === "custom" ? "block" : "none";
+            }
+
+            syncSupervisionSettings();
+            enabledCheckbox.addEventListener("change", syncSupervisionSettings);
+
+            if (templateSelect) {
+                syncSupervisionCustom();
+                templateSelect.addEventListener("change", syncSupervisionCustom);
+            }
+        }
+
         function initExamTypePicker(form) {
             if (!form) {
                 return;
@@ -447,6 +481,7 @@
 
             initExamTypePicker(form);
             initAccessToggle(form);
+            initSupervisionToggle(form);
 
             var groupSelector = initSearchableSelect(form, {
                 selectName: "allowed_groups",

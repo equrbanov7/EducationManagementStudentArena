@@ -56,7 +56,7 @@ class ExamForm(forms.ModelForm):
             ),
             "exam_type": forms.Select(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select",
                 }
             ),
             "is_active": forms.CheckboxInput(
@@ -87,12 +87,12 @@ class ExamForm(forms.ModelForm):
             ),
             "allowed_users": forms.SelectMultiple(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select",
                 }
             ),
             "allowed_groups": forms.SelectMultiple(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select",
                 }
             ),
             "access_code": forms.TextInput(
@@ -171,7 +171,7 @@ class ExamForm(forms.ModelForm):
             self.fields["organization"].required = True
             self.fields["organization"].widget.attrs.update(
                 {
-                    "class": "form-control",
+                    "class": "form-select",
                 }
             )
             if initial_organization is not None:
