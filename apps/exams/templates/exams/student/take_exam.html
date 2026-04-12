@@ -228,17 +228,18 @@
 
 <script nonce="{{ request.csp_nonce }}">
 const I18N_TAKE_EXAM = {
-    autosaveSaving: "{% trans 'autosave_saving' context 'exams.template.take_exam' %}",
-    autosaveSaved: "{% trans 'autosave_saved' context 'exams.template.take_exam' %}",
-    draftSaved: "{% trans 'draft_saved' context 'exams.template.take_exam' %}",
-    draftSavedWithCheck: "{% trans 'draft_saved_with_check' context 'exams.template.take_exam' %}",
-    saveError: "{% trans 'save_error' context 'exams.template.take_exam' %}",
-    saveErrorRetry: "{% trans 'save_error_retry' context 'exams.template.take_exam' %}",
-    btnSaving: "{% trans 'btn_saving' context 'exams.template.take_exam' %}",
-    btnSaved: "{% trans 'btn_saved' context 'exams.template.take_exam' %}",
-    btnDraftSaved: "{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}",
-    finishUnansweredCount: "{% trans 'confirm_finish_unanswered_count' context 'exams.template.take_exam' %}",
-    finishAllAnswered: "{% trans 'confirm_finish_all_answered' context 'exams.template.take_exam' %}"
+    autosaveSaving: "{% filter escapejs %}{% trans 'autosave_saving' context 'exams.template.take_exam' %}{% endfilter %}",
+    autosaveSaved: "{% filter escapejs %}{% trans 'autosave_saved' context 'exams.template.take_exam' %}{% endfilter %}",
+    draftSaved: "{% filter escapejs %}{% trans 'draft_saved' context 'exams.template.take_exam' %}{% endfilter %}",
+    draftSavedWithCheck: "{% filter escapejs %}{% trans 'draft_saved_with_check' context 'exams.template.take_exam' %}{% endfilter %}",
+    saveError: "{% filter escapejs %}{% trans 'save_error' context 'exams.template.take_exam' %}{% endfilter %}",
+    saveErrorRetry: "{% filter escapejs %}{% trans 'save_error_retry' context 'exams.template.take_exam' %}{% endfilter %}",
+    btnSaving: "{% filter escapejs %}{% trans 'btn_saving' context 'exams.template.take_exam' %}{% endfilter %}",
+    btnSaved: "{% filter escapejs %}{% trans 'btn_saved' context 'exams.template.take_exam' %}{% endfilter %}",
+    btnDraftSaved: "{% filter escapejs %}{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}{% endfilter %}",
+    finishUnansweredCount: "{% filter escapejs %}{% trans 'confirm_finish_unanswered_count' context 'exams.template.take_exam' %}{% endfilter %}",
+    finishAllAnswered: "{% filter escapejs %}{% trans 'confirm_finish_all_answered' context 'exams.template.take_exam' %}{% endfilter %}",
+    timeUpMessage: "{% filter escapejs %}{% trans 'time_up_auto_submit' context 'exams.template.take_exam' %}{% endfilter %}"
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -543,6 +544,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (questionTimerInterval) clearInterval(questionTimerInterval);
                 timerValueElement.textContent = "00:00";
 
+                // Prevent beforeunload warning during auto-submit
+                isFinishingExam = true;
+                hasUnsavedChanges = false;
+
+                // Show time-up notification
+                var timeUpMsg = (I18N_TAKE_EXAM.timeUpMessage || "").trim();
+                if (!timeUpMsg) timeUpMsg = "\u23F0 Time is up!";
+                showNotification(timeUpMsg, "error", 0);
+
                 const hiddenInput = document.createElement("input");
                 hiddenInput.type = "hidden";
                 hiddenInput.name = "submit_action";
@@ -550,7 +560,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 examForm.appendChild(hiddenInput);
 
                 localStorage.removeItem(storageKey);
-                examForm.submit();
+
+                // Short delay so user sees the time-up message before redirect
+                setTimeout(function() {
+                    examForm.submit();
+                }, 1500);
                 return;
             }
             
