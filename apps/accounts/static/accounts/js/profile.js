@@ -688,6 +688,43 @@ document.addEventListener("DOMContentLoaded", function () {
         syncPickerFromSelect();
     }
 
+    function showCreateExamTemplateInfo(form, templateSelect) {
+        var infoPanel = form.querySelector("#modalSupervisionTemplateInfo");
+        var infoTitle = form.querySelector("#modalSupervisionTemplateInfoTitle");
+        var infoDesc = form.querySelector("#modalSupervisionTemplateInfoDesc");
+        var infoFeatures = form.querySelector("#modalSupervisionTemplateInfoFeatures");
+        if (!infoPanel || !templateSelect) {
+            return;
+        }
+
+        var val = templateSelect.value;
+        var templates =
+            typeof window.MODAL_SUPERVISION_TPL_INFO === "object"
+                ? window.MODAL_SUPERVISION_TPL_INFO
+                : {};
+        var borderColors = {
+            custom: "#6c757d",
+            light: "#28a745",
+            medium: "#ffc107",
+            strict: "#dc3545"
+        };
+        var tpl = templates[val];
+        if (!tpl || val === "custom") {
+            infoPanel.style.display = "none";
+            return;
+        }
+        infoTitle.textContent = tpl.title || "";
+        infoDesc.textContent = tpl.desc || "";
+        infoFeatures.innerHTML = "";
+        (tpl.features || []).forEach(function (f) {
+            var li = document.createElement("li");
+            li.textContent = f;
+            infoFeatures.appendChild(li);
+        });
+        infoPanel.style.borderLeftColor = borderColors[val] || "#007bff";
+        infoPanel.style.display = "block";
+    }
+
     function initCreateExamSupervisionToggle(form) {
         if (!form) {
             return;
@@ -727,6 +764,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (templateSelect) {
             syncSupervisionCustom();
             templateSelect.addEventListener("change", syncSupervisionCustom);
+            templateSelect.addEventListener("change", function () {
+                showCreateExamTemplateInfo(form, templateSelect);
+            });
+            showCreateExamTemplateInfo(form, templateSelect);
         }
 
         // Initialize Bootstrap selects inside supervision settings
