@@ -18126,3 +18126,95 @@ msgstr "✅ Text selection blocked"
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_strict_f6"
 msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_title"
+msgstr "Custom Configuration"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_desc"
+msgstr "Manually configure all parameters."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_title"
+msgstr "Light Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_desc"
+msgstr "Minimal restrictions. Students take the exam more freely, only tab switching is tracked."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab switching is tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f2"
+msgstr "❌ Fullscreen not required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f3"
+msgstr "❌ Copy/paste not blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Max 5 violations, recovery chance given"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_title"
+msgstr "Medium Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_desc"
+msgstr "Balanced supervision. Core protection measures active, with teacher oversight."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Max 3 violations, teacher controls recovery"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_title"
+msgstr "Strict Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_desc"
+msgstr "Highest level supervision. All protection measures active, no second chance."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Text selection blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
