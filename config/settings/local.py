@@ -126,6 +126,11 @@ def _env_bool(name: str, default: bool) -> bool:
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
+# ---------------------------------------------------------------------------
+# AI / Gemini configuration
+# ---------------------------------------------------------------------------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 # SECURITY WARNING: SECRET_KEY must come from environment for local/dev too.
 SECRET_KEY = (os.getenv("SECRET_KEY") or "").strip()
 if not SECRET_KEY:
