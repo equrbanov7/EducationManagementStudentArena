@@ -283,8 +283,8 @@
                 {# ================= İMTAHAN NƏZARƏTİ BLOKU ================= #}
                 <div class="form-grid">
                     <div class="form-section-title span-full">
-                        <h2><i class="fas fa-shield-alt text-danger"></i> İmtahan Nəzarəti</h2>
-                        <p>Anti-cheating və imtahan nəzarəti parametrləri</p>
+                        <h2><i class="fas fa-shield-alt text-danger"></i> {% trans "supervision_section_title" context "exams.template.create_edit_exam" %}</h2>
+                        <p>{% trans "supervision_section_help" context "exams.template.create_edit_exam" %}</p>
                     </div>
 
                     <div class="form-group checkbox-group span-full">
@@ -294,10 +294,9 @@
                                    {% if supervision_config and supervision_config.enabled %}checked{% endif %}>
                             <span class="custom-checkbox-box"></span>
                             <span>
-                                İmtahan Nəzarəti Rejimini Aktivləşdir
+                                {% trans "supervision_enable_label" context "exams.template.create_edit_exam" %}
                                 <small class="checkbox-help">
-                                    Aktivləşdirildikdə, tələbə imtahan zamanı nəzarət altında olacaq.
-                                    Tab dəyişmə, fullscreen çıxışı, copy/paste və digər əməliyyatlar izlənəcək.
+                                    {% trans "supervision_enable_help" context "exams.template.create_edit_exam" %}
                                 </small>
                             </span>
                         </label>
@@ -307,14 +306,14 @@
 
                         {# Şablon seçimi #}
                         <div class="form-group">
-                            <label for="id_supervision_template">Nəzarət Şablonu</label>
-                            <select name="supervision_template" id="id_supervision_template" class="form-control">
-                                <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>Xüsusi (Custom)</option>
-                                <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>Yüngül (Light)</option>
-                                <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>Orta (Medium)</option>
-                                <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>Ciddi (Strict)</option>
+                            <label for="id_supervision_template">{% trans "supervision_template_label" context "exams.template.create_edit_exam" %}</label>
+                            <select name="supervision_template" id="id_supervision_template" class="form-select">
+                                <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_edit_exam" %}</option>
+                                <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_edit_exam" %}</option>
+                                <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_edit_exam" %}</option>
+                                <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_edit_exam" %}</option>
                             </select>
-                            <small class="form-text text-muted">Hazır şablon seçərək parametrləri avtomatik tənzimləyin, və ya xüsusi rejim seçərək əl ilə konfiqurasiya edin.</small>
+                            <small class="form-text text-muted">{% trans "supervision_template_help" context "exams.template.create_edit_exam" %}</small>
                         </div>
 
                         <div id="supervision-custom-settings">
@@ -328,8 +327,8 @@
                                                {% if not supervision_config or supervision_config.force_fullscreen %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Tam ekran rejimi tələb et
-                                            <small class="checkbox-help">Tələbə imtahana başlayarkən tam ekrana keçməlidir.</small>
+                                            {% trans "supervision_force_fullscreen" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_force_fullscreen_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -342,8 +341,8 @@
                                                {% if not supervision_config or supervision_config.detect_tab_switch %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Tab dəyişməni aşkarla
-                                            <small class="checkbox-help">Tələbə brauzerdə tab dəyişdirəndə qeydə alınacaq.</small>
+                                            {% trans "supervision_detect_tab_switch" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_detect_tab_switch_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -356,8 +355,8 @@
                                                {% if not supervision_config or supervision_config.block_copy_paste %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Kopyala/Yapışdır blokla
-                                            <small class="checkbox-help">Copy, Paste, Cut əməliyyatları bloklanacaq.</small>
+                                            {% trans "supervision_block_copy_paste" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_block_copy_paste_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -370,8 +369,8 @@
                                                {% if not supervision_config or supervision_config.disable_right_click %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Sağ klik menyusunu blokla
-                                            <small class="checkbox-help">Kontekst menyusuna giriş deaktiv ediləcək.</small>
+                                            {% trans "supervision_disable_right_click" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_disable_right_click_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -384,8 +383,8 @@
                                                {% if supervision_config and supervision_config.disable_text_selection %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Mətn seçimini blokla
-                                            <small class="checkbox-help">İmtahan mətninin seçilməsi və sürüklənməsi bloklanacaq.</small>
+                                            {% trans "supervision_disable_text_selection" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_disable_text_selection_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -398,8 +397,8 @@
                                                {% if not supervision_config or supervision_config.restrict_keyboard_shortcuts %}checked{% endif %}>
                                         <span class="custom-checkbox-box"></span>
                                         <span>
-                                            Klaviatura qısa yollarını məhdudla
-                                            <small class="checkbox-help">Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+S və s. bloklanacaq.</small>
+                                            {% trans "supervision_restrict_shortcuts" context "exams.template.create_edit_exam" %}
+                                            <small class="checkbox-help">{% trans "supervision_restrict_shortcuts_help" context "exams.template.create_edit_exam" %}</small>
                                         </span>
                                     </label>
                                 </div>
@@ -408,45 +407,45 @@
                             {# Numeric settings #}
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                                 <div class="form-group">
-                                    <label for="id_supervision_grace_period">Qaytarılma müddəti (saniyə)</label>
+                                    <label for="id_supervision_grace_period">{% trans "supervision_grace_period_label" context "exams.template.create_edit_exam" %}</label>
                                     <input type="number" name="supervision_grace_period"
                                            id="id_supervision_grace_period" class="form-control"
                                            min="5" max="60"
                                            value="{{ supervision_config.grace_period_seconds|default:15 }}">
-                                    <small class="form-text text-muted">Fullscreen çıxışından sonra qaytarılma üçün vaxt (5-60 saniyə).</small>
+                                    <small class="form-text text-muted">{% trans "supervision_grace_period_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="id_supervision_max_violations">Maksimum pozuntu sayı</label>
+                                    <label for="id_supervision_max_violations">{% trans "supervision_max_violations_label" context "exams.template.create_edit_exam" %}</label>
                                     <input type="number" name="supervision_max_violations"
                                            id="id_supervision_max_violations" class="form-control"
                                            min="1" max="20"
                                            value="{{ supervision_config.max_fullscreen_violations|default:3 }}">
-                                    <small class="form-text text-muted">Bu sayda pozuntudan sonra seçilmiş cəza tətbiq olunacaq.</small>
+                                    <small class="form-text text-muted">{% trans "supervision_max_violations_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
                             </div>
 
                             {# Action and Recovery #}
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                                 <div class="form-group">
-                                    <label for="id_supervision_violation_action">Pozuntu zamanı hərəkət</label>
-                                    <select name="supervision_violation_action" id="id_supervision_violation_action" class="form-control">
-                                        <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>Avtomatik göndər</option>
-                                        <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>İmtahanı kilidlə</option>
-                                        <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>Tələbəni çıxar</option>
-                                        <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>Şübhəli olaraq işarələ</option>
+                                    <label for="id_supervision_violation_action">{% trans "supervision_violation_action_label" context "exams.template.create_edit_exam" %}</label>
+                                    <select name="supervision_violation_action" id="id_supervision_violation_action" class="form-select">
+                                        <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_edit_exam" %}</option>
+                                        <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_edit_exam" %}</option>
+                                        <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_edit_exam" %}</option>
+                                        <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_edit_exam" %}</option>
                                     </select>
-                                    <small class="form-text text-muted">Maksimum pozuntu limitinə çatdıqda nə baş versin.</small>
+                                    <small class="form-text text-muted">{% trans "supervision_violation_action_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="id_supervision_recovery_policy">Bərpa siyasəti</label>
-                                    <select name="supervision_recovery_policy" id="id_supervision_recovery_policy" class="form-control">
-                                        <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>İkinci şans yoxdur</option>
-                                        <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>Bir əlavə şans</option>
-                                        <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>Müəllim tərəfindən idarə olunan</option>
+                                    <label for="id_supervision_recovery_policy">{% trans "supervision_recovery_policy_label" context "exams.template.create_edit_exam" %}</label>
+                                    <select name="supervision_recovery_policy" id="id_supervision_recovery_policy" class="form-select">
+                                        <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_edit_exam" %}</option>
+                                        <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_edit_exam" %}</option>
+                                        <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_edit_exam" %}</option>
                                     </select>
-                                    <small class="form-text text-muted">Kilidlənmiş tələbələr üçün bərpa imkanı.</small>
+                                    <small class="form-text text-muted">{% trans "supervision_recovery_policy_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
                             </div>
                         </div>
