@@ -18245,6 +18245,186 @@ msgctxt "exams.template.supervision_monitor"
 msgid "action_cancel"
 msgstr "İptal"
 
+#: supervision_monitor chart violation type labels
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_exited"
+msgstr "Tam ekrandan çıkış"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_restored"
+msgstr "Tam ekran geri yüklendi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_tab_switched"
+msgstr "Sekme değiştirildi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_blurred"
+msgstr "Pencere odağı kaybetti"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_focused"
+msgstr "Pencere odağa geri döndü"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_copy_attempt"
+msgstr "Kopyalama girişimi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_paste_attempt"
+msgstr "Yapıştırma girişimi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_cut_attempt"
+msgstr "Kesme girişimi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_right_click_attempt"
+msgstr "Sağ tıklama girişimi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_keyboard_shortcut"
+msgstr "Klavye kısayolu"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_text_select_attempt"
+msgstr "Metin seçme girişimi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_suspicious_repeated"
+msgstr "Şüpheli tekrarlanan eylem"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_grace_period_expired"
+msgstr "Tolerans süresi doldu"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_locked"
+msgstr "Otomatik kilitlendi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_submitted"
+msgstr "Otomatik gönderildi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_resumed"
+msgstr "Öğretmen devam ettirdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_granted_chance"
+msgstr "Öğretmen ek şans verdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_exam_started_supervised"
+msgstr "Gözetimli sınav başladı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_student_acknowledged"
+msgstr "Öğrenci onayladı"
+
+#: SupervisionIncident model event_type choices
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_exited"
+msgstr "Tam ekrandan çıkış"
+
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_restored"
+msgstr "Tam ekran geri yüklendi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "tab_switched"
+msgstr "Sekme değiştirildi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_blurred"
+msgstr "Pencere odağı kaybetti"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_focused"
+msgstr "Pencere odağa geri döndü"
+
+msgctxt "supervision.incident.choice.event"
+msgid "copy_attempt"
+msgstr "Kopyalama girişimi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "paste_attempt"
+msgstr "Yapıştırma girişimi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "cut_attempt"
+msgstr "Kesme girişimi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "right_click_attempt"
+msgstr "Sağ tıklama girişimi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "keyboard_shortcut"
+msgstr "Klavye kısayolu"
+
+msgctxt "supervision.incident.choice.event"
+msgid "text_select_attempt"
+msgstr "Metin seçme girişimi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "suspicious_repeated"
+msgstr "Şüpheli tekrarlanan eylem"
+
+msgctxt "supervision.incident.choice.event"
+msgid "grace_period_expired"
+msgstr "Tolerans süresi doldu"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_locked"
+msgstr "Otomatik kilitlendi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_submitted"
+msgstr "Otomatik gönderildi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_resumed"
+msgstr "Öğretmen devam ettirdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_granted_chance"
+msgstr "Öğretmen ek şans verdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "exam_started_supervised"
+msgstr "Gözetimli sınav başladı"
+
+msgctxt "supervision.incident.choice.event"
+msgid "student_acknowledged"
+msgstr "Öğrenci onayladı"
+
+#: SupervisionIncident model severity choices
+msgctxt "supervision.incident.choice.severity"
+msgid "info"
+msgstr "Bilgi"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "low"
+msgstr "Düşük"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "medium"
+msgstr "Orta"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "high"
+msgstr "Yüksek"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "critical"
+msgstr "Kritik"
+
+#: SupervisionIncident model field labels
+msgctxt "supervision.incident.field"
+msgid "event_type"
+msgstr "Olay türü"
+
 msgctxt "exams.template.supervision_detail"
 msgid "action_cancel"
 msgstr "İptal"

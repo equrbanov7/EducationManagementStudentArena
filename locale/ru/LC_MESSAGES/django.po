@@ -18267,6 +18267,186 @@ msgctxt "exams.template.supervision_monitor"
 msgid "action_cancel"
 msgstr "Отмена"
 
+#: supervision_monitor chart violation type labels
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_exited"
+msgstr "Выход из полного экрана"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_restored"
+msgstr "Полный экран восстановлен"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_tab_switched"
+msgstr "Переключение вкладки"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_blurred"
+msgstr "Окно потеряло фокус"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_focused"
+msgstr "Окно вернуло фокус"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_copy_attempt"
+msgstr "Попытка копирования"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_paste_attempt"
+msgstr "Попытка вставки"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_cut_attempt"
+msgstr "Попытка вырезания"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_right_click_attempt"
+msgstr "Попытка правого клика"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_keyboard_shortcut"
+msgstr "Сочетание клавиш"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_text_select_attempt"
+msgstr "Попытка выделения текста"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_suspicious_repeated"
+msgstr "Подозрительное повторное действие"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_grace_period_expired"
+msgstr "Льготный период истёк"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_locked"
+msgstr "Автоматическая блокировка"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_submitted"
+msgstr "Автоматическая отправка"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_resumed"
+msgstr "Возобновлено учителем"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_granted_chance"
+msgstr "Учитель дал дополнительный шанс"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_exam_started_supervised"
+msgstr "Экзамен под наблюдением начат"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_student_acknowledged"
+msgstr "Студент подтвердил"
+
+#: SupervisionIncident model event_type choices
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_exited"
+msgstr "Выход из полного экрана"
+
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_restored"
+msgstr "Полный экран восстановлен"
+
+msgctxt "supervision.incident.choice.event"
+msgid "tab_switched"
+msgstr "Переключение вкладки"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_blurred"
+msgstr "Окно потеряло фокус"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_focused"
+msgstr "Окно вернуло фокус"
+
+msgctxt "supervision.incident.choice.event"
+msgid "copy_attempt"
+msgstr "Попытка копирования"
+
+msgctxt "supervision.incident.choice.event"
+msgid "paste_attempt"
+msgstr "Попытка вставки"
+
+msgctxt "supervision.incident.choice.event"
+msgid "cut_attempt"
+msgstr "Попытка вырезания"
+
+msgctxt "supervision.incident.choice.event"
+msgid "right_click_attempt"
+msgstr "Попытка правого клика"
+
+msgctxt "supervision.incident.choice.event"
+msgid "keyboard_shortcut"
+msgstr "Сочетание клавиш"
+
+msgctxt "supervision.incident.choice.event"
+msgid "text_select_attempt"
+msgstr "Попытка выделения текста"
+
+msgctxt "supervision.incident.choice.event"
+msgid "suspicious_repeated"
+msgstr "Подозрительное повторное действие"
+
+msgctxt "supervision.incident.choice.event"
+msgid "grace_period_expired"
+msgstr "Льготный период истёк"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_locked"
+msgstr "Автоматическая блокировка"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_submitted"
+msgstr "Автоматическая отправка"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_resumed"
+msgstr "Возобновлено учителем"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_granted_chance"
+msgstr "Учитель дал дополнительный шанс"
+
+msgctxt "supervision.incident.choice.event"
+msgid "exam_started_supervised"
+msgstr "Экзамен под наблюдением начат"
+
+msgctxt "supervision.incident.choice.event"
+msgid "student_acknowledged"
+msgstr "Студент подтвердил"
+
+#: SupervisionIncident model severity choices
+msgctxt "supervision.incident.choice.severity"
+msgid "info"
+msgstr "Информация"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "low"
+msgstr "Низкий"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "medium"
+msgstr "Средний"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "high"
+msgstr "Высокий"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "critical"
+msgstr "Критический"
+
+#: SupervisionIncident model field labels
+msgctxt "supervision.incident.field"
+msgid "event_type"
+msgstr "Тип события"
+
 msgctxt "exams.template.supervision_detail"
 msgid "action_cancel"
 msgstr "Отмена"
