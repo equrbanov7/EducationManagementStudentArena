@@ -11,6 +11,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
@@ -414,6 +415,35 @@ class LiveSessionResultsViewTest(TestCase):
             f'{reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug})}?{expected_query}',
             html=False,
         )
+
+    def test_live_results_page_renders_translated_english_copy(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+        with override("en"):
+            response = self.client.get(reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Live Exam Results")
+        self.assertContains(response, "Detailed Statistics")
+        self.assertContains(response, "Participants")
+
+    def test_live_session_detail_page_renders_translated_english_copy(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+        with override("en"):
+            response = self.client.get(
+                reverse(
+                    "liveExam:teacher_live_session_detail",
+                    kwargs={"slug": self.exam.slug, "pin": self.session.pin},
+                )
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Session Statistics")
+        self.assertContains(response, "All Sessions")
+        self.assertContains(response, "Participant Results")
 
 
 class LiveJoinTest(TestCase):
