@@ -17,6 +17,7 @@ from django.urls import reverse
 
 from apps.exams.models import Exam, ExamQuestion
 from apps.exams.services.access_policy import is_teacher_user
+from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
@@ -189,6 +190,37 @@ def teacher_live_session_detail(request, slug, pin):
         "score_distribution_labels": score_distribution_labels,
         "score_distribution_counts": score_distribution_counts,
     }
+
+    # ── AI Summary (AJAX) ─────────────────────────────────────────────
+    if request.GET.get("ai_summary") == "1":
+        ai_stats = {
+            "player_count": player_count,
+            "total_answers": total_answers_count,
+            "total_correct": total_correct_count,
+            "overall_accuracy": overall_accuracy,
+            "avg_score": round(avg_score_val),
+            "max_score": max_score_val,
+            "avg_response_ms": round(avg_response_ms),
+            "question_stats": [
+                {
+                    "text": qs["question"].text[:80],
+                    "accuracy": qs["accuracy_percent"],
+                    "total": qs["total_answers"],
+                    "correct": qs["correct_answers"],
+                    "avg_ms": qs["avg_answer_ms"],
+                }
+                for qs in question_stats[:20]
+            ],
+            "top_players": [
+                {"nickname": p.nickname, "score": p.score, "correct": p.correct_count} for p in players[:10]
+            ],
+        }
+        result = generate_exam_statistics_summary(
+            exam_title=exam.title,
+            exam_type="Live Exam",
+            stats=ai_stats,
+        )
+        return JsonResponse(result)
 
     if request.headers.get("Accept") == "application/json":
         return JsonResponse(
