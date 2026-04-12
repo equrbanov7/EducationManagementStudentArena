@@ -67,6 +67,7 @@ const state = {
     revealKey: "",
     revealPayload: null,
     lastTop: [],
+    resultSignature: "",
     leaderboardSignature: "",
     finalSignature: "",
     lastRoundSoundKey: "",
@@ -495,6 +496,7 @@ function renderIdle() {
     state.currentQuestion = null;
     state.currentAnswer = null;
     state.revealPayload = null;
+    state.resultSignature = "";
     state.leaderboardSignature = "";
     state.finalSignature = "";
     hideOptions();
@@ -720,10 +722,23 @@ function renderResult(payload) {
     const totalScore = hasAnswer && Number.isFinite(Number(personalResult.total_score))
         ? Number(personalResult.total_score)
         : (Number.isFinite(Number(state.pendingScore)) ? Number(state.pendingScore) : state.player.score);
+    const resultSignature = [
+        getRevealKey(payload),
+        hasAnswer ? 1 : 0,
+        isCorrect ? 1 : 0,
+        points,
+        totalScore,
+        Number(personalResult?.answer_rank || 0),
+    ].join(":");
+
+    if (state.phase === PHASES.RESULT && state.resultSignature === resultSignature) {
+        return;
+    }
 
     setScore(totalScore);
     state.pendingScore = null;
     state.phase = PHASES.RESULT;
+    state.resultSignature = resultSignature;
 
     const subtitle = hasAnswer
         ? `${tr("resultAnswered", "You answered")} ${rankText}`
@@ -769,6 +784,7 @@ function renderLeaderboard(payload) {
 
     state.phase = PHASES.LEADERBOARD;
     state.revealPayload = payload;
+    state.resultSignature = "";
     state.leaderboardSignature = leaderboardSignature;
     state.finalSignature = "";
 
@@ -912,6 +928,7 @@ function renderFinal(payload) {
     setQuestionChip(null);
     state.phase = PHASES.FINAL;
     state.revealPayload = null;
+    state.resultSignature = "";
     state.finalSignature = finalSignature;
     state.leaderboardSignature = "";
     playFinalSound(finalSignature || "final");
@@ -1082,6 +1099,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
     clearPhaseTimer();
     state.revealPayload = null;
     state.currentQuestion = question;
+    state.resultSignature = "";
     state.finalSignature = "";
 
     if (isNewQuestion) {
@@ -1091,6 +1109,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
         state.submitting = false;
         state.waitingMessage = "";
         state.phase = "";
+        state.resultSignature = "";
         state.leaderboardSignature = "";
         setQuestionChip(question);
     }
