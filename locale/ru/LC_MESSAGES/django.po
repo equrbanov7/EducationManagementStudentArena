@@ -18679,6 +18679,14 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_locked_waiting"
 msgstr "Ждём ответа преподавателя..."
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_title"
+msgstr "⚠️ Внимание!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_msg"
+msgstr "Вы достигли 75% лимита нарушений! Осталось только {remaining} нарушение(й). Будьте внимательнее!"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Эта операция не может быть выполнена."

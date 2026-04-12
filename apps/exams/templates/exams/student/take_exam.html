@@ -893,7 +893,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedTitle: "{% filter escapejs %}{% trans 'supervision_locked_title' context 'exams.template.take_exam' %}{% endfilter %}",
         lockedMsg: "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
         lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
-        lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}"
+        lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
+        thresholdTitle: "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}"
     };
     </script>
     <script src="{% static 'exams/js/exam_supervision.js' %}"></script>
