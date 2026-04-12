@@ -26,6 +26,13 @@
 .sd-filter-field label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:4px}
 .sd-filter-field input,.sd-filter-field select{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.84rem;background:#f9fafb;transition:border-color .15s}
 .sd-filter-field input:focus,.sd-filter-field select:focus{outline:none;border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.12);background:#fff}
+.sd-filter-field .bootstrap-single-select{width:100%}
+.sd-filter-field .bootstrap-single-select__toggle{min-height:auto;padding:7px 10px;border-radius:8px;font-size:.84rem;font-weight:500;background:#f9fafb;border-color:#d1d5db;box-shadow:none}
+.sd-filter-field .bootstrap-single-select__toggle:hover{border-color:#9dbaf5;background:#fff}
+.sd-filter-field .bootstrap-single-select__toggle:focus,.sd-filter-field .bootstrap-single-select__toggle.show{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.12);background:#fff}
+.sd-filter-field .bootstrap-single-select__menu{border-radius:8px;margin-top:4px}
+.sd-filter-field .bootstrap-single-select__option{padding:6px 10px;font-size:.84rem;border-radius:6px}
+.sd-filter-field .bootstrap-single-select__caret{font-size:.7rem}
 .sd-filter-actions{display:flex;gap:8px;align-items:end}
 .sd-filter-btn{padding:8px 16px;border:none;border-radius:8px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s}
 .sd-filter-btn--apply{background:#1a56db;color:#fff}
@@ -154,12 +161,14 @@
             <div class="sd-filter-grid">
                 <div class="sd-filter-field">
                     <label for="fGroup">{% trans "filter_group" context "exams.template.exam_statistics" %}</label>
-                    <select name="group" id="fGroup">
-                        <option value="">{% trans "filter_all_groups" context "exams.template.exam_statistics" %}</option>
-                        {% for g in teacher_groups %}
-                            <option value="{{ g.id }}" {% if f_group|stringformat:"d" == g.id|stringformat:"d" %}selected{% endif %}>{{ g.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="group" id="fGroup" class="bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="">{% trans "filter_all_groups" context "exams.template.exam_statistics" %}</option>
+                            {% for g in teacher_groups %}
+                                <option value="{{ g.id }}" {% if f_group|stringformat:"d" == g.id|stringformat:"d" %}selected{% endif %}>{{ g.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="sd-filter-field">
                     <label for="fStudent">{% trans "filter_student" context "exams.template.exam_statistics" %}</label>
@@ -175,12 +184,14 @@
                 </div>
                 <div class="sd-filter-field">
                     <label for="fStatus">{% trans "filter_status" context "exams.template.exam_statistics" %}</label>
-                    <select name="status" id="fStatus">
-                        <option value="">{% trans "filter_all_statuses" context "exams.template.exam_statistics" %}</option>
-                        <option value="submitted" {% if f_status == "submitted" %}selected{% endif %}>{% trans "filter_status_submitted" context "exams.template.exam_statistics" %}</option>
-                        <option value="expired" {% if f_status == "expired" %}selected{% endif %}>{% trans "filter_status_expired" context "exams.template.exam_statistics" %}</option>
-                        <option value="in_progress" {% if f_status == "in_progress" %}selected{% endif %}>{% trans "filter_status_in_progress" context "exams.template.exam_statistics" %}</option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="status" id="fStatus" class="bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="">{% trans "filter_all_statuses" context "exams.template.exam_statistics" %}</option>
+                            <option value="submitted" {% if f_status == "submitted" %}selected{% endif %}>{% trans "filter_status_submitted" context "exams.template.exam_statistics" %}</option>
+                            <option value="expired" {% if f_status == "expired" %}selected{% endif %}>{% trans "filter_status_expired" context "exams.template.exam_statistics" %}</option>
+                            <option value="in_progress" {% if f_status == "in_progress" %}selected{% endif %}>{% trans "filter_status_in_progress" context "exams.template.exam_statistics" %}</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="sd-filter-field">
                     <label for="fScoreMin">{% trans "filter_score_min" context "exams.template.exam_statistics" %}</label>
@@ -192,21 +203,25 @@
                 </div>
                 <div class="sd-filter-field">
                     <label for="fPassFail">{% trans "filter_pass_fail" context "exams.template.exam_statistics" %}</label>
-                    <select name="pass_fail" id="fPassFail">
-                        <option value="">{% trans "filter_all" context "exams.template.exam_statistics" %}</option>
-                        <option value="pass" {% if f_pass_fail == "pass" %}selected{% endif %}>{% trans "filter_passed" context "exams.template.exam_statistics" %}</option>
-                        <option value="fail" {% if f_pass_fail == "fail" %}selected{% endif %}>{% trans "filter_failed" context "exams.template.exam_statistics" %}</option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="pass_fail" id="fPassFail" class="bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="">{% trans "filter_all" context "exams.template.exam_statistics" %}</option>
+                            <option value="pass" {% if f_pass_fail == "pass" %}selected{% endif %}>{% trans "filter_passed" context "exams.template.exam_statistics" %}</option>
+                            <option value="fail" {% if f_pass_fail == "fail" %}selected{% endif %}>{% trans "filter_failed" context "exams.template.exam_statistics" %}</option>
+                        </select>
+                    </div>
                 </div>
                 {% if blocks %}
                 <div class="sd-filter-field">
                     <label for="fBlock">{% trans "filter_block" context "exams.template.exam_statistics" %}</label>
-                    <select name="block" id="fBlock">
-                        <option value="">{% trans "filter_all_blocks" context "exams.template.exam_statistics" %}</option>
-                        {% for b in blocks %}
-                            <option value="{{ b.id }}" {% if f_block|stringformat:"d" == b.id|stringformat:"d" %}selected{% endif %}>{{ b.name }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="block" id="fBlock" class="bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="">{% trans "filter_all_blocks" context "exams.template.exam_statistics" %}</option>
+                            {% for b in blocks %}
+                                <option value="{{ b.id }}" {% if f_block|stringformat:"d" == b.id|stringformat:"d" %}selected{% endif %}>{{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 {% endif %}
                 {% if teacher_groups %}
@@ -245,17 +260,29 @@
         <div class="sd-card sd-card--green">
             <div class="sd-card__icon"><i class="fas fa-chart-bar"></i></div>
             <span class="sd-card__label">{% trans "card_avg_score" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ avg_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+            {% if is_written %}
+                <span class="sd-card__value">{{ avg_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+            {% else %}
+                <span class="sd-card__value">{{ avg_score }}%</span>
+            {% endif %}
         </div>
         <div class="sd-card sd-card--teal">
             <div class="sd-card__icon"><i class="fas fa-trophy"></i></div>
             <span class="sd-card__label">{% trans "card_max_score" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ max_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+            {% if is_written %}
+                <span class="sd-card__value">{{ max_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+            {% else %}
+                <span class="sd-card__value">{{ max_score }}%</span>
+            {% endif %}
         </div>
         <div class="sd-card sd-card--red">
             <div class="sd-card__icon"><i class="fas fa-arrow-down"></i></div>
             <span class="sd-card__label">{% trans "card_min_score" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ min_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+            {% if is_written %}
+                <span class="sd-card__value">{{ min_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+            {% else %}
+                <span class="sd-card__value">{{ min_score }}%</span>
+            {% endif %}
         </div>
         <div class="sd-card sd-card--green">
             <div class="sd-card__icon"><i class="fas fa-check-circle"></i></div>
@@ -267,11 +294,19 @@
             <span class="sd-card__label">{% trans "card_avg_duration" context "exams.template.exam_statistics" %}</span>
             <span class="sd-card__value">{{ avg_duration }}s</span>
         </div>
+        {% if is_written %}
+        <div class="sd-card sd-card--purple">
+            <div class="sd-card__icon"><i class="fas fa-user-check"></i></div>
+            <span class="sd-card__label">{% trans "card_checked" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ checked_count }}<small style="font-size:.55em;opacity:.7">/{{ total_attempts }}</small></span>
+        </div>
+        {% else %}
         <div class="sd-card sd-card--purple">
             <div class="sd-card__icon"><i class="fas fa-check"></i></div>
             <span class="sd-card__label">{% trans "card_submitted" context "exams.template.exam_statistics" %}</span>
             <span class="sd-card__value">{{ submitted_count }}</span>
         </div>
+        {% endif %}
         <div class="sd-card sd-card--red">
             <div class="sd-card__icon"><i class="fas fa-hourglass-end"></i></div>
             <span class="sd-card__label">{% trans "card_expired" context "exams.template.exam_statistics" %}</span>
@@ -286,15 +321,22 @@
             <div class="sd-chart-wrap"><canvas id="studentScoreChart"></canvas></div>
         </div>
         <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-bullseye"></i> {% trans "chart_question_accuracy" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-box__title"><i class="fas fa-bullseye"></i> {% if is_written %}{% trans "chart_avg_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "chart_question_accuracy" context "exams.template.exam_statistics" %}{% endif %}</div>
             <div class="sd-chart-wrap"><canvas id="questionAccuracyChart"></canvas></div>
         </div>
     </div>
     <div class="sd-chart-row">
+        {% if is_written %}
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-user-check"></i> {% trans "chart_checked_unchecked" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="checkedUncheckedChart"></canvas></div>
+        </div>
+        {% else %}
         <div class="sd-chart-box">
             <div class="sd-chart-box__title"><i class="fas fa-chart-pie"></i> {% trans "chart_correct_incorrect" context "exams.template.exam_statistics" %}</div>
             <div class="sd-chart-wrap"><canvas id="correctIncorrectChart"></canvas></div>
         </div>
+        {% endif %}
         <div class="sd-chart-box">
             <div class="sd-chart-box__title"><i class="fas fa-check-double"></i> {% trans "chart_pass_fail" context "exams.template.exam_statistics" %}</div>
             <div class="sd-chart-wrap"><canvas id="passFailChart"></canvas></div>
@@ -380,9 +422,14 @@
                         <th style="width:50px">#</th>
                         <th>{% trans "table_question" context "exams.template.exam_statistics" %}</th>
                         <th>{% trans "table_answers" context "exams.template.exam_statistics" %}</th>
+                        {% if is_written %}
+                        <th>{% trans "table_avg_score" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_max_points" context "exams.template.exam_statistics" %}</th>
+                        {% else %}
                         <th>{% trans "table_correct" context "exams.template.exam_statistics" %}</th>
                         <th>{% trans "table_incorrect" context "exams.template.exam_statistics" %}</th>
-                        <th style="min-width:180px">{% trans "table_accuracy" context "exams.template.exam_statistics" %}</th>
+                        {% endif %}
+                        <th style="min-width:180px">{% if is_written %}{% trans "table_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "table_accuracy" context "exams.template.exam_statistics" %}{% endif %}</th>
                     </tr>
                 </thead>
                 <tbody id="questionTbody">
@@ -391,8 +438,13 @@
                         <td><span style="font-weight:700;color:#64748b">{{ forloop.counter }}</span></td>
                         <td title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:60 }}</td>
                         <td>{{ qs.total_answers }}</td>
+                        {% if is_written %}
+                        <td style="font-weight:600;color:#1d4ed8">{{ qs.avg_score }}</td>
+                        <td style="font-weight:600;color:#64748b">{{ qs.max_points }}</td>
+                        {% else %}
                         <td style="color:#059669;font-weight:600">{{ qs.correct_answers }}</td>
                         <td style="color:#dc2626;font-weight:600">{{ qs.incorrect_answers }}</td>
+                        {% endif %}
                         <td>
                             <div class="sd-bar">
                                 <div class="sd-bar__track">
@@ -480,7 +532,15 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: Object.assign({}, tooltipStyle, { callbacks: { title: function(items){ var idx=items[0].dataIndex; return qLabels[idx]||("Q"+(idx+1)); }, label: function(item){ return item.raw+"%"; } } }) }, scales: { y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function(v){return v+"%";} } }, x: { grid: { display: false } } } }
     }, hasItems(qAcc), "{% trans 'chart_empty_questions' context 'exams.template.exam_statistics' %}");
 
-    /* Correct / Incorrect doughnut */
+    {% if is_written %}
+    /* Checked / Unchecked doughnut (written exams) */
+    mkChart("checkedUncheckedChart", {
+        type: "doughnut",
+        data: { labels: ["{% trans 'chart_label_checked' context 'exams.template.exam_statistics' %}", "{% trans 'chart_label_unchecked' context 'exams.template.exam_statistics' %}"], datasets: [{ data: [{{ checked_count }}, {{ unchecked_count }}], backgroundColor: ["#059669","#94a3b8"], borderWidth: 0, hoverOffset: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom", labels: { font: { family: fontFamily, size: 12, weight: "bold" }, padding: 16, usePointStyle: true } }, tooltip: tooltipStyle } }
+    }, {{ checked_count }} + {{ unchecked_count }} > 0, "{% trans 'chart_empty_checked' context 'exams.template.exam_statistics' %}");
+    {% else %}
+    /* Correct / Incorrect doughnut (test exams) */
     var qC = getArr("question_correct"), qI = getArr("question_incorrect");
     var tC = qC.reduce(function(a,b){return a+b;},0), tI = qI.reduce(function(a,b){return a+b;},0);
     mkChart("correctIncorrectChart", {
@@ -488,6 +548,7 @@
         data: { labels: ["{% trans 'chart_label_correct' context 'exams.template.exam_statistics' %}", "{% trans 'chart_label_incorrect' context 'exams.template.exam_statistics' %}"], datasets: [{ data: [tC, tI], backgroundColor: ["#059669","#dc2626"], borderWidth: 0, hoverOffset: 8 }] },
         options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom", labels: { font: { family: fontFamily, size: 12, weight: "bold" }, padding: 16, usePointStyle: true } }, tooltip: tooltipStyle } }
     }, hasPositive([tC, tI]), "{% trans 'chart_empty_correct_incorrect' context 'exams.template.exam_statistics' %}");
+    {% endif %}
 
     /* Pass / Fail doughnut */
     mkChart("passFailChart", {
