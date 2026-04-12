@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "page_title" context "exams.template.exam_statistics" %} — {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+<style nonce="{{ request.csp_nonce }}">
+/* ═══════════════════════ Base Layout ═══════════════════════ */
+.sd-page{max-width:1200px;margin:0 auto;padding:28px 20px 48px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,sans-serif}
+.sd-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;color:#4a5568;text-decoration:none;font-size:.9rem;font-weight:500;transition:color .15s}
+.sd-back:hover{color:#1a56db}
+.sd-back i{font-size:.8rem}
+
+/* ═══════════════════════ Header ═══════════════════════ */
+.sd-header{margin-bottom:28px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.sd-header__left h1{font-size:1.5rem;font-weight:800;margin:0 0 4px;color:#111827}
+.sd-header__left h1 i{color:#1a56db;margin-right:6px}
+.sd-header__left p{color:#6b7280;margin:0;font-size:.9rem}
+.sd-header__badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1a56db,#0e7490);color:#fff;font-size:.85rem;font-weight:700;padding:6px 14px;border-radius:8px}
+
+/* ═══════════════════════ Filter Card ═══════════════════════ */
+.sd-filter-card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;padding:20px;margin-bottom:28px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sd-filter-card__title{font-size:.95rem;font-weight:700;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sd-filter-card__title i{color:#1a56db}
+.sd-filter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;align-items:end}
+.sd-filter-field label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:4px}
+.sd-filter-field input,.sd-filter-field select{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:.84rem;background:#f9fafb;transition:border-color .15s}
+.sd-filter-field input:focus,.sd-filter-field select:focus{outline:none;border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.12);background:#fff}
+.sd-filter-actions{display:flex;gap:8px;align-items:end}
+.sd-filter-btn{padding:8px 16px;border:none;border-radius:8px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s}
+.sd-filter-btn--apply{background:#1a56db;color:#fff}
+.sd-filter-btn--apply:hover{background:#1e40af}
+.sd-filter-btn--clear{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}
+.sd-filter-btn--clear:hover{background:#e5e7eb}
+
+/* ═══════════════════════ Summary Cards ═══════════════════════ */
+.sd-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:32px}
+.sd-card{border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}
+.sd-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.sd-card__icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:.95rem}
+.sd-card__label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280}
+.sd-card__value{font-size:1.55rem;font-weight:800;line-height:1.2}
+.sd-card--blue{background:linear-gradient(135deg,#eff6ff,#dbeafe)}.sd-card--blue .sd-card__icon{background:#1a56db;color:#fff}.sd-card--blue .sd-card__value{color:#1a56db}
+.sd-card--green{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}.sd-card--green .sd-card__icon{background:#059669;color:#fff}.sd-card--green .sd-card__value{color:#059669}
+.sd-card--red{background:linear-gradient(135deg,#fef2f2,#fecaca)}.sd-card--red .sd-card__icon{background:#dc2626;color:#fff}.sd-card--red .sd-card__value{color:#dc2626}
+.sd-card--teal{background:linear-gradient(135deg,#f0fdfa,#ccfbf1)}.sd-card--teal .sd-card__icon{background:#0e7490;color:#fff}.sd-card--teal .sd-card__value{color:#0e7490}
+.sd-card--amber{background:linear-gradient(135deg,#fffbeb,#fef3c7)}.sd-card--amber .sd-card__icon{background:#d97706;color:#fff}.sd-card--amber .sd-card__value{color:#d97706}
+.sd-card--purple{background:linear-gradient(135deg,#faf5ff,#ede9fe)}.sd-card--purple .sd-card__icon{background:#7c3aed;color:#fff}.sd-card--purple .sd-card__value{color:#7c3aed}
+
+/* ═══════════════════════ Chart Area ═══════════════════════ */
+.sd-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.sd-chart-box{background:#fff;border-radius:16px;border:1px solid #e5e7eb;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sd-chart-box--full{grid-column:1 / -1}
+.sd-chart-box__title{font-size:.92rem;font-weight:700;margin-bottom:14px;color:#374151;display:flex;align-items:center;gap:8px}
+.sd-chart-box__title i{color:#1a56db}
+.sd-chart-box__hint{margin:-4px 0 14px;color:#6b7280;font-size:.83rem;line-height:1.45}
+.sd-chart-wrap{position:relative;height:280px}
+.sd-chart-wrap--compact{height:240px}
+.sd-chart-wrap.is-empty{display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px dashed #dbeafe;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
+.sd-chart-empty{max-width:260px;text-align:center;color:#6b7280;font-size:.9rem;line-height:1.5}
+
+/* ═══════════════════════ Panel ═══════════════════════ */
+.sd-panel{background:#fff;border-radius:16px;border:1px solid #e5e7eb;margin-bottom:28px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sd-panel__head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:10px}
+.sd-panel__title{font-size:1.08rem;font-weight:700;display:flex;align-items:center;gap:8px;color:#111827}
+.sd-panel__title i{color:#1a56db;font-size:.95rem}
+.sd-panel__tools{display:flex;align-items:center;gap:10px}
+
+/* ═══════════════════════ Search Box ═══════════════════════ */
+.sd-search{position:relative}
+.sd-search input{padding:7px 12px 7px 34px;border:1px solid #d1d5db;border-radius:8px;font-size:.84rem;width:200px;transition:border-color .15s,box-shadow .15s;background:#f9fafb}
+.sd-search input:focus{outline:none;border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.12);background:#fff}
+.sd-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.82rem}
+
+/* ═══════════════════════ Table ═══════════════════════ */
+.sd-table-wrap{max-height:480px;overflow-y:auto;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.sd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.88rem}
+.sd-table thead{position:sticky;top:0;z-index:2}
+.sd-table th{background:#f8fafc;padding:11px 14px;text-align:left;font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:#475569;border-bottom:2px solid #e2e8f0}
+.sd-table td{padding:11px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.sd-table tbody tr{transition:background .1s}
+.sd-table tbody tr:hover{background:#f0f9ff}
+.sd-table tbody tr.sd-hidden{display:none}
+
+/* ═══════════════════════ Bars ═══════════════════════ */
+.sd-bar{display:flex;align-items:center;gap:8px}
+.sd-bar__track{flex:1;height:10px;background:#f1f5f9;border-radius:6px;overflow:hidden;min-width:60px;max-width:140px}
+.sd-bar__fill{height:100%;border-radius:6px;transition:width .4s ease}
+.sd-bar__fill--green{background:linear-gradient(90deg,#10b981,#059669)}
+.sd-bar__fill--blue{background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.sd-bar__fill--red{background:linear-gradient(90deg,#f87171,#dc2626)}
+.sd-bar__text{font-weight:700;min-width:44px;font-size:.84rem}
+
+/* ═══════════════════════ AI Summary ═══════════════════════ */
+.sd-ai-panel{background:linear-gradient(135deg,#f0f9ff 0%,#faf5ff 100%);border-radius:16px;border:1px solid #c7d2fe;padding:24px;margin-bottom:28px}
+.sd-ai-panel__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.sd-ai-panel__title{font-size:1.08rem;font-weight:700;color:#4338ca;display:flex;align-items:center;gap:8px}
+.sd-ai-panel__title i{font-size:1rem}
+.sd-ai-btn{padding:8px 18px;background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.sd-ai-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(67,56,202,.3)}
+.sd-ai-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.sd-ai-content{font-size:.92rem;line-height:1.7;color:#1e1b4b}
+.sd-ai-content h1,.sd-ai-content h2,.sd-ai-content h3{color:#4338ca;margin:16px 0 8px;font-size:1rem}
+.sd-ai-content ul,.sd-ai-content ol{padding-left:20px;margin:8px 0}
+.sd-ai-content strong{color:#312e81}
+.sd-ai-loading{display:flex;align-items:center;gap:10px;color:#6366f1;font-weight:600;font-size:.9rem}
+.sd-ai-error{color:#dc2626;font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:6px}
+
+/* ═══════════════════════ Pagination ═══════════════════════ */
+.sd-pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-top:1px solid #f3f4f6}
+.sd-pagination button{padding:6px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:.82rem;font-weight:600;color:#374151;cursor:pointer;transition:all .15s}
+.sd-pagination button:hover:not(:disabled){background:#f0f9ff;border-color:#1a56db;color:#1a56db}
+.sd-pagination button:disabled{opacity:.4;cursor:default}
+.sd-pagination button.is-active{background:#1a56db;border-color:#1a56db;color:#fff}
+.sd-pagination__info{font-size:.8rem;color:#6b7280;margin:0 8px}
+
+/* ═══════════════════════ Responsive ═══════════════════════ */
+@media(max-width:768px){
+    .sd-chart-row{grid-template-columns:1fr}
+    .sd-summary{grid-template-columns:repeat(2,1fr)}
+    .sd-filter-grid{grid-template-columns:1fr 1fr}
+    .sd-search input{width:150px}
+}
+@media(max-width:480px){
+    .sd-summary{grid-template-columns:1fr}
+    .sd-header{flex-direction:column}
+    .sd-filter-grid{grid-template-columns:1fr}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sd-page">
+    <a href="{{ results_url }}" class="sd-back">
+        <i class="fas fa-arrow-left"></i> {% trans "back_to_results" context "exams.template.exam_statistics" %}
+    </a>
+
+    <div class="sd-header">
+        <div class="sd-header__left">
+            <h1><i class="fas fa-chart-line"></i> {% trans "page_title" context "exams.template.exam_statistics" %}</h1>
+            <p>{{ exam.title }} — {{ exam.get_exam_type_display }}</p>
+        </div>
+        <span class="sd-header__badge">
+            <i class="fas fa-file-alt"></i> {{ exam.get_exam_type_display }}
+        </span>
+    </div>
+
+    <!-- ═══════════ Filters ═══════════ -->
+    <div class="sd-filter-card">
+        <div class="sd-filter-card__title"><i class="fas fa-filter"></i> {% trans "filter_title" context "exams.template.exam_statistics" %}</div>
+        <form method="get" id="statsFilterForm">
+            {% if request.GET.from_section %}<input type="hidden" name="from_section" value="{{ request.GET.from_section }}">{% endif %}
+            {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
+            <div class="sd-filter-grid">
+                <div class="sd-filter-field">
+                    <label for="fGroup">{% trans "filter_group" context "exams.template.exam_statistics" %}</label>
+                    <select name="group" id="fGroup">
+                        <option value="">{% trans "filter_all_groups" context "exams.template.exam_statistics" %}</option>
+                        {% for g in teacher_groups %}
+                            <option value="{{ g.id }}" {% if f_group|stringformat:"d" == g.id|stringformat:"d" %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fStudent">{% trans "filter_student" context "exams.template.exam_statistics" %}</label>
+                    <input type="text" name="student" id="fStudent" value="{{ f_student }}" placeholder="{% trans 'filter_student_placeholder' context 'exams.template.exam_statistics' %}" autocomplete="off">
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fDateFrom">{% trans "filter_date_from" context "exams.template.exam_statistics" %}</label>
+                    <input type="date" name="date_from" id="fDateFrom" value="{{ f_date_from }}">
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fDateTo">{% trans "filter_date_to" context "exams.template.exam_statistics" %}</label>
+                    <input type="date" name="date_to" id="fDateTo" value="{{ f_date_to }}">
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fStatus">{% trans "filter_status" context "exams.template.exam_statistics" %}</label>
+                    <select name="status" id="fStatus">
+                        <option value="">{% trans "filter_all_statuses" context "exams.template.exam_statistics" %}</option>
+                        <option value="submitted" {% if f_status == "submitted" %}selected{% endif %}>{% trans "filter_status_submitted" context "exams.template.exam_statistics" %}</option>
+                        <option value="expired" {% if f_status == "expired" %}selected{% endif %}>{% trans "filter_status_expired" context "exams.template.exam_statistics" %}</option>
+                        <option value="in_progress" {% if f_status == "in_progress" %}selected{% endif %}>{% trans "filter_status_in_progress" context "exams.template.exam_statistics" %}</option>
+                    </select>
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fScoreMin">{% trans "filter_score_min" context "exams.template.exam_statistics" %}</label>
+                    <input type="number" name="score_min" id="fScoreMin" value="{{ f_score_min }}" min="0" placeholder="0">
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fScoreMax">{% trans "filter_score_max" context "exams.template.exam_statistics" %}</label>
+                    <input type="number" name="score_max" id="fScoreMax" value="{{ f_score_max }}" min="0" placeholder="100">
+                </div>
+                <div class="sd-filter-field">
+                    <label for="fPassFail">{% trans "filter_pass_fail" context "exams.template.exam_statistics" %}</label>
+                    <select name="pass_fail" id="fPassFail">
+                        <option value="">{% trans "filter_all" context "exams.template.exam_statistics" %}</option>
+                        <option value="pass" {% if f_pass_fail == "pass" %}selected{% endif %}>{% trans "filter_passed" context "exams.template.exam_statistics" %}</option>
+                        <option value="fail" {% if f_pass_fail == "fail" %}selected{% endif %}>{% trans "filter_failed" context "exams.template.exam_statistics" %}</option>
+                    </select>
+                </div>
+                {% if blocks %}
+                <div class="sd-filter-field">
+                    <label for="fBlock">{% trans "filter_block" context "exams.template.exam_statistics" %}</label>
+                    <select name="block" id="fBlock">
+                        <option value="">{% trans "filter_all_blocks" context "exams.template.exam_statistics" %}</option>
+                        {% for b in blocks %}
+                            <option value="{{ b.id }}" {% if f_block|stringformat:"d" == b.id|stringformat:"d" %}selected{% endif %}>{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                {% if teacher_groups %}
+                <div class="sd-filter-field" style="grid-column:1/-1">
+                    <label>{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        {% for g in teacher_groups %}
+                            <label style="display:flex;align-items:center;gap:4px;font-size:.84rem;cursor:pointer">
+                                <input type="checkbox" name="compare_groups" value="{{ g.id }}"
+                                       {% if g.id|stringformat:"d" in f_compare_groups %}checked{% endif %}>
+                                {{ g.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="sd-filter-actions" style="margin-top:14px">
+                <button type="submit" class="sd-filter-btn sd-filter-btn--apply">
+                    <i class="fas fa-filter"></i> {% trans "filter_apply" context "exams.template.exam_statistics" %}
+                </button>
+                <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ nav_query }}" class="sd-filter-btn sd-filter-btn--clear">
+                    <i class="fas fa-eraser"></i> {% trans "filter_clear" context "exams.template.exam_statistics" %}
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ═══════════ Summary Cards ═══════════ -->
+    <div class="sd-summary">
+        <div class="sd-card sd-card--blue">
+            <div class="sd-card__icon"><i class="fas fa-users"></i></div>
+            <span class="sd-card__label">{% trans "card_total_attempts" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ total_attempts }}</span>
+        </div>
+        <div class="sd-card sd-card--green">
+            <div class="sd-card__icon"><i class="fas fa-chart-bar"></i></div>
+            <span class="sd-card__label">{% trans "card_avg_score" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ avg_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+        </div>
+        <div class="sd-card sd-card--teal">
+            <div class="sd-card__icon"><i class="fas fa-trophy"></i></div>
+            <span class="sd-card__label">{% trans "card_max_score" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ max_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+        </div>
+        <div class="sd-card sd-card--red">
+            <div class="sd-card__icon"><i class="fas fa-arrow-down"></i></div>
+            <span class="sd-card__label">{% trans "card_min_score" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ min_score }}{% if exam.exam_type == "test" %}%{% endif %}</span>
+        </div>
+        <div class="sd-card sd-card--green">
+            <div class="sd-card__icon"><i class="fas fa-check-circle"></i></div>
+            <span class="sd-card__label">{% trans "card_pass_rate" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ pass_rate }}%</span>
+        </div>
+        <div class="sd-card sd-card--amber">
+            <div class="sd-card__icon"><i class="fas fa-clock"></i></div>
+            <span class="sd-card__label">{% trans "card_avg_duration" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ avg_duration }}s</span>
+        </div>
+        <div class="sd-card sd-card--purple">
+            <div class="sd-card__icon"><i class="fas fa-check"></i></div>
+            <span class="sd-card__label">{% trans "card_submitted" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ submitted_count }}</span>
+        </div>
+        <div class="sd-card sd-card--red">
+            <div class="sd-card__icon"><i class="fas fa-hourglass-end"></i></div>
+            <span class="sd-card__label">{% trans "card_expired" context "exams.template.exam_statistics" %}</span>
+            <span class="sd-card__value">{{ expired_count }}</span>
+        </div>
+    </div>
+
+    <!-- ═══════════ Charts ═══════════ -->
+    <div class="sd-chart-row">
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-chart-bar"></i> {% trans "chart_student_scores" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="studentScoreChart"></canvas></div>
+        </div>
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-bullseye"></i> {% trans "chart_question_accuracy" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="questionAccuracyChart"></canvas></div>
+        </div>
+    </div>
+    <div class="sd-chart-row">
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-chart-pie"></i> {% trans "chart_correct_incorrect" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="correctIncorrectChart"></canvas></div>
+        </div>
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-check-double"></i> {% trans "chart_pass_fail" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="passFailChart"></canvas></div>
+        </div>
+    </div>
+    <div class="sd-chart-row">
+        <div class="sd-chart-box sd-chart-box--full">
+            <div class="sd-chart-box__title"><i class="fas fa-layer-group"></i> {% trans "chart_score_distribution" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-box__hint">{% trans "chart_score_distribution_hint" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap sd-chart-wrap--compact"><canvas id="scoreDistributionChart"></canvas></div>
+        </div>
+    </div>
+
+    {% if compare_groups_data %}
+    <!-- ═══════════ Group Comparison Charts ═══════════ -->
+    <div class="sd-chart-row">
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-balance-scale"></i> {% trans "chart_group_avg_score" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="groupAvgScoreChart"></canvas></div>
+        </div>
+        <div class="sd-chart-box">
+            <div class="sd-chart-box__title"><i class="fas fa-percentage"></i> {% trans "chart_group_pass_rate" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-chart-wrap"><canvas id="groupPassRateChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- ═══════════ Group Comparison Table ═══════════ -->
+    <div class="sd-panel">
+        <div class="sd-panel__head">
+            <div class="sd-panel__title"><i class="fas fa-users-cog"></i> {% trans "table_group_comparison" context "exams.template.exam_statistics" %}</div>
+        </div>
+        <div class="sd-table-wrap">
+            <table class="sd-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "table_group_name" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_group_participants" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_group_avg" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_group_pass_rate" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_group_max" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_group_min" context "exams.template.exam_statistics" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in compare_groups_data %}
+                    <tr>
+                        <td><strong>{{ g.name }}</strong></td>
+                        <td>{{ g.count }}</td>
+                        <td><strong>{{ g.avg_score }}{% if exam.exam_type == "test" %}%{% endif %}</strong></td>
+                        <td>
+                            <div class="sd-bar">
+                                <div class="sd-bar__track">
+                                    <div class="sd-bar__fill {% if g.pass_rate >= 70 %}sd-bar__fill--green{% elif g.pass_rate >= 40 %}sd-bar__fill--blue{% else %}sd-bar__fill--red{% endif %}" style="width:{{ g.pass_rate }}%"></div>
+                                </div>
+                                <span class="sd-bar__text">{{ g.pass_rate }}%</span>
+                            </div>
+                        </td>
+                        <td>{{ g.max_score }}</td>
+                        <td>{{ g.min_score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════ Question Statistics ═══════════ -->
+    <div class="sd-panel">
+        <div class="sd-panel__head">
+            <div class="sd-panel__title"><i class="fas fa-question-circle"></i> {% trans "table_question_stats" context "exams.template.exam_statistics" %}</div>
+            <div class="sd-panel__tools">
+                <div class="sd-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="questionSearch" placeholder="{% trans 'search_question' context 'exams.template.exam_statistics' %}" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div class="sd-table-wrap" id="questionTableWrap">
+            <table class="sd-table" id="questionTable">
+                <thead>
+                    <tr>
+                        <th style="width:50px">#</th>
+                        <th>{% trans "table_question" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_answers" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_correct" context "exams.template.exam_statistics" %}</th>
+                        <th>{% trans "table_incorrect" context "exams.template.exam_statistics" %}</th>
+                        <th style="min-width:180px">{% trans "table_accuracy" context "exams.template.exam_statistics" %}</th>
+                    </tr>
+                </thead>
+                <tbody id="questionTbody">
+                    {% for qs in question_stats %}
+                    <tr data-question="{{ qs.question.text|lower }}">
+                        <td><span style="font-weight:700;color:#64748b">{{ forloop.counter }}</span></td>
+                        <td title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:60 }}</td>
+                        <td>{{ qs.total_answers }}</td>
+                        <td style="color:#059669;font-weight:600">{{ qs.correct_answers }}</td>
+                        <td style="color:#dc2626;font-weight:600">{{ qs.incorrect_answers }}</td>
+                        <td>
+                            <div class="sd-bar">
+                                <div class="sd-bar__track">
+                                    <div class="sd-bar__fill {% if qs.accuracy_percent >= 70 %}sd-bar__fill--green{% elif qs.accuracy_percent >= 40 %}sd-bar__fill--blue{% else %}sd-bar__fill--red{% endif %}" style="width:{{ qs.accuracy_percent }}%"></div>
+                                </div>
+                                <span class="sd-bar__text" style="color:{% if qs.accuracy_percent >= 70 %}#059669{% elif qs.accuracy_percent >= 40 %}#1d4ed8{% else %}#dc2626{% endif %}">{{ qs.accuracy_percent }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="sd-pagination" id="questionPagination"></div>
+    </div>
+
+    <!-- ═══════════ AI Summary ═══════════ -->
+    <div class="sd-ai-panel" id="aiSummaryPanel">
+        <div class="sd-ai-panel__head">
+            <div class="sd-ai-panel__title"><i class="fas fa-robot"></i> {% trans "ai_summary_title" context "exams.template.exam_statistics" %}</div>
+            <button type="button" class="sd-ai-btn" id="aiSummaryBtn">
+                <i class="fas fa-magic"></i> {% trans "ai_generate_btn" context "exams.template.exam_statistics" %}
+            </button>
+        </div>
+        <div class="sd-ai-content" id="aiSummaryContent">
+            <p style="color:#6b7280;font-style:italic">{% trans "ai_initial_message" context "exams.template.exam_statistics" %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+{{ chart_data|json_script:"statsChartData" }}
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    "use strict";
+
+    var chartDataEl = document.getElementById("statsChartData");
+    var CD = chartDataEl ? JSON.parse(chartDataEl.textContent) : {};
+    var PAGE_SIZE = 15;
+    var fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
+    var tooltipStyle = {
+        backgroundColor: "rgba(17,24,39,.92)",
+        titleFont: { family: fontFamily, size: 13, weight: "bold" },
+        bodyFont: { family: fontFamily, size: 12 },
+        cornerRadius: 8, padding: 10
+    };
+
+    function getArr(k) { return Array.isArray(CD[k]) ? CD[k] : []; }
+    function hasItems(v) { return Array.isArray(v) && v.length > 0; }
+    function hasPositive(v) { return hasItems(v) && v.some(function(x){ return Number(x) > 0; }); }
+
+    function showNotice(id, msg) {
+        var c = document.getElementById(id);
+        if (!c || !c.parentElement) return;
+        var w = c.parentElement;
+        w.classList.add("is-empty");
+        w.innerHTML = '<div class="sd-chart-empty">' + msg + '</div>';
+    }
+
+    function mkChart(id, cfg, ok, empty) {
+        if (typeof window.Chart !== "function") { showNotice(id, "{% trans 'chart_module_error' context 'exams.template.exam_statistics' %}"); return null; }
+        if (!ok) { showNotice(id, empty); return null; }
+        var c = document.getElementById(id);
+        return c ? new window.Chart(c, cfg) : null;
+    }
+
+    /* Student Scores */
+    var sLabels = getArr("student_labels");
+    var sScores = getArr("student_scores");
+    mkChart("studentScoreChart", {
+        type: "bar",
+        data: { labels: sLabels, datasets: [{ label: "{% trans 'chart_label_score' context 'exams.template.exam_statistics' %}", data: sScores, backgroundColor: sScores.map(function(_, i){ var c=["#1a56db","#0e7490","#059669","#0284c7","#2563eb"]; return c[i%c.length]; }), borderRadius: 6, borderSkipped: false, barPercentage: 0.7 }] },
+        options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipStyle }, scales: { x: { grid: { color: "#f1f5f9" } }, y: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } } } }
+    }, hasItems(sScores), "{% trans 'chart_empty_students' context 'exams.template.exam_statistics' %}");
+
+    /* Question Accuracy */
+    var qLabels = getArr("question_labels");
+    var qAcc = getArr("question_accuracy");
+    var qShort = qLabels.map(function(_, i){ return "S" + (i+1); });
+    mkChart("questionAccuracyChart", {
+        type: "bar",
+        data: { labels: qShort, datasets: [{ label: "{% trans 'chart_label_accuracy' context 'exams.template.exam_statistics' %}", data: qAcc, backgroundColor: qAcc.map(function(v){ return v>=70?"#059669":v>=40?"#0284c7":"#dc2626"; }), borderRadius: 6, borderSkipped: false, barPercentage: 0.6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: Object.assign({}, tooltipStyle, { callbacks: { title: function(items){ var idx=items[0].dataIndex; return qLabels[idx]||("Q"+(idx+1)); }, label: function(item){ return item.raw+"%"; } } }) }, scales: { y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function(v){return v+"%";} } }, x: { grid: { display: false } } } }
+    }, hasItems(qAcc), "{% trans 'chart_empty_questions' context 'exams.template.exam_statistics' %}");
+
+    /* Correct / Incorrect doughnut */
+    var qC = getArr("question_correct"), qI = getArr("question_incorrect");
+    var tC = qC.reduce(function(a,b){return a+b;},0), tI = qI.reduce(function(a,b){return a+b;},0);
+    mkChart("correctIncorrectChart", {
+        type: "doughnut",
+        data: { labels: ["{% trans 'chart_label_correct' context 'exams.template.exam_statistics' %}", "{% trans 'chart_label_incorrect' context 'exams.template.exam_statistics' %}"], datasets: [{ data: [tC, tI], backgroundColor: ["#059669","#dc2626"], borderWidth: 0, hoverOffset: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom", labels: { font: { family: fontFamily, size: 12, weight: "bold" }, padding: 16, usePointStyle: true } }, tooltip: tooltipStyle } }
+    }, hasPositive([tC, tI]), "{% trans 'chart_empty_correct_incorrect' context 'exams.template.exam_statistics' %}");
+
+    /* Pass / Fail doughnut */
+    mkChart("passFailChart", {
+        type: "doughnut",
+        data: { labels: ["{% trans 'chart_label_pass' context 'exams.template.exam_statistics' %}", "{% trans 'chart_label_fail' context 'exams.template.exam_statistics' %}"], datasets: [{ data: [{{ pass_count }}, {{ fail_count }}], backgroundColor: ["#059669","#dc2626"], borderWidth: 0, hoverOffset: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "bottom", labels: { font: { family: fontFamily, size: 12, weight: "bold" }, padding: 16, usePointStyle: true } }, tooltip: tooltipStyle } }
+    }, {{ pass_count }} + {{ fail_count }} > 0, "{% trans 'chart_empty_pass_fail' context 'exams.template.exam_statistics' %}");
+
+    /* Score Distribution */
+    var sdL = getArr("score_distribution_labels"), sdC = getArr("score_distribution_counts");
+    mkChart("scoreDistributionChart", {
+        type: "bar",
+        data: { labels: sdL, datasets: [{ label: "{% trans 'chart_label_participants' context 'exams.template.exam_statistics' %}", data: sdC, backgroundColor: "rgba(14,116,144,.82)", borderColor: "#0e7490", borderWidth: 1.5, borderRadius: 8, borderSkipped: false, maxBarThickness: 48 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipStyle }, scales: { y: { beginAtZero: true, grid: { color: "#f1f5f9" }, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+    }, hasItems(sdC), "{% trans 'chart_empty_distribution' context 'exams.template.exam_statistics' %}");
+
+    /* Group charts */
+    var gLabels = getArr("group_labels"), gAvg = getArr("group_avg_scores"), gPass = getArr("group_pass_rates");
+    if (hasItems(gLabels)) {
+        var gColors = gLabels.map(function(_, i){ var c=["#1a56db","#059669","#d97706","#dc2626","#7c3aed","#0e7490"]; return c[i%c.length]; });
+        mkChart("groupAvgScoreChart", {
+            type: "bar",
+            data: { labels: gLabels, datasets: [{ label: "{% trans 'chart_label_avg_score' context 'exams.template.exam_statistics' %}", data: gAvg, backgroundColor: gColors, borderRadius: 6, borderSkipped: false }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipStyle }, scales: { y: { grid: { color: "#f1f5f9" } }, x: { grid: { display: false } } } }
+        }, true, "");
+
+        mkChart("groupPassRateChart", {
+            type: "bar",
+            data: { labels: gLabels, datasets: [{ label: "{% trans 'chart_label_pass_rate' context 'exams.template.exam_statistics' %}", data: gPass, backgroundColor: gColors, borderRadius: 6, borderSkipped: false }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tooltipStyle }, scales: { y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function(v){return v+"%";} } }, x: { grid: { display: false } } } }
+        }, true, "");
+    }
+
+    /* Table search + pagination */
+    function setupTable(tbodyId, searchId, pagId) {
+        var tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
+        var searchEl = document.getElementById(searchId);
+        var pagEl = document.getElementById(pagId);
+        var page = 1, filtered = rows;
+
+        function doFilter() {
+            var q = (searchEl ? searchEl.value : "").toLowerCase().trim();
+            filtered = rows.filter(function(r){ return !q || (r.dataset.question||r.textContent||"").toLowerCase().indexOf(q)!==-1; });
+            page = 1; render();
+        }
+        function render() {
+            var tp = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+            if (page > tp) page = tp;
+            var s = (page-1)*PAGE_SIZE, e = s+PAGE_SIZE;
+            rows.forEach(function(r){r.classList.add("sd-hidden");});
+            filtered.forEach(function(r,i){if(i>=s&&i<e)r.classList.remove("sd-hidden");});
+            renderPag(pagEl, page, tp, filtered.length);
+        }
+        function renderPag(el, pg, tot, cnt) {
+            if (!el) return; el.innerHTML = "";
+            if (tot<=1 && cnt<=PAGE_SIZE) return;
+            var prev = document.createElement("button"); prev.textContent="‹"; prev.disabled=pg<=1; prev.onclick=function(){page--;render();}; el.appendChild(prev);
+            var ms=7,sp=Math.max(1,pg-Math.floor(ms/2)),ep=Math.min(tot,sp+ms-1);
+            if(ep-sp<ms-1) sp=Math.max(1,ep-ms+1);
+            for(var i=sp;i<=ep;i++){var b=document.createElement("button");b.textContent=i;if(i===pg)b.className="is-active";(function(p){b.onclick=function(){page=p;render();};})(i);el.appendChild(b);}
+            var info=document.createElement("span");info.className="sd-pagination__info";info.textContent=cnt+" {% trans 'pagination_results' context 'exams.template.exam_statistics' %}";el.appendChild(info);
+            var nx=document.createElement("button");nx.textContent="›";nx.disabled=pg>=tot;nx.onclick=function(){page++;render();};el.appendChild(nx);
+        }
+        if (searchEl) searchEl.addEventListener("input", doFilter);
+        doFilter();
+    }
+    setupTable("questionTbody", "questionSearch", "questionPagination");
+
+    /* AI Summary */
+    var aiBtn = document.getElementById("aiSummaryBtn");
+    var aiContent = document.getElementById("aiSummaryContent");
+    if (aiBtn && aiContent) {
+        aiBtn.addEventListener("click", function() {
+            aiBtn.disabled = true;
+            aiContent.innerHTML = '<div class="sd-ai-loading"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "exams.template.exam_statistics" %}</div>';
+
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set("ai_summary", "1");
+
+            fetch(currentUrl.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.ok) {
+                        aiContent.innerHTML = formatMarkdown(data.summary);
+                    } else {
+                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || "{% trans 'ai_error' context 'exams.template.exam_statistics' %}") + '</div>';
+                    }
+                    aiBtn.disabled = false;
+                })
+                .catch(function() {
+                    aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> {% trans "ai_error" context "exams.template.exam_statistics" %}</div>';
+                    aiBtn.disabled = false;
+                });
+        });
+    }
+
+    function formatMarkdown(text) {
+        /* Simple markdown to HTML conversion */
+        var html = text
+            .replace(/### (.*)/g, '<h3>$1</h3>')
+            .replace(/## (.*)/g, '<h2>$1</h2>')
+            .replace(/# (.*)/g, '<h1>$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^- (.*)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        return '<p>' + html + '</p>';
+    }
+})();
+</script>
+{% endblock %}

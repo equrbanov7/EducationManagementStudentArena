@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ exam.title }} - Canlı imtahan nəticələri{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "page_title" context "liveExam.template.results" %}{% endblock %}
 
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
@@ -39,8 +39,8 @@
         <i class="fas fa-arrow-left"></i> {{ exam.title }}
     </a>
     <div class="lr-header">
-        <h1><i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri</h1>
-        <p>{{ exam.title }} — keçirilmiş bütün canlı sessiyalar</p>
+        <h1><i class="fas fa-broadcast-tower"></i> {% trans "page_title" context "liveExam.template.results" %}</h1>
+        <p>{{ exam.title }} — {% trans "page_subtitle" context "liveExam.template.results" %}</p>
     </div>
 
     {% if sessions %}
@@ -55,24 +55,24 @@
             </div>
             <div class="lr-card__stats">
                 <div class="lr-stat lr-stat--blue">
-                    <span class="lr-stat__label">İştirakçı</span>
+                    <span class="lr-stat__label">{% trans "card_participants" context "liveExam.template.results" %}</span>
                     <span class="lr-stat__value">{{ s.player_count }}</span>
                 </div>
                 <div class="lr-stat">
-                    <span class="lr-stat__label">Cavab sayı</span>
+                    <span class="lr-stat__label">{% trans "card_answer_count" context "liveExam.template.results" %}</span>
                     <span class="lr-stat__value">{{ s.answer_count }}</span>
                 </div>
                 <div class="lr-stat lr-stat--green">
-                    <span class="lr-stat__label">Düzgün cavab</span>
+                    <span class="lr-stat__label">{% trans "card_correct_answers" context "liveExam.template.results" %}</span>
                     <span class="lr-stat__value">{{ s.total_correct }}</span>
                 </div>
                 <div class="lr-stat">
-                    <span class="lr-stat__label">Ort. bal</span>
+                    <span class="lr-stat__label">{% trans "card_avg_score" context "liveExam.template.results" %}</span>
                     <span class="lr-stat__value">{{ s.avg_score|floatformat:0|default:"0" }}</span>
                 </div>
             </div>
             <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}{% if live_results_navigation_query %}?{{ live_results_navigation_query }}{% endif %}" class="lr-card__link">
-                <i class="fas fa-chart-bar"></i> Ətraflı statistika <i class="fas fa-arrow-right" style="font-size:.78rem"></i>
+                <i class="fas fa-chart-bar"></i> {% trans "action_view_detailed_stats" context "liveExam.template.results" %} <i class="fas fa-arrow-right" style="font-size:.78rem"></i>
             </a>
         </div>
         {% endfor %}
@@ -80,7 +80,7 @@
     {% else %}
     <div class="lr-empty">
         <i class="fas fa-inbox"></i>
-        <p>Bu imtahan üzrə hələ canlı sessiya keçirilməyib.</p>
+        <p>{% trans "empty_no_sessions" context "liveExam.template.results" %}</p>
     </div>
     {% endif %}
 </div>
