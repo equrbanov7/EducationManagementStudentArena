@@ -8,11 +8,13 @@ from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, QuestionBlock
+from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services import parsing
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.organizations.models import Membership, Organization
@@ -257,7 +259,6 @@ class ExamQuestionRandomizerServicesTest(TestCase):
         )
 
         generate_random_questions_for_attempt(attempt)
-
         answers = list(attempt.answers.select_related("question__block"))
         self.assertEqual(len(answers), 5)
 
@@ -267,6 +268,36 @@ class ExamQuestionRandomizerServicesTest(TestCase):
 
         ordered_counts = [block_counts[block.id] for block in blocks]
         self.assertEqual(ordered_counts, [2, 1, 1, 1])
+
+
+class ExamStatisticsAiSummaryServiceTest(SimpleTestCase):
+    @override_settings(GEMINI_API_KEY="")
+    def test_returns_localized_missing_key_error_in_azerbaijani(self):
+        with override("az"):
+            result = generate_exam_statistics_summary(
+                exam_title="Sınaq",
+                exam_type="Test",
+                stats={},
+            )
+
+        self.assertEqual(
+            result,
+            {"ok": False, "error": "GEMINI_API_KEY tənzimlənməyib."},
+        )
+
+    @override_settings(GEMINI_API_KEY="")
+    def test_returns_localized_missing_key_error_in_english(self):
+        with override("en"):
+            result = generate_exam_statistics_summary(
+                exam_title="Trial",
+                exam_type="Test",
+                stats={},
+            )
+
+        self.assertEqual(
+            result,
+            {"ok": False, "error": "GEMINI_API_KEY is not configured."},
+        )
 
 
 class ExamAccessControlServicesTest(TestCase):
