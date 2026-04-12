@@ -18029,3 +18029,243 @@ msgstr "nəticə"
 msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Sonrakı ›"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "page_title"
+msgstr "İmtahan Nəzarəti - Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "heading"
+msgstr "İmtahan Nəzarəti Monitoru"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "subtitle"
+msgstr "Bütün nəzarət altındakı imtahanlar üçün şübhəli hadisələr və tələbə vəziyyətləri"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_total_incidents"
+msgstr "Ümumi Pozuntu"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_flagged_students"
+msgstr "Bayraqlanmış Tələbə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_supervised_exams"
+msgstr "Nəzarətli İmtahan"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_severity_distribution"
+msgstr "Ciddilik Paylanması"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_violation_types"
+msgstr "Pozuntu Növləri"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_search_placeholder"
+msgstr "Tələbə və ya imtahan axtar..."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_exams"
+msgstr "Bütün imtahanlar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_statuses"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_active"
+msgstr "Aktiv"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_warned"
+msgstr "Xəbərdarlıq"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_locked"
+msgstr "Kilidli"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_removed"
+msgstr "Çıxarılmış"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_resumed"
+msgstr "Bərpa edilmiş"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_search"
+msgstr "Axtar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_exam"
+msgstr "İmtahan"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_violation_count"
+msgstr "Pozuntu Sayı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_start_time"
+msgstr "Başlama Vaxtı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_details"
+msgstr "Detallar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_actions"
+msgstr "Əməliyyatlar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_details"
+msgstr "Detallar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_resume"
+msgstr "Bərpa et"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "empty_no_violations"
+msgstr "Hələlik heç bir pozuntu qeydə alınmayıb."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_info"
+msgstr "Məlumat"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_low"
+msgstr "Aşağı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_medium"
+msgstr "Orta"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_high"
+msgstr "Yüksək"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_critical"
+msgstr "Kritik"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_count_label"
+msgstr "Sayı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_resume"
+msgstr "Bu tələbəyə imtahana davam etməyə icazə vermək istəyirsiniz?"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_success"
+msgstr "Tələbəyə icazə verildi. Tələbənin imtahanı bərpa edildi."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_error"
+msgstr "Xəta: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "connection_error"
+msgstr "Əlaqə xətası."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_title"
+msgstr "Xüsusi Konfiqurasiya"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_desc"
+msgstr "Bütün parametrləri əl ilə tənzimləyin."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_title"
+msgstr "Yüngül Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_desc"
+msgstr "Minimal məhdudiyyətlər. Tələbələr daha sərbəst imtahan verir, yalnız tab dəyişmə izlənilir."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f2"
+msgstr "❌ Tam ekran tələb olunmur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f3"
+msgstr "❌ Kopyala/yapışdır bloklanmır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Maksimum 5 pozuntu, bərpa şansı verilir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_title"
+msgstr "Orta Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_desc"
+msgstr "Balanslaşdırılmış nəzarət. Əsas qoruma tədbirləri aktiv, müəllim nəzarəti ilə."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Sağ klik deaktiv edilir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Maksimum 3 pozuntu, müəllim bərpa edir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_title"
+msgstr "Ciddi Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_desc"
+msgstr "Ən yüksək səviyyəli nəzarət. Bütün qoruma tədbirləri aktiv, ikinci şans yoxdur."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Sağ klik deaktiv"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Mətn seçimi bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Maksimum 2 pozuntu, avtomatik təslim edilir, ikinci şans yoxdur"
