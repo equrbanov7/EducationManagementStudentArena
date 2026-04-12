@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         aiCached: i18n.aiCached || "Cached",
         aiQuotaInfo: i18n.aiQuotaInfo || "{remaining}/{limit} ({window})",
         aiNoAnswer: i18n.aiNoAnswer || "No answer to grade",
-        maxPointsLabel: i18n.maxPointsLabel || "/ {points}",
     };
 
     // Elementlər
@@ -25,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.getElementById('backBtn'); // HTML-də id="backBtn" olduğundan əmin olun
     const gradingForm = document.getElementById('gradingForm');
     const modalScoreInput = document.getElementById('modalScoreInput');
+    const modalMaxPointsInput = document.getElementById('modalMaxPointsInput');
     
     let isFormDirty = false;  
     let isModalDirty = false;
@@ -32,6 +32,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // YENİ: İtifadıçının getmək istədiyi ünvanı yadda saxlamaq üçün dəyişən
     let pendingNavigationUrl = null; 
+
+    function normalizePositiveIntegerInput(input, fallbackValue = '1') {
+        if (!input) return fallbackValue;
+        const rawValue = String(input.value || '').trim();
+        if (rawValue === '') {
+            input.value = fallbackValue;
+            return input.value;
+        }
+
+        const parsed = parseInt(rawValue, 10);
+        if (!Number.isFinite(parsed) || parsed < 1) {
+            input.value = fallbackValue;
+            return input.value;
+        }
+
+        input.value = String(parsed);
+        return input.value;
+    }
+
+    function syncScoreConstraints() {
+        if (!modalScoreInput || !modalMaxPointsInput) return;
+        const maxPoints = normalizePositiveIntegerInput(
+            modalMaxPointsInput,
+            modalMaxPointsInput.getAttribute('min') || '1'
+        );
+        modalScoreInput.setAttribute('max', maxPoints);
+    }
 
     // 1. Kartlara klikləmə
     document.querySelectorAll('.question-card').forEach(card => {
@@ -45,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(qId) {
         const currentScore = document.getElementById(`hidden_score_${qId}`).value;
         const currentFeedback = document.getElementById(`hidden_feedback_${qId}`).value;
+        const currentMaxPoints = document.getElementById(`hidden_max_points_${qId}`).value;
 
         const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
         const dataStore = card.querySelector('.data-store');
@@ -70,17 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('currentQuestionId').value = qId;
         normalizeIntegerInput(modalScoreInput);
 
-        // Show max points hint and set input max
-        const maxPoints = dataStore.getAttribute('data-q-points') || '';
-        const maxHint = document.getElementById('maxPointsHint');
-        if (maxHint && maxPoints) {
-            maxHint.textContent = t.maxPointsLabel.replace('{points}', maxPoints);
+        const maxPoints = currentMaxPoints || dataStore.getAttribute('data-q-points') || '1';
+        if (modalMaxPointsInput) {
+            modalMaxPointsInput.value = maxPoints;
+            modalMaxPointsInput.setAttribute('placeholder', maxPoints);
         }
-        const scoreInput = document.getElementById('modalScoreInput');
-        if (scoreInput && maxPoints) {
-            scoreInput.setAttribute('max', maxPoints);
-            scoreInput.setAttribute('placeholder', '0');
+        if (modalScoreInput) {
+            modalScoreInput.setAttribute('placeholder', '0');
         }
+        syncScoreConstraints();
 
         // Reset AI grade button state
         const aiBtn = document.getElementById('aiGradeBtn');
@@ -109,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 3. Modalda dəyişiklik izləmə
-    ['modalScoreInput', 'modalFeedbackInput'].forEach(id => {
+    ['modalScoreInput', 'modalMaxPointsInput', 'modalFeedbackInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
             isModalDirty = true;
         });
@@ -118,6 +144,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalScoreInput) {
         modalScoreInput.addEventListener('blur', () => {
             normalizeIntegerInput(modalScoreInput);
+            syncScoreConstraints();
+        });
+    }
+
+    if (modalMaxPointsInput) {
+        modalMaxPointsInput.addEventListener('input', syncScoreConstraints);
+        modalMaxPointsInput.addEventListener('blur', () => {
+            normalizePositiveIntegerInput(modalMaxPointsInput);
+            syncScoreConstraints();
         });
     }
 
@@ -189,14 +224,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Yadda Saxla (Modal daxili)
     function saveFromModal() {
         const qId = document.getElementById('currentQuestionId').value;
+        if (modalMaxPointsInput) {
+            normalizePositiveIntegerInput(modalMaxPointsInput);
+        }
+        syncScoreConstraints();
         normalizeIntegerInput(modalScoreInput);
+        if ((modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) || !modalScoreInput.checkValidity()) {
+            if (modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) {
+                modalMaxPointsInput.reportValidity();
+            } else {
+                modalScoreInput.reportValidity();
+            }
+            return;
+        }
         const newScore = document.getElementById('modalScoreInput').value;
         const newFeedback = document.getElementById('modalFeedbackInput').value;
+        const newMaxPoints = modalMaxPointsInput ? modalMaxPointsInput.value : '';
 
         document.getElementById(`hidden_score_${qId}`).value = newScore;
         document.getElementById(`hidden_feedback_${qId}`).value = newFeedback;
+        document.getElementById(`hidden_max_points_${qId}`).value = newMaxPoints;
 
         const badge = document.getElementById(`badge_${qId}`);
+        const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
+        const dataStore = card ? card.querySelector('.data-store') : null;
+        if (dataStore && newMaxPoints) {
+            dataStore.setAttribute('data-q-points', newMaxPoints);
+        }
         if (newScore) {
             badge.className = 'status-badge status-scored';
             badge.textContent = `${newScore} ${t.pointsUnit}`;
@@ -282,7 +336,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const maxPoints = parseInt(dataStore.getAttribute('data-q-points') || '10', 10);
+            if (modalMaxPointsInput) {
+                normalizePositiveIntegerInput(modalMaxPointsInput);
+            }
+            syncScoreConstraints();
+            if (modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) {
+                modalMaxPointsInput.reportValidity();
+                return;
+            }
+
+            const maxPoints = parseInt((modalMaxPointsInput && modalMaxPointsInput.value) || '1', 10);
             const aiUrl = window.AI_GRADE_URL;
             if (!aiUrl) return;
 
