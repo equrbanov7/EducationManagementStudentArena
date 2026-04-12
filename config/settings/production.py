@@ -138,6 +138,11 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY WARNING: Secret key must be set in environment
 SECRET_KEY = os.environ["SECRET_KEY"]
 
+# ---------------------------------------------------------------------------
+# AI / Gemini configuration
+# ---------------------------------------------------------------------------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
 
