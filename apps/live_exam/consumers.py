@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 from django.conf import settings
-from django.utils import timezone
 from django.utils.translation import pgettext
 
 from asgiref.sync import sync_to_async
@@ -334,13 +333,13 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     def _get_reveal_payload(self, pin: str, question_id: int) -> dict:
         with bypass_rls():
             session = LiveSession.objects.get(pin=pin)
-            return build_reveal_payload(session, question_id, revealed_at=timezone.now())
+            return build_reveal_payload(session, question_id)
 
     @database_sync_to_async
     def _get_player_reveal_payload(self, pin: str, question_id: int) -> dict:
         with bypass_rls():
             session = LiveSession.objects.get(pin=pin)
-            return build_player_reveal_payload(session, question_id, revealed_at=timezone.now())
+            return build_player_reveal_payload(session, question_id)
 
     @database_sync_to_async
     def _save_answer_and_score(self, pin, player_id, client_id, question_id, option_ids, answer_ms):

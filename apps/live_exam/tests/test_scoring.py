@@ -118,6 +118,14 @@ class LiveExamPayloadSecurityTest(TestCase):
         self.assertIn(self.correct_option.id, payload["correct_option_ids"])
         self.assertIn("results", payload)
 
+    def test_reveal_payload_uses_session_question_end_timestamp_by_default(self):
+        revealed_at = timezone.now()
+        self.session.question_ends_at = revealed_at
+        self.session.save(update_fields=["question_ends_at"])
+
+        payload = build_reveal_payload(self.session, self.question.id)
+        self.assertEqual(payload["revealed_at"], revealed_at.isoformat())
+
 
 class LiveExamLowPointScoringTest(TestCase):
     """Ensure live exam scoring awards the configured full points."""
@@ -172,17 +180,27 @@ class LiveExamLowPointScoringTest(TestCase):
         self.assertTrue(score["is_correct"])
         self.assertEqual(score["awarded_points"], 1)
 
-    def test_calculate_answer_score_keeps_full_points_for_slow_correct_answer(self):
-        score = calculate_answer_score(
+    def test_calculate_answer_score_rewards_faster_correct_answer(self):
+        fast_score = calculate_answer_score(
             option_ids=[self.correct_option.id],
             correct_ids=[self.correct_option.id],
-            base_points=5,
-            answer_ms=1000,
-            total_ms=1000,
+            base_points=1000,
+            answer_ms=0,
+            total_ms=10000,
+        )
+        slow_score = calculate_answer_score(
+            option_ids=[self.correct_option.id],
+            correct_ids=[self.correct_option.id],
+            base_points=1000,
+            answer_ms=10000,
+            total_ms=10000,
         )
 
-        self.assertTrue(score["is_correct"])
-        self.assertEqual(score["awarded_points"], 5)
+        self.assertTrue(fast_score["is_correct"])
+        self.assertTrue(slow_score["is_correct"])
+        self.assertEqual(fast_score["awarded_points"], 1000)
+        self.assertEqual(slow_score["awarded_points"], 500)
+        self.assertGreater(fast_score["awarded_points"], slow_score["awarded_points"])
 
     def test_save_answer_and_score_does_not_keep_correct_one_point_answer_at_zero(self):
         """When question.points=1 (the DB default) and exam.default_question_points=1
@@ -215,11 +233,12 @@ class LiveExamLowPointScoringTest(TestCase):
         )
 
         self.assertTrue(ok)
-        # points=1 is the DB default → treated as unset → Kahoot-style 1000
-        self.assertEqual(result["answer"]["awarded_points"], 1000)
+        # points=1 is the DB default → treated as unset → Kahoot-style 1000 base
+        # points, with the minimum time factor still awarding 50%.
+        self.assertEqual(result["answer"]["awarded_points"], 500)
 
         player.refresh_from_db()
-        self.assertEqual(player.score, 1000)
+        self.assertEqual(player.score, 500)
 
     def test_save_answer_and_score_awards_full_question_points(self):
         self.question.points = 5
@@ -248,7 +267,7 @@ class LiveExamLowPointScoringTest(TestCase):
             client_id=player.client_id,
             question_id=self.question.id,
             option_ids=[self.correct_option.id],
-            answer_ms=999999,
+            answer_ms=0,
         )
 
         self.assertTrue(ok)
