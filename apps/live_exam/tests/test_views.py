@@ -11,7 +11,6 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
@@ -420,8 +419,10 @@ class LiveSessionResultsViewTest(TestCase):
         self.client.login(username="results_teacher", password="StrongPass123!")
         _set_active_org(self.client, self.org)
 
-        with override("en"):
-            response = self.client.get(reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug}))
+        response = self.client.get(
+            reverse("liveExam:teacher_live_results", kwargs={"slug": self.exam.slug}),
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Live Exam Results")
@@ -432,13 +433,13 @@ class LiveSessionResultsViewTest(TestCase):
         self.client.login(username="results_teacher", password="StrongPass123!")
         _set_active_org(self.client, self.org)
 
-        with override("en"):
-            response = self.client.get(
-                reverse(
-                    "liveExam:teacher_live_session_detail",
-                    kwargs={"slug": self.exam.slug, "pin": self.session.pin},
-                )
-            )
+        response = self.client.get(
+            reverse(
+                "liveExam:teacher_live_session_detail",
+                kwargs={"slug": self.exam.slug, "pin": self.session.pin},
+            ),
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Session Statistics")
