@@ -3,6 +3,7 @@ View tests for exams app.
 """
 
 from datetime import timedelta
+from unittest.mock import patch
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
@@ -980,6 +981,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "Profile geri dön")
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "resultsFilterSearchInput")
+        self.assertContains(response, "css/pagination.css")
 
     def test_teacher_exam_results_renders_bulk_delete_controls(self):
         ExamAttempt.objects.create(
@@ -1213,7 +1215,99 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "courseActionConfirmModal")
         self.assertContains(response, 'id="modalScoreInput"')
+        self.assertContains(response, 'id="modalMaxPointsInput"')
+        self.assertContains(response, f'name="max_points_{question.id}"')
         self.assertContains(response, 'step="1"')
+
+    def test_teacher_check_attempt_post_updates_question_max_points(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Editable Max Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the solution",
+            order=1,
+            answer_mode="single",
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+
+        response = self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {
+                f"score_{question.id}": "4",
+                f"max_points_{question.id}": "6",
+                f"feedback_{question.id}": "Updated with new max",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        question.refresh_from_db()
+        answer.refresh_from_db()
+        attempt.refresh_from_db()
+
+        self.assertEqual(question.points, 6)
+        self.assertEqual(answer.teacher_score, 4)
+        self.assertEqual(answer.teacher_feedback, "Updated with new max")
+        self.assertEqual(attempt.teacher_score, 4)
+        self.assertTrue(attempt.checked_by_teacher)
+        self.assertIsNotNone(attempt.teacher_checked_at)
+
+    @patch("apps.exams.services.ai_grading.grade_written_answer")
+    def test_ai_grade_answer_uses_posted_max_points(self, mock_grade_written_answer):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="AI Max Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the solution",
+            order=1,
+            answer_mode="single",
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+        mock_grade_written_answer.return_value = {
+            "ok": True,
+            "score": 5,
+            "explanation": "Looks good",
+            "cached": False,
+        }
+
+        response = self.client.post(
+            reverse("exams:ai_grade_answer", args=[written_exam.slug, attempt.id]),
+            data='{"question_id": %d, "max_points": 5}' % question.id,
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["score"], 5)
+        mock_grade_written_answer.assert_called_once()
+        self.assertEqual(mock_grade_written_answer.call_args.kwargs["max_points"], 5)
 
 
 class StudentExamVisibilityFilteringTest(TestCase):
