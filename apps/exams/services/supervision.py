@@ -384,12 +384,16 @@ def save_supervision_config_from_form(exam, form_data):
         config.disable_text_selection = form_data.get("supervision_disable_text_selection") == "on"
         config.restrict_keyboard_shortcuts = form_data.get("supervision_restrict_shortcuts") == "on"
 
-        grace = form_data.get("supervision_grace_period", "15")
-        grace_val = int(grace) if grace.isdigit() else 15
+        try:
+            grace_val = int(form_data.get("supervision_grace_period", "15"))
+        except (ValueError, TypeError):
+            grace_val = 15
         config.grace_period_seconds = max(5, min(60, grace_val))
 
-        max_v = form_data.get("supervision_max_violations", "3")
-        max_val = int(max_v) if max_v.isdigit() else 3
+        try:
+            max_val = int(form_data.get("supervision_max_violations", "3"))
+        except (ValueError, TypeError):
+            max_val = 3
         config.max_fullscreen_violations = max(1, min(20, max_val))
 
         config.violation_action = form_data.get("supervision_violation_action", "lock_exam")

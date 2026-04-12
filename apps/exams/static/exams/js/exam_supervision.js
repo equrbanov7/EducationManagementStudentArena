@@ -256,7 +256,7 @@
 
             for (const combo of blocked) {
                 const ctrlMatch = combo.ctrl ? e.ctrlKey || e.metaKey : true;
-                const shiftMatch = combo.shift !== undefined ? combo.shift === e.shiftKey : true;
+                const shiftMatch = combo.shift === undefined || combo.shift === e.shiftKey;
                 const keyMatch = e.key && e.key.toLowerCase() === combo.key.toLowerCase();
 
                 if (ctrlMatch && shiftMatch && keyMatch) {
