@@ -46,6 +46,7 @@ from .teacher.supervision import (
     supervision_monitor,
     supervision_status_api,
     teacher_resume_api,
+    teacher_stop_api,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -88,6 +89,7 @@ __all__ = [
     "supervision_monitor",
     "supervision_detail",
     "teacher_resume_api",
+    "teacher_stop_api",
     "log_incident_api",
     "supervision_status_api",
     # Student - Results

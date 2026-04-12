@@ -20,6 +20,7 @@ from apps.exams.services.supervision import (
     get_supervision_monitor_data,
     log_supervision_incident,
     teacher_resume_attempt,
+    teacher_stop_attempt,
 )
 from apps.exams.views.shared.tenant import get_active_organization
 from core.tenancy import request_has_active_organization_context
@@ -257,5 +258,51 @@ def teacher_resume_api(request, attempt_id):
             "success": True,
             "supervision_status": attempt.supervision_status,
             "violation_count": attempt.supervision_violation_count,
+        }
+    )
+
+
+@login_required
+@require_POST
+def teacher_stop_api(request, attempt_id):
+    """
+    Teacher action to force-stop a supervised student attempt.
+    Submits the exam immediately and marks the student as removed.
+    """
+    org = _ensure_organization_context(request)
+    _ensure_teacher(request.user)
+
+    attempt = get_object_or_404(
+        ExamAttempt.objects.select_related("exam"),
+        id=attempt_id,
+        exam__organization=org,
+    )
+
+    try:
+        teacher_stop_attempt(attempt, request.user)
+    except ValueError:
+        return JsonResponse({"error": "Bu əməliyyat icra edilə bilməz."}, status=400)
+
+    # Audit log
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=org,
+        obj=attempt,
+        new_values={
+            "supervision_status": attempt.supervision_status,
+            "status": attempt.status,
+        },
+        reason="teacher_force_stopped_supervision",
+        request=request,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "supervision_status": attempt.supervision_status,
         }
     )
