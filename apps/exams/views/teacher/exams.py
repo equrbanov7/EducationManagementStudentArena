@@ -340,6 +340,11 @@ def createAndEditExamView(request, slug=None):
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
 
+            # Save supervision config from POST data
+            from apps.exams.services.supervision import save_supervision_config_from_form
+
+            save_supervision_config_from_form(exam_instance, request.POST)
+
             from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
 
             current_recipient_ids = get_exam_assigned_user_ids(exam_instance)
@@ -408,6 +413,14 @@ def createAndEditExamView(request, slug=None):
             form = ExamForm(**form_kwargs)
     group_student_map = _build_group_student_map(form)
 
+    # Load existing supervision config for edit mode
+    supervision_config = None
+    if is_editing and exam:
+        try:
+            supervision_config = exam.supervision_config
+        except Exception:
+            pass
+
     if is_modal_request:
         return render(
             request,
@@ -418,6 +431,7 @@ def createAndEditExamView(request, slug=None):
                 "is_editing": is_editing,
                 "linked_course": linked_course,
                 "group_student_map": group_student_map,
+                "supervision_config": supervision_config,
             },
         )
 
@@ -430,6 +444,7 @@ def createAndEditExamView(request, slug=None):
             "is_editing": is_editing,
             "linked_course": linked_course,
             "group_student_map": group_student_map,
+            "supervision_config": supervision_config,
         },
     )
 

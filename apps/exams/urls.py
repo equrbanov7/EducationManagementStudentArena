@@ -109,6 +109,34 @@ urlpatterns = [
     ),
     path("<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
+    # ==========================
+    # SUPERVISION API & MONITORING
+    # ==========================
+    path(
+        "supervision/monitor/",
+        views.supervision_monitor,
+        name="supervision_monitor",
+    ),
+    path(
+        "supervision/detail/<int:attempt_id>/",
+        views.supervision_detail,
+        name="supervision_detail",
+    ),
+    path(
+        "supervision/api/log/<int:attempt_id>/",
+        views.log_incident_api,
+        name="supervision_log_incident",
+    ),
+    path(
+        "supervision/api/status/<int:attempt_id>/",
+        views.supervision_status_api,
+        name="supervision_status_api",
+    ),
+    path(
+        "supervision/api/resume/<int:attempt_id>/",
+        views.teacher_resume_api,
+        name="supervision_resume",
+    ),
     # ✅ ƏN AXIRDA: Teacher exam detail (generic)
     path("<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),
 ]
