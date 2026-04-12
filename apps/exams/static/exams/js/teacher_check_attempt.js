@@ -309,9 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(function(res) {
                 if (!res.ok) {
-                    return res.text().then(function(body) {
-                        throw new Error('HTTP ' + res.status);
-                    });
+                    throw new Error('HTTP ' + res.status);
                 }
                 return res.json();
             })
