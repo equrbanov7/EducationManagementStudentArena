@@ -32,6 +32,7 @@ from .teacher.groups import (
 from .teacher.question_bank import create_question_bank, process_question_bank, test_question_bank
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (
+    ai_grade_answer,
     delete_exam_attempts,
     teacher_check_attempt,
     teacher_exam_results,
@@ -73,6 +74,7 @@ __all__ = [
     "teacher_view_attempt",
     "teacher_check_attempt",
     "teacher_pending_attempts",
+    "ai_grade_answer",
     # Teacher - Statistics
     "teacher_exam_statistics",
     # Student - Results
