@@ -63,6 +63,8 @@ const state = {
     lobbyMusicMode: "",
     lobbyMusicTimer: 0,
     statePollTimer: 0,
+    pendingSyncTimer: 0,
+    lastStateMutationAt: 0,
     players: [],
     sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
     isLocked: Boolean(CONFIG.sessionLocked),
@@ -189,6 +191,10 @@ function notifyHostShell() {
         }
     });
     window.dispatchEvent(new CustomEvent("live-host-state", { detail: snapshot }));
+}
+
+function markStateMutation() {
+    state.lastStateMutationAt = Date.now();
 }
 
 function lobbyCopy() {
@@ -624,6 +630,24 @@ function schedulePhaseLoop(fn) {
     state.frameId = requestAnimationFrame(tick);
 }
 
+function clearPendingStateSync() {
+    if (state.pendingSyncTimer) {
+        window.clearTimeout(state.pendingSyncTimer);
+        state.pendingSyncTimer = 0;
+    }
+}
+
+function scheduleStateSyncFallback(delayMs = 900) {
+    clearPendingStateSync();
+    const mutationSnapshot = state.lastStateMutationAt;
+    state.pendingSyncTimer = window.setTimeout(() => {
+        state.pendingSyncTimer = 0;
+        if (state.lastStateMutationAt === mutationSnapshot) {
+            syncState();
+        }
+    }, Math.max(150, delayMs));
+}
+
 function stateLabel(value) {
     if (value === "question") return tr("stateQuestion", "Question");
     if (value === "reveal") return tr("stateReveal", "Reveal");
@@ -640,6 +664,7 @@ function setPresentationMarkup(phase, signature, markup) {
     state.phase = phase;
     state.phaseSignature = signature;
     UI.presentationContent.innerHTML = markup;
+    markStateMutation();
     notifyHostShell();
 }
 
@@ -1147,11 +1172,15 @@ function movementBadge(player, index, previousTop) {
 function renderScoreboardStage(payload) {
     const previousTop = payload?.previous_top || [];
     const rows = (payload?.top || []).slice(0, 5);
+    const signature = `${state.revealKey}:${PHASES.SCOREBOARD}`;
+    if (state.phase === PHASES.SCOREBOARD && state.phaseSignature === signature) {
+        return;
+    }
     playScoreboardSound(state.revealKey || `${payload?.question_id || "0"}:scoreboard`);
 
     setPresentationMarkup(
         PHASES.SCOREBOARD,
-        `${state.revealKey}:${PHASES.SCOREBOARD}`,
+        signature,
         `
             <section class="present-view present-view--scoreboard">
                 <div class="scoreboard-stage__header">
@@ -1227,6 +1256,7 @@ function syncRevealPresentation() {
 
     if (leaderboardStartsAt && now >= leaderboardStartsAt) {
         renderScoreboardStage(state.currentReveal);
+        clearPhaseLoop();
     } else {
         renderRevealStage(state.currentQuestion, state.currentReveal);
     }
@@ -1438,6 +1468,7 @@ function renderPodium(top) {
 
 function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
+    markStateMutation();
 
     if (snapshot.settings) {
         applySessionSettings(snapshot.settings);
@@ -1509,7 +1540,7 @@ async function post(url, data = null) {
         const response = await fetch(url, options);
         const payload = await response.json();
         if (payload?.ok) {
-            await syncState();
+            scheduleStateSyncFallback();
         }
         return payload;
     } catch (error) {
@@ -1530,7 +1561,7 @@ async function postJson(url, payload = {}) {
         });
         const data = await response.json();
         if (data?.ok) {
-            await syncState();
+            scheduleStateSyncFallback();
         }
         return data;
     } catch (error) {
@@ -1562,6 +1593,7 @@ function stopStatePolling() {
         window.clearInterval(state.statePollTimer);
         state.statePollTimer = 0;
     }
+    clearPendingStateSync();
 }
 
 function startStatePolling() {
@@ -1622,6 +1654,7 @@ lobbyWS.onmessage = event => {
         const data = message.data || message;
 
         if (data.type === "lobby_state") {
+            markStateMutation();
             if (data.settings) {
                 applySessionSettings(data.settings);
             }
@@ -1645,10 +1678,19 @@ lobbyWS.onmessage = event => {
     }
 };
 
+let initialStateSynced = false;
+async function ensureInitialStateSync() {
+    if (initialStateSynced) {
+        return null;
+    }
+    initialStateSynced = true;
+    return syncState();
+}
+
 const playWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
 playWS.onopen = async () => {
     log(tr("wsPlayOpen", "Play WS open"));
-    await syncState();
+    await ensureInitialStateSync();
 };
 playWS.onclose = () => log(tr("wsPlayClosed", "Play WS closed"));
 playWS.onmessage = event => {
@@ -1657,12 +1699,14 @@ playWS.onmessage = event => {
         const data = message.data || message;
 
         if (data.type === "question_published") {
+            markStateMutation();
             state.answeredCount = 0;
             applyQuestionState(data.question, 0, state.totalPlayers);
             return;
         }
 
         if (data.type === "answer_progress") {
+            markStateMutation();
             state.answeredCount = Number(data.answered_count || 0);
             state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
             updateAnsweredCounter();
@@ -1685,11 +1729,13 @@ playWS.onmessage = event => {
         }
 
         if (data.type === "reveal") {
+            markStateMutation();
             applyRevealState(data, state.currentQuestion);
             return;
         }
 
         if (data.type === "finished") {
+            markStateMutation();
             clearPhaseLoop();
             clearAutoTimers();
             stopStatePolling();
@@ -1770,11 +1816,12 @@ if (CONFIG.presentationOnly) {
         }
     });
 }
-syncState();
+ensureInitialStateSync();
 startStatePolling();
 
 window.addEventListener("beforeunload", () => {
     stopStatePolling();
+    clearPendingStateSync();
     if (lobbyWS && lobbyWS.readyState <= WebSocket.OPEN) {
         lobbyWS.close();
     }

@@ -117,8 +117,14 @@
     </div>
 
     <div id="qrModal" class="qr-modal">
-        <img id="qrModalImage" src="{{ qr_url }}" alt="QR">
-        <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
+        <div class="qr-modal__card">
+            <div class="qr-modal__pin-badge">
+                <span>PIN</span>
+                <strong>{{ session.pin }}</strong>
+            </div>
+            <img id="qrModalImage" src="{{ qr_url }}" alt="QR">
+            <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
+        </div>
     </div>
 
     {{ session_settings|json_script:"hostPresentationSessionSettings" }}

@@ -54,9 +54,14 @@
 /* ═══════════════════════ Chart Area ═══════════════════════ */
 .sd-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
 .sd-chart-box{background:#fff;border-radius:16px;border:1px solid #e5e7eb;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sd-chart-box--full{grid-column:1 / -1}
 .sd-chart-box__title{font-size:.92rem;font-weight:700;margin-bottom:14px;color:#374151;display:flex;align-items:center;gap:8px}
 .sd-chart-box__title i{color:#1a56db}
+.sd-chart-box__hint{margin:-4px 0 14px;color:#6b7280;font-size:.83rem;line-height:1.45}
 .sd-chart-wrap{position:relative;height:280px}
+.sd-chart-wrap--compact{height:240px}
+.sd-chart-wrap.is-empty{display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px dashed #dbeafe;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
+.sd-chart-empty{max-width:260px;text-align:center;color:#6b7280;font-size:.9rem;line-height:1.5}
 
 /* ═══════════════════════ Scrollable Table ═══════════════════════ */
 .sd-table-wrap{max-height:480px;overflow-y:auto;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
@@ -180,6 +185,15 @@
             <div class="sd-chart-wrap"><canvas id="avgResponseChart"></canvas></div>
         </div>
     </div>
+    <div class="sd-chart-row">
+        <div class="sd-chart-box sd-chart-box--full">
+            <div class="sd-chart-box__title"><i class="fas fa-layer-group"></i> Bal paylanması</div>
+            <div class="sd-chart-box__hint">
+                Kiçik sessiyalarda dəqiq bal sayı, böyük sessiyalarda isə interval üzrə qruplaşdırılmış iştirakçı sayı göstərilir.
+            </div>
+            <div class="sd-chart-wrap sd-chart-wrap--compact"><canvas id="scoreDistributionChart"></canvas></div>
+        </div>
+    </div>
 
     <!-- ═══════════ Player Leaderboard ═══════════ -->
     <div class="sd-panel">
@@ -291,12 +305,14 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+{{ chart_data|json_script:"sessionChartData" }}
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     "use strict";
 
-    var CHART_DATA = {{ chart_data_json|safe }};
+    var chartDataElement = document.getElementById("sessionChartData");
+    var CHART_DATA = chartDataElement ? JSON.parse(chartDataElement.textContent) : {};
     var PAGE_SIZE = 15;
 
     /* ═══════════ Charts ═══════════ */
@@ -308,11 +324,45 @@
         cornerRadius: 8,
         padding: 10
     };
+    function getArray(name) {
+        return Array.isArray(CHART_DATA[name]) ? CHART_DATA[name] : [];
+    }
+
+    function showChartNotice(canvasId, message) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas || !canvas.parentElement) return;
+        var wrap = canvas.parentElement;
+        wrap.classList.add("is-empty");
+        wrap.innerHTML = '<div class="sd-chart-empty">' + message + "</div>";
+    }
+
+    function hasItems(values) {
+        return Array.isArray(values) && values.length > 0;
+    }
+
+    function hasPositiveValues(values) {
+        return hasItems(values) && values.some(function (value) { return Number(value) > 0; });
+    }
+
+    function createChart(canvasId, config, hasData, emptyMessage) {
+        if (typeof window.Chart !== "function") {
+            showChartNotice(canvasId, "Qrafik modulu yüklənmədi. Səhifəni yeniləyib yenidən yoxlayın.");
+            return null;
+        }
+        if (!hasData) {
+            showChartNotice(canvasId, emptyMessage);
+            return null;
+        }
+
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        return new window.Chart(canvas, config);
+    }
 
     /* Player Scores - horizontal bar */
-    var playerLabels = CHART_DATA.player_labels.slice(0, 25);
-    var playerScores = CHART_DATA.player_scores.slice(0, 25);
-    new Chart(document.getElementById("playerScoreChart"), {
+    var playerLabels = getArray("player_labels").slice(0, 25);
+    var playerScores = getArray("player_scores").slice(0, 25);
+    createChart("playerScoreChart", {
         type: "bar",
         data: {
             labels: playerLabels,
@@ -338,19 +388,21 @@
                 y: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
             }
         }
-    });
+    }, hasItems(playerScores), "İştirakçı balı qeydə alınmayıb.");
 
     /* Question Accuracy - vertical bar */
-    var qLabels = CHART_DATA.question_labels.map(function (t, i) { return "S" + (i + 1); });
-    new Chart(document.getElementById("questionAccuracyChart"), {
+    var questionLabels = getArray("question_labels");
+    var questionAccuracy = getArray("question_accuracy");
+    var qLabels = questionLabels.map(function (_, i) { return "S" + (i + 1); });
+    createChart("questionAccuracyChart", {
         type: "bar",
         data: {
             labels: qLabels,
             datasets: [{
                 label: "Dəqiqlik %",
-                data: CHART_DATA.question_accuracy,
-                backgroundColor: CHART_DATA.question_accuracy.map(function (v) {
-                    return v >= 70 ? "#059669" : v >= 40 ? "#0284c7" : "#dc2626";
+                data: questionAccuracy,
+                backgroundColor: questionAccuracy.map(function (value) {
+                    return value >= 70 ? "#059669" : value >= 40 ? "#0284c7" : "#dc2626";
                 }),
                 borderRadius: 6,
                 borderSkipped: false,
@@ -366,23 +418,25 @@
                     callbacks: {
                         title: function (items) {
                             var idx = items[0].dataIndex;
-                            return CHART_DATA.question_labels[idx] || ("Sual " + (idx + 1));
+                            return questionLabels[idx] || ("Sual " + (idx + 1));
                         },
                         label: function (item) { return "Dəqiqlik: " + item.raw + "%"; }
                     }
                 })
             },
             scales: {
-                y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function (v) { return v + "%"; }, font: { family: fontFamily, size: 11 } } },
+                y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function (value) { return value + "%"; }, font: { family: fontFamily, size: 11 } } },
                 x: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
             }
         }
-    });
+    }, hasItems(questionAccuracy), "Sual dəqiqliyi üçün kifayət qədər cavab yoxdur.");
 
     /* Correct / Incorrect - doughnut */
-    var totalCorrect = CHART_DATA.question_correct.reduce(function (a, b) { return a + b; }, 0);
-    var totalIncorrect = CHART_DATA.question_incorrect.reduce(function (a, b) { return a + b; }, 0);
-    new Chart(document.getElementById("correctIncorrectChart"), {
+    var questionCorrect = getArray("question_correct");
+    var questionIncorrect = getArray("question_incorrect");
+    var totalCorrect = questionCorrect.reduce(function (a, b) { return a + b; }, 0);
+    var totalIncorrect = questionIncorrect.reduce(function (a, b) { return a + b; }, 0);
+    createChart("correctIncorrectChart", {
         type: "doughnut",
         data: {
             labels: ["Düzgün", "Səhv"],
@@ -402,16 +456,17 @@
                 tooltip: tooltipStyle
             }
         }
-    });
+    }, hasPositiveValues([totalCorrect, totalIncorrect]), "Düzgün və səhv cavab müqayisəsi üçün məlumat yoxdur.");
 
     /* Average Response Time - line */
-    new Chart(document.getElementById("avgResponseChart"), {
+    var questionAvgMs = getArray("question_avg_ms");
+    createChart("avgResponseChart", {
         type: "line",
         data: {
             labels: qLabels,
             datasets: [{
                 label: "Ort. müddət (ms)",
-                data: CHART_DATA.question_avg_ms,
+                data: questionAvgMs,
                 borderColor: "#1a56db",
                 backgroundColor: "rgba(26,86,219,.1)",
                 fill: true,
@@ -431,18 +486,67 @@
                     callbacks: {
                         title: function (items) {
                             var idx = items[0].dataIndex;
-                            return CHART_DATA.question_labels[idx] || ("Sual " + (idx + 1));
+                            return questionLabels[idx] || ("Sual " + (idx + 1));
                         },
                         label: function (item) { return item.raw + " ms"; }
                     }
                 })
             },
             scales: {
-                y: { grid: { color: "#f1f5f9" }, ticks: { callback: function (v) { return v + "ms"; }, font: { family: fontFamily, size: 11 } } },
+                y: { grid: { color: "#f1f5f9" }, ticks: { callback: function (value) { return value + "ms"; }, font: { family: fontFamily, size: 11 } } },
                 x: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
             }
         }
-    });
+    }, hasItems(questionAvgMs), "Orta cavab müddəti üçün məlumat yoxdur.");
+
+    /* Score distribution - grouped bar */
+    var scoreDistributionLabels = getArray("score_distribution_labels");
+    var scoreDistributionCounts = getArray("score_distribution_counts");
+    createChart("scoreDistributionChart", {
+        type: "bar",
+        data: {
+            labels: scoreDistributionLabels,
+            datasets: [{
+                label: "İştirakçı sayı",
+                data: scoreDistributionCounts,
+                backgroundColor: "rgba(14,116,144,.82)",
+                borderColor: "#0e7490",
+                borderWidth: 1.5,
+                borderRadius: 8,
+                borderSkipped: false,
+                maxBarThickness: 48
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: Object.assign({}, tooltipStyle, {
+                    callbacks: {
+                        title: function (items) {
+                            return "Bal: " + (items[0].label || "0");
+                        },
+                        label: function (item) { return "İştirakçı sayı: " + item.raw; }
+                    }
+                })
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: "#f1f5f9" },
+                    ticks: {
+                        precision: 0,
+                        font: { family: fontFamily, size: 11 }
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: fontFamily, size: 11, weight: "bold" } }
+                }
+            }
+        }
+    }, hasItems(scoreDistributionCounts), "Bal paylanması üçün iştirakçı məlumatı yoxdur.");
 
     /* ═══════════ Search + Pagination ═══════════ */
     function setupTable(tableId, searchId, paginationId) {
