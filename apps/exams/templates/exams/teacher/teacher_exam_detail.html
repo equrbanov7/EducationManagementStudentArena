@@ -115,7 +115,7 @@
 
                     {% if exam.exam_type == "test" %}
                     <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn secondary-btn">
-                        <i class="fas fa-broadcast-tower"></i> Canlı imtahan nəticələri
+                        <i class="fas fa-broadcast-tower"></i> {% trans "action_view_live_results" context "exams.template.teacher_exam_detail" %}
                     </a>
                     {% endif %}
                 </div>
@@ -252,8 +252,8 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
 };
 window.TEACHER_EXAM_DETAIL_I18N = {
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
-    questionCreateTitle: "Yeni sual elave et",
-    questionEditTitle: "Suali redakte et",
+    questionCreateTitle: "{% trans 'question_create_title' context 'exams.template.teacher_exam_detail' %}",
+    questionEditTitle: "{% trans 'question_edit_title' context 'exams.template.teacher_exam_detail' %}",
     submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
 };
 </script>

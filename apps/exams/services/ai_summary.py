@@ -12,6 +12,7 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import get_language
+from django.utils.translation import pgettext
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ def generate_exam_statistics_summary(
     """
     api_key = _get_api_key()
     if not api_key:
-        return {"ok": False, "error": "GEMINI_API_KEY is not configured."}
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "gemini_api_key_missing")}
 
     lang = language_code or get_language() or "en"
     lang_name = _language_name(lang)
@@ -85,7 +86,7 @@ def generate_exam_statistics_summary(
         return {"ok": True, "summary": text.strip()}
     except Exception:
         logger.exception("Gemini AI summary generation failed")
-        return {"ok": False, "error": "AI summary generation failed. Please try again later."}
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "generation_failed")}
 
 
 def _build_prompt(
