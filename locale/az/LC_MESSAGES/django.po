@@ -18480,6 +18480,14 @@ msgctxt "exams.template.supervision_monitor"
 msgid "stop_error"
 msgstr "Dayandırma xətası: "
 
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
 #: take_exam supervision JS i18n
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_title"
@@ -18511,7 +18519,7 @@ msgstr "Klaviatura qısa yolları məhduddur"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_max_violation"
-msgstr "Maksimum pozuntuya icazə verilir."
+msgstr "Maksimum {count} pozuntuya icazə verilir."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_btn"
