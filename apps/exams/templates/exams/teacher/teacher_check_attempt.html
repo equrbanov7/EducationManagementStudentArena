@@ -167,18 +167,28 @@
         <div class="answer-detail" id="modalAnswerText"></div>
         
         <div class="grading-area">
-            <div class="ai-grade-row">
-                <button type="button" class="btn btn-ai-grade" id="aiGradeBtn">
-                    <i class="fas fa-robot"></i> {% trans "action_ai_grade" context "exams.template.teacher_check_attempt" %}
+            <div class="ai-grade-section">
+                <button type="button" class="btn-ai-grade" id="aiGradeBtn">
+                    <span class="btn-ai-grade__icon"><i class="fas fa-robot"></i></span>
+                    <span class="btn-ai-grade__text">{% trans "action_ai_grade" context "exams.template.teacher_check_attempt" %}</span>
+                    <span class="btn-ai-grade__loader" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></span>
                 </button>
                 <span class="ai-grade-status" id="aiGradeStatus"></span>
             </div>
 
-            <label>{% trans "label_score" context "exams.template.teacher_check_attempt" %} <small class="max-points-hint" id="maxPointsHint"></small>:</label>
-            <input type="number" id="modalScoreInput" class="form-control mb-2" step="1" min="0" inputmode="numeric">
-
-            <label>{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}:</label>
-            <textarea id="modalFeedbackInput" rows="3" class="form-control"></textarea>
+            <div class="grading-fields">
+                <div class="grading-field grading-field--score">
+                    <label for="modalScoreInput">{% trans "label_score" context "exams.template.teacher_check_attempt" %}</label>
+                    <div class="score-input-wrap">
+                        <input type="number" id="modalScoreInput" class="form-control" step="1" min="0" inputmode="numeric">
+                        <span class="score-max-badge" id="maxPointsHint"></span>
+                    </div>
+                </div>
+                <div class="grading-field grading-field--feedback">
+                    <label for="modalFeedbackInput">{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}</label>
+                    <textarea id="modalFeedbackInput" rows="4" class="form-control"></textarea>
+                </div>
+            </div>
 
             <input type="hidden" id="currentQuestionId">
         </div>
@@ -208,20 +218,20 @@
 {% block extraJs %}
     <script nonce="{{ request.csp_nonce }}">
         window.TEACHER_CHECK_I18N = {
-            modalTitleDetails: "{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}",
-            noAnswer: "{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}",
-            pointsUnit: "{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}",
-            statusNotChecked: "{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}",
-            saveButtonDirty: "{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}",
-            confirmTitle: "{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}",
-            confirmMessage: "{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}",
-            aiGrading: "{% trans 'ai_grading_in_progress' context 'exams.template.teacher_check_attempt' %}",
-            aiGradeBtn: "{% trans 'action_ai_grade' context 'exams.template.teacher_check_attempt' %}",
-            aiError: "{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}",
-            aiCached: "{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}",
-            aiQuotaInfo: "{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}",
-            aiNoAnswer: "{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}",
-            maxPointsLabel: "{% trans 'label_max_points' context 'exams.template.teacher_check_attempt' %}"
+            modalTitleDetails: "{% filter escapejs %}{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            noAnswer: "{% filter escapejs %}{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            pointsUnit: "{% filter escapejs %}{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            statusNotChecked: "{% filter escapejs %}{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            saveButtonDirty: "{% filter escapejs %}{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            confirmTitle: "{% filter escapejs %}{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            confirmMessage: "{% filter escapejs %}{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiGrading: "{% filter escapejs %}{% trans 'ai_grading_in_progress' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiGradeBtn: "{% filter escapejs %}{% trans 'action_ai_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiError: "{% filter escapejs %}{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiCached: "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiQuotaInfo: "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            maxPointsLabel: "{% filter escapejs %}{% trans 'label_max_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
         };
         window.AI_GRADE_URL = "{% url 'exams:ai_grade_answer' slug=exam.slug attempt_id=attempt.id %}";
     </script>
