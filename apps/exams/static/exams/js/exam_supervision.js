@@ -201,12 +201,12 @@
             }
         },
 
+        _isEditableField: function (target) {
+            return target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
+        },
+
         _onCopy: function (e) {
-            // Allow copy in input/textarea fields for user-typed content
-            const target = e.target;
-            if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-                return;
-            }
+            if (this._isEditableField(e.target)) return;
             e.preventDefault();
             this._logEvent("copy_attempt");
             this._incrementViolation();
@@ -219,10 +219,7 @@
         },
 
         _onCut: function (e) {
-            const target = e.target;
-            if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-                return;
-            }
+            if (this._isEditableField(e.target)) return;
             e.preventDefault();
             this._logEvent("cut_attempt");
             this._incrementViolation();
@@ -234,10 +231,7 @@
         },
 
         _onSelectStart: function (e) {
-            const target = e.target;
-            if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
-                return;
-            }
+            if (this._isEditableField(e.target)) return;
             e.preventDefault();
             this._logEvent("text_select_attempt");
         },
@@ -262,15 +256,14 @@
 
             for (const combo of blocked) {
                 const ctrlMatch = combo.ctrl ? e.ctrlKey || e.metaKey : true;
-                const shiftMatch = combo.shift ? e.shiftKey : !combo.shift;
+                const shiftMatch = combo.shift !== undefined ? combo.shift === e.shiftKey : true;
                 const keyMatch = e.key && e.key.toLowerCase() === combo.key.toLowerCase();
 
                 if (ctrlMatch && shiftMatch && keyMatch) {
                     // Allow Ctrl+C/V/X in input fields
                     if (
                         (combo.key === "c" || combo.key === "v" || combo.key === "x") &&
-                        e.target &&
-                        (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+                        this._isEditableField(e.target)
                     ) {
                         if (!this.config.block_copy_paste) return;
                     }
