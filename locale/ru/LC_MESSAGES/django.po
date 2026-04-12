@@ -17812,3 +17812,243 @@ msgstr "результатов"
 msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Далее ›"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "page_title"
+msgstr "Мониторинг экзаменов"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "heading"
+msgstr "Монитор надзора за экзаменами"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "subtitle"
+msgstr "Подозрительные события и состояния студентов для всех контролируемых экзаменов"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_total_incidents"
+msgstr "Всего нарушений"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_flagged_students"
+msgstr "Отмеченные студенты"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_supervised_exams"
+msgstr "Контролируемые экзамены"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_severity_distribution"
+msgstr "Распределение по серьёзности"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_violation_types"
+msgstr "Типы нарушений"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_search_placeholder"
+msgstr "Поиск студента или экзамена..."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_exams"
+msgstr "Все экзамены"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_statuses"
+msgstr "Все статусы"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_active"
+msgstr "Активный"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_warned"
+msgstr "Предупреждён"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_locked"
+msgstr "Заблокирован"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_removed"
+msgstr "Удалён"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_resumed"
+msgstr "Возобновлён"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_search"
+msgstr "Поиск"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_student"
+msgstr "Студент"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_exam"
+msgstr "Экзамен"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_violation_count"
+msgstr "Кол-во нарушений"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_status"
+msgstr "Статус"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_start_time"
+msgstr "Время начала"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_details"
+msgstr "Детали"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_actions"
+msgstr "Действия"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_details"
+msgstr "Детали"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_resume"
+msgstr "Возобновить"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "empty_no_violations"
+msgstr "Пока нарушений не зафиксировано."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_info"
+msgstr "Информация"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_low"
+msgstr "Низкий"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_medium"
+msgstr "Средний"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_high"
+msgstr "Высокий"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_critical"
+msgstr "Критический"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_count_label"
+msgstr "Количество"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_resume"
+msgstr "Вы хотите разрешить этому студенту продолжить экзамен?"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_success"
+msgstr "Разрешение предоставлено. Экзамен студента возобновлён."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_error"
+msgstr "Ошибка: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "connection_error"
+msgstr "Ошибка соединения."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_title"
+msgstr "Пользовательская конфигурация"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_desc"
+msgstr "Настройте все параметры вручную."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_title"
+msgstr "Лёгкий режим надзора"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_desc"
+msgstr "Минимальные ограничения. Студенты сдают экзамен более свободно, отслеживается только переключение вкладок."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f1"
+msgstr "✅ Переключение вкладок отслеживается"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f2"
+msgstr "❌ Полный экран не требуется"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f3"
+msgstr "❌ Копирование/вставка не блокируется"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Максимум 5 нарушений, даётся шанс на восстановление"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_title"
+msgstr "Средний режим надзора"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_desc"
+msgstr "Сбалансированный надзор. Основные меры защиты активны, с контролем преподавателя."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Полноэкранный режим обязателен"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Переключение вкладок отслеживается"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Копирование/вставка заблокирована"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Правый клик отключён"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Максимум 3 нарушения, преподаватель управляет восстановлением"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_title"
+msgstr "Строгий режим надзора"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_desc"
+msgstr "Высший уровень надзора. Все меры защиты активны, второго шанса нет."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Полноэкранный режим обязателен"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Переключение вкладок отслеживается"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Копирование/вставка заблокирована"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Правый клик отключён"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Выделение текста заблокировано"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Максимум 2 нарушения, автоматическая сдача, второго шанса нет"

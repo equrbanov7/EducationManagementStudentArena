@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}İmtahan Nəzarəti - Monitor{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.supervision_monitor" %}{% endblock %}
 
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
     .monitor-wrapper { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
     .monitor-header { margin-bottom: 2rem; }
-    .monitor-header h1 { font-size: 1.5rem; color: #333; display: flex; align-items: center; gap: 0.5rem; }
+    .monitor-header h1 { font-size: 1.5rem; color: #dc3545; display: flex; align-items: center; gap: 0.5rem; }
+    .monitor-header h1 i { color: #dc3545; }
+    .monitor-header p { color: #666; }
     .monitor-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-align: center; }
     .stat-card .stat-value { font-size: 2rem; font-weight: 700; }
@@ -16,7 +18,7 @@
     .stat-card.warning .stat-value { color: #ffc107; }
     .stat-card.info .stat-value { color: #17a2b8; }
     .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
-    .filter-bar input, .filter-bar select { padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; }
+    .filter-bar input { padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; }
     .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
     .monitor-table { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
     .monitor-table table { width: 100%; border-collapse: collapse; }
@@ -41,7 +43,7 @@
     .pagination-wrapper a { background: #f0f0f0; color: #333; }
     .pagination-wrapper a:hover { background: #007bff; color: #fff; }
     .pagination-wrapper .current { background: #007bff; color: #fff; }
-    .btn-action { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; border: none; cursor: pointer; }
+    .btn-action { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; text-decoration: none; }
     .btn-detail { background: #007bff; color: #fff; }
     .btn-resume { background: #28a745; color: #fff; }
     .empty-state { text-align: center; padding: 3rem; color: #999; }
@@ -56,56 +58,60 @@
 {% block content %}
 <div class="monitor-wrapper">
     <div class="monitor-header">
-        <h1><i class="fas fa-shield-alt text-danger"></i> İmtahan Nəzarəti Monitoru</h1>
-        <p style="color: #666;">Bütün nəzarət altındakı imtahanlar üçün şübhəli hadisələr və tələbə vəziyyətləri</p>
+        <h1><i class="fas fa-shield-alt"></i> {% trans "heading" context "exams.template.supervision_monitor" %}</h1>
+        <p>{% trans "subtitle" context "exams.template.supervision_monitor" %}</p>
     </div>
 
     {# Stats Cards #}
     <div class="monitor-stats">
         <div class="stat-card danger">
             <div class="stat-value">{{ total_incidents }}</div>
-            <div class="stat-label">Ümumi Pozuntu</div>
+            <div class="stat-label">{% trans "stat_total_incidents" context "exams.template.supervision_monitor" %}</div>
         </div>
         <div class="stat-card warning">
             <div class="stat-value">{{ page_obj.paginator.count }}</div>
-            <div class="stat-label">Bayraqlanmış Tələbə</div>
+            <div class="stat-label">{% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}</div>
         </div>
         <div class="stat-card info">
             <div class="stat-value">{{ supervised_exams|length }}</div>
-            <div class="stat-label">Nəzarətli İmtahan</div>
+            <div class="stat-label">{% trans "stat_supervised_exams" context "exams.template.supervision_monitor" %}</div>
         </div>
     </div>
 
     {# Charts #}
     <div class="chart-section">
         <div class="chart-card">
-            <h3><i class="fas fa-chart-pie"></i> Ciddilik Paylanması</h3>
+            <h3><i class="fas fa-chart-pie"></i> {% trans "chart_severity_distribution" context "exams.template.supervision_monitor" %}</h3>
             <canvas id="severityChart" height="200"></canvas>
         </div>
         <div class="chart-card">
-            <h3><i class="fas fa-chart-bar"></i> Pozuntu Növləri</h3>
+            <h3><i class="fas fa-chart-bar"></i> {% trans "chart_violation_types" context "exams.template.supervision_monitor" %}</h3>
             <canvas id="violationTypeChart" height="200"></canvas>
         </div>
     </div>
 
     {# Filters #}
     <form method="get" class="filter-bar">
-        <input type="text" name="q" placeholder="Tələbə və ya imtahan axtar..." value="{{ search_query }}">
-        <select name="exam">
-            <option value="">Bütün imtahanlar</option>
-            {% for eid, etitle in supervised_exams %}
-            <option value="{{ eid }}" {% if selected_exam_id == eid|stringformat:"s" %}selected{% endif %}>{{ etitle }}</option>
-            {% endfor %}
-        </select>
-        <select name="status">
-            <option value="">Bütün statuslar</option>
-            <option value="active" {% if status_filter == "active" %}selected{% endif %}>Aktiv</option>
-            <option value="warned" {% if status_filter == "warned" %}selected{% endif %}>Xəbərdarlıq</option>
-            <option value="locked" {% if status_filter == "locked" %}selected{% endif %}>Kilidli</option>
-            <option value="removed" {% if status_filter == "removed" %}selected{% endif %}>Çıxarılmış</option>
-            <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>Bərpa edilmiş</option>
-        </select>
-        <button type="submit" class="btn-action btn-detail"><i class="fas fa-search"></i> Axtar</button>
+        <input type="text" name="q" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
+        <div class="bootstrap-single-select">
+            <select name="exam" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
+                <option value="">{% trans "filter_all_exams" context "exams.template.supervision_monitor" %}</option>
+                {% for eid, etitle in supervised_exams %}
+                <option value="{{ eid }}" {% if selected_exam_id == eid|stringformat:"s" %}selected{% endif %}>{{ etitle }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="bootstrap-single-select">
+            <select name="status" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
+                <option value="">{% trans "filter_all_statuses" context "exams.template.supervision_monitor" %}</option>
+                <option value="active" {% if status_filter == "active" %}selected{% endif %}>{% trans "status_active" context "exams.template.supervision_monitor" %}</option>
+                <option value="warned" {% if status_filter == "warned" %}selected{% endif %}>{% trans "status_warned" context "exams.template.supervision_monitor" %}</option>
+                <option value="locked" {% if status_filter == "locked" %}selected{% endif %}>{% trans "status_locked" context "exams.template.supervision_monitor" %}</option>
+                <option value="removed" {% if status_filter == "removed" %}selected{% endif %}>{% trans "status_removed" context "exams.template.supervision_monitor" %}</option>
+                <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>{% trans "status_resumed" context "exams.template.supervision_monitor" %}</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-action btn-detail"><i class="fas fa-search"></i> {% trans "action_search" context "exams.template.supervision_monitor" %}</button>
     </form>
 
     {# Table #}
@@ -114,12 +120,13 @@
         <table>
             <thead>
                 <tr>
-                    <th>Tələbə</th>
-                    <th>İmtahan</th>
-                    <th>Pozuntu Sayı</th>
-                    <th>Status</th>
-                    <th>Başlama Vaxtı</th>
-                    <th>Əməliyyatlar</th>
+                    <th>{% trans "col_student" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_exam" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_violation_count" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_status" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_start_time" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_details" context "exams.template.supervision_monitor" %}</th>
+                    <th>{% trans "col_actions" context "exams.template.supervision_monitor" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -142,12 +149,14 @@
                     </td>
                     <td>{{ attempt.started_at|date:"d.m.Y H:i" }}</td>
                     <td>
-                        <a href="{% url 'exams:supervision_detail' attempt.id %}" class="btn-action btn-detail" title="Detallar">
-                            <i class="fas fa-eye"></i>
+                        <a href="{% url 'exams:supervision_detail' attempt.id %}" class="btn-action btn-detail" title="{% trans 'action_details' context 'exams.template.supervision_monitor' %}">
+                            <i class="fas fa-eye"></i> {% trans "action_details" context "exams.template.supervision_monitor" %}
                         </a>
+                    </td>
+                    <td>
                         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
-                        <button class="btn-action btn-resume" data-resume-attempt-id="{{ attempt.id }}" title="Bərpa et">
-                            <i class="fas fa-play"></i>
+                        <button class="btn-action btn-resume" data-resume-attempt-id="{{ attempt.id }}" title="{% trans 'action_resume' context 'exams.template.supervision_monitor' %}">
+                            <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_monitor" %}
                         </button>
                         {% endif %}
                     </td>
@@ -158,7 +167,7 @@
         {% else %}
         <div class="empty-state">
             <i class="fas fa-check-circle"></i>
-            <p>Hələlik heç bir pozuntu qeydə alınmayıb.</p>
+            <p>{% trans "empty_no_violations" context "exams.template.supervision_monitor" %}</p>
         </div>
         {% endif %}
     </div>
@@ -188,6 +197,19 @@
 
 <script src="{% static 'vendor/chartjs/chart.min.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}">
+var SUPERVISION_I18N = {
+    sevInfo: "{% filter escapejs %}{% trans 'sev_info' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevLow: "{% filter escapejs %}{% trans 'sev_low' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevMedium: "{% filter escapejs %}{% trans 'sev_medium' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevHigh: "{% filter escapejs %}{% trans 'sev_high' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevCritical: "{% filter escapejs %}{% trans 'sev_critical' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    chartCount: "{% filter escapejs %}{% trans 'chart_count_label' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    confirmResume: "{% filter escapejs %}{% trans 'confirm_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeSuccess: "{% filter escapejs %}{% trans 'resume_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeError: "{% filter escapejs %}{% trans 'resume_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_monitor' %}{% endfilter %}"
+};
+
 document.addEventListener("DOMContentLoaded", function() {
     // Severity Chart
     try {
@@ -195,12 +217,11 @@ document.addEventListener("DOMContentLoaded", function() {
         var sevLabels = Object.keys(severityData);
         var sevValues = Object.values(severityData);
         var sevColors = {"info":"#17a2b8","low":"#28a745","medium":"#ffc107","high":"#fd7e14","critical":"#dc3545"};
+        var sevI18n = {"info":SUPERVISION_I18N.sevInfo,"low":SUPERVISION_I18N.sevLow,"medium":SUPERVISION_I18N.sevMedium,"high":SUPERVISION_I18N.sevHigh,"critical":SUPERVISION_I18N.sevCritical};
         new Chart(document.getElementById("severityChart"), {
             type: "doughnut",
             data: {
-                labels: sevLabels.map(function(l) {
-                    return {"info":"Məlumat","low":"Aşağı","medium":"Orta","high":"Yüksək","critical":"Kritik"}[l] || l;
-                }),
+                labels: sevLabels.map(function(l) { return sevI18n[l] || l; }),
                 datasets: [{
                     data: sevValues,
                     backgroundColor: sevLabels.map(function(l){ return sevColors[l] || "#ccc"; })
@@ -220,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function() {
             data: {
                 labels: vtLabels.map(function(l){ return l.replace(/_/g, " "); }),
                 datasets: [{
-                    label: "Sayı",
+                    label: SUPERVISION_I18N.chartCount,
                     data: vtValues,
                     backgroundColor: "#007bff"
                 }]
@@ -235,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function resumeAttempt(attemptId) {
-    if (!confirm("Bu tələbəyə imtahana davam etməyə icazə vermək istəyirsiniz?")) return;
+    if (!confirm(SUPERVISION_I18N.confirmResume)) return;
     fetch("/exams/supervision/api/resume/" + attemptId + "/", {
         method: "POST",
         headers: {
@@ -250,13 +271,13 @@ function resumeAttempt(attemptId) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (data.success) {
-            alert("Tələbəyə icazə verildi. Tələbənin imtahanı bərpa edildi.");
+            alert(SUPERVISION_I18N.resumeSuccess);
             location.reload();
         } else {
-            alert("Xəta: " + (data.error || "Bilinməyən xəta"));
+            alert(SUPERVISION_I18N.resumeError + (data.error || ""));
         }
     })
-    .catch(function(e) { alert("Əlaqə xətası."); });
+    .catch(function(e) { alert(SUPERVISION_I18N.connectionError); });
 }
 
 document.addEventListener("click", function(event) {
