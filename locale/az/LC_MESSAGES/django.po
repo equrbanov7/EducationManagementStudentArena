@@ -17382,6 +17382,42 @@ msgctxt "exams.template.exam_statistics"
 msgid "pagination_results"
 msgstr "nəticə"
 
+msgctxt "exams.template.exam_statistics"
+msgid "chart_avg_score_percent"
+msgstr "Orta bal faizi"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_checked_unchecked"
+msgstr "Yoxlanılıb / Yoxlanılmayıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_checked"
+msgstr "Yoxlanılıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_label_unchecked"
+msgstr "Yoxlanılmayıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "chart_empty_checked"
+msgstr "Yoxlanma məlumatı yoxdur."
+
+msgctxt "exams.template.exam_statistics"
+msgid "card_checked"
+msgstr "Yoxlanılıb"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_avg_score"
+msgstr "ORTA BAL"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_max_points"
+msgstr "MAKS BAL"
+
+msgctxt "exams.template.exam_statistics"
+msgid "table_score_percent"
+msgstr "BAL FAİZİ"
+
 #: apps/live_exam/templates/liveExam/teacher_live_session_detail.html
 msgctxt "liveExam.template.session_detail"
 msgid "ai_summary_title"

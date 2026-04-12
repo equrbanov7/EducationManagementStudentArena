@@ -70,11 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('currentQuestionId').value = qId;
         normalizeIntegerInput(modalScoreInput);
 
-        // Show max points hint
+        // Show max points hint and set input max
         const maxPoints = dataStore.getAttribute('data-q-points') || '';
         const maxHint = document.getElementById('maxPointsHint');
         if (maxHint && maxPoints) {
             maxHint.textContent = t.maxPointsLabel.replace('{points}', maxPoints);
+        }
+        const scoreInput = document.getElementById('modalScoreInput');
+        if (scoreInput && maxPoints) {
+            scoreInput.setAttribute('max', maxPoints);
+            scoreInput.setAttribute('placeholder', '0');
         }
 
         // Reset AI grade button state
@@ -82,9 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiStatus = document.getElementById('aiGradeStatus');
         if (aiBtn) {
             aiBtn.disabled = !ansText;
-            aiBtn.innerHTML = `<i class="fas fa-robot"></i> ${t.aiGradeBtn}`;
+            aiBtn.classList.remove('is-loading');
         }
-        if (aiStatus) aiStatus.textContent = '';
+        if (aiStatus) {
+            aiStatus.textContent = '';
+            aiStatus.className = 'ai-grade-status';
+        }
 
         backdrop.style.display = 'block';
         modal.style.display = 'block';

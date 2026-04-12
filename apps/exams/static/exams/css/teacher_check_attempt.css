@@ -435,55 +435,119 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.16);
 }
 
-/* ====== AI Grading Button ====== */
-.ai-grade-row {
+/* ====== AI Grading Section ====== */
+.ai-grade-section {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+    border: 1px solid #e0e7ff;
+    border-radius: 10px;
 }
 
 .btn-ai-grade {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    gap: 8px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    font-size: 0.9em;
+    border-radius: 8px;
+    font-size: 0.88em;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
-.btn-ai-grade:hover {
-    opacity: 0.9;
+.btn-ai-grade:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4f46e5, #6d28d9);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
 }
 .btn-ai-grade:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
-.btn-ai-grade i {
-    font-size: 1em;
+.btn-ai-grade.is-loading {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    pointer-events: none;
 }
+.btn-ai-grade.is-loading .btn-ai-grade__icon,
+.btn-ai-grade.is-loading .btn-ai-grade__text { display: none; }
+.btn-ai-grade.is-loading .btn-ai-grade__loader { display: inline-flex !important; }
+.btn-ai-grade__icon { font-size: 1em; }
+.btn-ai-grade__loader { display: none; align-items: center; gap: 8px; }
+.btn-ai-grade__loader i { animation: spin 0.9s linear infinite; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .ai-grade-status {
     font-size: 0.82em;
-    color: #666;
+    color: #6b7280;
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
 }
-.ai-grade-status.ai-grade-success {
-    color: #16a34a;
+.ai-grade-status.ai-grade-success { color: #059669; font-weight: 500; }
+.ai-grade-status.ai-grade-error { color: #dc2626; font-weight: 500; }
+
+/* ====== Grading Fields ====== */
+.grading-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
-.ai-grade-status.ai-grade-error {
-    color: #dc2626;
+.grading-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88em;
+    color: #374151;
+    margin-bottom: 5px;
+}
+.grading-field .form-control {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95em;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+.grading-field .form-control:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.max-points-hint {
-    font-weight: 400;
-    color: #888;
+/* Score + max badge */
+.score-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.score-input-wrap .form-control {
+    max-width: 120px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+.score-max-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     font-size: 0.85em;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
 }
 /* ==================================== */
