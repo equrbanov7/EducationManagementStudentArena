@@ -18144,3 +18144,198 @@ msgstr "✅ Выделение текста заблокировано"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_f6"
 msgstr "⚙️ Максимум 2 нарушения, автоматическая сдача, второго шанса нет"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Детали надзора"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "Надзор за экзаменами"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Детали надзора"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Студент"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "Экзамен"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Статус надзора"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "Количество нарушений"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "Статус экзамена"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Дополнительные шансы"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Действия преподавателя"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "Возобновить экзамен"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Дать дополнительный шанс"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Остановить"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Назад"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Хронология инцидентов"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Действие преподавателя"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "Нарушение"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "Инциденты не зафиксированы."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Вы хотите возобновить экзамен этого студента?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr "Вы хотите дать этому студенту дополнительный шанс и позволить ему продолжить?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr "Вы хотите остановить экзамен этого студента? Экзамен будет сдан."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "Операция успешно выполнена."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Ошибка: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Ошибка подключения."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "Экзамен остановлен."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Остановить"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr "Вы хотите остановить экзамен этого студента? Экзамен будет сдан."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "Экзамен остановлен."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Ошибка остановки: "
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Режим надзора активен"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr "Этот экзамен проводится в <strong>режиме надзора</strong>. Применяются следующие правила:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Требуется полноэкранный режим"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Переключение вкладок отслеживается"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Копирование/вставка заблокированы"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Правый клик отключён"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Горячие клавиши ограничены"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Максимально допустимых нарушений."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "Понятно, продолжить"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Надзор активен"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Предупреждение"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "Вы покинули область экзамена. Пожалуйста, вернитесь."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "Если время истечёт, это будет зафиксировано как нарушение."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "Нарушение"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Вернуться в полноэкранный режим"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "Экзамен приостановлен"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "Вы достигли максимального лимита нарушений."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr "Ваш экзамен приостановлен. Дождитесь решения преподавателя."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Ждём ответа преподавателя..."

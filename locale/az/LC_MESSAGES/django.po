@@ -18361,3 +18361,198 @@ msgstr "✅ Mətn seçimi bloklanır"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_f6"
 msgstr "⚙️ Maksimum 2 pozuntu, avtomatik təslim edilir, ikinci şans yoxdur"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Nəzarət Detalı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "İmtahan Nəzarəti"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Nəzarət Detalı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "İmtahan"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Nəzarət Statusu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "Pozuntu Sayı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "İmtahan Statusu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Əlavə Şans"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Müəllim əməliyyatları"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "İmtahanı Bərpa Et"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Əlavə Şans Ver"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Dayandır"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Geri"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Hadisə Xronologiyası"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Müəllim hərəkəti"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "Pozuntu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "Heç bir hadisə qeydə alınmayıb."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Bu tələbənin imtahanını bərpa etmək istəyirsiniz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr "Bu tələbəyə əlavə şans verərək imtahana davam etməyə icazə vermək istəyirsiniz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr "Bu tələbənin imtahanını dayandırmaq istəyirsiniz? İmtahan təslim ediləcək."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "Əməliyyat uğurla tamamlandı."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Xəta: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Əlaqə xətası."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "İmtahan dayandırıldı."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Dayandır"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr "Bu tələbənin imtahanını dayandırmaq istəyirsiniz? İmtahan təslim ediləcək."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "İmtahan dayandırıldı."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Dayandırma xətası: "
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Nəzarət Rejimi Aktiv"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr "Bu imtahan <strong>nəzarət rejimində</strong> keçirilir. Aşağıdakı qaydalar tətbiq olunur:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Tab dəyişmə izlənilir"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Kopyala/yapışdır bloklanıb"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Sağ klik deaktivdir"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Klaviatura qısa yolları məhduddur"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Maksimum pozuntuya icazə verilir."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "Başa düşdüm, davam et"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Nəzarət aktiv"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Xəbərdarlıq"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "İmtahan sahəsindən çıxdınız. Zəhmət olmasa geri qayıdın."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "Vaxt bitərsə, bu pozuntu kimi qeyd olunacaq."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "Pozuntu"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Tam ekrana qayıt"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "İmtahan Dayandırıldı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "Maksimum pozuntu limitinə çatdınız."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr "İmtahanınız dayandırılıb. Müəllim qərar qəbul edənə qədər gözləyin."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Müəllim cavabını gözləyirik..."
