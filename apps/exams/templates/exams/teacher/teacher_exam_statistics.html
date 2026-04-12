@@ -573,7 +573,16 @@
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (data.ok) {
-                        aiContent.innerHTML = formatMarkdown(data.summary);
+                        var quotaHtml = "";
+                        if (typeof data.remaining !== "undefined") {
+                            quotaHtml = '<div class="sd-ai-quota" style="margin-top:12px;padding:8px 12px;background:#f0f9ff;border-radius:6px;font-size:13px;color:#1e40af">'
+                                + '<i class="fas fa-info-circle"></i> '
+                                + '{% trans "ai_quota_info" context "exams.template.exam_statistics" %}: '
+                                + '<strong>' + data.remaining + '/' + data.limit + '</strong> (' + data.window + ')'
+                                + (data.cached ? ' &middot; <span style="color:#059669"><i class="fas fa-bolt"></i> {% trans "ai_cached" context "exams.template.exam_statistics" %}</span>' : '')
+                                + '</div>';
+                        }
+                        aiContent.innerHTML = formatMarkdown(data.summary) + quotaHtml;
                     } else {
                         aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || "{% trans 'ai_error' context 'exams.template.exam_statistics' %}") + '</div>';
                     }

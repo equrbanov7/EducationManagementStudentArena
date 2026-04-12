@@ -434,4 +434,56 @@
     object-fit: cover;
     box-shadow: 0 1px 4px rgba(0,0,0,0.16);
 }
+
+/* ====== AI Grading Button ====== */
+.ai-grade-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-ai-grade {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.btn-ai-grade:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.btn-ai-grade:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.btn-ai-grade i {
+    font-size: 1em;
+}
+
+.ai-grade-status {
+    font-size: 0.82em;
+    color: #666;
+}
+.ai-grade-status.ai-grade-success {
+    color: #16a34a;
+}
+.ai-grade-status.ai-grade-error {
+    color: #dc2626;
+}
+
+.max-points-hint {
+    font-weight: 400;
+    color: #888;
+    font-size: 0.85em;
+}
 /* ==================================== */

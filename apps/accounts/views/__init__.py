@@ -75,6 +75,7 @@ from .roles import (
 
 # Superadmin views
 from .superadmin import (
+    superadmin_ai_settings,
     superadmin_organizations,
 )
 
@@ -124,4 +125,5 @@ __all__ = [
     "superadmin_user_management",
     # Superadmin
     "superadmin_organizations",
+    "superadmin_ai_settings",
 ]

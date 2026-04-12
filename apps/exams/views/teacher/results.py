@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from urllib.parse import urlencode, urlsplit
 
@@ -648,6 +649,45 @@ def teacher_check_attempt(request, slug, attempt_id):
         "results_return_url": results_return_url,
     }
     return render(request, "exams/teacher/teacher_check_attempt.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def ai_grade_answer(request, slug, attempt_id):
+    """AJAX endpoint — AI grades a single written answer."""
+    from django.http import JsonResponse
+
+    from apps.exams.services.ai_grading import grade_written_answer
+
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    question_id = data.get("question_id")
+    if not question_id:
+        return JsonResponse({"ok": False, "error": "question_id required"}, status=400)
+
+    answer = attempt.answers.select_related("question").filter(question_id=question_id).first()
+    if not answer:
+        return JsonResponse({"ok": False, "error": "Answer not found"}, status=404)
+
+    q = answer.question
+    max_points = data.get("max_points", q.points) or q.points
+
+    result = grade_written_answer(
+        question_text=q.text,
+        student_answer=answer.text_answer or "",
+        max_points=int(max_points),
+        correct_answer=getattr(q, "correct_answer", "") or "",
+        language_code=request.LANGUAGE_CODE,
+        user_id=request.user.pk,
+    )
+    return JsonResponse(result)
 
 
 @login_required

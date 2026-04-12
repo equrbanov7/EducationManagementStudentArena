@@ -44,6 +44,11 @@ urlpatterns = [
         name="teacher_check_attempt",
     ),
     path(
+        "<slug:slug>/attempt/<int:attempt_id>/ai-grade/",
+        views.ai_grade_answer,
+        name="ai_grade_answer",
+    ),
+    path(
         "<slug:slug>/attempt/<int:attempt_id>/view/",
         views.teacher_view_attempt,
         name="teacher_view_attempt",
