@@ -17886,3 +17886,243 @@ msgstr "results"
 msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Next ›"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "page_title"
+msgstr "Exam Supervision - Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "heading"
+msgstr "Exam Supervision Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "subtitle"
+msgstr "Suspicious events and student states for all supervised exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_total_incidents"
+msgstr "Total Violations"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_flagged_students"
+msgstr "Flagged Students"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_supervised_exams"
+msgstr "Supervised Exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_severity_distribution"
+msgstr "Severity Distribution"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_violation_types"
+msgstr "Violation Types"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_search_placeholder"
+msgstr "Search student or exam..."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_exams"
+msgstr "All exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_statuses"
+msgstr "All statuses"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_warned"
+msgstr "Warned"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_locked"
+msgstr "Locked"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_removed"
+msgstr "Removed"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_resumed"
+msgstr "Resumed"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_search"
+msgstr "Search"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_student"
+msgstr "Student"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_exam"
+msgstr "Exam"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_violation_count"
+msgstr "Violation Count"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_start_time"
+msgstr "Start Time"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_details"
+msgstr "Details"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_actions"
+msgstr "Actions"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_details"
+msgstr "Details"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_resume"
+msgstr "Resume"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "empty_no_violations"
+msgstr "No violations recorded yet."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_info"
+msgstr "Info"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_low"
+msgstr "Low"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_medium"
+msgstr "Medium"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_high"
+msgstr "High"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_critical"
+msgstr "Critical"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_count_label"
+msgstr "Count"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_resume"
+msgstr "Do you want to allow this student to continue the exam?"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_success"
+msgstr "Permission granted. The student's exam has been resumed."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_error"
+msgstr "Error: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "connection_error"
+msgstr "Connection error."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_title"
+msgstr "Custom Configuration"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_desc"
+msgstr "Manually configure all parameters."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_title"
+msgstr "Light Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_desc"
+msgstr "Minimal restrictions. Students take the exam more freely, only tab switching is tracked."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab switching is tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f2"
+msgstr "❌ Fullscreen not required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f3"
+msgstr "❌ Copy/paste not blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Max 5 violations, recovery chance given"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_title"
+msgstr "Medium Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_desc"
+msgstr "Balanced supervision. Core protection measures active, with teacher oversight."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Max 3 violations, teacher controls recovery"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_title"
+msgstr "Strict Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_desc"
+msgstr "Highest level supervision. All protection measures active, no second chance."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Text selection blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"

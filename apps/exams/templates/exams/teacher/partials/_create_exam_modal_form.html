@@ -197,12 +197,21 @@
             <div class="create-exam-form-grid">
                 <div class="form-group">
                     <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
-                    <select name="supervision_template" id="modalSupervisionTemplate" class="form-select">
-                        <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
-                        <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_exam_modal_form" %}</option>
-                        <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_exam_modal_form" %}</option>
-                        <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_exam_modal_form" %}</option>
-                    </select>
+                    <div class="bootstrap-single-select">
+                        <select name="supervision_template" id="modalSupervisionTemplate" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_exam_modal_form" %}</option>
+                        </select>
+                    </div>
+                </div>
+
+                {# Template info panel #}
+                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
+                    <h4 id="modalSupervisionTemplateInfoTitle" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
+                    <p id="modalSupervisionTemplateInfoDesc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
+                    <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
                 </div>
 
                 <div id="modalSupervisionCustomSettings">
@@ -273,21 +282,25 @@
 
                     <div class="form-group">
                         <label for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select">
-                            <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_exam_modal_form" %}</option>
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_exam_modal_form" %}</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select">
-                            <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_exam_modal_form" %}</option>
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_exam_modal_form" %}</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

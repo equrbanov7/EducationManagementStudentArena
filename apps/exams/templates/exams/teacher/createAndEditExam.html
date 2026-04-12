@@ -307,13 +307,22 @@
                         {# Şablon seçimi #}
                         <div class="form-group">
                             <label for="id_supervision_template">{% trans "supervision_template_label" context "exams.template.create_edit_exam" %}</label>
-                            <select name="supervision_template" id="id_supervision_template" class="form-select">
-                                <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_edit_exam" %}</option>
-                                <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_edit_exam" %}</option>
-                                <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_edit_exam" %}</option>
-                                <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_edit_exam" %}</option>
-                            </select>
+                            <div class="bootstrap-single-select">
+                                <select name="supervision_template" id="id_supervision_template" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                    <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_edit_exam" %}</option>
+                                    <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_edit_exam" %}</option>
+                                    <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_edit_exam" %}</option>
+                                    <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_edit_exam" %}</option>
+                                </select>
+                            </div>
                             <small class="form-text text-muted">{% trans "supervision_template_help" context "exams.template.create_edit_exam" %}</small>
+                        </div>
+
+                        {# Template info panel #}
+                        <div id="supervision-template-info" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
+                            <h4 id="supervision-template-info-title" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
+                            <p id="supervision-template-info-desc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
+                            <ul id="supervision-template-info-features" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
                         </div>
 
                         <div id="supervision-custom-settings">
@@ -429,22 +438,26 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                                 <div class="form-group">
                                     <label for="id_supervision_violation_action">{% trans "supervision_violation_action_label" context "exams.template.create_edit_exam" %}</label>
-                                    <select name="supervision_violation_action" id="id_supervision_violation_action" class="form-select">
-                                        <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_edit_exam" %}</option>
-                                        <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_edit_exam" %}</option>
-                                        <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_edit_exam" %}</option>
-                                        <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_edit_exam" %}</option>
-                                    </select>
+                                    <div class="bootstrap-single-select">
+                                        <select name="supervision_violation_action" id="id_supervision_violation_action" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                            <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_edit_exam" %}</option>
+                                            <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_edit_exam" %}</option>
+                                            <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_edit_exam" %}</option>
+                                            <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_edit_exam" %}</option>
+                                        </select>
+                                    </div>
                                     <small class="form-text text-muted">{% trans "supervision_violation_action_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="id_supervision_recovery_policy">{% trans "supervision_recovery_policy_label" context "exams.template.create_edit_exam" %}</label>
-                                    <select name="supervision_recovery_policy" id="id_supervision_recovery_policy" class="form-select">
-                                        <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_edit_exam" %}</option>
-                                        <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_edit_exam" %}</option>
-                                        <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_edit_exam" %}</option>
-                                    </select>
+                                    <div class="bootstrap-single-select">
+                                        <select name="supervision_recovery_policy" id="id_supervision_recovery_policy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                            <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_edit_exam" %}</option>
+                                            <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_edit_exam" %}</option>
+                                            <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_edit_exam" %}</option>
+                                        </select>
+                                    </div>
                                     <small class="form-text text-muted">{% trans "supervision_recovery_policy_help" context "exams.template.create_edit_exam" %}</small>
                                 </div>
                             </div>
@@ -544,8 +557,77 @@
             if (supervisionTemplate) {
                 toggleSupervisionCustom();
                 supervisionTemplate.addEventListener("change", toggleSupervisionCustom);
+                supervisionTemplate.addEventListener("change", showTemplateInfo);
+                showTemplateInfo();
             }
     
+            function showTemplateInfo() {
+                var infoPanel = document.getElementById("supervision-template-info");
+                var infoTitle = document.getElementById("supervision-template-info-title");
+                var infoDesc = document.getElementById("supervision-template-info-desc");
+                var infoFeatures = document.getElementById("supervision-template-info-features");
+                if (!supervisionTemplate || !infoPanel) return;
+
+                var val = supervisionTemplate.value;
+                var templates = {
+                    "custom": {
+                        title: "{% filter escapejs %}{% trans 'tpl_info_custom_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        desc: "{% filter escapejs %}{% trans 'tpl_info_custom_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        features: []
+                    },
+                    "light": {
+                        title: "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        desc: "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        features: [
+                            "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+                        ]
+                    },
+                    "medium": {
+                        title: "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        desc: "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        features: [
+                            "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+                        ]
+                    },
+                    "strict": {
+                        title: "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        desc: "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                        features: [
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+                            "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+                        ]
+                    }
+                };
+
+                var borderColors = {"custom":"#6c757d","light":"#28a745","medium":"#ffc107","strict":"#dc3545"};
+                var tpl = templates[val];
+                if (!tpl || val === "custom") {
+                    infoPanel.style.display = "none";
+                    return;
+                }
+                infoTitle.textContent = tpl.title;
+                infoDesc.textContent = tpl.desc;
+                infoFeatures.innerHTML = "";
+                tpl.features.forEach(function(f) {
+                    var li = document.createElement("li");
+                    li.textContent = f;
+                    infoFeatures.appendChild(li);
+                });
+                infoPanel.style.borderLeftColor = borderColors[val] || "#007bff";
+                infoPanel.style.display = "block";
+            }
+
             function toggleAccessBlock() {
                 if (!isPublicCheckbox || !accessBlock) return;
                 
