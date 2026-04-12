@@ -9530,7 +9530,7 @@ msgstr "Təsviri daxil edin"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:75
 msgctxt "exams.template.create_edit_exam"
 msgid "enable_paint"
-msgstr "Əməliyyat"
+msgstr "Yazılı imtahanlarda Paint cavabını aktiv et"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:78
 msgctxt "exams.template.create_edit_exam"
@@ -9540,12 +9540,12 @@ msgstr "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bil�
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:100
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "Tarix və Vaxt Parametrləri"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:101
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "İmtahanın başlama və bitmə vaxtlarını təyin edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:109
 msgctxt "exams.template.create_edit_exam"
@@ -9555,17 +9555,17 @@ msgstr "Başlanğıc"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:116
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_1"
-msgstr "Start exam"
+msgstr "Boş saxlasanız, tələbələr istənilən vaxt başlaya bilər."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:117
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_2"
-msgstr "Start exam"
+msgstr "Tələbələr bu tarixdən əvvəl başlaya bilməz."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:132
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_end"
-msgstr "İngilis dili"
+msgstr "Son"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:139
 msgctxt "exams.template.create_edit_exam"
@@ -9580,12 +9580,12 @@ msgstr "Bu tarixdən sonra tələbələr imtahana başlaya bilməz."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:151
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings"
-msgstr "Tələbələr"
+msgstr "Müddət və Cəhd Parametrləri"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:152
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "İmtahan müddəti, hər sual üçün vaxt və cəhd limitini konfiqurasiya edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:162
 msgctxt "exams.template.create_edit_exam"
@@ -9600,12 +9600,12 @@ msgstr "Məs: 60 (saniyə)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:190
 msgctxt "exams.template.create_edit_exam"
 msgid "max_attempt_help"
-msgstr "Maksimum cəhd"
+msgstr "Məs: 1, 2, 3..."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:199
 msgctxt "exams.template.create_edit_exam"
 msgid "section_access_rights"
-msgstr "Müəllim"
+msgstr "Giriş Hüquqları"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:200
 msgctxt "exams.template.create_edit_exam"
@@ -9669,6 +9669,191 @@ msgstr "Dəyişiklikləri Yadda Saxla"
 msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
 msgstr "İmtahan yarat"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_title"
+msgstr "İmtahan Nəzarəti"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_help"
+msgstr "Anti-cheating və imtahan nəzarəti parametrləri"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_label"
+msgstr "İmtahan Nəzarəti Rejimini Aktivləşdir"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_help"
+msgstr "Aktivləşdirildikdə, tələbə imtahan zamanı nəzarət altında olacaq. Tab dəyişmə, fullscreen çıxışı, copy/paste və digər əməliyyatlar izlənəcək."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_label"
+msgstr "Nəzarət Şablonu"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_custom"
+msgstr "Xüsusi (Custom)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_light"
+msgstr "Yüngül (Light)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_medium"
+msgstr "Orta (Medium)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_strict"
+msgstr "Ciddi (Strict)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_help"
+msgstr "Hazır şablon seçərək parametrləri avtomatik tənzimləyin, və ya xüsusi rejim seçərək əl ilə konfiqurasiya edin."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen"
+msgstr "Tam ekran rejimi tələb et"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen_help"
+msgstr "Tələbə imtahana başlayarkən tam ekrana keçməlidir."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch"
+msgstr "Tab dəyişməni aşkarla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch_help"
+msgstr "Tələbə brauzerdə tab dəyişdirəndə qeydə alınacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste"
+msgstr "Kopyala/Yapışdır blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste_help"
+msgstr "Copy, Paste, Cut əməliyyatları bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click"
+msgstr "Sağ klik menyusunu blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click_help"
+msgstr "Kontekst menyusuna giriş deaktiv ediləcək."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection"
+msgstr "Mətn seçimini blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection_help"
+msgstr "İmtahan mətninin seçilməsi və sürüklənməsi bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts"
+msgstr "Klaviatura qısa yollarını məhdudla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts_help"
+msgstr "Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+S və s. bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_label"
+msgstr "Qaytarılma müddəti (saniyə)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_help"
+msgstr "Fullscreen çıxışından sonra qaytarılma üçün vaxt (5-60 saniyə)."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_label"
+msgstr "Maksimum pozuntu sayı"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_help"
+msgstr "Bu sayda pozuntudan sonra seçilmiş cəza tətbiq olunacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_label"
+msgstr "Pozuntu zamanı hərəkət"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_auto_submit"
+msgstr "Avtomatik göndər"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_lock_exam"
+msgstr "İmtahanı kilidlə"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_remove_student"
+msgstr "Tələbəni çıxar"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_mark_suspicious"
+msgstr "Şübhəli olaraq işarələ"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_help"
+msgstr "Maksimum pozuntu limitinə çatdıqda nə baş versin."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_label"
+msgstr "Bərpa siyasəti"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_no_second_chance"
+msgstr "İkinci şans yoxdur"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "Bir əlavə şans"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Müəllim tərəfindən idarə olunan"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_help"
+msgstr "Kilidlənmiş tələbələr üçün bərpa imkanı."
 
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
@@ -10245,6 +10430,131 @@ msgstr "Yadda saxla"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
 msgstr "İmtahan yarat"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_title"
+msgstr "İmtahan Nəzarəti"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_help"
+msgstr "Anti-cheating və imtahan nəzarəti parametrləri"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_enable_label"
+msgstr "İmtahan Nəzarəti Rejimini Aktivləşdir"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_label"
+msgstr "Nəzarət Şablonu"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_custom"
+msgstr "Xüsusi (Custom)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_light"
+msgstr "Yüngül (Light)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_medium"
+msgstr "Orta (Medium)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_strict"
+msgstr "Ciddi (Strict)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_force_fullscreen"
+msgstr "Tam ekran rejimi tələb et"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_detect_tab_switch"
+msgstr "Tab dəyişməni aşkarla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_block_copy_paste"
+msgstr "Kopyala/Yapışdır blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_right_click"
+msgstr "Sağ klik menyusunu blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_text_selection"
+msgstr "Mətn seçimini blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_restrict_shortcuts"
+msgstr "Klaviatura qısa yollarını məhdudla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_grace_period_label"
+msgstr "Qaytarılma müddəti (saniyə)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_max_violations_label"
+msgstr "Maksimum pozuntu sayı"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_violation_action_label"
+msgstr "Pozuntu zamanı hərəkət"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_auto_submit"
+msgstr "Avtomatik göndər"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_lock_exam"
+msgstr "İmtahanı kilidlə"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_remove_student"
+msgstr "Tələbəni çıxar"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_mark_suspicious"
+msgstr "Şübhəli olaraq işarələ"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_policy_label"
+msgstr "Bərpa siyasəti"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_no_second_chance"
+msgstr "İkinci şans yoxdur"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "Bir əlavə şans"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Müəllim tərəfindən idarə olunan"
 
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
