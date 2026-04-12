@@ -186,7 +186,7 @@
                         if (el.requestFullscreen) {
                             fsPromise = el.requestFullscreen();
                         } else if (el.webkitRequestFullscreen) {
-                            el.webkitRequestFullscreen();
+                            fsPromise = el.webkitRequestFullscreen();
                         }
                         if (fsPromise && typeof fsPromise.then === "function") {
                             fsPromise.then(function () {
