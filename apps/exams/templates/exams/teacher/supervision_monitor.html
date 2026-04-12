@@ -146,7 +146,7 @@
                             <i class="fas fa-eye"></i>
                         </a>
                         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
-                        <button class="btn-action btn-resume" onclick="resumeAttempt({{ attempt.id }})" title="Bərpa et">
+                        <button class="btn-action btn-resume" data-resume-attempt-id="{{ attempt.id }}" title="Bərpa et">
                             <i class="fas fa-play"></i>
                         </button>
                         {% endif %}
@@ -258,5 +258,13 @@ function resumeAttempt(attemptId) {
     })
     .catch(function(e) { alert("Əlaqə xətası."); });
 }
+
+document.addEventListener("click", function(event) {
+    var btn = event.target.closest("[data-resume-attempt-id]");
+    if (btn) {
+        event.preventDefault();
+        resumeAttempt(parseInt(btn.getAttribute("data-resume-attempt-id"), 10));
+    }
+});
 </script>
 {% endblock %}
