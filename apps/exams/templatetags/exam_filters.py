@@ -44,6 +44,6 @@ def format_duration(seconds):
         parts.append(f"{hours} {pgettext('exams.filter.duration', 'unit_hours')}")
     if minutes:
         parts.append(f"{minutes} {pgettext('exams.filter.duration', 'unit_minutes')}")
-    if secs or not parts:
+    if secs > 0 or not parts:
         parts.append(f"{secs} {pgettext('exams.filter.duration', 'unit_seconds')}")
     return " ".join(parts)

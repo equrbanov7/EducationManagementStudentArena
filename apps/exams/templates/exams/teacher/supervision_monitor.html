@@ -551,7 +551,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- Loading overlay on navigation ---
     var loadingOverlay = document.getElementById("loadingOverlay");
     function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
-    document.querySelectorAll(".monitor-table th a, .pagination-wrapper a, .filter-bar .btn-search").forEach(function(el) {
+    document.querySelectorAll(".monitor-table th a, .pagination-wrapper a").forEach(function(el) {
         el.addEventListener("click", showLoading);
     });
     var filterForm = document.getElementById("monitorFilterForm");
