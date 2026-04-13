@@ -96,9 +96,9 @@
             <h1><i class="fas fa-shield-alt"></i> {% trans "heading" context "exams.template.supervision_monitor" %}</h1>
             <p>{% trans "subtitle" context "exams.template.supervision_monitor" %}</p>
         </div>
-        <button type="button" class="btn-back-top" id="backBtn">
+        <a href="{% url 'accounts:profile' %}" class="btn-back-top">
             <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.supervision_monitor" %}
-        </button>
+        </a>
     </div>
 
     {# Stats Cards #}
@@ -353,12 +353,6 @@ var SUPERVISION_I18N = {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    // --- Back button ---
-    var backBtn = document.getElementById("backBtn");
-    if (backBtn) {
-        backBtn.addEventListener("click", function() { history.back(); });
-    }
-
     // --- Charts ---
     try {
         var severityData = JSON.parse(document.getElementById("severity-data").textContent);
