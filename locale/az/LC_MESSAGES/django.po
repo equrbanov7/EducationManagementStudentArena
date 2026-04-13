@@ -18977,3 +18977,11 @@ msgstr "dəq"
 msgctxt "exams.filter.duration"
 msgid "unit_seconds"
 msgstr "san"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "loading"
+msgstr "Yüklənir..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "loading"
+msgstr "Yüklənir..."
