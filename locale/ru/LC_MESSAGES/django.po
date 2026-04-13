@@ -18702,3 +18702,35 @@ msgstr "Перейти в полноэкранный режим и продол�
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Эта операция не может быть выполнена."
+
+msgctxt "supervision.view.api"
+msgid "attempt_already_terminated"
+msgstr "Эта попытка уже завершена и не может быть восстановлена."
+
+#: supervision_monitor — terminated action button
+msgctxt "exams.template.supervision_monitor"
+msgid "action_terminated"
+msgstr "Прекращено"
+
+#: supervision_monitor — date filters and back button
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_from"
+msgstr "Дата от"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_to"
+msgstr "Дата до"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_back"
+msgstr "Назад"
+
+#: supervision_detail — terminated action button
+msgctxt "exams.template.supervision_detail"
+msgid "action_terminated"
+msgstr "Прекращено"
+
+#: liveExam session_detail — per-question charts heading
+msgctxt "liveExam.template.session_detail"
+msgid "heading_per_question_charts"
+msgstr "Статистика вариантов по вопросам"
