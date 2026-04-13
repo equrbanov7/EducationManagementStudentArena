@@ -15,8 +15,8 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from apps.exams.models import Exam, ExamQuestion
 from apps.exams.domain.question_bank import ExamQuestionOption
+from apps.exams.models import Exam, ExamQuestion
 from apps.exams.services.access_policy import is_teacher_user
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -174,9 +174,7 @@ def teacher_live_session_detail(request, slug, pin):
             label_text = opt.label or opt.text[:20]
             option_labels.append(label_text)
             # Count answers that chose this option (via choice_id or choice_ids)
-            chosen_count = answers.filter(
-                Q(choice_id=opt.id) | Q(choice_ids__contains=[opt.id])
-            ).count()
+            chosen_count = answers.filter(Q(choice_id=opt.id) | Q(choice_ids__contains=[opt.id])).count()
             option_counts.append(chosen_count)
             option_colors.append("#059669" if opt.is_correct else "#6b7280")
         per_question_option_stats.append(
