@@ -895,7 +895,10 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
         lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
         thresholdTitle: "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}"
+        thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        resumeTitle: "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        resumeMsg: "{% filter escapejs %}{% trans 'supervision_resume_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        resumeBtn: "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}"
     };
     </script>
     <script src="{% static 'exams/js/exam_supervision.js' %}"></script>
