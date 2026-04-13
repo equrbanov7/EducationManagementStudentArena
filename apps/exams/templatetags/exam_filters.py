@@ -1,5 +1,6 @@
 from django import template
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 register = template.Library()
 
@@ -34,15 +35,15 @@ def format_duration(seconds):
     except (ValueError, TypeError):
         return ""
     if total <= 0:
-        return "0 san"
+        return "0 " + pgettext("exams.filter.duration", "unit_seconds")
     hours = total // 3600
     minutes = (total % 3600) // 60
     secs = total % 60
     parts = []
     if hours:
-        parts.append(f"{hours} saat")
+        parts.append(f"{hours} {pgettext('exams.filter.duration', 'unit_hours')}")
     if minutes:
-        parts.append(f"{minutes} dəq")
+        parts.append(f"{minutes} {pgettext('exams.filter.duration', 'unit_minutes')}")
     if secs or not parts:
-        parts.append(f"{secs} san")
+        parts.append(f"{secs} {pgettext('exams.filter.duration', 'unit_seconds')}")
     return " ".join(parts)

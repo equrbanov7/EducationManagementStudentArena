@@ -18734,3 +18734,16 @@ msgstr "Прекращено"
 msgctxt "liveExam.template.session_detail"
 msgid "heading_per_question_charts"
 msgstr "Статистика вариантов по вопросам"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "ч"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "мин"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "сек"
