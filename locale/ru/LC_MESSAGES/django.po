@@ -18747,3 +18747,11 @@ msgstr "мин"
 msgctxt "exams.filter.duration"
 msgid "unit_seconds"
 msgstr "сек"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "loading"
+msgstr "Загрузка..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "loading"
+msgstr "Загрузка..."

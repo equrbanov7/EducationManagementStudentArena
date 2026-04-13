@@ -4,6 +4,7 @@ Supervision views for both teacher monitoring and student event logging.
 
 import json
 from datetime import datetime
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -164,9 +165,50 @@ def supervision_monitor(request):
         except ValueError:
             date_to_value = ""
 
+    # Sorting
+    sort_by = (request.GET.get("sort_by") or "").strip()
+    sort_dir = (request.GET.get("sort_dir") or "").strip()
+    ALLOWED_SORT_FIELDS = {
+        "student": "user__first_name",
+        "exam": "exam__title",
+        "violations": "supervision_violation_count",
+        "status": "supervision_status",
+        "start": "started_at",
+    }
+    if sort_by in ALLOWED_SORT_FIELDS and sort_dir in ("asc", "desc"):
+        order_field = ALLOWED_SORT_FIELDS[sort_by]
+        if sort_dir == "desc":
+            order_field = f"-{order_field}"
+        flagged = flagged.order_by(order_field)
+    else:
+        sort_by = ""
+        sort_dir = ""
+
+    # Build sort_base_query for pagination/sort links
+    sort_base_params = {}
+    if search_query:
+        sort_base_params["q"] = search_query
+    if status_filter:
+        sort_base_params["status"] = status_filter
+    if exam_id:
+        sort_base_params["exam"] = exam_id
+    if date_from_value:
+        sort_base_params["date_from"] = date_from_value
+    if date_to_value:
+        sort_base_params["date_to"] = date_to_value
+    sort_base_query = urlencode(sort_base_params)
+
+    # Build pagination query (includes sort params)
+    pagination_params = dict(sort_base_params)
+    if sort_by:
+        pagination_params["sort_by"] = sort_by
+    if sort_dir:
+        pagination_params["sort_dir"] = sort_dir
+    pagination_query = urlencode(pagination_params)
+
     # Pagination
     page_number = request.GET.get("page", 1)
-    paginator = Paginator(flagged, 20)
+    paginator = Paginator(flagged, 10)
     page_obj = paginator.get_page(page_number)
 
     # Severity distribution for charts (single aggregation query)
@@ -192,6 +234,10 @@ def supervision_monitor(request):
         "selected_exam_id": exam_id,
         "date_from_value": date_from_value,
         "date_to_value": date_to_value,
+        "sort_by": sort_by,
+        "sort_dir": sort_dir,
+        "sort_base_query": sort_base_query,
+        "pagination_query": pagination_query,
     }
 
     return render(request, "exams/teacher/supervision_monitor.html", context)

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static get_item i18n %}
+{% load static get_item i18n exam_filters %}
 
 {% block title %}{{ exam.title }} - {% trans "title_result" context "exams.template.student_exam_result" %}{% endblock %}
 
@@ -63,7 +63,7 @@
             {% endif %}
 
             {% if attempt.duration_seconds %}
-                <span class="duration-info"><i class="far fa-clock"></i> {% trans "label_duration" context "exams.template.student_exam_result" %}: {{ attempt.duration_seconds }} {% trans "unit_seconds" context "exams.template.student_exam_result" %}</span>
+                <span class="duration-info"><i class="far fa-clock"></i> {% trans "label_duration" context "exams.template.student_exam_result" %}: {{ attempt.duration_seconds|format_duration }}</span>
             {% endif %}
         </div>
     </div>
