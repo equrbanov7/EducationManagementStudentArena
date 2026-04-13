@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load exam_filters %}
+{% load i18n %}
 
-{% block title %}{{ exam.title }} - İmtahan nəticələri{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
@@ -23,22 +24,22 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="h3">{{ exam.title }} - İmtahan nəticələri</h1>
+    <h1 class="h3">{{ exam.title }} - {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}</h1>
 
     <div class="results-summary mb-4">
         <div class="results-summary__row">
-            <span class="results-summary__label">Tip:</span>
+            <span class="results-summary__label">{% trans "label_type" context "exams.template.teacher_exam_results" %}</span>
             <strong>{{ exam.get_exam_type_display }}</strong>
         </div>
         <div class="results-summary__row">
-            <span class="results-summary__label">Status:</span>
+            <span class="results-summary__label">{% trans "label_status" context "exams.template.teacher_exam_results" %}</span>
             {% if exam.is_active %}
                 <span class="results-summary__pill results-summary__pill--success">
-                    AKTİV
+                    {% trans "status_active" context "exams.template.teacher_exam_results" %}
                 </span>
             {% else %}
                 <span class="results-summary__pill results-summary__pill--neutral">
-                    Deaktiv
+                    {% trans "status_inactive" context "exams.template.teacher_exam_results" %}
                 </span>
             {% endif %}
         </div>
@@ -54,7 +55,7 @@
             {% endif %}
             <div class="results-filter-field results-filter-field--wide">
                 <label class="results-filter-label" for="resultsFilterSearchInput">
-                    İstifadəçi axtar...
+                    {% trans "search_placeholder" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="text"
                        id="resultsFilterSearchInput"
@@ -62,79 +63,85 @@
                        value="{{ search_query }}"
                        class="form-control js-filter-resettable js-auto-filter-search"
                        autocomplete="off"
-                       placeholder="İstifadəçi axtar...">
+                       placeholder="{% trans "search_placeholder" context "exams.template.teacher_exam_results" %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterStatusSelect">
-                    Status
+                    {% trans "filter_status_label" context "exams.template.teacher_exam_results" %}
                 </label>
+                <div class="bootstrap-single-select">
                 <select name="status"
                         id="resultsFilterStatusSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
+                        class="form-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
+                        data-bootstrap-select
                         data-reset-value="all">
                     <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
-                        Bütün statuslar
+                        {% trans "filter_all_statuses" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>
-                        Qaralama
+                        {% trans "filter_status_draft" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>
-                        Davam edir
+                        {% trans "filter_status_in_progress" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>
-                        Təqdim edilib
+                        {% trans "filter_status_submitted" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>
-                        Vaxtı bitib
+                        {% trans "filter_status_expired" context "exams.template.teacher_exam_results" %}
                     </option>
                 </select>
+                </div>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterCheckedSelect">
-                    Yoxlanıb
+                    {% trans "filter_checked_label" context "exams.template.teacher_exam_results" %}
                 </label>
+                <div class="bootstrap-single-select">
                 <select name="checked"
                         id="resultsFilterCheckedSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
+                        class="form-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
+                        data-bootstrap-select
                         data-reset-value="all">
                     <option value="all" {% if checked_filter == 'all' %}selected{% endif %}>
-                        Yoxlama: hamısı
+                        {% trans "filter_all_checks" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="checked" {% if checked_filter == 'checked' %}selected{% endif %}>
-                        Yoxlanıb
+                        {% trans "filter_checked" context "exams.template.teacher_exam_results" %}
                     </option>
                     <option value="unchecked" {% if checked_filter == 'unchecked' %}selected{% endif %}>
-                        Yoxlanmayıb
+                        {% trans "filter_unchecked" context "exams.template.teacher_exam_results" %}
                     </option>
                 </select>
+                </div>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateFromInput">
-                    Başlama tarixi
+                    {% trans "filter_date_from" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateFromInput"
                        name="date_from"
                        value="{{ date_from }}"
                        class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="Başlama tarixi">
+                       aria-label="{% trans "filter_date_from" context "exams.template.teacher_exam_results" %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateToInput">
-                    Bitmə tarixi
+                    {% trans "filter_date_to" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateToInput"
                        name="date_to"
                        value="{{ date_to }}"
                        class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="Bitmə tarixi">
+                       aria-label="{% trans "filter_date_to" context "exams.template.teacher_exam_results" %}">
             </div>
             <button type="submit" class="btn results-filter-submit">
-                <i class="fas fa-filter me-1"></i> Tətbiq et
+                <i class="fas fa-filter me-1"></i> {% trans "action_apply_filter" context "exams.template.teacher_exam_results" %}
             </button>
             <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
-                <i class="fas fa-eraser me-1"></i> Seçimi sıfırla
+                <i class="fas fa-eraser me-1"></i> {% trans "action_reset_filter" context "exams.template.teacher_exam_results" %}
             </button>
         </form>
     </div>
@@ -142,23 +149,23 @@
     {% if can_delete_attempts %}
         <div class="results-toolbar">
             <span class="selected-counter">
-                Seçilib: <span id="selectedAttemptCount">0</span>
+                {% trans "label_selected" context "exams.template.teacher_exam_results" %} <span id="selectedAttemptCount">0</span>
             </span>
             <div class="results-toolbar__actions">
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllAttemptsBtn">
-                    <i class="fas fa-check-double"></i> Hamısını seç
+                    <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.teacher_exam_results" %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--clear" id="clearAttemptsBtn">
-                    <i class="fas fa-eraser"></i> Seçimi sıfırla
+                    <i class="fas fa-eraser"></i> {% trans "action_clear_selection" context "exams.template.teacher_exam_results" %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--delete" id="deleteSelectedAttemptsBtn">
-                    <i class="fas fa-trash"></i> Seçilənləri sil
+                    <i class="fas fa-trash"></i> {% trans "action_delete_selected" context "exams.template.teacher_exam_results" %}
                 </button>
             </div>
         </div>
     {% endif %}
 
-    <h3>İştirakçı nəticələri</h3>
+    <h3>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
 
     {% if attempts_data %}
         <div class="table-responsive">
@@ -169,17 +176,17 @@
                             <th></th>
                         {% endif %}
                         <th>#</th>
-                        <th>İstifadəçi</th>
-                        <th>Status</th>
-                        <th>Düzgün</th>
-                        <th>Səhv</th>
+                        <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_correct" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_wrong" context "exams.template.teacher_exam_results" %}</th>
                         {% if exam.exam_type == 'written' %}
-                            <th>Bal</th>
+                            <th>{% trans "col_score" context "exams.template.teacher_exam_results" %}</th>
                         {% endif %}
-                        <th>Başlama tarixi</th>
-                        <th>Bitirmə vaxtı</th>
-                        <th>Müddət (san.)</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "col_start_time" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_end_time" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_duration" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -200,7 +207,7 @@
                                     <div class="text-muted small">@{{ att.user.username }}</div>
                                 {% else %}
                                     <strong class="anonymous-name">{{ item.anonymous_name }}</strong>
-                                    <div class="text-muted small">Anonim görünüş</div>
+                                    <div class="text-muted small">{% trans "label_anonymous_view" context "exams.template.teacher_exam_results" %}</div>
                                 {% endif %}
                             </td>
                             <td>
@@ -213,7 +220,7 @@
                                 {% endif %}
                                 {% if att.checked_by_teacher %}
                                     <div class="mt-2">
-                                        <span class="badge bg-secondary">Yoxlanıb</span>
+                                        <span class="badge bg-secondary">{% trans "badge_checked" context "exams.template.teacher_exam_results" %}</span>
                                     </div>
                                 {% endif %}
                             </td>
@@ -254,7 +261,7 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger js-single-delete-attempt"
                                                 data-attempt-id="{{ att.id }}">
-                                            <i class="fas fa-trash"></i> Sil
+                                            <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.teacher_exam_results" %}
                                         </button>
                                     {% endif %}
                                 </div>
@@ -269,7 +276,7 @@
     {% else %}
         <p class="text-muted text-center py-4">
             <i class="fas fa-inbox"></i>
-            Bu imtahan üzrə hələ cəhd yoxdur.
+            {% trans "empty_no_attempts" context "exams.template.teacher_exam_results" %}
         </p>
     {% endif %}
 
@@ -301,20 +308,20 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">
-                        <i class="fas fa-trash me-2"></i> Cəhdləri sil
+                        <i class="fas fa-trash me-2"></i> {% trans "modal_delete_title" context "exams.template.teacher_exam_results" %}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-2">Seçilmiş nəticələr silinəcək.</p>
-                    <small class="text-muted">Bu əməliyyat geri qaytarılmır.</small>
+                    <p class="mb-2">{% trans "modal_delete_message" context "exams.template.teacher_exam_results" %}</p>
+                    <small class="text-muted">{% trans "modal_delete_warning" context "exams.template.teacher_exam_results" %}</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Bağla
+                        {% trans "action_close" context "exams.template.teacher_exam_results" %}
                     </button>
                     <button type="button" class="btn btn-danger" id="confirmDeleteAttemptsBtn">
-                        Silməni təsdiqlə
+                        {% trans "action_confirm_delete" context "exams.template.teacher_exam_results" %}
                     </button>
                 </div>
             </div>

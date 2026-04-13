@@ -60,6 +60,43 @@
 {% endblock %}
 
 {% block extraJs %}
+<script nonce="{{ request.csp_nonce }}">
+window.MODAL_SUPERVISION_TPL_INFO = {
+    "light": {
+        title: "{% filter escapejs %}{% trans 'tpl_info_light_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        desc: "{% filter escapejs %}{% trans 'tpl_info_light_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        features: [
+            "{% filter escapejs %}{% trans 'tpl_info_light_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_light_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_light_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_light_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+        ]
+    },
+    "medium": {
+        title: "{% filter escapejs %}{% trans 'tpl_info_medium_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        desc: "{% filter escapejs %}{% trans 'tpl_info_medium_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        features: [
+            "{% filter escapejs %}{% trans 'tpl_info_medium_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_medium_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_medium_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_medium_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_medium_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+        ]
+    },
+    "strict": {
+        title: "{% filter escapejs %}{% trans 'tpl_info_strict_title' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        desc: "{% filter escapejs %}{% trans 'tpl_info_strict_desc' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+        features: [
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f1' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f2' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f3' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f4' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f5' context 'exams.template.create_edit_exam' %}{% endfilter %}",
+            "{% filter escapejs %}{% trans 'tpl_info_strict_f6' context 'exams.template.create_edit_exam' %}{% endfilter %}"
+        ]
+    }
+};
+</script>
 <script src="{% static 'accounts/js/profile.js' %}"></script>
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>

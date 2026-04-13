@@ -6,9 +6,11 @@ from .models import (
     ExamAttempt,
     ExamQuestion,
     ExamQuestionOption,
+    ExamSupervisionConfig,
     ProctoringLog,
     QuestionBank,
     StudentGroup,
+    SupervisionIncident,
 )
 
 # Register your models here.
@@ -143,3 +145,34 @@ class ProctoringLogAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related("exam_attempt__user", "exam_attempt__exam")
+
+
+@admin.register(ExamSupervisionConfig)
+class ExamSupervisionConfigAdmin(admin.ModelAdmin):
+    list_display = ("exam", "enabled", "template", "violation_action", "recovery_policy", "updated_at")
+    list_filter = ("enabled", "template", "violation_action", "recovery_policy")
+    search_fields = ("exam__title",)
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(SupervisionIncident)
+class SupervisionIncidentAdmin(admin.ModelAdmin):
+    list_display = ("student_display", "exam_display", "event_type", "severity", "timestamp")
+    list_filter = ("event_type", "severity", "timestamp")
+    search_fields = ("student__username", "exam__title")
+    readonly_fields = ("timestamp",)
+    date_hierarchy = "timestamp"
+
+    def student_display(self, obj):
+        return obj.student.username
+
+    student_display.short_description = "Tələbə"
+
+    def exam_display(self, obj):
+        return obj.exam.title
+
+    exam_display.short_description = "İmtahan"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related("student", "exam", "attempt")

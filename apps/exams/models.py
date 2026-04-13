@@ -17,6 +17,7 @@ from apps.exams.domain.question_bank import (
     question_media_path,
     validate_video_size,
 )
+from apps.exams.domain.supervision import ExamSupervisionConfig, SupervisionIncident
 
 __all__ = [
     "AIConfiguration",
@@ -26,10 +27,12 @@ __all__ = [
     "ExamAttempt",
     "ExamQuestion",
     "ExamQuestionOption",
+    "ExamSupervisionConfig",
     "ProctoringLog",
     "QuestionBank",
     "QuestionBlock",
     "StudentGroup",
+    "SupervisionIncident",
     "question_media_path",
     "validate_video_size",
 ]

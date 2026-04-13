@@ -3345,8 +3345,8 @@ msgstr "AI settings saved successfully."
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
 msgstr ""
-"Registration completed and your organization request is recorded. Verify the"
-" email code to continue."
+"Registration completed and your organization request is recorded. Verify the "
+"email code to continue."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
@@ -3392,8 +3392,8 @@ msgstr "A new verification code has been sent."
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
 msgstr ""
-"Registration failed: we could not send the verification email. Please check"
-" your email address and try again."
+"Registration failed: we could not send the verification email. Please check "
+"your email address and try again."
 
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
@@ -5172,8 +5172,8 @@ msgstr "Personalized Portals and Dashboards"
 msgctxt "blog.about_page"
 msgid "feature_3_text"
 msgstr ""
-"Dedicated dashboards for teachers, students, and administrators. Includes "
-"e-journal, grading, attendance, and analytics-based performance monitoring."
+"Dedicated dashboards for teachers, students, and administrators. Includes e-"
+"journal, grading, attendance, and analytics-based performance monitoring."
 
 #: apps/blog/templates/blog/about.html:62
 msgctxt "blog.about_page"
@@ -5343,8 +5343,8 @@ msgstr "Password changed successfully!"
 msgctxt "blog.password_reset_complete_page"
 msgid "message"
 msgstr ""
-"Great! Your account security has been restored. You can now log in with your"
-" new password."
+"Great! Your account security has been restored. You can now log in with your "
+"new password."
 
 #: apps/blog/templates/blog/password_reset_complete.html:27
 msgctxt "blog.password_reset_complete_page"
@@ -6013,8 +6013,8 @@ msgstr "Welcome to subscription! [Your Blog Name]"
 msgctxt "blog.subscribe.email"
 msgid "plain_text_body"
 msgstr ""
-"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for"
-" the latest updates."
+"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for "
+"the latest updates."
 
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
@@ -6424,8 +6424,7 @@ msgstr "After Creating a Course"
 #: apps/courses/templates/courses/create_course.html:131
 msgctxt "courses.create_page"
 msgid "after_create_item_1"
-msgstr ""
-"After the course is created, you are redirected to the dashboard page."
+msgstr "After the course is created, you are redirected to the dashboard page."
 
 #: apps/courses/templates/courses/create_course.html:132
 msgctxt "courses.create_page"
@@ -9458,7 +9457,7 @@ msgstr "Description"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:75
 msgctxt "exams.template.create_edit_exam"
 msgid "enable_paint"
-msgstr "Table action"
+msgstr "Enable Paint answers for written exams"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:78
 msgctxt "exams.template.create_edit_exam"
@@ -9597,6 +9596,195 @@ msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
 msgstr "Create Exam"
 
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_title"
+msgstr "Exam Supervision"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_help"
+msgstr "Anti-cheating and exam supervision settings"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_label"
+msgstr "Enable Exam Supervision Mode"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_help"
+msgstr ""
+"When enabled, students will be monitored during the exam. Tab switching, "
+"fullscreen exits, copy/paste, and other actions will be tracked."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_label"
+msgstr "Supervision Template"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_custom"
+msgstr "Custom"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_light"
+msgstr "Light"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_medium"
+msgstr "Medium"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_strict"
+msgstr "Strict"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_help"
+msgstr ""
+"Select a preset template to auto-configure settings, or choose Custom to "
+"configure manually."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen"
+msgstr "Require fullscreen mode"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen_help"
+msgstr "Students must enter fullscreen mode when starting the exam."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch"
+msgstr "Detect tab switching"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch_help"
+msgstr "Tab changes in the browser will be recorded."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste"
+msgstr "Block Copy/Paste"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste_help"
+msgstr "Copy, Paste, and Cut operations will be blocked."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click"
+msgstr "Block right-click menu"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click_help"
+msgstr "Context menu access will be disabled."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection"
+msgstr "Block text selection"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection_help"
+msgstr "Selecting and dragging exam text will be blocked."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts"
+msgstr "Restrict keyboard shortcuts"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts_help"
+msgstr "Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+S, etc. will be blocked."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_label"
+msgstr "Recovery period (seconds)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_help"
+msgstr "Time allowed to return after exiting fullscreen (5-60 seconds)."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_label"
+msgstr "Maximum violation count"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_help"
+msgstr "After this many violations, the selected penalty will be applied."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_label"
+msgstr "Action on violation"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_auto_submit"
+msgstr "Auto-submit"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_lock_exam"
+msgstr "Lock exam"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_remove_student"
+msgstr "Remove student"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_mark_suspicious"
+msgstr "Mark as suspicious"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_help"
+msgstr "What happens when the maximum violation limit is reached."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_label"
+msgstr "Recovery policy"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_no_second_chance"
+msgstr "No second chance"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "One extra chance"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Teacher controlled"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_help"
+msgstr "Recovery option for locked students."
+
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
 msgid "page_title_new_question"
@@ -9635,7 +9823,9 @@ msgstr "0 = show all questions"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Enter how many active questions students should see. Use 0 to show all questions."
+msgstr ""
+"Enter how many active questions students should see. Use 0 to show all "
+"questions."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:289
 #: apps/exams/templates/exams/teacher/create_question_bank.html:334
@@ -9649,7 +9839,9 @@ msgstr "Enable paint answers for this section"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:396
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
-msgstr "This sets paint as the default for questions in this section. If you disable paint on a specific question later, it will stay hidden for that question."
+msgstr ""
+"This sets paint as the default for questions in this section. If you disable "
+"paint on a specific question later, it will stay hidden for that question."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
@@ -9729,7 +9921,9 @@ msgstr "Confirm deletion"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:342
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "This section and its questions will be removed from the bank. Do you want to continue?"
+msgstr ""
+"This section and its questions will be removed from the bank. Do you want to "
+"continue?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
@@ -10089,6 +10283,131 @@ msgstr "Save"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
 msgstr "Create Exam"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_title"
+msgstr "Exam Supervision"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_help"
+msgstr "Anti-cheating and exam supervision settings"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_enable_label"
+msgstr "Enable Exam Supervision Mode"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_label"
+msgstr "Supervision Template"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_custom"
+msgstr "Custom"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_light"
+msgstr "Light"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_medium"
+msgstr "Medium"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_strict"
+msgstr "Strict"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_force_fullscreen"
+msgstr "Require fullscreen mode"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_detect_tab_switch"
+msgstr "Detect tab switching"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_block_copy_paste"
+msgstr "Block Copy/Paste"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_right_click"
+msgstr "Block right-click menu"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_text_selection"
+msgstr "Block text selection"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_restrict_shortcuts"
+msgstr "Restrict keyboard shortcuts"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_grace_period_label"
+msgstr "Recovery period (seconds)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_max_violations_label"
+msgstr "Maximum violation count"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_violation_action_label"
+msgstr "Action on violation"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_auto_submit"
+msgstr "Auto-submit"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_lock_exam"
+msgstr "Lock exam"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_remove_student"
+msgstr "Remove student"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_mark_suspicious"
+msgstr "Mark as suspicious"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_policy_label"
+msgstr "Recovery policy"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_no_second_chance"
+msgstr "No second chance"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "One extra chance"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Teacher controlled"
 
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
@@ -10510,122 +10829,6 @@ msgstr "min"
 msgctxt "exams.template.teacher_exam_list"
 msgid "empty_no_exam"
 msgstr "Empty upcoming exams"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
-msgctxt "exams.template.teacher_exam_results"
-msgid "title_results"
-msgstr "Results"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_results"
-msgstr "Exam results"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_type"
-msgstr "Type"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_status"
-msgstr "Status"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_active_upper"
-msgstr "ACTIVE"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_inactive"
-msgstr "INACTIVE"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_participant_results"
-msgstr "Participant results"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:45
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_user"
-msgstr "User"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:46
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_status"
-msgstr "Status"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_correct"
-msgstr "Correct"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_wrong"
-msgstr "Wrong"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_score_percent"
-msgstr "Score (%)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_started_at"
-msgstr "Start date"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_finished_at"
-msgstr "Finish date"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_duration_sec"
-msgstr "Duration (sec)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_action"
-msgstr "Action"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_checked"
-msgstr "Checked"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_view"
-msgstr "Detailed view"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_recheck"
-msgstr "Recheck"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_locked"
-msgstr "View only"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_check"
-msgstr "Check"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
-msgctxt "exams.template.teacher_exam_results"
-msgid "empty_no_attempt"
-msgstr "No attempts found."
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_back_to_exam"
-msgstr "Back to exam"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -11234,8 +11437,7 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "Blocked file detected inside ZIP: {filename}"
 
-#: apps/exams/views/shared/access.py:22
-#: apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -11251,8 +11453,7 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "You cannot start this exam."
 
-#: apps/exams/views/shared/access.py:60
-#: apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -11524,8 +11725,7 @@ msgstr "You have already submitted this lab!"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / "
-"%(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
 msgstr "%(submitted_at)s · Attempt: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -12868,7 +13068,8 @@ msgstr "Empty text submitted"
 #: apps/labs/views.py:430
 msgctxt "labs.view.error"
 msgid "import_no_questions_found_format"
-msgstr "No questions found. Format: \"1. Question text\" or \"1) Question text\""
+msgstr ""
+"No questions found. Format: \"1. Question text\" or \"1) Question text\""
 
 #: apps/labs/views.py:451
 msgctxt "labs.view.message"
@@ -13157,7 +13358,9 @@ msgstr "Connection error"
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
 msgid "hero_copy"
-msgstr "Look up to the main screen and make sure your nickname appears before the countdown begins."
+msgstr ""
+"Look up to the main screen and make sure your nickname appears before the "
+"countdown begins."
 
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
@@ -15086,8 +15289,7 @@ msgstr "Save grade"
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
 msgstr ""
-"For individual account, role will be set to organization admin "
-"automatically."
+"For individual account, role will be set to organization admin automatically."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student"
@@ -15252,15 +15454,21 @@ msgstr "Join as a student and access your courses."
 
 msgctxt "accounts.register"
 msgid "org_pending_approval_notice"
-msgstr "Your organization registration is pending superadmin approval. You will be notified once it is reviewed."
+msgstr ""
+"Your organization registration is pending superadmin approval. You will be "
+"notified once it is reviewed."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_teacher_join"
-msgstr "After email verification, you will join the selected organization as a teacher (pending approval)."
+msgstr ""
+"After email verification, you will join the selected organization as a "
+"teacher (pending approval)."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_staff_join"
-msgstr "After email verification, you will join the selected organization as a staff member (pending approval)."
+msgstr ""
+"After email verification, you will join the selected organization as a staff "
+"member (pending approval)."
 
 msgctxt "accounts.register"
 msgid "student_fields_title"
@@ -15282,7 +15490,9 @@ msgstr ""
 
 msgctxt "accounts.register"
 msgid "join_org_optional_hint"
-msgstr "Organization selection is optional. You can apply to join an organization later from your profile."
+msgstr ""
+"Organization selection is optional. You can apply to join an organization "
+"later from your profile."
 
 msgctxt "assignment.review_submissions"
 msgid "filter_search_placeholder"
@@ -15833,9 +16043,7 @@ msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Next"
 
-
 # Added for signup privacy policy modal
-
 msgctxt "accounts.form.register.label"
 msgid "accept_privacy_policy"
 msgstr "I have read and accept the Privacy Policy."
@@ -15860,7 +16068,9 @@ msgstr "Open Privacy Policy"
 
 msgctxt "accounts.register"
 msgid "privacy_accept_hint"
-msgstr "Open the full text in the modal window, review it, and then complete your signup."
+msgstr ""
+"Open the full text in the modal window, review it, and then complete your "
+"signup."
 
 msgctxt "accounts.register"
 msgid "privacy_modal_eyebrow"
@@ -15874,8 +16084,8 @@ msgctxt "accounts.register"
 msgid "privacy_modal_intro"
 msgstr ""
 "This policy explains how your information is processed when you create an "
-"account, join an organization, and use courses, exams, labs, assignments, and "
-"live session features inside EMSArena."
+"account, join an organization, and use courses, exams, labs, assignments, "
+"and live session features inside EMSArena."
 
 msgctxt "accounts.register"
 msgid "privacy_modal_summary_badge"
@@ -15885,8 +16095,8 @@ msgctxt "accounts.register"
 msgid "privacy_modal_summary"
 msgstr ""
 "Your data is used to create your account, keep sign-in secure, manage "
-"organization membership, and run the platform's teaching features. Your data is "
-"not sold and is only shared when necessary to provide the service."
+"organization membership, and run the platform's teaching features. Your data "
+"is not sold and is only shared when necessary to provide the service."
 
 msgctxt "accounts.register"
 msgid "privacy_section_data_title"
@@ -15895,10 +16105,10 @@ msgstr "What we collect"
 msgctxt "accounts.register"
 msgid "privacy_section_data_body"
 msgstr ""
-"During signup we collect your username, first name, last name, email, country, "
-"selected account type, and organization details. As you use the platform, "
-"operational records related to courses, exams, labs, assignments, results, and "
-"membership activity may also be generated."
+"During signup we collect your username, first name, last name, email, "
+"country, selected account type, and organization details. As you use the "
+"platform, operational records related to courses, exams, labs, assignments, "
+"results, and membership activity may also be generated."
 
 msgctxt "accounts.register"
 msgid "privacy_section_use_title"
@@ -15907,9 +16117,9 @@ msgstr "How we use it"
 msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
-"This data is used to create your account, send email OTP verification, manage "
-"workspace and organization access, run course and exam flows, show results, and "
-"support auditing and security controls."
+"This data is used to create your account, send email OTP verification, "
+"manage workspace and organization access, run course and exam flows, show "
+"results, and support auditing and security controls."
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
@@ -15929,9 +16139,10 @@ msgstr "Who data is shared with"
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_body"
 msgstr ""
-"Your information is not sold. It may be shared only with authorized managers in "
-"the organization you select, technical providers that support services such as "
-"email verification or hosting, and relevant parties when required by law."
+"Your information is not sold. It may be shared only with authorized managers "
+"in the organization you select, technical providers that support services "
+"such as email verification or hosting, and relevant parties when required by "
+"law."
 
 msgctxt "accounts.register"
 msgid "privacy_section_retention_title"
@@ -15942,8 +16153,8 @@ msgid "privacy_section_retention_body"
 msgstr ""
 "Information is retained for as long as it is needed to operate the service, "
 "support audits, and investigate disputes. Sensitive flows such as OTP "
-"verification are short-lived, and technical and organizational security measures "
-"are applied across the system."
+"verification are short-lived, and technical and organizational security "
+"measures are applied across the system."
 
 msgctxt "accounts.register"
 msgid "privacy_section_rights_title"
@@ -15953,8 +16164,8 @@ msgctxt "accounts.register"
 msgid "privacy_section_rights_body"
 msgstr ""
 "You can update your profile details, change your organization choices, and "
-"request clarification or deletion related to your account data. You can contact "
-"the platform administrator to exercise these rights."
+"request clarification or deletion related to your account data. You can "
+"contact the platform administrator to exercise these rights."
 
 msgctxt "accounts.register"
 msgid "privacy_close"
@@ -16105,8 +16316,12 @@ msgid "reject"
 msgstr "Reject"
 
 msgctxt "profile.notifications"
-msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
-msgstr "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgid ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
+msgstr ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
 
 msgctxt "profile.notifications"
 msgid "%(organization_name)s has invited you as %(role_label)s."
@@ -16117,20 +16332,38 @@ msgid "Join organization as %(role_label)s"
 msgstr "Join organization as %(role_label)s"
 
 msgctxt "profile.join_org"
-msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
-msgstr "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgid ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
+msgstr ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
 
 msgctxt "profile.join_org"
-msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
-msgstr "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgid ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
+"pending invites."
+msgstr ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
+"pending invites."
 
 msgctxt "profile.join_org"
-msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
-msgstr "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgid ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
+msgstr ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
 
 msgctxt "profile.join_org"
-msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
-msgstr "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgid ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
+msgstr ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
 
 msgctxt "profile.join_org"
 msgid "cancel"
@@ -16194,7 +16427,9 @@ msgstr "Send Notification"
 
 msgctxt "profile.publish_notification"
 msgid "description"
-msgstr "Fill out the form below to send a notification to your selected target group. Recipients will see it in the notifications section of their profile."
+msgstr ""
+"Fill out the form below to send a notification to your selected target "
+"group. Recipients will see it in the notifications section of their profile."
 
 msgctxt "profile.publish_notification"
 msgid "target_group_label"
@@ -16511,8 +16746,12 @@ msgid "Reason for removal..."
 msgstr "Reason for removal..."
 
 msgctxt "exams.view.student.result.message"
-msgid "Result is not available yet. It will appear after the teacher review window closes."
-msgstr "Result is not available yet. It will appear after the teacher review window closes."
+msgid ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
+msgstr ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"
@@ -16525,7 +16764,6 @@ msgstr "Activate the exam before starting a live session."
 # ═══════════════════════════════════════════════════════════════════════════
 # Account Deletion & User Management translations
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.section"
 msgid "delete_account_title"
@@ -16579,7 +16817,9 @@ msgstr "Confirm Account Deletion"
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
-msgstr "Are you sure you want to delete your account? Enter your password to confirm this action."
+msgstr ""
+"Are you sure you want to delete your account? Enter your password to confirm "
+"this action."
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
@@ -16611,7 +16851,8 @@ msgstr "Incorrect password. Please enter the correct password."
 
 #: apps/accounts/views/account_management.py
 msgid "delete_account_last_admin"
-msgstr "You are the only admin of your organization. You cannot delete your account."
+msgstr ""
+"You are the only admin of your organization. You cannot delete your account."
 
 #: apps/accounts/views/account_management.py
 msgid "delete_account_error"
@@ -16622,7 +16863,6 @@ msgid "delete_account_success"
 msgstr "Your account has been successfully deleted."
 
 # Profile Edit Enhancements
-
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
 msgctxt "profile.edit"
 msgid "organization_type"
@@ -16681,10 +16921,10 @@ msgstr "Enter your department"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
 msgctxt "profile.edit"
 msgid "edit_profile_type_change_warning"
-msgstr "Changing the organization type may affect your courses and permissions."
+msgstr ""
+"Changing the organization type may affect your courses and permissions."
 
 # Superadmin User Management
-
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "user_management_title"
@@ -16783,7 +17023,9 @@ msgstr "Permanently Delete"
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "hard_delete_confirm"
-msgstr "Are you sure you want to permanently delete this user? This action cannot be undone!"
+msgstr ""
+"Are you sure you want to permanently delete this user? This action cannot be "
+"undone!"
 
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
@@ -16817,7 +17059,8 @@ msgstr "AI features enabled"
 
 msgctxt "superadmin.ai_settings"
 msgid "hint_enabled"
-msgstr "When disabled, all AI features (summaries, grading) will be turned off."
+msgstr ""
+"When disabled, all AI features (summaries, grading) will be turned off."
 
 msgctxt "superadmin.ai_settings"
 msgid "section_rate_limit"
@@ -16893,7 +17136,6 @@ msgid "ai_settings"
 msgstr "AI Settings"
 
 # Superadmin User Management messages (i18n)
-
 #: apps/accounts/views/account_management.py
 msgid "superadmin_access_only"
 msgstr "Only superadmins can access this section."
@@ -16925,7 +17167,6 @@ msgstr "Unknown action."
 # ═══════════════════════════════════════════════════════════════════════════
 # EXAM STATISTICS (teacher_exam_statistics & live session AI summary)
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_statistics"
@@ -17086,7 +17327,9 @@ msgstr "Score Distribution"
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_score_distribution_hint"
-msgstr "For small groups, exact scores are shown; for larger groups, scores are grouped into intervals."
+msgstr ""
+"For small groups, exact scores are shown; for larger groups, scores are "
+"grouped into intervals."
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_group_avg_score"
@@ -17162,7 +17405,9 @@ msgstr "Generate Summary"
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_initial_message"
-msgstr "Click the button above to generate an AI-powered summary. The analysis will reflect the currently applied filters."
+msgstr ""
+"Click the button above to generate an AI-powered summary. The analysis will "
+"reflect the currently applied filters."
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_loading"
@@ -17451,7 +17696,9 @@ msgstr "Score Distribution"
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_score_distribution_hint"
-msgstr "Small sessions show exact scores, while larger sessions group participants into score ranges."
+msgstr ""
+"Small sessions show exact scores, while larger sessions group participants "
+"into score ranges."
 
 msgctxt "liveExam.template.session_detail"
 msgid "heading_participant_results"
@@ -17576,3 +17823,901 @@ msgstr "results"
 msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Next ›"
+
+#: teacher_exam_results translations
+msgctxt "exams.template.teacher_exam_results"
+msgid "page_title_suffix"
+msgstr "Exam results"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_type"
+msgstr "Type:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_status"
+msgstr "Status:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_active"
+msgstr "ACTIVE"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_inactive"
+msgstr "Inactive"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "search_placeholder"
+msgstr "Search user..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_label"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_statuses"
+msgstr "All statuses"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_label"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_checks"
+msgstr "Check: all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_unchecked"
+msgstr "Unchecked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_from"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_to"
+msgstr "End date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_apply_filter"
+msgstr "Apply"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_reset_filter"
+msgstr "Reset"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_selected"
+msgstr "Selected:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear_selection"
+msgstr "Clear selection"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "heading_participant_results"
+msgstr "Participant results"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_user"
+msgstr "User"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_correct"
+msgstr "Correct"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_wrong"
+msgstr "Wrong"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_score"
+msgstr "Score"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_start_time"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_end_time"
+msgstr "End time"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_duration"
+msgstr "Duration (sec.)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_action"
+msgstr "Action"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_anonymous_view"
+msgstr "Anonymous view"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_checked"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "empty_no_attempts"
+msgstr "No attempts for this exam yet."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_title"
+msgstr "Delete attempts"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_message"
+msgstr "Selected results will be deleted."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_warning"
+msgstr "This action cannot be undone."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_close"
+msgstr "Close"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_confirm_delete"
+msgstr "Confirm deletion"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "page_title"
+msgstr "Exam Supervision - Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "heading"
+msgstr "Exam Supervision Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "subtitle"
+msgstr "Suspicious events and student states for all supervised exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_total_incidents"
+msgstr "Total Violations"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_flagged_students"
+msgstr "Flagged Students"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_supervised_exams"
+msgstr "Supervised Exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_severity_distribution"
+msgstr "Severity Distribution"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_violation_types"
+msgstr "Violation Types"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_search_placeholder"
+msgstr "Search student or exam..."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_exams"
+msgstr "All exams"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_statuses"
+msgstr "All statuses"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_warned"
+msgstr "Warned"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_locked"
+msgstr "Locked"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_removed"
+msgstr "Removed"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_resumed"
+msgstr "Resumed"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_search"
+msgstr "Search"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_student"
+msgstr "Student"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_exam"
+msgstr "Exam"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_violation_count"
+msgstr "Violation Count"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_start_time"
+msgstr "Start Time"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_details"
+msgstr "Details"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_actions"
+msgstr "Actions"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_details"
+msgstr "Details"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_resume"
+msgstr "Resume"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "empty_no_violations"
+msgstr "No violations recorded yet."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_info"
+msgstr "Info"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_low"
+msgstr "Low"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_medium"
+msgstr "Medium"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_high"
+msgstr "High"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_critical"
+msgstr "Critical"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_count_label"
+msgstr "Count"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_resume"
+msgstr "Do you want to allow this student to continue the exam?"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_success"
+msgstr "Permission granted. The student's exam has been resumed."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_error"
+msgstr "Error: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "connection_error"
+msgstr "Connection error."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_title"
+msgstr "Custom Configuration"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_desc"
+msgstr "Manually configure all parameters."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_title"
+msgstr "Light Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_desc"
+msgstr ""
+"Minimal restrictions. Students take the exam more freely, only tab switching "
+"is tracked."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab switching is tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f2"
+msgstr "❌ Fullscreen not required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f3"
+msgstr "❌ Copy/paste not blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Max 5 violations, recovery chance given"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_title"
+msgstr "Medium Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_desc"
+msgstr ""
+"Balanced supervision. Core protection measures active, with teacher "
+"oversight."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Max 3 violations, teacher controls recovery"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_title"
+msgstr "Strict Supervision Mode"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_desc"
+msgstr ""
+"Highest level supervision. All protection measures active, no second chance."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Text selection blocked"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_title"
+msgstr "Custom Configuration"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_desc"
+msgstr "Manually configure all parameters."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_title"
+msgstr "Light Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_desc"
+msgstr ""
+"Minimal restrictions. Students take the exam more freely, only tab switching "
+"is tracked."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab switching is tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f2"
+msgstr "❌ Fullscreen not required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f3"
+msgstr "❌ Copy/paste not blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Max 5 violations, recovery chance given"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_title"
+msgstr "Medium Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_desc"
+msgstr ""
+"Balanced supervision. Core protection measures active, with teacher "
+"oversight."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Max 3 violations, teacher controls recovery"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_title"
+msgstr "Strict Supervision Mode"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_desc"
+msgstr ""
+"Highest level supervision. All protection measures active, no second chance."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Fullscreen mode required"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab switching tracked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Copy/paste blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Right-click disabled"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Text selection blocked"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Supervision Detail"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "Exam Supervision"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Supervision Detail"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Student"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "Exam"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Supervision Status"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "Violation Count"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "Exam Status"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Extra Chances"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Teacher actions"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "Resume Exam"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Grant Extra Chance"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Stop"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Back"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Incident Timeline"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Teacher action"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "Violation"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "No incidents have been recorded."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Do you want to resume this student's exam?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr ""
+"Do you want to grant this student an extra chance and allow them to continue?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr "Do you want to stop this student's exam? The exam will be submitted."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "Operation completed successfully."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Error: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Connection error."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "Exam has been stopped."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Stop"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr "Do you want to stop this student's exam? The exam will be submitted."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "Exam has been stopped."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Stop error: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "Cancel"
+
+#: supervision_monitor chart violation type labels
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_exited"
+msgstr "Fullscreen exited"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_restored"
+msgstr "Fullscreen restored"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_tab_switched"
+msgstr "Tab switched"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_blurred"
+msgstr "Window lost focus"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_focused"
+msgstr "Window regained focus"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_copy_attempt"
+msgstr "Copy attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_paste_attempt"
+msgstr "Paste attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_cut_attempt"
+msgstr "Cut attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_right_click_attempt"
+msgstr "Right-click attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_keyboard_shortcut"
+msgstr "Keyboard shortcut"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_text_select_attempt"
+msgstr "Text selection attempt"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_suspicious_repeated"
+msgstr "Suspicious repeated action"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_grace_period_expired"
+msgstr "Grace period expired"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_locked"
+msgstr "Auto-locked"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_submitted"
+msgstr "Auto-submitted"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_resumed"
+msgstr "Resumed by teacher"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_granted_chance"
+msgstr "Extra chance granted by teacher"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_exam_started_supervised"
+msgstr "Supervised exam started"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_student_acknowledged"
+msgstr "Student acknowledged"
+
+#: SupervisionIncident model event_type choices
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_exited"
+msgstr "Fullscreen exited"
+
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_restored"
+msgstr "Fullscreen restored"
+
+msgctxt "supervision.incident.choice.event"
+msgid "tab_switched"
+msgstr "Tab switched"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_blurred"
+msgstr "Window lost focus"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_focused"
+msgstr "Window regained focus"
+
+msgctxt "supervision.incident.choice.event"
+msgid "copy_attempt"
+msgstr "Copy attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "paste_attempt"
+msgstr "Paste attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "cut_attempt"
+msgstr "Cut attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "right_click_attempt"
+msgstr "Right-click attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "keyboard_shortcut"
+msgstr "Keyboard shortcut"
+
+msgctxt "supervision.incident.choice.event"
+msgid "text_select_attempt"
+msgstr "Text selection attempt"
+
+msgctxt "supervision.incident.choice.event"
+msgid "suspicious_repeated"
+msgstr "Suspicious repeated action"
+
+msgctxt "supervision.incident.choice.event"
+msgid "grace_period_expired"
+msgstr "Grace period expired"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_locked"
+msgstr "Auto-locked"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_submitted"
+msgstr "Auto-submitted"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_resumed"
+msgstr "Resumed by teacher"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_granted_chance"
+msgstr "Extra chance granted by teacher"
+
+msgctxt "supervision.incident.choice.event"
+msgid "exam_started_supervised"
+msgstr "Supervised exam started"
+
+msgctxt "supervision.incident.choice.event"
+msgid "student_acknowledged"
+msgstr "Student acknowledged"
+
+#: SupervisionIncident model severity choices
+msgctxt "supervision.incident.choice.severity"
+msgid "info"
+msgstr "Info"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "low"
+msgstr "Low"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "medium"
+msgstr "Medium"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "high"
+msgstr "High"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "critical"
+msgstr "Critical"
+
+#: SupervisionIncident model field labels
+msgctxt "supervision.incident.field"
+msgid "event_type"
+msgstr "Event type"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "Cancel"
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Supervision Mode Active"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr ""
+"This exam is conducted in <strong>supervision mode</strong>. The following "
+"rules apply:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Fullscreen mode is required"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Tab switching is monitored"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Copy/paste is blocked"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Right-click is disabled"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Keyboard shortcuts are restricted"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Maximum {count} violations allowed."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "I understand, continue"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Supervision active"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Warning"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "You have left the exam area. Please return."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "If time runs out, this will be recorded as a violation."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "Violation"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Return to fullscreen"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "Exam Suspended"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "You have reached the maximum violation limit."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr ""
+"Your exam has been suspended. Please wait until the teacher makes a decision."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Waiting for teacher's response..."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_title"
+msgstr "⚠️ Warning!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_msg"
+msgstr "You have reached 75% of the violation limit! Only {remaining} violation(s) left. Please be more careful!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_title"
+msgstr "Exam resumed!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_msg"
+msgstr "Please return to fullscreen to continue."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_btn"
+msgstr "Enter fullscreen and continue"
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "This operation cannot be performed."
