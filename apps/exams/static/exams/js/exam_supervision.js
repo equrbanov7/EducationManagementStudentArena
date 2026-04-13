@@ -659,7 +659,23 @@
             document.body.appendChild(overlay);
 
             document.getElementById("supervision-resume-fs-btn").addEventListener("click", function () {
-                ExamSupervision._requestFullscreen();
+                try {
+                    var el = document.documentElement;
+                    var fsPromise;
+                    if (el.requestFullscreen) {
+                        fsPromise = el.requestFullscreen();
+                    } else if (el.webkitRequestFullscreen) {
+                        fsPromise = el.webkitRequestFullscreen();
+                    }
+                    if (fsPromise && typeof fsPromise.then === "function") {
+                        fsPromise.then(function () {
+                            overlay.remove();
+                        }).catch(function () {
+                            overlay.remove();
+                        });
+                        return;
+                    }
+                } catch (e) {}
                 overlay.remove();
             });
         },
