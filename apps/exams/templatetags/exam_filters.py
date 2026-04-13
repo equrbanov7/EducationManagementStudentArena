@@ -22,3 +22,27 @@ def subtract(value, arg):
         return int(value) - int(arg)
     except (ValueError, TypeError):
         return 0
+
+
+@register.filter
+def format_duration(seconds):
+    """Format duration_seconds as human-readable string, e.g. '5 dəq 23 san'."""
+    if seconds is None:
+        return ""
+    try:
+        total = int(seconds)
+    except (ValueError, TypeError):
+        return ""
+    if total <= 0:
+        return "0 san"
+    hours = total // 3600
+    minutes = (total % 3600) // 60
+    secs = total % 60
+    parts = []
+    if hours:
+        parts.append(f"{hours} saat")
+    if minutes:
+        parts.append(f"{minutes} dəq")
+    if secs or not parts:
+        parts.append(f"{secs} san")
+    return " ".join(parts)
