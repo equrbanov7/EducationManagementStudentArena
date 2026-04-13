@@ -297,7 +297,29 @@ def teacher_exam_results(request, slug):
     if date_to:
         attempts = attempts.filter(started_at__date__lte=date_to)
 
-    attempts = attempts.order_by("-started_at")
+    # ---------- Sorting ----------
+    sort_by = (request.GET.get("sort_by") or "").strip()
+    sort_dir = (request.GET.get("sort_dir") or "").strip()
+    ALLOWED_SORT_FIELDS = {
+        "user": "user__first_name",
+        "status": "status",
+        "correct": "correct_count",
+        "wrong": "wrong_count",
+        "score": "teacher_score",
+        "start": "started_at",
+        "end": "finished_at",
+        "duration": "duration_seconds",
+    }
+    if sort_by in ALLOWED_SORT_FIELDS and sort_dir in ("asc", "desc"):
+        order_field = ALLOWED_SORT_FIELDS[sort_by]
+        if sort_dir == "desc":
+            order_field = f"-{order_field}"
+        attempts = attempts.order_by(order_field)
+    else:
+        sort_by = ""
+        sort_dir = ""
+        attempts = attempts.order_by("-started_at")
+
     max_score = 100 if exam.exam_type == "test" else exam.questions.aggregate(total=Sum("points")).get("total") or 0
     pending_count = 0 if exam.exam_type == "test" else attempts.filter(checked_by_teacher=False).count()
     graded_count = attempts.count() if exam.exam_type == "test" else attempts.filter(checked_by_teacher=True).count()
@@ -375,6 +397,25 @@ def teacher_exam_results(request, slug):
                 "checked": checked_filter,
                 "date_from": date_from_raw,
                 "date_to": date_to_raw,
+                "sort_by": sort_by,
+                "sort_dir": sort_dir,
+                "attempt": (request.GET.get("attempt") or "").strip(),
+                "from_section": (request.GET.get("from_section") or "").strip(),
+                "return_to": (request.GET.get("return_to") or "").strip(),
+            }.items()
+            if value not in ("", None)
+        }
+    )
+
+    sort_base_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "checked": checked_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
                 "attempt": (request.GET.get("attempt") or "").strip(),
                 "from_section": (request.GET.get("from_section") or "").strip(),
                 "return_to": (request.GET.get("return_to") or "").strip(),
@@ -389,7 +430,7 @@ def teacher_exam_results(request, slug):
         {
             "exam": exam,
             "attempts": page_obj.object_list,
-            "attempts_data": attempts_data,  # ✅ YENİ
+            "attempts_data": attempts_data,
             "page_obj": page_obj,
             "fastest_attempts": fastest_attempts,
             "hardest_questions": hardest_questions,
@@ -405,6 +446,9 @@ def teacher_exam_results(request, slug):
             "checked_filter": checked_filter,
             "date_from": date_from_raw,
             "date_to": date_to_raw,
+            "sort_by": sort_by,
+            "sort_dir": sort_dir,
+            "sort_base_query": sort_base_query,
             "pagination_query": pagination_query,
             "can_delete_attempts": request_has_permission(request, "exam.delete"),
         },
