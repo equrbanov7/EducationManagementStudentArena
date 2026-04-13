@@ -3,6 +3,7 @@ Supervision views for both teacher monitoring and student event logging.
 """
 
 import json
+from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -126,6 +127,8 @@ def supervision_monitor(request):
     search_query = request.GET.get("q", "").strip()
     status_filter = request.GET.get("status", "").strip()
     severity_filter = request.GET.get("severity", "").strip()
+    date_from_str = request.GET.get("date_from", "").strip()
+    date_to_str = request.GET.get("date_to", "").strip()
 
     data = get_supervision_monitor_data(org, exam_id=exam_id)
 
@@ -144,6 +147,22 @@ def supervision_monitor(request):
     # Apply status filter
     if status_filter:
         flagged = flagged.filter(supervision_status=status_filter)
+
+    # Apply date range filters
+    date_from_value = date_from_str
+    date_to_value = date_to_str
+    if date_from_str:
+        try:
+            dt_from = datetime.strptime(date_from_str, "%Y-%m-%d")
+            flagged = flagged.filter(started_at__date__gte=dt_from.date())
+        except ValueError:
+            date_from_value = ""
+    if date_to_str:
+        try:
+            dt_to = datetime.strptime(date_to_str, "%Y-%m-%d")
+            flagged = flagged.filter(started_at__date__lte=dt_to.date())
+        except ValueError:
+            date_to_value = ""
 
     # Pagination
     page_number = request.GET.get("page", 1)
@@ -171,6 +190,8 @@ def supervision_monitor(request):
         "status_filter": status_filter,
         "severity_filter": severity_filter,
         "selected_exam_id": exam_id,
+        "date_from_value": date_from_value,
+        "date_to_value": date_to_value,
     }
 
     return render(request, "exams/teacher/supervision_monitor.html", context)

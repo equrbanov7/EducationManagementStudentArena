@@ -6,10 +6,10 @@
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
     .monitor-wrapper { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-    .monitor-header { margin-bottom: 2rem; }
-    .monitor-header h1 { font-size: 1.5rem; color: #dc3545; display: flex; align-items: center; gap: 0.5rem; }
-    .monitor-header h1 i { color: #dc3545; }
-    .monitor-header p { color: #666; }
+    .monitor-header { margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+    .monitor-header-left h1 { font-size: 1.5rem; color: #dc3545; display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+    .monitor-header-left h1 i { color: #dc3545; }
+    .monitor-header-left p { color: #666; margin: 0.25rem 0 0; }
     .monitor-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-align: center; }
     .stat-card .stat-value { font-size: 2rem; font-weight: 700; }
@@ -17,10 +17,17 @@
     .stat-card.danger .stat-value { color: #dc3545; }
     .stat-card.warning .stat-value { color: #ffc107; }
     .stat-card.info .stat-value { color: #17a2b8; }
-    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: stretch; }
-    .filter-bar input { padding: 0.5rem 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; }
+    .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+    .filter-bar .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-bar .filter-group label { font-size: 0.78rem; font-weight: 600; color: #555; }
+    .filter-bar input[type="text"],
+    .filter-bar input[type="date"] { padding: 0.6rem 0.85rem; border: 1px solid #dee2e6; border-radius: 8px; font-size: 0.9rem; height: 44px; box-sizing: border-box; }
     .filter-bar input[type="text"] { flex: 1; min-width: 200px; }
-    .filter-bar .btn-search { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+    .filter-bar input[type="date"] { min-width: 150px; }
+    .filter-bar .btn-search { padding: 0.6rem 1.25rem; border-radius: 8px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; height: 44px; }
+    .filter-bar .btn-search:hover { background: #0069d9; }
+    .btn-back-top { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #dee2e6; background: #fff; color: #333; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.15s; }
+    .btn-back-top:hover { background: #f0f0f0; }
     .monitor-table { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
     .monitor-table table { width: 100%; border-collapse: collapse; }
     .monitor-table th { background: #f8f9fa; padding: 0.75rem 1rem; text-align: left; font-weight: 600; font-size: 0.85rem; color: #555; border-bottom: 2px solid #dee2e6; }
@@ -39,11 +46,12 @@
     .chart-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
     .chart-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
     .chart-card h3 { font-size: 1rem; color: #333; margin-bottom: 1rem; }
-    .pagination-wrapper { display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem; }
+    .pagination-wrapper { display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
     .pagination-wrapper a, .pagination-wrapper span { padding: 0.4rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
     .pagination-wrapper a { background: #f0f0f0; color: #333; }
     .pagination-wrapper a:hover { background: #007bff; color: #fff; }
     .pagination-wrapper .current { background: #007bff; color: #fff; }
+    .pagination-wrapper .page-info { font-size: 0.85rem; color: #666; margin: 0 0.5rem; }
     .btn-action { padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; text-decoration: none; }
     .btn-detail { background: #007bff; color: #fff; }
     .btn-resume { background: #28a745; color: #fff; }
@@ -63,6 +71,8 @@
     @media (max-width: 768px) {
         .chart-section { grid-template-columns: 1fr; }
         .filter-bar { flex-direction: column; }
+        .filter-bar input[type="text"],
+        .filter-bar input[type="date"] { width: 100%; }
     }
 </style>
 {% endblock %}
@@ -70,8 +80,13 @@
 {% block content %}
 <div class="monitor-wrapper">
     <div class="monitor-header">
-        <h1><i class="fas fa-shield-alt"></i> {% trans "heading" context "exams.template.supervision_monitor" %}</h1>
-        <p>{% trans "subtitle" context "exams.template.supervision_monitor" %}</p>
+        <div class="monitor-header-left">
+            <h1><i class="fas fa-shield-alt"></i> {% trans "heading" context "exams.template.supervision_monitor" %}</h1>
+            <p>{% trans "subtitle" context "exams.template.supervision_monitor" %}</p>
+        </div>
+        <a href="javascript:history.back()" class="btn-back-top">
+            <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.supervision_monitor" %}
+        </a>
     </div>
 
     {# Stats Cards #}
@@ -92,26 +107,42 @@
 
     {# Filters #}
     <form method="get" class="filter-bar" id="monitorFilterForm">
-        <input type="text" name="q" id="monitorSearchInput" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
-        <div class="bootstrap-single-select">
-            <select name="exam" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
-                <option value="">{% trans "filter_all_exams" context "exams.template.supervision_monitor" %}</option>
-                {% for eid, etitle in supervised_exams %}
-                <option value="{{ eid }}" {% if selected_exam_id == eid|stringformat:"s" %}selected{% endif %}>{{ etitle }}</option>
-                {% endfor %}
-            </select>
+        <div class="filter-group" style="flex:1;min-width:200px;">
+            <input type="text" name="q" id="monitorSearchInput" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
         </div>
-        <div class="bootstrap-single-select">
-            <select name="status" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
-                <option value="">{% trans "filter_all_statuses" context "exams.template.supervision_monitor" %}</option>
-                <option value="active" {% if status_filter == "active" %}selected{% endif %}>{% trans "status_active" context "exams.template.supervision_monitor" %}</option>
-                <option value="warned" {% if status_filter == "warned" %}selected{% endif %}>{% trans "status_warned" context "exams.template.supervision_monitor" %}</option>
-                <option value="locked" {% if status_filter == "locked" %}selected{% endif %}>{% trans "status_locked" context "exams.template.supervision_monitor" %}</option>
-                <option value="removed" {% if status_filter == "removed" %}selected{% endif %}>{% trans "status_removed" context "exams.template.supervision_monitor" %}</option>
-                <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>{% trans "status_resumed" context "exams.template.supervision_monitor" %}</option>
-            </select>
+        <div class="filter-group">
+            <label for="filterDateFrom">{% trans "filter_date_from" context "exams.template.supervision_monitor" %}</label>
+            <input type="date" name="date_from" id="filterDateFrom" value="{{ date_from_value }}">
         </div>
-        <button type="submit" class="btn-search"><i class="fas fa-search"></i> {% trans "action_search" context "exams.template.supervision_monitor" %}</button>
+        <div class="filter-group">
+            <label for="filterDateTo">{% trans "filter_date_to" context "exams.template.supervision_monitor" %}</label>
+            <input type="date" name="date_to" id="filterDateTo" value="{{ date_to_value }}">
+        </div>
+        <div class="filter-group">
+            <div class="bootstrap-single-select">
+                <select name="exam" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
+                    <option value="">{% trans "filter_all_exams" context "exams.template.supervision_monitor" %}</option>
+                    {% for eid, etitle in supervised_exams %}
+                    <option value="{{ eid }}" {% if selected_exam_id == eid|stringformat:"s" %}selected{% endif %}>{{ etitle }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="filter-group">
+            <div class="bootstrap-single-select">
+                <select name="status" class="form-select bootstrap-single-select__native" data-bootstrap-select data-submit-on-change>
+                    <option value="">{% trans "filter_all_statuses" context "exams.template.supervision_monitor" %}</option>
+                    <option value="active" {% if status_filter == "active" %}selected{% endif %}>{% trans "status_active" context "exams.template.supervision_monitor" %}</option>
+                    <option value="warned" {% if status_filter == "warned" %}selected{% endif %}>{% trans "status_warned" context "exams.template.supervision_monitor" %}</option>
+                    <option value="locked" {% if status_filter == "locked" %}selected{% endif %}>{% trans "status_locked" context "exams.template.supervision_monitor" %}</option>
+                    <option value="removed" {% if status_filter == "removed" %}selected{% endif %}>{% trans "status_removed" context "exams.template.supervision_monitor" %}</option>
+                    <option value="resumed" {% if status_filter == "resumed" %}selected{% endif %}>{% trans "status_resumed" context "exams.template.supervision_monitor" %}</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-group">
+            <button type="submit" class="btn-search"><i class="fas fa-search"></i> {% trans "action_search" context "exams.template.supervision_monitor" %}</button>
+        </div>
     </form>
 
     {# Table #}
@@ -187,18 +218,19 @@
     {% if page_obj.has_other_pages %}
     <div class="pagination-wrapper">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">&laquo;</a>
         {% endif %}
         {% for num in page_obj.paginator.page_range %}
             {% if page_obj.number == num %}
             <span class="current">{{ num }}</span>
             {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-            <a href="?page={{ num }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">{{ num }}</a>
+            <a href="?page={{ num }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">{{ num }}</a>
             {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}">&raquo;</a>
+        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">&raquo;</a>
         {% endif %}
+        <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
     </div>
     {% endif %}
 
