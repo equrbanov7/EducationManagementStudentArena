@@ -638,10 +638,12 @@ function clearPendingStateSync() {
 }
 
 function scheduleStateSyncFallback(delayMs = 900) {
+    if (state.sessionState === "finished") return;
     clearPendingStateSync();
     const mutationSnapshot = state.lastStateMutationAt;
     state.pendingSyncTimer = window.setTimeout(() => {
         state.pendingSyncTimer = 0;
+        if (state.sessionState === "finished") return;
         if (state.lastStateMutationAt === mutationSnapshot) {
             syncState();
         }
@@ -669,6 +671,9 @@ function setPresentationMarkup(phase, signature, markup) {
 }
 
 function setSessionState(nextState) {
+    if (nextState === "finished" && state.sessionState === "finished") {
+        return;
+    }
     state.sessionState = nextState;
     if (nextState !== "finished") {
         state.finalSignature = "";
@@ -1325,12 +1330,19 @@ function applyQuestionState(question, answeredCount, totalPlayers) {
 function applyRevealState(payload, question) {
     if (!payload) return;
 
+    const nextKey = revealKey(payload);
+    const alreadyInReveal = state.sessionState === "reveal" && state.revealKey === nextKey;
+
+    // Skip redundant reveal processing for the same reveal key
+    if (alreadyInReveal && state.phase === PHASES.SCOREBOARD) {
+        return;
+    }
+
     if (question) {
         state.currentQuestion = question;
     }
     state.currentReveal = payload;
 
-    const nextKey = revealKey(payload);
     const shouldRestart = state.revealKey !== nextKey || state.sessionState !== "reveal";
     if (state.revealKey !== nextKey) {
         playRevealSound(nextKey);
@@ -1532,6 +1544,7 @@ function applyStateSnapshot(snapshot) {
     }
 
     if (snapshot.state === "finished") {
+        if (state.sessionState === "finished") return;
         clearPhaseLoop();
         clearAutoTimers();
         stopStatePolling();
@@ -1588,7 +1601,10 @@ async function postJson(url, payload = {}) {
     }
 }
 
+let syncInFlight = false;
 async function syncState() {
+    if (syncInFlight) return null;
+    syncInFlight = true;
     try {
         const response = await fetch(CONFIG.urls.state, {
             headers: { Accept: "application/json" },
@@ -1603,6 +1619,8 @@ async function syncState() {
     } catch (error) {
         log(fmt(tr("playMessageError", "Play message error: {message}"), { message: error.message || "" }));
         return null;
+    } finally {
+        syncInFlight = false;
     }
 }
 
@@ -1753,6 +1771,7 @@ playWS.onmessage = event => {
         }
 
         if (data.type === "finished") {
+            if (state.sessionState === "finished") return;
             markStateMutation();
             clearPhaseLoop();
             clearAutoTimers();
