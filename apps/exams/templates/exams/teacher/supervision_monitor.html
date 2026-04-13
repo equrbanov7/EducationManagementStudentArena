@@ -155,9 +155,15 @@
                     </td>
                     <td>
                         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
-                        <button class="btn-action btn-resume" data-resume-attempt-id="{{ attempt.id }}" title="{% trans 'action_resume' context 'exams.template.supervision_monitor' %}">
-                            <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_monitor" %}
-                        </button>
+                            {% if attempt.is_finished %}
+                            <button class="btn-action btn-resume" disabled title="{% trans 'action_terminated' context 'exams.template.supervision_monitor' %}" style="opacity:0.5;cursor:not-allowed;">
+                                <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_monitor" %}
+                            </button>
+                            {% else %}
+                            <button class="btn-action btn-resume" data-resume-attempt-id="{{ attempt.id }}" title="{% trans 'action_resume' context 'exams.template.supervision_monitor' %}">
+                                <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_monitor" %}
+                            </button>
+                            {% endif %}
                         {% endif %}
                         {% if not attempt.is_finished %}
                         <button class="btn-action btn-stop" data-stop-attempt-id="{{ attempt.id }}" title="{% trans 'action_stop' context 'exams.template.supervision_monitor' %}" style="margin-left:0.25rem;">
