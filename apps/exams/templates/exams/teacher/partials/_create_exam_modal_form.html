@@ -193,7 +193,7 @@
             </label>
         </div>
 
-        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: none;">
+        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
             <div class="create-exam-form-grid">
                 <div class="form-group">
                     <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
@@ -214,7 +214,7 @@
                     <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
                 </div>
 
-                <div id="modalSupervisionCustomSettings">
+                <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
                     <div class="form-group">
                         <label class="modal-check-label">
                             <input type="checkbox" name="supervision_force_fullscreen"

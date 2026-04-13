@@ -684,9 +684,21 @@ function setSessionState(nextState) {
     const isFinished = nextState === "finished";
 
     safeDisplay(UI.playersSection, CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none"));
-    safeDisplay(UI.gameArea, CONFIG.presentationOnly ? "block" : ((isLobby || isPlay) ? "block" : "none"));
+    safeDisplay(UI.gameArea, (isLobby || isPlay) && !isFinished ? "block" : "none");
     safeDisplay(UI.finalPodium, isFinished ? "grid" : "none");
     safeDisplay(UI.progressBox, !CONFIG.presentationOnly && nextState === "question" ? "flex" : "none");
+
+    if (isFinished) {
+        clearPhaseLoop();
+        clearAutoTimers();
+        stopStatePolling();
+        if (UI.presentationContent) {
+            UI.presentationContent.innerHTML = "";
+        }
+        if (UI.presentationStage) {
+            UI.presentationStage.dataset.phase = "finished";
+        }
+    }
 
     if (isLobby) {
         clearPhaseLoop();
@@ -1344,6 +1356,11 @@ function renderPodium(top) {
         return;
     }
     state.finalSignature = finalKey;
+
+    // Ensure final podium is visible and game area is hidden
+    safeDisplay(UI.finalPodium, "grid");
+    safeDisplay(UI.gameArea, "none");
+
     playFinalSound(finalKey);
 
     UI.confetti.innerHTML = "";
@@ -1518,6 +1535,7 @@ function applyStateSnapshot(snapshot) {
         clearPhaseLoop();
         clearAutoTimers();
         stopStatePolling();
+        clearPendingStateSync();
         setSessionState("finished");
         renderPodium(snapshot.top || []);
         notifyHostShell();
@@ -1739,8 +1757,10 @@ playWS.onmessage = event => {
             clearPhaseLoop();
             clearAutoTimers();
             stopStatePolling();
+            clearPendingStateSync();
             setSessionState("finished");
             renderPodium(data.top || []);
+            return;
         }
     } catch (error) {
         log(fmt(tr("playMessageError", "Play message error: {message}"), { message: error.message || "" }));
