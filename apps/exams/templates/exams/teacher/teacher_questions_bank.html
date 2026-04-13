@@ -75,32 +75,36 @@
                     >
                 </div>
 
-                <select name="status" aria-label="{% trans 'label_filter_status' context 'exams.template.teacher_questions_bank' %}">
-                    <option value="all" {% if status_filter == "all" %}selected{% endif %}>
-                        {% trans "filter_status_all" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                    <option value="active" {% if status_filter == "active" %}selected{% endif %}>
-                        {% trans "filter_status_active" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                    <option value="inactive" {% if status_filter == "inactive" %}selected{% endif %}>
-                        {% trans "filter_status_inactive" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="status" class="form-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'label_filter_status' context 'exams.template.teacher_questions_bank' %}">
+                        <option value="all" {% if status_filter == "all" %}selected{% endif %}>
+                            {% trans "filter_status_all" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                        <option value="active" {% if status_filter == "active" %}selected{% endif %}>
+                            {% trans "filter_status_active" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                        <option value="inactive" {% if status_filter == "inactive" %}selected{% endif %}>
+                            {% trans "filter_status_inactive" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                    </select>
+                </div>
 
-                <select name="sort" aria-label="{% trans 'label_sort' context 'exams.template.teacher_questions_bank' %}">
-                    <option value="newest" {% if sort_filter == "newest" %}selected{% endif %}>
-                        {% trans "sort_newest" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                    <option value="oldest" {% if sort_filter == "oldest" %}selected{% endif %}>
-                        {% trans "sort_oldest" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                    <option value="az" {% if sort_filter == "az" %}selected{% endif %}>
-                        {% trans "sort_az" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                    <option value="za" {% if sort_filter == "za" %}selected{% endif %}>
-                        {% trans "sort_za" context "exams.template.teacher_questions_bank" %}
-                    </option>
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="sort" class="form-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'label_sort' context 'exams.template.teacher_questions_bank' %}">
+                        <option value="newest" {% if sort_filter == "newest" %}selected{% endif %}>
+                            {% trans "sort_newest" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                        <option value="oldest" {% if sort_filter == "oldest" %}selected{% endif %}>
+                            {% trans "sort_oldest" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                        <option value="az" {% if sort_filter == "az" %}selected{% endif %}>
+                            {% trans "sort_az" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                        <option value="za" {% if sort_filter == "za" %}selected{% endif %}>
+                            {% trans "sort_za" context "exams.template.teacher_questions_bank" %}
+                        </option>
+                    </select>
+                </div>
             </form>
         </section>
 

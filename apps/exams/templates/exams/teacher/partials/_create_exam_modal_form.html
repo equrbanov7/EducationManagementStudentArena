@@ -137,7 +137,7 @@
 
         <div class="form-group form-group-full">
             <div class="create-exam-modal-section-title">
-                <h4><i class="fas fa-users"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
+                <h4><i class="fas fa-users" style="color:#198754;"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
                 <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
             </div>
         </div>
@@ -174,6 +174,134 @@
                         {{ form.allowed_users }}
                     </div>
                     {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="form-group form-group-full">
+            <div class="create-exam-modal-section-title">
+                <h4><i class="fas fa-shield-alt" style="color:#dc3545;"></i> {% trans "supervision_section_title" context "exams.template.create_exam_modal_form" %}</h4>
+                <p>{% trans "supervision_section_help" context "exams.template.create_exam_modal_form" %}</p>
+            </div>
+        </div>
+
+        <div class="form-group form-group-full">
+            <label class="modal-check-label modal-check-label--supervision">
+                <input type="checkbox" name="supervision_enabled" id="modalSupervisionEnabled"
+                       class="form-check-input"
+                       {% if supervision_config and supervision_config.enabled %}checked{% endif %}>
+                <span class="modal-check-label-text">{% trans "supervision_enable_label" context "exams.template.create_exam_modal_form" %}</span>
+            </label>
+        </div>
+
+        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: none;">
+            <div class="create-exam-form-grid">
+                <div class="form-group">
+                    <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select name="supervision_template" id="modalSupervisionTemplate" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_exam_modal_form" %}</option>
+                            <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_exam_modal_form" %}</option>
+                        </select>
+                    </div>
+                </div>
+
+                {# Template info panel #}
+                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
+                    <h4 id="modalSupervisionTemplateInfoTitle" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
+                    <p id="modalSupervisionTemplateInfoDesc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
+                    <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
+                </div>
+
+                <div id="modalSupervisionCustomSettings">
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_force_fullscreen"
+                                   class="form-check-input"
+                                   {% if not supervision_config or supervision_config.force_fullscreen %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_force_fullscreen" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_detect_tab_switch"
+                                   class="form-check-input"
+                                   {% if not supervision_config or supervision_config.detect_tab_switch %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_detect_tab_switch" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_block_copy_paste"
+                                   class="form-check-input"
+                                   {% if not supervision_config or supervision_config.block_copy_paste %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_block_copy_paste" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_disable_right_click"
+                                   class="form-check-input"
+                                   {% if not supervision_config or supervision_config.disable_right_click %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_disable_right_click" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_disable_text_selection"
+                                   class="form-check-input"
+                                   {% if supervision_config and supervision_config.disable_text_selection %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_disable_text_selection" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="modal-check-label">
+                            <input type="checkbox" name="supervision_restrict_shortcuts"
+                                   class="form-check-input"
+                                   {% if not supervision_config or supervision_config.restrict_keyboard_shortcuts %}checked{% endif %}>
+                            <span class="modal-check-label-text">{% trans "supervision_restrict_shortcuts" context "exams.template.create_exam_modal_form" %}</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalSupervisionGracePeriod">{% trans "supervision_grace_period_label" context "exams.template.create_exam_modal_form" %}</label>
+                        <input type="number" name="supervision_grace_period"
+                               id="modalSupervisionGracePeriod" class="form-control"
+                               min="5" max="60"
+                               value="{{ supervision_config.grace_period_seconds|default:15 }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalSupervisionMaxViolations">{% trans "supervision_max_violations_label" context "exams.template.create_exam_modal_form" %}</label>
+                        <input type="number" name="supervision_max_violations"
+                               id="modalSupervisionMaxViolations" class="form-control"
+                               min="1" max="20"
+                               value="{{ supervision_config.max_fullscreen_violations|default:3 }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
+                        <div class="bootstrap-single-select">
+                            <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_exam_modal_form" %}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
+                        <div class="bootstrap-single-select">
+                            <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_exam_modal_form" %}</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
