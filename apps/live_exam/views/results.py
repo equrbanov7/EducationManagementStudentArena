@@ -171,7 +171,7 @@ def teacher_live_session_detail(request, slug, pin):
         option_counts = []
         option_colors = []
         for opt in options:
-            label_text = opt.label or opt.text[:20]
+            label_text = opt.label or (opt.text[:20] if opt.text else "")
             option_labels.append(label_text)
             # Count answers that chose this option (via choice_id or choice_ids)
             chosen_count = answers.filter(Q(choice_id=opt.id) | Q(choice_ids__contains=[opt.id])).count()
