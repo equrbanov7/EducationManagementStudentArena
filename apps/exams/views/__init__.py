@@ -40,6 +40,14 @@ from .teacher.results import (
     teacher_view_attempt,
 )
 from .teacher.statistics import teacher_exam_statistics
+from .teacher.supervision import (
+    log_incident_api,
+    supervision_detail,
+    supervision_monitor,
+    supervision_status_api,
+    teacher_resume_api,
+    teacher_stop_api,
+)
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Export ediləcək bütün funksiyalar
@@ -77,6 +85,13 @@ __all__ = [
     "ai_grade_answer",
     # Teacher - Statistics
     "teacher_exam_statistics",
+    # Teacher - Supervision
+    "supervision_monitor",
+    "supervision_detail",
+    "teacher_resume_api",
+    "teacher_stop_api",
+    "log_incident_api",
+    "supervision_status_api",
     # Student - Results
     "exam_result",
     "student_exam_history",

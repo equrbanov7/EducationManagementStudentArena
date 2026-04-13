@@ -137,6 +137,13 @@
                 {% if my_exams_count > 0 %}<span class="sidebar-menu-badge">{{ my_exams_count }}</span>{% endif %}
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'exams:supervision_monitor' %}"
+               class="sidebar-menu-link">
+                <i class="fas fa-shield-alt sidebar-menu-icon" style="color:#dc3545;"></i>
+                <span class="sidebar-menu-text">İmtahan Nəzarəti</span>
+            </a>
+        </li>
         {% endif %}
 
         {% if 'my-courses' in allowed_sections %}
