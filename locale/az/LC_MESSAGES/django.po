@@ -3392,12 +3392,16 @@ msgstr "AI tənzimləmələri uğurla yeniləndi."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email kodunu təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email "
+"kodunu təsdiqləyin."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu "
+"təsdiqləyin."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3447,7 +3451,8 @@ msgstr "Uğurla çıxış etdiniz."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
+msgstr ""
+"Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
 
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
@@ -6164,7 +6169,8 @@ msgstr "Yeni kod göndərildi."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
+msgstr ""
+"Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"
@@ -9530,7 +9536,7 @@ msgstr "Təsviri daxil edin"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:75
 msgctxt "exams.template.create_edit_exam"
 msgid "enable_paint"
-msgstr "Əməliyyat"
+msgstr "Yazılı imtahanlarda Paint cavabını aktiv et"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:78
 msgctxt "exams.template.create_edit_exam"
@@ -9540,12 +9546,12 @@ msgstr "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bil�
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:100
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "Tarix və Vaxt Parametrləri"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:101
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "İmtahanın başlama və bitmə vaxtlarını təyin edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:109
 msgctxt "exams.template.create_edit_exam"
@@ -9555,17 +9561,17 @@ msgstr "Başlanğıc"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:116
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_1"
-msgstr "Start exam"
+msgstr "Boş saxlasanız, tələbələr istənilən vaxt başlaya bilər."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:117
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_2"
-msgstr "Start exam"
+msgstr "Tələbələr bu tarixdən əvvəl başlaya bilməz."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:132
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_end"
-msgstr "İngilis dili"
+msgstr "Son"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:139
 msgctxt "exams.template.create_edit_exam"
@@ -9580,12 +9586,13 @@ msgstr "Bu tarixdən sonra tələbələr imtahana başlaya bilməz."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:151
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings"
-msgstr "Tələbələr"
+msgstr "Müddət və Cəhd Parametrləri"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:152
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr ""
+"İmtahan müddəti, hər sual üçün vaxt və cəhd limitini konfiqurasiya edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:162
 msgctxt "exams.template.create_edit_exam"
@@ -9600,12 +9607,12 @@ msgstr "Məs: 60 (saniyə)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:190
 msgctxt "exams.template.create_edit_exam"
 msgid "max_attempt_help"
-msgstr "Maksimum cəhd"
+msgstr "Məs: 1, 2, 3..."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:199
 msgctxt "exams.template.create_edit_exam"
 msgid "section_access_rights"
-msgstr "Müəllim"
+msgstr "Giriş Hüquqları"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:200
 msgctxt "exams.template.create_edit_exam"
@@ -9670,6 +9677,195 @@ msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
 msgstr "İmtahan yarat"
 
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_title"
+msgstr "İmtahan Nəzarəti"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_section_help"
+msgstr "Anti-cheating və imtahan nəzarəti parametrləri"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_label"
+msgstr "İmtahan Nəzarəti Rejimini Aktivləşdir"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_enable_help"
+msgstr ""
+"Aktivləşdirildikdə, tələbə imtahan zamanı nəzarət altında olacaq. Tab "
+"dəyişmə, fullscreen çıxışı, copy/paste və digər əməliyyatlar izlənəcək."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_label"
+msgstr "Nəzarət Şablonu"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_custom"
+msgstr "Xüsusi (Custom)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_light"
+msgstr "Yüngül (Light)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_medium"
+msgstr "Orta (Medium)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_strict"
+msgstr "Ciddi (Strict)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_template_help"
+msgstr ""
+"Hazır şablon seçərək parametrləri avtomatik tənzimləyin, və ya xüsusi rejim "
+"seçərək əl ilə konfiqurasiya edin."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen"
+msgstr "Tam ekran rejimi tələb et"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_force_fullscreen_help"
+msgstr "Tələbə imtahana başlayarkən tam ekrana keçməlidir."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch"
+msgstr "Tab dəyişməni aşkarla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_detect_tab_switch_help"
+msgstr "Tələbə brauzerdə tab dəyişdirəndə qeydə alınacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste"
+msgstr "Kopyala/Yapışdır blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_block_copy_paste_help"
+msgstr "Copy, Paste, Cut əməliyyatları bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click"
+msgstr "Sağ klik menyusunu blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_right_click_help"
+msgstr "Kontekst menyusuna giriş deaktiv ediləcək."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection"
+msgstr "Mətn seçimini blokla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_disable_text_selection_help"
+msgstr "İmtahan mətninin seçilməsi və sürüklənməsi bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts"
+msgstr "Klaviatura qısa yollarını məhdudla"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_restrict_shortcuts_help"
+msgstr "Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+S və s. bloklanacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_label"
+msgstr "Qaytarılma müddəti (saniyə)"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_grace_period_help"
+msgstr "Fullscreen çıxışından sonra qaytarılma üçün vaxt (5-60 saniyə)."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_label"
+msgstr "Maksimum pozuntu sayı"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_max_violations_help"
+msgstr "Bu sayda pozuntudan sonra seçilmiş cəza tətbiq olunacaq."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_label"
+msgstr "Pozuntu zamanı hərəkət"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_auto_submit"
+msgstr "Avtomatik göndər"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_lock_exam"
+msgstr "İmtahanı kilidlə"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_remove_student"
+msgstr "Tələbəni çıxar"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_action_mark_suspicious"
+msgstr "Şübhəli olaraq işarələ"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_violation_action_help"
+msgstr "Maksimum pozuntu limitinə çatdıqda nə baş versin."
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_label"
+msgstr "Bərpa siyasəti"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_no_second_chance"
+msgstr "İkinci şans yoxdur"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "Bir əlavə şans"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Müəllim tərəfindən idarə olunan"
+
+#: apps/exams/templates/exams/teacher/createAndEditExam.html
+msgctxt "exams.template.create_edit_exam"
+msgid "supervision_recovery_policy_help"
+msgstr "Kilidlənmiş tələbələr üçün bərpa imkanı."
+
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
 msgid "page_title_new_question"
@@ -9708,7 +9904,9 @@ msgstr "0 = bütün suallar"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:245
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
-msgstr "Tələbəyə neçə aktiv sual göstəriləcəyini yazın. 0 daxil etsəniz bütün suallar göstəriləcək."
+msgstr ""
+"Tələbəyə neçə aktiv sual göstəriləcəyini yazın. 0 daxil etsəniz bütün "
+"suallar göstəriləcək."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:289
 #: apps/exams/templates/exams/teacher/create_question_bank.html:334
@@ -9722,7 +9920,9 @@ msgstr "Bu bölmədə rəsm cavabını aktiv et"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:396
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
-msgstr "Bu seçim bölmədəki suallar üçün paint-i default aktiv edir. Hər hansı sualda ayrıca söndürsəniz, həmin sualda paint görünməyəcək."
+msgstr ""
+"Bu seçim bölmədəki suallar üçün paint-i default aktiv edir. Hər hansı sualda "
+"ayrıca söndürsəniz, həmin sualda paint görünməyəcək."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:254
 msgctxt "exams.template.create_question_bank"
@@ -9802,7 +10002,8 @@ msgstr "Silməni təsdiqlə"
 #: apps/exams/templates/exams/teacher/create_question_bank.html:342
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
-msgstr "Bu bölmə və içindəki suallar bankdan silinəcək. Davam etmək istəyirsiniz?"
+msgstr ""
+"Bu bölmə və içindəki suallar bankdan silinəcək. Davam etmək istəyirsiniz?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
@@ -10246,6 +10447,131 @@ msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
 msgstr "İmtahan yarat"
 
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_title"
+msgstr "İmtahan Nəzarəti"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_section_help"
+msgstr "Anti-cheating və imtahan nəzarəti parametrləri"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_enable_label"
+msgstr "İmtahan Nəzarəti Rejimini Aktivləşdir"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_label"
+msgstr "Nəzarət Şablonu"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_custom"
+msgstr "Xüsusi (Custom)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_light"
+msgstr "Yüngül (Light)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_medium"
+msgstr "Orta (Medium)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_template_strict"
+msgstr "Ciddi (Strict)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_force_fullscreen"
+msgstr "Tam ekran rejimi tələb et"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_detect_tab_switch"
+msgstr "Tab dəyişməni aşkarla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_block_copy_paste"
+msgstr "Kopyala/Yapışdır blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_right_click"
+msgstr "Sağ klik menyusunu blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_disable_text_selection"
+msgstr "Mətn seçimini blokla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_restrict_shortcuts"
+msgstr "Klaviatura qısa yollarını məhdudla"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_grace_period_label"
+msgstr "Qaytarılma müddəti (saniyə)"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_max_violations_label"
+msgstr "Maksimum pozuntu sayı"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_violation_action_label"
+msgstr "Pozuntu zamanı hərəkət"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_auto_submit"
+msgstr "Avtomatik göndər"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_lock_exam"
+msgstr "İmtahanı kilidlə"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_remove_student"
+msgstr "Tələbəni çıxar"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_action_mark_suspicious"
+msgstr "Şübhəli olaraq işarələ"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_policy_label"
+msgstr "Bərpa siyasəti"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_no_second_chance"
+msgstr "İkinci şans yoxdur"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_one_extra_chance"
+msgstr "Bir əlavə şans"
+
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+msgctxt "exams.template.create_exam_modal_form"
+msgid "supervision_recovery_teacher_controlled"
+msgstr "Müəllim tərəfindən idarə olunan"
+
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
 msgid "page_title"
@@ -10370,7 +10696,8 @@ msgstr "Yadda saxlanılmamış dəyişikliklər"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:189
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
-msgstr "Yadda saxlanılmamış dəyişikliklər itiriləcək. Çıxmaq istədiyinizə əminsiniz?"
+msgstr ""
+"Yadda saxlanılmamış dəyişikliklər itiriləcək. Çıxmaq istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:191
 msgctxt "exams.template.teacher_check_attempt"
@@ -10591,122 +10918,6 @@ msgstr "dəq"
 msgctxt "exams.template.teacher_exam_list"
 msgid "empty_no_exam"
 msgstr "Empty upcoming exams"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
-msgctxt "exams.template.teacher_exam_results"
-msgid "title_results"
-msgstr "Nəticəyə bax"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_results"
-msgstr "İmtahan nəticələri"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_type"
-msgstr "Növ"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
-msgctxt "exams.template.teacher_exam_results"
-msgid "label_status"
-msgstr "Status"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_active_upper"
-msgstr "Aktiv"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_inactive"
-msgstr "Deaktiv"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
-msgctxt "exams.template.teacher_exam_results"
-msgid "heading_participant_results"
-msgstr "İştirakçı nəticələri"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:45
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_user"
-msgstr "İstifadəçi"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:46
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_status"
-msgstr "Status"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_correct"
-msgstr "Düzgün?"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_wrong"
-msgstr "Səhv"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_score_percent"
-msgstr "Bal (%)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_started_at"
-msgstr "Başlama tarixi"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_finished_at"
-msgstr "Bitirmə vaxtı"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_duration_sec"
-msgstr "Məs: 30 (dəqiqə)"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
-msgctxt "exams.template.teacher_exam_results"
-msgid "col_action"
-msgstr "Əməliyyat"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_checked"
-msgstr "Arxivləndi"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_view"
-msgstr "Hamısını Gör"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_recheck"
-msgstr "Geri"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
-msgctxt "exams.template.teacher_exam_results"
-msgid "status_locked"
-msgstr "Bağlı"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_check"
-msgstr "Geri"
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
-msgctxt "exams.template.teacher_exam_results"
-msgid "empty_no_attempt"
-msgstr "No courses assigned yet."
-
-#: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
-msgctxt "exams.template.teacher_exam_results"
-msgid "action_back_to_exam"
-msgstr "İmtahana qayıt"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -11401,8 +11612,8 @@ msgstr "Qrup silindi."
 msgctxt "exams.view.question_bank.message"
 msgid "duplicate_block_name_request"
 msgstr ""
-"'{block_name}' adlı bölmə artıq bu imtahanda mövcuddur. Zəhmət olmasa "
-"fərqli ad seçin."
+"'{block_name}' adlı bölmə artıq bu imtahanda mövcuddur. Zəhmət olmasa fərqli "
+"ad seçin."
 
 #: apps/exams/views/teacher/question_bank.py:97
 msgctxt "exams.view.question_bank.message"
@@ -13216,7 +13427,9 @@ msgstr "Bağlantı xətası"
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
 msgid "hero_copy"
-msgstr "Əsas ekrana bax və geri sayım başlamazdan əvvəl nickname-nin göründüyünü yoxla."
+msgstr ""
+"Əsas ekrana bax və geri sayım başlamazdan əvvəl nickname-nin göründüyünü "
+"yoxla."
 
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
@@ -14146,7 +14359,9 @@ msgstr "Bu icazə yoxdur: {permission}"
 #: apps/organizations/decorators.py:74
 msgctxt "organizations.decorators.error"
 msgid "insufficient_role_level"
-msgstr "Rol səviyyəsi yetərli deyil. Tələb olunur: {required}, Sənin səviyyən: {current}"
+msgstr ""
+"Rol səviyyəsi yetərli deyil. Tələb olunur: {required}, Sənin səviyyən: "
+"{current}"
 
 #: apps/organizations/decorators.py:102
 msgctxt "organizations.decorators.error"
@@ -15139,9 +15354,7 @@ msgctxt "projects.review.js"
 msgid "grade_button"
 msgstr "Qiymət ver"
 
-
 # Added for auth/signup localization updates
-
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
 msgstr "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
@@ -15152,11 +15365,11 @@ msgstr "Bu hesab növü üçün rol avtomatik olaraq tələbə olacaq."
 
 msgctxt "accounts.register"
 msgid "individual_owner_help"
-msgstr "Fərdi hesab seçildikdə şəxsi workspace avtomatik yaradılır və siz təşkilat admini olursunuz."
-
+msgstr ""
+"Fərdi hesab seçildikdə şəxsi workspace avtomatik yaradılır və siz təşkilat "
+"admini olursunuz."
 
 # Added for updated register searchable select and org-role copy
-
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
 msgstr "Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq."
@@ -15307,15 +15520,21 @@ msgstr "Tələbə kimi qoşulun və kurslara daxil olun."
 
 msgctxt "accounts.register"
 msgid "org_pending_approval_notice"
-msgstr "Qurumun qeydiyyatı superadmin təsdiqi gözləyir. Nəzərdən keçirildikdən sonra sizə bildiriş göndəriləcəkdir."
+msgstr ""
+"Qurumun qeydiyyatı superadmin təsdiqi gözləyir. Nəzərdən keçirildikdən sonra "
+"sizə bildiriş göndəriləcəkdir."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_teacher_join"
-msgstr "Email təsdiqindən sonra seçdiyiniz quruma müəllim kimi qoşulacaqsınız (təsdiq gözlənilir)."
+msgstr ""
+"Email təsdiqindən sonra seçdiyiniz quruma müəllim kimi qoşulacaqsınız "
+"(təsdiq gözlənilir)."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_staff_join"
-msgstr "Email təsdiqindən sonra seçdiyiniz quruma işçi kimi qoşulacaqsınız (təsdiq gözlənilir)."
+msgstr ""
+"Email təsdiqindən sonra seçdiyiniz quruma işçi kimi qoşulacaqsınız (təsdiq "
+"gözlənilir)."
 
 msgctxt "accounts.register"
 msgid "student_fields_title"
@@ -15335,7 +15554,9 @@ msgstr "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqs�
 
 msgctxt "accounts.register"
 msgid "join_org_optional_hint"
-msgstr "Təşkilat seçimi boş qala bilər. Sonradan profil bölməsindən təşkilata müraciət edə bilərsiniz."
+msgstr ""
+"Təşkilat seçimi boş qala bilər. Sonradan profil bölməsindən təşkilata "
+"müraciət edə bilərsiniz."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "title_questions_bank"
@@ -15343,7 +15564,9 @@ msgstr "Sual bankı"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "subtitle_questions_bank"
-msgstr "İmtahana əlavə olunmuş sualları axtarın, seçin, aktiv/deaktiv edin və idarə edin."
+msgstr ""
+"İmtahana əlavə olunmuş sualları axtarın, seçin, aktiv/deaktiv edin və idarə "
+"edin."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "action_back_exam_detail"
@@ -15365,9 +15588,7 @@ msgctxt "exams.template.teacher_questions_bank"
 msgid "label_inactive_questions"
 msgstr "Deaktiv suallar"
 
-
 # Added for signup privacy policy modal
-
 msgctxt "accounts.form.register.label"
 msgid "accept_privacy_policy"
 msgstr "Məxfilik siyasətini oxudum və qəbul edirəm."
@@ -15383,8 +15604,8 @@ msgstr "Məxfilik və məlumatların işlənməsi"
 msgctxt "accounts.register"
 msgid "privacy_card_description"
 msgstr ""
-"Hesab yaratmazdan əvvəl EMSArena-da şəxsi məlumatların necə istifadə olunduğunu "
-"qısa formada oxuyun."
+"Hesab yaratmazdan əvvəl EMSArena-da şəxsi məlumatların necə istifadə "
+"olunduğunu qısa formada oxuyun."
 
 msgctxt "accounts.register"
 msgid "privacy_open_button"
@@ -15405,9 +15626,9 @@ msgstr "Məxfilik siyasəti"
 msgctxt "accounts.register"
 msgid "privacy_modal_intro"
 msgstr ""
-"Bu siyasət hesab yaradarkən, təşkilata qoşularkən və EMSArena daxilində kurs, "
-"imtahan, laboratoriya, tapşırıq və canlı sessiya funksiyalarından istifadə "
-"edərkən məlumatlarınızın necə emal olunduğunu izah edir."
+"Bu siyasət hesab yaradarkən, təşkilata qoşularkən və EMSArena daxilində "
+"kurs, imtahan, laboratoriya, tapşırıq və canlı sessiya funksiyalarından "
+"istifadə edərkən məlumatlarınızın necə emal olunduğunu izah edir."
 
 msgctxt "accounts.register"
 msgid "privacy_modal_summary_badge"
@@ -15416,9 +15637,10 @@ msgstr "Qısa və aydın xülasə"
 msgctxt "accounts.register"
 msgid "privacy_modal_summary"
 msgstr ""
-"Məlumatlarınız hesabın yaradılması, təhlükəsiz giriş, təşkilat üzvlüyünün idarə "
-"olunması və tədris funksiyalarının işləməsi üçün istifadə olunur. Məlumatlarınız "
-"satılmır və yalnız xidmətin işləməsi üçün zəruri hallarda paylaşılır."
+"Məlumatlarınız hesabın yaradılması, təhlükəsiz giriş, təşkilat üzvlüyünün "
+"idarə olunması və tədris funksiyalarının işləməsi üçün istifadə olunur. "
+"Məlumatlarınız satılmır və yalnız xidmətin işləməsi üçün zəruri hallarda "
+"paylaşılır."
 
 msgctxt "accounts.register"
 msgid "privacy_section_data_title"
@@ -15427,10 +15649,10 @@ msgstr "Hansı məlumatları toplayırıq"
 msgctxt "accounts.register"
 msgid "privacy_section_data_body"
 msgstr ""
-"Qeydiyyat zamanı istifadəçi adı, ad, soyad, email, ölkə, seçdiyiniz hesab növü "
-"və təşkilat məlumatlarını toplayırıq. Platformadan istifadə etdikcə kurs, "
-"imtahan, laboratoriya, tapşırıq, nəticə və üzvlük prosesləri ilə bağlı əməliyyat "
-"məlumatları da formalaşa bilər."
+"Qeydiyyat zamanı istifadəçi adı, ad, soyad, email, ölkə, seçdiyiniz hesab "
+"növü və təşkilat məlumatlarını toplayırıq. Platformadan istifadə etdikcə "
+"kurs, imtahan, laboratoriya, tapşırıq, nəticə və üzvlük prosesləri ilə bağlı "
+"əməliyyat məlumatları da formalaşa bilər."
 
 msgctxt "accounts.register"
 msgid "privacy_section_use_title"
@@ -15440,8 +15662,9 @@ msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
 "Bu məlumatlar hesab yaratmaq, email OTP təsdiqi göndərmək, workspace və "
-"təşkilat girişini idarə etmək, kurs və imtahan axınlarını işlətmək, nəticələri "
-"göstərmək, audit və təhlükəsizlik nəzarətini aparmaq üçün istifadə olunur."
+"təşkilat girişini idarə etmək, kurs və imtahan axınlarını işlətmək, "
+"nəticələri göstərmək, audit və təhlükəsizlik nəzarətini aparmaq üçün "
+"istifadə olunur."
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
@@ -15450,9 +15673,9 @@ msgstr "Təşkilat daxilində görünürlük"
 msgctxt "accounts.register"
 msgid "privacy_section_access_body"
 msgstr ""
-"Məktəbə, universitetə və ya kurs mərkəzinə qoşulduqda həmin qurumun səlahiyyətli "
-"admin və müəllimləri sizin əsas profil məlumatlarınızı, üzvlük statusunuzu və "
-"rolunuza aid tədris fəaliyyətlərini görə bilər."
+"Məktəbə, universitetə və ya kurs mərkəzinə qoşulduqda həmin qurumun "
+"səlahiyyətli admin və müəllimləri sizin əsas profil məlumatlarınızı, üzvlük "
+"statusunuzu və rolunuza aid tədris fəaliyyətlərini görə bilər."
 
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_title"
@@ -15472,9 +15695,10 @@ msgstr "Saxlama və təhlükəsizlik"
 msgctxt "accounts.register"
 msgid "privacy_section_retention_body"
 msgstr ""
-"Məlumatlar xidmətin işləməsi, audit və mübahisələrin araşdırılması üçün lazım "
-"olan müddətdə saxlanılır. OTP və doğrulama kimi həssas axınlar qısaömürlüdür və "
-"sistemdə texniki və təşkilati təhlükəsizlik tədbirləri tətbiq olunur."
+"Məlumatlar xidmətin işləməsi, audit və mübahisələrin araşdırılması üçün "
+"lazım olan müddətdə saxlanılır. OTP və doğrulama kimi həssas axınlar "
+"qısaömürlüdür və sistemdə texniki və təşkilati təhlükəsizlik tədbirləri "
+"tətbiq olunur."
 
 msgctxt "accounts.register"
 msgid "privacy_section_rights_title"
@@ -15483,9 +15707,10 @@ msgstr "Sizin hüquqlarınız"
 msgctxt "accounts.register"
 msgid "privacy_section_rights_body"
 msgstr ""
-"Profil məlumatlarınızı yeniləmək, təşkilata qoşulma seçimlərinizi dəyişmək və "
-"hesabınızla bağlı silinmə və ya dəqiqləşdirmə sorğusu vermək hüququnuz var. Belə "
-"sorğular üçün platforma administratoru ilə əlaqə saxlaya bilərsiniz."
+"Profil məlumatlarınızı yeniləmək, təşkilata qoşulma seçimlərinizi dəyişmək "
+"və hesabınızla bağlı silinmə və ya dəqiqləşdirmə sorğusu vermək hüququnuz "
+"var. Belə sorğular üçün platforma administratoru ilə əlaqə saxlaya "
+"bilərsiniz."
 
 msgctxt "accounts.register"
 msgid "privacy_close"
@@ -15812,8 +16037,12 @@ msgid "reject"
 msgstr "Rədd et"
 
 msgctxt "profile.notifications"
-msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
-msgstr "%(organization_name)s təşkilatına %(role_label)s kimi müraciətiniz göndərilib və hazırda cavab gözləyir."
+msgid ""
+"Your %(role_label)s request has been sent to %(organization_name)s and is "
+"currently awaiting a response."
+msgstr ""
+"%(organization_name)s təşkilatına %(role_label)s kimi müraciətiniz "
+"göndərilib və hazırda cavab gözləyir."
 
 msgctxt "profile.notifications"
 msgid "%(organization_name)s has invited you as %(role_label)s."
@@ -15824,20 +16053,38 @@ msgid "Join organization as %(role_label)s"
 msgstr "%(role_label)s kimi təşkilata qoşul"
 
 msgctxt "profile.join_org"
-msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
-msgstr "Mövcud təşkilatları axtarıb birini seçin və qısa mesajla %(role_label)s kimi qoşulma müraciəti göndərin."
+msgid ""
+"Search current organizations, choose one, and send a short message to join "
+"as %(role_label)s."
+msgstr ""
+"Mövcud təşkilatları axtarıb birini seçin və qısa mesajla %(role_label)s kimi "
+"qoşulma müraciəti göndərin."
 
 msgctxt "profile.join_org"
-msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
-msgstr "Hazırda <strong>%(organization_name)s</strong> təşkilatına bağlısınız. Ayrıldıqdan sonra bu bölmədən yenidən müraciət göndərə və ya gözləyən dəvətləri qəbul edə bilərsiniz."
+msgid ""
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
+"pending invites."
+msgstr ""
+"Hazırda <strong>%(organization_name)s</strong> təşkilatına bağlısınız. "
+"Ayrıldıqdan sonra bu bölmədən yenidən müraciət göndərə və ya gözləyən "
+"dəvətləri qəbul edə bilərsiniz."
 
 msgctxt "profile.join_org"
-msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
-msgstr "Hazırda <strong>%(count)s</strong> təşkilat üzrə müraciətiniz təsdiq gözləyir."
+msgid ""
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
+msgstr ""
+"Hazırda <strong>%(count)s</strong> təşkilat üzrə müraciətiniz təsdiq "
+"gözləyir."
 
 msgctxt "profile.join_org"
-msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
-msgstr "Sizə <strong>%(count)s</strong> təşkilat dəvəti var. Dəvətlərdən %(role_label)s kimi qoşula bilərsiniz."
+msgid ""
+"You have <strong>%(count)s</strong> organization invites. You can join from "
+"those invites as %(role_label)s."
+msgstr ""
+"Sizə <strong>%(count)s</strong> təşkilat dəvəti var. Dəvətlərdən "
+"%(role_label)s kimi qoşula bilərsiniz."
 
 msgctxt "profile.join_org"
 msgid "cancel"
@@ -15901,7 +16148,9 @@ msgstr "Bildiriş göndər"
 
 msgctxt "profile.publish_notification"
 msgid "description"
-msgstr "Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin. Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək."
+msgstr ""
+"Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin. "
+"Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək."
 
 msgctxt "profile.publish_notification"
 msgid "target_group_label"
@@ -15995,7 +16244,8 @@ msgid "notif_title_required"
 msgstr "Bildiriş başlığı boş ola bilməz."
 
 msgid "notif_link_invalid"
-msgstr "Daxil edilmiş link düzgün deyil. http:// və ya https:// ilə başlamalıdır."
+msgstr ""
+"Daxil edilmiş link düzgün deyil. http:// və ya https:// ilə başlamalıdır."
 
 msgid "notif_image_too_large"
 msgstr "Şəkil maksimum 5 MB ola bilər."
@@ -16058,8 +16308,12 @@ msgid "Student Management"
 msgstr "Tələbə İdarəetməsi"
 
 msgctxt "staff.management"
-msgid "Manage students in %(organization_name)s. You can accept requests and send invitations."
-msgstr "%(organization_name)s daxilində tələbələri idarə edin. Müraciətləri qəbul edə və dəvətlər göndərə bilərsiniz."
+msgid ""
+"Manage students in %(organization_name)s. You can accept requests and send "
+"invitations."
+msgstr ""
+"%(organization_name)s daxilində tələbələri idarə edin. Müraciətləri qəbul "
+"edə və dəvətlər göndərə bilərsiniz."
 
 msgctxt "staff.management"
 msgid "Teacher view"
@@ -16078,8 +16332,12 @@ msgid "Choose which group you want to view in superadmin mode."
 msgstr "Superadmin rejimində baxmaq istədiyiniz qrupu seçin."
 
 msgctxt "staff.management"
-msgid "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
-msgstr "Heç nə seçilməsə, bütün hissələr açıq qalacaq və panellər seçdiyiniz filterlərə uyğun görünəcək."
+msgid ""
+"If nothing is selected, all sections stay open and panels are shown "
+"according to the filters you choose."
+msgstr ""
+"Heç nə seçilməsə, bütün hissələr açıq qalacaq və panellər seçdiyiniz "
+"filterlərə uyğun görünəcək."
 
 msgctxt "staff.management"
 msgid "Superadmin view"
@@ -16406,8 +16664,11 @@ msgid "Confirm"
 msgstr "Təsdiqlə"
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to remove the following user from the organization."
-msgstr "Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin."
+msgid ""
+"Please confirm that you want to remove the following user from the "
+"organization."
+msgstr ""
+"Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin."
 
 msgctxt "staff.management"
 msgid "Name"
@@ -16434,8 +16695,10 @@ msgid "Reason for removal..."
 msgstr "Uzaqlaşdırma səbəbi..."
 
 msgctxt "staff.management"
-msgid "Please confirm that you want to add the selected user(s) to the organization."
-msgstr "Seçilən istifadəçi(lər)i təşkilata əlavə etmək istədiyinizi təsdiqləyin."
+msgid ""
+"Please confirm that you want to add the selected user(s) to the organization."
+msgstr ""
+"Seçilən istifadəçi(lər)i təşkilata əlavə etmək istədiyinizi təsdiqləyin."
 
 msgctxt "staff.management"
 msgid "Please confirm that you want to invite the selected user(s)."
@@ -16654,8 +16917,12 @@ msgid "No organization found."
 msgstr "Təşkilat tapılmadı."
 
 msgctxt "exams.view.student.result.message"
-msgid "Result is not available yet. It will appear after the teacher review window closes."
-msgstr "Nəticə hələ hazır deyil. Müəllimin baxış pəncərəsi bağlandıqdan sonra görünəcək."
+msgid ""
+"Result is not available yet. It will appear after the teacher review window "
+"closes."
+msgstr ""
+"Nəticə hələ hazır deyil. Müəllimin baxış pəncərəsi bağlandıqdan sonra "
+"görünəcək."
 
 msgctxt "exams.template.teacher_exam_detail"
 msgid "hint_activate_exam_before_live"
@@ -16668,7 +16935,6 @@ msgstr "Canlı imtahanı başlatmaq üçün öncə imtahanı aktiv edin."
 # ═══════════════════════════════════════════════════════════════════════════
 # Account Deletion & User Management translations
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.section"
 msgid "delete_account_title"
@@ -16722,7 +16988,9 @@ msgstr "Hesabı silməyi təsdiqləyin"
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
-msgstr "Hesabınızı silmək istədiyinizə əminsiniz? Bu əməliyyatı təsdiqləmək üçün şifrənizi daxil edin."
+msgstr ""
+"Hesabınızı silmək istədiyinizə əminsiniz? Bu əməliyyatı təsdiqləmək üçün "
+"şifrənizi daxil edin."
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html
 msgctxt "profile.delete_account"
@@ -16765,7 +17033,6 @@ msgid "delete_account_success"
 msgstr "Hesabınız uğurla silindi."
 
 # Profile Edit Enhancements
-
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
 msgctxt "profile.edit"
 msgid "organization_type"
@@ -16824,10 +17091,10 @@ msgstr "Departamentinizi daxil edin"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
 msgctxt "profile.edit"
 msgid "edit_profile_type_change_warning"
-msgstr "Təşkilat tipini dəyişmək kurs girişinizə və icazələrinizə təsir edə bilər."
+msgstr ""
+"Təşkilat tipini dəyişmək kurs girişinizə və icazələrinizə təsir edə bilər."
 
 # Superadmin User Management
-
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "user_management_title"
@@ -16926,7 +17193,9 @@ msgstr "Həmişəlik sil"
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
 msgid "hard_delete_confirm"
-msgstr "Bu istifadəçini həmişəlik silmək istəyirsiniz? Bu əməliyyat geri qaytarıla bilməz!"
+msgstr ""
+"Bu istifadəçini həmişəlik silmək istəyirsiniz? Bu əməliyyat geri qaytarıla "
+"bilməz!"
 
 #: apps/accounts/templates/accounts/superadmin_user_management.html
 msgctxt "superadmin.users"
@@ -16960,7 +17229,8 @@ msgstr "AI funksiyaları aktiv"
 
 msgctxt "superadmin.ai_settings"
 msgid "hint_enabled"
-msgstr "Söndürüldükdə bütün AI xüsusiyyətləri (xülasə, qiymətləndirmə) deaktiv olur."
+msgstr ""
+"Söndürüldükdə bütün AI xüsusiyyətləri (xülasə, qiymətləndirmə) deaktiv olur."
 
 msgctxt "superadmin.ai_settings"
 msgid "section_rate_limit"
@@ -17036,7 +17306,6 @@ msgid "ai_settings"
 msgstr "AI Tənzimləmələri"
 
 # Superadmin User Management messages (i18n)
-
 #: apps/accounts/views/account_management.py
 msgid "superadmin_access_only"
 msgstr "Bu bölməyə yalnız superadminlər daxil ola bilər."
@@ -17068,7 +17337,6 @@ msgstr "Naməlum əməliyyat."
 # ═══════════════════════════════════════════════════════════════════════════
 # EXAM STATISTICS (teacher_exam_statistics & live session AI summary)
 # ═══════════════════════════════════════════════════════════════════════════
-
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_statistics"
@@ -17229,7 +17497,9 @@ msgstr "Bal paylanması"
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_score_distribution_hint"
-msgstr "Kiçik qruplarda dəqiq bal, böyük qruplarda interval üzrə qruplaşdırılmış nəticə göstərilir."
+msgstr ""
+"Kiçik qruplarda dəqiq bal, böyük qruplarda interval üzrə qruplaşdırılmış "
+"nəticə göstərilir."
 
 msgctxt "exams.template.exam_statistics"
 msgid "chart_group_avg_score"
@@ -17305,7 +17575,9 @@ msgstr "Xülasə yarat"
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_initial_message"
-msgstr "AI xülasəsi yaratmaq üçün yuxarıdakı düyməyə klikləyin. Analiz cari filtrlərə əsaslanacaq."
+msgstr ""
+"AI xülasəsi yaratmaq üçün yuxarıdakı düyməyə klikləyin. Analiz cari "
+"filtrlərə əsaslanacaq."
 
 msgctxt "exams.template.exam_statistics"
 msgid "ai_loading"
@@ -17470,15 +17742,19 @@ msgstr "GEMINI_API_KEY tənzimlənməyib."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "ai_rate_limit_exceeded"
-msgstr "AI sorğu limitiniz bitib. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr ""
+"AI sorğu limitiniz bitib. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "gemini_quota_exhausted"
-msgstr "AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra yenidən cəhd edin."
+msgstr ""
+"AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra "
+"yenidən cəhd edin."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "generation_failed"
-msgstr "AI xülasəsi yaradıla bilmədi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr ""
+"AI xülasəsi yaradıla bilmədi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 msgctxt "exams.service.ai_summary.error"
 msgid "ai_disabled"
@@ -17494,11 +17770,14 @@ msgstr "Qiymətləndirmək üçün cavab yoxdur."
 
 msgctxt "exams.service.ai_grading.error"
 msgid "gemini_quota_exhausted"
-msgstr "AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra yenidən cəhd edin."
+msgstr ""
+"AI xidmətinin gündəlik limiti bitib. Zəhmət olmasa bir neçə saat sonra "
+"yenidən cəhd edin."
 
 msgctxt "exams.service.ai_grading.error"
 msgid "grading_failed"
-msgstr "AI qiymətləndirmə uğursuz oldu. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr ""
+"AI qiymətləndirmə uğursuz oldu. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 msgctxt "exams.service.ai_grading.error"
 msgid "ai_disabled"
@@ -17594,7 +17873,9 @@ msgstr "Bal paylanması"
 
 msgctxt "liveExam.template.session_detail"
 msgid "chart_score_distribution_hint"
-msgstr "Kiçik sessiyalarda dəqiq bal sayı, böyük sessiyalarda isə interval üzrə qruplaşdırılmış iştirakçı sayı göstərilir."
+msgstr ""
+"Kiçik sessiyalarda dəqiq bal sayı, böyük sessiyalarda isə interval üzrə "
+"qruplaşdırılmış iştirakçı sayı göstərilir."
 
 msgctxt "liveExam.template.session_detail"
 msgid "heading_participant_results"
@@ -17719,3 +18000,935 @@ msgstr "nəticə"
 msgctxt "liveExam.template.session_detail"
 msgid "pagination_next"
 msgstr "Sonrakı ›"
+
+#: teacher_exam_results translations
+msgctxt "exams.template.teacher_exam_results"
+msgid "page_title_suffix"
+msgstr "İmtahan nəticələri"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_type"
+msgstr "Tip:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_status"
+msgstr "Status:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_active"
+msgstr "AKTİV"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "status_inactive"
+msgstr "Deaktiv"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "search_placeholder"
+msgstr "İstifadəçi axtar..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_label"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_statuses"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Qaralama"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "Davam edir"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Vaxtı bitib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_label"
+msgstr "Yoxlanıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_all_checks"
+msgstr "Yoxlama: hamısı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked"
+msgstr "Yoxlanıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_unchecked"
+msgstr "Yoxlanmayıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_from"
+msgstr "Başlama tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_date_to"
+msgstr "Bitmə tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_apply_filter"
+msgstr "Tətbiq et"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_reset_filter"
+msgstr "Seçimi sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_selected"
+msgstr "Seçilib:"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Hamısını seç"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear_selection"
+msgstr "Seçimi sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "heading_participant_results"
+msgstr "İştirakçı nəticələri"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_user"
+msgstr "İstifadəçi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_correct"
+msgstr "Düzgün"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_wrong"
+msgstr "Səhv"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_score"
+msgstr "Bal"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_start_time"
+msgstr "Başlama tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_end_time"
+msgstr "Bitirmə vaxtı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_duration"
+msgstr "Müddət (san.)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "col_action"
+msgstr "Əməliyyat"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "label_anonymous_view"
+msgstr "Anonim görünüş"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "badge_checked"
+msgstr "Yoxlanıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "empty_no_attempts"
+msgstr "Bu imtahan üzrə hələ cəhd yoxdur."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_title"
+msgstr "Cəhdləri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_message"
+msgstr "Seçilmiş nəticələr silinəcək."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "modal_delete_warning"
+msgstr "Bu əməliyyat geri qaytarılmır."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_close"
+msgstr "Bağla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_confirm_delete"
+msgstr "Silməni təsdiqlə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "page_title"
+msgstr "İmtahan Nəzarəti - Monitor"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "heading"
+msgstr "İmtahan Nəzarəti Monitoru"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "subtitle"
+msgstr ""
+"Bütün nəzarət altındakı imtahanlar üçün şübhəli hadisələr və tələbə "
+"vəziyyətləri"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_total_incidents"
+msgstr "Ümumi Pozuntu"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_flagged_students"
+msgstr "Bayraqlanmış Tələbə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stat_supervised_exams"
+msgstr "Nəzarətli İmtahan"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_severity_distribution"
+msgstr "Ciddilik Paylanması"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_violation_types"
+msgstr "Pozuntu Növləri"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_search_placeholder"
+msgstr "Tələbə və ya imtahan axtar..."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_exams"
+msgstr "Bütün imtahanlar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_all_statuses"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_active"
+msgstr "Aktiv"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_warned"
+msgstr "Xəbərdarlıq"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_locked"
+msgstr "Kilidli"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_removed"
+msgstr "Çıxarılmış"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "status_resumed"
+msgstr "Bərpa edilmiş"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_search"
+msgstr "Axtar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_exam"
+msgstr "İmtahan"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_violation_count"
+msgstr "Pozuntu Sayı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_start_time"
+msgstr "Başlama Vaxtı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_details"
+msgstr "Detallar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "col_actions"
+msgstr "Əməliyyatlar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_details"
+msgstr "Detallar"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_resume"
+msgstr "Bərpa et"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "empty_no_violations"
+msgstr "Hələlik heç bir pozuntu qeydə alınmayıb."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_info"
+msgstr "Məlumat"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_low"
+msgstr "Aşağı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_medium"
+msgstr "Orta"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_high"
+msgstr "Yüksək"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "sev_critical"
+msgstr "Kritik"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "chart_count_label"
+msgstr "Sayı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_resume"
+msgstr "Bu tələbəyə imtahana davam etməyə icazə vermək istəyirsiniz?"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_success"
+msgstr "Tələbəyə icazə verildi. Tələbənin imtahanı bərpa edildi."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "resume_error"
+msgstr "Xəta: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "connection_error"
+msgstr "Əlaqə xətası."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_title"
+msgstr "Xüsusi Konfiqurasiya"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_custom_desc"
+msgstr "Bütün parametrləri əl ilə tənzimləyin."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_title"
+msgstr "Yüngül Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_desc"
+msgstr ""
+"Minimal məhdudiyyətlər. Tələbələr daha sərbəst imtahan verir, yalnız tab "
+"dəyişmə izlənilir."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f2"
+msgstr "❌ Tam ekran tələb olunmur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f3"
+msgstr "❌ Kopyala/yapışdır bloklanmır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Maksimum 5 pozuntu, bərpa şansı verilir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_title"
+msgstr "Orta Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_desc"
+msgstr ""
+"Balanslaşdırılmış nəzarət. Əsas qoruma tədbirləri aktiv, müəllim nəzarəti "
+"ilə."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Sağ klik deaktiv edilir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Maksimum 3 pozuntu, müəllim bərpa edir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_title"
+msgstr "Ciddi Nəzarət Rejimi"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_desc"
+msgstr ""
+"Ən yüksək səviyyəli nəzarət. Bütün qoruma tədbirləri aktiv, ikinci şans "
+"yoxdur."
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Sağ klik deaktiv"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Mətn seçimi bloklanır"
+
+msgctxt "exams.template.create_edit_exam"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Maksimum 2 pozuntu, avtomatik təslim edilir, ikinci şans yoxdur"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_title"
+msgstr "Xüsusi Konfiqurasiya"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_custom_desc"
+msgstr "Bütün parametrləri əl ilə tənzimləyin."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_title"
+msgstr "Yüngül Nəzarət Rejimi"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_desc"
+msgstr ""
+"Minimal məhdudiyyətlər. Tələbələr daha sərbəst imtahan verir, yalnız tab "
+"dəyişmə izlənilir."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f1"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f2"
+msgstr "❌ Tam ekran tələb olunmur"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f3"
+msgstr "❌ Kopyala/yapışdır bloklanmır"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_light_f4"
+msgstr "⚙️ Maksimum 5 pozuntu, bərpa şansı verilir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_title"
+msgstr "Orta Nəzarət Rejimi"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_desc"
+msgstr ""
+"Balanslaşdırılmış nəzarət. Əsas qoruma tədbirləri aktiv, müəllim nəzarəti "
+"ilə."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f4"
+msgstr "✅ Sağ klik deaktiv edilir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_medium_f5"
+msgstr "⚙️ Maksimum 3 pozuntu, müəllim bərpa edir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_title"
+msgstr "Ciddi Nəzarət Rejimi"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_desc"
+msgstr ""
+"Ən yüksək səviyyəli nəzarət. Bütün qoruma tədbirləri aktiv, ikinci şans "
+"yoxdur."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f1"
+msgstr "✅ Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f2"
+msgstr "✅ Tab dəyişmə izlənir"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f3"
+msgstr "✅ Kopyala/yapışdır bloklanır"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f4"
+msgstr "✅ Sağ klik deaktiv"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f5"
+msgstr "✅ Mətn seçimi bloklanır"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "tpl_info_strict_f6"
+msgstr "⚙️ Maksimum 2 pozuntu, avtomatik təslim edilir, ikinci şans yoxdur"
+
+#: supervision_detail translations
+msgctxt "exams.template.supervision_detail"
+msgid "page_title"
+msgstr "Nəzarət Detalı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "breadcrumb_monitor"
+msgstr "İmtahan Nəzarəti"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading"
+msgstr "Nəzarət Detalı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam"
+msgstr "İmtahan"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_supervision_status"
+msgstr "Nəzarət Statusu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_count"
+msgstr "Pozuntu Sayı"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_exam_status"
+msgstr "İmtahan Statusu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_extra_chances"
+msgstr "Əlavə Şans"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_actions"
+msgstr "Müəllim əməliyyatları"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_resume"
+msgstr "İmtahanı Bərpa Et"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_grant_chance"
+msgstr "Əlavə Şans Ver"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_stop"
+msgstr "Dayandır"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_back"
+msgstr "Geri"
+
+msgctxt "exams.template.supervision_detail"
+msgid "heading_timeline"
+msgstr "Hadisə Xronologiyası"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_teacher_action"
+msgstr "Müəllim hərəkəti"
+
+msgctxt "exams.template.supervision_detail"
+msgid "label_violation_number"
+msgstr "Pozuntu"
+
+msgctxt "exams.template.supervision_detail"
+msgid "empty_no_incidents"
+msgstr "Heç bir hadisə qeydə alınmayıb."
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_resume"
+msgstr "Bu tələbənin imtahanını bərpa etmək istəyirsiniz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_grant_chance"
+msgstr ""
+"Bu tələbəyə əlavə şans verərək imtahana davam etməyə icazə vermək "
+"istəyirsiniz?"
+
+msgctxt "exams.template.supervision_detail"
+msgid "confirm_stop"
+msgstr ""
+"Bu tələbənin imtahanını dayandırmaq istəyirsiniz? İmtahan təslim ediləcək."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_success"
+msgstr "Əməliyyat uğurla tamamlandı."
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_error_prefix"
+msgstr "Xəta: "
+
+msgctxt "exams.template.supervision_detail"
+msgid "connection_error"
+msgstr "Əlaqə xətası."
+
+msgctxt "exams.template.supervision_detail"
+msgid "stop_success"
+msgstr "İmtahan dayandırıldı."
+
+#: supervision_monitor stop translations
+msgctxt "exams.template.supervision_monitor"
+msgid "action_stop"
+msgstr "Dayandır"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "confirm_stop"
+msgstr ""
+"Bu tələbənin imtahanını dayandırmaq istəyirsiniz? İmtahan təslim ediləcək."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_success"
+msgstr "İmtahan dayandırıldı."
+
+msgctxt "exams.template.supervision_monitor"
+msgid "stop_error"
+msgstr "Dayandırma xətası: "
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+#: supervision_monitor chart violation type labels
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_exited"
+msgstr "Tam ekrandan çıxış"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_fullscreen_restored"
+msgstr "Tam ekran bərpa edildi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_tab_switched"
+msgstr "Tab dəyişmə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_blurred"
+msgstr "Pəncərə fokusdan çıxdı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_window_focused"
+msgstr "Pəncərə fokusa qayıtdı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_copy_attempt"
+msgstr "Kopyalama cəhdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_paste_attempt"
+msgstr "Yapışdırma cəhdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_cut_attempt"
+msgstr "Kəsmə cəhdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_right_click_attempt"
+msgstr "Sağ klik cəhdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_keyboard_shortcut"
+msgstr "Klaviatura qısa yolu"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_text_select_attempt"
+msgstr "Mətn seçmə cəhdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_suspicious_repeated"
+msgstr "Şübhəli təkrar hərəkət"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_grace_period_expired"
+msgstr "Güzəşt müddəti bitdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_locked"
+msgstr "Avtomatik kilidləndi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_auto_submitted"
+msgstr "Avtomatik təslim edildi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_resumed"
+msgstr "Müəllim davam etdirdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_teacher_granted_chance"
+msgstr "Müəllim əlavə şans verdi"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_exam_started_supervised"
+msgstr "Nəzarətli imtahan başladı"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "vt_student_acknowledged"
+msgstr "Tələbə təsdiqlədi"
+
+#: SupervisionIncident model event_type choices
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_exited"
+msgstr "Tam ekrandan çıxış"
+
+msgctxt "supervision.incident.choice.event"
+msgid "fullscreen_restored"
+msgstr "Tam ekran bərpa edildi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "tab_switched"
+msgstr "Tab dəyişmə"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_blurred"
+msgstr "Pəncərə fokusdan çıxdı"
+
+msgctxt "supervision.incident.choice.event"
+msgid "window_focused"
+msgstr "Pəncərə fokusa qayıtdı"
+
+msgctxt "supervision.incident.choice.event"
+msgid "copy_attempt"
+msgstr "Kopyalama cəhdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "paste_attempt"
+msgstr "Yapışdırma cəhdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "cut_attempt"
+msgstr "Kəsmə cəhdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "right_click_attempt"
+msgstr "Sağ klik cəhdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "keyboard_shortcut"
+msgstr "Klaviatura qısa yolu"
+
+msgctxt "supervision.incident.choice.event"
+msgid "text_select_attempt"
+msgstr "Mətn seçmə cəhdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "suspicious_repeated"
+msgstr "Şübhəli təkrar hərəkət"
+
+msgctxt "supervision.incident.choice.event"
+msgid "grace_period_expired"
+msgstr "Güzəşt müddəti bitdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_locked"
+msgstr "Avtomatik kilidləndi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "auto_submitted"
+msgstr "Avtomatik təslim edildi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_resumed"
+msgstr "Müəllim davam etdirdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "teacher_granted_chance"
+msgstr "Müəllim əlavə şans verdi"
+
+msgctxt "supervision.incident.choice.event"
+msgid "exam_started_supervised"
+msgstr "Nəzarətli imtahan başladı"
+
+msgctxt "supervision.incident.choice.event"
+msgid "student_acknowledged"
+msgstr "Tələbə təsdiqlədi"
+
+#: SupervisionIncident model severity choices
+msgctxt "supervision.incident.choice.severity"
+msgid "info"
+msgstr "Məlumat"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "low"
+msgstr "Aşağı"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "medium"
+msgstr "Orta"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "high"
+msgstr "Yüksək"
+
+msgctxt "supervision.incident.choice.severity"
+msgid "critical"
+msgstr "Kritik"
+
+#: SupervisionIncident model field labels
+msgctxt "supervision.incident.field"
+msgid "event_type"
+msgstr "Hadisə növü"
+
+msgctxt "exams.template.supervision_detail"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+#: take_exam supervision JS i18n
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_title"
+msgstr "Nəzarət Rejimi Aktiv"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_desc"
+msgstr ""
+"Bu imtahan <strong>nəzarət rejimində</strong> keçirilir. Aşağıdakı qaydalar "
+"tətbiq olunur:"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen"
+msgstr "Tam ekran rejimi tələb olunur"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_tab"
+msgstr "Tab dəyişmə izlənilir"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_copy"
+msgstr "Kopyala/yapışdır bloklanıb"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_right_click"
+msgstr "Sağ klik deaktivdir"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_keyboard"
+msgstr "Klaviatura qısa yolları məhduddur"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_max_violation"
+msgstr "Maksimum {count} pozuntuya icazə verilir."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_ack_btn"
+msgstr "Başa düşdüm, davam et"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_badge_active"
+msgstr "Nəzarət aktiv"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_title"
+msgstr "⚠️ Xəbərdarlıq"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_msg"
+msgstr "İmtahan sahəsindən çıxdınız. Zəhmət olmasa geri qayıdın."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_timeout"
+msgstr "Vaxt bitərsə, bu pozuntu kimi qeyd olunacaq."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_violation"
+msgstr "Pozuntu"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_warning_return"
+msgstr "Tam ekrana qayıt"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_title"
+msgstr "İmtahan Dayandırıldı"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_msg"
+msgstr "Maksimum pozuntu limitinə çatdınız."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_wait"
+msgstr "İmtahanınız dayandırılıb. Müəllim qərar qəbul edənə qədər gözləyin."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_locked_waiting"
+msgstr "Müəllim cavabını gözləyirik..."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_title"
+msgstr "⚠️ Diqqət!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_threshold_msg"
+msgstr "Siz artıq pozuntu limitinin 75%-inə çatmısınız! Yalnız {remaining} pozuntuya icazə qalıb. Daha diqqətli olun!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_title"
+msgstr "İmtahan bərpa edildi!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_msg"
+msgstr "Davam etmək üçün tam ekrana qayıdın."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_btn"
+msgstr "Tam ekrana keç və davam et"
+
+msgctxt "supervision.view.api"
+msgid "operation_not_allowed"
+msgstr "Bu əməliyyat icra edilə bilməz."

@@ -273,6 +273,15 @@ def take_exam(request, slug, attempt_id):
         )
 
     # GET sorğusu
+    # Load supervision status
+    from apps.exams.services.supervision import get_attempt_supervision_status
+
+    supervision_data = get_attempt_supervision_status(attempt)
+
+    # If attempt is locked/removed by supervision, show the locked state
+    if attempt.supervision_status in ("locked", "removed") and not attempt.is_finished:
+        pass  # Template will handle the locked overlay
+
     context = {
         "exam": exam,
         "attempt": attempt,
@@ -283,5 +292,6 @@ def take_exam(request, slug, attempt_id):
         "history_url": history_url,
         "previous_attempts": previous_attempts,
         "previous_attempts_count": len(previous_attempts),
+        "supervision": supervision_data,
     }
     return render(request, "exams/student/take_exam.html", context)

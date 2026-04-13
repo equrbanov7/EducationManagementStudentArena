@@ -18,6 +18,14 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         ("expired", pgettext_lazy("exams.model.attempt.choice.status", "expired")),
     )
 
+    SUPERVISION_STATUS_CHOICES = (
+        ("active", pgettext_lazy("exams.model.attempt.choice.supervision_status", "active")),
+        ("warned", pgettext_lazy("exams.model.attempt.choice.supervision_status", "warned")),
+        ("locked", pgettext_lazy("exams.model.attempt.choice.supervision_status", "locked")),
+        ("removed", pgettext_lazy("exams.model.attempt.choice.supervision_status", "removed")),
+        ("resumed", pgettext_lazy("exams.model.attempt.choice.supervision_status", "resumed")),
+    )
+
     checked_by_teacher = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "checked_by_teacher"),
@@ -58,6 +66,20 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     teacher_feedback = models.TextField(
         blank=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_feedback"),
+    )
+    supervision_status = models.CharField(
+        max_length=20,
+        choices=SUPERVISION_STATUS_CHOICES,
+        default="active",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_status"),
+    )
+    supervision_violation_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_violation_count"),
+    )
+    supervision_extra_chances = models.PositiveIntegerField(
+        default=0,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_extra_chances"),
     )
 
     class Meta:
