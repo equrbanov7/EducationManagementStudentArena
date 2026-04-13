@@ -18753,3 +18753,16 @@ msgstr "Terminated"
 msgctxt "liveExam.template.session_detail"
 msgid "heading_per_question_charts"
 msgstr "Per-question option statistics"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "hr"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "min"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "sec"

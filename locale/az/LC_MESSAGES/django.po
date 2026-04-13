@@ -18964,3 +18964,16 @@ msgstr "Dayandırılıb"
 msgctxt "liveExam.template.session_detail"
 msgid "heading_per_question_charts"
 msgstr "Sual üzrə variant statistikası"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "saat"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "dəq"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "san"
