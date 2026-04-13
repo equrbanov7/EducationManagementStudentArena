@@ -382,8 +382,35 @@ body.host-live-page.host-presentation-page .present-view--lobby {
     box-shadow: 0 30px 80px rgba(8, 23, 55, 0.26);
 }
 
-body.host-live-page.host-presentation-page .lobby-stage__join-board {
-    width: min(100%, calc(100% - 80px));
+body.host-presentation-page .lobby-stage__join-board {
+    width: min(100%, calc(100% - 60px));
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 1fr) 200px;
+}
+
+body.host-presentation-page .lobby-stage__join-copy,
+body.host-presentation-page .lobby-stage__pin,
+body.host-presentation-page .lobby-stage__qr {
+    padding: 24px 30px;
+}
+
+body.host-presentation-page .lobby-stage__join-copy strong {
+    font-size: clamp(1.4rem, 2.6vw, 2.5rem);
+}
+
+body.host-presentation-page .lobby-stage__pin strong {
+    font-size: clamp(2rem, 4vw, 3.8rem);
+    letter-spacing: 0.06em;
+}
+
+body.host-presentation-page .lobby-stage__pin small {
+    font-size: 1.1rem;
+}
+
+body.host-presentation-page .lobby-stage__qr img {
+    width: 164px;
+    height: 164px;
+    padding: 8px;
+    border-radius: 20px;
 }
 
 .lobby-stage__join-copy,
@@ -1905,6 +1932,23 @@ body.host-presentation-page .distribution-note {
     font-size: 0.95rem;
 }
 
+.reveal-chart-area {
+    width: min(820px, 100%);
+    height: 220px;
+    margin: 0 auto 12px;
+    padding: 14px 18px;
+    border-radius: 22px;
+    background: rgba(15, 12, 50, 0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+}
+
+body.host-presentation-page .reveal-chart-area {
+    width: min(1040px, calc(100% - 180px));
+    height: 260px;
+    padding: 18px 24px;
+}
+
 .distribution-chart {
     width: min(980px, 100%);
     margin: -4px auto 4px;
@@ -3178,7 +3222,7 @@ body.host-presentation-page .scoreboard-row__score {
 
 .qr-modal__pin-badge {
     position: absolute;
-    top: 18px;
+    top: -25px;
     left: 50%;
     transform: translateX(-50%);
     display: inline-flex;
@@ -3193,7 +3237,7 @@ body.host-presentation-page .scoreboard-row__score {
 }
 
 .qr-modal__pin-badge span {
-    font-size: 0.78rem;
+    font-size: 2.78rem;
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -3202,7 +3246,7 @@ body.host-presentation-page .scoreboard-row__score {
 
 .qr-modal__pin-badge strong {
     font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono", "Menlo", "Consolas", monospace;
-    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    font-size: clamp(1rem, 4.4vw, 3.4rem);
     letter-spacing: 0.18em;
 }
 
