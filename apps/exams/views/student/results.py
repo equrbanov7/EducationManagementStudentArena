@@ -1,8 +1,9 @@
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.core.paginator import Paginator
+from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -113,6 +114,7 @@ def student_exam_history(request):
     active_tenant_exams = tenant_scoped_exams(request)
     return_to = current_return_to(request)
     exam_slug = (request.GET.get("exam") or "").strip()
+    search_query = (request.GET.get("q") or "").strip()
     exam = None
 
     attempts = (
@@ -129,10 +131,30 @@ def student_exam_history(request):
         exam = get_object_or_404(active_tenant_exams, slug=exam_slug)
         attempts = attempts.filter(exam=exam)
 
-    attempts = annotate_attempt_result_visibility(list(attempts))
+    if search_query:
+        attempts = attempts.filter(Q(exam__title__icontains=search_query))
+
+    total_attempt_count = attempts.count()
+
+    # Pagination
+    paginator = Paginator(attempts, 12)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    visible_attempts = annotate_attempt_result_visibility(list(page_obj.object_list))
     current_path = request.get_full_path()
-    for attempt in attempts:
+    for attempt in visible_attempts:
         attempt.result_url = build_exam_result_url(attempt, return_to=current_path)
+
+    # Build extra_query for pagination links (preserve filters)
+    pagination_params = {}
+    if exam_slug:
+        pagination_params["exam"] = exam_slug
+    if search_query:
+        pagination_params["q"] = search_query
+    if return_to:
+        pagination_params["return_to"] = return_to
+    extra_query = urlencode(pagination_params)
 
     back_url = return_to
     if not back_url:
@@ -151,13 +173,16 @@ def student_exam_history(request):
                 history_max_score = exam.questions.aggregate(total=Sum("points")).get("total") or 0
 
     context = {
-        "attempts": attempts,
+        "attempts": visible_attempts,
         "exam": exam,
         "back_url": back_url,
         "can_start_exam": bool(exam and exam.can_user_start(request.user, code=None)[0]),
         "history_title": exam.title if exam else "",
-        "history_attempt_count": len(attempts),
+        "history_attempt_count": total_attempt_count,
         "history_attempts_left": exam.attempts_left_for(request.user) if exam else None,
         "history_max_score": history_max_score,
+        "page_obj": page_obj,
+        "search_query": search_query,
+        "extra_query": extra_query,
     }
     return render(request, "exams/student/student_exam_history.html", context)

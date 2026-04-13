@@ -18721,3 +18721,56 @@ msgstr "Enter fullscreen and continue"
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "This operation cannot be performed."
+
+msgctxt "supervision.view.api"
+msgid "attempt_already_terminated"
+msgstr "This attempt has already been terminated and cannot be restored."
+
+#: supervision_monitor — terminated action button
+msgctxt "exams.template.supervision_monitor"
+msgid "action_terminated"
+msgstr "Terminated"
+
+#: supervision_monitor — date filters and back button
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_from"
+msgstr "Date from"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_to"
+msgstr "Date to"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_back"
+msgstr "Back"
+
+#: supervision_detail — terminated action button
+msgctxt "exams.template.supervision_detail"
+msgid "action_terminated"
+msgstr "Terminated"
+
+#: liveExam session_detail — per-question charts heading
+msgctxt "liveExam.template.session_detail"
+msgid "heading_per_question_charts"
+msgstr "Per-question option statistics"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "hr"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "min"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "sec"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "loading"
+msgstr "Loading..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "loading"
+msgstr "Loading..."

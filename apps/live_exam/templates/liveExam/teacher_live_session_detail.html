@@ -302,6 +302,30 @@
         <div class="sd-pagination" id="questionPagination"></div>
     </div>
 
+    <!-- ═══════════ Per-Question Option Charts ═══════════ -->
+    {% if question_stats %}
+    <div class="sd-panel">
+        <div class="sd-panel__head">
+            <div class="sd-panel__title"><i class="fas fa-chart-bar"></i> {% trans "heading_per_question_charts" context "liveExam.template.session_detail" %}</div>
+        </div>
+        <div style="padding:22px">
+            <div id="perQuestionChartsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+                {% for qs in question_stats %}
+                <div class="sd-chart-box" style="margin:0">
+                    <div class="sd-chart-box__title" title="{{ qs.question.text }}">
+                        <i class="fas fa-chart-bar"></i>
+                        Q{{ forloop.counter }}: {{ qs.question.text|truncatechars:35 }}
+                    </div>
+                    <div class="sd-chart-wrap" style="height:200px">
+                        <canvas id="perQChart{{ forloop.counter0 }}"></canvas>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- ═══════════ AI Summary ═══════════ -->
     <div style="background:linear-gradient(135deg,#f0f9ff 0%,#faf5ff 100%);border-radius:16px;border:1px solid #c7d2fe;padding:24px;margin-bottom:28px" id="aiSummaryPanel">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -562,6 +586,56 @@
             }
         }
     }, hasItems(scoreDistributionCounts), "{% trans 'chart_empty_distribution' context 'liveExam.template.session_detail' %}");
+
+    /* Per-question option distribution charts */
+    var perQuestionOptionStats = getArray("per_question_option_stats");
+    perQuestionOptionStats.forEach(function (qData, idx) {
+        var canvasId = "perQChart" + idx;
+        if (!qData || !hasItems(qData.labels)) {
+            showChartNotice(canvasId, "{% trans 'chart_empty_question_accuracy' context 'liveExam.template.session_detail' %}");
+            return;
+        }
+        createChart(canvasId, {
+            type: "bar",
+            data: {
+                labels: qData.labels,
+                datasets: [{
+                    label: "{% trans 'chart_label_participant_count' context 'liveExam.template.session_detail' %}",
+                    data: qData.counts,
+                    backgroundColor: qData.colors,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barPercentage: 0.65,
+                    maxBarThickness: 48
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: Object.assign({}, tooltipStyle, {
+                        callbacks: {
+                            label: function (item) {
+                                return item.raw + " " + "{% trans 'chart_label_participant_count' context 'liveExam.template.session_detail' %}";
+                            }
+                        }
+                    })
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: "#f1f5f9" },
+                        ticks: { precision: 0, font: { family: fontFamily, size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: fontFamily, size: 12, weight: "bold" } }
+                    }
+                }
+            }
+        }, true, "");
+    });
 
     /* ═══════════ Search + Pagination ═══════════ */
     function setupTable(tableId, searchId, paginationId) {
