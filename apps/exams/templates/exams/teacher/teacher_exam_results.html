@@ -19,10 +19,22 @@
             font-style: italic;
             color: #6c757d;
         }
+
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:99998; justify-content:center; align-items:center; }
+        .loading-overlay.show { display:flex; }
+        .loading-spinner { text-align:center; color:#007bff; }
+        .loading-spinner i { font-size:2.5rem; }
+        .loading-spinner p { margin-top:0.75rem; font-size:0.95rem; color:#555; font-weight:600; }
     </style>
 {% endblock %}
 
 {% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p>{% trans "loading" context "exams.template.teacher_exam_results" %}</p>
+    </div>
+</div>
 <div class="container my-4">
     <h1 class="h3">{{ exam.title }} - {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}</h1>
 
@@ -176,16 +188,104 @@
                             <th></th>
                         {% endif %}
                         <th>#</th>
-                        <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_correct" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_wrong" context "exams.template.teacher_exam_results" %}</th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=user&sort_dir={% if sort_by == 'user' and sort_dir == 'asc' %}desc{% elif sort_by == 'user' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_user" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "user" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "user" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=status&sort_dir={% if sort_by == 'status' and sort_dir == 'asc' %}desc{% elif sort_by == 'status' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_status" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "status" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "status" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=correct&sort_dir={% if sort_by == 'correct' and sort_dir == 'asc' %}desc{% elif sort_by == 'correct' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_correct" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "correct" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "correct" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=wrong&sort_dir={% if sort_by == 'wrong' and sort_dir == 'asc' %}desc{% elif sort_by == 'wrong' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_wrong" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "wrong" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "wrong" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         {% if exam.exam_type == 'written' %}
-                            <th>{% trans "col_score" context "exams.template.teacher_exam_results" %}</th>
+                            <th>
+                                <a href="?{{ sort_base_query }}&sort_by=score&sort_dir={% if sort_by == 'score' and sort_dir == 'asc' %}desc{% elif sort_by == 'score' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                    {% trans "col_score" context "exams.template.teacher_exam_results" %}
+                                    {% if sort_by == "score" and sort_dir == "asc" %}
+                                        <i class="fas fa-sort-up"></i>
+                                    {% elif sort_by == "score" and sort_dir == "desc" %}
+                                        <i class="fas fa-sort-down"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
                         {% endif %}
-                        <th>{% trans "col_start_time" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_end_time" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_duration" context "exams.template.teacher_exam_results" %}</th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=start&sort_dir={% if sort_by == 'start' and sort_dir == 'asc' %}desc{% elif sort_by == 'start' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_start_time" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "start" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "start" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=end&sort_dir={% if sort_by == 'end' and sort_dir == 'asc' %}desc{% elif sort_by == 'end' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_end_time" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "end" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "end" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?{{ sort_base_query }}&sort_by=duration&sort_dir={% if sort_by == 'duration' and sort_dir == 'asc' %}desc{% elif sort_by == 'duration' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
+                                {% trans "col_duration" context "exams.template.teacher_exam_results" %}
+                                {% if sort_by == "duration" and sort_dir == "asc" %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "duration" and sort_dir == "desc" %}
+                                    <i class="fas fa-sort-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th>{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
                     </tr>
                 </thead>
@@ -239,7 +339,7 @@
                             </td>
                             <td>
                                 {% if att.duration_seconds %}
-                                    {{ att.duration_seconds }}
+                                    {{ att.duration_seconds|format_duration }}
                                 {% else %}
                                     <span class="text-muted">-</span>
                                 {% endif %}
@@ -379,6 +479,17 @@ document.addEventListener('DOMContentLoaded', function() {
         singleDeleteDataAttribute: 'attemptId'
     });
     {% endif %}
+
+    // --- Loading overlay on navigation ---
+    var loadingOverlay = document.getElementById("loadingOverlay");
+    function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
+    document.querySelectorAll("thead th a, .pagination-wrapper a").forEach(function(el) {
+        el.addEventListener("click", showLoading);
+    });
+    var filtersForm = document.getElementById("resultsFiltersForm");
+    if (filtersForm) {
+        filtersForm.addEventListener("submit", showLoading);
+    }
 });
 </script>
 {% endblock %}

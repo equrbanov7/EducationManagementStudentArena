@@ -133,12 +133,18 @@
     <div class="action-bar">
         <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
-        <button class="btn btn-resume-action" data-action="resume" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="false">
-            <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_detail" %}
-        </button>
-        <button class="btn btn-chance-action" data-action="chance" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="true">
-            <i class="fas fa-plus-circle"></i> {% trans "action_grant_chance" context "exams.template.supervision_detail" %}
-        </button>
+            {% if attempt.is_finished %}
+            <button class="btn btn-resume-action" disabled style="opacity:0.5;cursor:not-allowed;" title="{% trans 'action_terminated' context 'exams.template.supervision_detail' %}">
+                <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_detail" %}
+            </button>
+            {% else %}
+            <button class="btn btn-resume-action" data-action="resume" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="false">
+                <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_detail" %}
+            </button>
+            <button class="btn btn-chance-action" data-action="chance" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="true">
+                <i class="fas fa-plus-circle"></i> {% trans "action_grant_chance" context "exams.template.supervision_detail" %}
+            </button>
+            {% endif %}
         {% endif %}
         {% if not attempt.is_finished %}
         <button class="btn btn-stop-action" data-action="stop" data-attempt-id="{{ attempt.id }}">

@@ -1063,7 +1063,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(matching_item["countdown_seconds"], 0)
         self.assertContains(response, "Yoxla")
         self.assertContains(response, "Anonim görünüş")
-        self.assertContains(response, "<th>Bal</th>", html=True)
+        self.assertContains(response, "Bal")
         self.assertContains(response, "<strong>0</strong>", html=True)
         self.assertNotContains(response, "<strong>0%</strong>", html=True)
 
@@ -1114,7 +1114,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertTrue(locked_item["can_view_name"])
         self.assertEqual(locked_item["action_label"], "Bax")
         self.assertContains(locked_response, "Bax")
-        self.assertContains(locked_response, "<th>Bal</th>", html=True)
+        self.assertContains(locked_response, "Bal")
         self.assertContains(locked_response, "<strong>74</strong>", html=True)
         self.assertNotContains(locked_response, "<strong>74%</strong>", html=True)
 
