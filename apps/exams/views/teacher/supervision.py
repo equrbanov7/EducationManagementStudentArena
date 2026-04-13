@@ -230,6 +230,13 @@ def teacher_resume_api(request, attempt_id):
         exam__organization=org,
     )
 
+    # Explicitly block resume for terminated/finished attempts
+    if attempt.is_finished:
+        return JsonResponse(
+            {"error": pgettext("supervision.view.api", "attempt_already_terminated")},
+            status=403,
+        )
+
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):

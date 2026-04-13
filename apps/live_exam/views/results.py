@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from apps.exams.models import Exam, ExamQuestion
+from apps.exams.domain.question_bank import ExamQuestionOption
 from apps.exams.services.access_policy import is_teacher_user
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -147,6 +148,7 @@ def teacher_live_session_detail(request, slug, pin):
     ).order_by("order")
 
     question_stats = []
+    per_question_option_stats = []
     for q in questions:
         answers = LiveAnswer.objects.filter(session=session, question_id=q.id)
         total = answers.count()
@@ -160,6 +162,29 @@ def teacher_live_session_detail(request, slug, pin):
                 "incorrect_answers": total - correct,
                 "accuracy_percent": (round(correct * 100 / total, 1) if total > 0 else 0),
                 "avg_answer_ms": round(avg_ms),
+            }
+        )
+
+        # Per-question option distribution for chart
+        options = ExamQuestionOption.objects.filter(question=q).order_by("label", "id")
+        option_labels = []
+        option_counts = []
+        option_colors = []
+        for opt in options:
+            label_text = opt.label or opt.text[:20]
+            option_labels.append(label_text)
+            # Count answers that chose this option (via choice_id or choice_ids)
+            chosen_count = answers.filter(
+                Q(choice_id=opt.id) | Q(choice_ids__contains=[opt.id])
+            ).count()
+            option_counts.append(chosen_count)
+            option_colors.append("#059669" if opt.is_correct else "#6b7280")
+        per_question_option_stats.append(
+            {
+                "question_text": (q.text[:40] + "...") if len(q.text) > 40 else q.text,
+                "labels": option_labels,
+                "counts": option_counts,
+                "colors": option_colors,
             }
         )
 
@@ -189,6 +214,7 @@ def teacher_live_session_detail(request, slug, pin):
         "question_avg_ms": [qs["avg_answer_ms"] for qs in question_stats],
         "score_distribution_labels": score_distribution_labels,
         "score_distribution_counts": score_distribution_counts,
+        "per_question_option_stats": per_question_option_stats,
     }
 
     # ── AI Summary (AJAX) ─────────────────────────────────────────────
