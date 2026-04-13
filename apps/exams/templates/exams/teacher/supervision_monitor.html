@@ -68,6 +68,12 @@
     .confirm-box .btn-cancel { padding:0.5rem 1.25rem; border-radius:8px; border:1px solid #dee2e6; background:#fff; color:#333; cursor:pointer; font-size:0.9rem; }
     .confirm-box .btn-confirm-danger { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#dc3545; color:#fff; cursor:pointer; font-size:0.9rem; }
     .confirm-box .btn-confirm-success { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#28a745; color:#fff; cursor:pointer; font-size:0.9rem; }
+    /* Loading overlay */
+    .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:99998; justify-content:center; align-items:center; }
+    .loading-overlay.show { display:flex; }
+    .loading-spinner { text-align:center; color:#007bff; }
+    .loading-spinner i { font-size:2.5rem; }
+    .loading-spinner p { margin-top:0.75rem; font-size:0.95rem; color:#555; font-weight:600; }
     @media (max-width: 768px) {
         .chart-section { grid-template-columns: 1fr; }
         .filter-bar { flex-direction: column; }
@@ -78,15 +84,21 @@
 {% endblock %}
 
 {% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p>{% trans "loading" context "exams.template.supervision_monitor" %}</p>
+    </div>
+</div>
 <div class="monitor-wrapper">
     <div class="monitor-header">
         <div class="monitor-header-left">
             <h1><i class="fas fa-shield-alt"></i> {% trans "heading" context "exams.template.supervision_monitor" %}</h1>
             <p>{% trans "subtitle" context "exams.template.supervision_monitor" %}</p>
         </div>
-        <a href="javascript:history.back()" class="btn-back-top">
+        <button type="button" class="btn-back-top" id="backBtn">
             <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.supervision_monitor" %}
-        </a>
+        </button>
     </div>
 
     {# Stats Cards #}
@@ -151,11 +163,66 @@
         <table>
             <thead>
                 <tr>
-                    <th>{% trans "col_student" context "exams.template.supervision_monitor" %}</th>
-                    <th>{% trans "col_exam" context "exams.template.supervision_monitor" %}</th>
-                    <th>{% trans "col_violation_count" context "exams.template.supervision_monitor" %}</th>
-                    <th>{% trans "col_status" context "exams.template.supervision_monitor" %}</th>
-                    <th>{% trans "col_start_time" context "exams.template.supervision_monitor" %}</th>
+                    <th>
+                        <a href="?{{ sort_base_query }}&sort_by=student&sort_dir={% if sort_by == 'student' and sort_dir == 'asc' %}desc{% elif sort_by == 'student' and sort_dir == 'desc' %}{% else %}asc{% endif %}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                            {% trans "col_student" context "exams.template.supervision_monitor" %}
+                            {% if sort_by == "student" and sort_dir == "asc" %}
+                                <i class="fas fa-sort-up"></i>
+                            {% elif sort_by == "student" and sort_dir == "desc" %}
+                                <i class="fas fa-sort-down"></i>
+                            {% else %}
+                                <i class="fas fa-sort" style="opacity:0.3"></i>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?{{ sort_base_query }}&sort_by=exam&sort_dir={% if sort_by == 'exam' and sort_dir == 'asc' %}desc{% elif sort_by == 'exam' and sort_dir == 'desc' %}{% else %}asc{% endif %}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                            {% trans "col_exam" context "exams.template.supervision_monitor" %}
+                            {% if sort_by == "exam" and sort_dir == "asc" %}
+                                <i class="fas fa-sort-up"></i>
+                            {% elif sort_by == "exam" and sort_dir == "desc" %}
+                                <i class="fas fa-sort-down"></i>
+                            {% else %}
+                                <i class="fas fa-sort" style="opacity:0.3"></i>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?{{ sort_base_query }}&sort_by=violations&sort_dir={% if sort_by == 'violations' and sort_dir == 'asc' %}desc{% elif sort_by == 'violations' and sort_dir == 'desc' %}{% else %}asc{% endif %}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                            {% trans "col_violation_count" context "exams.template.supervision_monitor" %}
+                            {% if sort_by == "violations" and sort_dir == "asc" %}
+                                <i class="fas fa-sort-up"></i>
+                            {% elif sort_by == "violations" and sort_dir == "desc" %}
+                                <i class="fas fa-sort-down"></i>
+                            {% else %}
+                                <i class="fas fa-sort" style="opacity:0.3"></i>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?{{ sort_base_query }}&sort_by=status&sort_dir={% if sort_by == 'status' and sort_dir == 'asc' %}desc{% elif sort_by == 'status' and sort_dir == 'desc' %}{% else %}asc{% endif %}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                            {% trans "col_status" context "exams.template.supervision_monitor" %}
+                            {% if sort_by == "status" and sort_dir == "asc" %}
+                                <i class="fas fa-sort-up"></i>
+                            {% elif sort_by == "status" and sort_dir == "desc" %}
+                                <i class="fas fa-sort-down"></i>
+                            {% else %}
+                                <i class="fas fa-sort" style="opacity:0.3"></i>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?{{ sort_base_query }}&sort_by=start&sort_dir={% if sort_by == 'start' and sort_dir == 'asc' %}desc{% elif sort_by == 'start' and sort_dir == 'desc' %}{% else %}asc{% endif %}" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:4px">
+                            {% trans "col_start_time" context "exams.template.supervision_monitor" %}
+                            {% if sort_by == "start" and sort_dir == "asc" %}
+                                <i class="fas fa-sort-up"></i>
+                            {% elif sort_by == "start" and sort_dir == "desc" %}
+                                <i class="fas fa-sort-down"></i>
+                            {% else %}
+                                <i class="fas fa-sort" style="opacity:0.3"></i>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>{% trans "col_details" context "exams.template.supervision_monitor" %}</th>
                     <th>{% trans "col_actions" context "exams.template.supervision_monitor" %}</th>
                 </tr>
@@ -215,24 +282,7 @@
     </div>
 
     {# Pagination #}
-    {% if page_obj.has_other_pages %}
-    <div class="pagination-wrapper">
-        {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">&laquo;</a>
-        {% endif %}
-        {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <span class="current">{{ num }}</span>
-            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-            <a href="?page={{ num }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">{{ num }}</a>
-            {% endif %}
-        {% endfor %}
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&exam={{ selected_exam_id|default:'' }}&status={{ status_filter }}&date_from={{ date_from_value }}&date_to={{ date_to_value }}">&raquo;</a>
-        {% endif %}
-        <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-    </div>
-    {% endif %}
+    {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
 
     {# Charts (below table) #}
     <div class="chart-section" style="margin-top:2rem;">
@@ -303,6 +353,12 @@ var SUPERVISION_I18N = {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
+    // --- Back button ---
+    var backBtn = document.getElementById("backBtn");
+    if (backBtn) {
+        backBtn.addEventListener("click", function() { history.back(); });
+    }
+
     // --- Charts ---
     try {
         var severityData = JSON.parse(document.getElementById("severity-data").textContent);
@@ -491,6 +547,17 @@ document.addEventListener("DOMContentLoaded", function() {
             );
         }
     });
+
+    // --- Loading overlay on navigation ---
+    var loadingOverlay = document.getElementById("loadingOverlay");
+    function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
+    document.querySelectorAll(".monitor-table th a, .pagination-wrapper a, .filter-bar .btn-search").forEach(function(el) {
+        el.addEventListener("click", showLoading);
+    });
+    var filterForm = document.getElementById("monitorFilterForm");
+    if (filterForm) {
+        filterForm.addEventListener("submit", showLoading);
+    }
 });
 </script>
 {% endblock %}

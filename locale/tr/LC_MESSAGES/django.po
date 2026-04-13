@@ -18705,3 +18705,11 @@ msgstr "dk"
 msgctxt "exams.filter.duration"
 msgid "unit_seconds"
 msgstr "sn"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "loading"
+msgstr "Yükleniyor..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "loading"
+msgstr "Yükleniyor..."
