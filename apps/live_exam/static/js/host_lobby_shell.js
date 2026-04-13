@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
         playersList: document.getElementById("playersList"),
         autoMode: document.getElementById("autoMode"),
         maxParticipants: document.getElementById("maxParticipants"),
+        sfxVolumeSlider: document.getElementById("sfxVolumeSlider"),
+        sfxVolumeLabel: document.getElementById("sfxVolumeLabel"),
         themeButtons: Array.from(document.querySelectorAll("[data-theme-key]")),
     };
 
@@ -192,6 +194,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dom.maxParticipants) {
             dom.maxParticipants.value = String(snapshot.settings?.max_participants || 100);
         }
+        if (dom.sfxVolumeSlider && snapshot.settings?.sfx_volume != null) {
+            const vol = Number(snapshot.settings.sfx_volume);
+            dom.sfxVolumeSlider.value = vol;
+            if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${vol}%`;
+            if (typeof setSfxVolume === "function") setSfxVolume(vol);
+        }
 
         const showLobbyActions = snapshot.sessionState === "lobby";
         const showFlowAction = snapshot.sessionState === "question" || snapshot.sessionState === "reveal";
@@ -238,6 +246,24 @@ document.addEventListener("DOMContentLoaded", () => {
             controller.updateSettings({ [key]: element.value });
         });
     });
+
+    if (dom.sfxVolumeSlider) {
+        const initVol = Number(currentState.settings?.sfx_volume ?? 70);
+        dom.sfxVolumeSlider.value = initVol;
+        if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${initVol}%`;
+        if (typeof setSfxVolume === "function") setSfxVolume(initVol);
+
+        dom.sfxVolumeSlider.addEventListener("input", () => {
+            const vol = Number(dom.sfxVolumeSlider.value) || 0;
+            if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${vol}%`;
+            if (typeof setSfxVolume === "function") setSfxVolume(vol);
+        });
+        dom.sfxVolumeSlider.addEventListener("change", () => {
+            if (syncingControls) return;
+            const vol = Number(dom.sfxVolumeSlider.value) || 0;
+            controller.updateSettings({ sfx_volume: vol });
+        });
+    }
 
     dom.themeButtons.forEach((button) => {
         button.addEventListener("click", () => {
