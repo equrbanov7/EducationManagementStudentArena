@@ -18932,3 +18932,56 @@ msgstr "Tam ekrana keç və davam et"
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu əməliyyat icra edilə bilməz."
+
+msgctxt "supervision.view.api"
+msgid "attempt_already_terminated"
+msgstr "Bu cəhd artıq dayandırılıb və bərpa edilə bilməz."
+
+#: supervision_monitor — terminated action button
+msgctxt "exams.template.supervision_monitor"
+msgid "action_terminated"
+msgstr "Dayandırılıb"
+
+#: supervision_monitor — date filters and back button
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_from"
+msgstr "Tarixdən"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_to"
+msgstr "Tarixə"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_back"
+msgstr "Geri"
+
+#: supervision_detail — terminated action button
+msgctxt "exams.template.supervision_detail"
+msgid "action_terminated"
+msgstr "Dayandırılıb"
+
+#: liveExam session_detail — per-question charts heading
+msgctxt "liveExam.template.session_detail"
+msgid "heading_per_question_charts"
+msgstr "Sual üzrə variant statistikası"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "saat"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "dəq"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "san"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "loading"
+msgstr "Yüklənir..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "loading"
+msgstr "Yüklənir..."
