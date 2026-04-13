@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "page_title" context "exams.template.supervision_detail" %} - {{ student.username }}{% endblock %}
+
+{% block extraCss %}
+<style nonce="{{ request.csp_nonce }}">
+    .detail-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .detail-header { margin-bottom: 2rem; }
+    .detail-header h1 { font-size: 1.4rem; color: #dc3545; display: flex; align-items: center; gap: 0.5rem; }
+    .detail-header h1 i { color: #dc3545; }
+    .detail-header .breadcrumb { font-size: 0.85rem; color: #999; margin-bottom: 0.5rem; }
+    .detail-header .breadcrumb a { color: #007bff; text-decoration: none; }
+    .student-info { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .student-info .info-item { text-align: center; }
+    .student-info .info-label { font-size: 0.8rem; color: #999; margin-bottom: 0.25rem; }
+    .student-info .info-value { font-size: 1.1rem; font-weight: 600; }
+    .badge-status { padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-warned { background: #fff3cd; color: #856404; }
+    .badge-locked { background: #f8d7da; color: #721c24; }
+    .badge-removed { background: #721c24; color: #fff; }
+    .badge-resumed { background: #cce5ff; color: #004085; }
+    .action-bar { background: #fff; border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .action-bar .btn { padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
+    .btn-resume-action { background: #28a745; color: #fff; }
+    .btn-chance-action { background: #007bff; color: #fff; }
+    .btn-stop-action { background: #dc3545; color: #fff; }
+    .btn-back { background: #6c757d; color: #fff; text-decoration: none; }
+
+    /* Improved timeline */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ""; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #dee2e6; }
+    .timeline-item { position: relative; margin-bottom: 1.25rem; }
+    .timeline-dot { position: absolute; left: -1.65rem; top: 0.5rem; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; }
+    .timeline-dot.severity-info { background: #17a2b8; box-shadow: 0 0 0 3px rgba(23,162,184,0.25); }
+    .timeline-dot.severity-low { background: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,0.25); }
+    .timeline-dot.severity-medium { background: #ffc107; box-shadow: 0 0 0 3px rgba(255,193,7,0.25); }
+    .timeline-dot.severity-high { background: #fd7e14; box-shadow: 0 0 0 3px rgba(253,126,20,0.25); }
+    .timeline-dot.severity-critical { background: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.25); }
+
+    .timeline-content { background: #fff; border-radius: 10px; padding: 1rem 1.25rem; box-shadow: 0 1px 8px rgba(0,0,0,0.07); border-left: 3px solid #dee2e6; }
+    .timeline-content.border-info { border-left-color: #17a2b8; }
+    .timeline-content.border-low { border-left-color: #28a745; }
+    .timeline-content.border-medium { border-left-color: #ffc107; }
+    .timeline-content.border-high { border-left-color: #fd7e14; }
+    .timeline-content.border-critical { border-left-color: #dc3545; }
+
+    .event-header { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .event-type { font-weight: 700; font-size: 0.95rem; color: #333; }
+    .severity-badge { padding: 0.2rem 0.55rem; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+    .sev-info { background: #d1ecf1; color: #0c5460; }
+    .sev-low { background: #d4edda; color: #155724; }
+    .sev-medium { background: #fff3cd; color: #856404; }
+    .sev-high { background: #f8d7da; color: #721c24; }
+    .sev-critical { background: #721c24; color: #fff; }
+    .violation-num { font-size: 0.75rem; color: #fff; background: #6c757d; padding: 0.15rem 0.5rem; border-radius: 10px; margin-left: auto; }
+    .violation-num.is-violation { background: #dc3545; }
+
+    .event-time { font-size: 0.8rem; color: #999; margin-top: 0.35rem; }
+    .event-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .event-meta .meta-tag { background: #f0f0f0; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.78rem; color: #555; }
+    .event-teacher { font-size: 0.85rem; color: #007bff; margin-top: 0.4rem; font-weight: 500; }
+    .event-description { font-size: 0.85rem; color: #666; margin-top: 0.35rem; }
+
+    .pagination-wrapper { display: flex; justify-content: center; margin-top: 1.5rem; gap: 0.5rem; }
+    .pagination-wrapper a, .pagination-wrapper span { padding: 0.4rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+    .pagination-wrapper a { background: #f0f0f0; color: #333; }
+    .pagination-wrapper a:hover { background: #007bff; color: #fff; }
+    .pagination-wrapper .current { background: #007bff; color: #fff; }
+
+    /* Confirmation modal */
+    .confirm-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; justify-content:center; align-items:center; }
+    .confirm-overlay.show { display:flex; }
+    .confirm-box { background:#fff; border-radius:12px; padding:2rem; max-width:450px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+    .confirm-box h3 { margin-bottom:1rem; font-size:1.15rem; }
+    .confirm-box p { color:#555; margin-bottom:1.5rem; font-size:0.95rem; }
+    .confirm-box .confirm-actions { display:flex; gap:0.75rem; justify-content:center; }
+    .confirm-box .btn-cancel { padding:0.5rem 1.25rem; border-radius:8px; border:1px solid #dee2e6; background:#fff; color:#333; cursor:pointer; font-size:0.9rem; }
+    .confirm-box .btn-confirm-danger { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#dc3545; color:#fff; cursor:pointer; font-size:0.9rem; }
+    .confirm-box .btn-confirm-success { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#28a745; color:#fff; cursor:pointer; font-size:0.9rem; }
+    .confirm-box .btn-confirm-primary { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#007bff; color:#fff; cursor:pointer; font-size:0.9rem; }
+
+    @media (max-width: 768px) { .student-info { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper">
+    <div class="detail-header">
+        <div class="breadcrumb">
+            <a href="{% url 'exams:supervision_monitor' %}">{% trans "breadcrumb_monitor" context "exams.template.supervision_detail" %}</a> &raquo;
+            {{ student.username }} &raquo; {{ exam.title }}
+        </div>
+        <h1><i class="fas fa-user-shield"></i> {% trans "heading" context "exams.template.supervision_detail" %}: {{ student.get_full_name|default:student.username }}</h1>
+    </div>
+
+    <div class="student-info">
+        <div class="info-item">
+            <div class="info-label">{% trans "label_student" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value">{{ student.get_full_name|default:student.username }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">{% trans "label_exam" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value">{{ exam.title }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">{% trans "label_supervision_status" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value">
+                <span class="badge-status badge-{{ attempt.supervision_status }}">
+                    {{ attempt.get_supervision_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">{% trans "label_violation_count" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value" style="{% if attempt.supervision_violation_count >= 3 %}color:#dc3545;{% endif %}">
+                {{ attempt.supervision_violation_count }}
+                {% if config %} / {{ config.max_fullscreen_violations }}{% endif %}
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">{% trans "label_exam_status" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value">{{ attempt.get_status_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">{% trans "label_extra_chances" context "exams.template.supervision_detail" %}</div>
+            <div class="info-value">{{ attempt.supervision_extra_chances }}</div>
+        </div>
+    </div>
+
+    {# Action Bar #}
+    <div class="action-bar">
+        <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
+        {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
+        <button class="btn btn-resume-action" data-action="resume" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="false">
+            <i class="fas fa-play"></i> {% trans "action_resume" context "exams.template.supervision_detail" %}
+        </button>
+        <button class="btn btn-chance-action" data-action="chance" data-attempt-id="{{ attempt.id }}" data-grant-extra-chance="true">
+            <i class="fas fa-plus-circle"></i> {% trans "action_grant_chance" context "exams.template.supervision_detail" %}
+        </button>
+        {% endif %}
+        {% if not attempt.is_finished %}
+        <button class="btn btn-stop-action" data-action="stop" data-attempt-id="{{ attempt.id }}">
+            <i class="fas fa-stop"></i> {% trans "action_stop" context "exams.template.supervision_detail" %}
+        </button>
+        {% endif %}
+        <a href="{% url 'exams:supervision_monitor' %}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.supervision_detail" %}
+        </a>
+    </div>
+
+    {# Incident Timeline #}
+    <h2 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fas fa-stream"></i> {% trans "heading_timeline" context "exams.template.supervision_detail" %}</h2>
+
+    <div class="timeline">
+        {% for incident in incidents %}
+        <div class="timeline-item">
+            <div class="timeline-dot severity-{{ incident.severity }}"></div>
+            <div class="timeline-content border-{{ incident.severity }}">
+                <div class="event-header">
+                    <span class="event-type">{{ incident.get_event_type_display }}</span>
+                    <span class="severity-badge sev-{{ incident.severity }}">{{ incident.get_severity_display }}</span>
+                    {% if incident.violation_count_at_time > 0 %}
+                    <span class="violation-num {% if incident.severity == 'high' or incident.severity == 'critical' %}is-violation{% endif %}">
+                        #{{ incident.violation_count_at_time }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="event-time"><i class="far fa-clock"></i> {{ incident.timestamp|date:"d.m.Y H:i:s" }}</div>
+                {% if incident.metadata %}
+                <div class="event-meta">
+                    {% for key, value in incident.metadata.items %}
+                        <span class="meta-tag">{{ key }}: {{ value }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if incident.teacher_action %}
+                <div class="event-teacher">
+                    <i class="fas fa-user-tie"></i> {% trans "label_teacher_action" context "exams.template.supervision_detail" %}: {{ incident.teacher_action }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; text-align: center; padding: 2rem;">{% trans "empty_no_incidents" context "exams.template.supervision_detail" %}</p>
+        {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if incidents_page.has_other_pages %}
+    <div class="pagination-wrapper">
+        {% if incidents_page.has_previous %}
+        <a href="?page={{ incidents_page.previous_page_number }}">&laquo;</a>
+        {% endif %}
+        {% for num in incidents_page.paginator.page_range %}
+            {% if incidents_page.number == num %}
+            <span class="current">{{ num }}</span>
+            {% elif num > incidents_page.number|add:"-3" and num < incidents_page.number|add:"3" %}
+            <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if incidents_page.has_next %}
+        <a href="?page={{ incidents_page.next_page_number }}">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{# Confirmation Modal #}
+<div class="confirm-overlay" id="confirmModal">
+    <div class="confirm-box">
+        <h3 id="confirmModalTitle"></h3>
+        <p id="confirmModalMessage"></p>
+        <div class="confirm-actions">
+            <button type="button" class="btn-cancel" id="confirmModalCancel">{% trans "action_cancel" context "exams.template.supervision_detail" %}</button>
+            <button type="button" id="confirmModalOk"></button>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+var DETAIL_I18N = {
+    confirmResume: "{% filter escapejs %}{% trans 'confirm_resume' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    confirmChance: "{% filter escapejs %}{% trans 'confirm_grant_chance' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    confirmStop: "{% filter escapejs %}{% trans 'confirm_stop' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    success: "{% filter escapejs %}{% trans 'action_success' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    errorPrefix: "{% filter escapejs %}{% trans 'action_error_prefix' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    stopSuccess: "{% filter escapejs %}{% trans 'stop_success' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    resumeTitle: "{% filter escapejs %}{% trans 'action_resume' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    chanceTitle: "{% filter escapejs %}{% trans 'action_grant_chance' context 'exams.template.supervision_detail' %}{% endfilter %}",
+    stopTitle: "{% filter escapejs %}{% trans 'action_stop' context 'exams.template.supervision_detail' %}{% endfilter %}"
+};
+
+(function() {
+    var confirmModal = document.getElementById("confirmModal");
+    var confirmTitle = document.getElementById("confirmModalTitle");
+    var confirmMsg = document.getElementById("confirmModalMessage");
+    var confirmOk = document.getElementById("confirmModalOk");
+    var confirmCancel = document.getElementById("confirmModalCancel");
+    var pendingAction = null;
+
+    function showConfirmModal(title, message, btnText, btnClass, onConfirm) {
+        confirmTitle.textContent = title;
+        confirmMsg.textContent = message;
+        confirmOk.textContent = btnText;
+        confirmOk.className = btnClass;
+        pendingAction = onConfirm;
+        confirmModal.classList.add("show");
+    }
+
+    function hideConfirmModal() {
+        confirmModal.classList.remove("show");
+        pendingAction = null;
+    }
+
+    confirmCancel.addEventListener("click", hideConfirmModal);
+    confirmModal.addEventListener("click", function(e) {
+        if (e.target === confirmModal) hideConfirmModal();
+    });
+    confirmOk.addEventListener("click", function() {
+        if (pendingAction) pendingAction();
+        hideConfirmModal();
+    });
+
+    function resumeAttempt(attemptId, grantExtraChance) {
+        fetch("/exams/supervision/api/resume/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ grant_extra_chance: grantExtraChance })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(DETAIL_I18N.errorPrefix + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(DETAIL_I18N.connectionError); });
+    }
+
+    function stopAttempt(attemptId) {
+        fetch("/exams/supervision/api/stop/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(DETAIL_I18N.errorPrefix + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(DETAIL_I18N.connectionError); });
+    }
+
+    document.addEventListener("click", function(event) {
+        var btn = event.target.closest("[data-action]");
+        if (!btn) return;
+
+        event.preventDefault();
+        var action = btn.getAttribute("data-action");
+        var attemptId = parseInt(btn.getAttribute("data-attempt-id"), 10);
+
+        if (action === "resume") {
+            showConfirmModal(
+                DETAIL_I18N.resumeTitle,
+                DETAIL_I18N.confirmResume,
+                DETAIL_I18N.resumeTitle,
+                "btn-confirm-success",
+                function() { resumeAttempt(attemptId, false); }
+            );
+        } else if (action === "chance") {
+            showConfirmModal(
+                DETAIL_I18N.chanceTitle,
+                DETAIL_I18N.confirmChance,
+                DETAIL_I18N.chanceTitle,
+                "btn-confirm-primary",
+                function() { resumeAttempt(attemptId, true); }
+            );
+        } else if (action === "stop") {
+            showConfirmModal(
+                DETAIL_I18N.stopTitle,
+                DETAIL_I18N.confirmStop,
+                DETAIL_I18N.stopTitle,
+                "btn-confirm-danger",
+                function() { stopAttempt(attemptId); }
+            );
+        }
+    });
+})();
+</script>
+{% endblock %}
