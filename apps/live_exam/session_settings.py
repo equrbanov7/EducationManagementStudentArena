@@ -33,6 +33,7 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     "nickname_generator": False,
     "two_step_join": True,
     "max_participants": DEFAULT_MAX_PARTICIPANTS,
+    "sfx_volume": 70,
 }
 
 BOOLEAN_SETTING_KEYS = {
@@ -148,6 +149,13 @@ def normalize_session_setting_updates(
         except (TypeError, ValueError):
             value = DEFAULT_SESSION_SETTINGS["max_participants"]
         updates["max_participants"] = max(1, min(value, max(1, int(max_participants_cap or DEFAULT_MAX_PARTICIPANTS))))
+
+    if "sfx_volume" in raw:
+        try:
+            value = int(raw.get("sfx_volume"))
+        except (TypeError, ValueError):
+            value = DEFAULT_SESSION_SETTINGS["sfx_volume"]
+        updates["sfx_volume"] = max(0, min(100, value))
 
     return updates
 

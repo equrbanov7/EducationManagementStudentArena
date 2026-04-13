@@ -55,6 +55,8 @@ const state = {
     autoRevealTimeout: 0,
     autoNextTimeout: 0,
     audioContext: null,
+    masterGain: null,
+    sfxVolume: Number(CONFIG.sessionSettings?.sfx_volume ?? 70),
     lastIntroSoundKey: "",
     lastCountdownSoundKey: "",
     lastRevealSoundKey: "",
@@ -143,6 +145,9 @@ function applySessionSettings(nextSettings) {
     }
     if (previousLobbyMusic !== state.sessionSettings.lobby_music) {
         syncLobbyMusic(true);
+    }
+    if (state.sessionSettings.sfx_volume != null) {
+        setSfxVolume(state.sessionSettings.sfx_volume);
     }
 }
 
@@ -343,6 +348,26 @@ async function tryEnterFullscreen() {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+ *  SOUND EFFECTS SYSTEM
+ *  ────────────────────
+ *  All game sounds are synthesized via the Web Audio API below.
+ *  To change a specific sound, find its function by name:
+ *
+ *    playIntroSound      – "Get ready" jingle before a question
+ *    playCountdownSound  – 3-2-1 countdown beeps (escalating pitch)
+ *    playRevealSound     – Dramatic reveal when answers are shown
+ *    playScoreboardSound – Energetic build-up for the leaderboard
+ *    playFinalSound      – Victory fanfare on the final podium
+ *    scheduleLobbyMusicLoop – Background lobby music patterns
+ *
+ *  Each function contains clearly labelled note arrays you can
+ *  tweak (frequency, duration, gain, type).
+ *
+ *  Volume is controlled by the master gain node (state.sfxVolume,
+ *  range 0-100). The slider lives in the settings drawer.
+ * ═══════════════════════════════════════════════════════════════════ */
+
 function getAudioContext() {
     if (!AudioCtor) return null;
     if (!state.audioContext) {
@@ -351,15 +376,50 @@ function getAudioContext() {
     return state.audioContext;
 }
 
+function getMasterGain() {
+    const context = getAudioContext();
+    if (!context) return null;
+    if (!state.masterGain) {
+        state.masterGain = context.createGain();
+        state.masterGain.connect(context.destination);
+    }
+    const vol = Math.max(0, Math.min(100, Number(state.sfxVolume ?? 70)));
+    state.masterGain.gain.value = vol / 100;
+    return state.masterGain;
+}
+
+function setSfxVolume(value) {
+    state.sfxVolume = Math.max(0, Math.min(100, Number(value) || 0));
+    const master = getMasterGain();
+    if (master) {
+        master.gain.value = state.sfxVolume / 100;
+    }
+    const slider = document.getElementById("sfxVolumeSlider");
+    if (slider && Number(slider.value) !== state.sfxVolume) {
+        slider.value = state.sfxVolume;
+    }
+    const label = document.getElementById("sfxVolumeLabel");
+    if (label) label.textContent = `${state.sfxVolume}%`;
+}
+
 function unlockAudio() {
     const context = getAudioContext();
     if (!context || context.state !== "suspended") return;
     context.resume().then(() => {
+        getMasterGain();
         syncLobbyMusic(true);
     }).catch(() => {});
 }
 
+/**
+ * Core tone generator. All sounds are built from layered calls to this.
+ * @param {AudioContext} context
+ * @param {Object} config – { startTime, duration, frequency, endFrequency?, gain, type }
+ */
 function playTone(context, config) {
+    const master = getMasterGain();
+    if (!master) return;
+
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
     const startTime = config.startTime;
@@ -370,75 +430,84 @@ function playTone(context, config) {
     if (config.endFrequency) {
         oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, config.endFrequency), startTime + duration);
     }
+    if (config.detune) {
+        oscillator.detune.setValueAtTime(config.detune, startTime);
+    }
 
     gainNode.gain.setValueAtTime(0.0001, startTime);
-    gainNode.gain.exponentialRampToValueAtTime(config.gain || 0.04, startTime + 0.02);
+    gainNode.gain.linearRampToValueAtTime(config.gain || 0.04, startTime + (config.attack || 0.015));
+    if (config.sustain != null && config.sustainEnd != null) {
+        gainNode.gain.setValueAtTime(config.sustain, startTime + config.sustainEnd);
+    }
     gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
     oscillator.connect(gainNode);
-    gainNode.connect(context.destination);
+    gainNode.connect(master);
     oscillator.start(startTime);
-    oscillator.stop(startTime + duration + 0.02);
+    oscillator.stop(startTime + duration + 0.05);
 }
 
+function withAudio(fn) {
+    const context = getAudioContext();
+    if (!context) return;
+    if (context.state === "suspended") {
+        context.resume().then(() => fn(context)).catch(() => {});
+        return;
+    }
+    fn(context);
+}
+
+/* ── Intro Sound: bright ascending arpeggio ("Get ready!") ──────── */
 function playIntroSound(key) {
     if (!CONFIG.presentationOnly || state.lastIntroSoundKey === key) return;
-    const context = getAudioContext();
-    if (!context) return;
-
-    const start = () => {
-        const base = context.currentTime + 0.01;
-        playTone(context, {
-            startTime: base,
-            duration: 0.22,
-            frequency: 220,
-            endFrequency: 320,
-            gain: 0.045,
-            type: "triangle",
+    withAudio(context => {
+        const t = context.currentTime + 0.01;
+        // Rising arpeggio: C4 → E4 → G4 → C5 with sparkle
+        const notes = [
+            { offset: 0.00, freq: 262, end: 280, dur: 0.18, gain: 0.06, type: "triangle" },
+            { offset: 0.10, freq: 330, end: 350, dur: 0.18, gain: 0.06, type: "triangle" },
+            { offset: 0.20, freq: 392, end: 420, dur: 0.20, gain: 0.07, type: "triangle" },
+            { offset: 0.32, freq: 523, end: 560, dur: 0.30, gain: 0.08, type: "sine" },
+        ];
+        notes.forEach(n => {
+            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.end, gain: n.gain, type: n.type });
         });
-        playTone(context, {
-            startTime: base + 0.16,
-            duration: 0.28,
-            frequency: 320,
-            endFrequency: 430,
-            gain: 0.05,
-            type: "sine",
-        });
+        // Sub bass warmth
+        playTone(context, { startTime: t, duration: 0.5, frequency: 131, endFrequency: 165, gain: 0.025, type: "sine" });
+        // Shimmer layer
+        playTone(context, { startTime: t + 0.32, duration: 0.35, frequency: 1047, endFrequency: 1100, gain: 0.015, type: "sine" });
         state.lastIntroSoundKey = key;
-    };
-
-    if (context.state === "suspended") {
-        context.resume().then(start).catch(() => {});
-        return;
-    }
-    start();
+    });
 }
 
+/* ── Countdown Sound: escalating tension beeps (3, 2, 1) ────────── */
 function playCountdownSound(key) {
     if (!CONFIG.presentationOnly || state.lastCountdownSoundKey === key) return;
-    const context = getAudioContext();
-    if (!context) return;
+    withAudio(context => {
+        const t = context.currentTime + 0.01;
+        // Extract number from key: "xxx:3" → 3, "xxx:2" → 2, "xxx:1" → 1
+        const parts = String(key).split(":");
+        const num = parseInt(parts[parts.length - 1], 10) || 3;
+        // Higher pitch as countdown decreases: 3→low, 2→mid, 1→high
+        const pitches = { 3: 440, 2: 554, 1: 659 };
+        const baseFreq = pitches[num] || 440;
 
-    const start = () => {
-        const base = context.currentTime + 0.01;
-        playTone(context, {
-            startTime: base,
-            duration: 0.12,
-            frequency: 520,
-            endFrequency: 420,
-            gain: 0.04,
-            type: "square",
-        });
+        // Main beep with percussive attack
+        playTone(context, { startTime: t, duration: 0.18, frequency: baseFreq, endFrequency: baseFreq * 0.92, gain: 0.09, type: "square", attack: 0.005 });
+        // Soft harmonic layer
+        playTone(context, { startTime: t, duration: 0.22, frequency: baseFreq * 2, endFrequency: baseFreq * 1.8, gain: 0.025, type: "sine", attack: 0.005 });
+        // Sub pulse
+        playTone(context, { startTime: t, duration: 0.12, frequency: baseFreq / 2, gain: 0.04, type: "triangle", attack: 0.003 });
+
+        // On "1" add extra emphasis - a bright resolve
+        if (num === 1) {
+            playTone(context, { startTime: t + 0.06, duration: 0.28, frequency: baseFreq * 1.5, endFrequency: baseFreq * 1.6, gain: 0.04, type: "sine" });
+        }
         state.lastCountdownSoundKey = key;
-    };
-
-    if (context.state === "suspended") {
-        context.resume().then(start).catch(() => {});
-        return;
-    }
-    start();
+    });
 }
 
+/* ── Lobby Music: ambient background loop patterns ──────────────── */
 function stopLobbyMusic() {
     if (state.lobbyMusicTimer) {
         clearTimeout(state.lobbyMusicTimer);
@@ -454,6 +523,7 @@ function scheduleLobbyMusicLoop(mode) {
         return;
     }
 
+    // Lobby music patterns – tweak notes here to change the vibe
     const patterns = {
         original: {
             loopMs: 3200,
@@ -516,107 +586,73 @@ function syncLobbyMusic(force = false) {
     scheduleLobbyMusicLoop(mode);
 }
 
+/* ── Reveal Sound: dramatic suspense-to-resolve flourish ────────── */
 function playRevealSound(key) {
     if (state.lastRevealSoundKey === key) return;
-    const context = getAudioContext();
-    if (!context) return;
-
-    const start = () => {
-        const base = context.currentTime + 0.01;
-        playTone(context, {
-            startTime: base,
-            duration: 0.14,
-            frequency: 440,
-            endFrequency: 392,
-            gain: 0.038,
-            type: "triangle",
-        });
-        playTone(context, {
-            startTime: base + 0.09,
-            duration: 0.26,
-            frequency: 293.66,
-            endFrequency: 220,
-            gain: 0.05,
-            type: "sine",
-        });
+    withAudio(context => {
+        const t = context.currentTime + 0.01;
+        // Suspenseful descending sweep
+        playTone(context, { startTime: t, duration: 0.14, frequency: 880, endFrequency: 440, gain: 0.04, type: "sawtooth", attack: 0.005 });
+        // Resolve chord: bright major chord (C-E-G)
+        playTone(context, { startTime: t + 0.12, duration: 0.35, frequency: 523, endFrequency: 530, gain: 0.055, type: "triangle" });
+        playTone(context, { startTime: t + 0.14, duration: 0.32, frequency: 659, endFrequency: 665, gain: 0.04, type: "sine" });
+        playTone(context, { startTime: t + 0.16, duration: 0.30, frequency: 784, endFrequency: 790, gain: 0.035, type: "sine" });
+        // Deep bass hit
+        playTone(context, { startTime: t + 0.10, duration: 0.4, frequency: 131, endFrequency: 110, gain: 0.04, type: "sine" });
         state.lastRevealSoundKey = key;
-    };
-
-    if (context.state === "suspended") {
-        context.resume().then(start).catch(() => {});
-        return;
-    }
-    start();
+    });
 }
 
+/* ── Scoreboard Sound: energetic ascending fanfare ──────────────── */
 function playScoreboardSound(key) {
     if (state.lastScoreboardSoundKey === key) return;
-    const context = getAudioContext();
-    if (!context) return;
-
-    const start = () => {
-        const base = context.currentTime + 0.01;
-        [261.63, 329.63, 392, 523.25].forEach((frequency, index) => {
-            playTone(context, {
-                startTime: base + index * 0.08,
-                duration: 0.15,
-                frequency,
-                endFrequency: frequency * 1.02,
-                gain: 0.034,
-                type: index % 2 === 0 ? "square" : "triangle",
-            });
+    withAudio(context => {
+        const t = context.currentTime + 0.01;
+        // Quick ascending scale with rhythmic punch: C-D-E-F-G-C5
+        const arpeggio = [
+            { offset: 0.00, freq: 262, dur: 0.10, gain: 0.06, type: "square" },
+            { offset: 0.07, freq: 294, dur: 0.10, gain: 0.06, type: "square" },
+            { offset: 0.14, freq: 330, dur: 0.10, gain: 0.06, type: "triangle" },
+            { offset: 0.21, freq: 349, dur: 0.10, gain: 0.06, type: "triangle" },
+            { offset: 0.28, freq: 392, dur: 0.12, gain: 0.07, type: "triangle" },
+            { offset: 0.38, freq: 523, dur: 0.28, gain: 0.08, type: "sine" },
+        ];
+        arpeggio.forEach(n => {
+            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.freq * 1.02, gain: n.gain, type: n.type, attack: 0.005 });
         });
-        playTone(context, {
-            startTime: base + 0.04,
-            duration: 0.42,
-            frequency: 164.81,
-            endFrequency: 130.81,
-            gain: 0.018,
-            type: "sine",
-        });
+        // Warm bass underneath
+        playTone(context, { startTime: t, duration: 0.6, frequency: 131, endFrequency: 165, gain: 0.03, type: "sine" });
+        // Top shimmer on final note
+        playTone(context, { startTime: t + 0.38, duration: 0.3, frequency: 1047, endFrequency: 1060, gain: 0.015, type: "sine" });
         state.lastScoreboardSoundKey = key;
-    };
-
-    if (context.state === "suspended") {
-        context.resume().then(start).catch(() => {});
-        return;
-    }
-    start();
+    });
 }
 
+/* ── Final/Victory Sound: celebratory fanfare with harmony ──────── */
 function playFinalSound(key) {
     if (state.lastFinalSoundKey === key) return;
-    const context = getAudioContext();
-    if (!context) return;
-
-    const start = () => {
-        const base = context.currentTime + 0.02;
-        [261.63, 329.63, 392, 523.25, 659.25].forEach((frequency, index) => {
-            playTone(context, {
-                startTime: base + index * 0.09,
-                duration: index === 4 ? 0.56 : 0.24,
-                frequency,
-                endFrequency: frequency * 1.015,
-                gain: index === 4 ? 0.046 : 0.03,
-                type: index < 3 ? "triangle" : "sine",
-            });
+    withAudio(context => {
+        const t = context.currentTime + 0.02;
+        // Triumphant ascending fanfare: C-E-G-C5-E5 with big sustain
+        const fanfare = [
+            { offset: 0.00, freq: 262, dur: 0.22, gain: 0.06, type: "triangle" },
+            { offset: 0.12, freq: 330, dur: 0.22, gain: 0.06, type: "triangle" },
+            { offset: 0.24, freq: 392, dur: 0.24, gain: 0.07, type: "triangle" },
+            { offset: 0.38, freq: 523, dur: 0.30, gain: 0.08, type: "sine" },
+            { offset: 0.54, freq: 659, dur: 0.65, gain: 0.09, type: "sine" },
+        ];
+        fanfare.forEach(n => {
+            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.freq * 1.01, gain: n.gain, type: n.type });
+            // Doubled octave below for richness
+            playTone(context, { startTime: t + n.offset + 0.01, duration: n.dur * 0.8, frequency: n.freq / 2, endFrequency: n.freq / 2, gain: n.gain * 0.35, type: "sine" });
         });
-        playTone(context, {
-            startTime: base + 0.02,
-            duration: 0.8,
-            frequency: 130.81,
-            endFrequency: 98,
-            gain: 0.02,
-            type: "sine",
-        });
+        // Grand bass foundation
+        playTone(context, { startTime: t, duration: 1.2, frequency: 131, endFrequency: 98, gain: 0.035, type: "sine" });
+        // Sparkle overtone on the final sustained note
+        playTone(context, { startTime: t + 0.56, duration: 0.6, frequency: 1318, endFrequency: 1400, gain: 0.012, type: "sine" });
+        playTone(context, { startTime: t + 0.60, duration: 0.5, frequency: 1568, endFrequency: 1600, gain: 0.008, type: "sine" });
         state.lastFinalSoundKey = key;
-    };
-
-    if (context.state === "suspended") {
-        context.resume().then(start).catch(() => {});
-        return;
-    }
-    start();
+    });
 }
 
 function schedulePhaseLoop(fn) {
@@ -662,6 +698,11 @@ function setPresentationMarkup(phase, signature, markup) {
     UI.presentationStage.dataset.phase = phase;
     if (state.phaseSignature === signature && state.phase === phase) {
         return;
+    }
+    // Destroy Chart.js instance when leaving the reveal phase
+    if (typeof activeRevealChart !== "undefined" && activeRevealChart) {
+        try { activeRevealChart.destroy(); } catch (_) {}
+        activeRevealChart = null;
     }
     state.phase = phase;
     state.phaseSignature = signature;
@@ -1135,6 +1176,8 @@ function distributionBarMarkup(option, index, distribution, correctOptionIds) {
     `;
 }
 
+let activeRevealChart = null;
+
 function renderRevealStage(question, payload) {
     const distribution = distributionLookup(payload);
     const correctOptionIds = (payload?.correct_option_ids || []).map(value => Number(value));
@@ -1144,11 +1187,14 @@ function renderRevealStage(question, payload) {
             ? `<div class="distribution-note">${esc(answeredSummary)}</div>`
             : `<div class="distribution-note">${esc(tr("distributionNoAnswers", "No answers were submitted this round."))}</div>`;
 
+    const sig = `${state.revealKey}:${PHASES.REVEAL}`;
+    const willRender = !(state.phaseSignature === sig && state.phase === PHASES.REVEAL);
+
     setPresentationMarkup(
         PHASES.REVEAL,
-        `${state.revealKey}:${PHASES.REVEAL}`,
+        sig,
         `
-            <section class="present-view present-view--quiz">
+            <section class="present-view present-view--quiz present-view--reveal-chart">
                 <div class="quiz-shell quiz-shell--reveal">
                     <div class="quiz-shell__hud quiz-shell__hud--single">
                         <div class="quiz-shell__hud-left">
@@ -1160,6 +1206,9 @@ function renderRevealStage(question, payload) {
                     </div>
                 </div>
                 ${noAnswersNote}
+                <div class="reveal-chart-area">
+                    <canvas id="revealDistChart"></canvas>
+                </div>
                 <div class="distribution-chart">
                     ${(question?.options || [])
                         .map((option, index) => distributionBarMarkup(option, index, distribution, correctOptionIds))
@@ -1168,6 +1217,97 @@ function renderRevealStage(question, payload) {
             </section>
         `
     );
+
+    // Initialize Chart.js bar chart after DOM update
+    if (willRender && typeof Chart !== "undefined") {
+        requestAnimationFrame(() => {
+            const canvas = document.getElementById("revealDistChart");
+            if (!canvas) return;
+
+            if (activeRevealChart) {
+                try { activeRevealChart.destroy(); } catch (_) {}
+                activeRevealChart = null;
+            }
+
+            const options = question?.options || [];
+            const labels = options.map((opt, i) => opt?.label || String.fromCharCode(65 + i));
+            const counts = options.map(opt => Number(distribution.counts.get(Number(opt?.id || 0)) || 0));
+            const barColors = ["#f0205f", "#2563eb", "#ff8b16", "#11b981"];
+            const borderColors = ["#ff5b79", "#4f9cff", "#f8c325", "#4fd39a"];
+            const bgColors = options.map((opt, i) => {
+                const isCorrect = correctOptionIds.includes(Number(opt?.id || 0));
+                const base = barColors[i % 4];
+                return isCorrect ? base : base + "99";
+            });
+            const borders = options.map((opt, i) => {
+                const isCorrect = correctOptionIds.includes(Number(opt?.id || 0));
+                return isCorrect ? "#4ade80" : borderColors[i % 4];
+            });
+
+            activeRevealChart = new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: bgColors,
+                        borderColor: borders,
+                        borderWidth: 2,
+                        borderRadius: 12,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.75,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 800,
+                        easing: "easeOutQuart",
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: "rgba(15,23,42,0.92)",
+                            titleFont: { size: 14, weight: "bold" },
+                            bodyFont: { size: 13 },
+                            cornerRadius: 10,
+                            padding: 12,
+                            callbacks: {
+                                label(ctx) {
+                                    const total = distribution.totalAnswers || 0;
+                                    const pct = total > 0 ? Math.round((ctx.raw / total) * 100) : 0;
+                                    const opt = options[ctx.dataIndex];
+                                    const text = opt?.text || "";
+                                    return [`${text}`, `${ctx.raw} (${pct}%)`];
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: "rgba(255,255,255,0.7)",
+                                font: { size: 13, weight: "bold" },
+                            },
+                            grid: {
+                                color: "rgba(255,255,255,0.08)",
+                            },
+                        },
+                        x: {
+                            ticks: {
+                                color: "rgba(255,255,255,0.85)",
+                                font: { size: 15, weight: "900" },
+                            },
+                            grid: { display: false },
+                        },
+                    },
+                },
+            });
+        });
+    }
 }
 
 function movementBadge(player, index, previousTop) {
