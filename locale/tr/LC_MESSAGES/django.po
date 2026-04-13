@@ -18645,6 +18645,18 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr "İhlal limitinin %75'ine ulaştınız! Sadece {remaining} ihlal hakkınız kaldı. Daha dikkatli olun!"
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_title"
+msgstr "Sınav devam ediyor!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_msg"
+msgstr "Devam etmek için tam ekrana dönün."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_btn"
+msgstr "Tam ekrana geç ve devam et"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu işlem gerçekleştirilemez."

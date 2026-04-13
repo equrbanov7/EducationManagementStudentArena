@@ -351,7 +351,6 @@
         _onSelectStart: function (e) {
             if (this._isEditableField(e.target)) return;
             e.preventDefault();
-            this._logEvent("text_select_attempt");
         },
 
         _onDragStart: function (e) {
@@ -625,7 +624,7 @@
                         ExamSupervision.maxViolations = data.max_violations || ExamSupervision.maxViolations;
                         ExamSupervision._updateBadge();
                         if (ExamSupervision.config.force_fullscreen) {
-                            ExamSupervision._requestFullscreen();
+                            ExamSupervision._showResumeFullscreenOverlay();
                         }
                     } else if (data.is_finished) {
                         clearInterval(poll);
@@ -633,6 +632,36 @@
                     }
                 });
             }, 5000);
+        },
+
+        _showResumeFullscreenOverlay: function () {
+            if (document.getElementById("supervision-resume-overlay")) return;
+
+            var i18n = (window.SUPERVISION_ACK_I18N) || {};
+            var resumeTitle = i18n.resumeTitle || "\u0130mtahan b\u0259rpa edildi!";
+            var resumeMsg = i18n.resumeMsg || "Davam etm\u0259k \u00fc\u00e7\u00fcn tam ekrana qay\u0131d\u0131n.";
+            var resumeBtn = i18n.resumeBtn || "Tam ekrana ke\u00e7 v\u0259 davam et";
+
+            var overlay = document.createElement("div");
+            overlay.id = "supervision-resume-overlay";
+            overlay.style.cssText =
+                "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);" +
+                "z-index:100001;display:flex;justify-content:center;align-items:center;";
+            overlay.innerHTML =
+                '<div style="background:#fff;border-radius:12px;padding:2.5rem;max-width:500px;width:90%;text-align:center;">' +
+                '<div style="font-size:3rem;color:#28a745;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
+                '<h2 style="color:#333;">' + resumeTitle + '</h2>' +
+                '<p style="color:#555;margin:1rem 0;">' + resumeMsg + '</p>' +
+                '<button id="supervision-resume-fs-btn" style="margin-top:1rem;padding:0.75rem 2rem;background:#007bff;color:#fff;' +
+                'border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;">' +
+                '<i class="fas fa-expand"></i> ' + resumeBtn + '</button>' +
+                '</div>';
+            document.body.appendChild(overlay);
+
+            document.getElementById("supervision-resume-fs-btn").addEventListener("click", function () {
+                ExamSupervision._requestFullscreen();
+                overlay.remove();
+            });
         },
 
         _checkSupervisionStatus: function (callback) {

@@ -18917,6 +18917,18 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr "Siz artıq pozuntu limitinin 75%-inə çatmısınız! Yalnız {remaining} pozuntuya icazə qalıb. Daha diqqətli olun!"
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_title"
+msgstr "İmtahan bərpa edildi!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_msg"
+msgstr "Davam etmək üçün tam ekrana qayıdın."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_btn"
+msgstr "Tam ekrana keç və davam et"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu əməliyyat icra edilə bilməz."

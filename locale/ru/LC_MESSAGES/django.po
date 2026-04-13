@@ -18687,6 +18687,18 @@ msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
 msgstr "Вы достигли 75% лимита нарушений! Осталось только {remaining} нарушение(й). Будьте внимательнее!"
 
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_title"
+msgstr "Экзамен возобновлён!"
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_msg"
+msgstr "Пожалуйста, вернитесь в полноэкранный режим для продолжения."
+
+msgctxt "exams.template.take_exam"
+msgid "supervision_resume_btn"
+msgstr "Перейти в полноэкранный режим и продолжить"
+
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Эта операция не может быть выполнена."
