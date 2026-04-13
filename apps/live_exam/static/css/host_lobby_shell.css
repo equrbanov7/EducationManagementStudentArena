@@ -404,6 +404,54 @@ body.host-settings-open .host-settings-drawer {
     font-weight: 700;
 }
 
+.host-settings-volume {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.host-settings-range {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0.6));
+    outline: none;
+    cursor: pointer;
+}
+
+.host-settings-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    cursor: pointer;
+}
+
+.host-settings-range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    cursor: pointer;
+}
+
+.host-settings-range-label {
+    min-width: 42px;
+    text-align: right;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #3b5e8a;
+}
+
 .theme-picker {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
