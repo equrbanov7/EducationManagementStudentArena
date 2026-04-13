@@ -18692,3 +18692,16 @@ msgstr "Sonlandırıldı"
 msgctxt "liveExam.template.session_detail"
 msgid "heading_per_question_charts"
 msgstr "Soru bazında seçenek istatistikleri"
+
+#: duration format units
+msgctxt "exams.filter.duration"
+msgid "unit_hours"
+msgstr "sa"
+
+msgctxt "exams.filter.duration"
+msgid "unit_minutes"
+msgstr "dk"
+
+msgctxt "exams.filter.duration"
+msgid "unit_seconds"
+msgstr "sn"
