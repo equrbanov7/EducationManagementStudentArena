@@ -18660,3 +18660,35 @@ msgstr "Tam ekrana geç ve devam et"
 msgctxt "supervision.view.api"
 msgid "operation_not_allowed"
 msgstr "Bu işlem gerçekleştirilemez."
+
+msgctxt "supervision.view.api"
+msgid "attempt_already_terminated"
+msgstr "Bu deneme zaten sonlandırılmış ve geri yüklenemez."
+
+#: supervision_monitor — terminated action button
+msgctxt "exams.template.supervision_monitor"
+msgid "action_terminated"
+msgstr "Sonlandırıldı"
+
+#: supervision_monitor — date filters and back button
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_from"
+msgstr "Tarihten"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "filter_date_to"
+msgstr "Tarihe"
+
+msgctxt "exams.template.supervision_monitor"
+msgid "action_back"
+msgstr "Geri"
+
+#: supervision_detail — terminated action button
+msgctxt "exams.template.supervision_detail"
+msgid "action_terminated"
+msgstr "Sonlandırıldı"
+
+#: liveExam session_detail — per-question charts heading
+msgctxt "liveExam.template.session_detail"
+msgid "heading_per_question_charts"
+msgstr "Soru bazında seçenek istatistikleri"
