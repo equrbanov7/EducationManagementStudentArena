@@ -302,7 +302,7 @@
                         </label>
                     </div>
 
-                    <div id="supervision-settings" class="span-full" style="display: none;">
+                    <div id="supervision-settings" class="span-full" style="display: {% if supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
 
                         {# Şablon seçimi #}
                         <div class="form-group">
@@ -325,7 +325,7 @@
                             <ul id="supervision-template-info-features" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
                         </div>
 
-                        <div id="supervision-custom-settings">
+                        <div id="supervision-custom-settings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
 
                                 {# Fullscreen #}
