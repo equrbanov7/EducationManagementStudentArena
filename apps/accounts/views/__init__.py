@@ -59,6 +59,14 @@ from .organization import (
     student_organization_request,
 )
 
+# Post management views
+from .post_management import (
+    org_moderate_post,
+    org_post_management,
+    superadmin_delete_post,
+    superadmin_post_management,
+)
+
 # Profile views
 from .profile import (
     profile_avatar,
@@ -71,14 +79,6 @@ from .roles import (
     manage_roles,
     permission_editor,
     role_assignment,
-)
-
-# Post management views
-from .post_management import (
-    org_moderate_post,
-    org_post_management,
-    superadmin_delete_post,
-    superadmin_post_management,
 )
 
 # Superadmin views
