@@ -21,27 +21,47 @@
 
         <div class="section-card">
             <div class="results-tabs">
-                <a href="{% url 'accounts:my_results' %}?type=all"
+                <a href="{% url 'accounts:my_results' %}?type=all{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'all' %}active{% endif %}">
                     {% trans "tab_all" context "accounts.my_results_page" %} ({{ counts.all|default:0 }})
                 </a>
-                <a href="{% url 'accounts:my_results' %}?type=exams"
+                <a href="{% url 'accounts:my_results' %}?type=exams{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'exams' %}active{% endif %}">
                     {% trans "tab_exams" context "accounts.my_results_page" %} ({{ counts.exams|default:0 }})
                 </a>
-                <a href="{% url 'accounts:my_results' %}?type=courses"
+                <a href="{% url 'accounts:my_results' %}?type=courses{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'courses' %}active{% endif %}">
                     {% trans "tab_courses" context "accounts.my_results_page" %} ({{ counts.courses|default:0 }})
                 </a>
-                <a href="{% url 'accounts:my_results' %}?type=labs"
+                <a href="{% url 'accounts:my_results' %}?type=labs{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'labs' %}active{% endif %}">
                     {% trans "tab_labs" context "accounts.my_results_page" %} ({{ counts.labs|default:0 }})
                 </a>
-                <a href="{% url 'accounts:my_results' %}?type=independent"
+                <a href="{% url 'accounts:my_results' %}?type=independent{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'independent' %}active{% endif %}">
                     {% trans "tab_independent" context "accounts.my_results_page" %} ({{ counts.independent|default:0 }})
                 </a>
             </div>
+
+            <form method="get" class="results-search-form">
+                {% if active_filter and active_filter != 'all' %}
+                    <input type="hidden" name="type" value="{{ active_filter }}">
+                {% endif %}
+                <div class="results-search-row">
+                    <input type="text" name="q" value="{{ search_query }}"
+                           class="form-control results-search-input"
+                           placeholder="{% trans 'search_placeholder' context 'accounts.my_results_page' %}">
+                    <button type="submit" class="btn btn-primary results-search-btn">
+                        <i class="fas fa-search"></i> {% trans 'search' context 'accounts.my_results_page' %}
+                    </button>
+                    {% if search_query %}
+                        <a href="{% url 'accounts:my_results' %}{% if active_filter and active_filter != 'all' %}?type={{ active_filter }}{% endif %}"
+                           class="btn btn-secondary results-search-clear">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
         </div>
 
         {% if items %}
@@ -86,10 +106,19 @@
             </div>
             {% endfor %}
         </div>
+
+        {% if page_obj.has_other_pages %}
+            {% include "partials/_pagination.html" with page_obj=page_obj extra_query="type="|add:active_filter %}
+        {% endif %}
+
         {% else %}
         <div class="empty-state section-card">
             <i class="fas fa-clipboard-list"></i>
-            <p>{% trans "empty_state" context "accounts.my_results_page" %}</p>
+            {% if search_query %}
+                <p>{% trans "no_search_results" context "accounts.my_results_page" %}</p>
+            {% else %}
+                <p>{% trans "empty_state" context "accounts.my_results_page" %}</p>
+            {% endif %}
         </div>
         {% endif %}
     </div>
