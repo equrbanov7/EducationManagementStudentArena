@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import ProfileRole, UserProfile
@@ -21,12 +23,51 @@ from apps.notifications.models import NotificationType
 from apps.notifications.services import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import AuditAction
+from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.rls import bypass_rls
+from core.utils import get_client_ip
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 POSTS_PER_PAGE = 20
+
+# Role names that grant org-level post moderation access.
+# Uses the canonical set from ProfileRole rather than a numeric level threshold,
+# so new high-level roles without moderation intent are excluded by default.
+_ORG_MODERATOR_ROLE_NAMES = frozenset(ProfileRole.ADMIN_EQUIVALENT_ROLE_NAMES)
+
+
+def _check_post_delete_rate_limit(request):
+    """Return a 429 JsonResponse if the user exceeds POST_DELETE_RATE_LIMIT, else None."""
+    rate = getattr(settings, "POST_DELETE_RATE_LIMIT", None)
+    if not rate:
+        return None
+    ip = get_client_ip(request)
+    user_id = request.user.pk
+    limited, retry_after = is_rate_limited("post_delete", rate, user_id, ip)
+    if limited:
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        msg = pgettext(
+            "post_management.rate_limit",
+            "too_many_delete_requests",
+        )
+        if is_ajax:
+            resp = JsonResponse({"success": False, "error": msg}, status=429)
+            if retry_after:
+                resp["Retry-After"] = str(retry_after)
+            return resp
+        messages.error(request, msg)
+        return None  # non-ajax path continues to redirect anyway
+    return None
+
+
+def _record_post_delete_hit(request):
+    """Record a successful delete hit for rate limiting."""
+    rate = getattr(settings, "POST_DELETE_RATE_LIMIT", None)
+    if rate:
+        ip = get_client_ip(request)
+        record_rate_limit_hit("post_delete", rate, request.user.pk, ip)
 
 
 @login_required
@@ -110,15 +151,20 @@ def superadmin_delete_post(request, post_id):
     if not is_superadmin_user(request.user):
         raise PermissionDenied
 
+    rate_resp = _check_post_delete_rate_limit(request)
+    if rate_resp:
+        return rate_resp
+
     reason = (request.POST.get("reason") or "").strip()
     if not reason:
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        msg = pgettext("post_management.error", "delete_reason_required")
         if is_ajax:
             return JsonResponse(
-                {"success": False, "error": "Silinmə səbəbi yazılmalıdır."},
+                {"success": False, "error": msg},
                 status=400,
             )
-        messages.error(request, "Silinmə səbəbi yazılmalıdır.")
+        messages.error(request, msg)
         return redirect("accounts:superadmin_post_management")
 
     with bypass_rls():
@@ -141,8 +187,14 @@ def superadmin_delete_post(request, post_id):
     try:
         create_notification(
             recipient=post_author,
-            title=f"Postunuz superadmin tərəfindən silindi: {post_title}",
-            message=(f'"{post_title}" başlıqlı postunuz superadmin tərəfindən' f" silindi.\nSəbəb: {reason}"),
+            title=pgettext(
+                "post_management.notification",
+                "superadmin_deleted_post_title",
+            ).format(title=post_title),
+            message=pgettext(
+                "post_management.notification",
+                "superadmin_deleted_post_body",
+            ).format(title=post_title, reason=reason),
             link=f"{reverse('accounts:profile')}?section=posts",
             notification_type=NotificationType.SYSTEM,
             metadata={
@@ -166,7 +218,7 @@ def superadmin_delete_post(request, post_id):
                     Membership.objects.filter(
                         organization=org,
                         is_active=True,
-                        role__level__gte=80,
+                        role__name__in=_ORG_MODERATOR_ROLE_NAMES,
                     )
                     .exclude(user=request.user)
                     .select_related("user")
@@ -174,12 +226,14 @@ def superadmin_delete_post(request, post_id):
                 for admin_m in admin_memberships:
                     create_notification(
                         recipient=admin_m.user,
-                        title=("Superadmin tərəfindən post silindi:" f" {post_title}"),
-                        message=(
-                            f'Təşkilatınızdakı ({org.name}) "{post_title}"'
-                            " postu superadmin tərəfindən silindi.\n"
-                            f"Səbəb: {reason}"
-                        ),
+                        title=pgettext(
+                            "post_management.notification",
+                            "superadmin_deleted_org_post_title",
+                        ).format(title=post_title),
+                        message=pgettext(
+                            "post_management.notification",
+                            "superadmin_deleted_org_post_body",
+                        ).format(org_name=org.name, title=post_title, reason=reason),
                         link=f"{reverse('accounts:profile')}?section=posts",
                         notification_type=NotificationType.SYSTEM,
                         metadata={
@@ -192,12 +246,14 @@ def superadmin_delete_post(request, post_id):
         logger.exception("Failed to notify org admins about post deletion pk=%s", post_id)
 
     post.delete()
+    _record_post_delete_hit(request)
 
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    msg = pgettext("post_management.success", "post_deleted").format(title=post_title)
     if is_ajax:
-        return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
+        return JsonResponse({"success": True, "message": msg})
 
-    messages.success(request, f'"{post_title}" postu superadmin tərəfindən silindi.')
+    messages.success(request, msg)
     return redirect("accounts:superadmin_post_management")
 
 
@@ -211,7 +267,11 @@ def org_post_management(request):
 
     with bypass_rls():
         membership = (
-            Membership.objects.filter(user=user, is_active=True, role__level__gte=80)
+            Membership.objects.filter(
+                user=user,
+                is_active=True,
+                role__name__in=_ORG_MODERATOR_ROLE_NAMES,
+            )
             .select_related("organization")
             .first()
         )
@@ -301,7 +361,11 @@ def org_moderate_post(request, post_id):
         post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
 
         admin_membership = (
-            Membership.objects.filter(user=user, is_active=True, role__level__gte=80)
+            Membership.objects.filter(
+                user=user,
+                is_active=True,
+                role__name__in=_ORG_MODERATOR_ROLE_NAMES,
+            )
             .select_related("organization")
             .first()
         )
@@ -315,18 +379,25 @@ def org_moderate_post(request, post_id):
         author_in_org = Membership.objects.filter(user=post.author, organization=org, is_active=True).exists()
 
     if not author_in_org and not is_superadmin_user(user):
-        raise PermissionDenied("Bu post sizin təşkilatınıza aid deyil.")
+        raise PermissionDenied(
+            pgettext("post_management.error", "post_not_in_your_org"),
+        )
 
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
     if action == "delete":
+        rate_resp = _check_post_delete_rate_limit(request)
+        if rate_resp:
+            return rate_resp
+
         if not feedback:
+            msg = pgettext("post_management.error", "delete_reason_required")
             if is_ajax:
                 return JsonResponse(
-                    {"success": False, "error": "Silinmə səbəbi yazılmalıdır."},
+                    {"success": False, "error": msg},
                     status=400,
                 )
-            messages.error(request, "Silinmə səbəbi yazılmalıdır.")
+            messages.error(request, msg)
             return redirect("accounts:org_post_management")
 
         post_title = post.title
@@ -346,10 +417,14 @@ def org_moderate_post(request, post_id):
         try:
             create_notification(
                 recipient=post.author,
-                title=f"Postunuz silindi: {post_title}",
-                message=(
-                    f'"{post_title}" başlıqlı postunuz təşkilat admini' f" tərəfindən silindi.\nSəbəb: {feedback}"
-                ),
+                title=pgettext(
+                    "post_management.notification",
+                    "org_admin_deleted_post_title",
+                ).format(title=post_title),
+                message=pgettext(
+                    "post_management.notification",
+                    "org_admin_deleted_post_body",
+                ).format(title=post_title, reason=feedback),
                 link=f"{reverse('accounts:profile')}?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={
@@ -365,20 +440,23 @@ def org_moderate_post(request, post_id):
             )
 
         post.delete()
+        _record_post_delete_hit(request)
 
+        msg = pgettext("post_management.success", "post_deleted").format(title=post_title)
         if is_ajax:
-            return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
-        messages.success(request, f'"{post_title}" postu silindi.')
+            return JsonResponse({"success": True, "message": msg})
+        messages.success(request, msg)
         return redirect("accounts:org_post_management")
 
     elif action == "request_changes":
         if not feedback:
+            msg = pgettext("post_management.error", "feedback_required")
             if is_ajax:
                 return JsonResponse(
-                    {"success": False, "error": "Feedback yazılmalıdır."},
+                    {"success": False, "error": msg},
                     status=400,
                 )
-            messages.error(request, "Feedback yazılmalıdır.")
+            messages.error(request, msg)
             return redirect("accounts:org_post_management")
 
         post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
@@ -403,8 +481,14 @@ def org_moderate_post(request, post_id):
         try:
             create_notification(
                 recipient=post.author,
-                title=f"Postunuzda düzəliş tələb olunur: {post.title}",
-                message=(f'"{post.title}" başlıqlı postunuzda düzəliş tələb' f" olunur.\nFeedback: {feedback}"),
+                title=pgettext(
+                    "post_management.notification",
+                    "changes_requested_title",
+                ).format(title=post.title),
+                message=pgettext(
+                    "post_management.notification",
+                    "changes_requested_body",
+                ).format(title=post.title, feedback=feedback),
                 link=f"{reverse('accounts:profile')}?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={
@@ -416,12 +500,14 @@ def org_moderate_post(request, post_id):
         except Exception:
             logger.exception("Failed to notify author about feedback pk=%s", post_id)
 
+        msg = pgettext("post_management.success", "feedback_sent")
         if is_ajax:
-            return JsonResponse({"success": True, "message": "Feedback göndərildi."})
-        messages.success(request, "Feedback göndərildi.")
+            return JsonResponse({"success": True, "message": msg})
+        messages.success(request, msg)
         return redirect("accounts:org_post_management")
 
+    msg = pgettext("post_management.error", "invalid_action")
     if is_ajax:
-        return JsonResponse({"success": False, "error": "Yanlış əməliyyat."}, status=400)
-    messages.error(request, "Yanlış əməliyyat.")
+        return JsonResponse({"success": False, "error": msg}, status=400)
+    messages.error(request, msg)
     return redirect("accounts:org_post_management")
