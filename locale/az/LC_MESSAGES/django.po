@@ -17207,6 +17207,14 @@ msgctxt "superadmin.users"
 msgid "no_users_found"
 msgstr "İstifadəçi tapılmadı."
 
+msgctxt "superadmin.users"
+msgid "page"
+msgstr "Səhifə"
+
+msgctxt "superadmin.users"
+msgid "total_users"
+msgstr "istifadəçi"
+
 msgctxt "superadmin.ai_settings"
 msgid "title"
 msgstr "AI Tənzimləmələri"
