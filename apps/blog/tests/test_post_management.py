@@ -1,7 +1,7 @@
 """Tests for post management features."""
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole, UserProfile
@@ -250,7 +250,9 @@ class SuperadminPostManagementTest(TestCase):
         )
         notif = InAppNotification.objects.filter(recipient=self.author).first()
         self.assertIsNotNone(notif)
-        self.assertIn("superadmin", notif.title.lower())
+        # Notification title contains the post title
+        self.assertIn("SA Managed", notif.title)
+        # Notification body contains the deletion reason
         self.assertIn("Test reason", notif.message)
 
     def test_search_filter(self):
@@ -350,6 +352,7 @@ class OrgAdminPostManagementTest(TestCase):
         )
         notif = InAppNotification.objects.filter(recipient=self.teacher).first()
         self.assertIsNotNone(notif)
+        # Notification body contains the deletion reason
         self.assertIn("Policy violation", notif.message)
 
     def test_delete_requires_feedback(self):
@@ -392,3 +395,119 @@ class MyResultsPaginationSearchTest(TestCase):
         self.client.login(username="student1", password="pass1234")
         resp = self.client.get(reverse("accounts:my_results"))
         self.assertIn("page_obj", resp.context)
+
+
+class RoleNameBasedModerationAccessTest(TestCase):
+    """Verify that org moderation checks role names, not numeric levels."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("rlowner", "rlo@test.com", "pass1234")
+        UserProfile.objects.update_or_create(user=self.owner, defaults={"role": ProfileRole.ORG_OWNER})
+        self.org, _, self.teacher_role, _, _ = _create_org_with_roles(self.owner, name="Role Test Org")
+
+        # Create a custom high-level role (level 85) that is NOT in
+        # ADMIN_EQUIVALENT_ROLE_NAMES — it should be denied.
+        self.custom_role, _ = Role.objects.get_or_create(
+            organization=self.org,
+            name="senior_researcher",
+            defaults={
+                "display_name": "Senior Researcher",
+                "level": 85,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "is_system": False,
+            },
+        )
+
+        self.researcher = User.objects.create_user("researcher", "res@test.com", "pass1234")
+        UserProfile.objects.update_or_create(user=self.researcher, defaults={"role": ProfileRole.TEACHER})
+        Membership.objects.create(
+            user=self.researcher,
+            organization=self.org,
+            role=self.custom_role,
+            is_active=True,
+        )
+
+        # Teacher in org to create a post
+        self.teacher = User.objects.create_user("rlteacher", "rlt@test.com", "pass1234")
+        UserProfile.objects.update_or_create(user=self.teacher, defaults={"role": ProfileRole.TEACHER})
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.teacher_role,
+            is_active=True,
+        )
+
+        self.category = Category.objects.create(name="RL", slug="rl")
+        self.post = Post.objects.create(
+            title="RL Post",
+            content="Content",
+            author=self.teacher,
+            category=self.category,
+            is_published=True,
+            slug="rl-post",
+        )
+
+    def test_high_level_non_admin_role_denied_org_management(self):
+        """A role with level>=80 but name not in ADMIN_EQUIVALENT gets 403."""
+        self.client.login(username="researcher", password="pass1234")
+        resp = self.client.get(reverse("accounts:org_post_management"))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_high_level_non_admin_role_denied_moderate(self):
+        """A role with level>=80 but name not in ADMIN_EQUIVALENT gets 403."""
+        self.client.login(username="researcher", password="pass1234")
+        resp = self.client.post(
+            reverse("accounts:org_moderate_post", args=[self.post.pk]),
+            {"action": "delete", "feedback": "test"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 403)
+
+
+class PostDeleteRateLimitTest(TestCase):
+    """Verify rate limiting on post delete endpoints."""
+
+    def setUp(self):
+        self.superadmin = User.objects.create_superuser("rsa", "rsa@test.com", "pass1234")
+        self.author = User.objects.create_user("rauthor", "ra@test.com", "pass1234")
+        UserProfile.objects.update_or_create(user=self.author, defaults={"role": ProfileRole.TEACHER})
+        self.category = Category.objects.create(name="RC", slug="rc")
+        # Clear any prior rate limit state for this scope.
+        from core.rate_limit import clear_rate_limit
+
+        clear_rate_limit("post_delete", self.superadmin.pk, "127.0.0.1")
+
+    def _make_post(self, title, slug):
+        return Post.objects.create(
+            title=title,
+            content="Content",
+            author=self.author,
+            category=self.category,
+            is_published=True,
+            slug=slug,
+        )
+
+    @override_settings(POST_DELETE_RATE_LIMIT="2/1m")
+    def test_superadmin_delete_rate_limited(self):
+        """After exceeding the rate limit, the next delete returns 429."""
+        self.client.login(username="rsa", password="pass1234")
+
+        # First two deletions succeed
+        for i in range(2):
+            post = self._make_post(f"Rate Post {i}", f"rate-post-{i}")
+            resp = self.client.post(
+                reverse("accounts:superadmin_delete_post", args=[post.pk]),
+                {"reason": "Testing rate limit"},
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+            self.assertEqual(resp.status_code, 200, f"Delete {i} should succeed")
+
+        # Third deletion is rate-limited
+        post3 = self._make_post("Rate Post 3", "rate-post-3")
+        resp = self.client.post(
+            reverse("accounts:superadmin_delete_post", args=[post3.pk]),
+            {"reason": "Testing rate limit"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 429)
+        self.assertTrue(Post.objects.filter(pk=post3.pk).exists())

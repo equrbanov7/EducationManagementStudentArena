@@ -18985,3 +18985,64 @@ msgstr "Yüklənir..."
 msgctxt "exams.template.teacher_exam_results"
 msgid "loading"
 msgstr "Yüklənir..."
+
+#: apps/accounts/views/post_management.py — post management i18n strings
+msgctxt "post_management.error"
+msgid "delete_reason_required"
+msgstr "Silinmə səbəbi yazılmalıdır."
+
+msgctxt "post_management.error"
+msgid "feedback_required"
+msgstr "Feedback yazılmalıdır."
+
+msgctxt "post_management.error"
+msgid "invalid_action"
+msgstr "Yanlış əməliyyat seçildi."
+
+msgctxt "post_management.error"
+msgid "post_not_in_your_org"
+msgstr "Bu post sizin təşkilatınıza aid deyil."
+
+msgctxt "post_management.success"
+msgid "post_deleted"
+msgstr "'{title}' postu silindi."
+
+msgctxt "post_management.success"
+msgid "feedback_sent"
+msgstr "Feedback göndərildi."
+
+msgctxt "post_management.notification"
+msgid "superadmin_deleted_post_title"
+msgstr "Postunuz superadmin tərəfindən silindi: {title}"
+
+msgctxt "post_management.notification"
+msgid "superadmin_deleted_post_body"
+msgstr "'{title}' başlıqlı postunuz superadmin tərəfindən silindi.\nSəbəb: {reason}"
+
+msgctxt "post_management.notification"
+msgid "superadmin_deleted_org_post_title"
+msgstr "Superadmin tərəfindən post silindi: {title}"
+
+msgctxt "post_management.notification"
+msgid "superadmin_deleted_org_post_body"
+msgstr "Təşkilatınızdakı ({org_name}) '{title}' postu superadmin tərəfindən silindi.\nSəbəb: {reason}"
+
+msgctxt "post_management.notification"
+msgid "org_admin_deleted_post_title"
+msgstr "Postunuz silindi: {title}"
+
+msgctxt "post_management.notification"
+msgid "org_admin_deleted_post_body"
+msgstr "'{title}' başlıqlı postunuz təşkilat admini tərəfindən silindi.\nSəbəb: {reason}"
+
+msgctxt "post_management.notification"
+msgid "changes_requested_title"
+msgstr "Postunuzda düzəliş tələb olunur: {title}"
+
+msgctxt "post_management.notification"
+msgid "changes_requested_body"
+msgstr "'{title}' başlıqlı postunuzda düzəliş tələb olunur.\nFeedback: {feedback}"
+
+msgctxt "post_management.rate_limit"
+msgid "too_many_delete_requests"
+msgstr "Çox sayda silinmə sorğusu göndərdiniz. Zəhmət olmasa bir az gözləyin."
