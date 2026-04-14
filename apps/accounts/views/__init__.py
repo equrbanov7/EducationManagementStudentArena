@@ -73,6 +73,14 @@ from .roles import (
     role_assignment,
 )
 
+# Post management views
+from .post_management import (
+    org_moderate_post,
+    org_post_management,
+    superadmin_delete_post,
+    superadmin_post_management,
+)
+
 # Superadmin views
 from .superadmin import (
     superadmin_ai_settings,
@@ -123,6 +131,11 @@ __all__ = [
     # Account management
     "delete_account",
     "superadmin_user_management",
+    # Post management
+    "superadmin_post_management",
+    "superadmin_delete_post",
+    "org_post_management",
+    "org_moderate_post",
     # Superadmin
     "superadmin_organizations",
     "superadmin_ai_settings",
