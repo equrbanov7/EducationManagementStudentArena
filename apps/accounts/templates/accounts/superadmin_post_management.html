@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Post İdarəetmə - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/post_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main profile-main--results">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-newspaper"></i> Post İdarəetmə (Superadmin)
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        <div class="section-card">
+            <form method="get" class="post-mgmt-filters">
+                <div class="post-mgmt-filters__row">
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-q">Axtar</label>
+                        <input type="text" id="filter-q" name="q" value="{{ search_query }}" class="form-control" placeholder="Başlıq, müəllif, məzmun...">
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-org">Təşkilat</label>
+                        <select id="filter-org" name="org" class="form-control">
+                            <option value="">Hamısı</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.id }}" {% if org_filter == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-role">Rol</label>
+                        <select id="filter-role" name="role" class="form-control">
+                            <option value="">Hamısı</option>
+                            {% for value, label in role_choices %}
+                                <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-status">Status</label>
+                        <select id="filter-status" name="status" class="form-control">
+                            <option value="">Hamısı</option>
+                            <option value="published" {% if status_filter == "published" %}selected{% endif %}>Yayımlanmış</option>
+                            <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>Qaralama</option>
+                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Təsdiq gözləyir</option>
+                            <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>Düzəliş tələb olunur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="post-mgmt-filters__row">
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-date-from">Tarixdən</label>
+                        <input type="date" id="filter-date-from" name="date_from" value="{{ date_from }}" class="form-control">
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-date-to">Tarixə qədər</label>
+                        <input type="date" id="filter-date-to" name="date_to" value="{{ date_to }}" class="form-control">
+                    </div>
+                    <div class="post-mgmt-filters__actions">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrə et</button>
+                        <a href="{% url 'accounts:superadmin_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Sıfırla</a>
+                    </div>
+                </div>
+            </form>
+
+            <p class="post-mgmt-count">{{ total_count }} post tapıldı</p>
+        </div>
+
+        {% if posts %}
+        <div class="section-card">
+            <div class="post-mgmt-table-wrap">
+                <table class="post-mgmt-table">
+                    <thead>
+                        <tr>
+                            <th>Başlıq</th>
+                            <th>Müəllif</th>
+                            <th>Status</th>
+                            <th>Tarix</th>
+                            <th>Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td class="post-mgmt-title-cell">
+                                <a href="{% url 'article_detail' slug=post.slug %}">{{ post.title|truncatechars:60 }}</a>
+                            </td>
+                            <td>{{ post.author.get_full_name|default:post.author.username }}</td>
+                            <td>
+                                {% if post.is_published %}
+                                    <span class="post-status-badge status-published"><i class="fas fa-check-circle"></i> Yayımlanmış</span>
+                                {% elif post.requires_approval and post.approval_status == "pending" %}
+                                    <span class="post-status-badge status-awaiting"><i class="fas fa-hourglass-half"></i> Gözləyir</span>
+                                {% elif post.requires_approval and post.approval_status == "needs_changes" %}
+                                    <span class="post-status-badge status-needs-changes"><i class="fas fa-pen"></i> Düzəliş</span>
+                                {% else %}
+                                    <span class="post-status-badge status-draft"><i class="fas fa-pencil-alt"></i> Qaralama</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ post.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm js-sa-delete-post"
+                                        data-post-id="{{ post.pk }}"
+                                        data-post-title="{{ post.title|escape }}"
+                                        data-delete-url="{% url 'accounts:superadmin_delete_post' post.pk %}">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            {% include "partials/_pagination.html" with page_obj=page_obj %}
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state section-card">
+            <i class="fas fa-newspaper"></i>
+            <p>Heç bir post tapılmadı.</p>
+        </div>
+        {% endif %}
+
+        <!-- Delete Modal -->
+        <div id="saDeleteModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3><i class="fas fa-exclamation-triangle"></i> Post Silinməsi</h3>
+                <p><span id="saDeletePostTitle" class="post-mgmt-modal-title"></span> postu silinəcək.</p>
+                <form id="saDeleteForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="saDeleteReason">Silinmə səbəbi (məcburi)</label>
+                        <textarea id="saDeleteReason" name="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" id="saDeleteCancel" class="modal-cancel-btn">Ləğv et</button>
+                        <button type="submit" class="modal-confirm-btn delete-btn">Sil</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script nonce="{{ request.csp_nonce }}">
+(function() {
+    var modal = document.getElementById("saDeleteModal");
+    var form = document.getElementById("saDeleteForm");
+    var titleSpan = document.getElementById("saDeletePostTitle");
+    var cancelBtn = document.getElementById("saDeleteCancel");
+    var reasonInput = document.getElementById("saDeleteReason");
+
+    document.querySelectorAll(".js-sa-delete-post").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            titleSpan.textContent = this.dataset.postTitle;
+            form.action = this.dataset.deleteUrl;
+            reasonInput.value = "";
+            modal.classList.add("active");
+            document.body.classList.add("modal-open");
+        });
+    });
+
+    function closeModal() {
+        modal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+    }
+
+    cancelBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", function(e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && modal.classList.contains("active")) closeModal();
+    });
+})();
+</script>
+{% endblock %}

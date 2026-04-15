@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Post İdarəetmə - {{ organization.name }} - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/post_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main profile-main--results">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-newspaper"></i> Post İdarəetmə — {{ organization.name }}
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        <div class="section-card">
+            <form method="get" class="post-mgmt-filters">
+                <div class="post-mgmt-filters__row">
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-q">Axtar</label>
+                        <input type="text" id="filter-q" name="q" value="{{ search_query }}" class="form-control" placeholder="Başlıq, müəllif, məzmun...">
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-role">Rol</label>
+                        <select id="filter-role" name="role" class="form-control">
+                            <option value="">Hamısı</option>
+                            {% for value, label in role_choices %}
+                                <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-status">Status</label>
+                        <select id="filter-status" name="status" class="form-control">
+                            <option value="">Hamısı</option>
+                            <option value="published" {% if status_filter == "published" %}selected{% endif %}>Yayımlanmış</option>
+                            <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>Qaralama</option>
+                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Təsdiq gözləyir</option>
+                            <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>Düzəliş tələb olunur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="post-mgmt-filters__row">
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-date-from">Tarixdən</label>
+                        <input type="date" id="filter-date-from" name="date_from" value="{{ date_from }}" class="form-control">
+                    </div>
+                    <div class="post-mgmt-filters__field">
+                        <label for="filter-date-to">Tarixə qədər</label>
+                        <input type="date" id="filter-date-to" name="date_to" value="{{ date_to }}" class="form-control">
+                    </div>
+                    <div class="post-mgmt-filters__actions">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrə et</button>
+                        <a href="{% url 'accounts:org_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Sıfırla</a>
+                    </div>
+                </div>
+            </form>
+
+            <p class="post-mgmt-count">{{ total_count }} post tapıldı</p>
+        </div>
+
+        {% if posts %}
+        <div class="section-card">
+            <div class="post-mgmt-table-wrap">
+                <table class="post-mgmt-table">
+                    <thead>
+                        <tr>
+                            <th>Başlıq</th>
+                            <th>Müəllif</th>
+                            <th>Status</th>
+                            <th>Tarix</th>
+                            <th>Əməliyyatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td class="post-mgmt-title-cell">
+                                <a href="{% url 'article_detail' slug=post.slug %}">{{ post.title|truncatechars:60 }}</a>
+                            </td>
+                            <td>{{ post.author.get_full_name|default:post.author.username }}</td>
+                            <td>
+                                {% if post.is_published %}
+                                    <span class="post-status-badge status-published"><i class="fas fa-check-circle"></i> Yayımlanmış</span>
+                                {% elif post.requires_approval and post.approval_status == "pending" %}
+                                    <span class="post-status-badge status-awaiting"><i class="fas fa-hourglass-half"></i> Gözləyir</span>
+                                {% elif post.requires_approval and post.approval_status == "needs_changes" %}
+                                    <span class="post-status-badge status-needs-changes"><i class="fas fa-pen"></i> Düzəliş</span>
+                                {% else %}
+                                    <span class="post-status-badge status-draft"><i class="fas fa-pencil-alt"></i> Qaralama</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ post.created_at|date:"d.m.Y H:i" }}</td>
+                            <td class="post-mgmt-actions-cell">
+                                <button class="btn btn-warning btn-sm js-org-feedback-post"
+                                        data-post-id="{{ post.pk }}"
+                                        data-post-title="{{ post.title|escape }}"
+                                        data-moderate-url="{% url 'accounts:org_moderate_post' post.pk %}">
+                                    <i class="fas fa-comment-dots"></i> Düzəliş tələb et
+                                </button>
+                                <button class="btn btn-danger btn-sm js-org-delete-post"
+                                        data-post-id="{{ post.pk }}"
+                                        data-post-title="{{ post.title|escape }}"
+                                        data-moderate-url="{% url 'accounts:org_moderate_post' post.pk %}">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            {% include "partials/_pagination.html" with page_obj=page_obj %}
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state section-card">
+            <i class="fas fa-newspaper"></i>
+            <p>Heç bir post tapılmadı.</p>
+        </div>
+        {% endif %}
+
+        <!-- Delete Modal -->
+        <div id="orgDeleteModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3><i class="fas fa-exclamation-triangle"></i> Post Silinməsi</h3>
+                <p><span id="orgDeletePostTitle" class="post-mgmt-modal-title"></span> postu silinəcək.</p>
+                <form id="orgDeleteForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <div class="form-group">
+                        <label for="orgDeleteReason">Silinmə səbəbi (məcburi)</label>
+                        <textarea id="orgDeleteReason" name="feedback" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" id="orgDeleteCancel" class="modal-cancel-btn">Ləğv et</button>
+                        <button type="submit" class="modal-confirm-btn delete-btn">Sil</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Request Changes Modal -->
+        <div id="orgFeedbackModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3><i class="fas fa-comment-dots"></i> Düzəliş Tələbi</h3>
+                <p><span id="orgFeedbackPostTitle" class="post-mgmt-modal-title"></span> postuna feedback göndəriləcək.</p>
+                <form id="orgFeedbackForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="request_changes">
+                    <div class="form-group">
+                        <label for="orgFeedbackText">Feedback (məcburi)</label>
+                        <textarea id="orgFeedbackText" name="feedback" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" id="orgFeedbackCancel" class="modal-cancel-btn">Ləğv et</button>
+                        <button type="submit" class="modal-confirm-btn">Göndər</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script nonce="{{ request.csp_nonce }}">
+(function() {
+    /* Delete modal */
+    var delModal = document.getElementById("orgDeleteModal");
+    var delForm = document.getElementById("orgDeleteForm");
+    var delTitle = document.getElementById("orgDeletePostTitle");
+    var delCancel = document.getElementById("orgDeleteCancel");
+    var delReason = document.getElementById("orgDeleteReason");
+
+    document.querySelectorAll(".js-org-delete-post").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            delTitle.textContent = this.dataset.postTitle;
+            delForm.action = this.dataset.moderateUrl;
+            delReason.value = "";
+            delModal.classList.add("active");
+            document.body.classList.add("modal-open");
+        });
+    });
+
+    function closeDelModal() {
+        delModal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+    }
+
+    delCancel.addEventListener("click", closeDelModal);
+    delModal.addEventListener("click", function(e) {
+        if (e.target === delModal) closeDelModal();
+    });
+
+    /* Feedback modal */
+    var fbModal = document.getElementById("orgFeedbackModal");
+    var fbForm = document.getElementById("orgFeedbackForm");
+    var fbTitle = document.getElementById("orgFeedbackPostTitle");
+    var fbCancel = document.getElementById("orgFeedbackCancel");
+    var fbText = document.getElementById("orgFeedbackText");
+
+    document.querySelectorAll(".js-org-feedback-post").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            fbTitle.textContent = this.dataset.postTitle;
+            fbForm.action = this.dataset.moderateUrl;
+            fbText.value = "";
+            fbModal.classList.add("active");
+            document.body.classList.add("modal-open");
+        });
+    });
+
+    function closeFbModal() {
+        fbModal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+    }
+
+    fbCancel.addEventListener("click", closeFbModal);
+    fbModal.addEventListener("click", function(e) {
+        if (e.target === fbModal) closeFbModal();
+    });
+
+    /* Escape closes either modal */
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            if (delModal.classList.contains("active")) closeDelModal();
+            if (fbModal.classList.contains("active")) closeFbModal();
+        }
+    });
+})();
+</script>
+{% endblock %}

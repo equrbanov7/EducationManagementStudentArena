@@ -16,6 +16,13 @@
 
         <div id="createFormError" class="create-form-error" hidden></div>
 
+        {% if posting_blocked %}
+            <div class="approval-notice approval-notice--blocked">
+                <i class="fas fa-ban"></i>
+                {{ posting_blocked_reason }}
+            </div>
+        {% endif %}
+
         <form id="createForm" enctype="multipart/form-data" data-requires-approval="{{ post_creation_requires_approval|yesno:'true,false' }}">
             {% csrf_token %}
             {% if post_creation_requires_approval %}
@@ -86,7 +93,8 @@
             {% endif %}
 
             <div class="profile-create-post-actions">
-                <button type="submit" id="saveCreate" class="btn profile-action-btn profile-action-btn--ocean">
+                <button type="submit" id="saveCreate" class="btn profile-action-btn profile-action-btn--ocean"
+                    {% if posting_blocked %}disabled aria-disabled="true" title="{{ posting_blocked_reason }}"{% endif %}>
                     {% trans "create" context "profile.posts" %}
                 </button>
             </div>

@@ -327,11 +327,23 @@ def my_results(request):
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
-    items, counts, active_filter = _collect_my_results(request, filter_type=request.GET.get("type"))
+    from django.core.paginator import Paginator
+
+    search_query = (request.GET.get("q") or "").strip()
+    items, counts, active_filter = _collect_my_results(
+        request, filter_type=request.GET.get("type"), search=search_query
+    )
+
+    paginator = Paginator(items, 15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "items": items,
+        "items": page_obj,
+        "page_obj": page_obj,
         "counts": counts,
         "active_filter": active_filter,
+        "search_query": search_query,
     }
     return render(request, "accounts/my_results.html", context)
 
