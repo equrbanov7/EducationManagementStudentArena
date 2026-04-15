@@ -368,6 +368,7 @@ def user_profile(request):
     from apps.blog.services import (
         author_requires_post_approval,
         can_user_manage_categories,
+        can_user_publish_post,
         collect_reviewable_posts,
         count_pending_reviewable_posts,
     )
@@ -770,6 +771,8 @@ def user_profile(request):
     post_category_root_options = []
     post_category_subcategory_options = []
     post_creation_requires_approval = False
+    posting_blocked = False
+    posting_blocked_reason = ""
     if capabilities["can_manage_blog"]:
         user_posts_qs = (
             Post.objects.filter(author=request.user)
@@ -784,6 +787,9 @@ def user_profile(request):
             post_category_tree
         )
         post_creation_requires_approval = author_requires_post_approval(request.user)
+        can_publish, blocked_reason = can_user_publish_post(request.user)
+        posting_blocked = not can_publish
+        posting_blocked_reason = blocked_reason
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -1696,6 +1702,8 @@ def user_profile(request):
         "post_category_root_options": post_category_root_options,
         "post_category_subcategory_options": post_category_subcategory_options,
         "post_creation_requires_approval": post_creation_requires_approval,
+        "posting_blocked": posting_blocked,
+        "posting_blocked_reason": posting_blocked_reason,
         "my_courses": my_courses,
         "courses_count": courses_count,
         "my_exams": my_exams_page_obj,

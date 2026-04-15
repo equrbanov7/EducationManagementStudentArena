@@ -1,0 +1,148 @@
+/* Superadmin User Management page styles */
+.user-management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+.user-management-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.user-management-header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+.user-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.user-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    background: var(--bg-secondary, #f5f5f5);
+    border: 1px solid var(--border-color, #ddd);
+    transition: all 0.2s;
+}
+.user-tab:hover {
+    background: var(--bg-hover, #e9e9e9);
+}
+.user-tab.active {
+    background: var(--primary-color, #4a6cf7);
+    color: #fff;
+    border-color: var(--primary-color, #4a6cf7);
+}
+.user-tab .badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 0.5rem;
+    background: var(--bg-secondary, #e9e9e9);
+}
+.user-tab.active .badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+.user-management-container .search-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.user-management-container .search-bar input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+}
+.user-management-container .search-bar button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color, #4a6cf7);
+    color: #fff;
+    cursor: pointer;
+}
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.user-table th,
+.user-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+.user-table th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+.user-table tr:hover td {
+    background: var(--bg-hover, #f8f9fa);
+}
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.status-badge--active {
+    background: #d4edda;
+    color: #155724;
+}
+.status-badge--deleted {
+    background: #f8d7da;
+    color: #721c24;
+}
+.user-management-container .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+.user-management-container .action-buttons .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+.user-management-container .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+.user-management-container .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.3;
+}
+.user-management-container .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
+.user-management-container .back-link:hover {
+    color: var(--primary-color);
+}
+.user-email-masked {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.action-form-inline {
+    display: inline;
+}
+.user-management-container .pagination-info {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
