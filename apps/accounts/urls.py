@@ -105,4 +105,17 @@ urlpatterns = [
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),
+    # Post management
+    path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
+    path(
+        "superadmin/post-management/<int:post_id>/delete/",
+        views.superadmin_delete_post,
+        name="superadmin_delete_post",
+    ),
+    path("org-post-management/", views.org_post_management, name="org_post_management"),
+    path(
+        "org-post-management/<int:post_id>/moderate/",
+        views.org_moderate_post,
+        name="org_moderate_post",
+    ),
 ]

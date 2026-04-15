@@ -19,7 +19,12 @@ from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_fi
 from ..forms import PostForm
 from ..models import Category, Post, PostApprovalLog
 from ..selectors import get_post_category_tree
-from ..services import author_requires_post_approval, can_user_review_post, resolve_post_category_selection
+from ..services import (
+    author_requires_post_approval,
+    can_user_publish_post,
+    can_user_review_post,
+    resolve_post_category_selection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +41,13 @@ def create_post(request):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
+    can_publish, blocked_reason = can_user_publish_post(request.user)
     requires_approval = author_requires_post_approval(request.user)
 
     if request.method == "POST":
+        if not can_publish:
+            raise PermissionDenied(blocked_reason)
+
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         form = PostForm(request.POST, request.FILES, author=request.user)
         if form.is_valid():
@@ -98,6 +107,8 @@ def create_post(request):
         {
             "form": form,
             "requires_approval": requires_approval,
+            "posting_blocked": not can_publish,
+            "posting_blocked_reason": blocked_reason,
             "post_category_tree": get_post_category_tree(),
         },
     )
@@ -111,6 +122,13 @@ def create_post(request):
 def post_edit_ajax(request, pk):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
+
+    can_publish, blocked_reason = can_user_publish_post(request.user)
+    if not can_publish:
+        return JsonResponse(
+            {"success": False, "message": blocked_reason},
+            status=403,
+        )
 
     # Yalnız öz postunu düzəldə bilsin
     post = get_object_or_404(Post, pk=pk, author=request.user)

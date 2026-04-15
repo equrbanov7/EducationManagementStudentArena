@@ -5,35 +5,7 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
-<style>
-    .user-management-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-    .user-management-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
-    .user-management-header h1 { font-size: 1.5rem; margin: 0; }
-    .user-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .user-tab { padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; color: var(--text-secondary); background: var(--bg-secondary, #f5f5f5); border: 1px solid var(--border-color, #ddd); transition: all 0.2s; }
-    .user-tab:hover { background: var(--bg-hover, #e9e9e9); }
-    .user-tab.active { background: var(--primary-color, #4a6cf7); color: #fff; border-color: var(--primary-color, #4a6cf7); }
-    .user-tab .badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 10px; margin-left: 0.5rem; }
-    .user-tab.active .badge { background: rgba(255,255,255,0.3); color: #fff; }
-    .user-tab .badge { background: var(--bg-secondary, #e9e9e9); }
-    .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .search-bar input { flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border-color, #ddd); border-radius: 8px; }
-    .search-bar button { padding: 0.5rem 1rem; border: none; border-radius: 8px; background: var(--primary-color, #4a6cf7); color: #fff; cursor: pointer; }
-    .user-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    .user-table th, .user-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color, #eee); }
-    .user-table th { font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; }
-    .user-table tr:hover td { background: var(--bg-hover, #f8f9fa); }
-    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-    .status-badge--active { background: #d4edda; color: #155724; }
-    .status-badge--deleted { background: #f8d7da; color: #721c24; }
-    .action-buttons { display: flex; gap: 0.25rem; }
-    .action-buttons .btn { font-size: 0.8rem; padding: 0.25rem 0.5rem; }
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
-    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.3; }
-    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); text-decoration: none; margin-bottom: 1rem; }
-    .back-link:hover { color: var(--primary-color); }
-    .user-email-masked { color: var(--text-secondary); font-size: 0.9rem; }
-</style>
+<link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -127,7 +99,7 @@
                     <td>
                         <div class="action-buttons">
                             {% if status_filter == 'deleted' %}
-                            <form method="post" style="display:inline;">
+                            <form method="post" class="action-form-inline">
                                 {% csrf_token %}
                                 <input type="hidden" name="user_id" value="{{ u.pk }}">
                                 <input type="hidden" name="action" value="restore">
@@ -136,7 +108,7 @@
                                     <i class="fas fa-undo"></i>
                                 </button>
                             </form>
-                            <form method="post" style="display:inline;"
+                            <form method="post" class="action-form-inline"
                                   onsubmit="return confirm('{% trans "hard_delete_confirm" context "superadmin.users" %}');">
                                 {% csrf_token %}
                                 <input type="hidden" name="user_id" value="{{ u.pk }}">
@@ -156,10 +128,15 @@
     </div>
 
     {% if users.has_other_pages %}
-    <div class="d-flex justify-content-center mt-3">
+    <div class="d-flex flex-column align-items-center mt-3">
         <nav>
             <ul class="pagination">
                 {% if users.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
                 <li class="page-item">
                     <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ users.previous_page_number }}">
                         <i class="fas fa-chevron-left"></i>
@@ -181,9 +158,18 @@
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </li>
+                <li class="page-item">
+                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ users.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
                 {% endif %}
             </ul>
         </nav>
+        <p class="pagination-info">
+            {% trans "page" context "superadmin.users" %} {{ users.number }} / {{ users.paginator.num_pages }}
+            ({{ users.paginator.count }} {% trans "total_users" context "superadmin.users" %})
+        </p>
     </div>
     {% endif %}
 

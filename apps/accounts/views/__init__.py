@@ -59,6 +59,14 @@ from .organization import (
     student_organization_request,
 )
 
+# Post management views
+from .post_management import (
+    org_moderate_post,
+    org_post_management,
+    superadmin_delete_post,
+    superadmin_post_management,
+)
+
 # Profile views
 from .profile import (
     profile_avatar,
@@ -123,6 +131,11 @@ __all__ = [
     # Account management
     "delete_account",
     "superadmin_user_management",
+    # Post management
+    "superadmin_post_management",
+    "superadmin_delete_post",
+    "org_post_management",
+    "org_moderate_post",
     # Superadmin
     "superadmin_organizations",
     "superadmin_ai_settings",

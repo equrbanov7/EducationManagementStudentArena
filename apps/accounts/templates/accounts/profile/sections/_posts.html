@@ -50,6 +50,7 @@
 
                                     <button class="icon-action-btn delete-btn js-open-delete"
                                             data-post-id="{{ post.pk }}"
+                                            data-delete-url="{% url 'delete_post' post.pk %}"
                                             data-title="{{ post.title|escape }}"
                                             title="{% trans 'delete_title' context 'profile.posts' %}">
                                         <i class="fas fa-trash"></i>

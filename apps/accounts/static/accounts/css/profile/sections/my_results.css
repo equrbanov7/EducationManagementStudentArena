@@ -304,3 +304,33 @@
         margin-top: 0.5rem;
     }
 }
+
+/* --- Results Layout --- */
+.profile-main--results {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* --- Search Form --- */
+.results-search-form {
+    margin-top: 1rem;
+}
+
+.results-search-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.results-search-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.results-search-btn {
+    white-space: nowrap;
+}
+
+.results-search-clear {
+    white-space: nowrap;
+}

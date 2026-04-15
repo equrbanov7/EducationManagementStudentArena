@@ -374,7 +374,7 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     return items, counts, filter_type
 
 
-def _collect_my_results(request, filter_type=None):
+def _collect_my_results(request, filter_type=None, search=None):
     """
     Build a unified result list for current user across exams, assignments, labs, and projects.
     """
@@ -570,6 +570,18 @@ def _collect_my_results(request, filter_type=None):
             counts["independent"] += 1
 
     items.sort(key=lambda item: item["submitted_at"] or now, reverse=True)
+
+    search_query = (search or "").strip()
+    if search_query:
+        search_lower = search_query.lower()
+        items = [
+            item
+            for item in items
+            if search_lower in (item.get("title") or "").lower()
+            or search_lower in (item.get("kind") or "").lower()
+            or search_lower in (item.get("type_label") or "").lower()
+        ]
+
     if filter_type != "all":
         counts = {
             "exams": ExamAttempt.objects.filter(
