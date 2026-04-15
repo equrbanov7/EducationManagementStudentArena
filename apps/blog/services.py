@@ -11,7 +11,9 @@ from django.db.models import Q
 from apps.accounts.models import ProfileRole
 from apps.accounts.policies import get_user_role_level, is_superadmin_user, user_has_any_role
 from apps.exams.models import StudentGroup
+from apps.organizations.models import Membership
 from core.constants import ROLE_LEVEL_TEACHER
+from core.rls import bypass_rls
 
 from .models import Category, Post
 
@@ -23,12 +25,60 @@ APPROVAL_STATUS_FILTERS = {
 }
 
 
+def _user_has_active_org_membership(user):
+    """Return True if *user* has at least one active Membership in an active Organization."""
+    with bypass_rls():
+        return Membership.objects.filter(
+            user=user,
+            is_active=True,
+            organization__status="active",
+        ).exists()
+
+
+def _user_has_any_membership(user):
+    """Return True if *user* has any Membership record (active or not)."""
+    with bypass_rls():
+        return Membership.objects.filter(user=user).exists()
+
+
+def can_user_publish_post(user):
+    """Determine whether *user* is allowed to create/publish a post.
+
+    Returns ``(can_publish, reason)`` where *can_publish* is a bool and
+    *reason* is a human-readable explanation when publishing is blocked.
+    """
+    if not user or not getattr(user, "is_authenticated", False):
+        return False, "İstifadəçi daxil olmayıb."
+
+    if is_superadmin_user(user):
+        return True, ""
+
+    if _user_has_any_membership(user):
+        if _user_has_active_org_membership(user):
+            return True, ""
+        return (
+            False,
+            "Təşkilatınız tərəfindən üzvlüyünüz hələ təsdiqlənməyib.",
+        )
+
+    # No membership at all – allowed but will require superadmin review.
+    return True, ""
+
+
 def author_requires_post_approval(author):
     if not author or not getattr(author, "is_authenticated", False):
         return False
+    if is_superadmin_user(author):
+        return False
     if get_user_role_level(author) >= ROLE_LEVEL_TEACHER:
         return False
-    return user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
+    # Students / lead-students always require approval (original logic).
+    if user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}):
+        return True
+    # Users with no active org membership require superadmin review.
+    if not _user_has_active_org_membership(author):
+        return True
+    return False
 
 
 def can_user_manage_categories(user):

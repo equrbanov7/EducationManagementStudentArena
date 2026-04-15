@@ -124,7 +124,7 @@ def superadmin_user_management(request):
 
     users_qs = users_qs.order_by("-date_joined")
 
-    paginator = Paginator(users_qs, 25)
+    paginator = Paginator(users_qs, 15)
     page_number = request.GET.get("page")
     users_page = paginator.get_page(page_number)
 
