@@ -12,7 +12,7 @@ from apps.accounts.models import ProfileRole
 from apps.accounts.policies import get_user_role_level, is_superadmin_user, user_has_any_role
 from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership
-from core.constants import ROLE_LEVEL_TEACHER
+from core.constants import ROLE_LEVEL_TEACHER, OrganizationType
 from core.rls import bypass_rls
 
 from .models import Category, Post
@@ -23,22 +23,54 @@ APPROVAL_STATUS_FILTERS = {
     Post.ApprovalStatus.NEEDS_CHANGES,
     Post.ApprovalStatus.APPROVED,
 }
+PERSONAL_APPROVAL_ORG_FILTER = "__personal__"
+
+
+def _institutional_memberships_qs():
+    return Membership.objects.exclude(organization__org_type=OrganizationType.INDIVIDUAL)
 
 
 def _user_has_active_org_membership(user):
-    """Return True if *user* has at least one active Membership in an active Organization."""
+    """Return True if *user* has an active membership in a non-personal active organization."""
     with bypass_rls():
-        return Membership.objects.filter(
-            user=user,
-            is_active=True,
-            organization__status="active",
-        ).exists()
+        return (
+            _institutional_memberships_qs()
+            .filter(
+                user=user,
+                is_active=True,
+                organization__status="active",
+                organization__is_active=True,
+            )
+            .exists()
+        )
 
 
-def _user_has_any_membership(user):
-    """Return True if *user* has any Membership record (active or not)."""
+def _user_has_any_org_membership(user):
+    """Return True if *user* has any non-personal organization membership."""
     with bypass_rls():
-        return Membership.objects.filter(user=user).exists()
+        return _institutional_memberships_qs().filter(user=user).exists()
+
+
+def _active_org_ids_for_user(user):
+    with bypass_rls():
+        return set(
+            _institutional_memberships_qs()
+            .filter(
+                user=user,
+                is_active=True,
+                organization__status="active",
+                organization__is_active=True,
+            )
+            .values_list("organization_id", flat=True)
+        )
+
+
+def author_requires_superadmin_post_review(author):
+    if not author or not getattr(author, "is_authenticated", False):
+        return False
+    if is_superadmin_user(author):
+        return False
+    return not _user_has_active_org_membership(author)
 
 
 def can_user_publish_post(user):
@@ -53,7 +85,7 @@ def can_user_publish_post(user):
     if is_superadmin_user(user):
         return True, ""
 
-    if _user_has_any_membership(user):
+    if _user_has_any_org_membership(user):
         if _user_has_active_org_membership(user):
             return True, ""
         return (
@@ -61,7 +93,7 @@ def can_user_publish_post(user):
             "Təşkilatınız tərəfindən üzvlüyünüz hələ təsdiqlənməyib.",
         )
 
-    # No membership at all – allowed but will require superadmin review.
+    # Personal-only or no-org users can submit, but it will require superadmin review.
     return True, ""
 
 
@@ -70,14 +102,14 @@ def author_requires_post_approval(author):
         return False
     if is_superadmin_user(author):
         return False
-    if get_user_role_level(author) >= ROLE_LEVEL_TEACHER:
-        return False
     # Students / lead-students always require approval (original logic).
     if user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}):
         return True
-    # Users with no active org membership require superadmin review.
-    if not _user_has_active_org_membership(author):
+    # Users outside any active non-personal organization require superadmin review.
+    if author_requires_superadmin_post_review(author):
         return True
+    if get_user_role_level(author) >= ROLE_LEVEL_TEACHER:
+        return False
     return False
 
 
@@ -119,9 +151,13 @@ def can_user_review_post(user, post):
 
     reviewer_level = get_user_role_level(user)
 
-    # Org admin / org owner can manage any post that requires approval.
+    # Org admin / org owner can manage posts within their active organization scope.
     if reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
-        return True
+        reviewer_org_ids = _active_org_ids_for_user(user)
+        if not reviewer_org_ids:
+            return False
+        author_org_ids = _active_org_ids_for_user(post.author)
+        return bool(reviewer_org_ids & author_org_ids)
 
     author_level = get_user_role_level(post.author)
     if reviewer_level < ROLE_LEVEL_TEACHER or reviewer_level <= author_level:
@@ -144,28 +180,81 @@ def _build_group_scope_for_reviewer(reviewer):
         return StudentGroup.objects.filter(students__posts__requires_approval=True).distinct()
     reviewer_level = get_user_role_level(reviewer)
     if reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
-        return StudentGroup.objects.filter(students__posts__requires_approval=True).distinct()
+        reviewer_org_ids = _active_org_ids_for_user(reviewer)
+        if not reviewer_org_ids:
+            return StudentGroup.objects.none()
+        return (
+            StudentGroup.objects.filter(
+                students__memberships__organization_id__in=reviewer_org_ids,
+                students__memberships__is_active=True,
+                students__memberships__organization__status="active",
+                students__memberships__organization__is_active=True,
+                students__posts__requires_approval=True,
+            )
+            .exclude(students__memberships__organization__org_type=OrganizationType.INDIVIDUAL)
+            .distinct()
+        )
     return StudentGroup.objects.filter(Q(teacher=reviewer) | Q(teachers=reviewer)).distinct()
 
 
-def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=""):
+def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id="", organization_id=""):
     normalized_search = (search or "").strip()
     normalized_status = normalize_approval_status(status, include_all=True, default=Post.ApprovalStatus.PENDING)
     selected_group = str(group_id or "").strip()
+    selected_organization = str(organization_id or "").strip()
 
     reviewer_level = get_user_role_level(reviewer)
     superadmin = is_superadmin_user(reviewer)
-    # Org admin / org owner see all posts just like a superadmin.
-    is_elevated = superadmin or reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
-    if not is_elevated and reviewer_level < ROLE_LEVEL_TEACHER:
-        return [], normalized_search, normalized_status, "", []
+    is_org_admin = reviewer_level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
+    if not superadmin and reviewer_level < ROLE_LEVEL_TEACHER:
+        return [], normalized_search, normalized_status, "", [], "", []
 
     groups_scope = _build_group_scope_for_reviewer(reviewer)
     available_groups = list(groups_scope.order_by("name").values("id", "name"))
     available_group_ids = {str(group["id"]) for group in available_groups}
+    available_organizations = []
 
     if selected_group and selected_group not in available_group_ids:
         selected_group = ""
+
+    if superadmin:
+        with bypass_rls():
+            available_organizations = list(
+                Membership.objects.filter(
+                    is_active=True,
+                    organization__status="active",
+                    organization__is_active=True,
+                    user__posts__requires_approval=True,
+                )
+                .exclude(organization__org_type=OrganizationType.INDIVIDUAL)
+                .values("organization_id", "organization__name")
+                .distinct()
+                .order_by("organization__name")
+            )
+            available_organizations = [
+                {"id": row["organization_id"], "name": row["organization__name"]} for row in available_organizations
+            ]
+            active_institutional_author_ids = set(
+                _institutional_memberships_qs()
+                .filter(
+                    is_active=True,
+                    organization__status="active",
+                    organization__is_active=True,
+                )
+                .values_list("user_id", flat=True)
+            )
+            has_personal_authors = (
+                Post.objects.filter(requires_approval=True)
+                .exclude(author_id__in=active_institutional_author_ids)
+                .exists()
+            )
+
+        available_org_ids = {str(org["id"]) for org in available_organizations}
+        if has_personal_authors:
+            available_organizations.append({"id": PERSONAL_APPROVAL_ORG_FILTER, "name": "Şəxsi / qurumsuz"})
+            available_org_ids.add(PERSONAL_APPROVAL_ORG_FILTER)
+        if selected_organization and selected_organization not in available_org_ids:
+            selected_organization = ""
 
     posts_qs = (
         Post.objects.filter(requires_approval=True)
@@ -186,7 +275,50 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
             | Q(author__last_name__icontains=normalized_search)
         )
 
-    if is_elevated:
+    if superadmin:
+        if selected_organization == PERSONAL_APPROVAL_ORG_FILTER:
+            with bypass_rls():
+                institutional_author_ids = list(
+                    _institutional_memberships_qs()
+                    .filter(
+                        is_active=True,
+                        organization__status="active",
+                        organization__is_active=True,
+                    )
+                    .values_list("user_id", flat=True)
+                )
+            posts_qs = posts_qs.exclude(author_id__in=institutional_author_ids)
+        elif selected_organization:
+            with bypass_rls():
+                org_author_ids = list(
+                    _institutional_memberships_qs()
+                    .filter(
+                        organization_id=selected_organization,
+                        is_active=True,
+                        organization__status="active",
+                        organization__is_active=True,
+                    )
+                    .values_list("user_id", flat=True)
+                )
+            posts_qs = posts_qs.filter(author_id__in=org_author_ids)
+        if selected_group:
+            posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
+    elif is_org_admin:
+        reviewer_org_ids = _active_org_ids_for_user(reviewer)
+        if not reviewer_org_ids:
+            return [], normalized_search, normalized_status, selected_group, available_groups, "", []
+        with bypass_rls():
+            reviewer_author_ids = list(
+                _institutional_memberships_qs()
+                .filter(
+                    organization_id__in=reviewer_org_ids,
+                    is_active=True,
+                    organization__status="active",
+                    organization__is_active=True,
+                )
+                .values_list("user_id", flat=True)
+            )
+        posts_qs = posts_qs.filter(author_id__in=reviewer_author_ids)
         if selected_group:
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
     else:
@@ -195,14 +327,15 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
 
     posts = list(posts_qs)
-    if not is_elevated:
+    if not superadmin and not is_org_admin:
         posts = [post for post in posts if reviewer_level > get_user_role_level(post.author)]
 
     author_ids = {post.author_id for post in posts}
     author_group_names = defaultdict(list)
+    author_organization_names = defaultdict(list)
     if author_ids:
         group_pairs_qs = StudentGroup.objects.filter(students__id__in=author_ids)
-        if not is_elevated:
+        if not superadmin and not is_org_admin:
             group_pairs_qs = group_pairs_qs.filter(Q(teacher=reviewer) | Q(teachers=reviewer))
         if selected_group:
             group_pairs_qs = group_pairs_qs.filter(id=selected_group)
@@ -212,6 +345,28 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
                 continue
             if group_name not in author_group_names[student_id]:
                 author_group_names[student_id].append(group_name)
+
+        with bypass_rls():
+            org_pairs_qs = _institutional_memberships_qs().filter(
+                user_id__in=author_ids,
+                is_active=True,
+                organization__status="active",
+                organization__is_active=True,
+            )
+            if is_org_admin and not superadmin:
+                org_pairs_qs = org_pairs_qs.filter(organization_id__in=_active_org_ids_for_user(reviewer))
+            if selected_organization and selected_organization != PERSONAL_APPROVAL_ORG_FILTER:
+                org_pairs_qs = org_pairs_qs.filter(organization_id=selected_organization)
+
+            for user_id, org_name in org_pairs_qs.values_list("user_id", "organization__name"):
+                if not user_id or not org_name:
+                    continue
+                if org_name not in author_organization_names[user_id]:
+                    author_organization_names[user_id].append(org_name)
+
+    for author_id in author_ids:
+        if not author_organization_names.get(author_id):
+            author_organization_names[author_id].append("Şəxsi / qurumsuz")
 
     status_label_map = {
         Post.ApprovalStatus.PENDING: "Təsdiq gözləyir",
@@ -232,16 +387,25 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
                 "post": post,
                 "author_name": author_name,
                 "group_names": author_group_names.get(post.author_id, []),
+                "organization_names": author_organization_names.get(post.author_id, []),
                 "status_label": status_label_map.get(post.approval_status, post.approval_status),
                 "status_class": status_class_map.get(post.approval_status, "status-draft"),
             }
         )
 
-    return items, normalized_search, normalized_status, selected_group, available_groups
+    return (
+        items,
+        normalized_search,
+        normalized_status,
+        selected_group,
+        available_groups,
+        selected_organization,
+        available_organizations,
+    )
 
 
 def count_pending_reviewable_posts(reviewer):
-    items, _, _, _, _ = collect_reviewable_posts(
+    items, _, _, _, _, _, _ = collect_reviewable_posts(
         reviewer,
         status=Post.ApprovalStatus.PENDING,
     )

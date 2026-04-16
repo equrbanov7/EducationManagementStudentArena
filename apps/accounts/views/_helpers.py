@@ -519,6 +519,7 @@ def _role_capabilities(user, profile):
             "create-category",
             "category-management",
             "superadmin-organizations",
+            "superadmin-users",
             "pending-post-approvals",
             "blog",
             "edit-profile",

@@ -1,0 +1,249 @@
+{% load i18n %}
+<div class="user-management-container {% if embedded_in_profile %}user-management-container--embedded{% endif %}">
+    <div class="user-management-header">
+        <div>
+            <h2 class="user-management-heading">
+                <i class="fas fa-users-cog"></i>
+                {% trans "user_management_title" context "superadmin.users" %}
+            </h2>
+            <p class="user-management-subtitle">
+                {{ filtered_count }} nəticə göstərilir. Ümumi istifadəçi sayı: {{ total_count }}.
+            </p>
+        </div>
+        <div class="user-management-summary">
+            <span class="user-summary-pill">Aktiv: {{ active_count }}</span>
+            <span class="user-summary-pill user-summary-pill--blocked">Bloklanmış: {{ blocked_count }}</span>
+            <span class="user-summary-pill user-summary-pill--deleted">Silinmiş: {{ deleted_count }}</span>
+        </div>
+    </div>
+
+    <div class="user-tabs">
+        {% for tab in status_tabs %}
+        <a href="?{% if embedded_in_profile %}section=superadmin-users&{% endif %}{% if search_query %}user_search={{ search_query|urlencode }}&{% endif %}{% if role_filter %}user_role={{ role_filter|urlencode }}&{% endif %}{% if organization_filter %}user_org={{ organization_filter|urlencode }}&{% endif %}{% if group_filter %}user_group={{ group_filter|urlencode }}&{% endif %}{% if department_filter %}user_department={{ department_filter|urlencode }}&{% endif %}{% if sort_filter and sort_filter != 'newest' %}user_sort={{ sort_filter|urlencode }}&{% endif %}user_status={{ tab.value }}"
+           class="user-tab {% if status_filter == tab.value %}active{% endif %}">
+            {{ tab.label }}
+            <span class="badge">{{ tab.count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <form method="get" class="user-management-filters js-profile-debounce-search" data-debounce-ms="700">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="superadmin-users">
+        {% endif %}
+        <div class="user-management-filter-grid">
+            <label class="user-management-filter-field user-management-filter-field--wide">
+                <span>Axtarış</span>
+                <input type="search"
+                       name="user_search"
+                       value="{{ search_query }}"
+                       placeholder="{% trans 'search_placeholder' context 'superadmin.users' %}">
+            </label>
+            <label class="user-management-filter-field">
+                <span>Rol</span>
+                <select name="user_role" class="form-select">
+                    <option value="">Hamısı</option>
+                    {% for option in role_options %}
+                    <option value="{{ option.value }}" {% if role_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="user-management-filter-field">
+                <span>Təşkilat</span>
+                <select name="user_org" class="form-select">
+                    <option value="">Hamısı</option>
+                    {% for option in organization_options %}
+                    <option value="{{ option.value }}" {% if organization_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="user-management-filter-field">
+                <span>Qrup / sinif</span>
+                <input type="text" name="user_group" value="{{ group_filter }}" placeholder="Məs: 11A, CS-204">
+            </label>
+            <label class="user-management-filter-field">
+                <span>Departament</span>
+                <input type="text" name="user_department" value="{{ department_filter }}" placeholder="Məs: Riyaziyyat">
+            </label>
+            <label class="user-management-filter-field">
+                <span>Sıralama</span>
+                <select name="user_sort" class="form-select">
+                    {% for option in sort_options %}
+                    <option value="{{ option.value }}" {% if sort_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <div class="user-management-filter-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter me-1"></i> Filterlə
+            </button>
+            <a href="{{ reset_url }}" class="btn btn-outline-secondary">
+                <i class="fas fa-rotate-left me-1"></i> Sıfırla
+            </a>
+        </div>
+    </form>
+
+    {% if user_rows %}
+    <div class="table-responsive">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>{% trans "col_username" context "superadmin.users" %}</th>
+                    <th>{% trans "col_email" context "superadmin.users" %}</th>
+                    <th>{% trans "col_name" context "superadmin.users" %}</th>
+                    <th>{% trans "col_role" context "superadmin.users" %}</th>
+                    <th>{% trans "col_organization" context "superadmin.users" %}</th>
+                    <th>Qrup / departament</th>
+                    <th>{% trans "col_status" context "superadmin.users" %}</th>
+                    <th>Aktivlik</th>
+                    <th>{% trans "col_actions" context "superadmin.users" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in user_rows %}
+                <tr>
+                    <td>
+                        <div class="user-table-primary">{{ row.username }}</div>
+                        {% if row.restriction_label %}
+                        <div class="user-table-muted">{{ row.restriction_label }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div>{{ row.email_display }}</div>
+                    </td>
+                    <td>{{ row.full_name }}</td>
+                    <td>{{ row.role_label }}</td>
+                    <td>{{ row.organization_name }}</td>
+                    <td>
+                        <div class="user-table-meta"><strong>Qrup:</strong> {{ row.group_number }}</div>
+                        <div class="user-table-muted"><strong>Departament:</strong> {{ row.department }}</div>
+                    </td>
+                    <td>
+                        <span class="{{ row.status_badge_class }}">{{ row.status_label }}</span>
+                        {% if row.deleted_at %}
+                        <div class="user-table-muted">Silinmə: {{ row.deleted_at|date:"d M Y H:i" }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div>{{ row.last_login|date:"d M Y H:i"|default:"Heç daxil olmayıb" }}</div>
+                        <div class="user-table-muted">Qeydiyyat: {{ row.date_joined|date:"d M Y" }}</div>
+                    </td>
+                    <td>
+                        {% if row.can_block or row.can_unblock or row.can_soft_delete or row.can_restore or row.can_hard_delete %}
+                        <div class="action-buttons">
+                            {% if row.can_block %}
+                            <form method="post" action="{% url 'accounts:superadmin_user_management' %}" class="action-form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="user_id" value="{{ row.user.pk }}">
+                                <input type="hidden" name="action" value="block">
+                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Müvəqqəti blokla">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if row.can_unblock %}
+                            <form method="post" action="{% url 'accounts:superadmin_user_management' %}" class="action-form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="user_id" value="{{ row.user.pk }}">
+                                <input type="hidden" name="action" value="unblock">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Bloku aç">
+                                    <i class="fas fa-unlock"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if row.can_restore %}
+                            <form method="post" action="{% url 'accounts:superadmin_user_management' %}" class="action-form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="user_id" value="{{ row.user.pk }}">
+                                <input type="hidden" name="action" value="restore">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="{% trans 'restore' context 'superadmin.users' %}">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if row.can_soft_delete %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger js-user-management-delete-trigger"
+                                    title="Hesabı sil"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#superadminUserDeleteModal"
+                                    data-user-id="{{ row.user.pk }}"
+                                    data-username="{{ row.username }}"
+                                    data-next="{{ post_next_url }}"
+                                    data-action="soft_delete"
+                                    data-modal-title="Hesabı sil"
+                                    data-modal-description="Bu hesab silinmiş istifadəçilər siyahısına keçiriləcək və sonradan bərpa etmək mümkün olacaq."
+                                    data-modal-submit-label="Sil">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+
+                            {% if row.can_hard_delete %}
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger js-user-management-delete-trigger"
+                                    title="{% trans 'hard_delete' context 'superadmin.users' %}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#superadminUserDeleteModal"
+                                    data-user-id="{{ row.user.pk }}"
+                                    data-username="{{ row.username }}"
+                                    data-next="{{ post_next_url }}"
+                                    data-action="hard_delete"
+                                    data-modal-title="Hesabı tam sil"
+                                    data-modal-description="Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və ona bağlı qeydlər birdəfəlik silinə bilər."
+                                    data-modal-submit-label="Tam sil">
+                                <i class="fas fa-user-times"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <span class="user-table-muted">Məhdud</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "partials/_pagination.html" with page_obj=users extra_query=pagination_query page_param=page_param %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users-slash"></i>
+        <p>Seçilmiş filterlərə uyğun istifadəçi tapılmadı.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="superadminUserDeleteModal" tabindex="-1" aria-labelledby="superadminUserDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{% url 'accounts:superadmin_user_management' %}" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="superadminUserDeleteModalLabel">Hesabı sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="next" id="superadminUserDeleteNext" value="{{ post_next_url }}">
+                <input type="hidden" name="user_id" id="superadminUserDeleteId">
+                <input type="hidden" name="action" id="superadminUserDeleteAction">
+                <p class="mb-2">
+                    <strong id="superadminUserDeleteName"></strong> üçün seçilən əməliyyat tətbiq ediləcək.
+                </p>
+                <p class="mb-0 text-muted" id="superadminUserDeleteDescription">
+                    Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <button type="submit" class="btn btn-danger" id="superadminUserDeleteSubmitLabel">Sil</button>
+            </div>
+        </form>
+    </div>
+</div>
