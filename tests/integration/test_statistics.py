@@ -359,3 +359,19 @@ class StatisticsSelectorsTest(TestCase):
         )
         # With no data, all counts should be zero
         self.assertEqual(stats["summary"]["avg_score"], 0)
+
+    def test_student_statistics_with_none_organization(self):
+        """Stats should still work when organization is None."""
+        from apps.accounts.services.statistics_selectors import get_student_statistics
+
+        stats = get_student_statistics(self.user, organization=None)
+        self.assertIn("summary", stats)
+        self.assertEqual(stats["summary"]["total_items"], 0)
+
+    def test_teacher_statistics_with_none_organization(self):
+        """Teacher stats should still work when organization is None."""
+        from apps.accounts.services.statistics_selectors import get_teacher_statistics
+
+        stats = get_teacher_statistics(self.user, organization=None)
+        self.assertIn("summary", stats)
+        self.assertIsInstance(stats["summary"]["total_courses"], int)
