@@ -9,10 +9,68 @@
   </div>
   {% else %}
 
+  <div class="stats-ai-hero card mb-4" id="statsAiSummaryCard">
+    <div class="card-body">
+      <div class="stats-ai-hero__head">
+        <div class="stats-ai-hero__copy">
+          <span class="stats-ai-hero__badge">
+            <i class="fas fa-robot"></i> AI
+          </span>
+          <h4 class="stats-ai-hero__title mb-2">{% trans "ai_analysis" context "profile.statistics" %}</h4>
+          <p class="stats-ai-hero__lead mb-0">
+            Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik tövsiyələri bir yerdə göstər.
+          </p>
+        </div>
+        <div class="stats-ai-hero__actions">
+          <a href="{% url 'accounts:statistics_export_csv' %}?{{ request.META.QUERY_STRING }}"
+             class="btn btn-sm btn-light stats-ai-hero__action">
+            <i class="fas fa-file-csv me-1"></i> {% trans "btn_csv_export" context "profile.statistics" %}
+          </a>
+          <button type="button"
+                  class="btn btn-sm btn-primary stats-ai-hero__action"
+                  id="statsAiSummaryBtn"
+                  {% if not statistics_data or not statistics_data.summary %}disabled{% endif %}>
+            <i class="fas fa-robot me-1"></i>
+            <span class="stats-ai-btn__label">{% trans "btn_ai_summary" context "profile.statistics" %}</span>
+          </button>
+        </div>
+      </div>
+      <div class="stats-ai-meta" id="statsAiSummaryMeta">
+        <span class="stats-ai-meta__pill">Cari filtrlərə əsasən analiz olunur</span>
+        <span class="stats-ai-meta__pill">Qısa xülasə + tövsiyə</span>
+      </div>
+      <div class="stats-ai-shell" id="statsAiSummaryBody">
+        {% if statistics_data and statistics_data.summary %}
+        <div class="stats-ai-placeholder">
+          <div class="stats-ai-placeholder__icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <div class="stats-ai-placeholder__title">{% trans "ai_analysis" context "profile.statistics" %}</div>
+            <div class="stats-ai-placeholder__text">
+              {% trans "btn_ai_summary" context "profile.statistics" %} düyməsinə bas və hazır filtr üzrə xülasəni burada gör.
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="stats-ai-placeholder stats-ai-placeholder--muted">
+          <div class="stats-ai-placeholder__icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <div>
+            <div class="stats-ai-placeholder__title">{% trans "no_data_found" context "profile.statistics" %}</div>
+            <div class="stats-ai-placeholder__text">{% trans "no_data_hint" context "profile.statistics" %}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
   {# ── Filter bar ──────────────────────────────────────────────── #}
   <div class="stats-filter-bar card mb-3">
     <div class="card-body py-2">
-      <form method="get" action="" id="statsFilterForm" class="row g-2 align-items-end">
+      <form method="get" action="" id="statsFilterForm" class="row g-2 align-items-end" data-stats-auto-submit="true">
         <input type="hidden" name="section" value="statistics">
 
         <div class="col-6 col-md-2">
@@ -29,53 +87,70 @@
         {% if statistics_courses %}
         <div class="col-6 col-md-2">
           <label class="form-label form-label-sm mb-0">{% trans "filter_course" context "profile.statistics" %}</label>
-          <select class="form-select form-select-sm" name="stat_course">
-            <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
-            {% for c in statistics_courses %}
-            <option value="{{ c.id }}" {% if statistics_filters.course == c.id|stringformat:"s" %}selected{% endif %}>
-              {{ c.title|truncatewords:5 }}
-            </option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_course" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for c in statistics_courses %}
+              <option value="{{ c.id }}" {% if statistics_filters.course == c.id|stringformat:"s" %}selected{% endif %}>
+                {{ c.title|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
         {% endif %}
 
         {% if statistics_groups %}
         <div class="col-6 col-md-2">
           <label class="form-label form-label-sm mb-0">{% trans "filter_group" context "profile.statistics" %}</label>
-          <select class="form-select form-select-sm" name="stat_group">
-            <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
-            {% for g in statistics_groups %}
-            <option value="{{ g.id }}" {% if statistics_filters.group == g.id|stringformat:"s" %}selected{% endif %}>
-              {{ g.name|truncatewords:5 }}
-            </option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_group" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for g in statistics_groups %}
+              <option value="{{ g.id }}" {% if statistics_filters.group == g.id|stringformat:"s" %}selected{% endif %}>
+                {{ g.name|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
         {% endif %}
 
         {% if is_superadmin %}
         <div class="col-6 col-md-2">
           <label class="form-label form-label-sm mb-0">{% trans "filter_organization_id" context "profile.statistics" %}</label>
-          <input type="text" class="form-control form-control-sm" name="stat_organization"
-                 value="{{ statistics_filters.organization|default:'' }}" placeholder="ID">
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_organization" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for org in statistics_organizations %}
+              <option value="{{ org.id }}" {% if statistics_filters.organization == org.id|stringformat:"s" %}selected{% endif %}>
+                {{ org.name|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
         {% endif %}
 
         <div class="col-6 col-md-2">
           <label class="form-label form-label-sm mb-0">{% trans "filter_content_type" context "profile.statistics" %}</label>
-          <select class="form-select form-select-sm" name="stat_content_type">
-            <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>{% trans "filter_all" context "profile.statistics" %}</option>
-            <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>{% trans "content_exam" context "profile.statistics" %}</option>
-            <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>{% trans "content_assignment" context "profile.statistics" %}</option>
-            <option value="lab" {% if statistics_filters.content_type == "lab" %}selected{% endif %}>{% trans "content_lab" context "profile.statistics" %}</option>
-            <option value="project" {% if statistics_filters.content_type == "project" %}selected{% endif %}>{% trans "content_project" context "profile.statistics" %}</option>
-          </select>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_content_type" data-bootstrap-select>
+              <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>{% trans "filter_all" context "profile.statistics" %}</option>
+              <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>{% trans "content_exam" context "profile.statistics" %}</option>
+              <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>{% trans "content_assignment" context "profile.statistics" %}</option>
+              <option value="lab" {% if statistics_filters.content_type == "lab" %}selected{% endif %}>{% trans "content_lab" context "profile.statistics" %}</option>
+              <option value="project" {% if statistics_filters.content_type == "project" %}selected{% endif %}>{% trans "content_project" context "profile.statistics" %}</option>
+            </select>
+          </div>
         </div>
 
-        <div class="col-auto">
-          <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> {% trans "filter_apply" context "profile.statistics" %}</button>
-          <a href="{{ profile_base_url }}?section=statistics" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+        <div class="col-auto ms-auto">
+          {% if statistics_has_active_filters %}
+          <a href="{{ statistics_reset_url }}" class="btn btn-sm btn-outline-secondary stats-filter-reset" id="statsFilterReset" title="Filterləri sıfırla">
+            <i class="fas fa-times"></i>
+          </a>
+          {% endif %}
         </div>
       </form>
     </div>
@@ -418,6 +493,34 @@
   </div>
   {% endif %}
 
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="fas fa-bullseye me-1"></i> Statistik balans</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="statsBalanceRadarChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+    {% if role_capabilities.is_teacher or role_capabilities.is_org_admin or role_capabilities.is_superadmin %}
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-layer-group me-1"></i>
+            {% if role_capabilities.is_superadmin %}Təşkilat fəaliyyəti{% elif role_capabilities.is_org_admin %}Müəllim yükü{% else %}Kurs performansı{% endif %}
+          </h6>
+        </div>
+        <div class="card-body">
+          <canvas id="statsDetailChart" height="250"></canvas>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
   {# ── Student score breakdown bar (student only) ──────────────── #}
   {% if not role_capabilities.is_teacher and not role_capabilities.is_org_admin and not role_capabilities.is_superadmin %}
   <div class="row g-3 mb-4">
@@ -472,24 +575,35 @@
             <tr>
               <th class="stats-sortable" data-sort="name">{% trans "table_name" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="members">{% trans "card_members" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="teachers">{% trans "card_teachers" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="students">{% trans "card_students" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="courses">{% trans "card_courses" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
+              <th>Aç</th>
             </tr>
           </thead>
           <tbody>
-            {% for org in statistics_data.org_comparison %}
+            {% for org in statistics_org_rows %}
             <tr>
               <td>{{ org.name }}</td>
               <td>{{ org.members }}</td>
+              <td>{{ org.teachers }}</td>
+              <td>{{ org.students }}</td>
               <td>{{ org.courses }}</td>
               <td>{{ org.exams }}</td>
               <td>{{ org.attempts }}</td>
+              <td>
+                <a href="{{ profile_base_url }}?section=statistics&stat_organization={{ org.id }}" class="btn btn-sm btn-outline-primary">Bax</a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+    </div>
+    <div class="card-footer">
+      {% include "partials/_pagination.html" with page_obj=statistics_org_page extra_query=statistics_org_pagination_query page_param=statistics_org_page_param %}
     </div>
   </div>
   {% endif %}
@@ -507,59 +621,87 @@
           <thead class="table-light">
             <tr>
               <th class="stats-sortable" data-sort="name">{% trans "table_name" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="students">{% trans "card_students" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="courses">{% trans "card_courses" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
             </tr>
           </thead>
           <tbody>
-            {% for t in statistics_data.teacher_overview %}
+            {% for t in statistics_teacher_rows %}
             <tr>
               <td>{{ t.name }}</td>
+              <td>{{ t.student_count }}</td>
               <td>{{ t.course_count }}</td>
               <td>{{ t.exam_count }}</td>
+              <td>{{ t.attempt_count }}</td>
+              <td>{{ t.avg_score }}%</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+    </div>
+    <div class="card-footer">
+      {% include "partials/_pagination.html" with page_obj=statistics_teacher_page extra_query=statistics_teacher_pagination_query page_param=statistics_teacher_page_param %}
     </div>
   </div>
   {% endif %}
 
   {% if role_capabilities.is_org_admin and statistics_data.course_rankings %}
   <div class="card mb-4">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-trophy me-1"></i> {% trans "table_course_ranking_title" context "profile.statistics" %}</h6>
+      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchCourse" style="max-width:200px;">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-sm table-hover mb-0">
+        <table class="table table-sm table-hover mb-0 stats-sortable-table" id="statsCourseTable">
           <thead class="table-light">
             <tr>
               <th>#</th>
               <th>{% trans "filter_course" context "profile.statistics" %}</th>
+              <th>{% trans "card_teachers" context "profile.statistics" %}</th>
               <th>{% trans "table_student_count" context "profile.statistics" %}</th>
+              <th>{% trans "card_exams" context "profile.statistics" %}</th>
+              <th>{% trans "table_attempts" context "profile.statistics" %}</th>
+              <th>{% trans "card_assignments" context "profile.statistics" %}</th>
+              <th>Aç</th>
             </tr>
           </thead>
           <tbody>
-            {% for cr in statistics_data.course_rankings %}
+            {% for cr in statistics_course_rows %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ cr.course__title }}</td>
+              <td>{{ cr.teacher_name|default:"-" }}</td>
               <td>{{ cr.student_count }}</td>
+              <td>{{ cr.exam_count }}</td>
+              <td>{{ cr.attempt_count }}</td>
+              <td>{{ cr.assignment_total }}</td>
+              <td>
+                <a href="{{ profile_base_url }}?section=statistics&stat_course={{ cr.course__id }}" class="btn btn-sm btn-outline-primary">Bax</a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+    <div class="card-footer">
+      {% include "partials/_pagination.html" with page_obj=statistics_course_page extra_query=statistics_course_pagination_query page_param=statistics_course_page_param %}
+    </div>
   </div>
   {% endif %}
 
   {% if role_capabilities.is_teacher and statistics_data.group_comparison %}
   <div class="card mb-4">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-users me-1"></i> {% trans "chart_group_comparison" context "profile.statistics" %}</h6>
+      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchGroup" style="max-width:200px;">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -571,51 +713,76 @@
               <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="pass">{% trans "table_pass_pct" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
+              <th>Aç</th>
             </tr>
           </thead>
           <tbody>
-            {% for g in statistics_data.group_comparison %}
+            {% for g in statistics_group_rows %}
             <tr>
               <td>{{ g.name }}</td>
               <td>{{ g.student_count }}</td>
               <td>{{ g.avg_score }}%</td>
               <td>{{ g.pass_rate }}%</td>
               <td>{{ g.attempt_count }}</td>
+              <td>
+                <a href="{{ profile_base_url }}?section=statistics&stat_group={{ g.id }}" class="btn btn-sm btn-outline-primary">Bax</a>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+    <div class="card-footer">
+      {% include "partials/_pagination.html" with page_obj=statistics_group_page extra_query=statistics_group_pagination_query page_param=statistics_group_page_param %}
+    </div>
   </div>
   {% endif %}
 
-  {# ── Actions bar ─────────────────────────────────────────────── #}
-  <div class="d-flex flex-wrap gap-2 mb-4">
-    <a href="{% url 'accounts:statistics_export_csv' %}?{{ request.META.QUERY_STRING }}"
-       class="btn btn-sm btn-outline-secondary" id="statsExportCsvBtn">
-      <i class="fas fa-file-csv me-1"></i> {% trans "btn_csv_export" context "profile.statistics" %}
-    </a>
-    <button type="button" class="btn btn-sm btn-outline-primary" id="statsAiSummaryBtn">
-      <i class="fas fa-robot me-1"></i> {% trans "btn_ai_summary" context "profile.statistics" %}
-    </button>
-  </div>
-
-  {# ── AI summary container ────────────────────────────────────── #}
-  <div class="card mb-4 d-none" id="statsAiSummaryCard">
+  {% if role_capabilities.is_teacher and statistics_data.course_overview %}
+  <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h6 class="mb-0"><i class="fas fa-robot me-1"></i> {% trans "ai_analysis" context "profile.statistics" %}</h6>
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="statsAiCloseBtn">
-        <i class="fas fa-times"></i>
-      </button>
+      <h6 class="mb-0"><i class="fas fa-book-open me-1"></i> Kurs drill-down</h6>
+      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchTeacherCourse" style="max-width:220px;">
     </div>
-    <div class="card-body" id="statsAiSummaryBody">
-      <div class="text-center py-3">
-        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-        <span class="ms-2 text-muted">{% trans "ai_loading" context "profile.statistics" %}</span>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 stats-sortable-table" id="statsTeacherCourseTable">
+          <thead class="table-light">
+            <tr>
+              <th class="stats-sortable" data-sort="course">Kurs</th>
+              <th class="stats-sortable" data-sort="students">{% trans "table_student_count" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="pass">{% trans "table_pass_pct" context "profile.statistics" %}</th>
+              <th>Aç</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for course in statistics_teacher_course_rows %}
+            <tr>
+              <td>{{ course.title }}</td>
+              <td>{{ course.student_count }}</td>
+              <td>{{ course.exam_count }}</td>
+              <td>{{ course.attempt_count }}</td>
+              <td>{{ course.avg_score }}%</td>
+              <td>{{ course.pass_rate }}%</td>
+              <td>
+                <a href="{{ profile_base_url }}?section=statistics&stat_course={{ course.course_id }}" class="btn btn-sm btn-outline-primary">Bax</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
+    <div class="card-footer">
+      {% include "partials/_pagination.html" with page_obj=statistics_teacher_course_page extra_query=statistics_teacher_course_pagination_query page_param=statistics_teacher_course_page_param %}
+    </div>
   </div>
+  {% endif %}
 
   {% endif %}{# statistics_data exists #}
   {% endif %}{# statistics in allowed_sections #}

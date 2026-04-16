@@ -6,6 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
@@ -53,6 +54,7 @@
             {% include "accounts/profile/sections/_category_management.html" %}
             {% include "accounts/profile/sections/_superadmin_organizations.html" %}
             {% include "accounts/profile/sections/_superadmin_user_management.html" %}
+            {% include "accounts/profile/sections/_superadmin_ai_settings.html" %}
             {% include "accounts/profile/sections/_statistics.html" %}
             {% include "accounts/profile/sections/_edit_profile.html" %}
             {% include "accounts/profile/sections/_change_password.html" %}
