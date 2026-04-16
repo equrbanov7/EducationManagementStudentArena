@@ -6,6 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
@@ -52,6 +53,7 @@
             {% include "accounts/profile/sections/_category_management.html" %}
             {% include "accounts/profile/sections/_superadmin_organizations.html" %}
             {% include "accounts/profile/sections/_superadmin_user_management.html" %}
+            {% include "accounts/profile/sections/_statistics.html" %}
             {% include "accounts/profile/sections/_edit_profile.html" %}
             {% include "accounts/profile/sections/_change_password.html" %}
             {% include "accounts/profile/sections/_delete_account.html" %}
@@ -100,6 +102,8 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 };
 </script>
 <script src="{% static 'accounts/js/profile.js' %}"></script>
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+<script src="{% static 'accounts/js/statistics.js' %}"></script>
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor_ui.js' %}"></script>

@@ -72,6 +72,18 @@
         {% endif %}
  
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_education" context "profile.sidebar" %}</span></li>
+        {% if 'statistics' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=statistics"
+               data-section="statistics"
+               data-title="Statistika"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'statistics' %}active{% endif %}">
+                <i class="fas fa-chart-bar sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Statistika</span>
+            </a>
+        </li>
+        {% endif %}
         {% if 'posts' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=posts"
