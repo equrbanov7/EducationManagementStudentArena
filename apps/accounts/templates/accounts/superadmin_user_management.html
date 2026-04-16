@@ -9,179 +9,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="user-management-container">
-    <a href="{% url 'accounts:profile' %}?section=superadmin-organizations" class="back-link">
-        <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "superadmin.users" %}
-    </a>
-
-    <div class="user-management-header">
-        <h1><i class="fas fa-users-cog me-2"></i>{% trans "user_management_title" context "superadmin.users" %}</h1>
-    </div>
-
-    <div class="user-tabs">
-        <a href="?status=active{% if search_query %}&search={{ search_query }}{% endif %}"
-           class="user-tab {% if status_filter == 'active' %}active{% endif %}">
-            <i class="fas fa-check-circle me-1"></i>
-            {% trans "active_users" context "superadmin.users" %}
-            <span class="badge">{{ active_count }}</span>
-        </a>
-        <a href="?status=deleted{% if search_query %}&search={{ search_query }}{% endif %}"
-           class="user-tab {% if status_filter == 'deleted' %}active{% endif %}">
-            <i class="fas fa-user-times me-1"></i>
-            {% trans "deleted_users" context "superadmin.users" %}
-            <span class="badge">{{ deleted_count }}</span>
+<div class="user-management-standalone">
+    <div class="user-management-standalone-header">
+        <a href="{% url 'accounts:profile' %}?section=superadmin-organizations" class="back-link">
+            <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "superadmin.users" %}
         </a>
     </div>
 
-    <form method="get" class="search-bar">
-        <input type="hidden" name="status" value="{{ status_filter }}">
-        <input type="text" name="search" value="{{ search_query }}"
-               placeholder="{% trans 'search_placeholder' context 'superadmin.users' %}">
-        <button type="submit"><i class="fas fa-search me-1"></i> {% trans "search" context "superadmin.users" %}</button>
-    </form>
-
-    {% if messages %}
-    <div class="mb-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if users %}
-    <div class="table-responsive">
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>{% trans "col_username" context "superadmin.users" %}</th>
-                    <th>{% trans "col_email" context "superadmin.users" %}</th>
-                    <th>{% trans "col_name" context "superadmin.users" %}</th>
-                    <th>{% trans "col_role" context "superadmin.users" %}</th>
-                    <th>{% trans "col_organization" context "superadmin.users" %}</th>
-                    <th>{% trans "col_status" context "superadmin.users" %}</th>
-                    {% if status_filter == 'deleted' %}
-                    <th>{% trans "col_deleted_at" context "superadmin.users" %}</th>
-                    {% else %}
-                    <th>{% trans "col_joined" context "superadmin.users" %}</th>
-                    {% endif %}
-                    <th>{% trans "col_actions" context "superadmin.users" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users %}
-                <tr>
-                    <td><strong>{{ u.username }}</strong></td>
-                    <td>
-                        {% if status_filter == 'deleted' %}
-                        <span class="user-email-masked">{{ u.email|truncatechars:20 }}</span>
-                        {% else %}
-                        {{ u.email }}
-                        {% endif %}
-                    </td>
-                    <td>{{ u.get_full_name|default:"-" }}</td>
-                    <td>{{ u.profile.get_role_display|default:"-" }}</td>
-                    <td>{{ u.profile.organization_name|default:"-" }}</td>
-                    <td>
-                        {% if u.is_active %}
-                        <span class="status-badge status-badge--active">{% trans "status_active" context "superadmin.users" %}</span>
-                        {% else %}
-                        <span class="status-badge status-badge--deleted">{% trans "status_deleted" context "superadmin.users" %}</span>
-                        {% endif %}
-                    </td>
-                    {% if status_filter == 'deleted' %}
-                    <td>{{ u.profile.deleted_at|date:"d M Y H:i"|default:"-" }}</td>
-                    {% else %}
-                    <td>{{ u.date_joined|date:"d M Y" }}</td>
-                    {% endif %}
-                    <td>
-                        <div class="action-buttons">
-                            {% if status_filter == 'deleted' %}
-                            <form method="post" class="action-form-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ u.pk }}">
-                                <input type="hidden" name="action" value="restore">
-                                <button type="submit" class="btn btn-sm btn-outline-success"
-                                        title="{% trans 'restore' context 'superadmin.users' %}">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                            </form>
-                            <form method="post" class="action-form-inline"
-                                  onsubmit="return confirm('{% trans "hard_delete_confirm" context "superadmin.users" %}');">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ u.pk }}">
-                                <input type="hidden" name="action" value="hard_delete">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        title="{% trans 'hard_delete' context 'superadmin.users' %}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    {% if users.has_other_pages %}
-    <div class="d-flex flex-column align-items-center mt-3">
-        <nav>
-            <ul class="pagination">
-                {% if users.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page=1">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ users.previous_page_number }}">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-                {% endif %}
-                {% for num in users.paginator.page_range %}
-                {% if users.number == num %}
-                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
-                <li class="page-item">
-                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ num }}">{{ num }}</a>
-                </li>
-                {% endif %}
-                {% endfor %}
-                {% if users.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ users.next_page_number }}">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?status={{ status_filter }}&search={{ search_query }}&page={{ users.paginator.num_pages }}">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        <p class="pagination-info">
-            {% trans "page" context "superadmin.users" %} {{ users.number }} / {{ users.paginator.num_pages }}
-            ({{ users.paginator.count }} {% trans "total_users" context "superadmin.users" %})
-        </p>
-    </div>
-    {% endif %}
-
-    {% else %}
-    <div class="empty-state">
-        <i class="fas fa-users-slash"></i>
-        {% if status_filter == 'deleted' %}
-        <p>{% trans "no_deleted_users" context "superadmin.users" %}</p>
-        {% else %}
-        <p>{% trans "no_users_found" context "superadmin.users" %}</p>
-        {% endif %}
-    </div>
-    {% endif %}
+    {% include "accounts/profile/_messages.html" %}
+    {% include "accounts/partials/_superadmin_user_management_content.html" with embedded_in_profile=False %}
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
 {% endblock %}

@@ -27,7 +27,7 @@
             {% csrf_token %}
             {% if post_creation_requires_approval %}
                 <div class="approval-notice">
-                    Bu post əvvəlcə müəllim təsdiqinə gedəcək və təsdiqlənənə qədər paylaşılmayacaq.
+                    Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.
                 </div>
             {% endif %}
 
@@ -76,7 +76,7 @@
                 <div class="form-group">
                     <div class="approval-lock-row">
                         <i class="fas fa-lock"></i>
-                        <span>Bu post avtomatik olaraq müəllim təsdiqinə göndəriləcək.</span>
+                        <span>Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək.</span>
                     </div>
                     <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
                 </div>
