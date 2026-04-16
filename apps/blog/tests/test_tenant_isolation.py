@@ -205,6 +205,47 @@ class BlogModerationIsolationTest(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.approval_status, Post.ApprovalStatus.APPROVED)
 
+    def test_org_admin_cannot_review_pending_post_outside_own_organization(self):
+        from apps.accounts.models import ProfileRole, UserProfile
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        org_admin = User.objects.create_user(
+            username="mod_org_admin",
+            email="mod_org_admin@example.com",
+            password="StrongPass123!",
+        )
+        UserProfile.objects.update_or_create(user=org_admin, defaults={"role": ProfileRole.ORG_ADMIN})
+
+        owner = User.objects.create_user(
+            username="mod_org_owner",
+            email="mod_org_owner@example.com",
+            password="StrongPass123!",
+        )
+        organization = Organization.objects.create(
+            name="Moderation Org",
+            slug="moderation-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=org_admin,
+            organization=organization,
+            role=organization.roles.order_by("-level", "name").first(),
+            is_active=True,
+            is_primary=True,
+        )
+
+        self.client.force_login(org_admin)
+        url = reverse("review_post", kwargs={"post_id": self.post.id})
+        response = self.client.post(url, {"action": "approve", "feedback": ""})
+
+        self.assertEqual(response.status_code, 403)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.approval_status, Post.ApprovalStatus.PENDING)
+
 
 # ---------------------------------------------------------------------------
 # Test: Post detail read access
