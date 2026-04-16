@@ -109,6 +109,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var organizations = lookupData.organizations || [];
     var enhancedSelects = [];
     var step2bBaseTitle = step2bTitle ? step2bTitle.textContent.trim() : tr("choose_role", "Choose your role");
+    var individualSignupCard = orgTypeCards
+        ? orgTypeCards.querySelector('.register-persona-card[data-org-type="individual"]')
+        : null;
 
     // Track which org type the user picked in step 2a
     var _selectedOrgType = null;
@@ -220,6 +223,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function currentSelection() {
         var selected = registrationTypeSelect ? registrationTypeSelect.value : "";
+        if (!individualSignupCard && selected === "individual") {
+            return emptyRegistrationSelection;
+        }
         if (!selected) return emptyRegistrationSelection;
         return registrationTypeMap[selected] || emptyRegistrationSelection;
     }
@@ -265,6 +271,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getRegistrationMeta(value) {
         var selectedValue = value !== undefined ? value : registrationTypeSelect ? registrationTypeSelect.value : "";
+        if (!individualSignupCard && selectedValue === "individual") {
+            selectedValue = "";
+        }
 
         for (var orgType in orgRoleCombinedMap) {
             if (!Object.prototype.hasOwnProperty.call(orgRoleCombinedMap, orgType)) continue;
@@ -388,11 +397,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Set the combined registration type value from org type + role
     function setRegistrationValue(orgType, role) {
         var roles = orgRoleCombinedMap[orgType] || {};
-        var combinedValue = roles[role] || "individual";
+        var combinedValue = roles[role] || "";
         if (registrationTypeSelect) {
             registrationTypeSelect.value = combinedValue;
             registrationTypeSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
+    }
+
+    function clearUnsupportedIndividualSelection() {
+        if (individualSignupCard || !registrationTypeSelect || registrationTypeSelect.value !== "individual") {
+            return;
+        }
+
+        registrationTypeSelect.value = "";
     }
 
     // Show step 2b for the chosen org type
@@ -823,6 +840,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 organizationSearchInput.dataset.selectedValue = organizationSelect ? organizationSelect.value : "";
             }
 
+            clearUnsupportedIndividualSelection();
             updateStep2State();
             syncStep2CardSelection();
             restoredSelectFields.forEach(function (field) {
@@ -1111,6 +1129,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    clearUnsupportedIndividualSelection();
     updateStep2State();
     updateStep3State();
 

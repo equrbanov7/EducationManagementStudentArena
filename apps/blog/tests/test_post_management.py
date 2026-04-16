@@ -143,8 +143,10 @@ class NoOrgUserSuperadminReviewTest(TestCase):
     """Task 2: Users without any org go to superadmin review."""
 
     def setUp(self):
+        self.superadmin = User.objects.create_superuser("lonely_sa", "lonely_sa@test.com", "pass1234")
         self.user_no_org = User.objects.create_user("lonely", "lonely@test.com", "pass1234")
         UserProfile.objects.update_or_create(user=self.user_no_org, defaults={"role": ProfileRole.STUDENT})
+        self.category = Category.objects.create(name="No Org Review", slug="no-org-review")
 
     def test_no_org_user_requires_approval(self):
         self.assertTrue(author_requires_post_approval(self.user_no_org))
@@ -153,6 +155,87 @@ class NoOrgUserSuperadminReviewTest(TestCase):
         """User can submit but it goes to review queue."""
         can_publish, reason = can_user_publish_post(self.user_no_org)
         self.assertTrue(can_publish)
+
+    def test_no_org_user_create_post_goes_to_superadmin_review(self):
+        self.client.login(username="lonely", password="pass1234")
+        response = self.client.post(
+            reverse("create_post"),
+            {
+                "title": "No Org Pending Post",
+                "content": "Content awaiting review",
+                "category": self.category.pk,
+                "is_published": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        created_post = Post.objects.get(author=self.user_no_org, title="No Org Pending Post")
+        self.assertTrue(created_post.requires_approval)
+        self.assertEqual(created_post.approval_status, Post.ApprovalStatus.PENDING)
+        self.assertFalse(created_post.is_published)
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.superadmin,
+                title__icontains="No Org Pending Post",
+            ).exists()
+        )
+
+
+class PersonalWorkspaceSuperadminReviewTest(TestCase):
+    """Personal workspace users should still require superadmin review for posts."""
+
+    def setUp(self):
+        self.superadmin = User.objects.create_superuser("personal_sa", "personal_sa@test.com", "pass1234")
+        self.user = User.objects.create_user("personal_teacher", "personal_teacher@test.com", "pass1234")
+        UserProfile.objects.update_or_create(user=self.user, defaults={"role": ProfileRole.TEACHER})
+
+        self.personal_org = Organization.objects.create(
+            name="Personal Workspace",
+            slug="personal-workspace-posts",
+            org_type=OrganizationType.INDIVIDUAL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=self.user,
+            organization=self.personal_org,
+            role=self.personal_org.roles.get(name="member"),
+            is_primary=True,
+            is_active=True,
+        )
+        self.category = Category.objects.create(name="Personal Review", slug="personal-review")
+
+    def test_personal_workspace_user_requires_superadmin_approval(self):
+        self.assertTrue(author_requires_post_approval(self.user))
+        can_publish, reason = can_user_publish_post(self.user)
+        self.assertTrue(can_publish)
+
+    def test_personal_workspace_post_enters_superadmin_queue(self):
+        self.client.login(username="personal_teacher", password="pass1234")
+        response = self.client.post(
+            reverse("create_post"),
+            {
+                "title": "Personal Workspace Post",
+                "content": "This should not publish directly",
+                "category": self.category.pk,
+                "is_published": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        created_post = Post.objects.get(author=self.user, title="Personal Workspace Post")
+        self.assertTrue(created_post.requires_approval)
+        self.assertEqual(created_post.approval_status, Post.ApprovalStatus.PENDING)
+        self.assertFalse(created_post.is_published)
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.superadmin,
+                title__icontains="Personal Workspace Post",
+            ).exists()
+        )
 
 
 class PostDeletionTest(TestCase):
