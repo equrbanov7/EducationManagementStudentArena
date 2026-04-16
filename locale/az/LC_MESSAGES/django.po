@@ -19054,3 +19054,307 @@ msgstr "'{title}' başlıqlı postunuzda düzəliş tələb olunur.\nFeedback: {
 msgctxt "post_management.rate_limit"
 msgid "too_many_delete_requests"
 msgstr "Çox sayda silinmə sorğusu göndərdiniz. Zəhmət olmasa bir az gözləyin."
+
+#
+# ── Statistics profile section (profile.statistics) ────────────
+#
+
+msgctxt "profile.section"
+msgid "statistics"
+msgstr "Statistika"
+
+msgctxt "profile.section"
+msgid "change_password"
+msgstr "Şifrəni dəyiş"
+
+msgctxt "profile.sidebar"
+msgid "statistics"
+msgstr "Statistika"
+
+msgctxt "profile.statistics"
+msgid "section_not_available"
+msgstr "Bu bölmə sizin üçün əlçatan deyil."
+
+msgctxt "profile.statistics"
+msgid "filter_date_from"
+msgstr "Başlanğıc"
+
+msgctxt "profile.statistics"
+msgid "filter_date_to"
+msgstr "Son"
+
+msgctxt "profile.statistics"
+msgid "filter_course"
+msgstr "Kurs"
+
+msgctxt "profile.statistics"
+msgid "filter_all"
+msgstr "Hamısı"
+
+msgctxt "profile.statistics"
+msgid "filter_group"
+msgstr "Qrup"
+
+msgctxt "profile.statistics"
+msgid "filter_organization_id"
+msgstr "Təşkilat ID"
+
+msgctxt "profile.statistics"
+msgid "filter_content_type"
+msgstr "Kontent növü"
+
+msgctxt "profile.statistics"
+msgid "content_exam"
+msgstr "İmtahan"
+
+msgctxt "profile.statistics"
+msgid "content_assignment"
+msgstr "Tapşırıq"
+
+msgctxt "profile.statistics"
+msgid "content_lab"
+msgstr "Laboratoriya"
+
+msgctxt "profile.statistics"
+msgid "content_project"
+msgstr "Layihə"
+
+msgctxt "profile.statistics"
+msgid "filter_apply"
+msgstr "Filtr"
+
+msgctxt "profile.statistics"
+msgid "no_data_found"
+msgstr "Statistik məlumat tapılmadı"
+
+msgctxt "profile.statistics"
+msgid "no_data_hint"
+msgstr "Filtrlər dəyişdirilə bilər və ya bu hesab üçün hələ məlumat yoxdur."
+
+msgctxt "profile.statistics"
+msgid "card_organizations"
+msgstr "Təşkilatlar"
+
+msgctxt "profile.statistics"
+msgid "card_users"
+msgstr "İstifadəçilər"
+
+msgctxt "profile.statistics"
+msgid "card_courses"
+msgstr "Kurslar"
+
+msgctxt "profile.statistics"
+msgid "card_exam_attempts"
+msgstr "İmtahan cəhdləri"
+
+msgctxt "profile.statistics"
+msgid "card_exams"
+msgstr "İmtahanlar"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_submissions"
+msgstr "Tapşırıq təqdimləri"
+
+msgctxt "profile.statistics"
+msgid "card_lab_submissions"
+msgstr "Lab təqdimləri"
+
+msgctxt "profile.statistics"
+msgid "card_project_submissions"
+msgstr "Layihə təqdimləri"
+
+msgctxt "profile.statistics"
+msgid "card_members"
+msgstr "Üzvlər"
+
+msgctxt "profile.statistics"
+msgid "card_teachers"
+msgstr "Müəllimlər"
+
+msgctxt "profile.statistics"
+msgid "card_students"
+msgstr "Tələbələr"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_graded"
+msgstr "Tapşırıq (qiymətləndirilmiş)"
+
+msgctxt "profile.statistics"
+msgid "card_late_submissions"
+msgstr "Gecikmiş təqdimlər"
+
+msgctxt "profile.statistics"
+msgid "card_my_courses"
+msgstr "Kurslarım"
+
+msgctxt "profile.statistics"
+msgid "card_avg_score"
+msgstr "Orta bal"
+
+msgctxt "profile.statistics"
+msgid "card_pass_rate"
+msgstr "Keçid faizi"
+
+msgctxt "profile.statistics"
+msgid "card_checked"
+msgstr "Yoxlanılmış"
+
+msgctxt "profile.statistics"
+msgid "unit_days"
+msgstr "gün"
+
+msgctxt "profile.statistics"
+msgid "card_avg_grading_time"
+msgstr "Ort. qiymətləndirmə vaxtı"
+
+msgctxt "profile.statistics"
+msgid "card_late_assignments"
+msgstr "Gecikmiş tapşırıqlar"
+
+msgctxt "profile.statistics"
+msgid "card_total_tasks"
+msgstr "Ümumi tapşırıqlar"
+
+msgctxt "profile.statistics"
+msgid "card_pending"
+msgstr "Gözləyən"
+
+msgctxt "profile.statistics"
+msgid "card_assignments"
+msgstr "Tapşırıqlar"
+
+msgctxt "profile.statistics"
+msgid "card_labs"
+msgstr "Laboratoriyalar"
+
+msgctxt "profile.statistics"
+msgid "card_ontime_late"
+msgstr "Vaxtında / Gecikmiş"
+
+msgctxt "profile.statistics"
+msgid "chart_trend"
+msgstr "Trend"
+
+msgctxt "profile.statistics"
+msgid "chart_breakdown"
+msgstr "Bölgü"
+
+msgctxt "profile.statistics"
+msgid "chart_org_comparison"
+msgstr "Təşkilat müqayisəsi"
+
+msgctxt "profile.statistics"
+msgid "chart_course_ranking"
+msgstr "Kurs reytinqi"
+
+msgctxt "profile.statistics"
+msgid "chart_group_comparison"
+msgstr "Qrup müqayisəsi"
+
+msgctxt "profile.statistics"
+msgid "chart_grading_status"
+msgstr "Qiymətləndirmə vəziyyəti"
+
+msgctxt "profile.statistics"
+msgid "chart_avg_by_content"
+msgstr "Kontent üzrə orta bal"
+
+msgctxt "profile.statistics"
+msgid "card_live_exam"
+msgstr "Canlı imtahan"
+
+msgctxt "profile.statistics"
+msgid "live_total_answers"
+msgstr "Ümumi cavablar"
+
+msgctxt "profile.statistics"
+msgid "live_correct"
+msgstr "Düzgün"
+
+msgctxt "profile.statistics"
+msgid "live_accuracy"
+msgstr "Dəqiqlik"
+
+msgctxt "profile.statistics"
+msgid "table_search"
+msgstr "Axtar..."
+
+msgctxt "profile.statistics"
+msgid "table_name"
+msgstr "Ad"
+
+msgctxt "profile.statistics"
+msgid "table_attempts"
+msgstr "Cəhdlər"
+
+msgctxt "profile.statistics"
+msgid "table_course_ranking_title"
+msgstr "Kurs reytinqi (tələbə sayına görə)"
+
+msgctxt "profile.statistics"
+msgid "table_student_count"
+msgstr "Tələbə sayı"
+
+msgctxt "profile.statistics"
+msgid "table_student"
+msgstr "Tələbə"
+
+msgctxt "profile.statistics"
+msgid "table_pass_pct"
+msgstr "Keçid %"
+
+msgctxt "profile.statistics"
+msgid "btn_csv_export"
+msgstr "CSV İxrac"
+
+msgctxt "profile.statistics"
+msgid "btn_ai_summary"
+msgstr "AI Xülasə"
+
+msgctxt "profile.statistics"
+msgid "ai_analysis"
+msgstr "AI Analiz"
+
+msgctxt "profile.statistics"
+msgid "ai_loading"
+msgstr "AI xülasə hazırlanır..."
+
+msgctxt "profile.statistics"
+msgid "csv_header_metric"
+msgstr "Metrika"
+
+msgctxt "profile.statistics"
+msgid "csv_header_value"
+msgstr "Dəyər"
+
+msgctxt "profile.statistics"
+msgid "js_avg_score_pct"
+msgstr "Orta bal (%)"
+
+msgctxt "profile.statistics"
+msgid "js_submissions"
+msgstr "Təqdimlər"
+
+msgctxt "profile.statistics"
+msgid "js_passed"
+msgstr "Keçənlər"
+
+msgctxt "profile.statistics"
+msgid "js_failed"
+msgstr "Qalan"
+
+msgctxt "profile.statistics"
+msgid "js_graded"
+msgstr "Qiymətləndirilmiş"
+
+msgctxt "profile.statistics"
+msgid "ai_not_received"
+msgstr "AI xülasə alınmadı."
+
+msgctxt "profile.statistics"
+msgid "ai_error"
+msgstr "AI sorğusu zamanı xəta baş verdi."
+
+msgctxt "profile.statistics"
+msgid "ai_remaining"
+msgstr "Qalan sorğu"

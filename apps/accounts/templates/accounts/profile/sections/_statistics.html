@@ -5,7 +5,7 @@
   {% if 'statistics' not in allowed_sections %}
   <div class="stats-empty-state">
     <i class="fas fa-lock fa-3x text-muted mb-3"></i>
-    <p class="text-muted">Bu bölmə sizin üçün əlçatan deyil.</p>
+    <p class="text-muted">{% trans "section_not_available" context "profile.statistics" %}</p>
   </div>
   {% else %}
 
@@ -16,21 +16,21 @@
         <input type="hidden" name="section" value="statistics">
 
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Başlanğıc</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_date_from" context "profile.statistics" %}</label>
           <input type="date" class="form-control form-control-sm" name="stat_date_from"
                  value="{{ statistics_filters.date_from|default:'' }}">
         </div>
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Son</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_date_to" context "profile.statistics" %}</label>
           <input type="date" class="form-control form-control-sm" name="stat_date_to"
                  value="{{ statistics_filters.date_to|default:'' }}">
         </div>
 
         {% if statistics_courses %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Kurs</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_course" context "profile.statistics" %}</label>
           <select class="form-select form-select-sm" name="stat_course">
-            <option value="">Hamısı</option>
+            <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
             {% for c in statistics_courses %}
             <option value="{{ c.id }}" {% if statistics_filters.course == c.id|stringformat:"s" %}selected{% endif %}>
               {{ c.title|truncatewords:5 }}
@@ -42,9 +42,9 @@
 
         {% if statistics_groups %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Qrup</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_group" context "profile.statistics" %}</label>
           <select class="form-select form-select-sm" name="stat_group">
-            <option value="">Hamısı</option>
+            <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
             {% for g in statistics_groups %}
             <option value="{{ g.id }}" {% if statistics_filters.group == g.id|stringformat:"s" %}selected{% endif %}>
               {{ g.name|truncatewords:5 }}
@@ -56,25 +56,25 @@
 
         {% if is_superadmin %}
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Təşkilat ID</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_organization_id" context "profile.statistics" %}</label>
           <input type="text" class="form-control form-control-sm" name="stat_organization"
                  value="{{ statistics_filters.organization|default:'' }}" placeholder="ID">
         </div>
         {% endif %}
 
         <div class="col-6 col-md-2">
-          <label class="form-label form-label-sm mb-0">Kontent növü</label>
+          <label class="form-label form-label-sm mb-0">{% trans "filter_content_type" context "profile.statistics" %}</label>
           <select class="form-select form-select-sm" name="stat_content_type">
-            <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>Hamısı</option>
-            <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>İmtahan</option>
-            <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>Tapşırıq</option>
-            <option value="lab" {% if statistics_filters.content_type == "lab" %}selected{% endif %}>Laboratoriya</option>
-            <option value="project" {% if statistics_filters.content_type == "project" %}selected{% endif %}>Layihə</option>
+            <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>{% trans "filter_all" context "profile.statistics" %}</option>
+            <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>{% trans "content_exam" context "profile.statistics" %}</option>
+            <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>{% trans "content_assignment" context "profile.statistics" %}</option>
+            <option value="lab" {% if statistics_filters.content_type == "lab" %}selected{% endif %}>{% trans "content_lab" context "profile.statistics" %}</option>
+            <option value="project" {% if statistics_filters.content_type == "project" %}selected{% endif %}>{% trans "content_project" context "profile.statistics" %}</option>
           </select>
         </div>
 
         <div class="col-auto">
-          <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> Filtr</button>
+          <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> {% trans "filter_apply" context "profile.statistics" %}</button>
           <a href="{{ profile_base_url }}?section=statistics" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
         </div>
       </form>
@@ -84,8 +84,8 @@
   {% if not statistics_data or not statistics_data.summary %}
   <div class="stats-empty-state text-center py-5">
     <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
-    <h5 class="text-muted">Statistik məlumat tapılmadı</h5>
-    <p class="text-muted small">Filtrlər dəyişdirilə bilər və ya bu hesab üçün hələ məlumat yoxdur.</p>
+    <h5 class="text-muted">{% trans "no_data_found" context "profile.statistics" %}</h5>
+    <p class="text-muted small">{% trans "no_data_hint" context "profile.statistics" %}</p>
   </div>
   {% else %}
 
@@ -98,7 +98,7 @@
       <div class="card stats-card stats-card--primary h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_orgs }}</div>
-          <div class="stats-card-label">Təşkilatlar</div>
+          <div class="stats-card-label">{% trans "card_organizations" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -106,7 +106,7 @@
       <div class="card stats-card stats-card--info h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_users }}</div>
-          <div class="stats-card-label">İstifadəçilər</div>
+          <div class="stats-card-label">{% trans "card_users" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -114,7 +114,7 @@
       <div class="card stats-card stats-card--success h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
-          <div class="stats-card-label">Kurslar</div>
+          <div class="stats-card-label">{% trans "card_courses" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -122,7 +122,7 @@
       <div class="card stats-card stats-card--warning h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
-          <div class="stats-card-label">İmtahan cəhdləri</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -130,7 +130,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_exams }}</div>
-          <div class="stats-card-label">İmtahanlar</div>
+          <div class="stats-card-label">{% trans "card_exams" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.assignment_total }}</div>
-          <div class="stats-card-label">Tapşırıq təqdimləri</div>
+          <div class="stats-card-label">{% trans "card_assignment_submissions" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -146,7 +146,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.lab_total }}</div>
-          <div class="stats-card-label">Lab təqdimləri</div>
+          <div class="stats-card-label">{% trans "card_lab_submissions" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -154,7 +154,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.project_total }}</div>
-          <div class="stats-card-label">Layihə təqdimləri</div>
+          <div class="stats-card-label">{% trans "card_project_submissions" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -165,7 +165,7 @@
       <div class="card stats-card stats-card--primary h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_members }}</div>
-          <div class="stats-card-label">Üzvlər</div>
+          <div class="stats-card-label">{% trans "card_members" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -173,7 +173,7 @@
       <div class="card stats-card stats-card--info h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.teacher_count }}</div>
-          <div class="stats-card-label">Müəllimlər</div>
+          <div class="stats-card-label">{% trans "card_teachers" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -181,7 +181,7 @@
       <div class="card stats-card stats-card--success h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.student_count }}</div>
-          <div class="stats-card-label">Tələbələr</div>
+          <div class="stats-card-label">{% trans "card_students" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -189,7 +189,7 @@
       <div class="card stats-card stats-card--warning h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
-          <div class="stats-card-label">Kurslar</div>
+          <div class="stats-card-label">{% trans "card_courses" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -197,7 +197,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
-          <div class="stats-card-label">İmtahan cəhdləri</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -205,7 +205,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.assignment_graded }}/{{ statistics_data.summary.assignment_total }}</div>
-          <div class="stats-card-label">Tapşırıq (qiymətləndirilmiş)</div>
+          <div class="stats-card-label">{% trans "card_assignment_graded" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -213,7 +213,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.assignment_late }}</div>
-          <div class="stats-card-label">Gecikmiş təqdimlər</div>
+          <div class="stats-card-label">{% trans "card_late_submissions" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -221,7 +221,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.lab_total }}</div>
-          <div class="stats-card-label">Lab təqdimləri</div>
+          <div class="stats-card-label">{% trans "card_lab_submissions" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -232,7 +232,7 @@
       <div class="card stats-card stats-card--primary h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
-          <div class="stats-card-label">Kurslarım</div>
+          <div class="stats-card-label">{% trans "card_my_courses" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -240,7 +240,7 @@
       <div class="card stats-card stats-card--info h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_students }}</div>
-          <div class="stats-card-label">Tələbələr</div>
+          <div class="stats-card-label">{% trans "card_students" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -248,7 +248,7 @@
       <div class="card stats-card stats-card--success h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.exam_avg_score }}%</div>
-          <div class="stats-card-label">Orta bal</div>
+          <div class="stats-card-label">{% trans "card_avg_score" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -256,7 +256,7 @@
       <div class="card stats-card stats-card--warning h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.exam_pass_rate }}%</div>
-          <div class="stats-card-label">Keçid faizi</div>
+          <div class="stats-card-label">{% trans "card_pass_rate" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -264,7 +264,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
-          <div class="stats-card-label">İmtahan cəhdləri</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -272,15 +272,15 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.checked_attempts }}/{{ statistics_data.summary.total_attempts }}</div>
-          <div class="stats-card-label">Yoxlanılmış</div>
+          <div class="stats-card-label">{% trans "card_checked" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card stats-card h-100">
         <div class="card-body text-center">
-          <div class="stats-card-value">{{ statistics_data.summary.avg_grading_turnaround_days }} gün</div>
-          <div class="stats-card-label">Ort. qiymətləndirmə vaxtı</div>
+          <div class="stats-card-value">{{ statistics_data.summary.avg_grading_turnaround_days }} {% trans "unit_days" context "profile.statistics" %}</div>
+          <div class="stats-card-label">{% trans "card_avg_grading_time" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -288,7 +288,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.assignment_late }}</div>
-          <div class="stats-card-label">Gecikmiş tapşırıqlar</div>
+          <div class="stats-card-label">{% trans "card_late_assignments" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -299,7 +299,7 @@
       <div class="card stats-card stats-card--primary h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.avg_score }}%</div>
-          <div class="stats-card-label">Orta bal</div>
+          <div class="stats-card-label">{% trans "card_avg_score" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -307,7 +307,7 @@
       <div class="card stats-card stats-card--success h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.pass_rate }}%</div>
-          <div class="stats-card-label">Keçid faizi</div>
+          <div class="stats-card-label">{% trans "card_pass_rate" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -315,7 +315,7 @@
       <div class="card stats-card stats-card--info h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.total_items }}</div>
-          <div class="stats-card-label">Ümumi tapşırıqlar</div>
+          <div class="stats-card-label">{% trans "card_total_tasks" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -323,7 +323,7 @@
       <div class="card stats-card stats-card--warning h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.pending_items }}</div>
-          <div class="stats-card-label">Gözləyən</div>
+          <div class="stats-card-label">{% trans "card_pending" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -331,7 +331,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.exam_count }}</div>
-          <div class="stats-card-label">İmtahanlar</div>
+          <div class="stats-card-label">{% trans "card_exams" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -339,7 +339,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.assignment_count }}</div>
-          <div class="stats-card-label">Tapşırıqlar</div>
+          <div class="stats-card-label">{% trans "card_assignments" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -347,7 +347,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.lab_count }}</div>
-          <div class="stats-card-label">Laboratoriyalar</div>
+          <div class="stats-card-label">{% trans "card_labs" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -355,7 +355,7 @@
       <div class="card stats-card h-100">
         <div class="card-body text-center">
           <div class="stats-card-value">{{ statistics_data.summary.on_time_count }}/{{ statistics_data.summary.late_count }}</div>
-          <div class="stats-card-label">Vaxtında / Gecikmiş</div>
+          <div class="stats-card-label">{% trans "card_ontime_late" context "profile.statistics" %}</div>
         </div>
       </div>
     </div>
@@ -369,7 +369,7 @@
     <div class="col-12 col-lg-8">
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h6 class="mb-0"><i class="fas fa-chart-line me-1"></i> Trend</h6>
+          <h6 class="mb-0"><i class="fas fa-chart-line me-1"></i> {% trans "chart_trend" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body">
           <canvas id="statsTrendChart" height="220"></canvas>
@@ -381,7 +381,7 @@
     <div class="col-12 col-lg-4">
       <div class="card h-100">
         <div class="card-header">
-          <h6 class="mb-0"><i class="fas fa-chart-pie me-1"></i> Bölgü</h6>
+          <h6 class="mb-0"><i class="fas fa-chart-pie me-1"></i> {% trans "chart_breakdown" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body d-flex align-items-center justify-content-center">
           <canvas id="statsBreakdownChart" height="220"></canvas>
@@ -397,7 +397,7 @@
       <div class="card h-100">
         <div class="card-header">
           <h6 class="mb-0"><i class="fas fa-chart-bar me-1"></i>
-            {% if role_capabilities.is_superadmin %}Təşkilat müqayisəsi{% elif role_capabilities.is_org_admin %}Kurs reytinqi{% else %}Qrup müqayisəsi{% endif %}
+            {% if role_capabilities.is_superadmin %}{% trans "chart_org_comparison" context "profile.statistics" %}{% elif role_capabilities.is_org_admin %}{% trans "chart_course_ranking" context "profile.statistics" %}{% else %}{% trans "chart_group_comparison" context "profile.statistics" %}{% endif %}
           </h6>
         </div>
         <div class="card-body">
@@ -408,7 +408,7 @@
     <div class="col-12 col-lg-6">
       <div class="card h-100">
         <div class="card-header">
-          <h6 class="mb-0"><i class="fas fa-tasks me-1"></i> Qiymətləndirmə vəziyyəti</h6>
+          <h6 class="mb-0"><i class="fas fa-tasks me-1"></i> {% trans "chart_grading_status" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body d-flex align-items-center justify-content-center">
           <canvas id="statsGradingChart" height="250"></canvas>
@@ -424,7 +424,7 @@
     <div class="col-12 col-lg-6">
       <div class="card h-100">
         <div class="card-header">
-          <h6 class="mb-0"><i class="fas fa-chart-bar me-1"></i> Kontent üzrə orta bal</h6>
+          <h6 class="mb-0"><i class="fas fa-chart-bar me-1"></i> {% trans "chart_avg_by_content" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body">
           <canvas id="statsContentBarChart" height="250"></canvas>
@@ -434,21 +434,21 @@
     <div class="col-12 col-lg-6">
       <div class="card h-100">
         <div class="card-header">
-          <h6 class="mb-0"><i class="fas fa-gamepad me-1"></i> Canlı imtahan</h6>
+          <h6 class="mb-0"><i class="fas fa-gamepad me-1"></i> {% trans "card_live_exam" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body text-center py-4">
           <div class="d-flex justify-content-around">
             <div>
               <div class="fs-3 fw-bold text-primary">{{ statistics_data.summary.live_total }}</div>
-              <small class="text-muted">Ümumi cavablar</small>
+              <small class="text-muted">{% trans "live_total_answers" context "profile.statistics" %}</small>
             </div>
             <div>
               <div class="fs-3 fw-bold text-success">{{ statistics_data.summary.live_correct }}</div>
-              <small class="text-muted">Düzgün</small>
+              <small class="text-muted">{% trans "live_correct" context "profile.statistics" %}</small>
             </div>
             <div>
               <div class="fs-3 fw-bold text-warning">{{ statistics_data.summary.live_accuracy }}%</div>
-              <small class="text-muted">Dəqiqlik</small>
+              <small class="text-muted">{% trans "live_accuracy" context "profile.statistics" %}</small>
             </div>
           </div>
         </div>
@@ -461,8 +461,8 @@
   {% if role_capabilities.is_superadmin and statistics_data.org_comparison %}
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h6 class="mb-0"><i class="fas fa-building me-1"></i> Təşkilatlar</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="Axtar..."
+      <h6 class="mb-0"><i class="fas fa-building me-1"></i> {% trans "card_organizations" context "profile.statistics" %}</h6>
+      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
              id="statsTableSearchOrg" style="max-width:200px;">
     </div>
     <div class="card-body p-0">
@@ -470,11 +470,11 @@
         <table class="table table-sm table-hover mb-0 stats-sortable-table" id="statsOrgTable">
           <thead class="table-light">
             <tr>
-              <th class="stats-sortable" data-sort="name">Ad</th>
-              <th class="stats-sortable" data-sort="members">Üzvlər</th>
-              <th class="stats-sortable" data-sort="courses">Kurslar</th>
-              <th class="stats-sortable" data-sort="exams">İmtahanlar</th>
-              <th class="stats-sortable" data-sort="attempts">Cəhdlər</th>
+              <th class="stats-sortable" data-sort="name">{% trans "table_name" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="members">{% trans "card_members" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="courses">{% trans "card_courses" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -497,8 +497,8 @@
   {% if role_capabilities.is_org_admin and statistics_data.teacher_overview %}
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h6 class="mb-0"><i class="fas fa-chalkboard-teacher me-1"></i> Müəllimlər</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="Axtar..."
+      <h6 class="mb-0"><i class="fas fa-chalkboard-teacher me-1"></i> {% trans "card_teachers" context "profile.statistics" %}</h6>
+      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
              id="statsTableSearchTeacher" style="max-width:200px;">
     </div>
     <div class="card-body p-0">
@@ -506,9 +506,9 @@
         <table class="table table-sm table-hover mb-0 stats-sortable-table" id="statsTeacherTable">
           <thead class="table-light">
             <tr>
-              <th class="stats-sortable" data-sort="name">Ad</th>
-              <th class="stats-sortable" data-sort="courses">Kurslar</th>
-              <th class="stats-sortable" data-sort="exams">İmtahanlar</th>
+              <th class="stats-sortable" data-sort="name">{% trans "table_name" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="courses">{% trans "card_courses" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -529,7 +529,7 @@
   {% if role_capabilities.is_org_admin and statistics_data.course_rankings %}
   <div class="card mb-4">
     <div class="card-header">
-      <h6 class="mb-0"><i class="fas fa-trophy me-1"></i> Kurs reytinqi (tələbə sayına görə)</h6>
+      <h6 class="mb-0"><i class="fas fa-trophy me-1"></i> {% trans "table_course_ranking_title" context "profile.statistics" %}</h6>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -537,8 +537,8 @@
           <thead class="table-light">
             <tr>
               <th>#</th>
-              <th>Kurs</th>
-              <th>Tələbə sayı</th>
+              <th>{% trans "filter_course" context "profile.statistics" %}</th>
+              <th>{% trans "table_student_count" context "profile.statistics" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -559,18 +559,18 @@
   {% if role_capabilities.is_teacher and statistics_data.group_comparison %}
   <div class="card mb-4">
     <div class="card-header">
-      <h6 class="mb-0"><i class="fas fa-users me-1"></i> Qrup müqayisəsi</h6>
+      <h6 class="mb-0"><i class="fas fa-users me-1"></i> {% trans "chart_group_comparison" context "profile.statistics" %}</h6>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-sm table-hover mb-0 stats-sortable-table" id="statsGroupTable">
           <thead class="table-light">
             <tr>
-              <th class="stats-sortable" data-sort="name">Qrup</th>
-              <th class="stats-sortable" data-sort="students">Tələbə</th>
-              <th class="stats-sortable" data-sort="avg">Orta bal</th>
-              <th class="stats-sortable" data-sort="pass">Keçid %</th>
-              <th class="stats-sortable" data-sort="attempts">Cəhdlər</th>
+              <th class="stats-sortable" data-sort="name">{% trans "filter_group" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="students">{% trans "table_student" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="pass">{% trans "table_pass_pct" context "profile.statistics" %}</th>
+              <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -594,17 +594,17 @@
   <div class="d-flex flex-wrap gap-2 mb-4">
     <a href="{% url 'accounts:statistics_export_csv' %}?{{ request.META.QUERY_STRING }}"
        class="btn btn-sm btn-outline-secondary" id="statsExportCsvBtn">
-      <i class="fas fa-file-csv me-1"></i> CSV İxrac
+      <i class="fas fa-file-csv me-1"></i> {% trans "btn_csv_export" context "profile.statistics" %}
     </a>
     <button type="button" class="btn btn-sm btn-outline-primary" id="statsAiSummaryBtn">
-      <i class="fas fa-robot me-1"></i> AI Xülasə
+      <i class="fas fa-robot me-1"></i> {% trans "btn_ai_summary" context "profile.statistics" %}
     </button>
   </div>
 
   {# ── AI summary container ────────────────────────────────────── #}
   <div class="card mb-4 d-none" id="statsAiSummaryCard">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h6 class="mb-0"><i class="fas fa-robot me-1"></i> AI Analiz</h6>
+      <h6 class="mb-0"><i class="fas fa-robot me-1"></i> {% trans "ai_analysis" context "profile.statistics" %}</h6>
       <button type="button" class="btn btn-sm btn-outline-secondary" id="statsAiCloseBtn">
         <i class="fas fa-times"></i>
       </button>
@@ -612,7 +612,7 @@
     <div class="card-body" id="statsAiSummaryBody">
       <div class="text-center py-3">
         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-        <span class="ms-2 text-muted">AI xülasə hazırlanır...</span>
+        <span class="ms-2 text-muted">{% trans "ai_loading" context "profile.statistics" %}</span>
       </div>
     </div>
   </div>
@@ -623,6 +623,28 @@
   {# ── Inline chart data for JS ────────────────────────────────── #}
   {% if statistics_data and statistics_data.summary %}
   {{ statistics_data|json_script:"stats-data-json" }}
+  {# Pass translated chart labels to JS #}
+  <script id="stats-i18n-json" type="application/json">
+  {
+    "avg_score_pct": "{% trans 'js_avg_score_pct' context 'profile.statistics' %}",
+    "submissions": "{% trans 'js_submissions' context 'profile.statistics' %}",
+    "passed": "{% trans 'js_passed' context 'profile.statistics' %}",
+    "failed": "{% trans 'js_failed' context 'profile.statistics' %}",
+    "exam": "{% trans 'content_exam' context 'profile.statistics' %}",
+    "assignment": "{% trans 'content_assignment' context 'profile.statistics' %}",
+    "lab": "{% trans 'content_lab' context 'profile.statistics' %}",
+    "project": "{% trans 'content_project' context 'profile.statistics' %}",
+    "members": "{% trans 'card_members' context 'profile.statistics' %}",
+    "student_count": "{% trans 'table_student_count' context 'profile.statistics' %}",
+    "avg_score": "{% trans 'js_avg_score_pct' context 'profile.statistics' %}",
+    "graded": "{% trans 'js_graded' context 'profile.statistics' %}",
+    "pending": "{% trans 'card_pending' context 'profile.statistics' %}",
+    "ai_loading": "{% trans 'ai_loading' context 'profile.statistics' %}",
+    "ai_not_received": "{% trans 'ai_not_received' context 'profile.statistics' %}",
+    "ai_error": "{% trans 'ai_error' context 'profile.statistics' %}",
+    "ai_remaining": "{% trans 'ai_remaining' context 'profile.statistics' %}"
+  }
+  </script>
   <script nonce="{{ request.csp_nonce }}">
   (function() {
       var raw = document.getElementById("stats-data-json");
@@ -633,6 +655,14 @@
               window.STATS_DATA = parsed;
           } catch(e) {
               window.STATS_DATA = null;
+          }
+      }
+      var i18nEl = document.getElementById("stats-i18n-json");
+      if (i18nEl) {
+          try {
+              window.STATS_I18N = JSON.parse(i18nEl.textContent);
+          } catch(e) {
+              window.STATS_I18N = {};
           }
       }
   })();
