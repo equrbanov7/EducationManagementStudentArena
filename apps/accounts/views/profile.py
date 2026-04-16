@@ -107,6 +107,7 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "permission-editor",
     "manage-roles",
     "publish-notification",
+    "statistics",
 }
 PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
     "groups",
@@ -121,6 +122,7 @@ PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
     "permission-editor",
     "manage-roles",
     "publish-notification",
+    "statistics",
 }
 
 
@@ -1678,6 +1680,88 @@ def user_profile(request):
                 for category in category_management_edit_form.fields["parent"].queryset
             ]
 
+    # ── Statistics section context ────────────────────────────────────
+    statistics_data = {}
+    statistics_filters = {}
+    statistics_courses = []
+    statistics_groups = []
+    if active_section == "statistics" and "statistics" in allowed_sections:
+        from apps.accounts.services.statistics_selectors import (
+            get_org_admin_statistics,
+            get_student_statistics,
+            get_superadmin_statistics,
+            get_teacher_statistics,
+        )
+
+        stat_org = _get_active_organization(request)
+        statistics_filters = {
+            "date_from": (request.GET.get("stat_date_from") or "").strip(),
+            "date_to": (request.GET.get("stat_date_to") or "").strip(),
+            "course": (request.GET.get("stat_course") or "").strip() or None,
+            "group": (request.GET.get("stat_group") or "").strip() or None,
+            "content_type": (request.GET.get("stat_content_type") or "all").strip(),
+            "organization": (request.GET.get("stat_organization") or "").strip() or None,
+        }
+
+        # Populate filter options
+        if stat_org and not capabilities["is_superadmin"]:
+            statistics_courses = list(
+                Course.objects.filter(organization=stat_org)
+                .order_by("title")
+                .values("id", "title")[:100]
+            )
+        elif capabilities["is_superadmin"]:
+            statistics_courses = list(
+                Course.objects.all().order_by("title").values("id", "title")[:100]
+            )
+
+        if stat_org:
+            from apps.exams.models import StudentGroup as _SG
+
+            statistics_groups = list(
+                _SG.objects.filter(organization=stat_org)
+                .order_by("name")
+                .values("id", "name")[:100]
+            )
+
+        if capabilities["is_superadmin"]:
+            statistics_data = get_superadmin_statistics(filters=statistics_filters)
+        elif capabilities["is_org_admin"]:
+            if stat_org:
+                statistics_data = get_org_admin_statistics(
+                    organization=stat_org, filters=statistics_filters
+                )
+        elif capabilities["is_teacher"]:
+            statistics_data = get_teacher_statistics(
+                request.user, organization=stat_org, filters=statistics_filters
+            )
+        else:
+            # Student / lead student / member
+            statistics_data = get_student_statistics(
+                request.user, organization=stat_org, filters=statistics_filters
+            )
+
+        # ── AI summary (AJAX) ─────────────────────────────────────
+        if request.GET.get("stat_ai_summary") == "1" and statistics_data:
+            from apps.accounts.services.statistics_selectors import build_ai_stats_payload
+            from apps.exams.services.ai_summary import generate_exam_statistics_summary
+
+            role_label = "superadmin" if capabilities["is_superadmin"] else (
+                "org_admin" if capabilities["is_org_admin"] else (
+                    "teacher" if capabilities["is_teacher"] else "student"
+                )
+            )
+            ai_payload = build_ai_stats_payload(role=role_label, stats=statistics_data)
+            result = generate_exam_statistics_summary(
+                exam_title=f"Profil Statistikası ({role_label})",
+                exam_type="profile_statistics",
+                stats=ai_payload,
+                user_id=request.user.pk,
+            )
+            from django.http import JsonResponse as _JR
+
+            return _JR(result)
+
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
         "notifications": pgettext_lazy("profile.section", "notifications"),
@@ -1707,6 +1791,7 @@ def user_profile(request):
         "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
         "change-password": "Şifrəni dəyiş",
+        "statistics": "Statistika",
     }
 
     shortcut_sections = []
@@ -1854,9 +1939,64 @@ def user_profile(request):
         "can_view_blog": capabilities["can_view_blog"],
         "can_manage_blog": capabilities["can_manage_blog"],
         "can_view_student_assignments": capabilities["can_view_student_assignments"],
+        "statistics_data": statistics_data,
+        "statistics_filters": statistics_filters,
+        "statistics_courses": statistics_courses,
+        "statistics_groups": statistics_groups,
     }
 
     return render(request, "accounts/profile.html", context)
+
+
+@login_required
+def statistics_export_csv(request):
+    """Export current statistics data as CSV."""
+    import csv
+    import io
+
+    from apps.accounts.services.statistics_selectors import (
+        get_org_admin_statistics,
+        get_student_statistics,
+        get_superadmin_statistics,
+        get_teacher_statistics,
+    )
+
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    capabilities = _role_capabilities(request.user, profile)
+    if "statistics" not in capabilities["allowed_sections"]:
+        raise Http404
+
+    org = _get_active_organization(request)
+    filters = {
+        "date_from": (request.GET.get("stat_date_from") or "").strip(),
+        "date_to": (request.GET.get("stat_date_to") or "").strip(),
+        "course": (request.GET.get("stat_course") or "").strip() or None,
+        "group": (request.GET.get("stat_group") or "").strip() or None,
+        "content_type": (request.GET.get("stat_content_type") or "all").strip(),
+        "organization": (request.GET.get("stat_organization") or "").strip() or None,
+    }
+
+    if capabilities["is_superadmin"]:
+        stats = get_superadmin_statistics(filters=filters)
+    elif capabilities["is_org_admin"] and org:
+        stats = get_org_admin_statistics(organization=org, filters=filters)
+    elif capabilities["is_teacher"]:
+        stats = get_teacher_statistics(request.user, organization=org, filters=filters)
+    else:
+        stats = get_student_statistics(request.user, organization=org, filters=filters)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    summary = stats.get("summary", {})
+    writer.writerow(["Metrika", "Dəyər"])
+    for key, value in summary.items():
+        writer.writerow([key.replace("_", " ").title(), value])
+
+    from django.http import HttpResponse as _HR
+
+    response = _HR(output.getvalue(), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="statistika.csv"'
+    return response
 
 
 @require_safe
