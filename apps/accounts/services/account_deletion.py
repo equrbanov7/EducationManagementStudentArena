@@ -29,8 +29,12 @@ def _is_last_org_admin(user):
     """
     from apps.organizations.models import Membership, Organization
 
-    # Check if user owns any organizations
-    owned_orgs = Organization.objects.filter(owner=user, is_active=True)
+    # Only currently active organizations must retain at least one active admin.
+    owned_orgs = Organization.objects.filter(
+        owner=user,
+        is_active=True,
+        status="active",
+    )
     if owned_orgs.exists():
         return True
 
@@ -38,6 +42,8 @@ def _is_last_org_admin(user):
     admin_memberships = Membership.objects.filter(
         user=user,
         is_active=True,
+        organization__is_active=True,
+        organization__status="active",
         role__level__gte=80,
     ).select_related("organization")
 
@@ -46,6 +52,8 @@ def _is_last_org_admin(user):
             Membership.objects.filter(
                 organization=membership.organization,
                 is_active=True,
+                organization__is_active=True,
+                organization__status="active",
                 role__level__gte=80,
             )
             .exclude(user=user)
@@ -199,6 +207,67 @@ def restore_account(user, *, request=None):
             user.username,
             user.pk,
         )
+
+
+def block_account(user, *, request=None):
+    """
+    Temporarily block a user account without marking it as deleted.
+
+    This keeps account data intact so a superadmin can later unblock the user.
+    """
+    if _is_last_org_admin(user):
+        raise AccountDeletionError("last_org_admin")
+
+    if not user.is_active:
+        return
+
+    user.is_active = False
+    user.save(update_fields=["is_active"])
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=getattr(request, "user", None) if request else None,
+        obj=user,
+        reason="Account temporarily blocked by superadmin",
+        request=request,
+        resource_type="User",
+        resource_id=str(user.pk),
+        resource_repr=f"{user.username} ({user.email})",
+    )
+
+    logger.info(
+        "Account temporarily blocked for user %s (pk=%s)",
+        user.username,
+        user.pk,
+    )
+
+
+def unblock_account(user, *, request=None):
+    """
+    Restore a temporarily blocked account back to active state.
+    """
+    if user.is_active:
+        return
+
+    user.is_active = True
+    user.save(update_fields=["is_active"])
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=getattr(request, "user", None) if request else None,
+        obj=user,
+        reason="Account unblocked by superadmin",
+        request=request,
+        resource_type="User",
+        resource_id=str(user.pk),
+        resource_repr=f"{user.username} ({user.email})",
+    )
+
+    logger.info(
+        "Account unblocked for user %s (pk=%s)",
+        user.username,
+        user.pk,
+    )
 
 
 def hard_delete_account(user, *, request=None):

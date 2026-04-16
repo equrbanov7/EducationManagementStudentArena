@@ -11,7 +11,12 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.notifications.models import InAppNotification, StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    InAppNotification,
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
 from apps.notifications.services import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -60,6 +65,14 @@ class ProfileViewTest(TestCase):
             username="testuser",
             email="test@example.com",
             password="testpass123",
+        )
+
+    def _delete_account(self, user, *, password="testpass123"):
+        self.client.force_login(user)
+        return self.client.post(
+            reverse("accounts:delete_account"),
+            {"password": password},
+            follow=True,
         )
 
     def test_profile_requires_login(self):
@@ -125,6 +138,191 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["active_section"], "profile-info")
 
+    def test_delete_account_succeeds_for_active_teacher_student_and_member_roles(self):
+        owner = User.objects.create_user(
+            username="delete_roles_owner",
+            email="delete_roles_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Delete Roles Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        scenarios = [
+            ("teacher", ProfileRole.TEACHER, "teacher"),
+            ("student", ProfileRole.STUDENT, "student"),
+            ("member", ProfileRole.MEMBER, "member"),
+        ]
+
+        for label, profile_role, membership_role_name in scenarios:
+            with self.subTest(role=label):
+                user = User.objects.create_user(
+                    username=f"delete_{label}_user",
+                    email=f"delete_{label}_user@example.com",
+                    password="testpass123",
+                )
+                _assign_user_to_org(user, organization, profile_role, membership_role_name=membership_role_name)
+
+                response = self._delete_account(user)
+
+                self.assertRedirects(response, reverse("accounts:login"))
+                user.refresh_from_db()
+                user.profile.refresh_from_db()
+                self.assertFalse(user.is_active)
+                self.assertTrue(user.profile.is_deleted)
+
+    def test_delete_account_cancels_pending_join_requests(self):
+        requester = User.objects.create_user(
+            username="delete_pending_request",
+            email="delete_pending_request@example.com",
+            password="testpass123",
+        )
+        owner = User.objects.create_user(
+            username="delete_pending_request_owner",
+            email="delete_pending_request_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Delete Pending Request Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        requester.profile.role = ProfileRole.TEACHER
+        requester.profile.organization = None
+        requester.profile.organization_type = OrganizationType.INDIVIDUAL
+        requester.profile.requested_organization = organization
+        requester.profile.requested_organization_name = organization.name
+        requester.profile.requested_organization_message = "Join request"
+        requester.profile.save(
+            update_fields=[
+                "role",
+                "organization",
+                "organization_type",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+        pending_request = StudentOrganizationRequest.objects.create(
+            user=requester,
+            organization=organization,
+            role_type=MembershipRequestRoleType.TEACHER,
+            status=StudentOrganizationRequestStatus.PENDING,
+            message="Join request",
+        )
+
+        response = self._delete_account(requester)
+
+        self.assertRedirects(response, reverse("accounts:login"))
+        requester.refresh_from_db()
+        requester.profile.refresh_from_db()
+        pending_request.refresh_from_db()
+        self.assertFalse(requester.is_active)
+        self.assertTrue(requester.profile.is_deleted)
+        self.assertIsNone(requester.profile.requested_organization)
+        self.assertEqual(pending_request.status, StudentOrganizationRequestStatus.CANCELLED)
+
+    def test_delete_account_succeeds_for_user_with_pending_invite(self):
+        invited_user = User.objects.create_user(
+            username="delete_pending_invite",
+            email="delete_pending_invite@example.com",
+            password="testpass123",
+        )
+        owner = User.objects.create_user(
+            username="delete_pending_invite_owner",
+            email="delete_pending_invite_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Delete Pending Invite Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        invited_user.profile.role = ProfileRole.STUDENT
+        invited_user.profile.organization = None
+        invited_user.profile.organization_type = OrganizationType.INDIVIDUAL
+        invited_user.profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        pending_invite = Membership.objects.create(
+            user=invited_user,
+            organization=organization,
+            role=organization.roles.get(name="student"),
+            assigned_by=owner,
+            is_primary=False,
+            is_active=False,
+            title="__student_pending_invite__",
+        )
+
+        response = self._delete_account(invited_user)
+
+        self.assertRedirects(response, reverse("accounts:login"))
+        invited_user.refresh_from_db()
+        invited_user.profile.refresh_from_db()
+        pending_invite.refresh_from_db()
+        self.assertFalse(invited_user.is_active)
+        self.assertTrue(invited_user.profile.is_deleted)
+        self.assertFalse(pending_invite.is_active)
+
+    def test_delete_account_succeeds_for_pending_and_suspended_org_owners(self):
+        for status in ("pending", "suspended"):
+            with self.subTest(status=status):
+                owner = User.objects.create_user(
+                    username=f"delete_{status}_owner",
+                    email=f"delete_{status}_owner@example.com",
+                    password="testpass123",
+                )
+                owner.profile.role = ProfileRole.ORG_ADMIN
+                owner.profile.organization_type = OrganizationType.UNIVERSITY
+                owner.profile.save(update_fields=["role", "organization_type", "updated_at"])
+                Organization.objects.create(
+                    name=f"Delete {status.title()} Owner Org",
+                    org_type=OrganizationType.UNIVERSITY,
+                    owner=owner,
+                    status=status,
+                    is_active=True,
+                )
+
+                response = self._delete_account(owner)
+
+                self.assertRedirects(response, reverse("accounts:login"))
+                owner.refresh_from_db()
+                owner.profile.refresh_from_db()
+                self.assertFalse(owner.is_active)
+                self.assertTrue(owner.profile.is_deleted)
+
+    def test_delete_account_blocks_last_active_org_owner(self):
+        owner = User.objects.create_user(
+            username="delete_active_owner",
+            email="delete_active_owner@example.com",
+            password="testpass123",
+        )
+        owner.profile.role = ProfileRole.ORG_ADMIN
+        owner.profile.organization_type = OrganizationType.UNIVERSITY
+        owner.profile.save(update_fields=["role", "organization_type", "updated_at"])
+        Organization.objects.create(
+            name="Delete Active Owner Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        response = self._delete_account(owner)
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+        owner.refresh_from_db()
+        owner.profile.refresh_from_db()
+        self.assertTrue(owner.is_active)
+        self.assertFalse(owner.profile.is_deleted)
+
     def test_edit_profile_organization_type_uses_translated_bootstrap_select(self):
         self.client.login(username="testuser", password="testpass123")
         self.client.cookies["django_language"] = "en"
@@ -136,9 +334,28 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'class="form-select" id="organization_type"', html=False)
+        self.assertContains(response, 'disabled aria-disabled="true"', html=False)
         self.assertContains(response, "Organization Type")
         self.assertContains(response, "University")
         self.assertNotContains(response, "org_type_university")
+
+    def test_edit_profile_organization_type_links_to_join_flow_for_teacher_without_org(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_edit_profile",
+            email="teacher_edit_profile@example.com",
+            password="testpass123",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self.client.force_login(teacher_user)
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "?section=student-organization-request")
 
     def test_profile_change_password_section_renders(self):
         self.client.login(username="testuser", password="testpass123")
@@ -492,6 +709,31 @@ class ProfileViewTest(TestCase):
         self.assertFalse(self.user.is_superuser)
         self.assertFalse(self.user.is_staff)
         self.assertEqual(profile.role, ProfileRole.MEMBER)
+
+    def test_edit_profile_does_not_change_organization_type_from_post(self):
+        from apps.accounts.models import UserProfile
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.save(update_fields=["organization_type", "updated_at"])
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=edit-profile",
+            data={
+                "profile_form": "edit-profile",
+                "first_name": "Elvin",
+                "last_name": "Qurbanov",
+                "email": "elvin@example.com",
+                "organization_type": OrganizationType.UNIVERSITY,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile"))
+
+        profile.refresh_from_db()
+        self.assertEqual(profile.organization_type, OrganizationType.INDIVIDUAL)
 
     def test_superuser_is_teacher_and_admin(self):
         """Test that superusers always pass role checks."""
@@ -1458,6 +1700,120 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f"@{self.user.username}")
 
+    def test_superadmin_profile_shows_user_management_as_inline_section(self):
+        superuser = User.objects.create_superuser(
+            username="inline_superadmin",
+            email="inline_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'{reverse("accounts:profile")}?section=superadmin-users')
+        self.assertContains(response, 'data-section="superadmin-users"', html=False)
+        self.assertContains(response, 'data-profile-section-panel="superadmin-users"', html=False)
+
+    def test_superadmin_user_management_filters_blocked_users_by_role_and_group(self):
+        superuser = User.objects.create_superuser(
+            username="filter_superadmin",
+            email="filter_superadmin@example.com",
+            password="adminpass123",
+        )
+        organization = Organization.objects.create(
+            name="Superadmin Filter Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+
+        blocked_user = User.objects.create_user(
+            username="blocked_student",
+            email="blocked_student@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(blocked_user, organization, ProfileRole.STUDENT)
+        blocked_user.profile.student_group_number = "CS-204"
+        blocked_user.profile.save(update_fields=["student_group_number", "updated_at"])
+        blocked_user.is_active = False
+        blocked_user.save(update_fields=["is_active"])
+
+        active_user = User.objects.create_user(
+            username="active_student",
+            email="active_student@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(active_user, organization, ProfileRole.STUDENT)
+        active_user.profile.student_group_number = "BIO-101"
+        active_user.profile.save(update_fields=["student_group_number", "updated_at"])
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile")
+            + "?section=superadmin-users&user_status=blocked&user_role=student&user_group=CS-204"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "blocked_student")
+        self.assertNotContains(response, "active_student")
+        self.assertContains(response, "Bloklanıb")
+
+    def test_superadmin_can_block_user_from_management(self):
+        superuser = User.objects.create_superuser(
+            username="block_superadmin",
+            email="block_superadmin@example.com",
+            password="adminpass123",
+        )
+        target_user = User.objects.create_user(
+            username="block_target",
+            email="block_target@example.com",
+            password="testpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:superadmin_user_management"),
+            {
+                "action": "block",
+                "user_id": target_user.pk,
+                "next": reverse("accounts:profile") + "?section=superadmin-users&user_status=blocked",
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=superadmin-users&user_status=blocked")
+        target_user.refresh_from_db()
+        self.assertFalse(target_user.is_active)
+
+    def test_superadmin_can_soft_delete_user_from_management(self):
+        superuser = User.objects.create_superuser(
+            username="delete_superadmin",
+            email="delete_superadmin@example.com",
+            password="adminpass123",
+        )
+        target_user = User.objects.create_user(
+            username="delete_target",
+            email="delete_target@example.com",
+            password="testpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:superadmin_user_management"),
+            {
+                "action": "soft_delete",
+                "user_id": target_user.pk,
+                "next": reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted",
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted")
+        target_user.refresh_from_db()
+        target_user.profile.refresh_from_db()
+        self.assertFalse(target_user.is_active)
+        self.assertTrue(target_user.profile.is_deleted)
+
     def test_manage_roles_shows_primary_role_summary_for_multi_role_user(self):
         from apps.accounts.models import ProfileRole
         from apps.organizations.models import Membership
@@ -2400,6 +2756,157 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.context["assigned_courses_search_query"], "python")
         self.assertEqual(len(response.context["assigned_courses"]), 1)
         self.assertEqual(response.context["assigned_courses"][0].id, keep_course.id)
+
+    def test_superadmin_pending_post_approvals_filters_by_organization_and_personal_scope(self):
+        from apps.blog.models import Post
+
+        superadmin = User.objects.create_superuser(
+            username="pending_posts_superadmin",
+            email="pending_posts_superadmin@example.com",
+            password="testpass123",
+        )
+
+        owner_a = User.objects.create_user("pending_posts_owner_a", "owner_a@example.com", "testpass123")
+        owner_b = User.objects.create_user("pending_posts_owner_b", "owner_b@example.com", "testpass123")
+
+        org_a = Organization.objects.create(
+            name="Pending Posts Org A",
+            slug="pending-posts-org-a",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_a,
+            status="active",
+            is_active=True,
+        )
+        org_b = Organization.objects.create(
+            name="Pending Posts Org B",
+            slug="pending-posts-org-b",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_b,
+            status="active",
+            is_active=True,
+        )
+
+        org_a_student = User.objects.create_user("pending_posts_student_a", "student_a@example.com", "testpass123")
+        org_b_student = User.objects.create_user("pending_posts_student_b", "student_b@example.com", "testpass123")
+        personal_author = User.objects.create_user(
+            "pending_posts_personal_author",
+            "personal_author@example.com",
+            "testpass123",
+        )
+
+        _assign_user_to_org(org_a_student, org_a, ProfileRole.STUDENT)
+        _assign_user_to_org(org_b_student, org_b, ProfileRole.STUDENT)
+
+        personal_profile = personal_author.profile
+        personal_profile.role = ProfileRole.TEACHER
+        personal_profile.organization = None
+        personal_profile.organization_type = OrganizationType.INDIVIDUAL
+        personal_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        Post.objects.create(
+            author=org_a_student,
+            title="Org A Pending Post",
+            content="Org A content",
+            requires_approval=True,
+            approval_status=Post.ApprovalStatus.PENDING,
+            is_published=False,
+        )
+        Post.objects.create(
+            author=org_b_student,
+            title="Org B Pending Post",
+            content="Org B content",
+            requires_approval=True,
+            approval_status=Post.ApprovalStatus.PENDING,
+            is_published=False,
+        )
+        Post.objects.create(
+            author=personal_author,
+            title="Personal Pending Post",
+            content="Personal content",
+            requires_approval=True,
+            approval_status=Post.ApprovalStatus.PENDING,
+            is_published=False,
+        )
+
+        self.client.force_login(superadmin)
+        org_response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "pending-post-approvals", "approval_organization": str(org_a.id)},
+        )
+
+        self.assertEqual(org_response.status_code, 200)
+        org_titles = [item["post"].title for item in org_response.context["pending_post_approval_items"]]
+        self.assertEqual(org_titles, ["Org A Pending Post"])
+        self.assertEqual(org_response.context["pending_post_approval_filter_organization"], str(org_a.id))
+
+        available_org_ids = {
+            str(item["id"]) for item in org_response.context["pending_post_approval_available_organizations"]
+        }
+        self.assertIn(str(org_a.id), available_org_ids)
+        self.assertIn("__personal__", available_org_ids)
+
+        personal_response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "pending-post-approvals", "approval_organization": "__personal__"},
+        )
+
+        self.assertEqual(personal_response.status_code, 200)
+        personal_titles = [item["post"].title for item in personal_response.context["pending_post_approval_items"]]
+        self.assertEqual(personal_titles, ["Personal Pending Post"])
+
+    def test_superadmin_pending_post_approvals_paginate_filtered_results(self):
+        from apps.blog.models import Post
+
+        superadmin = User.objects.create_superuser(
+            username="pending_posts_pagination_superadmin",
+            email="pending_posts_pagination_superadmin@example.com",
+            password="testpass123",
+        )
+        owner = User.objects.create_user("pending_posts_page_owner", "page_owner@example.com", "testpass123")
+        organization = Organization.objects.create(
+            name="Pending Posts Pagination Org",
+            slug="pending-posts-pagination-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        for index in range(11):
+            student = User.objects.create_user(
+                username=f"pending_page_student_{index}",
+                email=f"pending_page_student_{index}@example.com",
+                password="testpass123",
+            )
+            _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+            Post.objects.create(
+                author=student,
+                title=f"Paginated Pending {index}",
+                content="Pagination content",
+                requires_approval=True,
+                approval_status=Post.ApprovalStatus.PENDING,
+                is_published=False,
+            )
+
+        self.client.force_login(superadmin)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "pending-post-approvals",
+                "approval_organization": str(organization.id),
+                "approval_page": 2,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pending_post_approval_page_obj"].number, 2)
+        self.assertEqual(len(response.context["pending_post_approval_items"]), 1)
+        page_titles = [item["post"].title for item in response.context["pending_post_approval_items"]]
+        self.assertEqual(page_titles, ["Paginated Pending 0"])
+        self.assertIn(
+            f"approval_organization={organization.id}",
+            response.context["pending_post_approval_pagination_query"],
+        )
 
 
 class AssignedItemsViewTest(TestCase):

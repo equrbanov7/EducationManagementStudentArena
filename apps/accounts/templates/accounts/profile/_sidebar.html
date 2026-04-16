@@ -360,8 +360,11 @@
             </a>
         </li>
         <li class="sidebar-menu-item">
-            <a href="{% url 'accounts:superadmin_user_management' %}"
-               class="sidebar-menu-link {% if active_section == 'superadmin-users' %}active{% endif %}">
+            <a href="{{ profile_base_url }}?section=superadmin-users"
+               data-section="superadmin-users"
+               data-title="{% trans 'user_management_title' context 'superadmin.users' %}"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-users' %}active{% endif %}">
                 <i class="fas fa-users-cog sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "user_management" context "profile.sidebar" %}</span>
             </a>

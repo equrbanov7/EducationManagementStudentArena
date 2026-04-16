@@ -57,8 +57,7 @@
             <div class="info-grid profile-form-grid mt-3">
                 <div class="info-item">
                     <label class="info-label" for="organization_type">{% trans "organization_type" context "profile.edit" %}</label>
-                    <select class="form-select" id="organization_type" name="organization_type"
-                            onchange="document.getElementById('editProfileTypeWarning').style.display = this.value !== '{{ profile.organization_type }}' ? 'block' : 'none';">
+                    <select class="form-select" id="organization_type" name="organization_type" disabled aria-disabled="true">
                         <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
                             {% trans "org_type_individual" context "profile.edit" %}
                         </option>
@@ -93,9 +92,17 @@
                 </div>
             </div>
 
-            <div id="editProfileTypeWarning" class="alert alert-warning mt-3" style="display: none; border-radius: 8px;">
+            <div id="editProfileTypeWarning" class="alert alert-warning mt-3" style="border-radius: 8px;">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 {% trans "edit_profile_type_change_warning" context "profile.edit" %}
+                {% if 'student-organization-request' in allowed_sections %}
+                <a href="{{ profile_base_url }}?section=student-organization-request"
+                   class="alert-link ms-2 js-profile-section-link"
+                   data-section="student-organization-request"
+                   data-title="{% trans 'join_organization' context 'profile.section' %}">
+                    {% trans "join_organization" context "profile.section" %}
+                </a>
+                {% endif %}
             </div>
 
             <div class="info-item profile-form-grid">
