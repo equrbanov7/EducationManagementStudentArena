@@ -520,6 +520,7 @@ def _role_capabilities(user, profile):
             "category-management",
             "superadmin-organizations",
             "superadmin-users",
+            "superadmin-ai",
             "pending-post-approvals",
             "blog",
             "edit-profile",

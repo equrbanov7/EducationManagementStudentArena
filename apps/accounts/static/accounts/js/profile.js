@@ -962,6 +962,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            if (link.getAttribute("data-force-navigation") === "true") {
+                return;
+            }
+
             if (setActiveSection(section, true)) {
                 event.preventDefault();
                 if (isMobileViewport()) {

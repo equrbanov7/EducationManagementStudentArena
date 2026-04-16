@@ -14,24 +14,13 @@ in the ``UNSUPPORTED_METRICS`` constant at the bottom of this file.
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db.models import (
-    Avg,
-    Case,
     Count,
-    F,
-    Max,
-    Min,
     Q,
-    Sum,
-    Value,
-    When,
 )
-from django.db.models.functions import Coalesce, TruncDate, TruncMonth
-from django.utils import timezone
 
 User = get_user_model()
 
@@ -71,6 +60,10 @@ def _apply_date_filter(qs, field_name, date_from, date_to):
     if date_to:
         qs = qs.filter(**{f"{field_name}__date__lte": date_to})
     return qs
+
+
+def _content_type_enabled(selected_type, expected_type):
+    return selected_type in ("all", expected_type)
 
 
 # ---------------------------------------------------------------------------
@@ -123,7 +116,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
         return round((a["correct_count"] or 0) * 100 / total, 1) if total else 0
 
     exam_scores = [_exam_pct(a) for a in exam_list if a["status"] in ("submitted", "expired")]
-    exam_passed = sum(1 for s in exam_scores if s >= 50)
+    # exam_passed = sum(1 for s in exam_scores if s >= 50)
 
     # ── Assignments ───────────────────────────────────────────────
     submissions_qs = Submission.objects.filter(user=user)
@@ -144,9 +137,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
         )
     )
     assignment_graded = [s for s in assignment_list if s["status"] == "graded" and s["grade"] is not None]
-    assignment_scores = [
-        _safe_pct(s["grade"], s["assignment__max_score"]) for s in assignment_graded
-    ]
+    assignment_scores = [_safe_pct(s["grade"], s["assignment__max_score"]) for s in assignment_graded]
 
     # ── Labs ──────────────────────────────────────────────────────
     lab_subs = LabSubmission.objects.filter(assignment__student=user)
@@ -166,9 +157,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
         )
     )
     lab_graded = [s for s in lab_list if s["status"] == "graded" and s["score"] is not None]
-    lab_scores = [
-        _safe_pct(s["score"], s["assignment__lab__max_score"]) for s in lab_graded
-    ]
+    lab_scores = [_safe_pct(s["score"], s["assignment__lab__max_score"]) for s in lab_graded]
 
     # ── Projects ──────────────────────────────────────────────────
     proj_subs = ProjectSubmission.objects.filter(student=user)
@@ -188,9 +177,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
         )
     )
     proj_graded = [s for s in proj_list if s["status"] == "graded" and s["grade"] is not None]
-    proj_scores = [
-        _safe_pct(s["grade"], s["project__max_score"]) for s in proj_graded
-    ]
+    proj_scores = [_safe_pct(s["grade"], s["project__max_score"]) for s in proj_graded]
 
     # ── Live exams ────────────────────────────────────────────────
     # LivePlayer does not have a user FK — players are semi-anonymous
@@ -201,6 +188,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
     live_correct = 0
     try:
         from apps.live_exam.models import LiveAnswer
+
         live_qs = LiveAnswer.objects.filter(session__state="finished")
         if organization:
             live_qs = live_qs.filter(session__exam__organization=organization)
@@ -225,9 +213,7 @@ def get_student_statistics(user, *, organization=None, filters=None):
     if content_type in ("all", "project"):
         all_scores.extend(proj_scores)
 
-    total_items = (
-        len(exam_list) + len(assignment_list) + len(lab_list) + len(proj_list)
-    )
+    total_items = len(exam_list) + len(assignment_list) + len(lab_list) + len(proj_list)
     graded_items = len(exam_scores) + len(assignment_graded) + len(lab_graded) + len(proj_graded)
     pending_items = total_items - graded_items
 
@@ -315,6 +301,7 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
     date_to = _parse_date(filters.get("date_to"))
     course_id = filters.get("course")
     group_id = filters.get("group")
+    content_type = filters.get("content_type", "all")
 
     # ── Owned courses ─────────────────────────────────────────────
     courses = Course.objects.filter(owner=user)
@@ -322,39 +309,54 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
         courses = courses.filter(organization=organization)
     if course_id:
         courses = courses.filter(id=course_id)
-    course_ids = list(courses.values_list("id", flat=True))
+    course_rows = list(courses.values("id", "title"))
+    course_ids = [row["id"] for row in course_rows]
 
-    total_students = CourseMembership.objects.filter(
-        course_id__in=course_ids, role="student"
-    ).values("user").distinct().count()
-
-    # ── Exams ─────────────────────────────────────────────────────
-    exams = Exam.objects.filter(author=user)
-    if organization:
-        exams = exams.filter(organization=organization)
-    if course_id:
-        exams = exams.filter(course_id=course_id)
-    exam_ids = list(exams.values_list("id", flat=True))
-
-    attempts = ExamAttempt.objects.filter(exam_id__in=exam_ids)
-    attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
+    group_students = None
     if group_id:
         try:
-            group = StudentGroup.objects.get(id=int(group_id))
-            attempts = attempts.filter(user__in=group.students.all())
+            group_students = StudentGroup.objects.get(id=int(group_id)).students.all()
         except (StudentGroup.DoesNotExist, ValueError, TypeError):
-            pass
+            group_students = None
 
-    attempt_stats = attempts.aggregate(
-        total=Count("id"),
-        submitted=Count("id", filter=Q(status="submitted")),
-        expired=Count("id", filter=Q(status="expired")),
-        checked=Count("id", filter=Q(checked_by_teacher=True)),
+    total_students = (
+        CourseMembership.objects.filter(course_id__in=course_ids, role="student").values("user").distinct().count()
     )
+
+    # ── Exams ─────────────────────────────────────────────────────
+    exams = Exam.objects.none()
+    exam_ids = []
+    attempts = ExamAttempt.objects.none()
+    attempt_stats = {
+        "total": 0,
+        "submitted": 0,
+        "expired": 0,
+        "checked": 0,
+    }
+    if _content_type_enabled(content_type, "exam"):
+        exams = Exam.objects.filter(author=user)
+        if organization:
+            exams = exams.filter(organization=organization)
+        if course_id:
+            exams = exams.filter(course_id=course_id)
+        exam_ids = list(exams.values_list("id", flat=True))
+
+        attempts = ExamAttempt.objects.filter(exam_id__in=exam_ids)
+        attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
+        if group_students is not None:
+            attempts = attempts.filter(user__in=group_students)
+
+        attempt_stats = attempts.aggregate(
+            total=Count("id"),
+            submitted=Count("id", filter=Q(status="submitted")),
+            expired=Count("id", filter=Q(status="expired")),
+            checked=Count("id", filter=Q(checked_by_teacher=True)),
+        )
 
     # Exam scores
     scored_attempts = list(
         attempts.filter(status__in=["submitted", "expired"]).values(
+            "exam__course_id",
             "exam__exam_type",
             "exam__default_question_points",
             "correct_count",
@@ -375,19 +377,26 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
     exam_pass_rate = _safe_pct(exam_pass_count, len(exam_scores))
 
     # ── Assignments ───────────────────────────────────────────────
-    assignments = Assignment.objects.filter(course_id__in=course_ids)
-    assignment_subs = Submission.objects.filter(assignment__in=assignments)
-    assignment_subs = _apply_date_filter(assignment_subs, "submitted_at", date_from, date_to)
-    assignment_stats = assignment_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-        late=Count("id", filter=Q(is_late=True)),
-    )
+    assignment_subs = Submission.objects.none()
+    assignment_stats = {
+        "total": 0,
+        "graded": 0,
+        "late": 0,
+    }
+    if _content_type_enabled(content_type, "assignment"):
+        assignments = Assignment.objects.filter(course_id__in=course_ids)
+        assignment_subs = Submission.objects.filter(assignment__in=assignments)
+        assignment_subs = _apply_date_filter(assignment_subs, "submitted_at", date_from, date_to)
+        if group_students is not None:
+            assignment_subs = assignment_subs.filter(user__in=group_students)
+        assignment_stats = assignment_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+            late=Count("id", filter=Q(is_late=True)),
+        )
 
     # Grading turnaround (avg days between submitted_at and graded_at)
-    graded_subs = assignment_subs.filter(
-        status="graded", graded_at__isnull=False
-    ).values("submitted_at", "graded_at")
+    graded_subs = assignment_subs.filter(status="graded", graded_at__isnull=False).values("submitted_at", "graded_at")
     turnaround_days = []
     for sub in graded_subs:
         if sub["submitted_at"] and sub["graded_at"]:
@@ -396,29 +405,45 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
     avg_turnaround = round(sum(turnaround_days) / len(turnaround_days), 1) if turnaround_days else 0
 
     # ── Labs ──────────────────────────────────────────────────────
-    labs = Lab.objects.filter(course_id__in=course_ids)
-    lab_subs = LabSubmission.objects.filter(assignment__lab__in=labs)
-    lab_subs = _apply_date_filter(lab_subs, "submitted_at", date_from, date_to)
-    lab_stats = lab_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-    )
+    lab_subs = LabSubmission.objects.none()
+    lab_stats = {
+        "total": 0,
+        "graded": 0,
+    }
+    if _content_type_enabled(content_type, "lab"):
+        labs = Lab.objects.filter(course_id__in=course_ids)
+        lab_subs = LabSubmission.objects.filter(assignment__lab__in=labs)
+        lab_subs = _apply_date_filter(lab_subs, "submitted_at", date_from, date_to)
+        if group_students is not None:
+            lab_subs = lab_subs.filter(assignment__student__in=group_students)
+        lab_stats = lab_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+        )
 
     # ── Projects ──────────────────────────────────────────────────
-    projects = Project.objects.filter(course_id__in=course_ids)
-    proj_subs = ProjectSubmission.objects.filter(project__in=projects)
-    proj_subs = _apply_date_filter(proj_subs, "submitted_at", date_from, date_to)
-    proj_stats = proj_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-    )
+    proj_subs = ProjectSubmission.objects.none()
+    proj_stats = {
+        "total": 0,
+        "graded": 0,
+    }
+    if _content_type_enabled(content_type, "project"):
+        projects = Project.objects.filter(course_id__in=course_ids)
+        proj_subs = ProjectSubmission.objects.filter(project__in=projects)
+        proj_subs = _apply_date_filter(proj_subs, "submitted_at", date_from, date_to)
+        if group_students is not None:
+            proj_subs = proj_subs.filter(student__in=group_students)
+        proj_stats = proj_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+        )
 
     # ── Group comparison ──────────────────────────────────────────
     groups_qs = StudentGroup.objects.none()
-    if organization:
+    if organization and _content_type_enabled(content_type, "exam"):
         groups_qs = StudentGroup.objects.filter(organization=organization)
     group_comparison = []
-    for grp in groups_qs[:20]:
+    for grp in groups_qs[:50]:
         grp_attempts = ExamAttempt.objects.filter(
             exam_id__in=exam_ids,
             user__in=grp.students.all(),
@@ -436,16 +461,49 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
         )
         grp_scores = [_attempt_pct(a) for a in grp_scored]
         grp_avg = _safe_avg(grp_scores)
-        group_comparison.append({
-            "id": grp.id,
-            "name": grp.name,
-            "student_count": grp.students.count(),
-            "avg_score": grp_avg,
-            "attempt_count": len(grp_scored),
-            "pass_rate": _safe_pct(
-                sum(1 for s in grp_scores if s >= 50), len(grp_scores)
-            ),
-        })
+        group_comparison.append(
+            {
+                "id": grp.id,
+                "name": grp.name,
+                "student_count": grp.students.count(),
+                "avg_score": grp_avg,
+                "attempt_count": len(grp_scored),
+                "pass_rate": _safe_pct(sum(1 for s in grp_scores if s >= 50), len(grp_scores)),
+            }
+        )
+
+    # ── Course overview ───────────────────────────────────────────
+    student_counts_by_course = dict(
+        CourseMembership.objects.filter(course_id__in=course_ids, role="student")
+        .values("course_id")
+        .annotate(count=Count("user", distinct=True))
+        .values_list("course_id", "count")
+    )
+    exam_counts_by_course = dict(
+        exams.values("course_id").annotate(count=Count("id")).values_list("course_id", "count")
+    )
+    attempt_counts_by_course = dict(
+        attempts.values("exam__course_id").annotate(count=Count("id")).values_list("exam__course_id", "count")
+    )
+    course_scores = defaultdict(list)
+    for attempt in scored_attempts:
+        course_scores[attempt["exam__course_id"]].append(_attempt_pct(attempt))
+
+    course_overview = []
+    for row in course_rows:
+        scores = course_scores.get(row["id"], [])
+        course_overview.append(
+            {
+                "course_id": row["id"],
+                "title": row["title"],
+                "student_count": student_counts_by_course.get(row["id"], 0),
+                "exam_count": exam_counts_by_course.get(row["id"], 0),
+                "attempt_count": attempt_counts_by_course.get(row["id"], 0),
+                "avg_score": _safe_avg(scores),
+                "pass_rate": _safe_pct(sum(1 for score in scores if score >= 50), len(scores)),
+            }
+        )
+    course_overview.sort(key=lambda row: (-row["attempt_count"], row["title"].lower()))
 
     # ── Submission trend ──────────────────────────────────────────
     trend_data = defaultdict(int)
@@ -479,6 +537,7 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
             "values": trend_values,
         },
         "group_comparison": group_comparison,
+        "course_overview": course_overview,
     }
 
 
@@ -500,6 +559,7 @@ def get_org_admin_statistics(*, organization, filters=None):
     date_from = _parse_date(filters.get("date_from"))
     date_to = _parse_date(filters.get("date_to"))
     course_id = filters.get("course")
+    content_type = filters.get("content_type", "all")
 
     # ── Active members ────────────────────────────────────────────
     memberships = Membership.objects.filter(organization=organization, is_active=True)
@@ -512,52 +572,68 @@ def get_org_admin_statistics(*, organization, filters=None):
     if course_id:
         courses = courses.filter(id=course_id)
     total_courses = courses.count()
-    active_courses = courses.filter(status="active").count()
+    active_courses = courses.filter(status="published").count()
 
-    course_ids = list(courses.values_list("id", flat=True))
+    # course_ids = list(courses.values_list("id", flat=True))
 
     # ── Exams ─────────────────────────────────────────────────────
-    exams = Exam.objects.filter(organization=organization)
-    total_exams = exams.count()
+    exams = Exam.objects.none()
+    attempts = ExamAttempt.objects.none()
+    total_exams = 0
+    attempt_agg = {"total": 0, "submitted": 0, "checked": 0}
+    if _content_type_enabled(content_type, "exam"):
+        exams = Exam.objects.filter(organization=organization)
+        if course_id:
+            exams = exams.filter(course_id=course_id)
+        total_exams = exams.count()
 
-    attempts = ExamAttempt.objects.filter(exam__organization=organization)
-    attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
-    attempt_agg = attempts.aggregate(
-        total=Count("id"),
-        submitted=Count("id", filter=Q(status="submitted")),
-        checked=Count("id", filter=Q(checked_by_teacher=True)),
-    )
+        attempts = ExamAttempt.objects.filter(exam__in=exams)
+        attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
+        attempt_agg = attempts.aggregate(
+            total=Count("id"),
+            submitted=Count("id", filter=Q(status="submitted")),
+            checked=Count("id", filter=Q(checked_by_teacher=True)),
+        )
 
     # ── Assignments ───────────────────────────────────────────────
-    assignment_subs = Submission.objects.filter(
-        assignment__course__organization=organization
-    )
-    assignment_subs = _apply_date_filter(assignment_subs, "submitted_at", date_from, date_to)
-    asn_agg = assignment_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-        late=Count("id", filter=Q(is_late=True)),
-    )
+    assignment_subs = Submission.objects.none()
+    asn_agg = {"total": 0, "graded": 0, "late": 0}
+    if _content_type_enabled(content_type, "assignment"):
+        assignment_subs = Submission.objects.filter(assignment__course__organization=organization)
+        if course_id:
+            assignment_subs = assignment_subs.filter(assignment__course_id=course_id)
+        assignment_subs = _apply_date_filter(assignment_subs, "submitted_at", date_from, date_to)
+        asn_agg = assignment_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+            late=Count("id", filter=Q(is_late=True)),
+        )
 
     # ── Labs ──────────────────────────────────────────────────────
-    lab_subs = LabSubmission.objects.filter(
-        assignment__lab__course__organization=organization
-    )
-    lab_subs = _apply_date_filter(lab_subs, "submitted_at", date_from, date_to)
-    lab_agg = lab_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-    )
+    lab_subs = LabSubmission.objects.none()
+    lab_agg = {"total": 0, "graded": 0}
+    if _content_type_enabled(content_type, "lab"):
+        lab_subs = LabSubmission.objects.filter(assignment__lab__course__organization=organization)
+        if course_id:
+            lab_subs = lab_subs.filter(assignment__lab__course_id=course_id)
+        lab_subs = _apply_date_filter(lab_subs, "submitted_at", date_from, date_to)
+        lab_agg = lab_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+        )
 
     # ── Projects ──────────────────────────────────────────────────
-    proj_subs = ProjectSubmission.objects.filter(
-        project__course__organization=organization
-    )
-    proj_subs = _apply_date_filter(proj_subs, "submitted_at", date_from, date_to)
-    proj_agg = proj_subs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-    )
+    proj_subs = ProjectSubmission.objects.none()
+    proj_agg = {"total": 0, "graded": 0}
+    if _content_type_enabled(content_type, "project"):
+        proj_subs = ProjectSubmission.objects.filter(project__course__organization=organization)
+        if course_id:
+            proj_subs = proj_subs.filter(project__course_id=course_id)
+        proj_subs = _apply_date_filter(proj_subs, "submitted_at", date_from, date_to)
+        proj_agg = proj_subs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+        )
 
     # ── Submission trend ──────────────────────────────────────────
     trend_data = defaultdict(int)
@@ -570,29 +646,100 @@ def get_org_admin_statistics(*, organization, filters=None):
     trend_labels = sorted(trend_data.keys())[-12:]
     trend_values = [trend_data[m] for m in trend_labels]
 
-    # ── Course rankings (top 10 by enrollment) ────────────────────
-    course_rankings = list(
-        CourseMembership.objects.filter(course__organization=organization, role="student")
-        .values("course__id", "course__title")
+    # ── Course rankings / drill-down ──────────────────────────────
+    course_memberships = CourseMembership.objects.filter(course__organization=organization, role="student")
+    if course_id:
+        course_memberships = course_memberships.filter(course_id=course_id)
+    course_student_counts = dict(
+        course_memberships.values("course_id")
         .annotate(student_count=Count("user", distinct=True))
-        .order_by("-student_count")[:10]
+        .values_list("course_id", "student_count")
     )
+    course_exam_counts = dict(
+        exams.values("course_id").annotate(exam_count=Count("id")).values_list("course_id", "exam_count")
+    )
+    course_attempt_counts = dict(
+        attempts.values("exam__course_id")
+        .annotate(attempt_count=Count("id"))
+        .values_list("exam__course_id", "attempt_count")
+    )
+    course_assignment_counts = dict(
+        assignment_subs.values("assignment__course_id")
+        .annotate(assignment_total=Count("id"))
+        .values_list("assignment__course_id", "assignment_total")
+    )
+    course_rankings = []
+    for course in courses.select_related("owner").order_by("title"):
+        owner_name = f"{course.owner.first_name} {course.owner.last_name}".strip() if course.owner_id else ""
+        course_rankings.append(
+            {
+                "course__id": course.id,
+                "course__title": course.title,
+                "teacher_name": owner_name or getattr(course.owner, "username", ""),
+                "student_count": course_student_counts.get(course.id, 0),
+                "exam_count": course_exam_counts.get(course.id, 0),
+                "attempt_count": course_attempt_counts.get(course.id, 0),
+                "assignment_total": course_assignment_counts.get(course.id, 0),
+            }
+        )
+    course_rankings.sort(key=lambda row: (-row["student_count"], row["course__title"].lower()))
 
     # ── Teacher overview ──────────────────────────────────────────
     teacher_user_ids = memberships.filter(role__level__gte=55).values_list("user_id", flat=True)
+    teacher_course_counts = dict(
+        Course.objects.filter(organization=organization, owner_id__in=teacher_user_ids)
+        .values("owner_id")
+        .annotate(course_count=Count("id"))
+        .values_list("owner_id", "course_count")
+    )
+    teacher_student_counts = dict(
+        CourseMembership.objects.filter(
+            course__organization=organization, role="student", course__owner_id__in=teacher_user_ids
+        )
+        .values("course__owner_id")
+        .annotate(student_count=Count("user", distinct=True))
+        .values_list("course__owner_id", "student_count")
+    )
+    teacher_exam_counts = dict(
+        exams.values("author_id").annotate(exam_count=Count("id")).values_list("author_id", "exam_count")
+    )
+    teacher_attempt_counts = dict(
+        attempts.values("exam__author_id")
+        .annotate(attempt_count=Count("id"))
+        .values_list("exam__author_id", "attempt_count")
+    )
+    teacher_scores = defaultdict(list)
+    for attempt in attempts.filter(status__in=["submitted", "expired"]).values(
+        "exam__author_id",
+        "exam__exam_type",
+        "correct_count",
+        "wrong_count",
+        "teacher_score",
+    ):
+        total = (attempt["correct_count"] or 0) + (attempt["wrong_count"] or 0)
+        score = (
+            float(attempt["teacher_score"] or 0)
+            if attempt["exam__exam_type"] == "written"
+            else (round((attempt["correct_count"] or 0) * 100 / total, 1) if total else 0)
+        )
+        teacher_scores[attempt["exam__author_id"]].append(score)
     teacher_overview = []
     for tid in list(teacher_user_ids)[:20]:
-        t_exams = Exam.objects.filter(author_id=tid, organization=organization).count()
-        t_courses = Course.objects.filter(owner_id=tid, organization=organization).count()
         t_user = User.objects.filter(id=tid).values("username", "first_name", "last_name").first()
         if t_user:
-            teacher_overview.append({
-                "user_id": tid,
-                "username": t_user["username"],
-                "name": f"{t_user['first_name']} {t_user['last_name']}".strip() or t_user["username"],
-                "exam_count": t_exams,
-                "course_count": t_courses,
-            })
+            teacher_overview.append(
+                {
+                    "user_id": tid,
+                    "username": t_user["username"],
+                    "name": f"{t_user['first_name']} {t_user['last_name']}".strip() or t_user["username"],
+                    "exam_count": teacher_exam_counts.get(tid, 0),
+                    "course_count": teacher_course_counts.get(tid, 0),
+                    "student_count": teacher_student_counts.get(tid, 0),
+                    "attempt_count": teacher_attempt_counts.get(tid, 0),
+                    "avg_score": _safe_avg(teacher_scores.get(tid, [])),
+                }
+            )
+    teacher_overview.sort(key=lambda row: (-row["attempt_count"], row["name"].lower()))
 
     return {
         "summary": {
@@ -640,79 +787,129 @@ def get_superadmin_statistics(*, filters=None):
     date_from = _parse_date(filters.get("date_from"))
     date_to = _parse_date(filters.get("date_to"))
     org_id = filters.get("organization")
+    course_id = filters.get("course")
+    content_type = filters.get("content_type", "all")
 
     # ── Organizations ─────────────────────────────────────────────
     orgs = Organization.objects.filter(is_active=True, status="active")
-    total_orgs = orgs.count()
+    scoped_orgs = orgs.filter(id=org_id) if org_id else orgs
+    total_orgs = scoped_orgs.count()
 
     # ── Users ─────────────────────────────────────────────────────
-    total_users = User.objects.filter(is_active=True).count()
-    total_memberships = Membership.objects.filter(is_active=True).count()
-
-    # ── Scoping ───────────────────────────────────────────────────
-    exam_filter = {}
-    course_filter = {}
+    total_memberships = Membership.objects.filter(is_active=True, organization__in=scoped_orgs).count()
     if org_id:
-        exam_filter["exam__organization_id"] = org_id
-        course_filter["organization_id"] = org_id
+        total_users = (
+            Membership.objects.filter(is_active=True, organization_id=org_id).values("user").distinct().count()
+        )
+    else:
+        total_users = User.objects.filter(is_active=True).count()
+
+    courses = Course.objects.all()
+    if org_id:
+        courses = courses.filter(organization_id=org_id)
+    if course_id:
+        courses = courses.filter(id=course_id)
+    total_courses = courses.count()
+
+    exam_qs = Exam.objects.all()
+    if org_id:
+        exam_qs = exam_qs.filter(organization_id=org_id)
+    if course_id:
+        exam_qs = exam_qs.filter(course_id=course_id)
 
     # ── Exams ─────────────────────────────────────────────────────
-    attempts = ExamAttempt.objects.all()
-    if org_id:
-        attempts = attempts.filter(exam__organization_id=org_id)
-    attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
-    attempt_agg = attempts.aggregate(
-        total=Count("id"),
-        submitted=Count("id", filter=Q(status="submitted")),
-        checked=Count("id", filter=Q(checked_by_teacher=True)),
-    )
-
-    if exam_filter:
-        exam_qs_filter = {k.replace("exam__", ""): v for k, v in exam_filter.items()}
-        total_exams = Exam.objects.filter(**exam_qs_filter).count()
-    else:
-        total_exams = Exam.objects.count()
-    total_courses = Course.objects.filter(**course_filter).count() if course_filter else Course.objects.count()
+    attempts = ExamAttempt.objects.none()
+    attempt_agg = {"total": 0, "submitted": 0, "checked": 0}
+    total_exams = 0
+    if _content_type_enabled(content_type, "exam"):
+        attempts = ExamAttempt.objects.filter(exam__in=exam_qs)
+        attempts = _apply_date_filter(attempts, "started_at", date_from, date_to)
+        attempt_agg = attempts.aggregate(
+            total=Count("id"),
+            submitted=Count("id", filter=Q(status="submitted")),
+            checked=Count("id", filter=Q(checked_by_teacher=True)),
+        )
+        total_exams = exam_qs.count()
 
     # ── Assignments ───────────────────────────────────────────────
-    asn_qs = Submission.objects.all()
-    if org_id:
-        asn_qs = asn_qs.filter(assignment__course__organization_id=org_id)
-    asn_qs = _apply_date_filter(asn_qs, "submitted_at", date_from, date_to)
-    asn_agg = asn_qs.aggregate(
-        total=Count("id"),
-        graded=Count("id", filter=Q(status="graded")),
-    )
+    asn_qs = Submission.objects.none()
+    asn_agg = {"total": 0, "graded": 0}
+    if _content_type_enabled(content_type, "assignment"):
+        asn_qs = Submission.objects.all()
+        if org_id:
+            asn_qs = asn_qs.filter(assignment__course__organization_id=org_id)
+        if course_id:
+            asn_qs = asn_qs.filter(assignment__course_id=course_id)
+        asn_qs = _apply_date_filter(asn_qs, "submitted_at", date_from, date_to)
+        asn_agg = asn_qs.aggregate(
+            total=Count("id"),
+            graded=Count("id", filter=Q(status="graded")),
+        )
 
     # ── Labs + Projects ───────────────────────────────────────────
-    lab_qs = LabSubmission.objects.all()
-    if org_id:
-        lab_qs = lab_qs.filter(assignment__lab__course__organization_id=org_id)
-    lab_qs = _apply_date_filter(lab_qs, "submitted_at", date_from, date_to)
-    lab_agg = lab_qs.aggregate(total=Count("id"), graded=Count("id", filter=Q(status="graded")))
+    lab_qs = LabSubmission.objects.none()
+    lab_agg = {"total": 0, "graded": 0}
+    if _content_type_enabled(content_type, "lab"):
+        lab_qs = LabSubmission.objects.all()
+        if org_id:
+            lab_qs = lab_qs.filter(assignment__lab__course__organization_id=org_id)
+        if course_id:
+            lab_qs = lab_qs.filter(assignment__lab__course_id=course_id)
+        lab_qs = _apply_date_filter(lab_qs, "submitted_at", date_from, date_to)
+        lab_agg = lab_qs.aggregate(total=Count("id"), graded=Count("id", filter=Q(status="graded")))
 
-    proj_qs = ProjectSubmission.objects.all()
-    if org_id:
-        proj_qs = proj_qs.filter(project__course__organization_id=org_id)
-    proj_qs = _apply_date_filter(proj_qs, "submitted_at", date_from, date_to)
-    proj_agg = proj_qs.aggregate(total=Count("id"), graded=Count("id", filter=Q(status="graded")))
+    proj_qs = ProjectSubmission.objects.none()
+    proj_agg = {"total": 0, "graded": 0}
+    if _content_type_enabled(content_type, "project"):
+        proj_qs = ProjectSubmission.objects.all()
+        if org_id:
+            proj_qs = proj_qs.filter(project__course__organization_id=org_id)
+        if course_id:
+            proj_qs = proj_qs.filter(project__course_id=course_id)
+        proj_qs = _apply_date_filter(proj_qs, "submitted_at", date_from, date_to)
+        proj_agg = proj_qs.aggregate(total=Count("id"), graded=Count("id", filter=Q(status="graded")))
 
     # ── Org comparison ────────────────────────────────────────────
     org_comparison = []
-    for org in orgs[:30]:
+    for org in scoped_orgs[:60]:
         o_members = Membership.objects.filter(organization=org, is_active=True).values("user").distinct().count()
+        o_teachers = (
+            Membership.objects.filter(
+                organization=org,
+                is_active=True,
+                role__level__gte=55,
+            )
+            .values("user")
+            .distinct()
+            .count()
+        )
+        o_students = (
+            Membership.objects.filter(
+                organization=org,
+                is_active=True,
+                role__level__lte=30,
+            )
+            .values("user")
+            .distinct()
+            .count()
+        )
         o_courses = Course.objects.filter(organization=org).count()
         o_exams = Exam.objects.filter(organization=org).count()
         o_attempts = ExamAttempt.objects.filter(exam__organization=org).count()
-        org_comparison.append({
-            "id": org.id,
-            "name": org.name,
-            "org_type": org.org_type,
-            "members": o_members,
-            "courses": o_courses,
-            "exams": o_exams,
-            "attempts": o_attempts,
-        })
+        org_comparison.append(
+            {
+                "id": org.id,
+                "name": org.name,
+                "org_type": org.org_type,
+                "members": o_members,
+                "teachers": o_teachers,
+                "students": o_students,
+                "courses": o_courses,
+                "exams": o_exams,
+                "attempts": o_attempts,
+            }
+        )
+    org_comparison.sort(key=lambda row: (-row["attempts"], row["name"].lower()))
 
     # ── Submission trend ──────────────────────────────────────────
     trend_data = defaultdict(int)

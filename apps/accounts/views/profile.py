@@ -79,6 +79,7 @@ from ._helpers import (
     _user_has_any_role,
 )
 from .account_management import build_superadmin_user_management_context
+from .superadmin import build_superadmin_ai_settings_context
 
 User = get_user_model()
 PUBLIC_PROFILE_SEARCH_MAX_LENGTH = 100
@@ -1200,6 +1201,13 @@ def user_profile(request):
         "deleted_count": 0,
         "embedded_in_profile": True,
     }
+    superadmin_ai_settings_section = {
+        "config": None,
+        "model_choices": [],
+        "rate_info": {},
+        "cost_estimates": {},
+        "post_next_url": "",
+    }
     superadmin_organizations_section = {
         "organizations": [],
         "organization_access_rows": [],
@@ -1545,6 +1553,13 @@ def user_profile(request):
             )
         )
 
+    if "superadmin-ai" in allowed_sections:
+        superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
+        superadmin_ai_settings_section["post_next_url"] = _append_query_params(
+            reverse("accounts:profile"),
+            section="superadmin-ai",
+        )
+
     # InAppNotification data for profile notifications section
     notif_filter = request.GET.get("notif_filter", "all")
     if notif_filter not in ("all", "unread", "read"):
@@ -1685,6 +1700,29 @@ def user_profile(request):
     statistics_filters = {}
     statistics_courses = []
     statistics_groups = []
+    statistics_organizations = []
+    statistics_has_active_filters = False
+    statistics_reset_url = _append_query_params(reverse("accounts:profile"), section="statistics")
+    statistics_org_page = None
+    statistics_teacher_page = None
+    statistics_course_page = None
+    statistics_group_page = None
+    statistics_teacher_course_page = None
+    statistics_org_rows = []
+    statistics_teacher_rows = []
+    statistics_course_rows = []
+    statistics_group_rows = []
+    statistics_teacher_course_rows = []
+    statistics_org_page_param = "stats_org_page"
+    statistics_teacher_page_param = "stats_teacher_page"
+    statistics_course_page_param = "stats_course_page"
+    statistics_group_page_param = "stats_group_page"
+    statistics_teacher_course_page_param = "stats_teacher_course_page"
+    statistics_org_pagination_query = ""
+    statistics_teacher_pagination_query = ""
+    statistics_course_pagination_query = ""
+    statistics_group_pagination_query = ""
+    statistics_teacher_course_pagination_query = ""
     if active_section == "statistics" and "statistics" in allowed_sections:
         from apps.accounts.services.statistics_selectors import (
             get_org_admin_statistics,
@@ -1692,63 +1730,138 @@ def user_profile(request):
             get_superadmin_statistics,
             get_teacher_statistics,
         )
+        from apps.organizations.models import Organization as _StatisticsOrganization
 
         stat_org = _get_active_organization(request)
+        statistics_content_type = (request.GET.get("stat_content_type") or "all").strip().lower()
+        if statistics_content_type not in {"all", "exam", "assignment", "lab", "project"}:
+            statistics_content_type = "all"
         statistics_filters = {
             "date_from": (request.GET.get("stat_date_from") or "").strip(),
             "date_to": (request.GET.get("stat_date_to") or "").strip(),
             "course": (request.GET.get("stat_course") or "").strip() or None,
             "group": (request.GET.get("stat_group") or "").strip() or None,
-            "content_type": (request.GET.get("stat_content_type") or "all").strip(),
+            "content_type": statistics_content_type,
             "organization": (request.GET.get("stat_organization") or "").strip() or None,
         }
+        statistics_has_active_filters = any(
+            [
+                statistics_filters["date_from"],
+                statistics_filters["date_to"],
+                statistics_filters["course"],
+                statistics_filters["group"],
+                statistics_filters["organization"],
+                statistics_filters["content_type"] != "all",
+            ]
+        )
+
+        selected_statistics_org = None
+        if capabilities["is_superadmin"] and statistics_filters["organization"]:
+            selected_statistics_org = (
+                _StatisticsOrganization.objects.filter(
+                    id=statistics_filters["organization"],
+                    is_active=True,
+                    status="active",
+                )
+                .only("id", "name")
+                .first()
+            )
+
+        statistics_scope_org = selected_statistics_org or stat_org
 
         # Populate filter options
-        if stat_org and not capabilities["is_superadmin"]:
+        if statistics_scope_org and not capabilities["is_superadmin"]:
             statistics_courses = list(
-                Course.objects.filter(organization=stat_org)
-                .order_by("title")
-                .values("id", "title")[:100]
+                Course.objects.filter(organization=statistics_scope_org).order_by("title").values("id", "title")[:100]
             )
         elif capabilities["is_superadmin"]:
-            statistics_courses = list(
-                Course.objects.all().order_by("title").values("id", "title")[:100]
+            statistics_organizations = list(
+                _StatisticsOrganization.objects.filter(is_active=True, status="active")
+                .order_by("name")
+                .values("id", "name")[:150]
             )
+            superadmin_course_qs = Course.objects.all()
+            if selected_statistics_org:
+                superadmin_course_qs = superadmin_course_qs.filter(organization=selected_statistics_org)
+            statistics_courses = list(superadmin_course_qs.order_by("title").values("id", "title")[:150])
 
-        if stat_org:
+        if statistics_scope_org:
             from apps.exams.models import StudentGroup as _SG
 
             statistics_groups = list(
-                _SG.objects.filter(organization=stat_org)
-                .order_by("name")
-                .values("id", "name")[:100]
+                _SG.objects.filter(organization=statistics_scope_org).order_by("name").values("id", "name")[:100]
             )
 
         if capabilities["is_superadmin"]:
             statistics_data = get_superadmin_statistics(filters=statistics_filters)
         elif capabilities["is_org_admin"]:
             if stat_org:
-                statistics_data = get_org_admin_statistics(
-                    organization=stat_org, filters=statistics_filters
-                )
+                statistics_data = get_org_admin_statistics(organization=stat_org, filters=statistics_filters)
         elif capabilities["is_teacher"]:
-            statistics_data = get_teacher_statistics(
-                request.user, organization=stat_org, filters=statistics_filters
-            )
+            statistics_data = get_teacher_statistics(request.user, organization=stat_org, filters=statistics_filters)
         else:
             # Student / lead student / member
-            statistics_data = get_student_statistics(
-                request.user, organization=stat_org, filters=statistics_filters
+            statistics_data = get_student_statistics(request.user, organization=stat_org, filters=statistics_filters)
+
+        statistics_base_query = _query_string(
+            section="statistics",
+            stat_date_from=statistics_filters["date_from"],
+            stat_date_to=statistics_filters["date_to"],
+            stat_course=statistics_filters["course"],
+            stat_group=statistics_filters["group"],
+            stat_content_type=(
+                None if statistics_filters["content_type"] == "all" else statistics_filters["content_type"]
+            ),
+            stat_organization=statistics_filters["organization"],
+        )
+
+        if statistics_data.get("org_comparison"):
+            statistics_org_page = Paginator(statistics_data["org_comparison"], 8).get_page(
+                request.GET.get(statistics_org_page_param)
             )
+            statistics_org_rows = list(statistics_org_page.object_list)
+            statistics_org_pagination_query = statistics_base_query
+
+        if statistics_data.get("teacher_overview"):
+            statistics_teacher_page = Paginator(statistics_data["teacher_overview"], 8).get_page(
+                request.GET.get(statistics_teacher_page_param)
+            )
+            statistics_teacher_rows = list(statistics_teacher_page.object_list)
+            statistics_teacher_pagination_query = statistics_base_query
+
+        if statistics_data.get("course_rankings"):
+            statistics_course_page = Paginator(statistics_data["course_rankings"], 8).get_page(
+                request.GET.get(statistics_course_page_param)
+            )
+            statistics_course_rows = list(statistics_course_page.object_list)
+            statistics_course_pagination_query = statistics_base_query
+
+        if statistics_data.get("group_comparison"):
+            statistics_group_page = Paginator(statistics_data["group_comparison"], 8).get_page(
+                request.GET.get(statistics_group_page_param)
+            )
+            statistics_group_rows = list(statistics_group_page.object_list)
+            statistics_group_pagination_query = statistics_base_query
+
+        if statistics_data.get("course_overview"):
+            statistics_teacher_course_page = Paginator(statistics_data["course_overview"], 8).get_page(
+                request.GET.get(statistics_teacher_course_page_param)
+            )
+            statistics_teacher_course_rows = list(statistics_teacher_course_page.object_list)
+            statistics_teacher_course_pagination_query = statistics_base_query
 
         # ── AI summary (AJAX) ─────────────────────────────────────
         if request.GET.get("stat_ai_summary") == "1" and statistics_data:
             from apps.accounts.services.statistics_selectors import build_ai_stats_payload
             from apps.exams.services.ai_summary import generate_exam_statistics_summary
 
-            role_label = "superadmin" if capabilities["is_superadmin"] else (
-                "org_admin" if capabilities["is_org_admin"] else (
-                    "teacher" if capabilities["is_teacher"] else "student"
+            role_label = (
+                "superadmin"
+                if capabilities["is_superadmin"]
+                else (
+                    "org_admin"
+                    if capabilities["is_org_admin"]
+                    else ("teacher" if capabilities["is_teacher"] else "student")
                 )
             )
             ai_payload = build_ai_stats_payload(role=role_label, stats=statistics_data)
@@ -1788,6 +1901,7 @@ def user_profile(request):
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
+        "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
         "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
         "change-password": pgettext_lazy("profile.section", "change_password"),
@@ -1914,6 +2028,7 @@ def user_profile(request):
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
         "superadmin_users_section": superadmin_users_section,
+        "superadmin_ai_settings_section": superadmin_ai_settings_section,
         "category_management_create_form": category_management_create_form,
         "category_management_edit_form": category_management_edit_form,
         "category_management_edit_item": category_management_edit_item,
@@ -1943,6 +2058,29 @@ def user_profile(request):
         "statistics_filters": statistics_filters,
         "statistics_courses": statistics_courses,
         "statistics_groups": statistics_groups,
+        "statistics_organizations": statistics_organizations,
+        "statistics_has_active_filters": statistics_has_active_filters,
+        "statistics_reset_url": statistics_reset_url,
+        "statistics_org_page": statistics_org_page,
+        "statistics_teacher_page": statistics_teacher_page,
+        "statistics_course_page": statistics_course_page,
+        "statistics_group_page": statistics_group_page,
+        "statistics_teacher_course_page": statistics_teacher_course_page,
+        "statistics_org_rows": statistics_org_rows,
+        "statistics_teacher_rows": statistics_teacher_rows,
+        "statistics_course_rows": statistics_course_rows,
+        "statistics_group_rows": statistics_group_rows,
+        "statistics_teacher_course_rows": statistics_teacher_course_rows,
+        "statistics_org_page_param": statistics_org_page_param,
+        "statistics_teacher_page_param": statistics_teacher_page_param,
+        "statistics_course_page_param": statistics_course_page_param,
+        "statistics_group_page_param": statistics_group_page_param,
+        "statistics_teacher_course_page_param": statistics_teacher_course_page_param,
+        "statistics_org_pagination_query": statistics_org_pagination_query,
+        "statistics_teacher_pagination_query": statistics_teacher_pagination_query,
+        "statistics_course_pagination_query": statistics_course_pagination_query,
+        "statistics_group_pagination_query": statistics_group_pagination_query,
+        "statistics_teacher_course_pagination_query": statistics_teacher_course_pagination_query,
     }
 
     return render(request, "accounts/profile.html", context)
@@ -1972,7 +2110,12 @@ def statistics_export_csv(request):
         "date_to": (request.GET.get("stat_date_to") or "").strip(),
         "course": (request.GET.get("stat_course") or "").strip() or None,
         "group": (request.GET.get("stat_group") or "").strip() or None,
-        "content_type": (request.GET.get("stat_content_type") or "all").strip(),
+        "content_type": (
+            (request.GET.get("stat_content_type") or "all").strip().lower()
+            if (request.GET.get("stat_content_type") or "all").strip().lower()
+            in {"all", "exam", "assignment", "lab", "project"}
+            else "all"
+        ),
         "organization": (request.GET.get("stat_organization") or "").strip() or None,
     }
 
@@ -1988,10 +2131,12 @@ def statistics_export_csv(request):
     output = io.StringIO()
     writer = csv.writer(output)
     summary = stats.get("summary", {})
-    writer.writerow([
-        str(pgettext_lazy("profile.statistics", "csv_header_metric")),
-        str(pgettext_lazy("profile.statistics", "csv_header_value")),
-    ])
+    writer.writerow(
+        [
+            str(pgettext_lazy("profile.statistics", "csv_header_metric")),
+            str(pgettext_lazy("profile.statistics", "csv_header_value")),
+        ]
+    )
     for key, value in summary.items():
         writer.writerow([key.replace("_", " ").title(), value])
 

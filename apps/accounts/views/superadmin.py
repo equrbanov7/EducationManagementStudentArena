@@ -32,6 +32,26 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+def build_superadmin_ai_settings_context():
+    """Return reusable context for the superadmin AI settings screen."""
+    from apps.exams.domain.ai_config import AIConfiguration
+    from apps.exams.services.ai_summary import _get_rate_limit
+    from core.rate_limit import parse_rate
+
+    config = AIConfiguration.load()
+    parsed = parse_rate(_get_rate_limit())
+
+    return {
+        "config": config,
+        "model_choices": AIConfiguration.MODEL_CHOICES,
+        "rate_info": {
+            "limit": parsed.limit if parsed else 0,
+            "window_seconds": parsed.window_seconds if parsed else 0,
+        },
+        "cost_estimates": _estimate_monthly_cost(config),
+    }
+
+
 def _notify_org_owner_of_approval(org, approved_by, *, approved: bool, reason: str = ""):
     """Send an in-app notification to the organization owner about approval outcome."""
     try:
@@ -256,6 +276,7 @@ def superadmin_ai_settings(request):
     from apps.exams.domain.ai_config import AIConfiguration
 
     config = AIConfiguration.load()
+    fallback_next_url = reverse("accounts:superadmin_ai_settings")
 
     if request.method == "POST":
         action = request.POST.get("action", "save")
@@ -278,27 +299,9 @@ def superadmin_ai_settings(request):
                 pgettext_lazy("accounts.superadmin_ai.message", "ai_settings_saved"),
             )
 
-        return redirect("accounts:superadmin_ai_settings")
+        return redirect(_resolve_next_url(request, fallback_next_url))
 
-    # Build quota info for all users from rate limit
-    from apps.exams.services.ai_summary import _get_rate_limit
-    from core.rate_limit import parse_rate
-
-    parsed = parse_rate(_get_rate_limit())
-    rate_info = {
-        "limit": parsed.limit if parsed else 0,
-        "window_seconds": parsed.window_seconds if parsed else 0,
-    }
-
-    # Cost estimates based on current model selection
-    cost_estimates = _estimate_monthly_cost(config)
-
-    context = {
-        "config": config,
-        "model_choices": AIConfiguration.MODEL_CHOICES,
-        "rate_info": rate_info,
-        "cost_estimates": cost_estimates,
-    }
+    context = build_superadmin_ai_settings_context()
     return render(request, "accounts/superadmin_ai_settings.html", context)
 
 

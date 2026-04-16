@@ -109,6 +109,84 @@ class ProfileViewTest(TestCase):
         self.assertIn("is_teacher", response.context)
         self.assertIn("is_admin", response.context)
 
+    def test_statistics_sidebar_link_forces_navigation(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-section="statistics"', html=False)
+        self.assertContains(response, 'data-force-navigation="true"', html=False)
+
+    def test_statistics_section_places_ai_panel_above_filters_and_uses_bootstrap_select(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="statsAiSummaryCard"', html=False)
+        self.assertContains(response, 'id="statsFilterForm"', html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
+
+        content = response.content.decode("utf-8")
+        self.assertLess(content.index('id="statsAiSummaryCard"'), content.index('id="statsFilterForm"'))
+
+    def test_statistics_section_uses_auto_submit_and_hides_reset_without_filters(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-stats-auto-submit="true"', html=False)
+        self.assertNotContains(response, 'id="statsFilterReset"', html=False)
+
+    def test_superadmin_statistics_shows_org_select_and_reset_when_filter_active(self):
+        superuser = User.objects.create_superuser(
+            username="stats_superadmin",
+            email="stats_superadmin@example.com",
+            password="adminpass123",
+        )
+        organization = Organization.objects.create(
+            name="Statistics Filter Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile") + f"?section=statistics&stat_organization={organization.id}"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="stat_organization"', html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertContains(response, 'id="statsFilterReset"', html=False)
+
+    def test_superadmin_statistics_org_table_uses_pagination(self):
+        superuser = User.objects.create_superuser(
+            username="stats_pagination_superadmin",
+            email="stats_pagination_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        for index in range(9):
+            Organization.objects.create(
+                name=f"Statistics Org {index}",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=superuser,
+                status="active",
+                is_active=True,
+            )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="statsOrgTable"', html=False)
+        self.assertContains(response, "stats_org_page=2")
+
     def test_profile_edit_section(self):
         """Test that edit-profile section renders form with save button."""
         self.client.login(username="testuser", password="testpass123")
@@ -1714,6 +1792,68 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, f'{reverse("accounts:profile")}?section=superadmin-users')
         self.assertContains(response, 'data-section="superadmin-users"', html=False)
         self.assertContains(response, 'data-profile-section-panel="superadmin-users"', html=False)
+
+    def test_superadmin_profile_shows_ai_settings_as_inline_section(self):
+        superuser = User.objects.create_superuser(
+            username="ai_inline_superadmin",
+            email="ai_inline_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'{reverse("accounts:profile")}?section=superadmin-ai')
+        self.assertContains(response, 'data-section="superadmin-ai"', html=False)
+        self.assertContains(response, 'data-profile-section-panel="superadmin-ai"', html=False)
+
+    def test_superadmin_ai_settings_section_renders_inside_profile(self):
+        superuser = User.objects.create_superuser(
+            username="ai_section_superadmin",
+            email="ai_section_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile") + "?section=superadmin-ai")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_section"], "superadmin-ai")
+        self.assertContains(response, 'data-profile-section-panel="superadmin-ai"', html=False)
+        self.assertContains(
+            response,
+            f'name="next" value="{reverse("accounts:profile")}?section=superadmin-ai"',
+            html=False,
+        )
+
+    def test_superadmin_ai_settings_post_respects_next_redirect(self):
+        superuser = User.objects.create_superuser(
+            username="ai_post_superadmin",
+            email="ai_post_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.post(
+            reverse("accounts:superadmin_ai_settings"),
+            {
+                "action": "save",
+                "enabled": "on",
+                "rate_limit": "120/1h",
+                "summary_model": "gemini-2.5-flash",
+                "grading_model": "gemini-2.5-flash-lite",
+                "monthly_budget": "8.50",
+                "next": f'{reverse("accounts:profile")}?section=superadmin-ai',
+            },
+            follow=False,
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("accounts:profile") + "?section=superadmin-ai",
+            fetch_redirect_response=False,
+        )
 
     def test_superadmin_user_management_filters_blocked_users_by_role_and_group(self):
         superuser = User.objects.create_superuser(
