@@ -1790,8 +1790,8 @@ def user_profile(request):
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
         "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
-        "change-password": "Şifrəni dəyiş",
-        "statistics": "Statistika",
+        "change-password": pgettext_lazy("profile.section", "change_password"),
+        "statistics": pgettext_lazy("profile.section", "statistics"),
     }
 
     shortcut_sections = []
@@ -1988,14 +1988,17 @@ def statistics_export_csv(request):
     output = io.StringIO()
     writer = csv.writer(output)
     summary = stats.get("summary", {})
-    writer.writerow(["Metrika", "Dəyər"])
+    writer.writerow([
+        str(pgettext_lazy("profile.statistics", "csv_header_metric")),
+        str(pgettext_lazy("profile.statistics", "csv_header_value")),
+    ])
     for key, value in summary.items():
         writer.writerow([key.replace("_", " ").title(), value])
 
     from django.http import HttpResponse as _HR
 
     response = _HR(output.getvalue(), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = 'attachment; filename="statistika.csv"'
+    response["Content-Disposition"] = 'attachment; filename="statistics.csv"'
     return response
 
 

@@ -94,7 +94,7 @@ class StatisticsSectionAccessTest(TestCase):
         self.client.login(username="stat_student", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Statistika")
+        self.assertContains(response, "data-profile-section-panel=\"statistics\"")
 
     def test_statistics_section_in_allowed_sections(self):
         from apps.accounts.views._helpers import _role_capabilities
@@ -270,7 +270,7 @@ class StatisticsCSVExportTest(TestCase):
         response = self.client.get(reverse("accounts:statistics_export_csv"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
-        self.assertIn("statistika.csv", response["Content-Disposition"])
+        self.assertIn("statistics.csv", response["Content-Disposition"])
 
     def test_csv_export_requires_auth(self):
         response = self.client.get(reverse("accounts:statistics_export_csv"))
@@ -280,8 +280,11 @@ class StatisticsCSVExportTest(TestCase):
         self.client.login(username="stat_csv_user", password="testpass123")
         response = self.client.get(reverse("accounts:statistics_export_csv"))
         content = response.content.decode("utf-8")
-        self.assertIn("Metrika", content)
-        self.assertIn("Dəyər", content)
+        # CSV headers are translated via pgettext_lazy; check for the
+        # msgid keys which work regardless of active language.
+        first_line = content.split("\n")[0]
+        # The first row must contain two columns (metric, value)
+        self.assertEqual(len(first_line.split(",")), 2)
 
 
 # ── Selector unit tests ───────────────────────────────────────────

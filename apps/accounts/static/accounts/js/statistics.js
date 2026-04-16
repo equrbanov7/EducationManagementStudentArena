@@ -2,7 +2,8 @@
  * Statistics section — Chart.js rendering, AI summary, table sorting/search.
  *
  * Reads window.STATS_DATA (set by the inline <script> in the template)
- * and builds all charts + interactive features.
+ * and window.STATS_I18N (translated labels from template) to build all
+ * charts + interactive features.
  */
 document.addEventListener("DOMContentLoaded", function () {
     "use strict";
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var data = window.STATS_DATA;
     if (!data || !data.summary) return;
 
+    var i18n = window.STATS_I18N || {};
     var role = data.role || "student";
     var COLORS = {
         primary: "#0d6efd",
@@ -38,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             data: {
                 labels: data.trend.labels,
                 datasets: [{
-                    label: role === "student" ? "Orta bal (%)" : "Təqdimlər",
+                    label: role === "student" ? (i18n.avg_score_pct || "Avg score (%)") : (i18n.submissions || "Submissions"),
                     data: data.trend.values,
                     borderColor: COLORS.primary,
                     backgroundColor: "rgba(13,110,253,0.1)",
@@ -64,11 +66,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (breakdownCtx) {
         var bLabels, bData, bColors;
         if (role === "student" && data.summary) {
-            bLabels = ["Keçənlər", "Qalan"];
+            bLabels = [i18n.passed || "Passed", i18n.failed || "Failed"];
             bData = [data.summary.pass_count || 0, data.summary.fail_count || 0];
             bColors = [COLORS.success, COLORS.danger];
         } else {
-            bLabels = ["İmtahan", "Tapşırıq", "Lab", "Layihə"];
+            bLabels = [
+                i18n.exam || "Exam",
+                i18n.assignment || "Assignment",
+                i18n.lab || "Lab",
+                i18n.project || "Project"
+            ];
             bData = [
                 data.summary.total_attempts || data.summary.total_exams || 0,
                 data.summary.assignment_total || 0,
@@ -103,15 +110,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (role === "superadmin" && data.org_comparison) {
             cLabels = data.org_comparison.map(function(o) { return o.name.substring(0, 20); });
             cData = data.org_comparison.map(function(o) { return o.members; });
-            cLabel = "Üzvlər";
+            cLabel = i18n.members || "Members";
         } else if (role === "org_admin" && data.course_rankings) {
             cLabels = data.course_rankings.map(function(c) { return (c.course__title || "").substring(0, 20); });
             cData = data.course_rankings.map(function(c) { return c.student_count; });
-            cLabel = "Tələbə sayı";
+            cLabel = i18n.student_count || "Student count";
         } else if (role === "teacher" && data.group_comparison) {
             cLabels = data.group_comparison.map(function(g) { return g.name.substring(0, 20); });
             cData = data.group_comparison.map(function(g) { return g.avg_score; });
-            cLabel = "Orta bal (%)";
+            cLabel = i18n.avg_score || "Avg score (%)";
         }
         if (cLabels.length) {
             new Chart(compCtx, {
@@ -138,7 +145,12 @@ document.addEventListener("DOMContentLoaded", function () {
     /* ── Grading status stacked bar (teacher / org admin / superadmin) */
     var gradingCtx = getCtx("statsGradingChart");
     if (gradingCtx) {
-        var gLabels = ["İmtahan", "Tapşırıq", "Lab", "Layihə"];
+        var gLabels = [
+            i18n.exam || "Exam",
+            i18n.assignment || "Assignment",
+            i18n.lab || "Lab",
+            i18n.project || "Project"
+        ];
         var gGraded, gPending;
         var s = data.summary;
         if (role === "teacher") {
@@ -163,8 +175,8 @@ document.addEventListener("DOMContentLoaded", function () {
             data: {
                 labels: gLabels,
                 datasets: [
-                    { label: "Qiymətləndirilmiş", data: gGraded, backgroundColor: COLORS.success },
-                    { label: "Gözləyən", data: gPending, backgroundColor: COLORS.warning },
+                    { label: i18n.graded || "Graded", data: gGraded, backgroundColor: COLORS.success },
+                    { label: i18n.pending || "Pending", data: gPending, backgroundColor: COLORS.warning },
                 ],
             },
             options: {
@@ -183,9 +195,14 @@ document.addEventListener("DOMContentLoaded", function () {
         new Chart(contentCtx, {
             type: "bar",
             data: {
-                labels: ["İmtahan", "Tapşırıq", "Lab", "Layihə"],
+                labels: [
+                    i18n.exam || "Exam",
+                    i18n.assignment || "Assignment",
+                    i18n.lab || "Lab",
+                    i18n.project || "Project"
+                ],
                 datasets: [{
-                    label: "Orta bal (%)",
+                    label: i18n.avg_score_pct || "Avg score (%)",
                     data: [sb.exam_avg || 0, sb.assignment_avg || 0, sb.lab_avg || 0, sb.project_avg || 0],
                     backgroundColor: [COLORS.primary, COLORS.success, COLORS.warning, COLORS.info],
                 }],
@@ -249,7 +266,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (aiBtn && aiCard && aiBody) {
         aiBtn.addEventListener("click", function () {
             aiCard.classList.remove("d-none");
-            aiBody.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> <span class="ms-2 text-muted">AI xülasə hazırlanır...</span></div>';
+            var loadingMsg = i18n.ai_loading || "AI summary is loading...";
+            aiBody.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> <span class="ms-2 text-muted">' + loadingMsg + '</span></div>';
 
             var params = new URLSearchParams(window.location.search);
             params.set("section", "statistics");
@@ -264,14 +282,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (json.ok && json.summary) {
                     aiBody.innerHTML = '<div class="ai-summary-content">' + _mdToHtml(json.summary) + '</div>';
                     if (json.remaining !== undefined) {
-                        aiBody.innerHTML += '<div class="text-muted small mt-2">Qalan sorğu: ' + json.remaining + '/' + (json.limit || '?') + '</div>';
+                        var remainingLabel = i18n.ai_remaining || "Remaining requests";
+                        aiBody.innerHTML += '<div class="text-muted small mt-2">' + remainingLabel + ': ' + json.remaining + '/' + (json.limit || '?') + '</div>';
                     }
                 } else {
-                    aiBody.innerHTML = '<div class="alert alert-warning mb-0">' + (json.error || "AI xülasə alınmadı.") + '</div>';
+                    var notReceivedMsg = i18n.ai_not_received || "AI summary could not be received.";
+                    aiBody.innerHTML = '<div class="alert alert-warning mb-0">' + (json.error || notReceivedMsg) + '</div>';
                 }
             })
             .catch(function () {
-                aiBody.innerHTML = '<div class="alert alert-danger mb-0">AI sorğusu zamanı xəta baş verdi.</div>';
+                var errorMsg = i18n.ai_error || "An error occurred during the AI request.";
+                aiBody.innerHTML = '<div class="alert alert-danger mb-0">' + errorMsg + '</div>';
             });
         });
 
