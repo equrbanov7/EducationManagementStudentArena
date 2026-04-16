@@ -6,6 +6,12 @@
     padding: 1.5rem;
 }
 
+.ai-settings-container--embedded {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
 .ai-settings-header {
     display: flex;
     align-items: center;

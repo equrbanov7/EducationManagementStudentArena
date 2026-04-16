@@ -77,6 +77,7 @@
             <a href="{{ profile_base_url }}?section=statistics"
                data-section="statistics"
                data-title="{% trans 'statistics' context 'profile.section' %}"
+               data-force-navigation="true"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'statistics' %}active{% endif %}">
                 <i class="fas fa-chart-bar sidebar-menu-icon"></i>
@@ -382,8 +383,11 @@
             </a>
         </li>
         <li class="sidebar-menu-item">
-            <a href="{% url 'accounts:superadmin_ai_settings' %}"
-               class="sidebar-menu-link {% if active_section == 'superadmin-ai' %}active{% endif %}">
+            <a href="{{ profile_base_url }}?section=superadmin-ai"
+               data-section="superadmin-ai"
+               data-title="{% trans 'title' context 'superadmin.ai_settings' %}"
+               data-source-url="{% url 'accounts:superadmin_ai_settings' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-ai' %}active{% endif %}">
                 <i class="fas fa-robot sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "ai_settings" context "profile.sidebar" %}</span>
             </a>

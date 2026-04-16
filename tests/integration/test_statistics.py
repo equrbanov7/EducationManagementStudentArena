@@ -17,8 +17,6 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole, UserProfile
-from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAttempt
 from apps.organizations.models import Membership, Organization, Role
 from apps.organizations.signals import create_default_roles
 from core.constants import OrganizationType, RoleScopeType
@@ -79,9 +77,7 @@ class StatisticsSectionAccessTest(TestCase):
     """Verify the statistics section is accessible to all authenticated roles."""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="stat_student", email="stat@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="stat_student", email="stat@test.com", password="testpass123")
         self.org = _make_org("Stat Org", "stat-org", self.user)
         role = _make_role(self.org)
         _assign(self.user, self.org, role, ProfileRole.STUDENT)
@@ -94,7 +90,7 @@ class StatisticsSectionAccessTest(TestCase):
         self.client.login(username="stat_student", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "data-profile-section-panel=\"statistics\"")
+        self.assertContains(response, 'data-profile-section-panel="statistics"')
 
     def test_statistics_section_in_allowed_sections(self):
         from apps.accounts.views._helpers import _role_capabilities
@@ -156,12 +152,8 @@ class StatisticsTenantIsolationTest(TestCase):
     """Ensure students in Org A do not see data from Org B."""
 
     def setUp(self):
-        self.user_a = User.objects.create_user(
-            username="tenant_a_stat", email="ta_stat@a.com", password="testpass123"
-        )
-        self.user_b = User.objects.create_user(
-            username="tenant_b_stat", email="tb_stat@b.com", password="testpass123"
-        )
+        self.user_a = User.objects.create_user(username="tenant_a_stat", email="ta_stat@a.com", password="testpass123")
+        self.user_b = User.objects.create_user(username="tenant_b_stat", email="tb_stat@b.com", password="testpass123")
         self.org_a = _make_org("Org A Stat", "org-a-stat", self.user_a)
         self.org_b = _make_org("Org B Stat", "org-b-stat", self.user_b)
 
@@ -212,9 +204,7 @@ class StatisticsFilterTest(TestCase):
 
     def test_content_type_filter(self):
         self.client.login(username="stat_filter_user", password="testpass123")
-        response = self.client.get(
-            reverse("accounts:profile") + "?section=statistics&stat_content_type=exam"
-        )
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics&stat_content_type=exam")
         self.assertEqual(response.status_code, 200)
 
 
@@ -225,9 +215,7 @@ class StatisticsAIEndpointTest(TestCase):
     """Verify AI summary endpoint within the statistics section."""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="stat_ai_user", email="ai@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="stat_ai_user", email="ai@test.com", password="testpass123")
         self.org = _make_org("AI Org", "ai-org", self.user)
         role = _make_role(self.org)
         _assign(self.user, self.org, role, ProfileRole.STUDENT)
@@ -245,9 +233,7 @@ class StatisticsAIEndpointTest(TestCase):
         self.assertFalse(data.get("ok", True))
 
     def test_ai_endpoint_requires_auth(self):
-        response = self.client.get(
-            reverse("accounts:profile") + "?section=statistics&stat_ai_summary=1"
-        )
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics&stat_ai_summary=1")
         self.assertEqual(response.status_code, 302)
 
 
@@ -258,9 +244,7 @@ class StatisticsCSVExportTest(TestCase):
     """Verify CSV export endpoint."""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="stat_csv_user", email="csv@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="stat_csv_user", email="csv@test.com", password="testpass123")
         self.org = _make_org("CSV Org", "csv-org", self.user)
         role = _make_role(self.org)
         _assign(self.user, self.org, role, ProfileRole.STUDENT)
@@ -294,9 +278,7 @@ class StatisticsSelectorsTest(TestCase):
     """Unit tests for statistics_selectors functions."""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="sel_test_user", email="sel@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="sel_test_user", email="sel@test.com", password="testpass123")
         self.org = _make_org("Selector Org", "sel-org", self.user)
 
     def test_student_statistics_returns_expected_keys(self):
