@@ -667,7 +667,11 @@ def get_superadmin_statistics(*, filters=None):
         checked=Count("id", filter=Q(checked_by_teacher=True)),
     )
 
-    total_exams = Exam.objects.filter(**{k.replace("exam__", ""): v for k, v in exam_filter.items()}).count() if exam_filter else Exam.objects.count()
+    if exam_filter:
+        exam_qs_filter = {k.replace("exam__", ""): v for k, v in exam_filter.items()}
+        total_exams = Exam.objects.filter(**exam_qs_filter).count()
+    else:
+        total_exams = Exam.objects.count()
     total_courses = Course.objects.filter(**course_filter).count() if course_filter else Course.objects.count()
 
     # ── Assignments ───────────────────────────────────────────────
