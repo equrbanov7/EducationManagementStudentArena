@@ -78,6 +78,7 @@ from ._helpers import (
     _tenant_scoped_exams,
     _user_has_any_role,
 )
+from .account_management import build_superadmin_user_management_context
 
 User = get_user_model()
 PUBLIC_PROFILE_SEARCH_MAX_LENGTH = 100
@@ -665,9 +666,6 @@ def user_profile(request):
             profile.student_school_identifier = student_school_identifier
 
             # Update enhanced profile fields
-            new_org_type = (request.POST.get("organization_type") or "").strip()
-            if new_org_type and new_org_type in {"individual", "school", "university", "course_center"}:
-                profile.organization_type = new_org_type
             profile.student_specialization = (
                 request.POST.get("student_specialization", profile.student_specialization) or ""
             ).strip()
@@ -1001,7 +999,9 @@ def user_profile(request):
     pending_post_approval_search_query = ""
     pending_post_approval_filter_status = "pending"
     pending_post_approval_filter_group = ""
+    pending_post_approval_filter_organization = ""
     pending_post_approval_available_groups = []
+    pending_post_approval_available_organizations = []
     pending_post_approval_page_obj = None
     pending_post_approval_pagination_query = ""
     if "pending-post-approvals" in allowed_sections:
@@ -1011,11 +1011,14 @@ def user_profile(request):
             pending_post_approval_filter_status,
             pending_post_approval_filter_group,
             pending_post_approval_available_groups,
+            pending_post_approval_filter_organization,
+            pending_post_approval_available_organizations,
         ) = collect_reviewable_posts(
             request.user,
             search=request.GET.get("approval_search"),
             status=request.GET.get("approval_status"),
             group_id=request.GET.get("approval_group"),
+            organization_id=request.GET.get("approval_organization"),
         )
         pending_post_approval_count = count_pending_reviewable_posts(request.user)
         pending_post_approval_page_obj = Paginator(pending_post_approval_items, 10).get_page(
@@ -1029,6 +1032,8 @@ def user_profile(request):
             extra.append(f"approval_status={pending_post_approval_filter_status}")
         if pending_post_approval_filter_group:
             extra.append(f"approval_group={pending_post_approval_filter_group}")
+        if pending_post_approval_filter_organization:
+            extra.append(f"approval_organization={pending_post_approval_filter_organization}")
         pending_post_approval_pagination_query = "&".join(extra)
 
     pending_review_items = []
@@ -1167,6 +1172,31 @@ def user_profile(request):
         "access_denied_message": "",
         "profiles_page_param": "manage_roles_page",
         "profiles_pagination_query": "",
+    }
+    superadmin_users_section = {
+        "users": [],
+        "user_rows": [],
+        "status_tabs": [],
+        "role_options": [],
+        "organization_options": [],
+        "sort_options": [],
+        "search_query": "",
+        "status_filter": "all",
+        "role_filter": "",
+        "organization_filter": "",
+        "group_filter": "",
+        "department_filter": "",
+        "sort_filter": "newest",
+        "pagination_query": "",
+        "page_param": "user_page",
+        "post_next_url": "",
+        "reset_url": "",
+        "filtered_count": 0,
+        "total_count": 0,
+        "active_count": 0,
+        "blocked_count": 0,
+        "deleted_count": 0,
+        "embedded_in_profile": True,
     }
     superadmin_organizations_section = {
         "organizations": [],
@@ -1504,6 +1534,15 @@ def user_profile(request):
         )
         superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 
+    if "superadmin-users" in allowed_sections:
+        superadmin_users_section.update(
+            build_superadmin_user_management_context(
+                request,
+                base_url=reverse("accounts:profile"),
+                include_section=True,
+            )
+        )
+
     # InAppNotification data for profile notifications section
     notif_filter = request.GET.get("notif_filter", "all")
     if notif_filter not in ("all", "unread", "read"):
@@ -1664,6 +1703,7 @@ def user_profile(request):
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
+        "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
         "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
         "change-password": "Şifrəni dəyiş",
@@ -1747,7 +1787,9 @@ def user_profile(request):
         "pending_post_approval_search_query": pending_post_approval_search_query,
         "pending_post_approval_filter_status": pending_post_approval_filter_status,
         "pending_post_approval_filter_group": pending_post_approval_filter_group,
+        "pending_post_approval_filter_organization": pending_post_approval_filter_organization,
         "pending_post_approval_available_groups": pending_post_approval_available_groups,
+        "pending_post_approval_available_organizations": pending_post_approval_available_organizations,
         "pending_post_approval_page_obj": pending_post_approval_page_obj,
         "pending_post_approval_pagination_query": pending_post_approval_pagination_query,
         "pending_review_items": pending_review_page_obj or pending_review_items,
@@ -1786,6 +1828,7 @@ def user_profile(request):
         "student_org_management_section": student_org_management_section,
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
+        "superadmin_users_section": superadmin_users_section,
         "category_management_create_form": category_management_create_form,
         "category_management_edit_form": category_management_edit_form,
         "category_management_edit_item": category_management_edit_item,

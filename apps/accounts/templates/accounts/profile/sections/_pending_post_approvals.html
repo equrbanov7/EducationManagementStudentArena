@@ -31,6 +31,21 @@
                         </select>
                     </div>
 
+                    {% if pending_post_approval_available_organizations %}
+                    <div class="bootstrap-single-select pending-review-select-wrap">
+                        <select name="approval_organization"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select>
+                            <option value="">Bütün təşkilatlar</option>
+                            {% for organization in pending_post_approval_available_organizations %}
+                                <option value="{{ organization.id }}" {% if pending_post_approval_filter_organization == organization.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ organization.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
                     <div class="bootstrap-single-select pending-review-select-wrap">
                         <select name="approval_group"
                                 class="form-select bootstrap-single-select__native js-bootstrap-single-select"
@@ -81,6 +96,9 @@
                                 <span><i class="fas fa-user"></i> {{ item.author_name }}</span>
                                 {% if item.post.category %}
                                     <span><i class="fas fa-tag"></i> {{ item.post.category.localized_name }}</span>
+                                {% endif %}
+                                {% if item.organization_names %}
+                                    <span><i class="fas fa-building"></i> {{ item.organization_names|join:", " }}</span>
                                 {% endif %}
                                 {% if item.group_names %}
                                     <span><i class="fas fa-users"></i> {{ item.group_names|join:", " }}</span>

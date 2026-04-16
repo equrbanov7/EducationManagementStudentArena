@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from .models import Category, Post, Subscriber
 from .selectors import invalidate_blog_listing_cache
+from .services import author_requires_superadmin_post_review
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,11 @@ def _get_reviewers_for_post(post):
     return list(User.objects.filter(pk__in=reviewer_user_ids, is_active=True))
 
 
+def _get_superadmin_reviewers():
+    User = get_user_model()
+    return list(User.objects.filter(is_active=True, is_superuser=True))
+
+
 @receiver(post_save, sender=Post)
 def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
     """Notify the post's reviewer(s) when approval_status transitions to PENDING."""
@@ -75,7 +81,10 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
         from apps.notifications.models import NotificationType
         from apps.notifications.services import create_notification_for_users
 
-        reviewers = _get_reviewers_for_post(instance)
+        if author_requires_superadmin_post_review(instance.author):
+            reviewers = _get_superadmin_reviewers()
+        else:
+            reviewers = _get_reviewers_for_post(instance)
         if not reviewers:
             return
 

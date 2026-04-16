@@ -69,6 +69,13 @@ class RegisterViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["form"].fields["organization_type"].initial, "")
 
+    def test_register_page_hides_individual_account_card(self):
+        response = self.client.get(self.register_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'data-org-type="individual"', html=False)
+        self.assertContains(response, 'data-org-type="university"', html=False)
+
     def test_register_creates_user_and_profile(self):
         """Registration should stay pending until OTP verification completes."""
         response = self.client.post(
