@@ -18774,3 +18774,307 @@ msgstr "Loading..."
 msgctxt "exams.template.teacher_exam_results"
 msgid "loading"
 msgstr "Loading..."
+
+#
+# ── Statistics profile section (profile.statistics) ────────────
+#
+
+msgctxt "profile.section"
+msgid "statistics"
+msgstr "Statistics"
+
+msgctxt "profile.section"
+msgid "change_password"
+msgstr "Change password"
+
+msgctxt "profile.sidebar"
+msgid "statistics"
+msgstr "Statistics"
+
+msgctxt "profile.statistics"
+msgid "section_not_available"
+msgstr "This section is not available to you."
+
+msgctxt "profile.statistics"
+msgid "filter_date_from"
+msgstr "From"
+
+msgctxt "profile.statistics"
+msgid "filter_date_to"
+msgstr "To"
+
+msgctxt "profile.statistics"
+msgid "filter_course"
+msgstr "Course"
+
+msgctxt "profile.statistics"
+msgid "filter_all"
+msgstr "All"
+
+msgctxt "profile.statistics"
+msgid "filter_group"
+msgstr "Group"
+
+msgctxt "profile.statistics"
+msgid "filter_organization_id"
+msgstr "Organization ID"
+
+msgctxt "profile.statistics"
+msgid "filter_content_type"
+msgstr "Content type"
+
+msgctxt "profile.statistics"
+msgid "content_exam"
+msgstr "Exam"
+
+msgctxt "profile.statistics"
+msgid "content_assignment"
+msgstr "Assignment"
+
+msgctxt "profile.statistics"
+msgid "content_lab"
+msgstr "Lab"
+
+msgctxt "profile.statistics"
+msgid "content_project"
+msgstr "Project"
+
+msgctxt "profile.statistics"
+msgid "filter_apply"
+msgstr "Filter"
+
+msgctxt "profile.statistics"
+msgid "no_data_found"
+msgstr "No statistics data found"
+
+msgctxt "profile.statistics"
+msgid "no_data_hint"
+msgstr "You can change filters or there is no data for this account yet."
+
+msgctxt "profile.statistics"
+msgid "card_organizations"
+msgstr "Organizations"
+
+msgctxt "profile.statistics"
+msgid "card_users"
+msgstr "Users"
+
+msgctxt "profile.statistics"
+msgid "card_courses"
+msgstr "Courses"
+
+msgctxt "profile.statistics"
+msgid "card_exam_attempts"
+msgstr "Exam attempts"
+
+msgctxt "profile.statistics"
+msgid "card_exams"
+msgstr "Exams"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_submissions"
+msgstr "Assignment submissions"
+
+msgctxt "profile.statistics"
+msgid "card_lab_submissions"
+msgstr "Lab submissions"
+
+msgctxt "profile.statistics"
+msgid "card_project_submissions"
+msgstr "Project submissions"
+
+msgctxt "profile.statistics"
+msgid "card_members"
+msgstr "Members"
+
+msgctxt "profile.statistics"
+msgid "card_teachers"
+msgstr "Teachers"
+
+msgctxt "profile.statistics"
+msgid "card_students"
+msgstr "Students"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_graded"
+msgstr "Assignment (graded)"
+
+msgctxt "profile.statistics"
+msgid "card_late_submissions"
+msgstr "Late submissions"
+
+msgctxt "profile.statistics"
+msgid "card_my_courses"
+msgstr "My courses"
+
+msgctxt "profile.statistics"
+msgid "card_avg_score"
+msgstr "Average score"
+
+msgctxt "profile.statistics"
+msgid "card_pass_rate"
+msgstr "Pass rate"
+
+msgctxt "profile.statistics"
+msgid "card_checked"
+msgstr "Checked"
+
+msgctxt "profile.statistics"
+msgid "unit_days"
+msgstr "days"
+
+msgctxt "profile.statistics"
+msgid "card_avg_grading_time"
+msgstr "Avg. grading time"
+
+msgctxt "profile.statistics"
+msgid "card_late_assignments"
+msgstr "Late assignments"
+
+msgctxt "profile.statistics"
+msgid "card_total_tasks"
+msgstr "Total tasks"
+
+msgctxt "profile.statistics"
+msgid "card_pending"
+msgstr "Pending"
+
+msgctxt "profile.statistics"
+msgid "card_assignments"
+msgstr "Assignments"
+
+msgctxt "profile.statistics"
+msgid "card_labs"
+msgstr "Labs"
+
+msgctxt "profile.statistics"
+msgid "card_ontime_late"
+msgstr "On time / Late"
+
+msgctxt "profile.statistics"
+msgid "chart_trend"
+msgstr "Trend"
+
+msgctxt "profile.statistics"
+msgid "chart_breakdown"
+msgstr "Breakdown"
+
+msgctxt "profile.statistics"
+msgid "chart_org_comparison"
+msgstr "Organization comparison"
+
+msgctxt "profile.statistics"
+msgid "chart_course_ranking"
+msgstr "Course ranking"
+
+msgctxt "profile.statistics"
+msgid "chart_group_comparison"
+msgstr "Group comparison"
+
+msgctxt "profile.statistics"
+msgid "chart_grading_status"
+msgstr "Grading status"
+
+msgctxt "profile.statistics"
+msgid "chart_avg_by_content"
+msgstr "Average score by content"
+
+msgctxt "profile.statistics"
+msgid "card_live_exam"
+msgstr "Live exam"
+
+msgctxt "profile.statistics"
+msgid "live_total_answers"
+msgstr "Total answers"
+
+msgctxt "profile.statistics"
+msgid "live_correct"
+msgstr "Correct"
+
+msgctxt "profile.statistics"
+msgid "live_accuracy"
+msgstr "Accuracy"
+
+msgctxt "profile.statistics"
+msgid "table_search"
+msgstr "Search..."
+
+msgctxt "profile.statistics"
+msgid "table_name"
+msgstr "Name"
+
+msgctxt "profile.statistics"
+msgid "table_attempts"
+msgstr "Attempts"
+
+msgctxt "profile.statistics"
+msgid "table_course_ranking_title"
+msgstr "Course ranking (by student count)"
+
+msgctxt "profile.statistics"
+msgid "table_student_count"
+msgstr "Student count"
+
+msgctxt "profile.statistics"
+msgid "table_student"
+msgstr "Student"
+
+msgctxt "profile.statistics"
+msgid "table_pass_pct"
+msgstr "Pass %"
+
+msgctxt "profile.statistics"
+msgid "btn_csv_export"
+msgstr "CSV Export"
+
+msgctxt "profile.statistics"
+msgid "btn_ai_summary"
+msgstr "AI Summary"
+
+msgctxt "profile.statistics"
+msgid "ai_analysis"
+msgstr "AI Analysis"
+
+msgctxt "profile.statistics"
+msgid "ai_loading"
+msgstr "AI summary is loading..."
+
+msgctxt "profile.statistics"
+msgid "csv_header_metric"
+msgstr "Metric"
+
+msgctxt "profile.statistics"
+msgid "csv_header_value"
+msgstr "Value"
+
+msgctxt "profile.statistics"
+msgid "js_avg_score_pct"
+msgstr "Avg score (%)"
+
+msgctxt "profile.statistics"
+msgid "js_submissions"
+msgstr "Submissions"
+
+msgctxt "profile.statistics"
+msgid "js_passed"
+msgstr "Passed"
+
+msgctxt "profile.statistics"
+msgid "js_failed"
+msgstr "Failed"
+
+msgctxt "profile.statistics"
+msgid "js_graded"
+msgstr "Graded"
+
+msgctxt "profile.statistics"
+msgid "ai_not_received"
+msgstr "AI summary could not be received."
+
+msgctxt "profile.statistics"
+msgid "ai_error"
+msgstr "An error occurred during the AI request."
+
+msgctxt "profile.statistics"
+msgid "ai_remaining"
+msgstr "Remaining requests"
