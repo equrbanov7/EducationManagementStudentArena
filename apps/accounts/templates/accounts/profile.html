@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
@@ -50,6 +51,7 @@
             {% include "accounts/profile/sections/_create_category.html" %}
             {% include "accounts/profile/sections/_category_management.html" %}
             {% include "accounts/profile/sections/_superadmin_organizations.html" %}
+            {% include "accounts/profile/sections/_superadmin_user_management.html" %}
             {% include "accounts/profile/sections/_edit_profile.html" %}
             {% include "accounts/profile/sections/_change_password.html" %}
             {% include "accounts/profile/sections/_delete_account.html" %}
@@ -102,6 +104,7 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 <script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor_ui.js' %}"></script>
 <script src="{% static 'accounts/js/manage_roles.js' %}"></script>
+<script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
 <script src="{% static 'js/post_category_picker.js' %}"></script>
 <script src="{% static 'js/user_profile.js' %}"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}"></script>
