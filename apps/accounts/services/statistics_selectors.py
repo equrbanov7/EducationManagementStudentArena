@@ -84,7 +84,6 @@ def get_student_statistics(user, *, organization=None, filters=None):
     from apps.courses.models import CourseMembership
     from apps.exams.models import ExamAttempt
     from apps.labs.models import LabSubmission
-    from apps.live_exam.models import LiveAnswer, LivePlayer
     from apps.projects.models import ProjectSubmission
 
     filters = filters or {}
@@ -105,21 +104,21 @@ def get_student_statistics(user, *, organization=None, filters=None):
             "id",
             "exam__title",
             "exam__exam_type",
-            "exam__max_score",
+            "exam__default_question_points",
             "correct_count",
             "wrong_count",
             "teacher_score",
             "status",
             "started_at",
-            "completed_at",
+            "finished_at",
             "checked_by_teacher",
         )
     )
 
     def _exam_pct(a):
         if a["exam__exam_type"] == "written":
-            ms = float(a["exam__max_score"] or 0)
-            return round(float(a["teacher_score"] or 0) * 100 / ms, 1) if ms else 0
+            # Written exams use teacher_score directly; no max_score on model
+            return float(a["teacher_score"] or 0)
         total = (a["correct_count"] or 0) + (a["wrong_count"] or 0)
         return round((a["correct_count"] or 0) * 100 / total, 1) if total else 0
 
@@ -194,22 +193,26 @@ def get_student_statistics(user, *, organization=None, filters=None):
     ]
 
     # ── Live exams ────────────────────────────────────────────────
-    live_players = LivePlayer.objects.filter(
-        session__state="finished",
-    )
-    # Filter by nickname containing username (players are semi-anonymous)
-    live_answers = LiveAnswer.objects.filter(
-        player__in=live_players,
-    )
-    if organization:
-        live_answers = live_answers.filter(session__exam__organization=organization)
-    live_answers = _apply_date_filter(live_answers, "session__created_at", date_from, date_to)
-    live_stats = live_answers.aggregate(
-        total=Count("id"),
-        correct=Count("id", filter=Q(is_correct=True)),
-    )
-    live_total = live_stats["total"] or 0
-    live_correct = live_stats["correct"] or 0
+    # LivePlayer does not have a user FK — players are semi-anonymous
+    # (identified by nickname + client_id). We cannot reliably tie live
+    # exam answers to a specific user, so we report aggregate stats
+    # for the organization only (not user-specific).
+    live_total = 0
+    live_correct = 0
+    try:
+        from apps.live_exam.models import LiveAnswer
+        live_qs = LiveAnswer.objects.filter(session__state="finished")
+        if organization:
+            live_qs = live_qs.filter(session__exam__organization=organization)
+        live_qs = _apply_date_filter(live_qs, "session__created_at", date_from, date_to)
+        live_stats = live_qs.aggregate(
+            total=Count("id"),
+            correct=Count("id", filter=Q(is_correct=True)),
+        )
+        live_total = live_stats["total"] or 0
+        live_correct = live_stats["correct"] or 0
+    except Exception:
+        pass
 
     # ── Aggregate all scores ──────────────────────────────────────
     all_scores = []
@@ -353,7 +356,7 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
     scored_attempts = list(
         attempts.filter(status__in=["submitted", "expired"]).values(
             "exam__exam_type",
-            "exam__max_score",
+            "exam__default_question_points",
             "correct_count",
             "wrong_count",
             "teacher_score",
@@ -362,8 +365,7 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
 
     def _attempt_pct(a):
         if a["exam__exam_type"] == "written":
-            ms = float(a["exam__max_score"] or 0)
-            return round(float(a["teacher_score"] or 0) * 100 / ms, 1) if ms else 0
+            return float(a["teacher_score"] or 0)
         total = (a["correct_count"] or 0) + (a["wrong_count"] or 0)
         return round((a["correct_count"] or 0) * 100 / total, 1) if total else 0
 
@@ -426,7 +428,7 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
         grp_scored = list(
             grp_attempts.values(
                 "exam__exam_type",
-                "exam__max_score",
+                "exam__default_question_points",
                 "correct_count",
                 "wrong_count",
                 "teacher_score",
