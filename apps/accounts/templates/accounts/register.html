@@ -73,11 +73,7 @@
                     </div>
 
                     <div class="register-persona-grid" id="orgTypeCards">
-                        <button type="button" class="register-persona-card" data-org-type="individual">
-                            <span class="register-persona-card__icon"><i class="fas fa-user-circle"></i></span>
-                            <span class="register-persona-card__title">{% trans "org_type_individual" context "accounts.form.register.choice" %}</span>
-                            <span class="register-persona-card__desc">{% trans "individual_owner_help" context "accounts.register" %}</span>
-                        </button>
+                        {# Temporary: hide personal workspace signup to prevent university users from registering into the wrong flow. #}
                         <button type="button" class="register-persona-card" data-org-type="school">
                             <span class="register-persona-card__icon"><i class="fas fa-school"></i></span>
                             <span class="register-persona-card__title">{% trans "org_type_school" context "accounts.form.register.choice" %}</span>
@@ -191,14 +187,6 @@
                         <div class="register-form-field register-hidden-field" id="organizationSelectField">
                             <label for="{{ form.join_organization.id_for_label }}" id="organizationSelectLabel">{{ form.join_organization.label }}</label>
                             {{ form.join_organization }}
-                        </div>
-                    </div>
-
-                    <div id="individualAccountInfo" hidden>
-                        <div class="register-form-field">
-                            <small class="register-help-text">
-                                {% trans "individual_owner_help" context "accounts.register" %}
-                            </small>
                         </div>
                     </div>
 

@@ -83,7 +83,7 @@ def create_post(request):
                     }
                 )
             if requires_approval:
-                messages.success(request, "Post yaradıldı və müəllim təsdiqi gözləyir.")
+                messages.success(request, "Post yaradıldı və təsdiq gözləyir.")
                 return redirect(f"{reverse('accounts:profile')}?section=posts")
 
             messages.success(request, pgettext("blog.post.message", "created"))
