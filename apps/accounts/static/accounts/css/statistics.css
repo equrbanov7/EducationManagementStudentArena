@@ -1,0 +1,99 @@
+/* ── Statistics section styles ───────────────────────────────────── */
+
+.profile-section--statistics .stats-card {
+    border-radius: .5rem;
+    transition: transform .15s ease, box-shadow .15s ease;
+    border: 1px solid rgba(0,0,0,.08);
+}
+.profile-section--statistics .stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+.profile-section--statistics .stats-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.profile-section--statistics .stats-card-label {
+    font-size: .75rem;
+    color: #6c757d;
+    margin-top: .25rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+/* Colored left border accents */
+.stats-card--primary { border-left: 4px solid #0d6efd !important; }
+.stats-card--success { border-left: 4px solid #198754 !important; }
+.stats-card--info    { border-left: 4px solid #0dcaf0 !important; }
+.stats-card--warning { border-left: 4px solid #ffc107 !important; }
+.stats-card--danger  { border-left: 4px solid #dc3545 !important; }
+
+/* Filter bar */
+.stats-filter-bar .card-body {
+    background: #f8f9fa;
+    border-radius: .5rem;
+}
+
+/* Tables */
+.stats-sortable-table th.stats-sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.stats-sortable-table th.stats-sortable:hover {
+    background-color: #e9ecef;
+}
+.stats-sortable-table th.stats-sortable::after {
+    content: " \2195";
+    opacity: .3;
+    font-size: .7rem;
+}
+.stats-sortable-table th.stats-sortable.sort-asc::after {
+    content: " \2191";
+    opacity: 1;
+}
+.stats-sortable-table th.stats-sortable.sort-desc::after {
+    content: " \2193";
+    opacity: 1;
+}
+
+/* AI summary */
+#statsAiSummaryBody {
+    max-height: 500px;
+    overflow-y: auto;
+}
+#statsAiSummaryBody h1,
+#statsAiSummaryBody h2,
+#statsAiSummaryBody h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: .75rem;
+}
+#statsAiSummaryBody ul {
+    padding-left: 1.25rem;
+}
+#statsAiSummaryBody p {
+    margin-bottom: .5rem;
+}
+
+/* Empty state */
+.stats-empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+/* Chart containers */
+.profile-section--statistics canvas {
+    max-height: 300px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-section--statistics .stats-card-value {
+        font-size: 1.25rem;
+    }
+    .profile-section--statistics .stats-card-label {
+        font-size: .65rem;
+    }
+}
