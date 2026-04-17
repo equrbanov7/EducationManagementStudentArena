@@ -520,12 +520,14 @@ def _role_capabilities(user, profile):
             "category-management",
             "superadmin-organizations",
             "superadmin-users",
+            "superadmin-ai",
             "pending-post-approvals",
             "blog",
             "edit-profile",
             "change-password",
             "publish-notification",
             "delete-account",
+            "statistics",
         }
     else:
         allowed_sections = {
@@ -536,6 +538,7 @@ def _role_capabilities(user, profile):
             "edit-profile",
             "change-password",
             "delete-account",
+            "statistics",
         }
         allowed_sections.add("my-results")
         if can_view_student_assignments:
