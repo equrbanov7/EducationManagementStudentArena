@@ -71,6 +71,7 @@ from .post_management import (
 from .profile import (
     profile_avatar,
     public_user_profile,
+    statistics_export_csv,
     user_profile,
 )
 
@@ -105,6 +106,7 @@ __all__ = [
     "user_profile",
     "public_user_profile",
     "profile_avatar",
+    "statistics_export_csv",
     # Dashboard
     "dashboard",
     "teacher_dashboard",

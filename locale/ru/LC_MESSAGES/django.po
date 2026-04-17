@@ -18755,3 +18755,307 @@ msgstr "Загрузка..."
 msgctxt "exams.template.teacher_exam_results"
 msgid "loading"
 msgstr "Загрузка..."
+
+#
+# ── Statistics profile section (profile.statistics) ────────────
+#
+
+msgctxt "profile.section"
+msgid "statistics"
+msgstr "Статистика"
+
+msgctxt "profile.section"
+msgid "change_password"
+msgstr "Изменить пароль"
+
+msgctxt "profile.sidebar"
+msgid "statistics"
+msgstr "Статистика"
+
+msgctxt "profile.statistics"
+msgid "section_not_available"
+msgstr "Этот раздел вам недоступен."
+
+msgctxt "profile.statistics"
+msgid "filter_date_from"
+msgstr "С"
+
+msgctxt "profile.statistics"
+msgid "filter_date_to"
+msgstr "По"
+
+msgctxt "profile.statistics"
+msgid "filter_course"
+msgstr "Курс"
+
+msgctxt "profile.statistics"
+msgid "filter_all"
+msgstr "Все"
+
+msgctxt "profile.statistics"
+msgid "filter_group"
+msgstr "Группа"
+
+msgctxt "profile.statistics"
+msgid "filter_organization_id"
+msgstr "ID организации"
+
+msgctxt "profile.statistics"
+msgid "filter_content_type"
+msgstr "Тип контента"
+
+msgctxt "profile.statistics"
+msgid "content_exam"
+msgstr "Экзамен"
+
+msgctxt "profile.statistics"
+msgid "content_assignment"
+msgstr "Задание"
+
+msgctxt "profile.statistics"
+msgid "content_lab"
+msgstr "Лабораторная"
+
+msgctxt "profile.statistics"
+msgid "content_project"
+msgstr "Проект"
+
+msgctxt "profile.statistics"
+msgid "filter_apply"
+msgstr "Фильтр"
+
+msgctxt "profile.statistics"
+msgid "no_data_found"
+msgstr "Статистические данные не найдены"
+
+msgctxt "profile.statistics"
+msgid "no_data_hint"
+msgstr "Вы можете изменить фильтры или для этого аккаунта пока нет данных."
+
+msgctxt "profile.statistics"
+msgid "card_organizations"
+msgstr "Организации"
+
+msgctxt "profile.statistics"
+msgid "card_users"
+msgstr "Пользователи"
+
+msgctxt "profile.statistics"
+msgid "card_courses"
+msgstr "Курсы"
+
+msgctxt "profile.statistics"
+msgid "card_exam_attempts"
+msgstr "Попытки экзамена"
+
+msgctxt "profile.statistics"
+msgid "card_exams"
+msgstr "Экзамены"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_submissions"
+msgstr "Отправки заданий"
+
+msgctxt "profile.statistics"
+msgid "card_lab_submissions"
+msgstr "Отправки лабораторных"
+
+msgctxt "profile.statistics"
+msgid "card_project_submissions"
+msgstr "Отправки проектов"
+
+msgctxt "profile.statistics"
+msgid "card_members"
+msgstr "Участники"
+
+msgctxt "profile.statistics"
+msgid "card_teachers"
+msgstr "Преподаватели"
+
+msgctxt "profile.statistics"
+msgid "card_students"
+msgstr "Студенты"
+
+msgctxt "profile.statistics"
+msgid "card_assignment_graded"
+msgstr "Задание (оценено)"
+
+msgctxt "profile.statistics"
+msgid "card_late_submissions"
+msgstr "Просроченные отправки"
+
+msgctxt "profile.statistics"
+msgid "card_my_courses"
+msgstr "Мои курсы"
+
+msgctxt "profile.statistics"
+msgid "card_avg_score"
+msgstr "Средний балл"
+
+msgctxt "profile.statistics"
+msgid "card_pass_rate"
+msgstr "Процент прохождения"
+
+msgctxt "profile.statistics"
+msgid "card_checked"
+msgstr "Проверено"
+
+msgctxt "profile.statistics"
+msgid "unit_days"
+msgstr "дней"
+
+msgctxt "profile.statistics"
+msgid "card_avg_grading_time"
+msgstr "Ср. время оценки"
+
+msgctxt "profile.statistics"
+msgid "card_late_assignments"
+msgstr "Просроченные задания"
+
+msgctxt "profile.statistics"
+msgid "card_total_tasks"
+msgstr "Всего заданий"
+
+msgctxt "profile.statistics"
+msgid "card_pending"
+msgstr "Ожидание"
+
+msgctxt "profile.statistics"
+msgid "card_assignments"
+msgstr "Задания"
+
+msgctxt "profile.statistics"
+msgid "card_labs"
+msgstr "Лабораторные"
+
+msgctxt "profile.statistics"
+msgid "card_ontime_late"
+msgstr "Вовремя / Просрочено"
+
+msgctxt "profile.statistics"
+msgid "chart_trend"
+msgstr "Тренд"
+
+msgctxt "profile.statistics"
+msgid "chart_breakdown"
+msgstr "Распределение"
+
+msgctxt "profile.statistics"
+msgid "chart_org_comparison"
+msgstr "Сравнение организаций"
+
+msgctxt "profile.statistics"
+msgid "chart_course_ranking"
+msgstr "Рейтинг курсов"
+
+msgctxt "profile.statistics"
+msgid "chart_group_comparison"
+msgstr "Сравнение групп"
+
+msgctxt "profile.statistics"
+msgid "chart_grading_status"
+msgstr "Статус оценивания"
+
+msgctxt "profile.statistics"
+msgid "chart_avg_by_content"
+msgstr "Средний балл по контенту"
+
+msgctxt "profile.statistics"
+msgid "card_live_exam"
+msgstr "Живой экзамен"
+
+msgctxt "profile.statistics"
+msgid "live_total_answers"
+msgstr "Всего ответов"
+
+msgctxt "profile.statistics"
+msgid "live_correct"
+msgstr "Правильных"
+
+msgctxt "profile.statistics"
+msgid "live_accuracy"
+msgstr "Точность"
+
+msgctxt "profile.statistics"
+msgid "table_search"
+msgstr "Поиск..."
+
+msgctxt "profile.statistics"
+msgid "table_name"
+msgstr "Название"
+
+msgctxt "profile.statistics"
+msgid "table_attempts"
+msgstr "Попытки"
+
+msgctxt "profile.statistics"
+msgid "table_course_ranking_title"
+msgstr "Рейтинг курсов (по количеству студентов)"
+
+msgctxt "profile.statistics"
+msgid "table_student_count"
+msgstr "Количество студентов"
+
+msgctxt "profile.statistics"
+msgid "table_student"
+msgstr "Студент"
+
+msgctxt "profile.statistics"
+msgid "table_pass_pct"
+msgstr "Прохождение %"
+
+msgctxt "profile.statistics"
+msgid "btn_csv_export"
+msgstr "Экспорт CSV"
+
+msgctxt "profile.statistics"
+msgid "btn_ai_summary"
+msgstr "ИИ Резюме"
+
+msgctxt "profile.statistics"
+msgid "ai_analysis"
+msgstr "ИИ Анализ"
+
+msgctxt "profile.statistics"
+msgid "ai_loading"
+msgstr "ИИ резюме подготавливается..."
+
+msgctxt "profile.statistics"
+msgid "csv_header_metric"
+msgstr "Метрика"
+
+msgctxt "profile.statistics"
+msgid "csv_header_value"
+msgstr "Значение"
+
+msgctxt "profile.statistics"
+msgid "js_avg_score_pct"
+msgstr "Средний балл (%)"
+
+msgctxt "profile.statistics"
+msgid "js_submissions"
+msgstr "Отправки"
+
+msgctxt "profile.statistics"
+msgid "js_passed"
+msgstr "Прошли"
+
+msgctxt "profile.statistics"
+msgid "js_failed"
+msgstr "Не прошли"
+
+msgctxt "profile.statistics"
+msgid "js_graded"
+msgstr "Оценено"
+
+msgctxt "profile.statistics"
+msgid "ai_not_received"
+msgstr "ИИ резюме не получено."
+
+msgctxt "profile.statistics"
+msgid "ai_error"
+msgstr "Произошла ошибка при запросе ИИ."
+
+msgctxt "profile.statistics"
+msgid "ai_remaining"
+msgstr "Оставшихся запросов"

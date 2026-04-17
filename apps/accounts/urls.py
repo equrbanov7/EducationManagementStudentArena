@@ -51,6 +51,7 @@ urlpatterns = [
     path("dashboard/teacher/", views.teacher_dashboard, name="teacher_dashboard"),
     # Profile
     path("profile/", views.user_profile, name="profile"),
+    path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
     path("users/<str:username>/", views.public_user_profile, name="public_profile"),
     # Role management
