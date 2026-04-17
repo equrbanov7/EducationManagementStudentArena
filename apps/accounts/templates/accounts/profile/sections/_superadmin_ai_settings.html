@@ -1,0 +1,9 @@
+{% if 'superadmin-ai' in allowed_sections %}
+<section class="profile-section-panel profile-section--superadmin-ai {% if active_section == 'superadmin-ai' %}is-active{% endif %}"
+         data-profile-section-panel="superadmin-ai"
+         data-source-url="{% url 'accounts:superadmin_ai_settings' %}">
+    <div class="ai-settings-container ai-settings-container--embedded">
+        {% include "accounts/partials/_superadmin_ai_settings_content.html" with config=superadmin_ai_settings_section.config model_choices=superadmin_ai_settings_section.model_choices rate_info=superadmin_ai_settings_section.rate_info cost_estimates=superadmin_ai_settings_section.cost_estimates post_next_url=superadmin_ai_settings_section.post_next_url embedded_in_profile=True %}
+    </div>
+</section>
+{% endif %}

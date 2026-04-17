@@ -1,0 +1,98 @@
+{% load i18n %}
+<div class="ai-settings-header">
+    <h1><i class="fas fa-robot"></i> {% trans "heading" context "superadmin.ai_settings" %}</h1>
+</div>
+
+<form method="post" action="{% url 'accounts:superadmin_ai_settings' %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save">
+    {% if post_next_url %}
+    <input type="hidden" name="next" value="{{ post_next_url }}">
+    {% endif %}
+
+    <div class="settings-card">
+        <h2><i class="fas fa-power-off"></i> {% trans "section_general" context "superadmin.ai_settings" %}</h2>
+        <div class="toggle-row">
+            <label class="toggle-switch">
+                <input type="checkbox" name="enabled" {% if config.enabled %}checked{% endif %}>
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">{% trans "label_enabled" context "superadmin.ai_settings" %}</span>
+        </div>
+        <p class="hint ai-settings-hint">
+            {% trans "hint_enabled" context "superadmin.ai_settings" %}
+        </p>
+    </div>
+
+    <div class="settings-card">
+        <h2><i class="fas fa-tachometer-alt"></i> {% trans "section_rate_limit" context "superadmin.ai_settings" %}</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="rate_limit">{% trans "label_rate_limit" context "superadmin.ai_settings" %}</label>
+                <input type="text" id="rate_limit" name="rate_limit" value="{{ config.rate_limit }}" placeholder="100/1h">
+                <p class="hint">{% trans "hint_rate_limit" context "superadmin.ai_settings" %}</p>
+            </div>
+            <div class="form-group">
+                <label for="monthly_budget">{% trans "label_budget" context "superadmin.ai_settings" %}</label>
+                <input type="number" id="monthly_budget" name="monthly_budget" value="{{ config.monthly_budget }}" step="0.50" min="0">
+                <p class="hint">{% trans "hint_budget" context "superadmin.ai_settings" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <h2><i class="fas fa-microchip"></i> {% trans "section_models" context "superadmin.ai_settings" %}</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="summary_model">{% trans "label_summary_model" context "superadmin.ai_settings" %}</label>
+                <div class="bootstrap-single-select">
+                    <select id="summary_model" name="summary_model" class="bootstrap-single-select__native" data-bootstrap-select>
+                        {% for value, display in model_choices %}
+                            <option value="{{ value }}" {% if config.summary_model == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <p class="hint">{% trans "hint_summary_model" context "superadmin.ai_settings" %}</p>
+            </div>
+            <div class="form-group">
+                <label for="grading_model">{% trans "label_grading_model" context "superadmin.ai_settings" %}</label>
+                <div class="bootstrap-single-select">
+                    <select id="grading_model" name="grading_model" class="bootstrap-single-select__native" data-bootstrap-select>
+                        {% for value, display in model_choices %}
+                            <option value="{{ value }}" {% if config.grading_model == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <p class="hint">{% trans "hint_grading_model" context "superadmin.ai_settings" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <h2><i class="fas fa-chart-pie"></i> {% trans "section_estimates" context "superadmin.ai_settings" %}</h2>
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="value">${{ config.monthly_budget }}</div>
+                <div class="label">{% trans "label_monthly_budget" context "superadmin.ai_settings" %}</div>
+            </div>
+            <div class="info-box">
+                <div class="value">~{{ cost_estimates.max_summaries|floatformat:0 }}</div>
+                <div class="label">{% trans "label_max_summaries" context "superadmin.ai_settings" %}</div>
+            </div>
+            <div class="info-box">
+                <div class="value">~{{ cost_estimates.max_gradings|floatformat:0 }}</div>
+                <div class="label">{% trans "label_max_gradings" context "superadmin.ai_settings" %}</div>
+            </div>
+            <div class="info-box">
+                <div class="value">{{ config.rate_limit }}</div>
+                <div class="label">{% trans "label_per_user_limit" context "superadmin.ai_settings" %}</div>
+            </div>
+        </div>
+</div>
+
+    <div class="save-row">
+        <button type="submit" class="btn-ai-save">
+            <i class="fas fa-save"></i> {% trans "action_save" context "superadmin.ai_settings" %}
+        </button>
+    </div>
+</form>
