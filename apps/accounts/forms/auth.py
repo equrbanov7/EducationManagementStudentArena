@@ -388,10 +388,21 @@ class RegisterForm(forms.ModelForm):
                     pgettext_lazy("accounts.form.register.error", "institution_name_required"),
                 )
 
-            if organization_type == OrganizationType.UNIVERSITY and not organization_identifier:
+            if not organization_identifier:
+                identifier_error_key = (
+                    "university_identifier_required"
+                    if organization_type == OrganizationType.UNIVERSITY
+                    else "organization_identifier_required"
+                )
                 self.add_error(
                     "organization_identifier",
-                    pgettext_lazy("accounts.form.register.error", "university_identifier_required"),
+                    pgettext_lazy("accounts.form.register.error", identifier_error_key),
+                )
+
+            if not organization_license_identifier:
+                self.add_error(
+                    "organization_license_identifier",
+                    pgettext_lazy("accounts.form.register.error", "license_identifier_required"),
                 )
 
             cleaned_data["institution"] = None

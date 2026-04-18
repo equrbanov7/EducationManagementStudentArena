@@ -54,6 +54,7 @@ def log_incident_api(request, attempt_id):
         user=request.user,
     )
 
+    attempt.expire_if_time_limit_reached()
     if attempt.is_finished:
         return JsonResponse({"error": "Attempt is already finished."}, status=400)
 
@@ -104,6 +105,7 @@ def supervision_status_api(request, attempt_id):
         user=request.user,
     )
 
+    attempt.expire_if_time_limit_reached()
     status = get_attempt_supervision_status(attempt)
     status["is_finished"] = attempt.is_finished
     status["attempt_status"] = attempt.status
