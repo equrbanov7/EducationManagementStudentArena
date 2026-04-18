@@ -9,6 +9,7 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from apps.audit.utils import log_action
@@ -169,6 +170,24 @@ def soft_delete_account(user, *, request=None, password=None):
         )
 
 
+def _delete_owned_organizations(user):
+    """Remove organizations still owned by the user before a hard delete."""
+    from apps.organizations.models import Organization
+
+    owned_organizations = Organization.objects.filter(owner=user)
+    if not owned_organizations.exists():
+        return
+
+    active_owned_organizations = owned_organizations.filter(
+        is_active=True,
+        status="active",
+    )
+    if active_owned_organizations.exists():
+        raise AccountDeletionError("last_org_admin")
+
+    owned_organizations.delete()
+
+
 def restore_account(user, *, request=None):
     """
     Restore a soft-deleted user account.
@@ -295,8 +314,17 @@ def hard_delete_account(user, *, request=None):
         resource_repr=f"{username} ({email})",
     )
 
-    with transaction.atomic():
-        user.delete()
+    try:
+        with transaction.atomic():
+            _delete_owned_organizations(user)
+            user.delete()
+    except ProtectedError as exc:
+        logger.exception(
+            "Hard delete blocked for user %s (pk=%s) due to protected relations",
+            username,
+            user_pk,
+        )
+        raise AccountDeletionError("hard_delete_blocked") from exc
 
     logger.info(
         "Account permanently deleted for user %s (pk=%s)",

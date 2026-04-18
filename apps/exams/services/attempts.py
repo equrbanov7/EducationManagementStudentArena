@@ -13,7 +13,11 @@ from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed
 
 
 def get_active_attempt_for_user(exam, user):
-    return exam.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at").first()
+    for attempt in exam.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at"):
+        if attempt.expire_if_time_limit_reached():
+            continue
+        return attempt
+    return None
 
 
 def get_finished_attempts_for_user(exam, user):
