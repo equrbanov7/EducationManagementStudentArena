@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         aiCached: i18n.aiCached || "Cached",
         aiQuotaInfo: i18n.aiQuotaInfo || "{remaining}/{limit} ({window})",
         aiNoAnswer: i18n.aiNoAnswer || "No answer to grade",
+        uploadedFilesLabel: i18n.uploadedFilesLabel || "Uploaded files",
+        answeredWithPaint: i18n.answeredWithPaint || "Answered with paint",
     };
 
     // Elementlər
@@ -81,9 +83,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
 
         const ansText = dataStore.getAttribute('data-ans-text');
+        const hasAnswer = dataStore.getAttribute('data-has-answer') === '1';
+        const hasAiGradable = dataStore.getAttribute('data-has-ai-gradable') === '1';
+        const hasFileAnswer = dataStore.getAttribute('data-has-file-answer') === '1';
+        const hasPaintAnswer = dataStore.getAttribute('data-has-paint-answer') === '1';
         const modalAnswerEl = document.getElementById('modalAnswerText');
         if (ansText) {
             modalAnswerEl.textContent = ansText;
+        } else if (hasFileAnswer || hasPaintAnswer) {
+            modalAnswerEl.innerHTML = '';
+            const infoEl = document.createElement('i');
+            infoEl.className = 'text-muted';
+            infoEl.textContent = hasFileAnswer ? t.uploadedFilesLabel : t.answeredWithPaint;
+            modalAnswerEl.appendChild(infoEl);
+        } else if (hasAnswer) {
+            modalAnswerEl.innerHTML = '';
+            const infoEl = document.createElement('i');
+            infoEl.className = 'text-muted';
+            infoEl.textContent = t.statusNotChecked;
+            modalAnswerEl.appendChild(infoEl);
         } else {
             // Use DOM manipulation to safely add italic element
             modalAnswerEl.innerHTML = '';
@@ -112,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiBtn = document.getElementById('aiGradeBtn');
         const aiStatus = document.getElementById('aiGradeStatus');
         if (aiBtn) {
-            aiBtn.disabled = !ansText;
+            aiBtn.disabled = !hasAiGradable;
             aiBtn.classList.remove('is-loading');
             // Restore button inner elements visibility
             const iconEl = aiBtn.querySelector('.btn-ai-grade__icon');
@@ -327,8 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const dataStore = card.querySelector('.data-store');
             if (!dataStore) return;
             const ansText = dataStore.getAttribute('data-ans-text');
+            const hasAiGradable = dataStore.getAttribute('data-has-ai-gradable') === '1';
 
-            if (!ansText) {
+            if (!ansText && !hasAiGradable) {
                 if (aiGradeStatus) {
                     aiGradeStatus.textContent = t.aiNoAnswer;
                     aiGradeStatus.className = 'ai-grade-status ai-grade-error';

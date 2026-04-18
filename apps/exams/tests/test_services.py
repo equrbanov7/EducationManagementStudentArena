@@ -2,12 +2,14 @@
 Service tests for exams app.
 """
 
+import base64
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
@@ -17,6 +19,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamSupervisionConfig, QuestionBlock
 from apps.exams.services import parsing
+from apps.exams.services.ai_grading import grade_written_answer
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import log_supervision_incident, teacher_stop_attempt
@@ -24,6 +27,9 @@ from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+_TINY_PNG_BYTES = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF9sAAAAASUVORK5CYII="
+)
 
 
 class ExamAttemptManagementServicesTest(TestCase):
@@ -100,6 +106,44 @@ class ExamAttemptManagementServicesTest(TestCase):
 
         self.assertEqual(submitted_attempt.status, "submitted")
         self.assertIsNotNone(submitted_attempt.finished_at)
+
+
+class AIWrittenGradingServiceTest(SimpleTestCase):
+    @override_settings(GEMINI_API_KEY="test-gemini-key")
+    @patch("apps.exams.services.ai_grading.requests.post")
+    def test_grade_written_answer_sends_uploaded_images_to_gemini(self, mock_post):
+        cache.clear()
+        uploaded_image = SimpleUploadedFile(
+            "written-answer.png",
+            _TINY_PNG_BYTES,
+            content_type="image/png",
+        )
+        mock_response = Mock(status_code=200)
+        mock_response.json.return_value = {
+            "candidates": [
+                {"content": {"parts": [{"text": "SCORE: 4\nEXPLANATION: The handwritten solution is mostly correct."}]}}
+            ]
+        }
+        mock_post.return_value = mock_response
+
+        result = grade_written_answer(
+            question_text="Explain the theorem",
+            student_answer="",
+            max_points=5,
+            answer_files=[SimpleNamespace(file=uploaded_image)],
+            language_code="en",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["score"], 4)
+        self.assertIn("handwritten solution", result["explanation"])
+        mock_post.assert_called_once()
+
+        payload = mock_post.call_args.kwargs["json"]
+        parts = payload["contents"][0]["parts"]
+        self.assertTrue(parts[0]["text"].startswith("You are an expert exam grader."))
+        self.assertEqual(parts[1]["inline_data"]["mime_type"], "image/png")
+        self.assertEqual(parts[1]["inline_data"]["data"], base64.b64encode(_TINY_PNG_BYTES).decode("ascii"))
 
 
 class ExamGradingServicesTest(TestCase):

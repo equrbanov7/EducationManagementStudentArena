@@ -1,6 +1,7 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.blog.utils import DATA_URL_PNG_RE
@@ -32,6 +33,10 @@ def _attempt_has_any_answer(attempt) -> bool:
 
     # files
     if attempt.answers.filter(files__isnull=False).distinct().exists():
+        return True
+
+    # paint / drawn answers
+    if attempt.answers.filter(Q(has_paint=True) | Q(paint_image__isnull=False)).exists():
         return True
 
     return False
