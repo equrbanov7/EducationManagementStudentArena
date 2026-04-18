@@ -51,8 +51,8 @@ class SignupAndLoginFlowTest(TestCase):
             "join_organization": "",
             "institution": "",
             "institution_not_listed_name": "",
-            "organization_identifier": "",
-            "organization_license_identifier": "",
+            "organization_identifier": "ORG-001",
+            "organization_license_identifier": "LIC-001",
             "initial_role": ProfileRole.MEMBER,
             "accept_privacy_policy": "on",
             "phone": "",
@@ -148,13 +148,15 @@ class SignupAndLoginFlowTest(TestCase):
             email="schooladmin@example.com",
             organization_type=OrganizationType.SCHOOL,
             institution_not_listed_name="Baku School 500",
-            organization_identifier="",
+            organization_identifier="SCH-500",
+            organization_license_identifier="LIC-SCH-500",
             initial_role=ProfileRole.TEACHER,
         )
         profile = user.profile
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "Baku School 500")
-        self.assertEqual(profile.organization.organization_identifier, "")
+        self.assertEqual(profile.organization.organization_identifier, "SCH-500")
+        self.assertEqual(profile.organization.license_identifier, "LIC-SCH-500")
         # New organizations start as pending (require superadmin approval)
         self.assertEqual(profile.organization.status, "pending")
         self.assertTrue(profile.organization.is_active)
@@ -193,13 +195,14 @@ class SignupAndLoginFlowTest(TestCase):
             email="centeradmin@example.com",
             organization_type=OrganizationType.COURSE_CENTER,
             institution_not_listed_name="My New Center",
-            organization_identifier="",
+            organization_identifier="COURSE-991",
             organization_license_identifier="TAX-991",
             initial_role=ProfileRole.HR,
         )
         profile = user.profile
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "My New Center")
+        self.assertEqual(profile.organization.organization_identifier, "COURSE-991")
         self.assertEqual(profile.organization.license_identifier, "TAX-991")
         # New organizations start as pending (require superadmin approval)
         self.assertEqual(profile.organization.status, "pending")
@@ -216,18 +219,53 @@ class SignupAndLoginFlowTest(TestCase):
         profile = user.profile
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
 
-    def test_university_signup_requires_identifier(self):
+    def test_university_signup_requires_identifier_and_license(self):
         response = self.client.post(
             self.register_url,
             self._register_payload(
                 organization_type=OrganizationType.UNIVERSITY,
                 institution_not_listed_name="No Identifier Uni",
                 organization_identifier="",
+                organization_license_identifier="",
                 initial_role=ProfileRole.HR,
             ),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Universitet üçün rəsmi identifikator")
+        form = response.context["form"]
+        self.assertIn("organization_identifier", form.errors)
+        self.assertIn("organization_license_identifier", form.errors)
+
+    def test_school_signup_requires_identifier_and_license(self):
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type=OrganizationType.SCHOOL,
+                institution_not_listed_name="No Identifier School",
+                organization_identifier="",
+                organization_license_identifier="",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("organization_identifier", form.errors)
+        self.assertIn("organization_license_identifier", form.errors)
+
+    def test_course_center_signup_requires_identifier_and_license(self):
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type=OrganizationType.COURSE_CENTER,
+                institution_not_listed_name="No Identifier Course Center",
+                organization_identifier="",
+                organization_license_identifier="",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("organization_identifier", form.errors)
+        self.assertIn("organization_license_identifier", form.errors)
 
     def test_student_join_without_organization_selection_is_allowed(self):
         user = self._register_and_verify(

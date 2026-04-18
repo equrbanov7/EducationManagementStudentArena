@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
@@ -343,7 +343,11 @@ def superadmin_user_management(request):
             messages.error(request, _("user_not_found"))
             return redirect(next_url)
 
-        target_user = get_object_or_404(User, pk=user_id)
+        target_user = User.objects.filter(pk=user_id).first()
+        if target_user is None:
+            messages.error(request, _("user_not_found"))
+            return redirect(next_url)
+
         target_profile = _safe_user_profile(target_user)
         target_status = _superadmin_user_status_key(target_user, target_profile)
 
@@ -400,11 +404,18 @@ def superadmin_user_management(request):
                 messages.error(request, _("cannot_delete_superadmin"))
             else:
                 username = target_user.username
-                hard_delete_account(target_user, request=request)
-                messages.success(
-                    request,
-                    _("user_hard_deleted_success") % {"username": username},
-                )
+                try:
+                    hard_delete_account(target_user, request=request)
+                except AccountDeletionError as exc:
+                    if str(exc) == "last_org_admin":
+                        messages.error(request, _("delete_account_last_admin"))
+                    else:
+                        messages.error(request, _("delete_account_error"))
+                else:
+                    messages.success(
+                        request,
+                        _("user_hard_deleted_success") % {"username": username},
+                    )
         else:
             messages.error(request, _("unknown_action"))
 

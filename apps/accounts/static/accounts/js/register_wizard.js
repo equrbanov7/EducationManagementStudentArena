@@ -10,7 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var i18n = window.REGISTER_I18N || {};
 
     function tr(key, fallback) {
-        return i18n[key] || fallback;
+        if (!i18n[key] || i18n[key] === key) {
+            return fallback;
+        }
+        return i18n[key];
     }
 
     var registrationTypeMap = {
@@ -65,6 +68,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var orgIdentifierLabel = document.getElementById("orgIdentifierLabel");
     var orgIdentifierHelp = document.getElementById("orgIdentifierHelp");
     var licenseIdentifierInput = document.getElementById("id_organization_license_identifier");
+    var licenseIdentifierLabel = document.getElementById("licenseIdentifierLabel");
+    var licenseIdentifierHelp = document.getElementById("licenseIdentifierHelp");
 
     var organizationSearchInput = document.getElementById("organizationSearchInput");
     var organizationSearchLabel = document.getElementById("organizationSearchLabel");
@@ -604,8 +609,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 "placeholder_school_manual",
                 "Məktəb siyahıda yoxdursa adını daxil edin..."
             );
-            orgIdentifierLabel.textContent = tr("label_school_identifier", "Məktəb nömrəsi / kodu (opsional)");
-            orgIdentifierHelp.textContent = tr("help_identifier_optional", "Bu sahə opsionaldır.");
+            orgIdentifierLabel.textContent = tr("label_school_identifier", "Məktəb kodu / identifikatoru");
+            orgIdentifierHelp.textContent = tr("help_identifier_required", "Məktəb üçün bu sahə məcburidir.");
         } else if (orgType === "course_center") {
             organizationNameLabel.textContent = tr(
                 "label_course_center_manual",
@@ -615,8 +620,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 "placeholder_course_center_manual",
                 "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
             );
-            orgIdentifierLabel.textContent = tr("label_course_center_identifier", "Mərkəz identifikatoru (opsional)");
-            orgIdentifierHelp.textContent = tr("help_identifier_optional", "Bu sahə opsionaldır.");
+            orgIdentifierLabel.textContent = tr("label_course_center_identifier", "Kurs mərkəzi kodu / identifikatoru");
+            orgIdentifierHelp.textContent = tr("help_identifier_required", "Kurs mərkəzi üçün bu sahə məcburidir.");
         } else {
             organizationNameLabel.textContent = tr(
                 "label_institution_manual_default",
@@ -624,7 +629,25 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             organizationNameInput.placeholder = tr("placeholder_search_default", "Müəssisə axtar...");
             orgIdentifierLabel.textContent = tr("label_identifier_default", "Rəsmi identifikator / kod");
-            orgIdentifierHelp.textContent = tr("help_identifier_optional", "Bu sahə opsionaldır.");
+            orgIdentifierHelp.textContent = tr("help_identifier_required", "Bu sahə məcburidir.");
+        }
+
+        if (licenseIdentifierLabel) {
+            licenseIdentifierLabel.textContent = tr("label_license_identifier", "Lisenziya identifikatoru");
+        }
+
+        if (licenseIdentifierInput) {
+            licenseIdentifierInput.placeholder = tr(
+                "placeholder_license_identifier",
+                "Lisenziya identifikatorunu daxil edin..."
+            );
+        }
+
+        if (licenseIdentifierHelp) {
+            licenseIdentifierHelp.textContent = tr(
+                "help_license_identifier_required",
+                "Lisenziya identifikatoru məcburidir."
+            );
         }
     }
 
@@ -937,12 +960,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (orgIdentifierInput) {
-            orgIdentifierInput.required = isCreatorMode && selection.orgType === "university";
+            orgIdentifierInput.required = isCreatorMode;
             if (!isCreatorMode) orgIdentifierInput.value = "";
         }
 
-        if (licenseIdentifierInput && !isCreatorMode) {
-            licenseIdentifierInput.value = "";
+        if (licenseIdentifierInput) {
+            licenseIdentifierInput.required = isCreatorMode;
+            if (!isCreatorMode) licenseIdentifierInput.value = "";
         }
 
         if (organizationSelect) {
