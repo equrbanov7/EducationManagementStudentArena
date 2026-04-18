@@ -2,12 +2,14 @@
 View tests for exams app.
 """
 
+import base64
 from datetime import timedelta
 from unittest.mock import patch
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -18,6 +20,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import (
     Exam,
     ExamAnswer,
+    ExamAnswerFile,
     ExamAttempt,
     ExamQuestion,
     ExamQuestionOption,
@@ -28,6 +31,9 @@ from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+_TINY_PNG_BYTES = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aF9sAAAAASUVORK5CYII="
+)
 
 
 def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
@@ -1313,6 +1319,92 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.json()["score"], 5)
         mock_grade_written_answer.assert_called_once()
         self.assertEqual(mock_grade_written_answer.call_args.kwargs["max_points"], 5)
+
+    @patch("apps.exams.services.ai_grading.requests.post")
+    def test_ai_grade_answer_accepts_image_only_written_submission(self, mock_post):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="AI Image Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Read and grade the handwritten answer",
+            order=1,
+            answer_mode="single",
+            points=5,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="",
+        )
+        ExamAnswerFile.objects.create(
+            answer=answer,
+            file=SimpleUploadedFile("answer-image.png", _TINY_PNG_BYTES, content_type="image/png"),
+        )
+
+        mock_response = mock_post.return_value
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "candidates": [
+                {"content": {"parts": [{"text": "SCORE: 5\nEXPLANATION: The uploaded handwritten answer is correct."}]}}
+            ]
+        }
+
+        with self.settings(GEMINI_API_KEY="test-gemini-key"):
+            response = self.client.post(
+                reverse("exams:ai_grade_answer", args=[written_exam.slug, attempt.id]),
+                data='{"question_id": %d, "max_points": 5}' % question.id,
+                content_type="application/json",
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["score"], 5)
+        mock_post.assert_called_once()
+
+    def test_teacher_check_attempt_marks_image_only_answer_as_not_empty(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Image Only Review Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Check attached answer",
+            order=1,
+            answer_mode="single",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="",
+        )
+        ExamAnswerFile.objects.create(
+            answer=answer,
+            file=SimpleUploadedFile("answer-image.png", _TINY_PNG_BYTES, content_type="image/png"),
+        )
+
+        response = self.client.get(reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-has-answer="1"')
+        self.assertContains(response, 'data-has-ai-gradable="1"')
+        self.assertContains(response, "status-not-checked")
+        self.assertNotContains(response, "status-empty")
 
 
 class StudentExamVisibilityFilteringTest(TestCase):
