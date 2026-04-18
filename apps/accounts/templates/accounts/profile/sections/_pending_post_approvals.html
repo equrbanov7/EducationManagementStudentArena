@@ -4,20 +4,20 @@
     <div class="section-card pending-post-approvals-card">
         <div class="section-title">
             <i class="fas fa-user-check"></i>
-            Postların idarəetməsi ({{ pending_post_approval_count }})
+            Postların idarəetməsi ({{ pending_post_approval_total_count|default:pending_post_approval_count }})
         </div>
 
         <div class="pr-filter-card">
             <form method="get" class="js-auto-filter-form" data-auto-filter-form>
                 <input type="hidden" name="section" value="pending-post-approvals">
 
-                <div class="pr-filter-grid">
+                <div class="pr-filter-grid{% if pending_post_approval_available_organizations %} pr-filter-grid--5col{% endif %}">
                     <input
                         type="text"
                         name="approval_search"
                         value="{{ pending_post_approval_search_query }}"
                         placeholder="Post, tələbə və məzmun üzrə axtar"
-                        class="pr-form-control"
+                        class="pr-form-control{% if pending_post_approval_available_organizations %} pr-filter-search-full{% endif %}"
                     >
 
                     <div class="bootstrap-single-select pending-review-select-wrap">
@@ -151,6 +151,7 @@
 
                             {% if item.post.approval_status != 'approved' %}
                                 {# ===== Pending / needs-changes: review form ===== #}
+                                {% if item.can_review %}
                                 <form method="post"
                                       action="{% url 'review_post' item.post.id %}"
                                       class="pending-post-actions"
@@ -184,8 +185,10 @@
                                         </button>
                                     </div>
                                 </form>
+                                {% endif %}
 
                                 {# Delete form for pending posts #}
+                                {% if item.can_moderate %}
                                 <form method="post"
                                       action="{% url 'teacher_moderate_post' item.post.id %}"
                                       class="pending-post-actions pending-post-moderate-form"
@@ -213,8 +216,9 @@
                                         </button>
                                     </div>
                                 </form>
+                                {% endif %}
 
-                            {% elif item.post.is_published %}
+                            {% elif item.can_moderate and item.post.is_published %}
                                 {# ===== Approved + published: deactivate / delete ===== #}
                                 <div class="pending-post-approved-note">
                                     <i class="fas fa-circle-check"></i>
@@ -255,7 +259,7 @@
                                     </div>
                                 </form>
 
-                            {% else %}
+                            {% elif item.can_moderate %}
                                 {# ===== Approved + deactivated: reactivate / delete ===== #}
                                 <div class="pending-post-deactivated-note">
                                     <i class="fas fa-eye-slash"></i>
@@ -323,7 +327,7 @@
         <div class="section-card">
             <div class="empty-state">
                 <i class="fas fa-check-circle"></i>
-                <p>Filtrə uyğun təsdiq gözləyən post tapılmadı.</p>
+                <p>Filtrə uyğun post tapılmadı.</p>
             </div>
         </div>
     {% endif %}
