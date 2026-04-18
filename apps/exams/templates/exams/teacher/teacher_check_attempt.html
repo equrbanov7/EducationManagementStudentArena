@@ -27,10 +27,10 @@
                                     status-empty
                                 {% elif ans.teacher_score is not None %}
                                     status-scored
-                                {% elif not ans.text_answer %}
-                                    status-empty
-                                {% else %}
+                                {% elif item.has_answer_content %}
                                     status-not-checked
+                                {% else %}
+                                    status-empty
                                 {% endif %}" 
                                 id="badge_{{ q.id }}">
                                 
@@ -38,10 +38,10 @@
                                     {% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}
                                 {% elif ans.teacher_score is not None %}
                                     {{ ans.teacher_score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
-                                {% elif not ans.text_answer %}
-                                    {% trans "status_empty_answer" context "exams.template.teacher_check_attempt" %}
-                                {% else %}
+                                {% elif item.has_answer_content %}
                                     {% trans "status_not_checked" context "exams.template.teacher_check_attempt" %}
+                                {% else %}
+                                    {% trans "status_empty_answer" context "exams.template.teacher_check_attempt" %}
                                 {% endif %}
                             </span>
                         </div>
@@ -67,15 +67,23 @@
                         <div class="data-store" style="display:none;"
                              data-q-text="{{ q.text|escape }}"
                              data-ans-text="{% if ans %}{{ ans.text_answer|escape }}{% else %}{% endif %}"
+                             data-has-answer="{% if item.has_answer_content %}1{% else %}0{% endif %}"
+                             data-has-ai-gradable="{% if item.has_ai_gradeable_content %}1{% else %}0{% endif %}"
+                             data-has-file-answer="{% if item.has_file_answer %}1{% else %}0{% endif %}"
+                             data-has-paint-answer="{% if item.has_paint_answer %}1{% else %}0{% endif %}"
                              data-q-points="{{ q.points }}"
                              data-q-correct-answer="{{ q.correct_answer|default_if_none:''|escape }}">
                         </div>
 
                         <div class="answer-preview">
-                            {% if ans and ans.text_answer %}
+                            {% if item.has_text_answer %}
                                 {{ ans.text_answer|truncatewords:10 }}
+                            {% elif item.has_file_answer %}
+                                <span class="answered-with-file">
+                                    <i class="fas fa-paperclip"></i> {% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}
+                                </span>
                         
-                            {% elif ans and ans.paint_image %}
+                            {% elif item.has_paint_answer %}
                                 <span class="answered-with-paint">
                                     <i class="fas fa-paint-brush"></i> {% trans "status_answered_with_paint" context "exams.template.teacher_check_attempt" %}
                                 </span>
@@ -87,11 +95,11 @@
                         
 
                         {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
-                        {% if ans and ans.files.all %}
+                        {% if item.has_file_answer %}
                             <div class="answer-files">
                                 <span class="files-title">{% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}:</span>
                                 <ul class="file-list">
-                                    {% for f in ans.files.all %}
+                                    {% for f in item.answer_files %}
                                         {% with name=f.filename|lower %}
                                             <li class="file-item">
                                                 <span class="file-icon">
@@ -241,7 +249,9 @@
             aiError: "{% filter escapejs %}{% trans 'ai_grade_error' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             aiCached: "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             aiQuotaInfo: "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
+            aiNoAnswer: "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            uploadedFilesLabel: "{% filter escapejs %}{% trans 'label_uploaded_files' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            answeredWithPaint: "{% filter escapejs %}{% trans 'status_answered_with_paint' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
         };
         window.AI_GRADE_URL = "{% url 'exams:ai_grade_answer' slug=exam.slug attempt_id=attempt.id %}";
     </script>
