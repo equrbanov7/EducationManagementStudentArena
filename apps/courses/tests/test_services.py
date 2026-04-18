@@ -2,13 +2,19 @@
 Service tests for courses app.
 """
 
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
+from apps.assignments.models import Assignment
 from apps.courses import services
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import StudentGroup
+from apps.exams.models import Exam, StudentGroup
+from apps.labs.models import Lab
 from apps.organizations.models import Membership, Organization
+from apps.projects.models import Project
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -216,3 +222,127 @@ class CourseTenantOrganizationTest(TestCase):
         )
 
         self.assertEqual(course.organization, organization)
+
+
+class StudentGroupTaskPropagationSignalTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="signal_teacher",
+            email="signal_teacher@example.com",
+            password="pass123",
+        )
+        self.existing_student = User.objects.create_user(
+            username="signal_student_existing",
+            email="signal_student_existing@example.com",
+            password="pass123",
+        )
+        self.new_student = User.objects.create_user(
+            username="signal_student_new",
+            email="signal_student_new@example.com",
+            password="pass123",
+        )
+        self.org = Organization.objects.create(
+            name="Signal Propagation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        self.course = Course.objects.create(
+            title="Signal Test Course",
+            owner=self.teacher,
+            status="published",
+            organization=self.org,
+        )
+        CourseMembership.objects.create(
+            course=self.course,
+            user=self.existing_student,
+            role="student",
+            group_name="Group A",
+        )
+
+        self.group = StudentGroup.objects.create(
+            name="Group A",
+            teacher=self.teacher,
+            organization=self.org,
+        )
+        self.group.students.add(self.existing_student)
+
+        now = timezone.now()
+        self.assignment = Assignment.objects.create(
+            course=self.course,
+            title="Signal Assignment",
+            created_by=self.teacher,
+            status="published",
+            start_date=now,
+        )
+        self.assignment.assigned_students.add(self.existing_student)
+
+        self.project = Project.objects.create(
+            course=self.course,
+            title="Signal Project",
+            description="Inherited by group",
+            start_date=now,
+            deadline=now + timedelta(days=7),
+            status="active",
+        )
+        self.project.assigned_students.add(self.existing_student)
+
+        self.lab = Lab.objects.create(
+            course=self.course,
+            title="Signal Lab",
+            description="Inherited by group",
+            start_datetime=now - timedelta(hours=1),
+            end_datetime=now + timedelta(days=2),
+            max_score=100,
+            max_attempts=1,
+            status="published",
+            allowed_groups="Group A",
+            created_by=self.teacher,
+        )
+
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            title="Signal Exam",
+            course=self.course,
+            organization=self.org,
+            is_active=True,
+            is_public=False,
+            start_datetime=now - timedelta(hours=1),
+            end_datetime=now + timedelta(days=2),
+        )
+        self.exam.allowed_groups.add(self.group)
+
+    def test_new_group_member_inherits_existing_group_course_tasks(self):
+        self.assertFalse(CourseMembership.objects.filter(course=self.course, user=self.new_student).exists())
+        self.assertFalse(self.assignment.assigned_students.filter(id=self.new_student.id).exists())
+        self.assertFalse(self.project.assigned_students.filter(id=self.new_student.id).exists())
+        self.assertFalse(self.lab.can_student_access(self.new_student))
+        self.assertFalse(self.exam.can_user_see(self.new_student))
+
+        with self.captureOnCommitCallbacks(execute=True):
+            self.group.students.add(self.new_student)
+
+        self.assertTrue(
+            CourseMembership.objects.filter(
+                course=self.course,
+                user=self.new_student,
+                role="student",
+                group_name="Group A",
+            ).exists()
+        )
+        self.assertTrue(self.assignment.assigned_students.filter(id=self.new_student.id).exists())
+        self.assertTrue(self.project.assigned_students.filter(id=self.new_student.id).exists())
+        self.assertTrue(self.lab.can_student_access(self.new_student))
+        self.assertTrue(self.exam.can_user_see(self.new_student))

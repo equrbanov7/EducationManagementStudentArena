@@ -209,6 +209,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         if not self.max_attempts_per_user:
             return None
 
+        self._expire_stale_attempts_for(user)
         used = self.attempts.filter(user=user, status__in=["submitted", "expired", "graded"]).count()
         left = self.max_attempts_per_user - used
         return max(left, 0)

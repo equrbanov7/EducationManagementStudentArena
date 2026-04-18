@@ -119,7 +119,7 @@ def _apply_violation_action(attempt, config, violation_count):
 
     if action == "auto_submit":
         attempt.supervision_status = "removed"
-        attempt.mark_finished(status="submitted")
+        attempt.mark_finished(status="submitted", extra_update_fields=["supervision_status"])
         _log_system_incident(
             attempt,
             "auto_submitted",
@@ -259,7 +259,7 @@ def teacher_stop_attempt(attempt, teacher):
 
     old_status = attempt.supervision_status
     attempt.supervision_status = "removed"
-    attempt.mark_finished(status="submitted")
+    attempt.mark_finished(status="submitted", extra_update_fields=["supervision_status"])
 
     SupervisionIncident.objects.create(
         organization=attempt.exam.organization,

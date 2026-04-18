@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -99,19 +101,43 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         return self.status in ("submitted", "expired")
 
     @property
+    def deadline_at(self):
+        if not self.started_at:
+            return None
+        duration_minutes = getattr(self.exam, "total_duration_minutes", None)
+        if not duration_minutes:
+            return None
+        return self.started_at + timedelta(minutes=duration_minutes)
+
+    @property
     def score_percent(self):
         total = self.correct_count + self.wrong_count
         if not total:
             return 0
         return round(self.correct_count * 100 / total, 1)
 
-    def mark_finished(self, status="submitted"):
+    def is_time_limit_reached(self, *, at_time=None):
+        deadline = self.deadline_at
+        if deadline is None:
+            return False
+        return (at_time or timezone.now()) >= deadline
+
+    def expire_if_time_limit_reached(self, *, at_time=None):
+        if self.is_finished or not self.is_time_limit_reached(at_time=at_time):
+            return False
+        self.mark_finished(status="expired")
+        return True
+
+    def mark_finished(self, status="submitted", extra_update_fields=None):
         self.status = status
         self.finished_at = timezone.now()
         if self.finished_at and self.started_at:
             delta = self.finished_at - self.started_at
             self.duration_seconds = int(delta.total_seconds())
-        self.save(update_fields=["status", "finished_at", "duration_seconds"])
+        update_fields = ["status", "finished_at", "duration_seconds"]
+        if extra_update_fields:
+            update_fields.extend(extra_update_fields)
+        self.save(update_fields=list(dict.fromkeys(update_fields)))
 
     def recalculate_score(self):
         qs = self.answers.all()
