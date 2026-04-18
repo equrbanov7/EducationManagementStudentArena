@@ -1954,6 +1954,59 @@ class ProfileViewTest(TestCase):
         self.assertFalse(target_user.is_active)
         self.assertTrue(target_user.profile.is_deleted)
 
+    def test_superadmin_can_hard_delete_soft_deleted_pending_org_owner(self):
+        superuser = User.objects.create_superuser(
+            username="hard_delete_superadmin",
+            email="hard_delete_superadmin@example.com",
+            password="adminpass123",
+        )
+        target_user = User.objects.create_user(
+            username="pending_owner_target",
+            email="pending_owner_target@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Pending Owner Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=target_user,
+            status="pending",
+            is_active=True,
+            organization_identifier="SCH-900",
+            license_identifier="LIC-900",
+        )
+
+        self.client.force_login(superuser)
+
+        soft_delete_response = self.client.post(
+            reverse("accounts:superadmin_user_management"),
+            {
+                "action": "soft_delete",
+                "user_id": target_user.pk,
+                "next": reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted",
+            },
+        )
+
+        self.assertRedirects(
+            soft_delete_response,
+            reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted",
+        )
+
+        hard_delete_response = self.client.post(
+            reverse("accounts:superadmin_user_management"),
+            {
+                "action": "hard_delete",
+                "user_id": target_user.pk,
+                "next": reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted",
+            },
+        )
+
+        self.assertRedirects(
+            hard_delete_response,
+            reverse("accounts:profile") + "?section=superadmin-users&user_status=deleted",
+        )
+        self.assertFalse(User.objects.filter(pk=target_user.pk).exists())
+        self.assertFalse(Organization.objects.filter(pk=pending_org.pk).exists())
+
     def test_manage_roles_shows_primary_role_summary_for_multi_role_user(self):
         from apps.accounts.models import ProfileRole
         from apps.organizations.models import Membership

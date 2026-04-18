@@ -464,12 +464,10 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         session["active_organization"] = self.org_a.slug
         session.save()
 
-    def test_teacher_exam_list_is_owner_and_tenant_scoped(self):
+    def test_teacher_exam_list_redirects_to_profile_my_exams_section(self):
         response = self.client.get(reverse("exams:teacher_exam_list"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.exam_visible.title)
-        self.assertNotContains(response, self.exam_other_tenant.title)
-        self.assertNotContains(response, self.exam_other_author.title)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
 
     def test_modal_create_exam_includes_course_hidden_field_when_requested_from_course_dashboard(self):
         response = self.client.get(
@@ -823,6 +821,13 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
         self.assertEqual(response.status_code, 403)
         self.assertTrue(Exam.objects.filter(id=self.exam_visible.id).exists())
+
+    def test_delete_exam_redirects_to_profile_my_exams_section(self):
+        response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
+        self.assertFalse(Exam.objects.filter(id=self.exam_visible.id).exists())
 
     def test_edit_other_tenant_exam_is_not_found(self):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
@@ -1597,6 +1602,96 @@ class StudentExamVisibilityFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:take_exam", args=[self.code_assigned_exam.slug, attempt.id]))
+
+    def test_timed_out_test_attempt_no_longer_resumes_from_start_route(self):
+        self.course_assigned_exam.total_duration_minutes = 30
+        self.course_assigned_exam.max_attempts_per_user = 1
+        self.course_assigned_exam.save(update_fields=["total_duration_minutes", "max_attempts_per_user"])
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        attempt.started_at = timezone.now() - timedelta(minutes=31)
+        attempt.save(update_fields=["started_at"])
+
+        response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]))
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
+        self.assertIsNotNone(attempt.finished_at)
+
+    def test_timed_out_written_attempt_starts_new_attempt_when_attempts_remain(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Retry Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+            total_duration_minutes=20,
+            max_attempts_per_user=2,
+        )
+        written_exam.allowed_users.add(self.student)
+        ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Written retry question",
+            order=1,
+            points=1,
+        )
+        old_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        old_attempt.started_at = timezone.now() - timedelta(minutes=21)
+        old_attempt.save(update_fields=["started_at"])
+
+        response = self.client.get(reverse("exams:start_exam", args=[written_exam.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        old_attempt.refresh_from_db()
+        self.assertEqual(old_attempt.status, "expired")
+        new_attempt = written_exam.attempts.get(user=self.student, attempt_number=2)
+        self.assertEqual(new_attempt.status, "in_progress")
+        self.assertEqual(response.url, reverse("exams:take_exam", args=[written_exam.slug, new_attempt.id]))
+
+    def test_take_exam_redirects_timed_out_written_attempt_to_result(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Direct Timeout Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+            total_duration_minutes=15,
+        )
+        written_exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Written timeout question",
+            order=1,
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="Draft answer")
+        attempt.started_at = timezone.now() - timedelta(minutes=16)
+        attempt.save(update_fields=["started_at"])
+
+        response = self.client.get(reverse("exams:take_exam", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:exam_result", args=[written_exam.slug, attempt.id]))
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
+        self.assertIsNotNone(attempt.finished_at)
 
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))

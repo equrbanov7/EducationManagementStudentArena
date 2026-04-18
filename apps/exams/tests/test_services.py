@@ -2,6 +2,7 @@
 Service tests for exams app.
 """
 
+from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -9,14 +10,16 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils import timezone
 from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, QuestionBlock
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamSupervisionConfig, QuestionBlock
 from apps.exams.services import parsing
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.supervision import log_supervision_incident, teacher_stop_attempt
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -48,6 +51,20 @@ class ExamAttemptManagementServicesTest(TestCase):
         active_attempt = services.get_active_attempt_for_user(self.exam, self.student)
 
         self.assertEqual(active_attempt, attempt)
+
+    def test_get_active_attempt_for_user_expires_timed_out_attempt(self):
+        self.exam.total_duration_minutes = 30
+        self.exam.save(update_fields=["total_duration_minutes"])
+        attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, attempt_number=1, status="in_progress")
+        attempt.started_at = timezone.now() - timedelta(minutes=31)
+        attempt.save(update_fields=["started_at"])
+
+        active_attempt = services.get_active_attempt_for_user(self.exam, self.student)
+
+        self.assertIsNone(active_attempt)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
+        self.assertIsNotNone(attempt.finished_at)
 
     def test_can_user_start_new_attempt(self):
         """Test checking if user can start new attempt."""
@@ -268,6 +285,76 @@ class ExamQuestionRandomizerServicesTest(TestCase):
 
         ordered_counts = [block_counts[block.id] for block in blocks]
         self.assertEqual(ordered_counts, [2, 1, 1, 1])
+
+
+class ExamSupervisionServicesTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="supervision_teacher",
+            email="supervision_teacher@example.com",
+            password="pass123",
+        )
+        self.student = User.objects.create_user(
+            username="supervision_student",
+            email="supervision_student@example.com",
+            password="pass123",
+        )
+        self.org = Organization.objects.create(
+            name="Supervision Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        self.exam = Exam.objects.create(
+            title="Supervision Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
+
+    def test_teacher_stop_attempt_persists_removed_status_and_finishes_attempt(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        teacher_stop_attempt(attempt, self.teacher)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "submitted")
+        self.assertEqual(attempt.supervision_status, "removed")
+        self.assertTrue(attempt.is_finished)
+        self.assertIsNotNone(attempt.finished_at)
+
+    def test_auto_submit_persists_removed_status_and_finishes_attempt(self):
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            violation_action="auto_submit",
+            max_fullscreen_violations=1,
+            detect_tab_switch=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        result = log_supervision_incident(attempt, "fullscreen_exited", {"source": "test"})
+
+        self.assertEqual(result["action_taken"], "auto_submitted")
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "submitted")
+        self.assertEqual(attempt.supervision_status, "removed")
+        self.assertTrue(attempt.is_finished)
+        self.assertIsNotNone(attempt.finished_at)
 
 
 class ExamStatisticsAiSummaryServiceTest(SimpleTestCase):
