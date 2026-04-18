@@ -16,6 +16,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
@@ -23,6 +24,33 @@ from core.permissions import request_has_permission
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 ANONYMOUS_NAME_CODE_LENGTH = 6
+
+
+def _build_answer_review_item(answer):
+    answer_files = list(answer.files.all())
+    has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
+    has_paint_answer = bool(getattr(answer, "paint_image", None)) or bool(getattr(answer, "has_paint", False))
+    has_file_answer = bool(answer_files)
+    has_answer_content = has_written_answer_content(
+        student_answer=answer.text_answer,
+        answer_files=answer_files,
+        paint_image=getattr(answer, "paint_image", None),
+    )
+
+    return {
+        "question": answer.question,
+        "answer": answer,
+        "answer_files": answer_files,
+        "has_text_answer": has_text_answer,
+        "has_paint_answer": has_paint_answer,
+        "has_file_answer": has_file_answer,
+        "has_answer_content": has_answer_content,
+        "has_ai_gradeable_content": has_ai_gradeable_answer_content(
+            student_answer=answer.text_answer,
+            answer_files=answer_files,
+            paint_image=getattr(answer, "paint_image", None),
+        ),
+    }
 
 
 def _append_query_params(url, **params):
@@ -529,7 +557,7 @@ def teacher_view_attempt(request, slug, attempt_id):
             .order_by("id")
         )
 
-    qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
+    qa_list = [_build_answer_review_item(a) for a in answers_qs]
     can_view_name, seconds_remaining = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
@@ -627,7 +655,7 @@ def teacher_check_attempt(request, slug, attempt_id):
             .order_by("id")
         )
 
-    qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
+    qa_list = [_build_answer_review_item(a) for a in answers_qs]
 
     if request.method == "POST":
         if not request_has_permission(request, "grade.input"):
@@ -731,7 +759,9 @@ def ai_grade_answer(request, slug, attempt_id):
     if not question_id:
         return JsonResponse({"ok": False, "error": "question_id required"}, status=400)
 
-    answer = attempt.answers.select_related("question").filter(question_id=question_id).first()
+    answer = (
+        attempt.answers.select_related("question").prefetch_related("files").filter(question_id=question_id).first()
+    )
     if not answer:
         return JsonResponse({"ok": False, "error": "Answer not found"}, status=404)
 
@@ -749,6 +779,8 @@ def ai_grade_answer(request, slug, attempt_id):
         correct_answer=getattr(q, "correct_answer", "") or "",
         language_code=request.LANGUAGE_CODE,
         user_id=request.user.pk,
+        answer_files=answer.files.all(),
+        paint_image=getattr(answer, "paint_image", None),
     )
     return JsonResponse(result)
 

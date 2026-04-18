@@ -7,7 +7,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import Exam
-from apps.exams.services.attempts import _start_or_resume_attempt
+from apps.exams.services.attempts import _start_or_resume_attempt, get_attempt_limit_result_redirect_url
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
@@ -53,6 +53,15 @@ def exam_code_check(request):
 
     can_start, reason = exam.can_user_start(request.user, code=code)
     if not can_start:
+        attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, request.user)
+        if attempt_limit_result_url:
+            messages.info(
+                request,
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(
+                    max_attempts=exam.max_attempts_per_user
+                ),
+            )
+            return redirect(attempt_limit_result_url)
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_failed"))
         return redirect(_resolve_exam_failure_redirect(request))
 
