@@ -3024,7 +3024,11 @@ class ProfileViewTest(TestCase):
         self.client.force_login(superadmin)
         org_response = self.client.get(
             reverse("accounts:profile"),
-            {"section": "pending-post-approvals", "approval_organization": str(org_a.id)},
+            {
+                "section": "pending-post-approvals",
+                "approval_organization": str(org_a.id),
+                "approval_status": "pending",
+            },
         )
 
         self.assertEqual(org_response.status_code, 200)
@@ -3040,7 +3044,11 @@ class ProfileViewTest(TestCase):
 
         personal_response = self.client.get(
             reverse("accounts:profile"),
-            {"section": "pending-post-approvals", "approval_organization": "__personal__"},
+            {
+                "section": "pending-post-approvals",
+                "approval_organization": "__personal__",
+                "approval_status": "pending",
+            },
         )
 
         self.assertEqual(personal_response.status_code, 200)
@@ -3100,6 +3108,149 @@ class ProfileViewTest(TestCase):
             f"approval_organization={organization.id}",
             response.context["pending_post_approval_pagination_query"],
         )
+
+    def test_superadmin_pending_post_approvals_default_to_all_posts_and_show_org_filter(self):
+        from apps.blog.models import Post
+
+        scope_marker = "ScopeMarkerPendingPostsAll"
+        superadmin = User.objects.create_superuser(
+            username="pending_posts_all_superadmin",
+            email="pending_posts_all_superadmin@example.com",
+            password="testpass123",
+        )
+        owner = User.objects.create_user("pending_posts_all_owner", "owner_all@example.com", "testpass123")
+        teacher = User.objects.create_user("pending_posts_all_teacher", "teacher_all@example.com", "testpass123")
+        personal_author = User.objects.create_user(
+            "pending_posts_all_personal",
+            "personal_all@example.com",
+            "testpass123",
+        )
+
+        organization = Organization.objects.create(
+            name="Pending Posts All Org",
+            slug="pending-posts-all-org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+
+        personal_profile = personal_author.profile
+        personal_profile.role = ProfileRole.TEACHER
+        personal_profile.organization = None
+        personal_profile.organization_type = OrganizationType.INDIVIDUAL
+        personal_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        Post.objects.create(
+            author=teacher,
+            title=f"{scope_marker} Published Org Teacher Post",
+            content="Published org post",
+            requires_approval=False,
+            approval_status=Post.ApprovalStatus.APPROVED,
+            is_published=True,
+        )
+        Post.objects.create(
+            author=personal_author,
+            title=f"{scope_marker} Personal Hidden Post",
+            content="Personal hidden post",
+            requires_approval=False,
+            approval_status=Post.ApprovalStatus.APPROVED,
+            is_published=False,
+        )
+
+        _login_with_org(self.client, superadmin, organization)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "pending-post-approvals",
+                "approval_search": scope_marker,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pending_post_approval_filter_status"], "all")
+        self.assertEqual(response.context["pending_post_approval_total_count"], 2)
+        titles = [item["post"].title for item in response.context["pending_post_approval_items"]]
+        self.assertEqual(
+            titles,
+            [
+                f"{scope_marker} Personal Hidden Post",
+                f"{scope_marker} Published Org Teacher Post",
+            ],
+        )
+        available_org_ids = {
+            str(item["id"]) for item in response.context["pending_post_approval_available_organizations"]
+        }
+        self.assertIn(str(organization.id), available_org_ids)
+        self.assertIn("__personal__", available_org_ids)
+
+    def test_org_admin_pending_post_approvals_are_scoped_to_active_organization_posts(self):
+        from apps.blog.models import Post
+
+        scope_marker = "ScopeMarkerOrgScopedPosts"
+        org_admin = User.objects.create_user(
+            username="pending_posts_org_admin",
+            email="pending_posts_org_admin@example.com",
+            password="testpass123",
+        )
+        owner_a = User.objects.create_user("pending_posts_owner_one", "owner_one@example.com", "testpass123")
+        owner_b = User.objects.create_user("pending_posts_owner_two", "owner_two@example.com", "testpass123")
+        teacher_a = User.objects.create_user("pending_posts_teacher_one", "teacher_one@example.com", "testpass123")
+        teacher_b = User.objects.create_user("pending_posts_teacher_two", "teacher_two@example.com", "testpass123")
+
+        org_a = Organization.objects.create(
+            name="Pending Posts Admin Org A",
+            slug="pending-posts-admin-org-a",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_a,
+            status="active",
+            is_active=True,
+        )
+        org_b = Organization.objects.create(
+            name="Pending Posts Admin Org B",
+            slug="pending-posts-admin-org-b",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_b,
+            status="active",
+            is_active=True,
+        )
+
+        _assign_user_to_org(org_admin, org_a, ProfileRole.ORG_ADMIN, membership_role_name="director")
+        _assign_user_to_org(teacher_a, org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(teacher_b, org_b, ProfileRole.TEACHER)
+
+        Post.objects.create(
+            author=teacher_a,
+            title=f"{scope_marker} Org A Visible Post",
+            content="Org A content",
+            requires_approval=False,
+            approval_status=Post.ApprovalStatus.APPROVED,
+            is_published=True,
+        )
+        Post.objects.create(
+            author=teacher_b,
+            title=f"{scope_marker} Org B Hidden Post",
+            content="Org B content",
+            requires_approval=False,
+            approval_status=Post.ApprovalStatus.APPROVED,
+            is_published=True,
+        )
+
+        _login_with_org(self.client, org_admin, org_a)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "pending-post-approvals",
+                "approval_search": scope_marker,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pending_post_approval_filter_status"], "all")
+        self.assertEqual(response.context["pending_post_approval_total_count"], 1)
+        titles = [item["post"].title for item in response.context["pending_post_approval_items"]]
+        self.assertEqual(titles, [f"{scope_marker} Org A Visible Post"])
 
 
 class AssignedItemsViewTest(TestCase):
