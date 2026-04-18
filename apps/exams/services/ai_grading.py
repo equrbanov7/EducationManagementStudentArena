@@ -9,15 +9,21 @@ Follows the same caching + rate-limiting pattern as ai_summary.py:
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
+import mimetypes
 import re
 import time
+from typing import Iterable
+from urllib.parse import quote
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import get_language, pgettext
+
+import requests
 
 from core.rate_limit import record_rate_limit_hit
 
@@ -27,6 +33,7 @@ _DEFAULT_MODEL_CHAIN = ("gemini-2.5-flash-lite", "gemini-2.5-flash")
 _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 _CACHE_TTL = 60 * 60 * 24  # 24 hours
+_REQUEST_TIMEOUT_SECONDS = 60
 
 
 def _get_grading_model_chain() -> tuple[str, ...]:
@@ -69,12 +76,30 @@ def _language_name(code: str) -> str:
 
 
 def _grade_cache_key(question_text: str, student_answer: str, max_points: int, lang: str) -> str:
+    return _grade_cache_key_with_attachments(
+        question_text=question_text,
+        student_answer=student_answer,
+        max_points=max_points,
+        lang=lang,
+        attachment_hashes=(),
+    )
+
+
+def _grade_cache_key_with_attachments(
+    *,
+    question_text: str,
+    student_answer: str,
+    max_points: int,
+    lang: str,
+    attachment_hashes: Iterable[str],
+) -> str:
     payload = json.dumps(
         {
             "question": question_text,
             "answer": student_answer,
             "max_points": max_points,
             "lang": lang,
+            "attachments": list(attachment_hashes),
         },
         sort_keys=True,
         ensure_ascii=False,
@@ -127,6 +152,107 @@ def _parse_ai_grade(text: str, max_points: int) -> tuple[int, str]:
     return score, explanation
 
 
+def _normalized_text(student_answer: str) -> str:
+    return (student_answer or "").strip()
+
+
+def _materialize_answer_files(answer_files) -> list:
+    if not answer_files:
+        return []
+    if hasattr(answer_files, "all"):
+        return list(answer_files.all())
+    return list(answer_files)
+
+
+def _detect_mime_type(file_obj, fallback_name: str = "") -> str:
+    mime_type = (
+        (getattr(file_obj, "content_type", "") or getattr(getattr(file_obj, "file", None), "content_type", "") or "")
+        .strip()
+        .lower()
+    )
+    if mime_type:
+        return mime_type
+
+    guessed, _ = mimetypes.guess_type(getattr(file_obj, "name", "") or fallback_name)
+    return (guessed or "").strip().lower()
+
+
+def _is_image_mime_type(mime_type: str) -> bool:
+    return bool(mime_type and mime_type.startswith("image/"))
+
+
+def _read_file_bytes(file_obj) -> bytes:
+    if not file_obj:
+        return b""
+
+    try:
+        file_obj.open("rb")
+    except Exception:
+        pass
+
+    try:
+        if hasattr(file_obj, "seek"):
+            file_obj.seek(0)
+        data = file_obj.read()
+    finally:
+        try:
+            file_obj.close()
+        except Exception:
+            pass
+
+    return data or b""
+
+
+def _collect_image_inputs(*, answer_files=None, paint_image=None) -> list[dict]:
+    image_inputs: list[dict] = []
+
+    for answer_file in _materialize_answer_files(answer_files):
+        file_field = getattr(answer_file, "file", None)
+        if not file_field:
+            continue
+
+        mime_type = _detect_mime_type(file_field)
+        if not _is_image_mime_type(mime_type):
+            continue
+
+        binary = _read_file_bytes(file_field)
+        if not binary:
+            continue
+
+        image_inputs.append(
+            {
+                "mime_type": mime_type,
+                "data_b64": base64.b64encode(binary).decode("ascii"),
+                "attachment_hash": hashlib.sha256(mime_type.encode("utf-8") + b":" + binary).hexdigest(),
+            }
+        )
+
+    if paint_image:
+        mime_type = _detect_mime_type(paint_image, fallback_name="paint.png") or "image/png"
+        if _is_image_mime_type(mime_type):
+            binary = _read_file_bytes(paint_image)
+            if binary:
+                image_inputs.append(
+                    {
+                        "mime_type": mime_type,
+                        "data_b64": base64.b64encode(binary).decode("ascii"),
+                        "attachment_hash": hashlib.sha256(mime_type.encode("utf-8") + b":" + binary).hexdigest(),
+                    }
+                )
+
+    return image_inputs
+
+
+def has_written_answer_content(*, student_answer: str = "", answer_files=None, paint_image=None) -> bool:
+    return bool(_normalized_text(student_answer)) or bool(_materialize_answer_files(answer_files)) or bool(paint_image)
+
+
+def has_ai_gradeable_answer_content(*, student_answer: str = "", answer_files=None, paint_image=None) -> bool:
+    if _normalized_text(student_answer):
+        return True
+    return bool(_collect_image_inputs(answer_files=answer_files, paint_image=paint_image))
+
+
 def _build_grading_prompt(
     *,
     question_text: str,
@@ -134,12 +260,21 @@ def _build_grading_prompt(
     max_points: int,
     correct_answer: str,
     lang_name: str,
+    includes_image_inputs: bool,
 ) -> str:
     correct_section = ""
     if correct_answer:
         correct_section = f"""
 **Reference/Correct Answer:**
 {correct_answer}
+"""
+
+    image_section = ""
+    if includes_image_inputs:
+        image_section = """
+**Attached Visual Answer Material:**
+- The student's answer may include uploaded images or drawn work.
+- Read handwriting, formulas, diagrams, screenshots, and annotations in the images before grading.
 """
 
     return f"""You are an expert exam grader. Grade the following student answer.
@@ -149,6 +284,7 @@ def _build_grading_prompt(
 {correct_section}
 **Student's Answer:**
 {student_answer}
+{image_section}
 
 **Maximum Points:** {max_points}
 
@@ -167,6 +303,50 @@ SCORE: <number between 0 and {max_points}>
 EXPLANATION: <your grading explanation in {lang_name}>"""
 
 
+def _gemini_generate_content(*, model_name: str, api_key: str, prompt: str, image_inputs: list[dict]) -> str:
+    parts = [{"text": prompt}]
+    for image in image_inputs:
+        parts.append(
+            {
+                "inline_data": {
+                    "mime_type": image["mime_type"],
+                    "data": image["data_b64"],
+                }
+            }
+        )
+
+    response = requests.post(
+        (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{quote(model_name, safe='')}:"
+            "generateContent"
+            f"?key={api_key}"
+        ),
+        json={"contents": [{"parts": parts}]},
+        timeout=_REQUEST_TIMEOUT_SECONDS,
+    )
+
+    if response.status_code >= 400:
+        try:
+            payload = response.json()
+        except ValueError:
+            payload = {}
+        error_message = (
+            payload.get("error", {}).get("message") or response.text or f"Gemini HTTP {response.status_code}"
+        )
+        raise requests.HTTPError(error_message, response=response)
+
+    payload = response.json()
+    texts = []
+    for candidate in payload.get("candidates", []):
+        for part in candidate.get("content", {}).get("parts", []):
+            text = (part.get("text") or "").strip()
+            if text:
+                texts.append(text)
+
+    return "\n".join(texts).strip()
+
+
 def grade_written_answer(
     *,
     question_text: str,
@@ -175,6 +355,8 @@ def grade_written_answer(
     correct_answer: str = "",
     language_code: str | None = None,
     user_id: int | None = None,
+    answer_files=None,
+    paint_image=None,
 ) -> dict:
     """Grade a written answer using AI.
 
@@ -191,14 +373,22 @@ def grade_written_answer(
     if not api_key:
         return {"ok": False, "error": pgettext("exams.service.ai_grading.error", "gemini_api_key_missing")}
 
-    if not student_answer or not student_answer.strip():
+    normalized_answer = _normalized_text(student_answer)
+    image_inputs = _collect_image_inputs(answer_files=answer_files, paint_image=paint_image)
+    if not normalized_answer and not image_inputs:
         return {"ok": False, "error": pgettext("exams.service.ai_grading.error", "empty_answer")}
 
     lang = language_code or get_language() or "en"
     lang_name = _language_name(lang)
 
     # ── Cache check ────────────────────────────────────────────────
-    cache_key = _grade_cache_key(question_text, student_answer, max_points, lang)
+    cache_key = _grade_cache_key_with_attachments(
+        question_text=question_text,
+        student_answer=normalized_answer,
+        max_points=max_points,
+        lang=lang,
+        attachment_hashes=(item["attachment_hash"] for item in image_inputs),
+    )
     cached = cache.get(cache_key)
     if cached is not None:
         quota = _get_quota_info(user_id)
@@ -213,24 +403,24 @@ def grade_written_answer(
     # ── Call Gemini ────────────────────────────────────────────────
     prompt = _build_grading_prompt(
         question_text=question_text,
-        student_answer=student_answer,
+        student_answer=normalized_answer,
         max_points=max_points,
         correct_answer=correct_answer,
         lang_name=lang_name,
+        includes_image_inputs=bool(image_inputs),
     )
 
     try:
-        import google.generativeai as genai
-
-        genai.configure(api_key=api_key)
-
         last_exc = None
         for model_name in _get_grading_model_chain():
             for attempt in range(_MAX_RETRIES + 1):
                 try:
-                    model = genai.GenerativeModel(model_name)
-                    response = model.generate_content(prompt)
-                    text = (response.text or "").strip()
+                    text = _gemini_generate_content(
+                        model_name=model_name,
+                        api_key=api_key,
+                        prompt=prompt,
+                        image_inputs=image_inputs,
+                    )
 
                     score, explanation = _parse_ai_grade(text, max_points)
 
@@ -245,7 +435,9 @@ def grade_written_answer(
                 except Exception as exc:
                     last_exc = exc
                     exc_name = type(exc).__name__
-                    if "ResourceExhausted" in exc_name or "429" in str(exc):
+                    response = getattr(exc, "response", None)
+                    response_status = getattr(response, "status_code", None)
+                    if response_status == 429 or "ResourceExhausted" in exc_name or "429" in str(exc):
                         if attempt < _MAX_RETRIES:
                             time.sleep(_RETRY_BASE_DELAY * (attempt + 1))
                             continue
