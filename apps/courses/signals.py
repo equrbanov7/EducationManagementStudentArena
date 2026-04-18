@@ -41,7 +41,7 @@ def _propagate_new_members_to_courses(instance, new_student_ids):
     When new students join a StudentGroup, enrol them in every course
     where that group is already linked (i.e. existing CourseMembership rows
     carry group_name == instance.name) and propagate any group-based
-    assignment membership to them as well.
+    task membership to them as well.
 
     This ensures idempotent behaviour: students already enrolled are
     ignored, and each student gets exactly one membership per course.
@@ -50,6 +50,7 @@ def _propagate_new_members_to_courses(instance, new_student_ids):
     so the M2M rows are fully committed before any DB reads here.
     """
     from apps.assignments.models import Assignment
+    from apps.projects.models import Project
 
     teacher = getattr(instance, "teacher", None)
 
@@ -83,37 +84,58 @@ def _propagate_new_members_to_courses(instance, new_student_ids):
         if to_create:
             CourseMembership.objects.bulk_create(to_create, ignore_conflicts=True)
 
-        # Propagate existing group-based assignment membership.
-        # Assignments that have at least one member from this group are
-        # considered "group assignments" and new students inherit them.
-        group_assignment_ids = list(
-            Assignment.objects.filter(
-                course_id=course_id,
-                assigned_students__course_memberships__course_id=course_id,
-                assigned_students__course_memberships__group_name=instance.name,
-            )
-            .distinct()
-            .values_list("id", flat=True)
+        _propagate_group_task_assignments(
+            task_model=Assignment,
+            course_id=course_id,
+            group_name=instance.name,
+            new_student_ids=new_student_ids,
         )
-        if not group_assignment_ids:
-            continue
+        _propagate_group_task_assignments(
+            task_model=Project,
+            course_id=course_id,
+            group_name=instance.name,
+            new_student_ids=new_student_ids,
+        )
 
-        # Bulk-insert the M2M relations to avoid one query per assignment.
-        AssignmentStudentThrough = Assignment.assigned_students.through
-        already_assigned = set(
-            AssignmentStudentThrough.objects.filter(
-                assignment_id__in=group_assignment_ids,
-                user_id__in=new_student_ids,
-            ).values_list("assignment_id", "user_id")
+
+def _propagate_group_task_assignments(*, task_model, course_id, group_name, new_student_ids):
+    """
+    Copy existing group-based M2M task assignments to newly added students.
+
+    The app stores course assignments/projects as explicit user relations, so
+    when a teacher originally targets a whole group we infer that intent from
+    existing assignees whose course membership currently carries ``group_name``.
+    """
+    task_fk_name = f"{task_model._meta.model_name}_id"
+    group_task_ids = list(
+        task_model.objects.filter(
+            course_id=course_id,
+            assigned_students__course_memberships__course_id=course_id,
+            assigned_students__course_memberships__group_name=group_name,
         )
-        new_relations = [
-            AssignmentStudentThrough(assignment_id=aid, user_id=uid)
-            for aid in group_assignment_ids
-            for uid in new_student_ids
-            if (aid, uid) not in already_assigned
-        ]
-        if new_relations:
-            AssignmentStudentThrough.objects.bulk_create(new_relations, ignore_conflicts=True)
+        .distinct()
+        .values_list("id", flat=True)
+    )
+    if not group_task_ids:
+        return
+
+    through_model = task_model.assigned_students.through
+    already_assigned = set(
+        through_model.objects.filter(
+            **{
+                f"{task_fk_name}__in": group_task_ids,
+                "user_id__in": new_student_ids,
+            }
+        ).values_list(task_fk_name, "user_id")
+    )
+    new_relations = [
+        through_model(**{task_fk_name: task_id, "user_id": user_id})
+        for task_id in group_task_ids
+        for user_id in new_student_ids
+        if (task_id, user_id) not in already_assigned
+    ]
+    if new_relations:
+        through_model.objects.bulk_create(new_relations, ignore_conflicts=True)
 
 
 # Qrupun tələbələri dəyişəndə -> kurs membership qrupunu sync elə

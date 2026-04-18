@@ -461,22 +461,18 @@ class HttpTenantIsolationTest(TestCase):
 
     def test_teacher_exam_list_requires_active_organization(self):
         """
-        When a teacher has no active_organization in their session and belongs
-        to multiple organizations, the exam list view either redirects to the
-        org selector or denies access — in either case, no exam content is shown.
+        The legacy /exams/ route should no longer render a standalone exam list
+        page and must redirect to the profile my-exams section instead.
         """
-        # Log in as teacher_a with org_a active.
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        # Give teacher_a a second membership so the middleware cannot auto-select.
         _assign_user_to_org(self.teacher_a, self.org_b, ProfileRole.TEACHER)
-        # Remove the active org from the session to trigger the ambiguous-org path.
         session = self.client.session
         session.pop("active_organization", None)
         session.save()
 
         response = self.client.get(reverse("exams:teacher_exam_list"))
-        # The view must NOT render an exam list without an active org context.
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
 
     def test_student_available_exams_empty_without_active_organization(self):
         """
@@ -540,14 +536,13 @@ class HttpTenantIsolationTest(TestCase):
     def test_forged_session_cannot_expose_cross_tenant_exams(self):
         """
         Even when Org-B's slug is injected into the session, the Org-A teacher
-        must not see Org-B exams in their exam list.
+        must not see Org-B exams in their profile my-exams list.
         """
         _login_with_org(self.client, self.teacher_a, self.org_b)
 
-        response = self.client.get(reverse("exams:teacher_exam_list"))
+        response = self.client.get(f"{reverse('accounts:profile')}?section=my-exams")
         self.assertEqual(response.status_code, 200)
-        exam_titles = [e.title for e in response.context["exams"]]
-        self.assertNotIn(self.exam_b.title, exam_titles)
+        self.assertNotContains(response, self.exam_b.title)
 
     # ─────────────────────────────────────────────────────────────────────────
     # HTTP cross-tenant resource access
@@ -600,13 +595,12 @@ class HttpTenantIsolationTest(TestCase):
         self.assertNotIn(self.course_b.title, course_titles)
 
     def test_teacher_exam_list_shows_only_active_tenant_exams(self):
-        """Teacher sees only exams belonging to the active tenant."""
+        """Teacher sees only exams belonging to the active tenant in profile my-exams."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("exams:teacher_exam_list"))
+        response = self.client.get(f"{reverse('accounts:profile')}?section=my-exams")
         self.assertEqual(response.status_code, 200)
-        exam_titles = [e.title for e in response.context["exams"]]
-        self.assertIn(self.exam_a.title, exam_titles)
-        self.assertNotIn(self.exam_b.title, exam_titles)
+        self.assertContains(response, self.exam_a.title)
+        self.assertNotContains(response, self.exam_b.title)
 
     def test_student_available_exams_excludes_other_tenant_exams(self):
         """Student's available exam list does not include Org-B exams."""
@@ -646,13 +640,12 @@ class HttpTenantIsolationTest(TestCase):
     def test_user_from_org_A_cannot_see_org_B_exams(self):
         """
         Acceptance criteria: a user logged in under Org-A must never see
-        exams that belong to Org-B in the teacher exam list view.
+        exams that belong to Org-B in the profile my-exams section.
         """
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("exams:teacher_exam_list"))
+        response = self.client.get(f"{reverse('accounts:profile')}?section=my-exams")
         self.assertEqual(response.status_code, 200)
-        exam_titles = [e.title for e in response.context["exams"]]
-        self.assertNotIn(self.exam_b.title, exam_titles, "Org-A user must not see Org-B exams")
+        self.assertNotContains(response, self.exam_b.title)
 
     def test_user_org_a_cannot_download_org_b_media(self):
         """
