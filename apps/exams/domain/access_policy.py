@@ -102,7 +102,18 @@ class StudentGroup(models.Model):
 
 
 class ExamAccessPolicyMixin:
+    def _expire_stale_attempts_for(self, user: User) -> bool:
+        changed = False
+        # Use Python-side expiry logic because the effective deadline depends on
+        # each attempt's started_at plus the exam duration, which is easier to
+        # keep consistent in one place on the model.
+        for attempt in self.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at"):
+            if attempt.expire_if_time_limit_reached():
+                changed = True
+        return changed
+
     def _user_has_active_attempt(self, user: User) -> bool:
+        self._expire_stale_attempts_for(user)
         return self.attempts.filter(user=user, status__in=["draft", "in_progress"]).exists()
 
     def _user_in_allowed_groups(self, user: User) -> bool:
