@@ -10,7 +10,11 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
-from apps.exams.services.attempts import _start_or_resume_attempt, generate_random_questions_for_attempt
+from apps.exams.services.attempts import (
+    _start_or_resume_attempt,
+    generate_random_questions_for_attempt,
+    get_attempt_limit_result_redirect_url,
+)
 from apps.exams.services.randomizer import build_shuffled_options
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
@@ -55,6 +59,15 @@ def start_exam(request, slug):
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
     if not can_start:
+        attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, request.user)
+        if attempt_limit_result_url:
+            messages.info(
+                request,
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(
+                    max_attempts=exam.max_attempts_per_user
+                ),
+            )
+            return redirect(attempt_limit_result_url)
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
         return redirect(_resolve_exam_failure_redirect(request))
 
