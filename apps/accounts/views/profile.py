@@ -1007,6 +1007,7 @@ def user_profile(request):
     pending_post_approval_available_organizations = []
     pending_post_approval_page_obj = None
     pending_post_approval_pagination_query = ""
+    pending_post_approval_total_count = 0
     if "pending-post-approvals" in allowed_sections:
         (
             pending_post_approval_items,
@@ -1023,6 +1024,7 @@ def user_profile(request):
             group_id=request.GET.get("approval_group"),
             organization_id=request.GET.get("approval_organization"),
         )
+        pending_post_approval_total_count = len(pending_post_approval_items)
         pending_post_approval_count = count_pending_reviewable_posts(request.user)
         pending_post_approval_page_obj = Paginator(pending_post_approval_items, 10).get_page(
             request.GET.get("approval_page", 1)
@@ -1991,6 +1993,7 @@ def user_profile(request):
         "pending_post_approval_available_organizations": pending_post_approval_available_organizations,
         "pending_post_approval_page_obj": pending_post_approval_page_obj,
         "pending_post_approval_pagination_query": pending_post_approval_pagination_query,
+        "pending_post_approval_total_count": pending_post_approval_total_count,
         "pending_review_items": pending_review_page_obj or pending_review_items,
         "pending_review_search_query": pending_review_search_query,
         "pending_review_filter_type": pending_review_filter_type,

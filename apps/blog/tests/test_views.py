@@ -513,6 +513,49 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, "data-pending-post-toggle")
         self.assertContains(response, "data-pending-post-full")
 
+    def test_superadmin_can_deactivate_published_post_without_approval_flag(self):
+        superadmin = User.objects.create_superuser(
+            username="blog_post_superadmin",
+            email="blog_post_superadmin@example.com",
+            password="StrongPass123!",
+        )
+
+        self._activate_org(superadmin)
+        response = self.client.post(
+            reverse("teacher_moderate_post", args=[self.teacher_post.id]),
+            {
+                "action": "deactivate",
+                "feedback": "Yenilənməlidir.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.teacher_post.refresh_from_db()
+        self.assertFalse(self.teacher_post.is_published)
+        self.assertEqual(self.teacher_post.approval_feedback, "Yenilənməlidir.")
+
+    def test_org_admin_can_deactivate_published_org_post_without_approval_flag(self):
+        org_admin = User.objects.create_user(
+            username="blog_post_org_admin",
+            email="blog_post_org_admin@example.com",
+            password="StrongPass123!",
+        )
+        _assign_user_to_org(org_admin, self.organization, ProfileRole.ORG_ADMIN, membership_role_name="manager")
+
+        self._activate_org(org_admin)
+        response = self.client.post(
+            reverse("teacher_moderate_post", args=[self.teacher_post.id]),
+            {
+                "action": "deactivate",
+                "feedback": "Təşkilat qaydalarına uyğun yenilə.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.teacher_post.refresh_from_db()
+        self.assertFalse(self.teacher_post.is_published)
+        self.assertEqual(self.teacher_post.approval_feedback, "Təşkilat qaydalarına uyğun yenilə.")
+
 
 class BlogCategoryHierarchyTest(TestCase):
     def setUp(self):
