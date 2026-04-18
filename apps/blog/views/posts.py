@@ -21,6 +21,7 @@ from ..models import Category, Post, PostApprovalLog
 from ..selectors import get_post_category_tree
 from ..services import (
     author_requires_post_approval,
+    can_user_moderate_post,
     can_user_publish_post,
     can_user_review_post,
     resolve_post_category_selection,
@@ -348,7 +349,7 @@ def teacher_moderate_post(request, post_id):
     """
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
 
-    if not can_user_review_post(request.user, post):
+    if not can_user_moderate_post(request.user, post):
         raise PermissionDenied("Bu postu idarə etmək üçün icazəniz yoxdur.")
 
     action = (request.POST.get("action") or "").strip().lower()
@@ -395,7 +396,7 @@ def teacher_moderate_post(request, post_id):
             create_notification(
                 recipient=post_author,
                 title=f"Postunuz silindi: {post_title}",
-                message=(f'"{post_title}" başlıqlı postunuz müəllim tərəfindən silindi. ' f"Səbəb: {feedback}"),
+                message=(f'"{post_title}" başlıqlı postunuz idarəçi tərəfindən silindi. ' f"Səbəb: {feedback}"),
                 link=f"{reverse('accounts:profile')}?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_title": post_title, "feedback": feedback},
@@ -430,7 +431,7 @@ def teacher_moderate_post(request, post_id):
             create_notification(
                 recipient=post.author,
                 title=f"Postunuz yenidən aktiv edildi: {post.title}",
-                message=f'"{post.title}" başlıqlı postunuz müəllim tərəfindən yenidən paylaşıldı.',
+                message=f'"{post.title}" başlıqlı postunuz idarəçi tərəfindən yenidən paylaşıldı.',
                 link=reverse("article_detail", kwargs={"slug": post.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": post.pk},
@@ -472,9 +473,9 @@ def teacher_moderate_post(request, post_id):
             recipient=post.author,
             title=f"Postunuz deaktiv edildi: {post.title}",
             message=(
-                f'"{post.title}" başlıqlı postunuz müəllim tərəfindən gizlədildi. '
+                f'"{post.title}" başlıqlı postunuz idarəçi tərəfindən gizlədildi. '
                 f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
-                f"Müəllim rəyi: {feedback}"
+                f"Rəy: {feedback}"
             ),
             link=f"{reverse('accounts:profile')}?section=posts",
             notification_type=NotificationType.APPROVAL,
