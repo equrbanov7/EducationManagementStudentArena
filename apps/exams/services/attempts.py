@@ -21,7 +21,7 @@ def get_active_attempt_for_user(exam, user):
 
 
 def get_finished_attempts_for_user(exam, user):
-    return exam.attempts.filter(user=user, status__in=["submitted", "expired"]).order_by("-started_at")
+    return exam.attempts.filter(user=user, status__in=["submitted", "expired", "graded"]).order_by("-started_at")
 
 
 def can_user_start_new_attempt(exam, user):
@@ -82,6 +82,33 @@ def _build_exam_result_url(exam, attempt, return_to):
     )
 
 
+def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
+    max_attempts = exam.max_attempts_per_user
+    if not max_attempts or not exam.is_active or exam.is_before_start() or exam.is_after_end():
+        return ""
+
+    return_to = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to")
+        or request.GET.get("next")
+        or request.POST.get("return_to")
+        or request.POST.get("next"),
+    )
+
+    if get_active_attempt_for_user(exam, user):
+        return ""
+
+    finished_qs = get_finished_attempts_for_user(exam, user)
+    if finished_qs.count() < max_attempts:
+        return ""
+
+    last_attempt = finished_qs.first()
+    if not last_attempt:
+        return ""
+
+    return _build_exam_result_url(exam, last_attempt, return_to)
+
+
 def _start_or_resume_attempt(request, exam: Exam):
     """
     İstifadəçi üçün attempt yaradır və ya mövcud attempt-ə yönləndirir.
@@ -109,19 +136,14 @@ def _start_or_resume_attempt(request, exam: Exam):
             )
         )
 
-    finished_qs = get_finished_attempts_for_user(exam, user)
-    finished_count = finished_qs.count()
     max_attempts = exam.max_attempts_per_user
-
-    if max_attempts and finished_count >= max_attempts:
-        last = finished_qs.first()
-        if last:
-            messages.info(
-                request,
-                pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
-            )
-            return redirect(_build_exam_result_url(exam, last, return_to))
-        return redirect("exams:student_exam_list")
+    attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, user)
+    if attempt_limit_result_url:
+        messages.info(
+            request,
+            pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
+        )
+        return redirect(attempt_limit_result_url)
 
     last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
     next_attempt_number = last_attempt.attempt_number + 1 if last_attempt else 1

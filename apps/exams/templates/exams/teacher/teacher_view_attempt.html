@@ -171,16 +171,27 @@
                         <div class="student-answer-block mb-4">
                             <h6 class="block-title"><i class="fas fa-pen"></i> {% trans "label_student_answer" context "exams.template.teacher_view_attempt" %}:</h6>
                             <div class="answer-content p-3 bg-light border rounded">
-                                {% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" as empty_student_text_answer %}
-                                {{ item.answer.text_answer|default:empty_student_text_answer|linebreaks }}
+                                {% if item.has_text_answer %}
+                                    {{ item.answer.text_answer|linebreaks }}
+                                {% elif item.has_file_answer %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-paperclip me-2"></i>{% trans "label_attached_files" context "exams.template.teacher_view_attempt" %}
+                                    </span>
+                                {% elif item.has_paint_answer %}
+                                    <span class="text-muted">
+                                        <i class="fas fa-paint-brush me-2"></i>{% trans "label_paint_answer" context "exams.template.teacher_view_attempt" %}
+                                    </span>
+                                {% else %}
+                                    {% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" %}
+                                {% endif %}
                             </div>
                         </div>
 
-                        {% if item.answer.files.exists %}
+                        {% if item.has_file_answer %}
                             <div class="attached-files-block mb-4">
                                 <h6 class="block-title"><i class="fas fa-paperclip"></i> {% trans "label_attached_files" context "exams.template.teacher_view_attempt" %}:</h6>
                                 <ul class="list-group list-group-flush rounded border">
-                                    {% for f in item.answer.files.all %}
+                                    {% for f in item.answer_files %}
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <a href="{{ f.file.url }}" target="_blank" class="text-decoration-none">
                                                 <i class="far fa-file me-2"></i> {{ f.filename }}
@@ -191,6 +202,17 @@
                                         </li>
                                     {% endfor %}
                                 </ul>
+                            </div>
+                        {% endif %}
+
+                        {% if item.has_paint_answer %}
+                            <div class="attached-files-block mb-4">
+                                <h6 class="block-title"><i class="fas fa-paint-brush"></i> {% trans "label_paint_answer" context "exams.template.teacher_view_attempt" %}:</h6>
+                                <div class="border rounded p-3 bg-white">
+                                    <a href="{{ item.answer.paint_image.url }}" target="_blank" class="text-decoration-none">
+                                        <img src="{{ item.answer.paint_image.url }}" alt="{% trans 'label_paint_answer' context 'exams.template.teacher_view_attempt' %}" class="img-fluid rounded">
+                                    </a>
+                                </div>
                             </div>
                         {% endif %}
 
