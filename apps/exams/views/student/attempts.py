@@ -79,6 +79,7 @@ def take_exam(request, slug, attempt_id):
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
 
+    attempt.expire_if_time_limit_reached()
     if attempt.is_finished:
         return redirect(build_exam_result_url(attempt, return_to=return_to))
 

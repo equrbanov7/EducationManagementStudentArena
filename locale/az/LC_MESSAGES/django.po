@@ -110,12 +110,12 @@ msgstr "Rəsmi identifikator"
 #: apps/accounts/forms.py:110
 msgctxt "accounts.form.register.label"
 msgid "license_identifier_optional"
-msgstr "Lisenziya identifikatoru (opsional)"
+msgstr "Lisenziya identifikatoru"
 
 #: apps/accounts/forms.py:114
 msgctxt "accounts.form.register.placeholder"
 msgid "license_identifier_optional"
-msgstr "Lisenziya identifikatoru (opsional)"
+msgstr "Lisenziya identifikatorunu daxil edin"
 
 #: apps/accounts/forms.py:121
 msgctxt "accounts.form.register.label"
@@ -206,6 +206,16 @@ msgstr "Müəssisə seçilən hesab növünə uyğun deyil."
 msgctxt "accounts.form.register.error"
 msgid "university_identifier_required"
 msgstr "Universitet üçün rəsmi identifikator və ya kod tələb olunur."
+
+#: apps/accounts/forms.py:230
+msgctxt "accounts.form.register.error"
+msgid "organization_identifier_required"
+msgstr "Rəsmi identifikator və ya kod tələb olunur."
+
+#: apps/accounts/forms.py:235
+msgctxt "accounts.form.register.error"
+msgid "license_identifier_required"
+msgstr "Lisenziya identifikatoru tələb olunur."
 
 #: apps/accounts/forms.py:236
 msgctxt "accounts.form.register.error"
@@ -2626,6 +2636,11 @@ msgctxt "accounts.register"
 msgid "org_identifier_help_university"
 msgstr "Universitet üçün bu sahə məcburidir."
 
+#: apps/accounts/templates/accounts/register.html:126
+msgctxt "accounts.register"
+msgid "license_identifier_help_required"
+msgstr "Lisenziya identifikatoru məcburidir."
+
 #: apps/accounts/templates/accounts/register.html:132
 #: apps/accounts/templates/accounts/register.html:208
 msgctxt "accounts.register"
@@ -2745,7 +2760,7 @@ msgstr "Məktəb siyahıda yoxdursa adını daxil edin..."
 #: apps/accounts/templates/accounts/register.html:245
 msgctxt "accounts.register.js"
 msgid "label_school_identifier"
-msgstr "Məktəb nömrəsi / kodu (opsional)"
+msgstr "Məktəb kodu / identifikatoru"
 
 #: apps/accounts/templates/accounts/register.html:246
 msgctxt "accounts.register.js"
@@ -2780,7 +2795,7 @@ msgstr "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
 #: apps/accounts/templates/accounts/register.html:252
 msgctxt "accounts.register.js"
 msgid "label_course_center_identifier"
-msgstr "Mərkəz identifikatoru (opsional)"
+msgstr "Kurs mərkəzi kodu / identifikatoru"
 
 #: apps/accounts/templates/accounts/register.html:253
 msgctxt "accounts.register.js"
@@ -2815,7 +2830,22 @@ msgstr "Rəsmi identifikator / kod"
 #: apps/accounts/templates/accounts/register.html:259
 msgctxt "accounts.register.js"
 msgid "help_identifier_required"
-msgstr "Universitet üçün bu sahə məcburidir."
+msgstr "Bu sahə məcburidir."
+
+#: apps/accounts/templates/accounts/register.html:260
+msgctxt "accounts.register.js"
+msgid "label_license_identifier"
+msgstr "Lisenziya identifikatoru"
+
+#: apps/accounts/templates/accounts/register.html:261
+msgctxt "accounts.register.js"
+msgid "placeholder_license_identifier"
+msgstr "Lisenziya identifikatorunu daxil edin..."
+
+#: apps/accounts/templates/accounts/register.html:262
+msgctxt "accounts.register.js"
+msgid "help_license_identifier_required"
+msgstr "Lisenziya identifikatoru məcburidir."
 
 #: apps/accounts/templates/accounts/register.html:260
 msgctxt "accounts.register.js"

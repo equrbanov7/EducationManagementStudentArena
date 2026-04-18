@@ -154,11 +154,14 @@
                         </div>
 
                         <div class="register-form-field">
-                            {{ form.organization_license_identifier.label_tag }}
+                            <label for="{{ form.organization_license_identifier.id_for_label }}" id="licenseIdentifierLabel">{{ form.organization_license_identifier.label }}</label>
                             {{ form.organization_license_identifier }}
                             {% if form.organization_license_identifier.errors %}
                                 <div class="register-field-error">{{ form.organization_license_identifier.errors.0 }}</div>
                             {% endif %}
+                            <small class="register-help-text" id="licenseIdentifierHelp">
+                                {% trans "license_identifier_help_required" context "accounts.register" %}
+                            </small>
                         </div>
 
                         <div class="register-form-field">
@@ -577,11 +580,14 @@
         placeholder_course_center_manual: "{% trans 'placeholder_course_center_manual' context 'accounts.register.js' %}",
         label_course_center_identifier: "{% trans 'label_course_center_identifier' context 'accounts.register.js' %}",
         hint_course_center: "{% trans 'hint_course_center' context 'accounts.register.js' %}",
+        label_license_identifier: "{% trans 'label_license_identifier' context 'accounts.register.js' %}",
+        placeholder_license_identifier: "{% trans 'placeholder_license_identifier' context 'accounts.register.js' %}",
         label_search_default: "{% trans 'label_search_default' context 'accounts.register.js' %}",
         placeholder_search_default: "{% trans 'placeholder_search_default' context 'accounts.register.js' %}",
         label_institution_manual_default: "{% trans 'label_institution_manual_default' context 'accounts.register.js' %}",
         label_identifier_default: "{% trans 'label_identifier_default' context 'accounts.register.js' %}",
         help_identifier_required: "{% trans 'help_identifier_required' context 'accounts.register.js' %}",
+        help_license_identifier_required: "{% trans 'help_license_identifier_required' context 'accounts.register.js' %}",
         help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}",
         no_results: "{% trans 'no_results' context 'accounts.register.js' %}",
         privacy_policy_required: "{% trans 'privacy_policy_required' context 'accounts.form.register.error' %}"

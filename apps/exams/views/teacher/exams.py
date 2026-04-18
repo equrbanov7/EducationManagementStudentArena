@@ -25,6 +25,10 @@ from core.tenancy import (
 )
 
 
+def _teacher_profile_my_exams_url():
+    return f"{reverse('accounts:profile')}?section=my-exams"
+
+
 def _safe_same_origin_redirect_path(request, candidate_url):
     raw_url = (candidate_url or "").strip()
     if not raw_url:
@@ -226,20 +230,10 @@ def _get_requested_course_for_exam(request):
 @login_required
 def teacher_exam_list(request):
     """
-    Müəllimin yaratdığı bütün imtahanların siyahısı.
+    Legacy /exams/ entry point.
+    Teacher exam list now lives inside the profile "my-exams" section.
     """
-    organization = _resolve_required_organization(request)
-    if organization is None:
-        return _organization_selection_redirect(request)
-    _ensure_teacher(request.user)
-    exams = tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
-    return render(
-        request,
-        "exams/teacher/teacher_exam_list.html",
-        {
-            "exams": exams,
-        },
-    )
+    return redirect(_teacher_profile_my_exams_url())
 
 
 # ((sonra adını teacher_exam_create / teacher_exam_edit edərsən))
@@ -548,6 +542,6 @@ def delete_exam(request, slug):
             invalidate_exam_question_ids_cache(_exam_pk)
         except Exception:
             pass
-        return redirect("exams:teacher_exam_list")
+        return redirect(_teacher_profile_my_exams_url())
 
     return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})
