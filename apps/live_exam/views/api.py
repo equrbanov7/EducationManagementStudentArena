@@ -244,7 +244,8 @@ def live_answer_submit(request, pin):
             host_reveal_payload = None
             player_reveal_payload = None
 
-    broadcast_players(pin, answer_payload)
+    # `answer_saved` is a per-player UI state; broadcasting it to all players
+    # makes other devices look like they already answered.
     broadcast_host(pin, progress_payload)
 
     if host_reveal_payload and player_reveal_payload:
