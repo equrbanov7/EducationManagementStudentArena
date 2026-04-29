@@ -279,8 +279,16 @@ function findPersonalResult(results) {
     return rows.find((row) => Number(row.player_id) === Number(state.player.id)) || null;
 }
 
+function isOwnPlayerResult(result) {
+    if (!result || result.player_id == null) return true;
+    return Number(result.player_id) === Number(state.player.id);
+}
+
 function getPersonalResult(payload) {
-    if (state.currentAnswer) {
+    if (payload && payload.player_answer && isOwnPlayerResult(payload.player_answer)) {
+        return Object.assign({}, payload.player_answer);
+    }
+    if (state.currentAnswer && isOwnPlayerResult(state.currentAnswer)) {
         return Object.assign({}, state.currentAnswer);
     }
     const fromResults = findPersonalResult(payload && payload.results);
@@ -933,6 +941,11 @@ function renderFinal(payload) {
     state.leaderboardSignature = "";
     playFinalSound(finalSignature || "final");
 
+    const ownFinalRow = finalRows.find((row) => Number(row.player_id) === Number(state.player.id));
+    if (ownFinalRow) {
+        setScore(ownFinalRow.score);
+    }
+
     const podiumPlaces = finalRows.slice(0, PODIUM_SIZE);
     const others = finalRows.slice(PODIUM_SIZE);
     const suffix = esc(tr("pointsSuffix", "pts"));
@@ -1279,6 +1292,9 @@ async function submitAnswerFallback(payload) {
 }
 
 function handleAnswerSaved(data) {
+    if (!isOwnPlayerResult(data)) {
+        return;
+    }
     state.submitting = false;
     state.currentAnswer = Object.assign({}, state.currentAnswer || {}, data, {
         total_score: data.total_score || data.score || state.pendingScore || state.player.score,
