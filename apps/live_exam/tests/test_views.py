@@ -3,6 +3,7 @@ View tests for live_exam app.
 """
 
 import json
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -1344,6 +1345,58 @@ class LiveWaitRoomInteractionTest(TestCase):
 
         answer = LiveAnswer.objects.get(session=self.session, player=self.player, question_id=question.id)
         self.assertEqual(answer.choice_id, correct_option.id)
+
+    def test_answer_submit_does_not_broadcast_personal_answer_state_to_other_players(self):
+        question = ExamQuestion.objects.create(exam=self.exam, text="HTTP fallback isolation question")
+        correct_option = ExamQuestionOption.objects.create(question=question, text="Correct", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
+        started_at = timezone.now() - timezone.timedelta(seconds=12)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = question.id
+        self.session.question_started_at = started_at
+        self.session.question_ends_at = started_at + timezone.timedelta(seconds=60)
+        self.session.save(
+            update_fields=[
+                "state",
+                "current_index",
+                "current_question_id",
+                "question_started_at",
+                "question_ends_at",
+            ]
+        )
+        LivePlayer.objects.create(
+            session=self.session,
+            nickname="Other Player",
+            avatar_key="avatar_3",
+            client_id="other-player-client",
+        )
+
+        with (
+            patch("apps.live_exam.views.api.broadcast_host") as mock_broadcast_host,
+            patch("apps.live_exam.views.api.broadcast_players") as mock_broadcast_players,
+        ):
+            response = self.client.post(
+                reverse("liveExam:answer_submit", kwargs={"pin": self.session.pin}),
+                data=json.dumps(
+                    {
+                        "question_id": question.id,
+                        "option_id": correct_option.id,
+                        "answer_ms": 1200,
+                    }
+                ),
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["answer"]["player_id"], self.player.id)
+        mock_broadcast_host.assert_called_once()
+        progress_call = mock_broadcast_host.call_args[0]
+        self.assertEqual(progress_call[0], self.session.pin)
+        self.assertEqual(progress_call[1]["type"], "answer_progress")
+        mock_broadcast_players.assert_not_called()
 
     def test_answer_submit_requires_authenticated_player_token(self):
         anonymous = Client()
