@@ -214,7 +214,6 @@ class LiveExamRoundScenarioTest(TestCase):
         )
         option_2 = ExamQuestionOption.objects.create(question=question, text="2", is_correct=True)
         option_3 = ExamQuestionOption.objects.create(question=question, text="3", is_correct=True)
-        option_5 = ExamQuestionOption.objects.create(question=question, text="5", is_correct=True)
         option_4 = ExamQuestionOption.objects.create(question=question, text="4", is_correct=False)
 
         now = timezone.now()
