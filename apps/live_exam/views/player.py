@@ -11,6 +11,7 @@ import secrets
 from itertools import product
 
 from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -516,40 +517,68 @@ def live_join_enter(request, pin):
     max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))
 
     with bypass_rls():
-        player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
-        if player is None and session.players.count() >= max_participants:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
-                        limit=max_participants
-                    ),
-                },
-                status=403,
-            )
+        with transaction.atomic():
+            locked_session = LiveSession.objects.select_for_update().get(pk=session.pk)
+            player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
 
-        if _nickname_is_taken(session, nickname, exclude_client_id=client_id):
-            return JsonResponse(
-                {"ok": False, "message": _nickname_conflict_message()},
-                status=409,
+            if player is None and LivePlayer.objects.filter(session=locked_session).count() >= max_participants:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
+                            limit=max_participants
+                        ),
+                    },
+                    status=403,
+                )
+
+            nickname_conflict = (
+                LivePlayer.objects.filter(session=locked_session, nickname__iexact=nickname)
+                .exclude(client_id=client_id)
+                .exists()
             )
-        if player:
-            player.nickname = nickname
-            player.avatar_key = avatar_key
-            player.accessory_key = accessory_key
-            player.is_connected = True
-            player.last_seen = now
-            player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
-        else:
-            player = LivePlayer.objects.create(
-                session=session,
-                client_id=client_id,
-                nickname=nickname,
-                avatar_key=avatar_key,
-                accessory_key=accessory_key,
-                is_connected=True,
-                last_seen=now,
-            )
+            if nickname_conflict:
+                return JsonResponse(
+                    {"ok": False, "message": _nickname_conflict_message()},
+                    status=409,
+                )
+
+            if player:
+                player.nickname = nickname
+                player.avatar_key = avatar_key
+                player.accessory_key = accessory_key
+                player.is_connected = True
+                player.last_seen = now
+                player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
+            else:
+                try:
+                    player = LivePlayer.objects.create(
+                        session=locked_session,
+                        client_id=client_id,
+                        nickname=nickname,
+                        avatar_key=avatar_key,
+                        accessory_key=accessory_key,
+                        is_connected=True,
+                        last_seen=now,
+                    )
+                except IntegrityError:
+                    player = (
+                        LivePlayer.objects.select_for_update()
+                        .filter(
+                            session=locked_session,
+                            client_id=client_id,
+                        )
+                        .first()
+                    )
+                    if player is None:
+                        raise
+
+                    player.nickname = nickname
+                    player.avatar_key = avatar_key
+                    player.accessory_key = accessory_key
+                    player.is_connected = True
+                    player.last_seen = now
+                    player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
 
     token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
