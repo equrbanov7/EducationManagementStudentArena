@@ -11,6 +11,7 @@ import json
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
@@ -78,6 +79,7 @@ def live_state_json(request, pin):
 
     with bypass_rls():
         session = get_object_or_404(LiveSession, pin=pin)
+        server_time = timezone.now()
         is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
         player = None if is_host else get_request_player(request, pin=pin)
         if not is_host and player is None:
@@ -90,14 +92,21 @@ def live_state_json(request, pin):
 
         data: dict = {
             "ok": True,
+            "server_time": server_time.isoformat(),
             "pin": session.pin,
             "state": session.state,
             "is_locked": bool(session.is_locked),
             "settings": get_session_settings(session),
             "current_index": int(session.current_index or 0),
             "total_questions": total,
+            "created_at": session.created_at.isoformat() if session.created_at else None,
             "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
             "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
+            "finished_at": (
+                (session.question_ends_at or server_time).isoformat()
+                if session.state == LiveSession.STATE_FINISHED
+                else None
+            ),
         }
         if session.state == LiveSession.STATE_LOBBY:
             players = serialize_players(session)
