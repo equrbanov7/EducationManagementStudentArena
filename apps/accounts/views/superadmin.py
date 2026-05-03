@@ -3,6 +3,7 @@ Superadmin views for organization oversight and AI settings.
 """
 
 import logging
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -205,6 +206,17 @@ def superadmin_organizations(request):
                 pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
                 % {"organization_name": organization.name},
             )
+        elif action == "set_written_exam_identity_reveal":
+            reveal_enabled = request.POST.get("enabled") == "1"
+            organization.set_written_exam_identity_reveal_enabled(reveal_enabled)
+            organization.save(update_fields=["settings", "updated_at"])
+            messages.success(
+                request,
+                (
+                    f'"{organization.name}" üçün yazılı imtahan anonimliyi '
+                    f'{"söndürüldü" if reveal_enabled else "yenidən aktiv edildi"}.'
+                ),
+            )
         else:
             messages.error(request, pgettext_lazy("accounts.superadmin_orgs.message", "unknown_action"))
 
@@ -258,11 +270,35 @@ def superadmin_organizations(request):
             include_active_superadmin_org=True,
             profile_section="superadmin-organizations",
         ),
+        "all_modules": [
+            "accounts",
+            "organizations",
+            "courses",
+            "exams",
+            "assignments",
+            "projects",
+            "labs",
+            "live_exam",
+            "blog",
+            "audit",
+        ],
         "search_query": search_query,
         "org_type_filter": org_type_filter,
         "status_filter": status_filter,
         "pending_count": pending_count,
         "post_next_url": profile_next_url,
+        "organizations_pagination_query": urlencode(
+            {
+                key: value
+                for key, value in {
+                    "search": search_query,
+                    "org_type": org_type_filter,
+                    "status": status_filter,
+                }.items()
+                if value not in ("", None)
+            }
+        ),
+        "organizations_page_param": "page",
     }
     return render(request, "accounts/superadmin_organizations.html", context)
 

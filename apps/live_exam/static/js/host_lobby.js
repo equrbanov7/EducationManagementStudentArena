@@ -71,6 +71,8 @@ const state = {
     sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
     isLocked: Boolean(CONFIG.sessionLocked),
     finalSignature: "",
+    serverTimeOffsetMs: 0,
+    timelineMeta: null,
 };
 
 const I18N = window.LIVE_EXAM_HOST_I18N || {};
@@ -92,6 +94,7 @@ const toMs = value => {
     const parsed = value ? new Date(value).getTime() : 0;
     return Number.isFinite(parsed) ? parsed : 0;
 };
+const nowMs = () => Date.now() + Number(state.serverTimeOffsetMs || 0);
 const questionKey = question => `${question?.id || "0"}:${question?.started_at || ""}`;
 const revealKey = payload => `${payload?.question_id || "0"}:${payload?.revealed_at || ""}`;
 const answerWord = count => tr(count === 1 ? "answersSingular" : "answersPlural", count === 1 ? "Answer" : "Answers");
@@ -130,6 +133,88 @@ const topSignature = rows =>
             ].join(":")
         )
         .join("|");
+
+function timelinePhaseRank(kind) {
+    switch (kind) {
+        case "question":
+            return 1;
+        case "reveal":
+            return 2;
+        case "finished":
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+function updateServerTimeOffset(payload, receivedAtMs = Date.now()) {
+    const serverMs = toMs(payload?.server_time);
+    if (!serverMs) return;
+    const sample = serverMs - receivedAtMs;
+    if (!Number.isFinite(sample)) return;
+    if (!Number.isFinite(state.serverTimeOffsetMs) || state.serverTimeOffsetMs === 0) {
+        state.serverTimeOffsetMs = sample;
+        return;
+    }
+    state.serverTimeOffsetMs = Math.round((state.serverTimeOffsetMs * 3 + sample) / 4);
+}
+
+function extractTimelineMeta(payload) {
+    if (!payload) return null;
+
+    const kind = payload.type === "finished" || payload.state === "finished"
+        ? "finished"
+        : payload.type === "reveal" || payload.state === "reveal"
+            ? "reveal"
+            : payload.type === "question_published" || payload.state === "question"
+                ? "question"
+                : "lobby";
+    const question = payload.question || null;
+    const questionId = Number(payload.question_id || question?.id || 0);
+    let phaseAtMs = 0;
+
+    if (kind === "finished") {
+        phaseAtMs = toMs(payload.finished_at) || toMs(payload.next_question_at) || toMs(payload.revealed_at) || toMs(question?.ends_at);
+    } else if (kind === "reveal") {
+        phaseAtMs = toMs(payload.revealed_at) || toMs(question?.ends_at) || toMs(payload.question_ends_at);
+    } else if (kind === "question") {
+        phaseAtMs = toMs(question?.started_at) || toMs(payload.question_started_at);
+    }
+
+    return {
+        phaseRank: timelinePhaseRank(kind),
+        phaseAtMs,
+        questionId,
+    };
+}
+
+function compareTimelineMeta(nextMeta, currentMeta) {
+    if (!nextMeta) return 0;
+    if (!currentMeta) return 1;
+    if (nextMeta.phaseAtMs !== currentMeta.phaseAtMs) {
+        return nextMeta.phaseAtMs > currentMeta.phaseAtMs ? 1 : -1;
+    }
+    if (nextMeta.phaseRank !== currentMeta.phaseRank) {
+        return nextMeta.phaseRank > currentMeta.phaseRank ? 1 : -1;
+    }
+    if (nextMeta.questionId && currentMeta.questionId && nextMeta.questionId !== currentMeta.questionId) {
+        return nextMeta.questionId > currentMeta.questionId ? 1 : -1;
+    }
+    return 0;
+}
+
+function shouldApplyTimelinePayload(payload) {
+    const nextMeta = extractTimelineMeta(payload);
+    return compareTimelineMeta(nextMeta, state.timelineMeta) >= 0;
+}
+
+function rememberTimelinePayload(payload) {
+    const nextMeta = extractTimelineMeta(payload);
+    if (!nextMeta) return;
+    if (compareTimelineMeta(nextMeta, state.timelineMeta) >= 0) {
+        state.timelineMeta = nextMeta;
+    }
+}
 
 let debugOn = false;
 const logs = [];
@@ -199,7 +284,7 @@ function notifyHostShell() {
 }
 
 function markStateMutation() {
-    state.lastStateMutationAt = Date.now();
+    state.lastStateMutationAt = nowMs();
 }
 
 function lobbyCopy() {
@@ -1378,7 +1463,7 @@ function syncQuestionPresentation() {
         return;
     }
 
-    const now = Date.now();
+    const now = nowMs();
     const plan = state.questionPlan;
 
     if (plan.hasCountdown && now < plan.quizEnd) {
@@ -1409,7 +1494,7 @@ function syncRevealPresentation() {
     }
 
     const leaderboardStartsAt = toMs(state.currentReveal.leaderboard_starts_at);
-    const now = Date.now();
+    const now = nowMs();
 
     if (leaderboardStartsAt && now >= leaderboardStartsAt) {
         renderScoreboardStage(state.currentReveal);
@@ -1422,7 +1507,7 @@ function syncRevealPresentation() {
 function scheduleAutoReveal(question) {
     clearTimeout(state.autoRevealTimeout);
     if (!controlsEnabled() || !UI.autoMode.checked || !question?.ends_at) return;
-    const ms = Math.max(0, toMs(question.ends_at) - Date.now());
+    const ms = Math.max(0, toMs(question.ends_at) - nowMs());
     state.autoRevealTimeout = setTimeout(() => {
         if (state.sessionState === "question") {
             UI.revealBtn.click();
@@ -1433,7 +1518,7 @@ function scheduleAutoReveal(question) {
 function scheduleAutoNext(payload) {
     clearTimeout(state.autoNextTimeout);
     if (!controlsEnabled() || !UI.autoMode.checked || !payload?.next_question_at) return;
-    const ms = Math.max(0, toMs(payload.next_question_at) - Date.now());
+    const ms = Math.max(0, toMs(payload.next_question_at) - nowMs());
     state.autoNextTimeout = setTimeout(() => {
         if (state.sessionState === "reveal") {
             UI.nextBtn.click();
@@ -1637,6 +1722,9 @@ function renderPodium(top) {
 
 function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
+    updateServerTimeOffset(snapshot);
+    if (!shouldApplyTimelinePayload(snapshot)) return;
+    rememberTimelinePayload(snapshot);
     markStateMutation();
 
     if (snapshot.settings) {
@@ -1753,7 +1841,9 @@ async function syncState() {
             log(`State sync failed: ${response.status}`);
             return null;
         }
+        const receivedAtMs = Date.now();
         const snapshot = await response.json();
+        updateServerTimeOffset(snapshot, receivedAtMs);
         applyStateSnapshot(snapshot);
         return snapshot;
     } catch (error) {
@@ -1828,6 +1918,7 @@ lobbyWS.onmessage = event => {
     try {
         const message = JSON.parse(event.data);
         const data = message.data || message;
+        updateServerTimeOffset(data);
 
         if (data.type === "lobby_state") {
             markStateMutation();
@@ -1873,8 +1964,13 @@ playWS.onmessage = event => {
     try {
         const message = JSON.parse(event.data);
         const data = message.data || message;
+        updateServerTimeOffset(data);
 
         if (data.type === "question_published") {
+            if (!shouldApplyTimelinePayload(data)) {
+                return;
+            }
+            rememberTimelinePayload(data);
             markStateMutation();
             state.answeredCount = 0;
             applyQuestionState(data.question, 0, state.totalPlayers);
@@ -1882,6 +1978,9 @@ playWS.onmessage = event => {
         }
 
         if (data.type === "answer_progress") {
+            if (state.currentQuestion && Number(data.question_id || 0) !== Number(state.currentQuestion.id || 0)) {
+                return;
+            }
             markStateMutation();
             state.answeredCount = Number(data.answered_count || 0);
             state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
@@ -1905,12 +2004,18 @@ playWS.onmessage = event => {
         }
 
         if (data.type === "reveal") {
+            if (!shouldApplyTimelinePayload(data)) {
+                return;
+            }
+            rememberTimelinePayload(data);
             markStateMutation();
             applyRevealState(data, state.currentQuestion);
             return;
         }
 
         if (data.type === "finished") {
+            if (!shouldApplyTimelinePayload(data)) return;
+            rememberTimelinePayload(data);
             if (state.sessionState === "finished") return;
             markStateMutation();
             clearPhaseLoop();

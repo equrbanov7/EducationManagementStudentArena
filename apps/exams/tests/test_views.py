@@ -1151,8 +1151,64 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         attempts_data = response.context["attempts_data"]
         matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
         self.assertTrue(matching_item["can_view_name"])
-        self.assertIsNone(matching_item["seconds_remaining"])
+        self.assertEqual(matching_item["seconds_remaining"], 0)
         self.assertEqual(matching_item["real_name"], self.student.username)
+
+    def test_teacher_exam_results_reveals_pending_written_student_name_when_org_override_enabled(self):
+        self.org_a.set_written_exam_identity_reveal_enabled(True)
+        self.org_a.save(update_fields=["settings", "updated_at"])
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Org Override Pending Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+            finished_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        attempts_data = response.context["attempts_data"]
+        matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
+        self.assertTrue(matching_item["can_view_name"])
+        self.assertEqual(matching_item["action_label"], "Yoxla")
+        self.assertEqual(matching_item["countdown_seconds"], 0)
+        self.assertContains(response, self.student.username)
+        self.assertNotContains(response, "Anonim görünüş")
+
+    def test_teacher_exam_results_keeps_recheck_window_when_org_override_enabled(self):
+        self.org_a.set_written_exam_identity_reveal_enabled(True)
+        self.org_a.save(update_fields=["settings", "updated_at"])
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Org Override Recheck Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_score=74,
+            teacher_checked_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        attempts_data = response.context["attempts_data"]
+        matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
+        self.assertTrue(matching_item["can_view_name"])
+        self.assertEqual(matching_item["action_label"], "Yenidən yoxla")
+        self.assertGreater(matching_item["countdown_seconds"], 0)
+        self.assertContains(response, self.student.username)
+        self.assertContains(response, "Yenidən yoxla")
 
     def test_teacher_view_attempt_keeps_generic_source_back_label(self):
         attempt = ExamAttempt.objects.create(
@@ -1229,6 +1285,39 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'id="modalMaxPointsInput"')
         self.assertContains(response, f'name="max_points_{question.id}"')
         self.assertContains(response, 'step="1"')
+
+    def test_teacher_check_attempt_shows_real_student_name_when_org_override_enabled(self):
+        self.org_a.set_written_exam_identity_reveal_enabled(True)
+        self.org_a.save(update_fields=["settings", "updated_at"])
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Override Identity Check Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the solution",
+            order=1,
+            answer_mode="single",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+
+        response = self.client.get(reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["can_view_student_identity"])
+        self.assertEqual(response.context["student_display"], self.student.username)
+        self.assertContains(response, self.student.username)
 
     def test_teacher_check_attempt_post_updates_question_max_points(self):
         written_exam = Exam.objects.create(
@@ -1784,6 +1873,24 @@ class StudentExamVisibilityFilteringTest(TestCase):
         attempt.refresh_from_db()
         self.assertEqual(attempt.status, "expired")
         self.assertIsNotNone(attempt.finished_at)
+
+    def test_take_exam_uses_deadline_based_timer_logic_for_background_tabs(self):
+        self.course_assigned_exam.total_duration_minutes = 30
+        self.course_assigned_exam.default_question_time_seconds = 45
+        self.course_assigned_exam.save(update_fields=["total_duration_minutes", "default_question_time_seconds"])
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "const examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);")
+        self.assertContains(response, "questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);")
+        self.assertContains(response, "document.addEventListener('visibilitychange', refreshVisibleTimers);")
 
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
