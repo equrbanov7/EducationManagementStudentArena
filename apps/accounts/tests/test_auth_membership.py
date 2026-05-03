@@ -212,6 +212,11 @@ class LoginRateLimitTest(TestCase):
         cache.clear()
         self.client = Client()
         self.user = User.objects.create_user("limiteduser", "limited@example.com", "StrongPass123!")
+        self.superadmin = User.objects.create_superuser(
+            "limitedsuperadmin",
+            "limitedsuperadmin@example.com",
+            "StrongPass123!",
+        )
         self.login_url = reverse("accounts:login")
 
     def test_login_blocks_after_too_many_invalid_attempts(self):
@@ -229,6 +234,29 @@ class LoginRateLimitTest(TestCase):
 
         self.assertEqual(blocked.status_code, 429)
         self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+    def test_superadmin_correct_login_clears_limit_and_allows_access(self):
+        for _ in range(2):
+            response = self.client.post(
+                self.login_url,
+                {"username": "limitedsuperadmin", "password": "wrongpassword"},
+            )
+            self.assertEqual(response.status_code, 200)
+
+        success = self.client.post(
+            self.login_url,
+            {"username": "limitedsuperadmin", "password": "StrongPass123!"},
+        )
+
+        self.assertEqual(success.status_code, 302)
+        self.assertTrue(success.wsgi_request.user.is_authenticated)
+
+        self.client.logout()
+        retry = self.client.post(
+            self.login_url,
+            {"username": "limitedsuperadmin", "password": "wrongpassword"},
+        )
+        self.assertEqual(retry.status_code, 200)
 
 
 class LogoutViewTest(TestCase):
