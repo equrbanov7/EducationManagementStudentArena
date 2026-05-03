@@ -127,25 +127,44 @@ def _resolve_attempt_name_visibility(attempt, *, current_time=None):
 
     # Test imtahanlarında nəticə dərhal görünür, ad da gizli qalmamalıdır.
     if attempt.exam.exam_type == "test":
-        return True, None
+        return True, 0
+
+    organization = getattr(attempt.exam, "organization", None)
+    if organization is not None and organization.written_exam_identity_reveal_enabled:
+        return True, 0
 
     # Yazılı imtahanlarda tələbə adı yoxlama tamamlanana qədər həmişə anonim
     # qalır. 5 dəqiqəlik pəncərə yalnız müəllim ilkin yoxlamanı bitirdikdən
     # sonra başlayır.
     if not attempt.checked_by_teacher:
-        return False, None
+        return False, 0
 
     # Köhnə datada timestamp olmaya bilər. Bu halda tələbə balı görə bildiyi üçün
     # müəllim də real adı görə bilməlidir.
     if not attempt.teacher_checked_at:
-        return True, None
+        return True, 0
 
     reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
     if now >= reveal_at:
-        return True, None
+        return True, 0
 
     seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
     return False, seconds_remaining
+
+
+def _resolve_attempt_review_window_seconds(attempt, *, current_time=None):
+    if attempt.exam.exam_type == "test":
+        return 0
+
+    if not attempt.checked_by_teacher or not attempt.teacher_checked_at:
+        return 0
+
+    now = current_time or timezone.now()
+    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
+    if now >= reveal_at:
+        return 0
+
+    return max(0, int((reveal_at - now).total_seconds()))
 
 
 def _attempt_review_window_locked(attempt, *, current_time=None):
@@ -155,15 +174,12 @@ def _attempt_review_window_locked(attempt, *, current_time=None):
     if not attempt.checked_by_teacher:
         return False
 
-    if not attempt.teacher_checked_at:
-        return False
-
-    now = current_time or timezone.now()
-    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
-    return now >= reveal_at
+    return _resolve_attempt_review_window_seconds(attempt, current_time=current_time) == 0 and bool(
+        attempt.teacher_checked_at
+    )
 
 
-def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
+def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_seconds, identity_window_seconds):
     if attempt.exam.exam_type == "test":
         return {
             "label": "Bax",
@@ -173,11 +189,11 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
         }
 
     if attempt.checked_by_teacher:
-        if seconds_remaining:
+        if review_window_seconds:
             return {
                 "label": "Yenidən yoxla",
                 "url_name": "exams:teacher_check_attempt",
-                "countdown_seconds": seconds_remaining,
+                "countdown_seconds": review_window_seconds,
                 "countdown_mode": "recheck",
             }
         return {
@@ -190,8 +206,8 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
     return {
         "label": "Yoxla",
         "url_name": "exams:teacher_check_attempt",
-        "countdown_seconds": seconds_remaining if not can_view_name else 0,
-        "countdown_mode": "identity" if not can_view_name and seconds_remaining else "",
+        "countdown_seconds": identity_window_seconds if not can_view_name else 0,
+        "countdown_mode": "identity" if not can_view_name and identity_window_seconds else "",
     }
 
 
@@ -380,11 +396,13 @@ def teacher_exam_results(request, slug):
     for att in attempts_page:
         anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
 
-        can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
+        can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(att, current_time=now)
+        review_window_seconds = _resolve_attempt_review_window_seconds(att, current_time=now)
         action_state = _resolve_attempt_action_state(
             att,
             can_view_name=can_view_name,
-            seconds_remaining=seconds_remaining or 0,
+            review_window_seconds=review_window_seconds,
+            identity_window_seconds=identity_window_seconds,
         )
         real_name = att.user.get_full_name() or att.user.username
 
@@ -394,7 +412,7 @@ def teacher_exam_results(request, slug):
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
                 "can_view_name": can_view_name,
-                "seconds_remaining": seconds_remaining,
+                "seconds_remaining": review_window_seconds or identity_window_seconds or 0,
                 "action_label": action_state["label"],
                 "action_url": _append_query_params(
                     reverse(action_state["url_name"], kwargs={"slug": exam.slug, "attempt_id": att.id}),
@@ -558,7 +576,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         )
 
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
-    can_view_name, seconds_remaining = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
+    can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
     else:
@@ -605,7 +623,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
         "student_display": student_display,
         "can_view_student_identity": can_view_name,
-        "identity_window_seconds_left": seconds_remaining or 0,
+        "identity_window_seconds_left": identity_window_seconds,
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)
@@ -656,6 +674,16 @@ def teacher_check_attempt(request, slug, attempt_id):
         )
 
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
+    can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
+    if attempt.exam.exam_type == "test":
+        student_display = attempt.user.get_full_name() or attempt.user.username
+    else:
+        anonymous_name = _build_anonymous_name(
+            attempt_id=attempt.id,
+            user_id=attempt.user_id,
+            exam_id=attempt.exam_id,
+        )
+        student_display = attempt.user.get_full_name() or attempt.user.username if can_view_name else anonymous_name
 
     if request.method == "POST":
         if not request_has_permission(request, "grade.input"):
@@ -734,6 +762,9 @@ def teacher_check_attempt(request, slug, attempt_id):
         "qa_list": qa_list,
         "profile_return_url": profile_return_url,
         "results_return_url": results_return_url,
+        "student_display": student_display,
+        "can_view_student_identity": can_view_name,
+        "identity_window_seconds_left": identity_window_seconds,
     }
     return render(request, "exams/teacher/teacher_check_attempt.html", context)
 
