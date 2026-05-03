@@ -10,12 +10,11 @@ from collections import Counter
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, Max, Q, Sum
+from django.db.models import Avg, Case, Count, IntegerField, Q, Sum, When
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from apps.exams.domain.question_bank import ExamQuestionOption
 from apps.exams.models import Exam, ExamQuestion
 from apps.exams.services.access_policy import is_teacher_user
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
@@ -88,6 +87,52 @@ def _resolve_exam_navigation(request, exam, *, default_section="my-exams"):
     return exam_detail_url, results_url, navigation_query
 
 
+def _session_question_ids(session: LiveSession) -> list[int]:
+    question_ids: list[int] = []
+    for raw_id in session.selected_question_ids or []:
+        try:
+            question_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    if question_ids:
+        return question_ids
+
+    fallback_ids: list[int] = []
+    for question_id in LiveAnswer.objects.filter(session=session).values_list("question_id", flat=True):
+        try:
+            normalized_id = int(question_id)
+        except (TypeError, ValueError):
+            continue
+        if normalized_id not in fallback_ids:
+            fallback_ids.append(normalized_id)
+    return fallback_ids
+
+
+def _session_questions(exam: Exam, session: LiveSession) -> list[ExamQuestion]:
+    question_ids = _session_question_ids(session)
+    if not question_ids:
+        return []
+
+    ordering = Case(
+        *[When(id=question_id, then=position) for position, question_id in enumerate(question_ids)],
+        output_field=IntegerField(),
+    )
+    return list(
+        ExamQuestion.objects.filter(exam=exam, id__in=question_ids)
+        .prefetch_related("options")
+        .annotate(_session_order=ordering)
+        .order_by("_session_order", "order", "id")
+    )
+
+
+def _truncate_question_text(value: str | None, limit: int) -> str:
+    text = (value or "").strip()
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit]}..."
+
+
 @login_required
 def teacher_live_exam_results(request, slug):
     """
@@ -132,7 +177,7 @@ def teacher_live_session_detail(request, slug, pin):
 
     session = get_object_or_404(LiveSession, exam=exam, pin=pin, state=LiveSession.STATE_FINISHED)
 
-    players = (
+    players = list(
         LivePlayer.objects.filter(session=session)
         .order_by("-score", "created_at")
         .annotate(
@@ -142,18 +187,63 @@ def teacher_live_session_detail(request, slug, pin):
         )
     )
 
-    questions = ExamQuestion.objects.filter(
-        exam=exam,
-        id__in=session.selected_question_ids or [],
-    ).order_by("order")
+    questions = _session_questions(exam, session)
+    question_ids = [question.id for question in questions]
+
+    raw_answers = list(
+        LiveAnswer.objects.filter(session=session, question_id__in=question_ids).values(
+            "question_id",
+            "choice_id",
+            "choice_ids",
+            "is_correct",
+            "answer_ms",
+        )
+    )
+
+    question_totals: dict[int, dict[str, int]] = {
+        question.id: {"total": 0, "correct": 0, "answer_ms_sum": 0} for question in questions
+    }
+    option_totals: dict[int, Counter[int]] = {question.id: Counter() for question in questions}
+
+    total_answers_count = 0
+    total_correct_count = 0
+    total_answer_ms = 0
+    for answer in raw_answers:
+        question_id = int(answer["question_id"])
+        stats = question_totals.setdefault(question_id, {"total": 0, "correct": 0, "answer_ms_sum": 0})
+        stats["total"] += 1
+        total_answers_count += 1
+
+        if answer["is_correct"]:
+            stats["correct"] += 1
+            total_correct_count += 1
+
+        answer_ms = int(answer["answer_ms"] or 0)
+        stats["answer_ms_sum"] += answer_ms
+        total_answer_ms += answer_ms
+
+        chosen_option_ids = list(answer["choice_ids"] or [])
+        if not chosen_option_ids and answer["choice_id"] is not None:
+            chosen_option_ids = [answer["choice_id"]]
+
+        seen_option_ids: set[int] = set()
+        for raw_option_id in chosen_option_ids:
+            try:
+                option_id = int(raw_option_id)
+            except (TypeError, ValueError):
+                continue
+            if option_id <= 0 or option_id in seen_option_ids:
+                continue
+            option_totals.setdefault(question_id, Counter())[option_id] += 1
+            seen_option_ids.add(option_id)
 
     question_stats = []
     per_question_option_stats = []
     for q in questions:
-        answers = LiveAnswer.objects.filter(session=session, question_id=q.id)
-        total = answers.count()
-        correct = answers.filter(is_correct=True).count()
-        avg_ms = answers.aggregate(avg=Avg("answer_ms"))["avg"] or 0
+        stats = question_totals.get(q.id, {"total": 0, "correct": 0, "answer_ms_sum": 0})
+        total = int(stats["total"] or 0)
+        correct = int(stats["correct"] or 0)
+        avg_ms = round(stats["answer_ms_sum"] / total) if total > 0 else 0
         question_stats.append(
             {
                 "question": q,
@@ -161,25 +251,23 @@ def teacher_live_session_detail(request, slug, pin):
                 "correct_answers": correct,
                 "incorrect_answers": total - correct,
                 "accuracy_percent": (round(correct * 100 / total, 1) if total > 0 else 0),
-                "avg_answer_ms": round(avg_ms),
+                "avg_answer_ms": avg_ms,
             }
         )
 
         # Per-question option distribution for chart
-        options = ExamQuestionOption.objects.filter(question=q).order_by("label", "id")
+        options = sorted(q.options.all(), key=lambda option: (option.label or "", option.id))
         option_labels = []
         option_counts = []
         option_colors = []
         for opt in options:
-            label_text = opt.label or (opt.text[:20] if opt.text else "")
+            label_text = opt.label or _truncate_question_text(opt.text, 20)
             option_labels.append(label_text)
-            # Count answers that chose this option (via choice_id or choice_ids)
-            chosen_count = answers.filter(Q(choice_id=opt.id) | Q(choice_ids__contains=[opt.id])).count()
-            option_counts.append(chosen_count)
+            option_counts.append(int(option_totals.get(q.id, Counter()).get(opt.id, 0)))
             option_colors.append("#059669" if opt.is_correct else "#6b7280")
         per_question_option_stats.append(
             {
-                "question_text": (q.text[:40] + "...") if len(q.text) > 40 else q.text,
+                "question_text": _truncate_question_text(q.text, 40),
                 "labels": option_labels,
                 "counts": option_counts,
                 "colors": option_colors,
@@ -187,25 +275,20 @@ def teacher_live_session_detail(request, slug, pin):
         )
 
     # Aggregate stats for summary cards
-    player_count = players.count()
-    total_answers_count = LiveAnswer.objects.filter(session=session).count()
-    total_correct_count = LiveAnswer.objects.filter(session=session, is_correct=True).count()
+    player_count = len(players)
     overall_accuracy = round(total_correct_count * 100 / total_answers_count, 1) if total_answers_count > 0 else 0
-    avg_score_val = players.aggregate(avg=Avg("score"))["avg"] or 0
-    max_score_val = players.aggregate(mx=Max("score"))["mx"] or 0
-    avg_response_ms = LiveAnswer.objects.filter(session=session).aggregate(avg=Avg("answer_ms"))["avg"] or 0
+    player_scores = [int(player.score or 0) for player in players]
+    avg_score_val = (sum(player_scores) / player_count) if player_count else 0
+    max_score_val = max(player_scores, default=0)
+    avg_response_ms = round(total_answer_ms / total_answers_count) if total_answers_count > 0 else 0
 
-    player_scores = [int(p.score or 0) for p in players]
     score_distribution_labels, score_distribution_counts = _build_score_distribution(player_scores)
 
     # JSON-safe data for charts
     chart_data = {
-        "player_labels": [p.nickname for p in players],
+        "player_labels": [player.nickname for player in players],
         "player_scores": player_scores,
-        "question_labels": [
-            (qs["question"].text[:40] + "...") if len(qs["question"].text) > 40 else qs["question"].text
-            for qs in question_stats
-        ],
+        "question_labels": [_truncate_question_text(qs["question"].text, 40) for qs in question_stats],
         "question_accuracy": [qs["accuracy_percent"] for qs in question_stats],
         "question_correct": [qs["correct_answers"] for qs in question_stats],
         "question_incorrect": [qs["incorrect_answers"] for qs in question_stats],
@@ -224,10 +307,10 @@ def teacher_live_session_detail(request, slug, pin):
             "overall_accuracy": overall_accuracy,
             "avg_score": round(avg_score_val),
             "max_score": max_score_val,
-            "avg_response_ms": round(avg_response_ms),
+            "avg_response_ms": avg_response_ms,
             "question_stats": [
                 {
-                    "text": qs["question"].text[:80],
+                    "text": _truncate_question_text(qs["question"].text, 80),
                     "accuracy": qs["accuracy_percent"],
                     "total": qs["total_answers"],
                     "correct": qs["correct_answers"],
@@ -264,7 +347,7 @@ def teacher_live_session_detail(request, slug, pin):
                 "question_stats": [
                     {
                         "question_id": qs["question"].id,
-                        "question_text": qs["question"].text[:120],
+                        "question_text": _truncate_question_text(qs["question"].text, 120),
                         "total_answers": qs["total_answers"],
                         "correct_answers": qs["correct_answers"],
                         "accuracy_percent": qs["accuracy_percent"],
@@ -289,7 +372,7 @@ def teacher_live_session_detail(request, slug, pin):
             "overall_accuracy": overall_accuracy,
             "avg_score": round(avg_score_val),
             "max_score": max_score_val,
-            "avg_response_ms": round(avg_response_ms),
+            "avg_response_ms": avg_response_ms,
             "chart_data": chart_data,
             "live_results_url": live_results_url,
             "live_results_navigation_query": navigation_query,

@@ -672,6 +672,53 @@ class ProfileAndSuspensionFlowTest(TestCase):
         self.assertEqual(organization.status, "suspended")
         self.assertFalse(organization.is_active)
 
+    def test_superadmin_can_toggle_written_exam_identity_reveal_per_organization(self):
+        superadmin = User.objects.create_superuser(
+            username="superadmin_exam_identity",
+            email="superadmin_exam_identity@example.com",
+            password="StrongPass123!",
+        )
+        org_owner = User.objects.create_user(
+            username="owner_exam_identity",
+            email="owner_exam_identity@example.com",
+            password="StrongPass123!",
+        )
+        organization = Organization.objects.create(
+            name="Exam Identity Managed Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=org_owner,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superadmin)
+
+        enable_response = self.client.post(
+            reverse("accounts:superadmin_organizations"),
+            {
+                "organization_id": str(organization.id),
+                "action": "set_written_exam_identity_reveal",
+                "enabled": "1",
+            },
+        )
+
+        self.assertRedirects(enable_response, reverse("accounts:superadmin_organizations"))
+        organization.refresh_from_db()
+        self.assertTrue(organization.written_exam_identity_reveal_enabled)
+
+        disable_response = self.client.post(
+            reverse("accounts:superadmin_organizations"),
+            {
+                "organization_id": str(organization.id),
+                "action": "set_written_exam_identity_reveal",
+                "enabled": "0",
+            },
+        )
+
+        self.assertRedirects(disable_response, reverse("accounts:superadmin_organizations"))
+        organization.refresh_from_db()
+        self.assertFalse(organization.written_exam_identity_reveal_enabled)
+
 
 class RoleAndPermissionTenantIsolationTest(TestCase):
     def setUp(self):

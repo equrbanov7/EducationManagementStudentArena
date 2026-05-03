@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, SignatureExpired
@@ -63,6 +63,19 @@ def _login_limit_keys(request, username):
         (LOGIN_LIMIT_SCOPE_IP, client_ip),
         (LOGIN_LIMIT_SCOPE_IDENTITY, client_ip, normalized_username),
     ]
+
+
+def _authenticate_superadmin_for_rate_limit_reset(request, username, password):
+    if not username or not password:
+        return None
+
+    user = authenticate(request=request, username=username, password=password)
+    if user is None:
+        return None
+
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return user
+    return None
 
 
 def _otp_limit_key(request, email):
@@ -143,11 +156,26 @@ class CustomLoginView(LoginView):
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
         limit_keys = _login_limit_keys(request, username)
 
         for scope, *key_parts in limit_keys:
             is_limited, retry_after = is_rate_limited(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
             if is_limited:
+                superadmin_user = _authenticate_superadmin_for_rate_limit_reset(request, username, password)
+                if superadmin_user is not None:
+                    for reset_scope, *reset_key_parts in limit_keys:
+                        clear_rate_limit(reset_scope, *reset_key_parts)
+                    form.user_cache = superadmin_user
+                    logger.warning(
+                        "Cleared login rate limit after successful superadmin authentication",
+                        extra={
+                            "username": normalize_rate_identity(username),
+                            "client_ip": get_client_ip(request) or "unknown",
+                        },
+                    )
+                    return self.form_valid(form)
+
                 form.add_error(None, AUTH_RATE_LIMIT_MESSAGE)
                 response = self.render_to_response(self.get_context_data(form=form), status=429)
                 if retry_after:
