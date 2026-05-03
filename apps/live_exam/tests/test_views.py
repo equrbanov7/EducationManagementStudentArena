@@ -372,6 +372,25 @@ class LiveSessionResultsViewTest(TestCase):
         self.assertEqual(chart_data["score_distribution_labels"], ["40", "90"])
         self.assertEqual(chart_data["score_distribution_counts"], [1, 1])
 
+    def test_session_detail_falls_back_to_answered_questions_when_selection_is_missing(self):
+        self.client.login(username="results_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+        self.session.selected_question_ids = []
+        self.session.save(update_fields=["selected_question_ids"])
+
+        response = self.client.get(
+            reverse(
+                "liveExam:teacher_live_session_detail",
+                kwargs={"slug": self.exam.slug, "pin": self.session.pin},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        question_stats = response.context["question_stats"]
+        self.assertEqual([row["question"].id for row in question_stats], [self.question_one.id, self.question_two.id])
+        self.assertEqual(question_stats[0]["total_answers"], 2)
+        self.assertEqual(question_stats[1]["total_answers"], 2)
+
     def test_live_results_back_and_detail_links_preserve_original_return_to(self):
         self.client.login(username="results_teacher", password="StrongPass123!")
         _set_active_org(self.client, self.org)
@@ -872,6 +891,22 @@ class LiveStateAPITest(TestCase):
         self.assertGreater(ready_ends_at, started_at)
         self.assertGreater(answer_starts_at, ready_ends_at)
 
+    def test_state_json_includes_server_time_for_client_clock_sync(self):
+        self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=20)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("server_time", data)
+        self.assertIsNotNone(parse_datetime(data["server_time"]))
+
     def test_state_json_uses_question_phase_override_when_present(self):
         self._authenticate_player()
         now = timezone.now()
@@ -1040,6 +1075,20 @@ class LiveStateAPITest(TestCase):
         self.assertIsNotNone(current_row)
         self.assertEqual(previous_row["score"], 18)
         self.assertEqual(current_row["score"], 30)
+
+    def test_state_json_finished_includes_finished_at(self):
+        self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_FINISHED
+        self.session.question_ends_at = now
+        self.session.save(update_fields=["state", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["state"], LiveSession.STATE_FINISHED)
+        self.assertEqual(parse_datetime(data["finished_at"]), now)
 
 
 @override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_STATE_RATE_LIMIT="1/1m")

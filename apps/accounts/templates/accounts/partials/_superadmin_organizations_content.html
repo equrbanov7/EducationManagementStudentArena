@@ -104,6 +104,14 @@
                     <td>
                         <div><strong>{% trans "detail_code" context "profile.superadmin_orgs" %}:</strong> {{ organization.organization_identifier|default:"-" }}</div>
                         <div><strong>{% trans "detail_license" context "profile.superadmin_orgs" %}:</strong> {{ organization.license_identifier|default:"-" }}</div>
+                        <div class="mt-2">
+                            <strong>Yazılı imtahan anonimliyi:</strong>
+                            {% if organization.written_exam_identity_reveal_enabled %}
+                                <span class="role-badge role-warning">Söndürülüb, ad görünür</span>
+                            {% else %}
+                                <span class="role-badge role-success">Standart anonimlik aktivdir</span>
+                            {% endif %}
+                        </div>
                         {% if organization.suspension_reason %}
                         <div><strong>{% trans "detail_suspend_reason" context "profile.superadmin_orgs" %}:</strong> {{ organization.suspension_reason }}</div>
                         {% endif %}
@@ -133,6 +141,20 @@
                                     <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "suspend" context "profile.superadmin_orgs" %}</button>
                                 </div>
                             {% endif %}
+                            <hr class="my-3">
+                            <input type="hidden"
+                                   name="enabled"
+                                   value="{% if organization.written_exam_identity_reveal_enabled %}0{% else %}1{% endif %}">
+                            <button type="submit"
+                                    name="action"
+                                    value="set_written_exam_identity_reveal"
+                                    class="btn btn-outline-primary btn-sm w-100">
+                                {% if organization.written_exam_identity_reveal_enabled %}
+                                    Anonim yoxlamanı qaytar
+                                {% else %}
+                                    Müəllimə tələbə adını göstər
+                                {% endif %}
+                            </button>
                         </form>
                     </td>
                 </tr>

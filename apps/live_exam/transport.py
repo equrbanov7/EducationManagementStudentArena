@@ -15,7 +15,12 @@ from asgiref.sync import async_to_sync
 from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
-from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
+from apps.live_exam.constants import (
+    PLAYER_LEADERBOARD_SECONDS,
+    PLAYER_QUESTION_PUBLISH_GRACE_SECONDS,
+    PLAYER_RESULT_SECONDS,
+    PLAYER_REVEAL_TRANSITION_SECONDS,
+)
 from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
 from apps.live_exam.serializers import (
     serialize_answer_distribution,
@@ -113,6 +118,7 @@ def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
     players = serialize_players(session, limit=limit)
     return {
         "type": "lobby_state",
+        "server_time": timezone.now().isoformat(),
         "count": len(players),
         "players": players,
         "is_locked": bool(session.is_locked),
@@ -135,6 +141,7 @@ def build_reaction_event_payload(*, player, reaction_key: str, emoji: str, creat
 def build_answer_progress_payload(*, question_id: int, answered_count: int, total_players: int) -> dict[str, Any]:
     return {
         "type": "answer_progress",
+        "server_time": timezone.now().isoformat(),
         "question_id": question_id,
         "answered_count": answered_count,
         "total_players": total_players,
@@ -142,7 +149,7 @@ def build_answer_progress_payload(*, question_id: int, answered_count: int, tota
 
 
 def build_question_payload(session, exam_question, *, idx: int, total: int):
-    started_at = timezone.now()
+    started_at = timezone.now() + timezone.timedelta(seconds=PLAYER_QUESTION_PUBLISH_GRACE_SECONDS)
     ready_ends_at, answer_starts_at, ends_at = build_question_phase_times(
         session,
         exam_question,
@@ -151,6 +158,7 @@ def build_question_payload(session, exam_question, *, idx: int, total: int):
     )
     payload = {
         "type": "question_published",
+        "server_time": timezone.now().isoformat(),
         "question": serialize_question(
             session,
             exam_question,
@@ -179,6 +187,7 @@ def build_question_phase_payload(
 ):
     return {
         "type": "question_published",
+        "server_time": timezone.now().isoformat(),
         "question": serialize_question(
             session,
             exam_question,
@@ -215,6 +224,7 @@ def build_reveal_payload(
     _, _, correct_ids = detect_multi(exam_question)
     payload = {
         "type": "reveal",
+        "server_time": timezone.now().isoformat(),
         "question_id": question_id,
         "correct_option_ids": correct_ids,
         "distribution": serialize_answer_distribution(session, question_id),
@@ -258,6 +268,7 @@ def build_player_reveal_payload(
     _, _, correct_ids = detect_multi(exam_question)
     return {
         "type": "reveal",
+        "server_time": timezone.now().isoformat(),
         "question_id": question_id,
         "correct_option_ids": correct_ids,
         "distribution": serialize_answer_distribution(session, question_id),
@@ -273,10 +284,11 @@ def build_player_reveal_payload(
 
 
 def build_finished_payload(session, *, finished_at=None, limit: int = 50) -> dict[str, Any]:
+    resolved_finished_at = finished_at or session.question_ends_at or timezone.now()
     payload = {
         "type": "finished",
+        "server_time": timezone.now().isoformat(),
         "top": serialize_top(session, limit=limit),
+        "finished_at": resolved_finished_at.isoformat(),
     }
-    if finished_at is not None:
-        payload["finished_at"] = finished_at.isoformat()
     return payload
