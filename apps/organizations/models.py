@@ -11,6 +11,9 @@ from django.utils.translation import pgettext, pgettext_lazy
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
+REVIEW_VISIBILITY_SETTINGS_KEY = "review_visibility"
+WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY = "written_exam_identity_reveal_enabled"
+
 
 class Country(models.Model):
     """
@@ -137,6 +140,29 @@ class Organization(UUIDModel, TimeStampedModel):
     @property
     def is_suspended(self):
         return self.status == "suspended" or not self.is_active
+
+    def _review_visibility_settings(self):
+        settings_payload = self.settings if isinstance(self.settings, dict) else {}
+        review_settings = settings_payload.get(REVIEW_VISIBILITY_SETTINGS_KEY)
+        if isinstance(review_settings, dict):
+            return review_settings
+        return {}
+
+    @property
+    def written_exam_identity_reveal_enabled(self):
+        return bool(
+            self._review_visibility_settings().get(
+                WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY,
+                False,
+            )
+        )
+
+    def set_written_exam_identity_reveal_enabled(self, enabled: bool):
+        settings_payload = dict(self.settings or {})
+        review_settings = dict(self._review_visibility_settings())
+        review_settings[WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY] = bool(enabled)
+        settings_payload[REVIEW_VISIBILITY_SETTINGS_KEY] = review_settings
+        self.settings = settings_payload
 
 
 class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):

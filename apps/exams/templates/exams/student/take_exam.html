@@ -257,6 +257,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const qTimerValue = document.getElementById('question-timer-value');
 
     let questionTimerInterval = null;
+    let questionTimerTick = null;
+    let questionTimerSlide = null;
+    let questionTimerDeadlineMs = null;
+    let examTimerInterval = null;
+    let examTimerTick = null;
     let currentIndex = 0;
     const totalSlides = slides.length;
     let hasUnsavedChanges = false;
@@ -332,6 +337,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
+    function getSecondsUntil(deadlineMs) {
+        if (!deadlineMs) {
+            return 0;
+        }
+        return Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000));
+    }
+
     function disableSlideInputs(slideElement) {
         const inputs = slideElement.querySelectorAll('input, textarea');
         inputs.forEach(input => {
@@ -341,11 +353,50 @@ document.addEventListener('DOMContentLoaded', function() {
         slideElement.style.pointerEvents = 'none';
     }
 
-    function startQuestionTimer(slideElement) {
+    function syncQuestionTimerState() {
+        if (!questionTimerSlide || !questionTimerDeadlineMs) {
+            return 0;
+        }
+
+        const secondsLeft = getSecondsUntil(questionTimerDeadlineMs);
+        questionTimerSlide.setAttribute('data-time-limit', String(secondsLeft));
+        return secondsLeft;
+    }
+
+    function stopQuestionTimer() {
+        syncQuestionTimerState();
+
         if (questionTimerInterval) {
             clearInterval(questionTimerInterval);
-            qTimerContainer.classList.remove('danger');
         }
+
+        questionTimerInterval = null;
+        questionTimerTick = null;
+        questionTimerSlide = null;
+        questionTimerDeadlineMs = null;
+        qTimerContainer.classList.remove('danger');
+    }
+
+    function handleQuestionTimerExpiry(slideElement) {
+        stopQuestionTimer();
+        slideElement.setAttribute('data-time-limit', '0');
+        slideElement.setAttribute('data-time-expired', 'true');
+        qTimerContainer.style.display = 'flex';
+        qTimerValue.textContent = "00:00";
+        qTimerContainer.classList.add('danger');
+        disableSlideInputs(slideElement);
+
+        if (currentIndex < totalSlides - 1) {
+            showSlide(currentIndex + 1);
+        } else {
+            localStorage.removeItem(storageKey);
+            examForm.submit();
+        }
+        updateProgress();
+    }
+
+    function startQuestionTimer(slideElement) {
+        stopQuestionTimer();
 
         if (slideElement.getAttribute('data-time-expired') === 'true') {
             qTimerContainer.style.display = 'flex';
@@ -359,32 +410,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (timeLimit > 0) {
             qTimerContainer.style.display = 'flex';
-            qTimerValue.textContent = formatTime(timeLimit);
+            questionTimerSlide = slideElement;
+            questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);
 
-            questionTimerInterval = setInterval(() => {
-                timeLimit--;
-                slideElement.setAttribute('data-time-limit', timeLimit);
-                
-                qTimerValue.textContent = formatTime(timeLimit);
+            questionTimerTick = () => {
+                const secondsLeft = syncQuestionTimerState();
+                qTimerValue.textContent = formatTime(secondsLeft);
+                qTimerContainer.classList.toggle('danger', secondsLeft > 0 && secondsLeft <= 10);
 
-                if (timeLimit <= 10 && timeLimit > 0) {
-                    qTimerContainer.classList.add('danger');
+                if (secondsLeft <= 0) {
+                    handleQuestionTimerExpiry(slideElement);
                 }
+            };
 
-                if (timeLimit <= 0) {
-                    clearInterval(questionTimerInterval);
-                    slideElement.setAttribute('data-time-expired', 'true');
-                    disableSlideInputs(slideElement);
-
-                    if (currentIndex < totalSlides - 1) {
-                        showSlide(currentIndex + 1);
-                    } else {
-                        localStorage.removeItem(storageKey);
-                        examForm.submit();
-                    }
-                    updateProgress();
-                }
-            }, 1000);
+            questionTimerTick();
+            if (questionTimerSlide) {
+                questionTimerInterval = setInterval(questionTimerTick, 1000);
+            }
         } else {
             qTimerContainer.style.display = 'none';
         }
@@ -533,15 +575,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
         const timerValueElement = document.getElementById('timer-value');
         const timerContainer = document.getElementById('exam-timer-container');
-        
-        timerValueElement.textContent = formatTime(remainingSeconds);
 
-        const timerInterval = setInterval(() => {
-            remainingSeconds--;
-            
+        const examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);
+
+        examTimerTick = () => {
+            remainingSeconds = getSecondsUntil(examTimerDeadlineMs);
+            timerValueElement.textContent = formatTime(remainingSeconds);
+
             if (remainingSeconds <= 0) {
-                clearInterval(timerInterval);
-                if (questionTimerInterval) clearInterval(questionTimerInterval);
+                if (examTimerInterval) {
+                    clearInterval(examTimerInterval);
+                    examTimerInterval = null;
+                }
+                stopQuestionTimer();
                 timerValueElement.textContent = "00:00";
 
                 // Prevent beforeunload warning during auto-submit
@@ -567,18 +613,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1500);
                 return;
             }
-            
-            timerValueElement.textContent = formatTime(remainingSeconds);
-            
+
             if (remainingSeconds < 60) {
                 timerContainer.style.backgroundColor = '#fee2e2';
                 timerContainer.style.color = '#dc2626';
             }
-        }, 1000);
+        };
+
+        examTimerTick();
+        examTimerInterval = setInterval(examTimerTick, 1000);
     } else {
         document.getElementById('timer-value').textContent = "00:00";
     }
     {% endif %}
+
+    function refreshVisibleTimers() {
+        if (!document.hidden) {
+            if (typeof questionTimerTick === 'function') {
+                questionTimerTick();
+            }
+            if (typeof examTimerTick === 'function') {
+                examTimerTick();
+            }
+        }
+    }
+
+    document.addEventListener('visibilitychange', refreshVisibleTimers);
+    window.addEventListener('focus', refreshVisibleTimers);
 
     // ---- Fayl helper-ləri ----
     function syncInputFiles(qid) {
