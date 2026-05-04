@@ -1210,6 +1210,12 @@ def user_profile(request):
         "cost_estimates": {},
         "post_next_url": "",
     }
+    superadmin_org_features_section = {
+        "organizations": [],
+        "organizations_page_param": "superadmin_feature_org_page",
+        "organizations_pagination_query": "",
+        "post_next_url": "",
+    }
     superadmin_organizations_section = {
         "organizations": [],
         "organization_access_rows": [],
@@ -1512,39 +1518,66 @@ def user_profile(request):
             manage_roles_search=manage_roles_search,
         )
 
-    if "superadmin-organizations" in allowed_sections:
-        from apps.organizations.models import Organization
+    if "superadmin-org-features" in allowed_sections or "superadmin-organizations" in allowed_sections:
+        from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
 
         superadmin_organizations_queryset = (
             Organization.objects.select_related("owner")
             .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
             .order_by("name")
         )
-        superadmin_org_page = request.GET.get("superadmin_org_page")
-        superadmin_organizations_section["organizations"] = Paginator(superadmin_organizations_queryset, 12).get_page(
-            superadmin_org_page
-        )
-        superadmin_organizations_section["organization_access_rows"] = organization_access_rows
-        superadmin_organizations_section["all_modules"] = [
-            "accounts",
-            "organizations",
-            "courses",
-            "exams",
-            "assignments",
-            "projects",
-            "labs",
-            "live_exam",
-            "blog",
-            "audit",
-        ]
-        superadmin_organizations_section["organizations_pagination_query"] = _query_string(
-            section="superadmin-organizations"
-        )
-        superadmin_organizations_section["post_next_url"] = _append_query_params(
-            reverse("accounts:profile"),
-            section="superadmin-organizations",
-        )
-        superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
+        if "superadmin-org-features" in allowed_sections:
+            superadmin_feature_org_page = request.GET.get("superadmin_feature_org_page")
+            superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
+                superadmin_feature_org_page
+            )
+            for organization in superadmin_org_features_page.object_list:
+                organization.review_feature_items = [
+                    {
+                        "key": feature_name,
+                        "label": feature_config["label"],
+                        "short_label": feature_config["short_label"],
+                        "enabled": organization.is_review_identity_reveal_enabled(feature_name),
+                    }
+                    for feature_name, feature_config in REVIEW_VISIBILITY_FEATURES.items()
+                ]
+            superadmin_org_features_section["organizations"] = superadmin_org_features_page
+            superadmin_org_features_section["organizations_pagination_query"] = _query_string(
+                section="superadmin-org-features"
+            )
+            superadmin_org_features_section["post_next_url"] = _append_query_params(
+                reverse("accounts:profile"),
+                section="superadmin-org-features",
+                superadmin_feature_org_page=superadmin_feature_org_page,
+            )
+
+        if "superadmin-organizations" in allowed_sections:
+            superadmin_org_page = request.GET.get("superadmin_org_page")
+            superadmin_organizations_section["organizations"] = Paginator(
+                superadmin_organizations_queryset, 12
+            ).get_page(superadmin_org_page)
+            superadmin_organizations_section["organization_access_rows"] = organization_access_rows
+            superadmin_organizations_section["all_modules"] = [
+                "accounts",
+                "organizations",
+                "courses",
+                "exams",
+                "assignments",
+                "projects",
+                "labs",
+                "live_exam",
+                "blog",
+                "audit",
+            ]
+            superadmin_organizations_section["organizations_pagination_query"] = _query_string(
+                section="superadmin-organizations"
+            )
+            superadmin_organizations_section["post_next_url"] = _append_query_params(
+                reverse("accounts:profile"),
+                section="superadmin-organizations",
+                superadmin_org_page=superadmin_org_page,
+            )
+            superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 
     if "superadmin-users" in allowed_sections:
         superadmin_users_section.update(
@@ -1901,6 +1934,7 @@ def user_profile(request):
         "student-organization-management": pgettext_lazy("profile.section", "staff_management"),
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
+        "superadmin-org-features": "Təşkilat özəllikləri",
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
         "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
@@ -2032,6 +2066,7 @@ def user_profile(request):
         "manage_roles_section": manage_roles_section,
         "superadmin_users_section": superadmin_users_section,
         "superadmin_ai_settings_section": superadmin_ai_settings_section,
+        "superadmin_org_features_section": superadmin_org_features_section,
         "category_management_create_form": category_management_create_form,
         "category_management_edit_form": category_management_edit_form,
         "category_management_edit_item": category_management_edit_item,

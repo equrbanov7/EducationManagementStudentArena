@@ -18,8 +18,14 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
+from apps.exams.services.review_visibility import (
+    resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
+)
+from apps.exams.services.review_visibility import (
+    resolve_exam_attempt_review_window_seconds as _resolve_attempt_review_window_seconds,
+)
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
-from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.permissions import request_has_permission
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
@@ -120,63 +126,6 @@ def _parse_filter_date(raw_value):
         return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
     except ValueError:
         return "", None
-
-
-def _resolve_attempt_name_visibility(attempt, *, current_time=None):
-    now = current_time or timezone.now()
-
-    # Test imtahanlarında nəticə dərhal görünür, ad da gizli qalmamalıdır.
-    if attempt.exam.exam_type == "test":
-        return True, 0
-
-    organization = getattr(attempt.exam, "organization", None)
-    if organization is not None and organization.written_exam_identity_reveal_enabled:
-        return True, 0
-
-    # Yazılı imtahanlarda tələbə adı yoxlama tamamlanana qədər həmişə anonim
-    # qalır. 5 dəqiqəlik pəncərə yalnız müəllim ilkin yoxlamanı bitirdikdən
-    # sonra başlayır.
-    if not attempt.checked_by_teacher:
-        return False, 0
-
-    # Köhnə datada timestamp olmaya bilər. Bu halda tələbə balı görə bildiyi üçün
-    # müəllim də real adı görə bilməlidir.
-    if not attempt.teacher_checked_at:
-        return True, 0
-
-    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return True, 0
-
-    seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
-    return False, seconds_remaining
-
-
-def _resolve_attempt_review_window_seconds(attempt, *, current_time=None):
-    if attempt.exam.exam_type == "test":
-        return 0
-
-    if not attempt.checked_by_teacher or not attempt.teacher_checked_at:
-        return 0
-
-    now = current_time or timezone.now()
-    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return 0
-
-    return max(0, int((reveal_at - now).total_seconds()))
-
-
-def _attempt_review_window_locked(attempt, *, current_time=None):
-    if attempt.exam.exam_type == "test":
-        return False
-
-    if not attempt.checked_by_teacher:
-        return False
-
-    return _resolve_attempt_review_window_seconds(attempt, current_time=current_time) == 0 and bool(
-        attempt.teacher_checked_at
-    )
 
 
 def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_seconds, identity_window_seconds):
@@ -641,10 +590,13 @@ def teacher_check_attempt(request, slug, attempt_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
-    results_return_url = _append_query_params(
-        reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
-        **navigation_params,
-    )
+    if navigation_params.get("from_section") == "pending-review":
+        results_return_url = profile_return_url
+    else:
+        results_return_url = _append_query_params(
+            reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
+            **navigation_params,
+        )
     view_attempt_url = _append_query_params(
         reverse("exams:teacher_view_attempt", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
         **navigation_params,
