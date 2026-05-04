@@ -518,6 +518,7 @@ def _role_capabilities(user, profile):
             "manage-roles",
             "create-category",
             "category-management",
+            "superadmin-org-features",
             "superadmin-organizations",
             "superadmin-users",
             "superadmin-ai",

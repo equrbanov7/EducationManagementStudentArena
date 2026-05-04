@@ -1808,6 +1808,21 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'data-section="superadmin-ai"', html=False)
         self.assertContains(response, 'data-profile-section-panel="superadmin-ai"', html=False)
 
+    def test_superadmin_profile_shows_org_features_as_inline_section(self):
+        superuser = User.objects.create_superuser(
+            username="feature_inline_superadmin",
+            email="feature_inline_superadmin@example.com",
+            password="adminpass123",
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'{reverse("accounts:profile")}?section=superadmin-org-features')
+        self.assertContains(response, 'data-section="superadmin-org-features"', html=False)
+        self.assertContains(response, 'data-profile-section-panel="superadmin-org-features"', html=False)
+
     def test_superadmin_ai_settings_section_renders_inside_profile(self):
         superuser = User.objects.create_superuser(
             username="ai_section_superadmin",
@@ -1824,6 +1839,42 @@ class ProfileViewTest(TestCase):
         self.assertContains(
             response,
             f'name="next" value="{reverse("accounts:profile")}?section=superadmin-ai"',
+            html=False,
+        )
+
+    def test_superadmin_org_features_section_renders_inside_profile(self):
+        superuser = User.objects.create_superuser(
+            username="feature_section_superadmin",
+            email="feature_section_superadmin@example.com",
+            password="adminpass123",
+        )
+        org_owner = User.objects.create_user(
+            username="feature_section_owner",
+            email="feature_section_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Feature Section Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=org_owner,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:profile") + "?section=superadmin-org-features")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_section"], "superadmin-org-features")
+        self.assertContains(response, 'data-profile-section-panel="superadmin-org-features"', html=False)
+        self.assertContains(response, organization.name)
+        self.assertContains(response, "Yazılı imtahan")
+        self.assertContains(response, "Sərbəst iş")
+        self.assertContains(response, "Kurs işi")
+        self.assertContains(response, "Lab işi")
+        self.assertContains(
+            response,
+            f'name="next" value="{reverse("accounts:profile")}?section=superadmin-org-features"',
             html=False,
         )
 
@@ -4088,6 +4139,130 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Teacher Pending Exam")
         self.assertNotContains(response, "Other Pending Exam")
+
+    def test_pending_review_reveals_written_exam_student_when_org_override_enabled(self):
+        from apps.exams.models import Exam, ExamAttempt
+
+        self.org.set_written_exam_identity_reveal_enabled(True)
+        self.org.save(update_fields=["settings", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_visible_exam_student",
+            email="pending_visible_exam_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        exam = Exam.objects.create(
+            author=self.user,
+            title="Visible Pending Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(
+            user=student,
+            exam=exam,
+            status="submitted",
+        )
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"))
+
+        self.assertEqual(response.status_code, 200)
+        exam_item = next(item for item in response.context["review_items"] if item["title"] == "Visible Pending Exam")
+        self.assertEqual(exam_item["student_display"], student.username)
+        self.assertTrue(exam_item["can_view_student_identity"])
+        self.assertContains(response, student.username)
+        self.assertNotContains(response, "Anonim tələbə")
+
+    def test_pending_review_reveals_assignment_student_when_org_override_enabled(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+
+        self.org.set_assignment_identity_reveal_enabled(True)
+        self.org.save(update_fields=["settings", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_visible_assignment_student",
+            email="pending_visible_assignment_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        course = Course.objects.create(owner=self.user, title="Visible Pending Assignment Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Visible Pending Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Pending assignment answer",
+            status="submitted",
+        )
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"))
+
+        self.assertEqual(response.status_code, 200)
+        assignment_item = next(
+            item for item in response.context["review_items"] if item["title"] == "Visible Pending Assignment"
+        )
+        self.assertEqual(assignment_item["student_display"], student.username)
+        self.assertTrue(assignment_item["can_view_student_identity"])
+        self.assertContains(response, student.username)
+
+    def test_pending_review_detail_reveals_assignment_student_when_org_override_enabled(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+
+        self.org.set_assignment_identity_reveal_enabled(True)
+        self.org.save(update_fields=["settings", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_detail_visible_assignment_student",
+            email="pending_detail_visible_assignment_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        course = Course.objects.create(owner=self.user, title="Visible Pending Detail Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Visible Pending Detail Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Pending detail answer",
+            status="submitted",
+        )
+
+        self._login_user()
+        response = self.client.get(
+            reverse(
+                "accounts:pending_review_detail",
+                kwargs={"item_type": "assignment", "item_id": submission.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, student.username)
+        self.assertFalse(response.context["is_identity_hidden"])
 
     def test_pending_review_assignment_points_to_pending_detail_with_type_label(self):
         from datetime import timedelta
