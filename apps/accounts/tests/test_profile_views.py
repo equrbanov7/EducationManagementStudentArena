@@ -4140,6 +4140,56 @@ class PendingReviewViewTest(TestCase):
         self.assertContains(response, "Teacher Pending Exam")
         self.assertNotContains(response, "Other Pending Exam")
 
+    def test_profile_pending_review_section_renders_pr_page_pagination_links(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_pagination_student",
+            email="pending_pagination_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+
+        base_time = timezone.now() - timedelta(hours=3)
+        for index in range(16):
+            exam = Exam.objects.create(
+                author=self.user,
+                title=f"Paginated Pending Exam {index}",
+                exam_type="written",
+                is_active=True,
+            )
+            attempt = ExamAttempt.objects.create(
+                user=student,
+                exam=exam,
+                status="submitted",
+                checked_by_teacher=False,
+            )
+            attempt.started_at = base_time + timedelta(minutes=index)
+            attempt.finished_at = attempt.started_at + timedelta(minutes=20)
+            attempt.save(update_fields=["started_at", "finished_at"])
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:profile"), {"section": "pending-review"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "pr_page=2")
+        self.assertEqual(response.context["pending_review_page_obj"].number, 1)
+
+        second_page_response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "pending-review", "pr_page": 2},
+        )
+
+        self.assertEqual(second_page_response.status_code, 200)
+        self.assertEqual(second_page_response.context["pending_review_page_obj"].number, 2)
+        self.assertContains(second_page_response, "Paginated Pending Exam 15")
+
     def test_pending_review_reveals_written_exam_student_when_org_override_enabled(self):
         from apps.exams.models import Exam, ExamAttempt
 
