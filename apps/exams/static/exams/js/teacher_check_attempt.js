@@ -53,13 +53,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return input.value;
     }
 
+    function readNonNegativeIntegerValue(input) {
+        if (!input) return null;
+        const normalized = String(input.value || '').trim().replace(',', '.');
+        if (!normalized) {
+            return null;
+        }
+        const match = normalized.match(/^-?\d+/);
+        if (!match) {
+            return null;
+        }
+        const parsed = parseInt(match[0], 10);
+        if (!Number.isFinite(parsed)) {
+            return null;
+        }
+        return parsed < 0 ? 0 : parsed;
+    }
+
     function syncScoreConstraints() {
         if (!modalScoreInput || !modalMaxPointsInput) return;
-        const maxPoints = normalizePositiveIntegerInput(
+        const maxPoints = parseInt(normalizePositiveIntegerInput(
             modalMaxPointsInput,
             modalMaxPointsInput.getAttribute('min') || '1'
-        );
-        modalScoreInput.setAttribute('max', maxPoints);
+        ), 10);
+        modalScoreInput.removeAttribute('max');
+
+        const scoreValue = readNonNegativeIntegerValue(modalScoreInput);
+        if (scoreValue !== null && Number.isFinite(maxPoints) && scoreValue > maxPoints) {
+            modalMaxPointsInput.value = String(scoreValue);
+        }
     }
 
     // 1. Kartlara klikləmə

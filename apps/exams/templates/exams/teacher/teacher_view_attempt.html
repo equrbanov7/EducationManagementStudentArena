@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n exam_filters %}
 
 {% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ student_display }}{% endblock %}
 
@@ -44,7 +44,39 @@
             <i class="far fa-calendar-alt"></i>
             <div class="summary-content">
                 <span class="label">{% trans "label_started_at" context "exams.template.teacher_view_attempt" %}:</span>
-                <span class="value">{{ attempt.started_at|date:"d.m.Y H:i" }}</span>
+                <span class="value">
+                    {% if attempt_timing.started_at %}
+                        {{ attempt_timing.started_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="summary-item">
+            <i class="far fa-calendar-check"></i>
+            <div class="summary-content">
+                <span class="label">Bitirib:</span>
+                <span class="value">
+                    {% if attempt_timing.finished_at %}
+                        {{ attempt_timing.finished_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="summary-item">
+            <i class="far fa-clock"></i>
+            <div class="summary-content">
+                <span class="label">Ümumi müddət:</span>
+                <span class="value">
+                    {% if attempt_timing.has_duration %}
+                        {{ attempt_timing.duration_seconds|format_duration }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
             </div>
         </div>
         <div class="summary-item result-item">
