@@ -82,7 +82,10 @@ def lab_submissions(request, pk):
         _raise_lab_teacher_access_denied()
 
     # Bütün submission-lar
-    submissions = LabSubmission.objects.filter(assignment__lab=lab).select_related("assignment__student")
+    submissions = LabSubmission.objects.filter(assignment__lab=lab).select_related(
+        "assignment__student",
+        "assignment__lab__course__organization",
+    )
 
     # Qrupları al - CourseMembership-dən
 
