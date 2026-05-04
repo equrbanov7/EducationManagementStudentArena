@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
@@ -116,6 +116,25 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
         "return_to": profile_return_url,
     }
     return profile_return_url, navigation_params
+
+
+def _build_attempt_timing_context(attempt):
+    started_at = getattr(attempt, "started_at", None)
+    finished_at = getattr(attempt, "finished_at", None)
+    duration_seconds = getattr(attempt, "duration_seconds", None)
+
+    if duration_seconds is None and started_at and finished_at:
+        duration_seconds = max(int((finished_at - started_at).total_seconds()), 0)
+
+    if finished_at is None and started_at and duration_seconds is not None:
+        finished_at = started_at + timedelta(seconds=duration_seconds)
+
+    return {
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "duration_seconds": duration_seconds,
+        "has_duration": duration_seconds is not None,
+    }
 
 
 def _parse_filter_date(raw_value):
@@ -562,6 +581,7 @@ def teacher_view_attempt(request, slug, attempt_id):
     context = {
         "exam": exam,
         "attempt": attempt,
+        "attempt_timing": _build_attempt_timing_context(attempt),
         "qa_list": questions_page.object_list,
         "qa_page": questions_page,
         "qa_search_query": search_query,
@@ -671,11 +691,7 @@ def teacher_check_attempt(request, slug, attempt_id):
                     max_points_val = q.points
                 max_points_val = max(1, max_points_val)
             else:
-                max_points_val = q.points
-
-            if q.points != max_points_val:
-                q.points = max_points_val
-                q.save(update_fields=["points"])
+                max_points_val = max(1, q.points)
 
             if score_raw == "":
                 a.teacher_score = None
@@ -684,10 +700,16 @@ def teacher_check_attempt(request, slug, attempt_id):
                     score_val = int(score_raw)
                 except ValueError:
                     score_val = 0
-                score_val = max(0, min(score_val, max_points_val))
+                score_val = max(0, score_val)
+                if score_val > max_points_val:
+                    max_points_val = score_val
                 a.teacher_score = score_val
                 total_score += score_val
                 any_score = True
+
+            if q.points != max_points_val:
+                q.points = max_points_val
+                q.save(update_fields=["points"])
 
             a.teacher_feedback = feedback
             a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
@@ -711,6 +733,7 @@ def teacher_check_attempt(request, slug, attempt_id):
     context = {
         "exam": exam,
         "attempt": attempt,
+        "attempt_timing": _build_attempt_timing_context(attempt),
         "qa_list": qa_list,
         "profile_return_url": profile_return_url,
         "results_return_url": results_return_url,
