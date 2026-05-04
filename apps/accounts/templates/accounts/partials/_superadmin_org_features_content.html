@@ -1,0 +1,85 @@
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-sliders-h"></i> Təşkilat özəllikləri
+    </div>
+    <p class="text-muted mb-0">
+        Buradan təşkilatlara aid review visibility feature-lərini ayrıca açıb bağlaya bilərsən. Toggle aktiv olanda müəllim tələbə adını anonim pəncərə bitmədən də görür, amma bal redaktə vaxtı olduğu kimi qalır.
+    </p>
+</div>
+
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-user-shield"></i> Review visibility feature flag-ları
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Təşkilat</th>
+                    <th>Tip</th>
+                    <th>Sahib</th>
+                    <th>Özəlliklər</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for organization in organizations %}
+                <tr>
+                    <td>
+                        <div><strong>{{ organization.name }}</strong></div>
+                        <div class="text-muted small">Kod: {{ organization.organization_identifier|default:"-" }}</div>
+                    </td>
+                    <td>{{ organization.get_org_type_display }}</td>
+                    <td>{{ organization.owner.username }}</td>
+                    <td>
+                        <div class="d-flex flex-column gap-2">
+                            {% for feature in organization.review_feature_items %}
+                            <div class="border rounded p-2">
+                                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                                    <div>
+                                        <div><strong>{{ feature.short_label }}</strong></div>
+                                        <div class="text-muted small">{{ feature.label }}</div>
+                                    </div>
+                                    <div>
+                                        {% if feature.enabled %}
+                                            <span class="role-badge role-warning">Aktivdir, ad görünür</span>
+                                        {% else %}
+                                            <span class="role-badge role-success">Standart anonimlik aktivdir</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <form method="post"
+                                      action="{% url 'accounts:superadmin_organizations' %}"
+                                      class="mt-2 d-flex justify-content-end">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ post_next_url }}">
+                                    <input type="hidden" name="organization_id" value="{{ organization.id }}">
+                                    <input type="hidden" name="feature_name" value="{{ feature.key }}">
+                                    <input type="hidden"
+                                           name="enabled"
+                                           value="{% if feature.enabled %}0{% else %}1{% endif %}">
+                                    <button type="submit"
+                                            name="action"
+                                            value="set_review_identity_reveal"
+                                            class="btn btn-outline-primary btn-sm">
+                                        {% if feature.enabled %}
+                                            Anonim yoxlamanı qaytar
+                                        {% else %}
+                                            Aktiv et
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Təşkilat tapılmadı.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=organizations extra_query=organizations_pagination_query page_param=organizations_page_param %}
+</div>
