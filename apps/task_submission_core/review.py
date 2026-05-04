@@ -7,6 +7,12 @@ from django.utils import timezone
 
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
+SUBMISSION_REVIEW_VISIBILITY_FEATURES = {
+    "submission": "assignment",
+    "projectsubmission": "project",
+    "labsubmission": "lab",
+}
+
 
 @dataclass(frozen=True)
 class SubmissionFilterState:
@@ -56,16 +62,44 @@ def resolve_recheck_window(submission, *, current_time=None):
     return True, max(0, int((reveal_at - now).total_seconds()))
 
 
+def _resolve_submission_review_visibility_feature(submission):
+    model_meta = getattr(submission, "_meta", None)
+    model_name = getattr(model_meta, "model_name", "")
+    return SUBMISSION_REVIEW_VISIBILITY_FEATURES.get(model_name, "")
+
+
+def _resolve_submission_review_visibility_organization(submission):
+    feature_name = _resolve_submission_review_visibility_feature(submission)
+    if feature_name == "assignment":
+        assignment = getattr(submission, "assignment", None)
+        course = getattr(assignment, "course", None)
+        return getattr(course, "organization", None)
+
+    if feature_name == "project":
+        project = getattr(submission, "project", None)
+        course = getattr(project, "course", None)
+        return getattr(course, "organization", None)
+
+    if feature_name == "lab":
+        assignment = getattr(submission, "assignment", None)
+        lab = getattr(assignment, "lab", None)
+        course = getattr(lab, "course", None)
+        return getattr(course, "organization", None)
+
+    return None
+
+
 def resolve_identity_window(submission, *, current_time=None):
     now = current_time or timezone.now()
+    organization = _resolve_submission_review_visibility_organization(submission)
+    feature_name = _resolve_submission_review_visibility_feature(submission)
 
-    # Identity is always hidden while the submission has not been graded yet.
-    # There is no time-based reveal for pending submissions — the teacher must
-    # never see the student's name before the re-check window has closed.
+    if organization is not None and feature_name and organization.is_review_identity_reveal_enabled(feature_name):
+        return False, 0
+
     if submission.status != "graded" or not submission.graded_at:
         return True, 0
 
-    # Once graded, hide identity until the re-check window closes.
     reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
     if now >= reveal_at:
         return False, 0
