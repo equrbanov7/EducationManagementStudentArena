@@ -672,7 +672,7 @@ class ProfileAndSuspensionFlowTest(TestCase):
         self.assertEqual(organization.status, "suspended")
         self.assertFalse(organization.is_active)
 
-    def test_superadmin_can_toggle_written_exam_identity_reveal_per_organization(self):
+    def test_superadmin_can_toggle_review_identity_reveal_per_organization(self):
         superadmin = User.objects.create_superuser(
             username="superadmin_exam_identity",
             email="superadmin_exam_identity@example.com",
@@ -692,32 +692,43 @@ class ProfileAndSuspensionFlowTest(TestCase):
         )
 
         self.client.force_login(superadmin)
+        next_url = f"{reverse('accounts:profile')}?section=superadmin-org-features"
 
-        enable_response = self.client.post(
-            reverse("accounts:superadmin_organizations"),
-            {
-                "organization_id": str(organization.id),
-                "action": "set_written_exam_identity_reveal",
-                "enabled": "1",
-            },
-        )
+        for feature_name, property_name in (
+            ("written_exam", "written_exam_identity_reveal_enabled"),
+            ("assignment", "assignment_identity_reveal_enabled"),
+            ("project", "project_identity_reveal_enabled"),
+            ("lab", "lab_identity_reveal_enabled"),
+        ):
+            enable_response = self.client.post(
+                reverse("accounts:superadmin_organizations"),
+                {
+                    "organization_id": str(organization.id),
+                    "action": "set_review_identity_reveal",
+                    "feature_name": feature_name,
+                    "enabled": "1",
+                    "next": next_url,
+                },
+            )
 
-        self.assertRedirects(enable_response, reverse("accounts:superadmin_organizations"))
-        organization.refresh_from_db()
-        self.assertTrue(organization.written_exam_identity_reveal_enabled)
+            self.assertRedirects(enable_response, next_url)
+            organization.refresh_from_db()
+            self.assertTrue(getattr(organization, property_name))
 
-        disable_response = self.client.post(
-            reverse("accounts:superadmin_organizations"),
-            {
-                "organization_id": str(organization.id),
-                "action": "set_written_exam_identity_reveal",
-                "enabled": "0",
-            },
-        )
+            disable_response = self.client.post(
+                reverse("accounts:superadmin_organizations"),
+                {
+                    "organization_id": str(organization.id),
+                    "action": "set_review_identity_reveal",
+                    "feature_name": feature_name,
+                    "enabled": "0",
+                    "next": next_url,
+                },
+            )
 
-        self.assertRedirects(disable_response, reverse("accounts:superadmin_organizations"))
-        organization.refresh_from_db()
-        self.assertFalse(organization.written_exam_identity_reveal_enabled)
+            self.assertRedirects(disable_response, next_url)
+            organization.refresh_from_db()
+            self.assertFalse(getattr(organization, property_name))
 
 
 class RoleAndPermissionTenantIsolationTest(TestCase):

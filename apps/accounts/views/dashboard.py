@@ -19,6 +19,7 @@ from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
 from apps.labs.models import LabAnswer, LabSubmission
 from apps.projects.models import ProjectSubmission
+from apps.task_submission_core.review import resolve_identity_window as resolve_submission_identity_window
 from core.tenancy import restore_request_organization_from_profile
 
 from ._dashboard_helpers import (
@@ -26,7 +27,6 @@ from ._dashboard_helpers import (
     _collect_my_results,
     _collect_pending_answer_items,
     _collect_pending_review_items,
-    _resolve_teacher_identity_window,
 )
 from ._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -53,12 +53,10 @@ from ._helpers import (
 User = get_user_model()
 
 
-def _resolve_pending_review_identity(*, student, submitted_at, graded_at, is_recheck, now=None):
-    is_hidden, seconds_left = _resolve_teacher_identity_window(
-        submitted_at=submitted_at,
-        reviewed_at=graded_at,
-        is_reviewed=is_recheck,
-        now=now,
+def _resolve_pending_review_identity(*, reviewable, student, now=None):
+    is_hidden, seconds_left = resolve_submission_identity_window(
+        reviewable,
+        current_time=now,
     )
     student_display = "Anonim tələbə" if is_hidden else (student.get_full_name() or student.username)
     return student_display, is_hidden, seconds_left
@@ -649,7 +647,13 @@ def pending_review_detail(request, item_type, item_id):
 
     if normalized_type == "assignment":
         submission = get_object_or_404(
-            Submission.objects.select_related("assignment", "assignment__course", "user", "graded_by"),
+            Submission.objects.select_related(
+                "assignment",
+                "assignment__course",
+                "assignment__course__organization",
+                "user",
+                "graded_by",
+            ),
             id=item_id,
             assignment__course__in=teacher_courses,
         )
@@ -657,10 +661,8 @@ def pending_review_detail(request, item_type, item_id):
         is_locked = _is_review_window_closed(submission.graded_at)
         is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
         student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+            reviewable=submission,
             student=submission.user,
-            submitted_at=submission.submitted_at,
-            graded_at=submission.graded_at,
-            is_recheck=is_recheck_window,
         )
 
         if request.method == "POST":
@@ -718,7 +720,13 @@ def pending_review_detail(request, item_type, item_id):
 
     if normalized_type == "project":
         submission = get_object_or_404(
-            ProjectSubmission.objects.select_related("project", "project__course", "student", "graded_by"),
+            ProjectSubmission.objects.select_related(
+                "project",
+                "project__course",
+                "project__course__organization",
+                "student",
+                "graded_by",
+            ),
             id=item_id,
             project__course__in=teacher_courses,
         )
@@ -726,10 +734,8 @@ def pending_review_detail(request, item_type, item_id):
         is_locked = _is_review_window_closed(submission.graded_at)
         is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
         student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+            reviewable=submission,
             student=submission.student,
-            submitted_at=submission.submitted_at,
-            graded_at=submission.graded_at,
-            is_recheck=is_recheck_window,
         )
 
         if request.method == "POST":
@@ -791,7 +797,11 @@ def pending_review_detail(request, item_type, item_id):
 
     submission = get_object_or_404(
         LabSubmission.objects.select_related(
-            "assignment", "assignment__lab", "assignment__lab__course", "assignment__student"
+            "assignment",
+            "assignment__lab",
+            "assignment__lab__course",
+            "assignment__lab__course__organization",
+            "assignment__student",
         ),
         id=item_id,
         assignment__lab__course__in=teacher_courses,
@@ -800,10 +810,8 @@ def pending_review_detail(request, item_type, item_id):
     is_locked = _is_review_window_closed(submission.graded_at)
     is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
     student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+        reviewable=submission,
         student=submission.assignment.student,
-        submitted_at=submission.submitted_at,
-        graded_at=submission.graded_at,
-        is_recheck=is_recheck_window,
     )
 
     lab_answers = list(

@@ -13,6 +13,31 @@ from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 REVIEW_VISIBILITY_SETTINGS_KEY = "review_visibility"
 WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY = "written_exam_identity_reveal_enabled"
+ASSIGNMENT_IDENTITY_REVEAL_SETTINGS_KEY = "assignment_identity_reveal_enabled"
+PROJECT_IDENTITY_REVEAL_SETTINGS_KEY = "project_identity_reveal_enabled"
+LAB_IDENTITY_REVEAL_SETTINGS_KEY = "lab_identity_reveal_enabled"
+REVIEW_VISIBILITY_FEATURES = {
+    "written_exam": {
+        "setting_key": WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY,
+        "label": "Yazılı imtahanda müəllimə tələbə adını göstər",
+        "short_label": "Yazılı imtahan",
+    },
+    "assignment": {
+        "setting_key": ASSIGNMENT_IDENTITY_REVEAL_SETTINGS_KEY,
+        "label": "Sərbəst işdə müəllimə tələbə adını göstər",
+        "short_label": "Sərbəst iş",
+    },
+    "project": {
+        "setting_key": PROJECT_IDENTITY_REVEAL_SETTINGS_KEY,
+        "label": "Kurs işində müəllimə tələbə adını göstər",
+        "short_label": "Kurs işi",
+    },
+    "lab": {
+        "setting_key": LAB_IDENTITY_REVEAL_SETTINGS_KEY,
+        "label": "Lab işində müəllimə tələbə adını göstər",
+        "short_label": "Lab işi",
+    },
+}
 
 
 class Country(models.Model):
@@ -148,21 +173,56 @@ class Organization(UUIDModel, TimeStampedModel):
             return review_settings
         return {}
 
-    @property
-    def written_exam_identity_reveal_enabled(self):
+    def is_review_identity_reveal_enabled(self, feature_name: str) -> bool:
+        feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)
+        if feature_config is None:
+            return False
+
         return bool(
             self._review_visibility_settings().get(
-                WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY,
+                feature_config["setting_key"],
                 False,
             )
         )
 
-    def set_written_exam_identity_reveal_enabled(self, enabled: bool):
+    def set_review_identity_reveal_enabled(self, feature_name: str, enabled: bool):
+        feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)
+        if feature_config is None:
+            raise ValueError(f"Unsupported review visibility feature: {feature_name}")
+
         settings_payload = dict(self.settings or {})
         review_settings = dict(self._review_visibility_settings())
-        review_settings[WRITTEN_EXAM_IDENTITY_REVEAL_SETTINGS_KEY] = bool(enabled)
+        review_settings[feature_config["setting_key"]] = bool(enabled)
         settings_payload[REVIEW_VISIBILITY_SETTINGS_KEY] = review_settings
         self.settings = settings_payload
+
+    @property
+    def written_exam_identity_reveal_enabled(self):
+        return self.is_review_identity_reveal_enabled("written_exam")
+
+    def set_written_exam_identity_reveal_enabled(self, enabled: bool):
+        self.set_review_identity_reveal_enabled("written_exam", enabled)
+
+    @property
+    def assignment_identity_reveal_enabled(self):
+        return self.is_review_identity_reveal_enabled("assignment")
+
+    def set_assignment_identity_reveal_enabled(self, enabled: bool):
+        self.set_review_identity_reveal_enabled("assignment", enabled)
+
+    @property
+    def project_identity_reveal_enabled(self):
+        return self.is_review_identity_reveal_enabled("project")
+
+    def set_project_identity_reveal_enabled(self, enabled: bool):
+        self.set_review_identity_reveal_enabled("project", enabled)
+
+    @property
+    def lab_identity_reveal_enabled(self):
+        return self.is_review_identity_reveal_enabled("lab")
+
+    def set_lab_identity_reveal_enabled(self, enabled: bool):
+        self.set_review_identity_reveal_enabled("lab", enabled)
 
 
 class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):

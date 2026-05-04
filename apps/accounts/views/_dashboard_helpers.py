@@ -14,8 +14,14 @@ from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseMembership
 from apps.exams.domain.access_policy import StudentGroup
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.services.review_visibility import (
+    resolve_exam_attempt_name_visibility,
+    resolve_exam_attempt_review_window_seconds,
+)
 from apps.labs.models import Lab, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
+from apps.task_submission_core.review import resolve_identity_window as resolve_submission_identity_window
+from apps.task_submission_core.review import resolve_recheck_window as resolve_submission_recheck_window
 
 from ._helpers import (
     PENDING_REVIEW_STATUS_CHOICES,
@@ -26,7 +32,6 @@ from ._helpers import (
     _assigned_exams_queryset,
     _csv_to_lower_token_set,
     _is_result_visible_to_student,
-    _is_review_window_open,
     _normalize_assigned_tasks_filter,
     _normalize_pending_answers_filter,
     _normalize_results_filter,
@@ -70,23 +75,6 @@ def _standard_item_type_meta(raw_type):
         "exam": ("İmtahan", "fas fa-file-alt"),
     }
     return mapping.get(normalized, ("Tapşırıq", "fas fa-file"))
-
-
-def _resolve_teacher_identity_window(*, submitted_at=None, reviewed_at=None, is_reviewed=False, now=None):
-    current_time = now or timezone.now()
-
-    # Identity is always hidden while the submission has not been reviewed yet.
-    # `reviewed_at` is only populated once grading has actually been completed,
-    # so it reliably indicates whether the teacher has reviewed the submission.
-    if not reviewed_at:
-        return True, 0
-
-    # Once reviewed, hide identity until the re-check window closes.
-    reveal_at = reviewed_at + REVIEW_EDIT_WINDOW
-    if current_time >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - current_time).total_seconds()))
 
 
 def _resolve_teacher_review_action(*, is_graded=False, in_recheck_window=False):
@@ -868,6 +856,7 @@ def _collect_pending_review_items(
         status=normalized_status,
         pr_group=selected_group,
         submitted_order=normalized_submitted_order,
+        pr_page=(request.GET.get("pr_page") or request.GET.get("page") or "").strip(),
     )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
@@ -893,17 +882,17 @@ def _collect_pending_review_items(
             )
         for attempt in attempts:
             course = attempt.exam.course
-            is_recheck = bool(
-                attempt.checked_by_teacher and _is_review_window_open(attempt.teacher_checked_at, now=current_time)
+            can_view_student_identity, identity_window_seconds_left = resolve_exam_attempt_name_visibility(
+                attempt,
+                current_time=current_time,
             )
-            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
-                submitted_at=attempt.finished_at or attempt.started_at,
-                reviewed_at=attempt.teacher_checked_at,
-                is_reviewed=is_recheck,
-                now=current_time,
+            review_window_seconds_left = resolve_exam_attempt_review_window_seconds(
+                attempt,
+                current_time=current_time,
             )
+            is_recheck = bool(attempt.checked_by_teacher and review_window_seconds_left > 0)
             student_display = (
-                "Anonim tələbə" if is_identity_hidden else (attempt.user.get_full_name() or attempt.user.username)
+                attempt.user.get_full_name() or attempt.user.username if can_view_student_identity else "Anonim tələbə"
             )
             submitted_at = attempt.finished_at or attempt.started_at
             items.append(
@@ -920,9 +909,13 @@ def _collect_pending_review_items(
                     "reviewed_at": attempt.teacher_checked_at,
                     "type_label": _pending_review_type_label("exam"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
-                    "can_view_student_identity": not is_identity_hidden,
-                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
+                    "review_window_seconds_left": review_window_seconds_left,
+                    "can_view_student_identity": can_view_student_identity,
+                    "countdown_mode": (
+                        "recheck"
+                        if is_recheck
+                        else ("identity" if (not can_view_student_identity and identity_window_seconds_left) else "")
+                    ),
                     "action_url": _append_query_params(
                         reverse(
                             "exams:teacher_check_attempt",
@@ -944,7 +937,7 @@ def _collect_pending_review_items(
                 assignment__course__in=teacher_courses,
             )
             .filter(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff))
-            .select_related("assignment", "user", "assignment__course")
+            .select_related("assignment", "user", "assignment__course", "assignment__course__organization")
         )
         if search_query:
             submissions = submissions.filter(
@@ -952,14 +945,13 @@ def _collect_pending_review_items(
             )
         for submission in submissions:
             course = submission.assignment.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(
-                submission.graded_at, now=current_time
+            is_recheck, review_window_seconds_left = resolve_submission_recheck_window(
+                submission,
+                current_time=current_time,
             )
-            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
-                submitted_at=submission.submitted_at,
-                reviewed_at=submission.graded_at,
-                is_reviewed=is_recheck,
-                now=current_time,
+            is_identity_hidden, identity_window_seconds_left = resolve_submission_identity_window(
+                submission,
+                current_time=current_time,
             )
             items.append(
                 {
@@ -979,9 +971,11 @@ def _collect_pending_review_items(
                     "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("assignment"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "can_view_student_identity": not is_identity_hidden,
-                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
+                    "countdown_mode": (
+                        "recheck" if is_recheck else ("identity" if identity_window_seconds_left > 0 else "")
+                    ),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",
@@ -1002,7 +996,7 @@ def _collect_pending_review_items(
                 project__course__in=teacher_courses,
             )
             .filter(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff))
-            .select_related("project", "project__course", "student")
+            .select_related("project", "project__course", "project__course__organization", "student")
         )
         if search_query:
             project_submissions = project_submissions.filter(
@@ -1010,14 +1004,13 @@ def _collect_pending_review_items(
             )
         for submission in project_submissions:
             course = submission.project.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(
-                submission.graded_at, now=current_time
+            is_recheck, review_window_seconds_left = resolve_submission_recheck_window(
+                submission,
+                current_time=current_time,
             )
-            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
-                submitted_at=submission.submitted_at,
-                reviewed_at=submission.graded_at,
-                is_reviewed=is_recheck,
-                now=current_time,
+            is_identity_hidden, identity_window_seconds_left = resolve_submission_identity_window(
+                submission,
+                current_time=current_time,
             )
             items.append(
                 {
@@ -1037,9 +1030,11 @@ def _collect_pending_review_items(
                     "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("project"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "can_view_student_identity": not is_identity_hidden,
-                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
+                    "countdown_mode": (
+                        "recheck" if is_recheck else ("identity" if identity_window_seconds_left > 0 else "")
+                    ),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",
@@ -1060,7 +1055,13 @@ def _collect_pending_review_items(
                 assignment__lab__course__in=teacher_courses,
             )
             .filter(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff))
-            .select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+            .select_related(
+                "assignment",
+                "assignment__lab",
+                "assignment__lab__course",
+                "assignment__lab__course__organization",
+                "assignment__student",
+            )
         )
         if search_query:
             lab_submissions = lab_submissions.filter(
@@ -1070,14 +1071,13 @@ def _collect_pending_review_items(
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(
-                submission.graded_at, now=current_time
+            is_recheck, review_window_seconds_left = resolve_submission_recheck_window(
+                submission,
+                current_time=current_time,
             )
-            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
-                submitted_at=submission.submitted_at,
-                reviewed_at=submission.graded_at,
-                is_reviewed=is_recheck,
-                now=current_time,
+            is_identity_hidden, identity_window_seconds_left = resolve_submission_identity_window(
+                submission,
+                current_time=current_time,
             )
             items.append(
                 {
@@ -1095,9 +1095,11 @@ def _collect_pending_review_items(
                     "reviewed_at": submission.graded_at,
                     "type_label": _pending_review_type_label("lab"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "can_view_student_identity": not is_identity_hidden,
-                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
+                    "countdown_mode": (
+                        "recheck" if is_recheck else ("identity" if identity_window_seconds_left > 0 else "")
+                    ),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",

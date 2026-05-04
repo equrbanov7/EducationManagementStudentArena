@@ -66,7 +66,7 @@ def review_submissions(request, pk):
         messages.error(request, pgettext("projects.views.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
-    submissions = project.submissions.select_related("student")
+    submissions = project.submissions.select_related("student", "project__course__organization")
     submissions, filters = apply_submission_filters(
         submissions,
         request.GET,

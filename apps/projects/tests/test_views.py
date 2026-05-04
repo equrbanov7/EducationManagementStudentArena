@@ -227,6 +227,18 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         self.assertContains(still_anonymous_response, "Anonim tələbə")
         self.assertNotContains(still_anonymous_response, self.student.username)
 
+    def test_review_submissions_reveals_student_name_when_org_override_enabled(self):
+        self.organization.set_project_identity_reveal_enabled(True)
+        self.organization.save(update_fields=["settings", "updated_at"])
+
+        self._login_teacher()
+        response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student.username)
+        self.assertNotContains(response, "Anonim tələbə")
+        self.assertTrue(response.context["submissions"][0].can_view_student_identity)
+
     def test_review_submissions_shows_recheck_then_view_after_window_closes(self):
         self.submission.status = "graded"
         self.submission.grade = "77.00"

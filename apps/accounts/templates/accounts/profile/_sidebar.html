@@ -360,6 +360,16 @@
 
         {% if 'superadmin-organizations' in allowed_sections %}
         <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=superadmin-org-features"
+               data-section="superadmin-org-features"
+               data-title="Təşkilat özəllikləri"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-org-features' %}active{% endif %}">
+                <i class="fas fa-sliders-h sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Təşkilat özəllikləri</span>
+            </a>
+        </li>
+        <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=superadmin-organizations"
                data-section="superadmin-organizations"
                data-title="{% trans 'superadmin_control' context 'profile.section' %}"

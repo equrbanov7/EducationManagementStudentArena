@@ -18,7 +18,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import NotificationType
 from apps.notifications.services import create_notification
-from apps.organizations.models import Organization
+from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
 from apps.organizations.services import ensure_owner_membership
 
 from ._helpers import (
@@ -206,14 +206,20 @@ def superadmin_organizations(request):
                 pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
                 % {"organization_name": organization.name},
             )
-        elif action == "set_written_exam_identity_reveal":
+        elif action in {"set_written_exam_identity_reveal", "set_review_identity_reveal"}:
+            feature_name = (request.POST.get("feature_name") or "").strip() or "written_exam"
+            feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)
+            if feature_config is None:
+                messages.error(request, "Naməlum review visibility feature seçildi.")
+                return redirect(next_url)
+
             reveal_enabled = request.POST.get("enabled") == "1"
-            organization.set_written_exam_identity_reveal_enabled(reveal_enabled)
+            organization.set_review_identity_reveal_enabled(feature_name, reveal_enabled)
             organization.save(update_fields=["settings", "updated_at"])
             messages.success(
                 request,
                 (
-                    f'"{organization.name}" üçün yazılı imtahan anonimliyi '
+                    f'"{organization.name}" üçün {feature_config["short_label"].lower()} anonimliyi '
                     f'{"söndürüldü" if reveal_enabled else "yenidən aktiv edildi"}.'
                 ),
             )

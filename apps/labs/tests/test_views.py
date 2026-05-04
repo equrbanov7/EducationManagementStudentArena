@@ -494,6 +494,42 @@ class LabTeacherReviewWindowTest(TestCase):
         self.assertContains(response, "Anonim tələbə")
         self.assertNotContains(response, 'data-review-countdown="')
 
+    def test_lab_submissions_reveals_pending_student_identity_when_org_override_enabled(self):
+        pending_submission = LabSubmission.objects.create(
+            assignment=self.assignment,
+            status="submitted",
+            attempt_number=2,
+        )
+        self.organization.set_lab_identity_reveal_enabled(True)
+        self.organization.save(update_fields=["settings", "updated_at"])
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        submissions = list(response.context["submissions"])
+        pending_context = next(sub for sub in submissions if sub.id == pending_submission.id)
+        self.assertTrue(pending_context.can_view_student_identity)
+        self.assertEqual(pending_context.student_display_name, self.student.username)
+        self.assertContains(response, self.student.username)
+        self.assertContains(response, self.student.email)
+
+    def test_grade_submission_page_reveals_pending_student_identity_when_org_override_enabled(self):
+        pending_submission = LabSubmission.objects.create(
+            assignment=self.assignment,
+            status="submitted",
+            attempt_number=2,
+        )
+        self.organization.set_lab_identity_reveal_enabled(True)
+        self.organization.save(update_fields=["settings", "updated_at"])
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:grade_submission_page", kwargs={"pk": pending_submission.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student.username)
+        self.assertNotContains(response, "Anonim yoxlama pəncərəsi aktivdir.")
+
     def test_lab_submissions_reveals_student_identity_after_recheck_window_closes(self):
         self.submission.graded_at = timezone.now() - timedelta(minutes=6)
         self.submission.save(update_fields=["graded_at"])
