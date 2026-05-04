@@ -1251,6 +1251,46 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, self.student.username)
         self.assertNotContains(response, "Qalan vaxt:")
 
+    def test_teacher_view_attempt_shows_finished_at_and_computed_duration(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Timing View Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the timing",
+            order=1,
+            answer_mode="single",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Timing answer",
+        )
+
+        started_at = timezone.now() - timedelta(minutes=42)
+        finished_at = started_at + timedelta(minutes=35)
+        attempt.started_at = started_at
+        attempt.finished_at = finished_at
+        attempt.duration_seconds = None
+        attempt.save(update_fields=["started_at", "finished_at", "duration_seconds"])
+
+        response = self.client.get(reverse("exams:teacher_view_attempt", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["attempt_timing"]["finished_at"], finished_at)
+        self.assertEqual(response.context["attempt_timing"]["duration_seconds"], 35 * 60)
+        self.assertContains(response, "Bitirib:")
+        self.assertContains(response, "Ümumi müddət:")
+        self.assertContains(response, "35 dəq")
+
     def test_teacher_check_attempt_includes_confirm_modal_and_integer_score_input(self):
         written_exam = Exam.objects.create(
             author=self.teacher,
@@ -1285,6 +1325,47 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'id="modalMaxPointsInput"')
         self.assertContains(response, f'name="max_points_{question.id}"')
         self.assertContains(response, 'step="1"')
+
+    def test_teacher_check_attempt_shows_exam_timing_summary(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Timing Summary Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the solution",
+            order=1,
+            answer_mode="single",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+
+        started_at = timezone.now() - timedelta(minutes=30)
+        finished_at = started_at + timedelta(minutes=27)
+        attempt.started_at = started_at
+        attempt.finished_at = finished_at
+        attempt.duration_seconds = None
+        attempt.save(update_fields=["started_at", "finished_at", "duration_seconds"])
+
+        response = self.client.get(reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["attempt_timing"]["finished_at"], finished_at)
+        self.assertEqual(response.context["attempt_timing"]["duration_seconds"], 27 * 60)
+        self.assertContains(response, "Başlayıb")
+        self.assertContains(response, "Bitirib")
+        self.assertContains(response, "Ümumi müddət")
+        self.assertContains(response, "27 dəq")
 
     def test_teacher_check_attempt_shows_real_student_name_when_org_override_enabled(self):
         self.org_a.set_written_exam_identity_reveal_enabled(True)
@@ -1412,6 +1493,52 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(answer.teacher_score, 4)
         self.assertEqual(answer.teacher_feedback, "Updated with new max")
         self.assertEqual(attempt.teacher_score, 4)
+        self.assertTrue(attempt.checked_by_teacher)
+        self.assertIsNotNone(attempt.teacher_checked_at)
+
+    def test_teacher_check_attempt_post_keeps_score_above_existing_question_points(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Free Score Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Allow scores above old max",
+            order=1,
+            answer_mode="single",
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+
+        response = self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {
+                f"score_{question.id}": "10",
+                f"max_points_{question.id}": "1",
+                f"feedback_{question.id}": "Free score should be preserved",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        question.refresh_from_db()
+        answer.refresh_from_db()
+        attempt.refresh_from_db()
+
+        self.assertEqual(question.points, 10)
+        self.assertEqual(answer.teacher_score, 10)
+        self.assertEqual(answer.teacher_feedback, "Free score should be preserved")
+        self.assertEqual(attempt.teacher_score, 10)
         self.assertTrue(attempt.checked_by_teacher)
         self.assertIsNotNone(attempt.teacher_checked_at)
 
