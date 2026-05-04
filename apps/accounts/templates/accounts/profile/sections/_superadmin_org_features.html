@@ -1,0 +1,7 @@
+{% if 'superadmin-org-features' in allowed_sections %}
+<section class="profile-section-panel profile-section--superadmin-org-features {% if active_section == 'superadmin-org-features' %}is-active{% endif %}"
+         data-profile-section-panel="superadmin-org-features"
+         data-source-url="{{ profile_base_url }}?section=superadmin-org-features">
+    {% include "accounts/partials/_superadmin_org_features_content.html" with organizations=superadmin_org_features_section.organizations organizations_page_param=superadmin_org_features_section.organizations_page_param organizations_pagination_query=superadmin_org_features_section.organizations_pagination_query post_next_url=superadmin_org_features_section.post_next_url %}
+</section>
+{% endif %}

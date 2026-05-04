@@ -5,7 +5,7 @@ View tests for exams app.
 import base64
 from datetime import timedelta
 from unittest.mock import patch
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -1318,6 +1318,56 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertTrue(response.context["can_view_student_identity"])
         self.assertEqual(response.context["student_display"], self.student.username)
         self.assertContains(response, self.student.username)
+
+    def test_teacher_check_attempt_returns_to_pending_review_when_opened_from_queue(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Pending Review Return Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Explain the solution",
+            order=1,
+            answer_mode="single",
+            points=5,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+        )
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            text_answer="Written answer",
+        )
+        return_to = f"{reverse('accounts:profile')}?section=pending-review&pr_page=2"
+
+        response = self.client.get(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id]),
+            {
+                "from_section": "pending-review",
+                "return_to": return_to,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["results_return_url"], return_to)
+        self.assertContains(response, f'href="{return_to.replace("&", "&amp;")}"', html=False)
+
+        save_response = self.client.post(
+            reverse("exams:teacher_check_attempt", args=[written_exam.slug, attempt.id])
+            + f"?from_section=pending-review&return_to={quote(return_to)}",
+            {
+                f"score_{question.id}": "4",
+                f"max_points_{question.id}": "5",
+                f"feedback_{question.id}": "Queue return flow",
+            },
+        )
+
+        self.assertRedirects(save_response, return_to, fetch_redirect_response=False)
 
     def test_teacher_check_attempt_post_updates_question_max_points(self):
         written_exam = Exam.objects.create(
