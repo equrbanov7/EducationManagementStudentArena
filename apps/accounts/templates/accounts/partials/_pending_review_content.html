@@ -155,7 +155,7 @@
     {% if not embedded_in_profile %}
         {% include "partials/_pagination.html" with page_obj=review_items extra_query=pagination_query %}
     {% else %}
-        {% include "partials/_pagination.html" with page_obj=pending_review_page_obj extra_query=pending_review_pagination_query page_param="pr_page" %}
+        {% include "partials/_pagination.html" with page_obj=review_items extra_query=pending_review_pagination_query page_param=pending_review_page_param|default:"pr_page" %}
     {% endif %}
 {% else %}
     <div class="pr-empty-state">

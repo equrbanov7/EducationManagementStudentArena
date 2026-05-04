@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n exam_filters %}
 
 {% block title %}{{ exam.title }} - {% trans "title_review" context "exams.template.teacher_check_attempt" %}{% endblock %}
 
@@ -15,6 +15,38 @@
             Tələbə:
             <strong{% if not can_view_student_identity %} class="text-warning"{% endif %}>{{ student_display }}</strong>
         </p>
+        <div class="exam-timing-summary">
+            <article class="exam-timing-card">
+                <span class="exam-timing-card__label">Başlayıb</span>
+                <strong class="exam-timing-card__value">
+                    {% if attempt_timing.started_at %}
+                        {{ attempt_timing.started_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+            </article>
+            <article class="exam-timing-card">
+                <span class="exam-timing-card__label">Bitirib</span>
+                <strong class="exam-timing-card__value">
+                    {% if attempt_timing.finished_at %}
+                        {{ attempt_timing.finished_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+            </article>
+            <article class="exam-timing-card">
+                <span class="exam-timing-card__label">Ümumi müddət</span>
+                <strong class="exam-timing-card__value">
+                    {% if attempt_timing.has_duration %}
+                        {{ attempt_timing.duration_seconds|format_duration }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+            </article>
+        </div>
         {% if not can_view_student_identity and identity_window_seconds_left %}
             <div class="alert alert-warning mt-3 mb-0">
                 Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
