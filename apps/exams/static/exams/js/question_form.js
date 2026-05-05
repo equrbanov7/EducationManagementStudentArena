@@ -21,6 +21,10 @@
         }
         initializedRoots.add(root);
 
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.init(root);
+        }
+
         var imageInput = root.querySelector('input[name="image"]');
         var videoInput = root.querySelector('input[name="video"]');
         var imageClearInput = root.querySelector('input[name="image-clear"]');

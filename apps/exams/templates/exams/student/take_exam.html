@@ -63,7 +63,8 @@
           enctype="multipart/form-data"
           data-exam-id="{{ exam.id }}"
           data-attempt-id="{{ attempt.id }}"
-          data-exam-type="{{ exam.exam_type }}">
+          data-exam-type="{{ exam.exam_type }}"
+          data-autosave-interval-ms="15000">
         {% csrf_token %}
  
         <div class="slides-wrapper">
@@ -265,6 +266,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentIndex = 0;
     const totalSlides = slides.length;
     let hasUnsavedChanges = false;
+    let autoSaveTimer = null;
+    let autoSaveRequestInFlight = false;
+    let answerRevision = 0;
+    const dirtyQuestionIds = new Set();
 
     // Exam type
     const examType = examForm.dataset.examType;
@@ -273,6 +278,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const examId = examForm.dataset.examId;
     const attemptId = examForm.dataset.attemptId;
     const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
+    const draftStorageKey = `exam_${examId}_attempt_${attemptId}_draft`;
+    const serverAutoSaveIntervalMs = Math.max(
+        5000,
+        parseInt(examForm.dataset.autosaveIntervalMs || "15000", 10) || 15000
+    );
 
     // Fayl state
     const fileState = {};
@@ -532,28 +542,182 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.updateProgress = updateProgress;
 
-    function queueAutoSave(delayMs = 1000) {
-        clearTimeout(window.autoSaveTimer);
-        window.autoSaveTimer = setTimeout(() => {
-            sendDraft("autosave");
-        }, delayMs);
+    function getQuestionIdFromField(field) {
+        if (!field) {
+            return null;
+        }
+
+        if (field.dataset && field.dataset.questionId) {
+            return String(field.dataset.questionId);
+        }
+
+        const fieldName = field.getAttribute('name') || '';
+        const match = fieldName.match(/^q_(\d+)$/);
+        return match ? match[1] : null;
     }
 
-    function markAnswerChanged(delayMs = null) {
-        hasUnsavedChanges = true;
-        updateProgress();
-        if (typeof delayMs === 'number' && delayMs >= 0) {
-            queueAutoSave(delayMs);
+    function markQuestionDirty(questionId) {
+        if (questionId !== null && questionId !== undefined && questionId !== '') {
+            dirtyQuestionIds.add(String(questionId));
         }
+    }
+
+    function collectLocalDraft() {
+        const textAnswers = {};
+        const selectedAnswers = {};
+
+        document.querySelectorAll('textarea.written-answer[name^="q_"]').forEach(textarea => {
+            const questionId = getQuestionIdFromField(textarea);
+            if (questionId) {
+                textAnswers[questionId] = textarea.value;
+            }
+        });
+
+        document.querySelectorAll('input[name^="q_"]').forEach(input => {
+            const questionId = getQuestionIdFromField(input);
+            if (!questionId) {
+                return;
+            }
+
+            if (input.type === 'radio') {
+                if (!(questionId in selectedAnswers)) {
+                    selectedAnswers[questionId] = null;
+                }
+                if (input.checked) {
+                    selectedAnswers[questionId] = input.value;
+                }
+                return;
+            }
+
+            if (input.type === 'checkbox') {
+                if (!Array.isArray(selectedAnswers[questionId])) {
+                    selectedAnswers[questionId] = [];
+                }
+                if (input.checked) {
+                    selectedAnswers[questionId].push(input.value);
+                }
+            }
+        });
+
+        return {
+            version: 1,
+            updatedAt: Date.now(),
+            currentIndex,
+            textAnswers,
+            selectedAnswers
+        };
+    }
+
+    function persistLocalDraft() {
+        try {
+            localStorage.setItem(draftStorageKey, JSON.stringify(collectLocalDraft()));
+        } catch (error) {
+            // localStorage dolu olduqda imtahan axını bloklanmasın; server interval save yenə işləyir.
+        }
+    }
+
+    function clearLocalDraft() {
+        localStorage.removeItem(draftStorageKey);
+    }
+
+    function restoreLocalDraft() {
+        let draft = null;
+
+        try {
+            draft = JSON.parse(localStorage.getItem(draftStorageKey) || "null");
+        } catch (error) {
+            clearLocalDraft();
+            return;
+        }
+
+        if (!draft || draft.version !== 1) {
+            return;
+        }
+
+        let restored = false;
+
+        Object.entries(draft.textAnswers || {}).forEach(([questionId, value]) => {
+            const textarea = document.querySelector(`textarea.written-answer[name="q_${questionId}"]`);
+            if (textarea && textarea.value !== value) {
+                textarea.value = value;
+                markQuestionDirty(questionId);
+                restored = true;
+            }
+        });
+
+        Object.entries(draft.selectedAnswers || {}).forEach(([questionId, value]) => {
+            const inputs = document.querySelectorAll(`input[name="q_${questionId}"]`);
+            if (!inputs.length) {
+                return;
+            }
+
+            let questionRestored = false;
+            const selectedValues = Array.isArray(value) ? value.map(String) : [String(value)];
+            inputs.forEach(input => {
+                const shouldCheck = value !== null && selectedValues.includes(String(input.value));
+                if (input.checked !== shouldCheck) {
+                    input.checked = shouldCheck;
+                    questionRestored = true;
+                    restored = true;
+                }
+            });
+
+            if (questionRestored) {
+                markQuestionDirty(questionId);
+            }
+        });
+
+        if (restored) {
+            hasUnsavedChanges = true;
+            answerRevision += 1;
+            updateProgress();
+            queueAutoSave();
+        } else {
+            clearLocalDraft();
+        }
+    }
+
+    function queueAutoSave(delayMs = serverAutoSaveIntervalMs) {
+        if (autoSaveTimer) {
+            return;
+        }
+
+        const effectiveDelayMs = Math.max(serverAutoSaveIntervalMs, Number(delayMs) || 0);
+        autoSaveTimer = setTimeout(() => {
+            autoSaveTimer = null;
+            flushAutoSave();
+        }, effectiveDelayMs);
+    }
+
+    function flushAutoSave() {
+        if (!hasUnsavedChanges) {
+            return;
+        }
+
+        if (autoSaveRequestInFlight) {
+            queueAutoSave();
+            return;
+        }
+
+        sendDraft("autosave", { silent: true }).catch(() => {});
+    }
+
+    function markAnswerChanged(delayMs = null, questionId = null) {
+        hasUnsavedChanges = true;
+        answerRevision += 1;
+        markQuestionDirty(questionId);
+        persistLocalDraft();
+        updateProgress();
+        queueAutoSave(delayMs);
     }
 
     window.markExamAnswerChanged = markAnswerChanged;
 
     // Test suallarında radio/checkbox dəyişikliyini izlə
-    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+    document.querySelectorAll('input[name^="q_"]').forEach(input => {
         input.addEventListener('change', function() {
             if (examType === 'test') {
-                markAnswerChanged(1000);
+                markAnswerChanged(1000, getQuestionIdFromField(input));
                 return;
             }
 
@@ -564,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Yazılı cavablarda textarea dəyişikliyini izlə
     document.querySelectorAll('textarea.written-answer').forEach(textarea => {
         textarea.addEventListener('input', function() {
-            markAnswerChanged(3000);
+            markAnswerChanged(3000, getQuestionIdFromField(textarea));
         });
     });
 
@@ -701,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid] = fileState[qid].concat(selected);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000);
+        markAnswerChanged(1000, qid);
     };
 
     window.handleDrop = function(event, qid) {
@@ -713,7 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid] = fileState[qid].concat(selected);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000);
+        markAnswerChanged(1000, qid);
     };
 
     window.triggerFileInput = function(qid) {
@@ -728,45 +892,73 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid].splice(index, 1);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000);
+        markAnswerChanged(1000, qid);
     };
 
     // Draft / autosave – AJAX
-    function sendDraft(action = "autosave") {
+    function sendDraft(action = "autosave", options = {}) {
         if (action === "autosave" && !hasUnsavedChanges) {
-            return;
+            return Promise.resolve(null);
         }
 
+        if (action === "autosave" && autoSaveRequestInFlight) {
+            queueAutoSave();
+            return Promise.resolve(null);
+        }
+
+        const sentRevision = answerRevision;
         const formData = new FormData(examForm);
         formData.append("submit_action", action);
 
-        // ✅ ƏLAVƏ: Vizual feedback - kiçik bildiriş göstər
-        let notification = null;
+        if (action === "autosave" && dirtyQuestionIds.size > 0) {
+            dirtyQuestionIds.forEach(questionId => {
+                formData.append("changed_questions[]", questionId);
+            });
+        }
+
         if (action === "autosave") {
+            autoSaveRequestInFlight = true;
+        }
+
+        let notification = null;
+        if (action === "autosave" && !options.silent) {
             notification = showNotification(I18N_TAKE_EXAM.autosaveSaving, "info");
         }
 
-        fetch(window.location.href, {
+        return fetch(window.location.href, {
             method: "POST",
             headers: {
                 "X-Requested-With": "XMLHttpRequest"
             },
             body: formData
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Draft save failed");
+            }
+            return res.json();
+        })
         .then(data => {
-            hasUnsavedChanges = false;
+            if (sentRevision === answerRevision) {
+                hasUnsavedChanges = false;
+                dirtyQuestionIds.clear();
+                clearLocalDraft();
+            } else {
+                hasUnsavedChanges = true;
+                persistLocalDraft();
+                queueAutoSave();
+            }
 
-            // ✅ ƏLAVƏ: Uğurlu bildiriş
             if (notification) {
                 hideNotification(notification);
             }
-            if (action === "autosave") {
+            if (action === "autosave" && !options.silent) {
                 showNotification(I18N_TAKE_EXAM.autosaveSaved, "success", 2000);
             }
 
             if (data.finished && data.redirect_url) {
                 localStorage.removeItem(storageKey);
+                clearLocalDraft();
                 window.location.href = data.redirect_url;
                 return;
             }
@@ -780,15 +972,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     saveDraftBtn.disabled = false;
                 }, 2000);
             }
+
+            return data;
         })
         .catch(err => {
             if (notification) {
                 hideNotification(notification);
             }
-            showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
+            hasUnsavedChanges = true;
+            persistLocalDraft();
+
+            if (action === "autosave") {
+                queueAutoSave();
+            }
+
+            if (!options.silent || action === "save_draft") {
+                showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
+            }
             
             if (action === "save_draft") {
                 alert(I18N_TAKE_EXAM.saveErrorRetry);
+            }
+            throw err;
+        })
+        .finally(() => {
+            if (action === "autosave") {
+                autoSaveRequestInFlight = false;
+                if (hasUnsavedChanges) {
+                    queueAutoSave();
+                }
             }
         });
     }
@@ -802,6 +1014,7 @@ document.addEventListener('DOMContentLoaded', function() {
             saveDraftBtn.disabled = true;
             
             // Draft saxla
+            const sentRevision = answerRevision;
             const formData = new FormData(examForm);
             formData.append("submit_action", "save_draft");
 
@@ -812,12 +1025,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Draft save failed");
+                }
+                return res.json();
+            })
             .then(data => {
-                hasUnsavedChanges = false;
+                if (sentRevision === answerRevision) {
+                    hasUnsavedChanges = false;
+                    dirtyQuestionIds.clear();
+                    clearLocalDraft();
+                } else {
+                    hasUnsavedChanges = true;
+                    persistLocalDraft();
+                    queueAutoSave();
+                }
 
                 if (data.finished && data.redirect_url) {
                     localStorage.removeItem(storageKey);
+                    clearLocalDraft();
                     window.location.href = data.redirect_url;
                     return;
                 }
@@ -832,6 +1059,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 2000);
             })
             .catch(err => {
+                hasUnsavedChanges = true;
+                persistLocalDraft();
                 saveDraftBtn.innerHTML = originalText;
                 saveDraftBtn.disabled = false;
                 showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
@@ -839,19 +1068,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ✅ DƏYİŞİKLİK: 5 dəqiqəlik interval-ı silmək olar, çünki artıq avtomatik saxlama var
-    // Amma təhlükəsizlik üçün saxlaya bilərik (backup kimi)
+    // Backup timer: əsas axın localStorage + interval save-dir, bu isə ilişmiş timer olarsa yenidən yoxlayır.
     setInterval(() => {
-        if (hasUnsavedChanges) {
-            sendDraft("autosave");
+        if (hasUnsavedChanges && !autoSaveTimer) {
+            flushAutoSave();
         }
-    }, 5 * 60 * 1000);
+    }, serverAutoSaveIntervalMs);
 
     let isFinishingExam = false;
 
     // Səhifədən çıxanda xəbərdarlıq
     window.addEventListener("beforeunload", function (e) {
         if (!hasUnsavedChanges || isFinishingExam) return;
+        persistLocalDraft();
         e.preventDefault();
         e.returnValue = "";
     });
@@ -917,6 +1146,8 @@ document.addEventListener('DOMContentLoaded', function() {
     prevBtn.addEventListener('click', () => {
         if (currentIndex > 0) showSlide(currentIndex - 1);
     });
+
+    restoreLocalDraft();
 
     // Başlanğıc slayd
     const savedIndex = parseInt(localStorage.getItem(storageKey));
