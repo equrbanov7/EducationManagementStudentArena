@@ -96,6 +96,29 @@ def _resequence_exam_questions(exam):
         ExamQuestion.objects.bulk_update(updated_questions, ["order"])
 
 
+def _question_form_blocks(exam):
+    created_default_block = None
+
+    if exam.exam_type == "written" and not exam.question_blocks.exists():
+        created_default_block = QuestionBlock.objects.create(
+            exam=exam,
+            name=f"{pgettext('exams.template.create_question_bank', 'block_default')} 1",
+            order=1,
+            enable_paint=exam.enable_paint,
+        )
+
+    return QuestionBlock.objects.filter(exam=exam).order_by("order", "id"), created_default_block
+
+
+def _question_post_data_with_default_block(request, created_default_block):
+    if not created_default_block or request.POST.get("block"):
+        return request.POST
+
+    post_data = request.POST.copy()
+    post_data["block"] = str(created_default_block.id)
+    return post_data
+
+
 def _render_question_form_html(request, *, exam, form, editing=False, question=None, navigation_query=""):
     return render_to_string(
         "exams/teacher/partials/_question_form.html",
@@ -260,7 +283,7 @@ def add_exam_question(request, slug):
     """
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
-    blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
+    blocks, created_default_block = _question_form_blocks(exam)
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
@@ -340,7 +363,7 @@ def add_exam_question(request, slug):
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
-            request.POST,
+            _question_post_data_with_default_block(request, created_default_block),
             request.FILES,
             exam_type=exam.exam_type,
             subject_blocks=blocks,
@@ -447,9 +470,7 @@ def edit_exam_question(request, slug, question_id):
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
-    # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
-    blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
-    # ------------------------------------------------------------
+    blocks, created_default_block = _question_form_blocks(exam)
 
     if exam.exam_type == "coding":
         try:
@@ -529,7 +550,7 @@ def edit_exam_question(request, slug, question_id):
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
-            request.POST,
+            _question_post_data_with_default_block(request, created_default_block),
             request.FILES,
             instance=question,
             exam_type=exam.exam_type,

@@ -18646,6 +18646,10 @@ msgid "supervision_ack_rule_fullscreen"
 msgstr "Требуется полноэкранный режим"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen_unavailable"
+msgstr "Полноэкранный режим не поддерживается браузером этого устройства; доступные средства надзора останутся активными."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
 msgstr "Переключение вкладок отслеживается"
 
