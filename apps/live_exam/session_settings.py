@@ -17,7 +17,7 @@ DEFAULT_MAX_PARTICIPANTS = 100
 PRIVILEGED_MAX_PARTICIPANTS = 500
 
 DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
-    "show_questions_on_devices": False,
+    "show_questions_on_devices": True,
     "characters_enabled": True,
     "theme_key": "aurora",
     "language": "system",

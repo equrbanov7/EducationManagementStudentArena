@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=live-host-fallback-20260408">
     <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}?v=live-host-fallback-20260408">
-    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}?v=live-host-fallback-20260408">
+    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}?v=live-host-settings-20260506">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body class="host-live-page host-presentation-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
@@ -32,19 +32,19 @@
         <div id="hostQuickActions" class="host-quick-actions" aria-label="Quick actions">
             <button id="quickStartBtn" class="host-quick-action host-quick-action--start" type="button">
                 <i class="fas fa-play"></i>
-                <span>Start</span>
+                <span>{% trans "start_button" context "live_exam.host_lobby" %}</span>
             </button>
             <button id="quickFlowBtn" class="host-quick-action host-quick-action--advance" type="button" hidden>
                 <i class="fas fa-forward-step"></i>
-                <span>Next</span>
+                <span>{% trans "next_button" context "live_exam.host_lobby" %}</span>
             </button>
             <button
                 id="quickLockBtn"
                 class="host-quick-action host-quick-action--lock host-quick-action--icon"
                 type="button"
                 aria-pressed="false"
-                aria-label="Lobby open"
-                title="Lobby open">
+                aria-label="{% trans 'lobby_open' context 'live_exam.host_lobby' %}"
+                title="{% trans 'lobby_open' context 'live_exam.host_lobby' %}">
                 <i class="fas fa-lock-open"></i>
             </button>
         </div>
@@ -221,9 +221,9 @@
     </script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-fallback-20260408"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-fallback-20260408"></script>
-    <script src="{% static 'js/host_lobby.js' %}?v=live-host-fallback-20260408"></script>
+    <script src="{% static 'js/host_lobby.js' %}?v=live-host-settings-20260506"></script>
     {% if presentation_controls %}
-    <script src="{% static 'js/host_lobby_shell.js' %}?v=live-host-fallback-20260408"></script>
+    <script src="{% static 'js/host_lobby_shell.js' %}?v=live-host-settings-20260506"></script>
     {% endif %}
 </body>
 </html>
