@@ -22,7 +22,7 @@ from apps.exams.services import parsing
 from apps.exams.services.ai_grading import grade_written_answer
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
-from apps.exams.services.supervision import log_supervision_incident, teacher_stop_attempt
+from apps.exams.services.supervision import log_supervision_incident, teacher_resume_attempt, teacher_stop_attempt
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -398,6 +398,32 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertEqual(attempt.status, "submitted")
         self.assertEqual(attempt.supervision_status, "removed")
         self.assertTrue(attempt.is_finished)
+        self.assertIsNotNone(attempt.finished_at)
+
+    def test_teacher_resume_attempt_rejects_expired_timed_attempt(self):
+        self.exam.total_duration_minutes = 60
+        self.exam.save(update_fields=["total_duration_minutes"])
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            recovery_policy="teacher_controlled",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+            supervision_status="locked",
+        )
+        attempt.started_at = timezone.now() - timedelta(minutes=61)
+        attempt.save(update_fields=["started_at"])
+
+        with self.assertRaises(ValueError):
+            teacher_resume_attempt(attempt, self.teacher)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "expired")
+        self.assertEqual(attempt.supervision_status, "locked")
         self.assertIsNotNone(attempt.finished_at)
 
 
