@@ -32,7 +32,7 @@ dependencies = [
     "pycparser==2.23",
     "pyOpenSSL==26.0.0",
     "service-identity==24.2.0",
-    "Twisted==25.5.0",
+    "Twisted==26.4.0rc2",
     "txaio==25.12.2",
     "zope.interface==8.1.1",
     "django-phonenumber-field==8.0.0",

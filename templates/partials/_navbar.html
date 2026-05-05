@@ -35,7 +35,7 @@
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
-                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
+                       class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
                         {% trans "exams" context "nav" %}
                     </a>
                 </li>
@@ -152,7 +152,7 @@
     </li>
     <li class="blog-header__nav-item">
         <a href="{% url 'exams:student_exam_list' %}"
-           class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
+           class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' %}blog-header__nav-link--active{% endif %}">
             {% trans "exams" context "nav" %}
         </a>
     </li>

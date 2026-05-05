@@ -133,7 +133,7 @@
     <div class="action-bar">
         <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
-            {% if attempt.is_finished %}
+            {% if attempt.is_finished or attempt.is_resume_time_expired %}
             <button class="btn btn-resume-action" disabled style="opacity:0.5;cursor:not-allowed;" title="{% trans 'action_terminated' context 'exams.template.supervision_detail' %}">
                 <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_detail" %}
             </button>
