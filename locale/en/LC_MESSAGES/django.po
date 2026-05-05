@@ -18664,6 +18664,10 @@ msgid "supervision_ack_rule_fullscreen"
 msgstr "Fullscreen mode is required"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen_unavailable"
+msgstr "Fullscreen is not supported by this device browser; available supervision controls will stay active."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
 msgstr "Tab switching is monitored"
 
