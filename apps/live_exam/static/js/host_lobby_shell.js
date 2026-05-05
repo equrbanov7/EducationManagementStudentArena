@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sfxVolumeSlider: document.getElementById("sfxVolumeSlider"),
         sfxVolumeLabel: document.getElementById("sfxVolumeLabel"),
         themeButtons: Array.from(document.querySelectorAll("[data-theme-key]")),
+        drawerBody: document.querySelector(".host-settings-drawer__body"),
     };
 
     if (!controlsEnabled || !dom.controlBar) return;
@@ -55,10 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const lang = String((typeof CONFIG !== "undefined" ? CONFIG.languageCode : "az") || "az").slice(0, 2).toLowerCase();
         const labels = {
             az: {
-                open: "Lobby aciqdir",
-                locked: "Lobby kilidlidir",
-                skip: "Skip",
-                next: "Next",
+                open: "Lobbi açıqdır",
+                locked: "Lobbi kilidlidir",
+                skip: "Keç",
+                next: "Növbəti",
             },
             en: {
                 open: "Lobby open",
@@ -73,10 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 next: "Далее",
             },
             tr: {
-                open: "Lobi acik",
+                open: "Lobi açık",
                 locked: "Lobi kilitli",
-                skip: "Skip",
-                next: "Next",
+                skip: "Atla",
+                next: "Sonraki",
             },
         };
         return labels[lang] || labels.az;
@@ -138,6 +139,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (dom.drawerBackdrop) {
             dom.drawerBackdrop.hidden = !open;
+        }
+        if (open && dom.drawerBody) {
+            window.requestAnimationFrame(() => {
+                dom.drawerBody.scrollTop = 0;
+            });
         }
     }
 
@@ -233,17 +239,25 @@ document.addEventListener("DOMContentLoaded", () => {
         syncingControls = false;
     }
 
+    async function updateSettings(updates) {
+        const result = await controller.updateSettings(updates);
+        if (!result?.ok) {
+            syncUi(controller.getState());
+        }
+        return result;
+    }
+
     checkboxControls.forEach(([element, key]) => {
         element.addEventListener("change", () => {
             if (syncingControls) return;
-            controller.updateSettings({ [key]: Boolean(element.checked) });
+            updateSettings({ [key]: Boolean(element.checked) });
         });
     });
 
     selectControls.forEach(([element, key]) => {
         element.addEventListener("change", () => {
             if (syncingControls) return;
-            controller.updateSettings({ [key]: element.value });
+            updateSettings({ [key]: element.value });
         });
     });
 
@@ -261,13 +275,13 @@ document.addEventListener("DOMContentLoaded", () => {
         dom.sfxVolumeSlider.addEventListener("change", () => {
             if (syncingControls) return;
             const vol = Number(dom.sfxVolumeSlider.value) || 0;
-            controller.updateSettings({ sfx_volume: vol });
+            updateSettings({ sfx_volume: vol });
         });
     }
 
     dom.themeButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            controller.updateSettings({ theme_key: button.dataset.themeKey || "aurora" });
+            updateSettings({ theme_key: button.dataset.themeKey || "aurora" });
         });
     });
 
@@ -349,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
         value = Math.max(1, Math.min(value, cap));
         dom.maxParticipants.value = String(value);
         if (!syncingControls) {
-            controller.updateSettings({ max_participants: value });
+            updateSettings({ max_participants: value });
         }
     });
     dom.maxParticipants?.addEventListener("keydown", (event) => {
