@@ -273,6 +273,7 @@ body.host-live-page.host-presentation-page.presentation-sidebar-open .host-sideb
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    overflow: clip;
 }
 
 body.host-settings-open .host-settings-drawer {
@@ -341,11 +342,16 @@ body.host-settings-open .host-settings-drawer {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
     align-items: center;
+    position: relative;
 }
 
 .host-settings-item--stack,
 .host-settings-item--field {
     grid-template-columns: 1fr;
+}
+
+.host-settings-item:not(.host-settings-item--stack):not(.host-settings-item--field) {
+    cursor: pointer;
 }
 
 .host-settings-item__copy {
@@ -365,8 +371,15 @@ body.host-settings-open .host-settings-drawer {
 
 .host-switch__input {
     position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 2;
+    width: 58px;
+    height: 32px;
+    margin: 0;
     opacity: 0;
-    pointer-events: none;
+    cursor: pointer;
+    transform: translateY(-50%);
 }
 
 .host-switch {
@@ -391,6 +404,11 @@ body.host-settings-open .host-settings-drawer {
 
 .host-switch__input:checked + .host-switch {
     background: #16a34a;
+}
+
+.host-switch__input:focus-visible + .host-switch {
+    outline: 3px solid rgba(37, 99, 235, 0.24);
+    outline-offset: 3px;
 }
 
 .host-switch__input:checked + .host-switch span {
