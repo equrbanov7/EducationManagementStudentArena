@@ -24,6 +24,7 @@ from apps.exams.models import (
     ExamAttempt,
     ExamQuestion,
     ExamQuestionOption,
+    ExamSupervisionConfig,
     QuestionBlock,
     StudentGroup,
 )
@@ -3219,6 +3220,67 @@ class WrittenExamPaintInheritanceTest(TestCase):
         self.assertTrue(self.hidden_question.disable_paint)
         self.assertFalse(self.hidden_question.paint_enabled_effective)
         self.assertEqual(self.visible_question.text, "Yenilənmiş 2")
+
+
+class SupervisionTeacherApiTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="supervision_api_teacher",
+            email="supervision_api_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.student = User.objects.create_user(
+            username="supervision_api_student",
+            email="supervision_api_student@example.com",
+            password="StrongPass123!",
+        )
+        self.org = Organization.objects.create(
+            name="Supervision API Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.org, ProfileRole.STUDENT)
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            organization=self.org,
+            title="Timed Supervision Exam",
+            exam_type="test",
+            is_active=True,
+            total_duration_minutes=60,
+        )
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            recovery_policy="teacher_controlled",
+        )
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            status="in_progress",
+            attempt_number=1,
+            supervision_status="locked",
+            supervision_violation_count=1,
+        )
+        _login_with_org(self.client, self.teacher, self.org)
+
+    def test_teacher_resume_api_rejects_attempt_after_exam_duration(self):
+        self.attempt.started_at = timezone.now() - timedelta(minutes=61)
+        self.attempt.save(update_fields=["started_at"])
+
+        response = self.client.post(
+            reverse("exams:supervision_resume", args=[self.attempt.id]),
+            data="{}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.status, "expired")
+        self.assertEqual(self.attempt.supervision_status, "locked")
+        self.assertIsNotNone(self.attempt.finished_at)
 
 
 # ════════════════════════════════════════════════════════════════════════════

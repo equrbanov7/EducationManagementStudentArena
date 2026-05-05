@@ -122,6 +122,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             return False
         return (at_time or timezone.now()) >= deadline
 
+    @property
+    def is_resume_time_expired(self):
+        return self.is_time_limit_reached()
+
     def expire_if_time_limit_reached(self, *, at_time=None):
         if self.is_finished or not self.is_time_limit_reached(at_time=at_time):
             return False

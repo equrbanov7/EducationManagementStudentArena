@@ -253,7 +253,7 @@
                     </td>
                     <td>
                         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
-                            {% if attempt.is_finished %}
+                            {% if attempt.is_finished or attempt.is_resume_time_expired %}
                             <button class="btn-action btn-resume" disabled title="{% trans 'action_terminated' context 'exams.template.supervision_monitor' %}" style="opacity:0.5;cursor:not-allowed;">
                                 <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_monitor" %}
                             </button>
