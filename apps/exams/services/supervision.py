@@ -334,7 +334,7 @@ def get_flagged_students_for_exam(exam, organization):
     ]
 
 
-def get_supervision_monitor_data(organization, exam_id=None):
+def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None):
     """
     Get supervision monitor data for the teacher dashboard.
     Returns flagged students across all supervised exams.
@@ -342,6 +342,8 @@ def get_supervision_monitor_data(organization, exam_id=None):
     incidents_qs = SupervisionIncident.objects.filter(
         organization=organization,
     ).select_related("exam", "student", "attempt")
+    if exam_queryset is not None:
+        incidents_qs = incidents_qs.filter(exam__in=exam_queryset)
 
     if exam_id:
         incidents_qs = incidents_qs.filter(exam_id=exam_id)
@@ -355,6 +357,8 @@ def get_supervision_monitor_data(organization, exam_id=None):
         .select_related("user", "exam", "exam__course")
         .order_by("-supervision_violation_count")
     )
+    if exam_queryset is not None:
+        flagged_attempts = flagged_attempts.filter(exam__in=exam_queryset)
 
     if exam_id:
         flagged_attempts = flagged_attempts.filter(exam_id=exam_id)
@@ -368,6 +372,8 @@ def get_supervision_monitor_data(organization, exam_id=None):
         .select_related("exam")
         .values_list("exam__id", "exam__title")
     )
+    if exam_queryset is not None:
+        supervised_exams = supervised_exams.filter(exam__in=exam_queryset)
 
     # Summary stats
     total_incidents = incidents_qs.filter(

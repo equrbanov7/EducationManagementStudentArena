@@ -257,6 +257,7 @@
                            placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}"
                            autocomplete="off"
                            inputmode="numeric">
+                    <div class="invalid-feedback d-none" id="examStartModalCodeError"></div>
                 </form>
             </div>
 
@@ -282,6 +283,8 @@
 {% trans "modal_note_empty" context "exams.partial.exam_section" as modal_note_empty %}
 {% trans "modal_action_start" context "exams.partial.exam_section" as modal_action_start %}
 {% trans "modal_action_confirm_code" context "exams.partial.exam_section" as modal_action_confirm_code %}
+{% trans "access_code_required" context "exams.model.access" as modal_access_code_required_error %}
+{% trans "exam_start_failed" context "exams.view.access.message" as modal_access_code_generic_error %}
 <script nonce="{{ request.csp_nonce }}">
     const I18N_STUDENT_EXAM_LIST = {
         modalAccessCodeTitle: "{{ modal_access_code_title|escapejs }}",
@@ -289,7 +292,9 @@
         modalAccessCodeDescriptionWithTitle: "{{ modal_access_code_description_with_title|escapejs }}",
         modalNoteEmpty: "{{ modal_note_empty|escapejs }}",
         modalActionStart: "{{ modal_action_start|escapejs }}",
-        modalActionConfirmCode: "{{ modal_action_confirm_code|escapejs }}"
+        modalActionConfirmCode: "{{ modal_action_confirm_code|escapejs }}",
+        modalAccessCodeRequiredError: "{{ modal_access_code_required_error|escapejs }}",
+        modalAccessCodeGenericError: "{{ modal_access_code_generic_error|escapejs }}"
     };
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -307,11 +312,23 @@
         const codeForm = document.getElementById("examStartCodeForm");
         const slugInput = document.getElementById("examStartModalSlug");
         const codeInput = document.getElementById("examStartModalCodeInput");
+        const codeErrorEl = document.getElementById("examStartModalCodeError");
         const codeHintEl = document.getElementById("examStartModalCodeHint");
         const actionBtn = document.getElementById("examStartModalActionBtn");
 
         let startUrl = "";
         let requiresCode = false;
+        let codeSubmitInFlight = false;
+
+        function setCodeError(message) {
+            if (codeInput) {
+                codeInput.classList.toggle("is-invalid", Boolean(message));
+            }
+            if (codeErrorEl) {
+                codeErrorEl.textContent = message || "";
+                codeErrorEl.classList.toggle("d-none", !message);
+            }
+        }
 
         function setCodeHint(title) {
             if (!codeHintEl) {
@@ -355,12 +372,14 @@
 
             if (codeInput) {
                 codeInput.required = false;
-                codeInput.classList.remove("is-invalid");
             }
+            setCodeError("");
 
             if (actionBtn) {
                 actionBtn.textContent = I18N_STUDENT_EXAM_LIST.modalActionStart;
+                actionBtn.disabled = false;
             }
+            codeSubmitInFlight = false;
         }
 
         document.addEventListener("click", function(event) {
@@ -413,7 +432,7 @@
             if (codeInput) {
                 codeInput.required = requiresCode;
                 codeInput.value = "";
-                codeInput.classList.remove("is-invalid");
+                setCodeError("");
             }
             if (actionBtn) {
                 actionBtn.textContent = requiresCode
@@ -436,22 +455,60 @@
         if (codeInput) {
             codeInput.addEventListener("input", function() {
                 this.value = this.value.replace(/[^0-9]/g, "");
-                this.classList.remove("is-invalid");
+                setCodeError("");
             });
         }
 
         if (codeForm) {
-            codeForm.addEventListener("submit", function(event) {
+            codeForm.addEventListener("submit", async function(event) {
+                event.preventDefault();
                 if (!requiresCode) {
-                    event.preventDefault();
                     return;
                 }
 
                 if (!(codeInput && codeInput.value.trim())) {
-                    event.preventDefault();
-                    if (codeInput) {
-                        codeInput.classList.add("is-invalid");
-                        codeInput.focus();
+                    setCodeError(I18N_STUDENT_EXAM_LIST.modalAccessCodeRequiredError);
+                    if (codeInput) codeInput.focus();
+                    return;
+                }
+                if (codeSubmitInFlight) {
+                    return;
+                }
+
+                codeSubmitInFlight = true;
+                if (actionBtn) {
+                    actionBtn.disabled = true;
+                }
+
+                try {
+                    const response = await fetch(codeForm.getAttribute("action"), {
+                        method: "POST",
+                        body: new FormData(codeForm),
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+                    const contentType = response.headers.get("content-type") || "";
+                    if (contentType.indexOf("application/json") !== -1) {
+                        const payload = await response.json();
+                        if (response.ok && payload.success) {
+                            window.location.href = payload.redirect_url || startUrl || window.location.href;
+                            return;
+                        }
+                        setCodeError(payload.error || I18N_STUDENT_EXAM_LIST.modalAccessCodeGenericError);
+                        return;
+                    }
+                    if (response.redirected && response.url) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    setCodeError(I18N_STUDENT_EXAM_LIST.modalAccessCodeGenericError);
+                } catch (error) {
+                    setCodeError(I18N_STUDENT_EXAM_LIST.modalAccessCodeGenericError);
+                } finally {
+                    codeSubmitInFlight = false;
+                    if (actionBtn) {
+                        actionBtn.disabled = false;
                     }
                 }
             });
@@ -461,10 +518,8 @@
             actionBtn.addEventListener("click", function() {
                 if (requiresCode) {
                     if (!codeForm || !codeInput || !codeInput.value.trim()) {
-                        if (codeInput) {
-                            codeInput.classList.add("is-invalid");
-                            codeInput.focus();
-                        }
+                        setCodeError(I18N_STUDENT_EXAM_LIST.modalAccessCodeRequiredError);
+                        if (codeInput) codeInput.focus();
                         return;
                     }
 

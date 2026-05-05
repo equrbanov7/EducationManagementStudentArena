@@ -51,6 +51,8 @@
                             <label class="btn btn-outline-primary create-exam-type-btn" for="createExamTypeOption_{{ forloop.counter }}">
                                 {% if value == "test" %}
                                     <i class="fas fa-list-ul" aria-hidden="true"></i>
+                                {% elif value == "coding" %}
+                                    <i class="fas fa-code" aria-hidden="true"></i>
                                 {% else %}
                                     <i class="fas fa-pen-fancy" aria-hidden="true"></i>
                                 {% endif %}
@@ -134,6 +136,10 @@
             </label>
             {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
         </div>
+
+        {% if form.practical_exams_enabled %}
+            {% include "exams/teacher/partials/_coding_exam_fields.html" %}
+        {% endif %}
 
         <div class="form-group form-group-full">
             <div class="create-exam-modal-section-title">

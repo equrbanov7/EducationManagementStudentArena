@@ -147,6 +147,10 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
 
+# Practical/coding exams are not production-ready yet. Keep the feature hidden
+# and block new production usage unless explicitly re-enabled for a deploy.
+PRACTICAL_EXAMS_ENABLED = _env_bool("PRACTICAL_EXAMS_ENABLED", False)
+
 ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "manage/")
 if ADMIN_URL_PREFIX.strip("/").lower() == "admin":
     raise ImproperlyConfigured("ADMIN_URL_PREFIX must not expose the default /admin/ path in production.")

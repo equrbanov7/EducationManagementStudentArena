@@ -1019,8 +1019,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var assignedExamCodeForm = document.getElementById("assignedExamCodeForm");
     var assignedExamCodeSlug = document.getElementById("assignedExamCodeSlug");
     var assignedExamAccessCodeInput = document.getElementById("assignedExamAccessCodeInput");
+    var assignedExamCodeError = document.getElementById("assignedExamCodeError");
     var assignedExamModalStartUrl = "";
     var assignedExamModalRequiresCode = false;
+    var assignedExamCodeSubmitInFlight = false;
+
+    function setAssignedExamCodeError(message) {
+        if (assignedExamAccessCodeInput) {
+            assignedExamAccessCodeInput.classList.toggle("is-invalid", Boolean(message));
+        }
+        if (assignedExamCodeError) {
+            assignedExamCodeError.textContent = message || "";
+            assignedExamCodeError.hidden = !message;
+        }
+    }
 
     function openAssignedExamInfoModal(trigger) {
         if (!assignedExamInfoBackdrop || !trigger) {
@@ -1059,11 +1071,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (assignedExamAccessCodeInput) {
             assignedExamAccessCodeInput.value = "";
         }
+        setAssignedExamCodeError("");
         if (assignedExamInfoStartBtn) {
             assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
                 ? "Kodu təsdiqlə və başla"
                 : "İmtahana başla";
+            assignedExamInfoStartBtn.disabled = false;
         }
+        assignedExamCodeSubmitInFlight = false;
 
         assignedExamInfoBackdrop.classList.add("is-open");
         assignedExamInfoBackdrop.setAttribute("aria-hidden", "false");
@@ -1112,20 +1127,75 @@ document.addEventListener("DOMContentLoaded", function () {
     if (assignedExamAccessCodeInput) {
         assignedExamAccessCodeInput.addEventListener("input", function () {
             this.value = this.value.replace(/[^0-9]/g, "");
+            setAssignedExamCodeError("");
         });
     }
+
+    async function submitAssignedExamCodeForm() {
+        if (!assignedExamCodeForm || !assignedExamAccessCodeInput) {
+            return;
+        }
+
+        var codeValue = (assignedExamAccessCodeInput.value || "").trim();
+        if (!codeValue) {
+            setAssignedExamCodeError("İmtahan kodu tələb olunur.");
+            assignedExamAccessCodeInput.focus();
+            return;
+        }
+
+        if (assignedExamCodeSubmitInFlight) {
+            return;
+        }
+
+        assignedExamCodeSubmitInFlight = true;
+        if (assignedExamInfoStartBtn) {
+            assignedExamInfoStartBtn.disabled = true;
+        }
+
+        try {
+            var response = await fetch(assignedExamCodeForm.getAttribute("action"), {
+                method: "POST",
+                body: new FormData(assignedExamCodeForm),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            var contentType = response.headers.get("content-type") || "";
+            if (contentType.indexOf("application/json") !== -1) {
+                var payload = await response.json();
+                if (response.ok && payload.success) {
+                    window.location.href = payload.redirect_url || assignedExamModalStartUrl || window.location.href;
+                    return;
+                }
+                setAssignedExamCodeError(payload.error || "İmtahana başlamaq mümkün olmadı.");
+                return;
+            }
+            if (response.redirected && response.url) {
+                window.location.href = response.url;
+                return;
+            }
+            setAssignedExamCodeError("İmtahana başlamaq mümkün olmadı.");
+        } catch (error) {
+            setAssignedExamCodeError("İmtahana başlamaq mümkün olmadı.");
+        } finally {
+            assignedExamCodeSubmitInFlight = false;
+            if (assignedExamInfoStartBtn) {
+                assignedExamInfoStartBtn.disabled = false;
+            }
+        }
+    }
+
+    if (assignedExamCodeForm) {
+        assignedExamCodeForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            submitAssignedExamCodeForm();
+        });
+    }
+
     if (assignedExamInfoStartBtn) {
         assignedExamInfoStartBtn.addEventListener("click", function () {
             if (assignedExamModalRequiresCode) {
-                if (!assignedExamCodeForm || !assignedExamAccessCodeInput) {
-                    return;
-                }
-                var codeValue = (assignedExamAccessCodeInput.value || "").trim();
-                if (!codeValue) {
-                    assignedExamAccessCodeInput.focus();
-                    return;
-                }
-                assignedExamCodeForm.submit();
+                submitAssignedExamCodeForm();
                 return;
             }
 

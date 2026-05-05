@@ -43,9 +43,18 @@ def _build_answer_review_item(answer):
         paint_image=getattr(answer, "paint_image", None),
     )
 
+    coding_submission = None
+    if getattr(answer.question.exam, "exam_type", "") == "coding":
+        coding_submission = (
+            answer.attempt.coding_submissions.filter(question__question=answer.question, is_final=True)
+            .order_by("-submitted_at")
+            .first()
+        )
+
     return {
         "question": answer.question,
         "answer": answer,
+        "coding_submission": coding_submission,
         "answer_files": answer_files,
         "has_text_answer": has_text_answer,
         "has_paint_answer": has_paint_answer,
@@ -152,6 +161,14 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_secon
         return {
             "label": "Bax",
             "url_name": "exams:teacher_view_attempt",
+            "countdown_seconds": 0,
+            "countdown_mode": "",
+        }
+
+    if attempt.exam.exam_type == "coding":
+        return {
+            "label": "Yenidən yoxla" if attempt.checked_by_teacher else "Yoxla",
+            "url_name": "exams:teacher_check_attempt",
             "countdown_seconds": 0,
             "countdown_mode": "",
         }

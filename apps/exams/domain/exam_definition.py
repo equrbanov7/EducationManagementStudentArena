@@ -15,6 +15,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
     EXAM_TYPE_CHOICES = (
         ("test", pgettext_lazy("exams.model.exam.choice.exam_type", "test")),
         ("written", pgettext_lazy("exams.model.exam.choice.exam_type", "written")),
+        ("coding", pgettext_lazy("exams.model.exam.choice.exam_type", "Practical Coding Exam")),
     )
     EXAM_TYPE_EXTENDED_CHOICES = (
         ("quiz", pgettext_lazy("exams.model.exam.choice.exam_type_extended", "quiz")),

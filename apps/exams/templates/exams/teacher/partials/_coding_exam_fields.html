@@ -1,0 +1,100 @@
+{% load i18n %}
+
+<div class="form-group form-group-full span-full coding-exam-fields" data-coding-exam-fields>
+    <div class="create-exam-modal-section-title">
+        <h4><i class="fas fa-code" style="color:#0f766e;"></i> {% trans "Practical Coding Exam" context "exams.template.create_exam_modal_form" %}</h4>
+        <p>{% trans "Configure the coding task, starter code, test cases, and execution controls." context "exams.template.create_exam_modal_form" %}</p>
+    </div>
+
+    <div class="create-exam-form-grid">
+        <div class="form-group">
+            {{ form.coding_language.label_tag }}
+            {{ form.coding_language }}
+            {% if form.coding_language.errors %}<div class="field-error">{{ form.coding_language.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.coding_max_score.label_tag }}
+            {{ form.coding_max_score }}
+            {% if form.coding_max_score.errors %}<div class="field-error">{{ form.coding_max_score.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full span-full">
+            {{ form.coding_question_title.label_tag }}
+            {{ form.coding_question_title }}
+            {% if form.coding_question_title.errors %}<div class="field-error">{{ form.coding_question_title.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full span-full">
+            {{ form.coding_problem_statement.label_tag }}
+            {{ form.coding_problem_statement }}
+            {% if form.coding_problem_statement.errors %}<div class="field-error">{{ form.coding_problem_statement.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.coding_input_description.label_tag }}
+            {{ form.coding_input_description }}
+            {% if form.coding_input_description.errors %}<div class="field-error">{{ form.coding_input_description.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.coding_output_description.label_tag }}
+            {{ form.coding_output_description }}
+            {% if form.coding_output_description.errors %}<div class="field-error">{{ form.coding_output_description.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.coding_example_input.label_tag }}
+            {{ form.coding_example_input }}
+            {% if form.coding_example_input.errors %}<div class="field-error">{{ form.coding_example_input.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.coding_example_output.label_tag }}
+            {{ form.coding_example_output }}
+            {% if form.coding_example_output.errors %}<div class="field-error">{{ form.coding_example_output.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.coding_time_limit_seconds.label_tag }}
+            {{ form.coding_time_limit_seconds }}
+            {% if form.coding_time_limit_seconds.errors %}<div class="field-error">{{ form.coding_time_limit_seconds.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.coding_memory_limit_mb.label_tag }}
+            {{ form.coding_memory_limit_mb }}
+            {% if form.coding_memory_limit_mb.errors %}<div class="field-error">{{ form.coding_memory_limit_mb.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full span-full">
+            {{ form.coding_starter_code.label_tag }}
+            {{ form.coding_starter_code }}
+            {% if form.coding_starter_code.errors %}<div class="field-error">{{ form.coding_starter_code.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.coding_visible_test_cases.label_tag }}
+            {{ form.coding_visible_test_cases }}
+            {% if form.coding_visible_test_cases.help_text %}<small class="form-text text-muted">{{ form.coding_visible_test_cases.help_text }}</small>{% endif %}
+            {% if form.coding_visible_test_cases.errors %}<div class="field-error">{{ form.coding_visible_test_cases.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.coding_hidden_test_cases.label_tag }}
+            {{ form.coding_hidden_test_cases }}
+            {% if form.coding_hidden_test_cases.help_text %}<small class="form-text text-muted">{{ form.coding_hidden_test_cases.help_text }}</small>{% endif %}
+            {% if form.coding_hidden_test_cases.errors %}<div class="field-error">{{ form.coding_hidden_test_cases.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full span-full coding-exam-switches">
+            <label class="modal-check-label">
+                {{ form.coding_allow_file_creation }}
+                <span class="modal-check-label-text">{{ form.coding_allow_file_creation.label }}</span>
+            </label>
+            <label class="modal-check-label">
+                {{ form.coding_allow_multiple_files }}
+                <span class="modal-check-label-text">{{ form.coding_allow_multiple_files.label }}</span>
+            </label>
+            <label class="modal-check-label">
+                {{ form.coding_enable_code_execution }}
+                <span class="modal-check-label-text">{{ form.coding_enable_code_execution.label }}</span>
+            </label>
+        </div>
+    </div>
+</div>
