@@ -18884,6 +18884,10 @@ msgid "supervision_ack_rule_fullscreen"
 msgstr "Tam ekran rejimi tələb olunur"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen_unavailable"
+msgstr "Tam ekran bu cihazın brauzerində dəstəklənmir; mümkün nəzarətlər aktiv qalacaq."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
 msgstr "Tab dəyişmə izlənilir"
 
