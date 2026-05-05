@@ -152,6 +152,101 @@ textarea {
     line-height: 1.45;
 }
 
+.question-paint-toggle {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-height: 86px;
+    margin: 8px 0 0;
+    padding: 16px 18px;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.question-paint-toggle:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
+}
+
+.question-paint-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.question-paint-toggle__box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: 2px solid #bfdbfe;
+    background: #ffffff;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-size: 18px;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.question-paint-toggle input[type="checkbox"]:checked + .question-paint-toggle__box {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+    transform: scale(1.03);
+}
+
+.question-paint-toggle__copy {
+    min-width: 0;
+}
+
+.question-paint-toggle__title {
+    display: block;
+    margin-bottom: 4px;
+    color: #17233b;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.question-paint-toggle__hint {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.question-paint-state-card {
+    margin-top: 12px;
+    padding: 14px 16px;
+    border: 1px solid #d9e7ff;
+    border-radius: 14px;
+    background: #f8fbff;
+    color: #4f5d75;
+    font-size: 13px;
+}
+
+.question-paint-state-card__line + .question-paint-state-card__line,
+.question-paint-state-card__hint {
+    margin-top: 6px;
+}
+
+.question-paint-state-card__line {
+    color: #2f3a4c;
+}
+
+.question-block-select-wrap .bootstrap-single-select__toggle {
+    min-height: 56px;
+    border-radius: 12px;
+}
+
 .variant-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;

@@ -152,6 +152,101 @@
     line-height: 1.45;
 }
 
+.question-form-shell--modal .question-paint-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-height: 5.35rem;
+    margin: 0.45rem 0 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.question-form-shell--modal .question-paint-toggle:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
+}
+
+.question-form-shell--modal .question-paint-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.question-form-shell--modal .question-paint-toggle__box {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 14px;
+    border: 2px solid #bfdbfe;
+    background: #ffffff;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-size: 1.15rem;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.question-form-shell--modal .question-paint-toggle input[type="checkbox"]:checked + .question-paint-toggle__box {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+    transform: scale(1.03);
+}
+
+.question-form-shell--modal .question-paint-toggle__copy {
+    min-width: 0;
+}
+
+.question-form-shell--modal .question-paint-toggle__title {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #17233b;
+    font-size: 1rem;
+    font-weight: 850;
+}
+
+.question-form-shell--modal .question-paint-toggle__hint {
+    display: block;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.question-form-shell--modal .question-paint-state-card {
+    margin-top: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #d9e7ff;
+    border-radius: 14px;
+    background: #f8fbff;
+    color: #4f5d75;
+    font-size: 0.86rem;
+}
+
+.question-form-shell--modal .question-paint-state-card__line + .question-paint-state-card__line,
+.question-form-shell--modal .question-paint-state-card__hint {
+    margin-top: 0.35rem;
+}
+
+.question-form-shell--modal .question-paint-state-card__line {
+    color: #2f3a4c;
+}
+
+.question-form-shell--modal .question-block-select-wrap .bootstrap-single-select__toggle {
+    min-height: 3.55rem;
+    border-radius: 12px;
+}
+
 .question-form-shell--modal .clear-media-btn {
     margin-top: 0.75rem;
     border: none;

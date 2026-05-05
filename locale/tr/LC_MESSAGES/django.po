@@ -18604,6 +18604,10 @@ msgid "supervision_ack_rule_fullscreen"
 msgstr "Tam ekran modu gereklidir"
 
 msgctxt "exams.template.take_exam"
+msgid "supervision_ack_rule_fullscreen_unavailable"
+msgstr "Tam ekran bu cihazın tarayıcısı tarafından desteklenmiyor; mümkün gözetim kontrolleri aktif kalacak."
+
+msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
 msgstr "Sekme değiştirme izleniyor"
 

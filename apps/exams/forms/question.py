@@ -83,7 +83,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("exams.form.question.placeholder", "text"),
                 }
             ),
-            "block": forms.Select(attrs={"class": "form-control"}),
+            "block": forms.Select(
+                attrs={
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
+                }
+            ),
             "answer_mode": forms.Select(
                 attrs={
                     "class": "form-control",
@@ -143,18 +148,27 @@ class ExamQuestionCreateForm(forms.ModelForm):
         # Blokları dropdown-a doldururuq
         if subject_blocks is not None:
             self.fields["block"].queryset = subject_blocks
-            self.fields["block"].empty_label = pgettext_lazy("exams.form.question.select", "block_empty")
         else:
             self.fields["block"].queryset = QuestionBlock.objects.none()
+
+        block_widget_attrs = self.fields["block"].widget.attrs
+        block_widget_attrs["class"] = "form-select bootstrap-single-select__native js-bootstrap-single-select"
+        block_widget_attrs["data-bootstrap-select"] = ""
 
         # Yazılı imtahanlarda answer_mode-u məcburi etməyək
         if self.exam_type == "written":
             self.fields["answer_mode"].required = False
+            self.fields["block"].required = True
+            self.fields["block"].empty_label = None
+            block_widget_attrs["required"] = "required"
+            block_widget_attrs["aria-required"] = "true"
             if "enable_paint" in self.fields and not self.is_bound:
                 if instance and getattr(instance, "pk", None):
                     self.initial["enable_paint"] = instance.paint_enabled_effective
                 elif self.exam is not None:
                     self.initial["enable_paint"] = bool(self.exam.enable_paint)
+        else:
+            self.fields["block"].empty_label = pgettext_lazy("exams.form.question.select", "block_empty")
 
         # Edit zamanı mövcud variantları inputlara doldur
         instance = getattr(self, "instance", None)
@@ -273,6 +287,11 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
         # Yazılı imtahanda options validasiyasını skip edirik
         if self.exam_type == "written":
+            if not cleaned_data.get("block"):
+                self.add_error(
+                    "block",
+                    forms.ValidationError("Yazılı sual üçün mövzu bloku seçilməlidir."),
+                )
             return cleaned_data
 
         # TEST üçün variant validasiyası
