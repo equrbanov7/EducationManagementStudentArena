@@ -13616,6 +13616,287 @@ msgctxt "live_exam.host_lobby"
 msgid "qr_scan"
 msgstr "Сканируйте!"
 
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+#: apps/live_exam/templates/liveExam/host_presentation.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_open"
+msgstr "Лобби открыто"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "max_participants_label"
+msgstr "Макс. участников"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "settings_button"
+msgstr "Настройки"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "fullscreen_button"
+msgstr "Полный экран"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_eyebrow"
+msgstr "Настройка лобби"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_title"
+msgstr "Настройки"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_close"
+msgstr "Закрыть настройки"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_general"
+msgstr "Общее"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_label"
+msgstr "Показывать вопросы на устройствах"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_help"
+msgstr "Игроки также видят текст вопроса на своем устройстве."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_label"
+msgstr "Персонажи"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_help"
+msgstr "Разрешить настройку ника, аватара и аксессуаров."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_label"
+msgstr "Тема"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_help"
+msgstr "Выберите стиль фона лобби."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_standard"
+msgstr "Стандарт"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_winter"
+msgstr "Зима"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_aurora"
+msgstr "Аврора"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_sweet"
+msgstr "Sweet"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_label"
+msgstr "Язык"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_help"
+msgstr "Предпочитаемый язык лобби для этой сессии."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_system"
+msgstr "Система"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_az"
+msgstr "Азербайджанский"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_en"
+msgstr "Английский"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_ru"
+msgstr "Русский"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_tr"
+msgstr "Турецкий"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_label"
+msgstr "Музыка лобби"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_help"
+msgstr "Сохранить выбранный режим звука лобби."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_original"
+msgstr "Оригинал"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_focus"
+msgstr "Фокус"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_silent"
+msgstr "Без звука"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_label"
+msgstr "Громкость эффектов"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_help"
+msgstr "Настройте громкость всех игровых звуков."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_accessibility"
+msgstr "Доступность"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_label"
+msgstr "Повысить контраст"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_help"
+msgstr "Усилить контраст для вида преподавателя."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_hosting"
+msgstr "Проведение"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_label"
+msgstr "Реакции"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_help"
+msgstr "Студенты могут отправлять живые реакции в лобби."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_label"
+msgstr "Перемешать порядок вопросов"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_help"
+msgstr "Перемешивать выбранные вопросы при старте ведущего."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_label"
+msgstr "Перемешать порядок ответов"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_help"
+msgstr "Перемешивать варианты ответов в каждом раунде."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_label"
+msgstr "Автовоспроизведение"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_help"
+msgstr "Использовать автоматический показ и переход к следующему шагу."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_label"
+msgstr "Вопросы и ответы"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "coming_soon"
+msgstr "Скоро"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_help"
+msgstr "Зарезервировано для будущего интерактивного режима."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_label"
+msgstr "Разрешить выбор команды"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_help"
+msgstr "Зарезервировано для будущих командных сессий."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_label"
+msgstr "Командный чат"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_help"
+msgstr "Зарезервировано для будущих совместных раундов."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_security"
+msgstr "Безопасность и конфиденциальность"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_label"
+msgstr "Генератор ников"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_help"
+msgstr "Создавать случайный ник, если игрок оставил поле пустым."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_label"
+msgstr "Вход в 2 шага"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_help"
+msgstr "Студенты сначала вводят PIN, затем переходят к форме входа."
+
 #: apps/live_exam/templates/liveExam/host_lobby.html
 msgctxt "live_exam.host_lobby.js"
 msgid "debug_label"
