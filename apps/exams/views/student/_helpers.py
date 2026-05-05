@@ -66,10 +66,10 @@ def annotate_attempt_result_visibility(attempts, *, current_time=None):
     prepared_attempts = []
 
     for attempt in attempts:
-        can_view_result = attempt.exam.exam_type == "test"
+        can_view_result = attempt.exam.exam_type in {"test", "coding"}
         review_available_in_seconds = 0
 
-        if attempt.exam.exam_type != "test":
+        if attempt.exam.exam_type not in {"test", "coding"}:
             if attempt.checked_by_teacher:
                 if attempt.teacher_checked_at:
                     reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW

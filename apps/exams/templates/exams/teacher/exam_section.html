@@ -348,6 +348,7 @@
                    maxlength="6"
                    inputmode="numeric"
                    placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}">
+            <div id="courseExamCodeError" style="margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600;" hidden></div>
         </form>
 
         <div class="assigned-exam-info-actions">
@@ -380,11 +381,25 @@
     var codeForm = document.getElementById("courseExamCodeForm");
     var codeSlug = document.getElementById("courseExamCodeSlug");
     var codeInput = document.getElementById("courseExamAccessCodeInput");
+    var codeError = document.getElementById("courseExamCodeError");
     var startUrl = "";
     var requiresCode = false;
+    var codeSubmitInFlight = false;
     var emptyNoteText = "{% trans 'modal_note_empty' context 'exams.partial.exam_section'|escapejs %}";
     var directStartText = "{% trans 'modal_action_start' context 'exams.partial.exam_section'|escapejs %}";
     var confirmCodeText = "{% trans 'modal_action_confirm_code' context 'exams.partial.exam_section'|escapejs %}";
+    var codeRequiredText = "{% filter escapejs %}{% trans 'access_code_required' context 'exams.model.access' %}{% endfilter %}";
+    var startFailedText = "{% filter escapejs %}{% trans 'exam_start_failed' context 'exams.view.access.message' %}{% endfilter %}";
+
+    function setCodeError(message) {
+        if (codeInput) {
+            codeInput.classList.toggle("is-invalid", Boolean(message));
+        }
+        if (codeError) {
+            codeError.textContent = message || "";
+            codeError.hidden = !message;
+        }
+    }
 
     function closeModal() {
         if (!backdrop) {
@@ -429,10 +444,13 @@
         }
         if (codeInput) {
             codeInput.value = "";
+            setCodeError("");
         }
         if (startBtn) {
             startBtn.textContent = requiresCode ? confirmCodeText : directStartText;
+            startBtn.disabled = false;
         }
+        codeSubmitInFlight = false;
 
         backdrop.classList.add("is-open");
         backdrop.setAttribute("aria-hidden", "false");
@@ -470,19 +488,70 @@
     if (codeInput) {
         codeInput.addEventListener("input", function () {
             this.value = this.value.replace(/[^0-9]/g, "");
+            setCodeError("");
         });
     }
+
+    async function submitCodeForm() {
+        if (!codeForm || !codeInput) {
+            return;
+        }
+        if (!(codeInput.value || "").trim()) {
+            setCodeError(codeRequiredText);
+            codeInput.focus();
+            return;
+        }
+        if (codeSubmitInFlight) {
+            return;
+        }
+        codeSubmitInFlight = true;
+        if (startBtn) {
+            startBtn.disabled = true;
+        }
+        try {
+            var response = await fetch(codeForm.getAttribute("action"), {
+                method: "POST",
+                body: new FormData(codeForm),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            var contentType = response.headers.get("content-type") || "";
+            if (contentType.indexOf("application/json") !== -1) {
+                var payload = await response.json();
+                if (response.ok && payload.success) {
+                    window.location.href = payload.redirect_url || startUrl || window.location.href;
+                    return;
+                }
+                setCodeError(payload.error || startFailedText);
+                return;
+            }
+            if (response.redirected && response.url) {
+                window.location.href = response.url;
+                return;
+            }
+            setCodeError(startFailedText);
+        } catch (error) {
+            setCodeError(startFailedText);
+        } finally {
+            codeSubmitInFlight = false;
+            if (startBtn) {
+                startBtn.disabled = false;
+            }
+        }
+    }
+
+    if (codeForm) {
+        codeForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            submitCodeForm();
+        });
+    }
+
     if (startBtn) {
         startBtn.addEventListener("click", function () {
             if (requiresCode) {
-                if (!codeForm || !codeInput) {
-                    return;
-                }
-                if (!(codeInput.value || "").trim()) {
-                    codeInput.focus();
-                    return;
-                }
-                codeForm.submit();
+                submitCodeForm();
                 return;
             }
 

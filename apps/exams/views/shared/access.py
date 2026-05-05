@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -42,6 +43,15 @@ def _resolve_exam_failure_redirect(request):
     return reverse("exams:student_exam_list")
 
 
+def _is_ajax_request(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _json_redirect_response(response):
+    redirect_url = response.get("Location") if hasattr(response, "get") else ""
+    return JsonResponse({"success": True, "redirect_url": redirect_url})
+
+
 @login_required
 @require_POST
 def exam_code_check(request):
@@ -55,6 +65,17 @@ def exam_code_check(request):
     if not can_start:
         attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, request.user)
         if attempt_limit_result_url:
+            if _is_ajax_request(request):
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": pgettext("exams.service.attempt.message", "max_attempts_reached").format(
+                            max_attempts=exam.max_attempts_per_user
+                        ),
+                        "redirect_url": attempt_limit_result_url,
+                    },
+                    status=400,
+                )
             messages.info(
                 request,
                 pgettext("exams.service.attempt.message", "max_attempts_reached").format(
@@ -62,11 +83,24 @@ def exam_code_check(request):
                 ),
             )
             return redirect(attempt_limit_result_url)
+        if _is_ajax_request(request):
+            return JsonResponse(
+                {"success": False, "error": reason or pgettext("exams.view.access.message", "exam_start_failed")},
+                status=400,
+            )
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_failed"))
         return redirect(_resolve_exam_failure_redirect(request))
 
     if not exam.questions.filter(is_active=True).exists():
+        if _is_ajax_request(request):
+            return JsonResponse(
+                {"success": False, "error": pgettext("exams.view.access.message", "exam_has_no_questions")},
+                status=400,
+            )
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
         return redirect(_resolve_exam_failure_redirect(request))
 
-    return _start_or_resume_attempt(request, exam)
+    response = _start_or_resume_attempt(request, exam)
+    if _is_ajax_request(request):
+        return _json_redirect_response(response)
+    return response

@@ -309,6 +309,18 @@
     font-size: 0.94rem;
 }
 
+.assigned-exam-code-input.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.assigned-exam-code-error {
+    margin-top: 0.4rem;
+    color: #b91c1c;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
 .assigned-exam-info-actions {
     display: flex;
     justify-content: flex-end;

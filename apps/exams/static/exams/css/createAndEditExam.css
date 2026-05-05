@@ -477,6 +477,25 @@
     border-color: #d1d5db;
 }
 
+.coding-exam-fields {
+    border: 1px solid #d8efe9;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #f7fffc;
+}
+
+.coding-exam-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.coding-testcase-json,
+.code-textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.9rem;
+}
+
 /* =========================================
    11. RESPONSIVE DESIGN
    ========================================= */
