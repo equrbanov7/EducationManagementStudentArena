@@ -189,9 +189,23 @@ def take_exam(request, slug, attempt_id):
     if request.method == "POST":
         action = (request.POST.get("submit_action") or "").strip()
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        autosave_changed_question_ids = None
+        raw_changed_question_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist(
+            "changed_questions"
+        )
+        if action == "autosave" and raw_changed_question_ids:
+            autosave_changed_question_ids = set()
+            for raw_question_id in raw_changed_question_ids:
+                try:
+                    autosave_changed_question_ids.add(int(raw_question_id))
+                except (TypeError, ValueError):
+                    continue
 
         # ✅ KRİTİK: Hər sual üçün cavabı yenilə
         for q in questions:
+            if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
+                continue
+
             ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
 
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):

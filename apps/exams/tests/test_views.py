@@ -2069,6 +2069,61 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);")
         self.assertContains(response, "document.addEventListener('visibilitychange', refreshVisibleTimers);")
 
+    def test_take_exam_autosave_updates_only_changed_questions(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Interval Autosave Written Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+        )
+        written_exam.allowed_users.add(self.student)
+        first_question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="First written question",
+            order=1,
+            points=1,
+        )
+        second_question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Second written question",
+            order=2,
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        first_answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=first_question,
+            text_answer="Old first answer",
+        )
+        second_answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=second_question,
+            text_answer="Keep second answer",
+        )
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[written_exam.slug, attempt.id]),
+            {
+                "submit_action": "autosave",
+                "changed_questions[]": [str(first_question.id)],
+                f"q_{first_question.id}": "New first answer",
+                f"q_{second_question.id}": "Should not overwrite",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        first_answer.refresh_from_db()
+        second_answer.refresh_from_db()
+        self.assertEqual(first_answer.text_answer, "New first answer")
+        self.assertEqual(second_answer.text_answer, "Keep second answer")
+
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
 
@@ -2933,6 +2988,7 @@ class TeacherQuestionsBankViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+        self.assertContains(response, 'class="btn-back-main"', html=False)
 
     def test_process_question_bank_success_redirect_preserves_return_navigation(self):
         return_to = f"{reverse('accounts:profile')}?section=my-courses"
@@ -3076,6 +3132,8 @@ class WrittenExamPaintInheritanceTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r'name="enable_paint"[^>]*checked')
         self.assertContains(response, "Mövzu bloku ayarı")
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertNotContains(response, "Ümumi", html=False)
 
     def test_edit_question_form_shows_question_source_when_question_override_disables_paint(self):
         _login_with_org(self.client, self.teacher, self.organization)
@@ -3089,6 +3147,52 @@ class WrittenExamPaintInheritanceTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotRegex(response.content.decode(), r'name="enable_paint"[^>]*checked')
         self.assertContains(response, "Bu sualın öz ayarı")
+
+    def test_add_written_question_without_blocks_creates_default_block_and_assigns_question(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Without Blocks",
+            exam_type="written",
+            is_active=True,
+            enable_paint=True,
+        )
+
+        response = self.client.post(
+            reverse("exams:add_exam_question", args=[exam.slug]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Default bloka düşən sual",
+                "time_limit_seconds": "",
+                "correct_answer": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+        block = exam.question_blocks.get()
+        question = exam.questions.get(text="Default bloka düşən sual")
+        self.assertEqual(block.name, "Bölmə 1")
+        self.assertEqual(question.block, block)
+
+    def test_add_written_question_requires_block_when_blocks_exist(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.post(
+            reverse("exams:add_exam_question", args=[self.exam.slug]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Bloksuz yazılı sual",
+                "time_limit_seconds": "",
+                "correct_answer": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["success"], False)
+        self.assertFalse(self.exam.questions.filter(text="Bloksuz yazılı sual").exists())
 
     def test_process_question_bank_preserves_question_override_and_saves_block_paint(self):
         _login_with_org(self.client, self.teacher, self.organization)
