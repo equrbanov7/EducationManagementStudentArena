@@ -13676,6 +13676,287 @@ msgctxt "live_exam.host_lobby"
 msgid "qr_scan"
 msgstr "Skan edin!"
 
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+#: apps/live_exam/templates/liveExam/host_presentation.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_open"
+msgstr "Lobbi açıqdır"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "max_participants_label"
+msgstr "Maks. iştirakçı"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "settings_button"
+msgstr "Tənzimləmələr"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "fullscreen_button"
+msgstr "Tam ekran"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_eyebrow"
+msgstr "Lobbi qurulumu"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_title"
+msgstr "Tənzimləmələr"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_close"
+msgstr "Tənzimləmələri bağla"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_general"
+msgstr "Ümumi"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_label"
+msgstr "Sualları cihazlarda göstər"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_help"
+msgstr "Oyunçular sual mətnini öz cihazlarında da görür."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_label"
+msgstr "Personajlar"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_help"
+msgstr "Ləqəb, avatar və aksesuar fərdiləşdirməsinə icazə ver."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_label"
+msgstr "Mövzu"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_help"
+msgstr "Lobbi fon stilini seç."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_standard"
+msgstr "Standart"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_winter"
+msgstr "Qış"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_aurora"
+msgstr "Avrora"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_sweet"
+msgstr "Şirin"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_label"
+msgstr "Dil"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_help"
+msgstr "Bu sessiya üçün üstün tutulan lobbi dili."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_system"
+msgstr "Sistem"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_az"
+msgstr "Azərbaycan dili"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_en"
+msgstr "İngilis dili"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_ru"
+msgstr "Rus dili"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_tr"
+msgstr "Türk dili"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_label"
+msgstr "Lobbi musiqisi"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_help"
+msgstr "Seçilmiş lobbi səs rejimini saxla."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_original"
+msgstr "Orijinal"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_focus"
+msgstr "Fokus"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_silent"
+msgstr "Səssiz"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_label"
+msgstr "Səs effektlərinin səviyyəsi"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_help"
+msgstr "Bütün oyun səslərinin səviyyəsini tənzimlə."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_accessibility"
+msgstr "Əlçatanlıq"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_label"
+msgstr "Kontrastı artır"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_help"
+msgstr "Müəllim görünüşü üçün kontrastı gücləndir."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_hosting"
+msgstr "Aparıcılıq"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_label"
+msgstr "Reaksiyalar"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_help"
+msgstr "Tələbələr lobbidə canlı reaksiyalar göndərə bilər."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_label"
+msgstr "Sualların sırasını qarışdır"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_help"
+msgstr "Aparıcı başladanda seçilmiş sualları qarışdır."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_label"
+msgstr "Cavabların sırasını qarışdır"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_help"
+msgstr "Hər raundda cavab variantlarını qarışdır."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_label"
+msgstr "Avtomatik oynatma"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_help"
+msgstr "Cavabı göstərmə və növbəti addım axınını avtomatik et."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_label"
+msgstr "Sual-cavab"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "coming_soon"
+msgstr "Tezliklə"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_help"
+msgstr "Daha sonrakı interaktiv rejim üçün saxlanılıb."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_label"
+msgstr "Komanda seçiminə icazə ver"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_help"
+msgstr "Gələcək komanda sessiyaları üçün saxlanılıb."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_label"
+msgstr "Komanda söhbəti"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_help"
+msgstr "Gələcək əməkdaşlıq raundları üçün saxlanılıb."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_security"
+msgstr "Təhlükəsizlik və məxfilik"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_label"
+msgstr "Ləqəb generatoru"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_help"
+msgstr "Oyunçu boş saxladıqda təsadüfi ləqəb yarat."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_label"
+msgstr "2 mərhələli qoşulma"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_help"
+msgstr "Tələbələr əvvəlcə PIN daxil edir, sonra qoşulma formasına keçir."
+
 #: apps/live_exam/templates/liveExam/host_lobby.html
 msgctxt "live_exam.host_lobby.js"
 msgid "debug_label"

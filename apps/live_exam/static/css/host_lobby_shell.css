@@ -289,6 +289,7 @@ body.host-settings-open .host-settings-drawer {
 .host-settings-drawer__header {
     padding: 28px 28px 22px;
     border-bottom: 1px solid rgba(24, 16, 40, 0.08);
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
@@ -315,9 +316,12 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-drawer__body {
+    flex: 1 1 auto;
+    min-height: 0;
     gap: 20px;
     padding: 22px 24px 28px;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .host-settings-group {
