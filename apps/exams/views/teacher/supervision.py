@@ -310,6 +310,8 @@ def teacher_resume_api(request, attempt_id):
         exam__in=_supervision_exam_queryset(request, org),
     )
 
+    attempt.expire_if_time_limit_reached()
+
     # Explicitly block resume for terminated/finished attempts
     if attempt.is_finished:
         return JsonResponse(
