@@ -62,6 +62,21 @@ urlpatterns = [
         views.exam_result,
         name="exam_result",
     ),
+    path(
+        "<slug:slug>/attempt/<int:attempt_id>/coding/autosave/",
+        views.coding_autosave,
+        name="coding_autosave",
+    ),
+    path(
+        "<slug:slug>/attempt/<int:attempt_id>/coding/run/",
+        views.coding_run,
+        name="coding_run",
+    ),
+    path(
+        "<slug:slug>/attempt/<int:attempt_id>/coding/submit/",
+        views.coding_submit,
+        name="coding_submit",
+    ),
     path("<slug:slug>/attempt/<int:attempt_id>/", views.take_exam, name="take_exam"),
     # ==========================
     # SLUG - Teacher Question Bank
