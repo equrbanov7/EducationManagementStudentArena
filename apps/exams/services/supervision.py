@@ -195,6 +195,9 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     if attempt.supervision_status not in ("locked", "removed", "warned"):
         raise ValueError("Attempt is not in a locked/removed/warned state.")
 
+    if attempt.expire_if_time_limit_reached():
+        raise ValueError("Attempt time limit has expired and cannot be resumed.")
+
     if attempt.is_finished:
         raise ValueError("Attempt is already finished and cannot be resumed.")
 
