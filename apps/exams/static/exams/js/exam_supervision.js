@@ -24,6 +24,9 @@
         warningModal: null,
         isActive: false,
         isFullscreen: false,
+        capabilities: null,
+        requestedConfig: null,
+        _fullscreenDisabledByCapability: false,
         _acknowledged: false,
         _initialized: false,
         _initialStatus: "active",
@@ -38,7 +41,8 @@
             if (this._initialized) return;
             this._initialized = true;
 
-            this.config = opts.config || {};
+            this.requestedConfig = this._cloneConfig(opts.config || {});
+            this.config = this._cloneConfig(opts.config || {});
             this.attemptId = opts.attemptId;
             this.csrfToken = opts.csrfToken;
             this.logEndpoint = opts.logEndpoint;
@@ -49,6 +53,9 @@
             this._initialStatus = opts.supervisionStatus || "active";
             this.isActive = true;
             this._acknowledged = false;
+            this._fullscreenDisabledByCapability = false;
+            this.capabilities = this._detectCapabilities();
+            this._applyCapabilityFallbacks();
 
             this._createWarningModal();
             this._createSupervisionBadge();
@@ -63,6 +70,80 @@
 
             // Show acknowledgment overlay - events bind AFTER student acknowledges
             this._showAcknowledgment();
+        },
+
+        _cloneConfig: function (config) {
+            var clone = {};
+            Object.keys(config || {}).forEach(function (key) {
+                clone[key] = config[key];
+            });
+            return clone;
+        },
+
+        _detectCapabilities: function () {
+            var el = document.documentElement || document.body;
+            var ua = navigator.userAgent || "";
+            var platform = navigator.platform || "";
+            var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            var isMobileLike = isIOS || /Android|Mobi|Tablet|IEMobile|Opera Mini/i.test(ua) ||
+                (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && Math.min(window.innerWidth, window.innerHeight) < 900);
+            var hasRequestFullscreen = !!(
+                el &&
+                (typeof el.requestFullscreen === "function" || typeof el.webkitRequestFullscreen === "function")
+            );
+            var fullscreenEnabled = true;
+            if (typeof document.fullscreenEnabled === "boolean") {
+                fullscreenEnabled = document.fullscreenEnabled;
+            } else if (typeof document.webkitFullscreenEnabled === "boolean") {
+                fullscreenEnabled = document.webkitFullscreenEnabled;
+            }
+
+            return {
+                fullscreen_supported: !!(hasRequestFullscreen && fullscreenEnabled),
+                has_request_fullscreen: hasRequestFullscreen,
+                fullscreen_enabled: fullscreenEnabled,
+                is_ios: !!isIOS,
+                is_mobile: !!isMobileLike,
+                user_agent: ua
+            };
+        },
+
+        _applyCapabilityFallbacks: function () {
+            if (this.config.force_fullscreen && !(this.capabilities && this.capabilities.fullscreen_supported)) {
+                this.config.force_fullscreen = false;
+                this._fullscreenDisabledByCapability = true;
+                if (this.capabilities) {
+                    this.capabilities.fullscreen_disabled_reason = "unsupported";
+                }
+            }
+        },
+
+        _disableFullscreenForSession: function (reason) {
+            this.config.force_fullscreen = false;
+            this._fullscreenDisabledByCapability = true;
+            if (this.capabilities) {
+                this.capabilities.fullscreen_supported = false;
+                this.capabilities.fullscreen_disabled_reason = reason || "request_failed";
+            }
+        },
+
+        _isFullscreenActive: function () {
+            return !!(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement
+            );
+        },
+
+        _publicConfig: function (config) {
+            return {
+                force_fullscreen: !!config.force_fullscreen,
+                detect_tab_switch: !!config.detect_tab_switch,
+                block_copy_paste: !!config.block_copy_paste,
+                disable_right_click: !!config.disable_right_click,
+                disable_text_selection: !!config.disable_text_selection,
+                restrict_keyboard_shortcuts: !!config.restrict_keyboard_shortcuts
+            };
         },
 
         _createWarningModal: function () {
@@ -130,6 +211,14 @@
             var ruleCopy = i18n.ruleCopy || "Kopyala/yap\u0131\u015fd\u0131r bloklan\u0131b";
             var ruleRightClick = i18n.ruleRightClick || "Sa\u011f klik deaktivdir";
             var ruleKeyboard = i18n.ruleKeyboard || "Klaviatura q\u0131sa yollar\u0131 m\u0259hduddur";
+            var ruleFullscreenUnavailable = i18n.ruleFullscreenUnavailable ||
+                "Tam ekran bu cihaz\u0131n brauzerind\u0259 d\u0259st\u0259kl\u0259nmir; m\u00fcmk\u00fcn n\u0259zar\u0259tl\u0259r aktiv qalacaq.";
+            var fullscreenRuleHtml = "";
+            if (this.config.force_fullscreen) {
+                fullscreenRuleHtml = "<li>" + ruleFullscreen + "</li>";
+            } else if (this.requestedConfig && this.requestedConfig.force_fullscreen && this._fullscreenDisabledByCapability) {
+                fullscreenRuleHtml = '<li style="color:#856404;">' + ruleFullscreenUnavailable + "</li>";
+            }
 
             // Build max violation text with actual count
             var maxViolationText = i18n.maxViolation || "";
@@ -155,7 +244,7 @@
                 '<h2 style="color:#333;">' + titleText + "</h2>" +
                 '<p style="color:#555;margin:1rem 0;">' + descText + "</p>" +
                 '<ul style="text-align:left;color:#555;margin:1rem 2rem;">' +
-                (this.config.force_fullscreen ? "<li>" + ruleFullscreen + "</li>" : "") +
+                fullscreenRuleHtml +
                 (this.config.detect_tab_switch ? "<li>" + ruleTab + "</li>" : "") +
                 (this.config.block_copy_paste ? "<li>" + ruleCopy + "</li>" : "") +
                 (this.config.disable_right_click ? "<li>" + ruleRightClick + "</li>" : "") +
@@ -181,26 +270,13 @@
 
                 // Request fullscreen FIRST (required before allowing exam)
                 if (self.config.force_fullscreen) {
-                    try {
-                        var el = document.documentElement;
-                        var fsPromise;
-                        if (el.requestFullscreen) {
-                            fsPromise = el.requestFullscreen();
-                        } else if (el.webkitRequestFullscreen) {
-                            fsPromise = el.webkitRequestFullscreen();
+                    self._requestFullscreen().then(function (success) {
+                        if (!success && self.capabilities && self.capabilities.is_mobile) {
+                            self._disableFullscreenForSession("request_failed");
                         }
-                        if (fsPromise && typeof fsPromise.then === "function") {
-                            fsPromise.then(function () {
-                                self._completeAcknowledgment(overlay);
-                            }).catch(function () {
-                                // Fullscreen failed - still allow but enforce later
-                                self._completeAcknowledgment(overlay);
-                            });
-                            return;
-                        }
-                    } catch (e) {
-                        // Fullscreen API not available
-                    }
+                        self._completeAcknowledgment(overlay);
+                    });
+                    return;
                 }
                 self._completeAcknowledgment(overlay);
             };
@@ -221,16 +297,22 @@
             this._bindEvents();
 
             // Log exam start and acknowledgment
-            this._logEvent("exam_started_supervised", { timestamp: new Date().toISOString() });
-            this._logEvent("student_acknowledged");
+            this._logEvent("exam_started_supervised", {
+                timestamp: new Date().toISOString(),
+                capabilities: this.capabilities || {},
+                requested_config: this._publicConfig(this.requestedConfig || {}),
+                effective_config: this._publicConfig(this.config || {})
+            });
+            this._logEvent("student_acknowledged", {
+                fullscreen_adjusted: !!this._fullscreenDisabledByCapability
+            });
 
             // Update badge immediately with current violation count
             this._updateBadge();
 
             // If fullscreen is required but not active, show warning immediately
             if (this.config.force_fullscreen) {
-                var isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
-                if (!isFS) {
+                if (!this._isFullscreenActive()) {
                     this._showWarning();
                     this._startGraceTimer();
                 }
@@ -278,8 +360,7 @@
         _onFullscreenChange: function () {
             if (!this._acknowledged) return;
 
-            var isFS =
-                !!document.fullscreenElement || !!document.webkitFullscreenElement;
+            var isFS = this._isFullscreenActive();
             this.isFullscreen = isFS;
 
             if (!isFS && this.config.force_fullscreen && this.isActive) {
@@ -398,14 +479,32 @@
         },
 
         _requestFullscreen: function () {
+            var self = this;
+            if (!(this.capabilities && this.capabilities.fullscreen_supported)) {
+                return Promise.resolve(false);
+            }
             try {
                 var el = document.documentElement;
+                var fsPromise;
                 if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(function () {});
+                    fsPromise = el.requestFullscreen();
                 } else if (el.webkitRequestFullscreen) {
-                    el.webkitRequestFullscreen();
+                    fsPromise = el.webkitRequestFullscreen();
+                } else {
+                    return Promise.resolve(false);
                 }
+
+                if (fsPromise && typeof fsPromise.then === "function") {
+                    return fsPromise.then(function () {
+                        return self._isFullscreenActive();
+                    }).catch(function () {
+                        return false;
+                    });
+                }
+
+                return Promise.resolve(true);
             } catch (e) {}
+            return Promise.resolve(false);
         },
 
         _showWarning: function (title, message) {
@@ -453,15 +552,15 @@
         },
 
         _onGracePeriodExpired: function () {
-            this._logEvent("grace_period_expired");
+            this._logEvent("grace_period_expired", {
+                reason: "fullscreen_not_restored",
+                fullscreen_active: this._isFullscreenActive()
+            });
             this._incrementViolation();
             this._hideWarning();
-            // If fullscreen required and still not in fullscreen, lock the exam
-            if (this.config.force_fullscreen && this.isActive) {
-                var isFS = !!document.fullscreenElement || !!document.webkitFullscreenElement;
-                if (!isFS) {
-                    this._onLimitExceeded();
-                }
+            if (this.config.force_fullscreen && this.isActive && !this._isFullscreenActive()) {
+                this._showWarning();
+                this._startGraceTimer();
             }
         },
 
