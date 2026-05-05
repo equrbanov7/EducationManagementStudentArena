@@ -90,6 +90,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let pendingFlowState = "";
     let pendingFlowPhase = "";
 
+    function resetDrawerShellScroll() {
+        if (!dom.drawer || dom.drawer.scrollTop === 0) return;
+        dom.drawer.scrollTop = 0;
+    }
+
     function syncSidebarButtons() {
         const expanded = presentationMode
             ? dom.body.classList.contains("presentation-sidebar-open")
@@ -136,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dom.body.classList.toggle("host-settings-open", Boolean(open));
         if (dom.drawer) {
             dom.drawer.setAttribute("aria-hidden", open ? "false" : "true");
+            resetDrawerShellScroll();
         }
         if (dom.drawerBackdrop) {
             dom.drawerBackdrop.hidden = !open;
@@ -167,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function syncUi(snapshot) {
         currentState = snapshot;
+        resetDrawerShellScroll();
         if (snapshot.sessionState !== "lobby") {
             startPending = false;
         }
@@ -250,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkboxControls.forEach(([element, key]) => {
         element.addEventListener("change", () => {
             if (syncingControls) return;
+            resetDrawerShellScroll();
             updateSettings({ [key]: Boolean(element.checked) });
         });
     });
