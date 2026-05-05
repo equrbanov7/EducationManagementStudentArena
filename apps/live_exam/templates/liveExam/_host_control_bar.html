@@ -12,7 +12,7 @@
             <div class="state-badge" id="gameState">{% trans "state_lobby" context "live_exam.host_lobby" %}</div>
             <button id="lockLobbyBtn" class="control-pill-btn" type="button" aria-pressed="{{ session_locked|yesno:'true,false' }}">
                 <i class="fas fa-lock-open"></i>
-                <span>Lobby open</span>
+                <span>{% trans "lobby_open" context "live_exam.host_lobby" %}</span>
             </button>
         </div>
 
@@ -30,7 +30,7 @@
         <div class="question-count-box">
             <div class="question-count-box__label">
                 <i class="fas fa-users"></i>
-                <span>Max participants</span>
+                <span>{% trans "max_participants_label" context "live_exam.host_lobby" %}</span>
             </div>
             <div class="question-count-box__input">
                 <input
@@ -51,11 +51,11 @@
         <div class="control-toolbar">
             <button id="settingsBtn" class="control-toolbar__button" type="button">
                 <i class="fas fa-sliders"></i>
-                <span>Settings</span>
+                <span>{% trans "settings_button" context "live_exam.host_lobby" %}</span>
             </button>
             <button id="fullscreenBtn" class="control-toolbar__button" type="button">
                 <i class="fas fa-expand"></i>
-                <span>Fullscreen</span>
+                <span>{% trans "fullscreen_button" context "live_exam.host_lobby" %}</span>
             </button>
         </div>
 

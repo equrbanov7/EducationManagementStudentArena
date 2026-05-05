@@ -13607,6 +13607,287 @@ msgctxt "live_exam.host_lobby"
 msgid "qr_scan"
 msgstr "Scan!"
 
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+#: apps/live_exam/templates/liveExam/host_presentation.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_open"
+msgstr "Lobby open"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "max_participants_label"
+msgstr "Max participants"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "settings_button"
+msgstr "Settings"
+
+#: apps/live_exam/templates/liveExam/_host_control_bar.html
+msgctxt "live_exam.host_lobby"
+msgid "fullscreen_button"
+msgstr "Fullscreen"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_eyebrow"
+msgstr "Lobby setup"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_title"
+msgstr "Settings"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "settings_drawer_close"
+msgstr "Close settings"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_general"
+msgstr "General"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_label"
+msgstr "Show questions on devices"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "show_questions_help"
+msgstr "Players also see question text on their own device."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_label"
+msgstr "Characters"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "characters_help"
+msgstr "Allow nickname, avatar, and accessory customization."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_label"
+msgstr "Theme"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_help"
+msgstr "Pick the lobby background style."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_standard"
+msgstr "Standard"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_winter"
+msgstr "Winter"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_aurora"
+msgstr "Aurora"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "theme_sweet"
+msgstr "Sweet"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_label"
+msgstr "Language"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_help"
+msgstr "Preferred lobby language for this session."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_system"
+msgstr "System"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_az"
+msgstr "Azerbaijani"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_en"
+msgstr "English"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_ru"
+msgstr "Russian"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "language_tr"
+msgstr "Turkish"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_label"
+msgstr "Lobby music"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "lobby_music_help"
+msgstr "Store the selected lobby sound mode."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_original"
+msgstr "Original"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_focus"
+msgstr "Focus"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "music_silent"
+msgstr "Silent"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_label"
+msgstr "Sound effects volume"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "sfx_volume_help"
+msgstr "Adjust the volume for all game sounds."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_accessibility"
+msgstr "Accessibility"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_label"
+msgstr "Increase contrast"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "increase_contrast_help"
+msgstr "Boost contrast for the teacher view."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_hosting"
+msgstr "Hosting"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_label"
+msgstr "Reactions"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "reactions_help"
+msgstr "Students can send live reactions in the lobby."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_label"
+msgstr "Randomize order of questions"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_questions_help"
+msgstr "Shuffle selected questions when the host starts."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_label"
+msgstr "Randomize order of answers"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "randomize_answers_help"
+msgstr "Shuffle answer choices for each round."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_label"
+msgstr "Autoplay"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "autoplay_help"
+msgstr "Use automatic reveal and next-step flow."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_label"
+msgstr "Q&A"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "coming_soon"
+msgstr "Coming soon"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "qna_help"
+msgstr "Reserved for a later interactive mode."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_label"
+msgstr "Allow team selection"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_selection_help"
+msgstr "Reserved for future team-based sessions."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_label"
+msgstr "Team talk"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "team_talk_help"
+msgstr "Reserved for future collaborative rounds."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "group_security"
+msgstr "Security & privacy"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_label"
+msgstr "Nickname generator"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "nickname_generator_help"
+msgstr "Generate a random nickname when a player leaves it blank."
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_label"
+msgstr "2-step join"
+
+#: apps/live_exam/templates/liveExam/_host_settings_drawer.html
+msgctxt "live_exam.host_settings"
+msgid "two_step_join_help"
+msgstr "Students enter the PIN first, then continue to the join form."
+
 #: apps/live_exam/templates/liveExam/host_lobby.html
 msgctxt "live_exam.host_lobby.js"
 msgid "debug_label"
