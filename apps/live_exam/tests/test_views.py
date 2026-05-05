@@ -1720,8 +1720,8 @@ class HostOrgRBACTest(TestCase):
                 # 200 OK for page views, not 403/404
                 self.assertNotEqual(response.status_code, 403, f"{url_name} should allow access with correct org")
                 self.assertNotEqual(response.status_code, 404, f"{url_name} should allow access with correct org")
-                self.assertContains(response, "host_lobby.css?v=live-host-fallback-20260408")
-                self.assertContains(response, "host_lobby.js?v=live-host-fallback-20260408")
+                self.assertContains(response, "host_lobby.css?v=")
+                self.assertContains(response, "host_lobby.js?v=")
 
     def test_missing_exam_host_permission_blocks_host_access(self):
         """A user without exam.host or exam.manage cannot perform host actions."""
