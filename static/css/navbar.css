@@ -82,6 +82,28 @@
     color: var(--primary-color, #2563eb);
 }
 
+.blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: var(--primary-color, #2563eb);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams:hover,
+.blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams.blog-header__nav-link--active {
+    color: #fff;
+    background: #1d4ed8;
+    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
+}
+
+.blog-header__nav-link--exams.blog-header__nav-link--active::after {
+    display: none;
+}
+
 .blog-header__nav-list--desktop .blog-header__nav-link--primary {
     background: var(--primary-color, #2563eb);
     color: white !important;
@@ -329,6 +351,21 @@ button.blog-header__user-menu-item{
 .mobile-nav-panel .blog-header__nav-link:hover {
     color: var(--primary-color, #2563eb);
     background: rgba(37, 99, 235, 0.06);
+}
+
+.mobile-nav-panel .blog-header__nav-link--exams {
+    color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    font-weight: 700;
+}
+
+.mobile-nav-panel .blog-header__nav-link--exams:hover,
+.mobile-nav-panel .blog-header__nav-link--exams.blog-header__nav-link--active {
+    color: #fff;
+    background: var(--primary-color, #2563eb);
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: none;
 }
 
 .mobile-nav-panel .blog-header__nav-link--primary {
