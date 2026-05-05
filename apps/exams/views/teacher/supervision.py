@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
+from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
     get_attempt_supervision_status,
@@ -24,7 +24,8 @@ from apps.exams.services.supervision import (
     teacher_resume_attempt,
     teacher_stop_attempt,
 )
-from apps.exams.views.shared.tenant import get_active_organization
+from apps.exams.views.shared.tenant import get_active_organization, tenant_scoped_exams
+from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import request_has_active_organization_context
 
 
@@ -34,6 +35,13 @@ def _ensure_organization_context(request):
     if org is None or not request_has_active_organization_context(request):
         raise PermissionDenied(pgettext("supervision.view.permission", "active_org_required"))
     return org
+
+
+def _supervision_exam_queryset(request, organization):
+    exams = tenant_scoped_exams(request, Exam.objects.filter(organization=organization))
+    if is_superadmin_user(request.user) or request_has_permission(request, "exam.manage"):
+        return exams
+    return exams.filter(author=request.user)
 
 
 # ─────────────────────────────────────────────
@@ -133,7 +141,8 @@ def supervision_monitor(request):
     date_from_str = request.GET.get("date_from", "").strip()
     date_to_str = request.GET.get("date_to", "").strip()
 
-    data = get_supervision_monitor_data(org, exam_id=exam_id)
+    accessible_exams = _supervision_exam_queryset(request, org)
+    data = get_supervision_monitor_data(org, exam_id=exam_id, exam_queryset=accessible_exams)
 
     flagged = data["flagged_attempts"]
 
@@ -257,6 +266,7 @@ def supervision_detail(request, attempt_id):
         ExamAttempt.objects.select_related("user", "exam"),
         id=attempt_id,
         exam__organization=org,
+        exam__in=_supervision_exam_queryset(request, org),
     )
 
     incidents_qs = SupervisionIncident.objects.filter(attempt=attempt).order_by("-timestamp")
@@ -297,6 +307,7 @@ def teacher_resume_api(request, attempt_id):
         ExamAttempt.objects.select_related("exam"),
         id=attempt_id,
         exam__organization=org,
+        exam__in=_supervision_exam_queryset(request, org),
     )
 
     # Explicitly block resume for terminated/finished attempts
@@ -361,6 +372,7 @@ def teacher_stop_api(request, attempt_id):
         ExamAttempt.objects.select_related("exam"),
         id=attempt_id,
         exam__organization=org,
+        exam__in=_supervision_exam_queryset(request, org),
     )
 
     try:
