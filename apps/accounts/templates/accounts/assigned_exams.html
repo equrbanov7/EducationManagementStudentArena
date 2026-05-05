@@ -93,6 +93,7 @@
                        autocomplete="off"
                        inputmode="numeric"
                        required>
+                <div id="exam-code-error" style="margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600;" hidden></div>
             </div>
             <div class="exam-code-actions">
                 <button type="button" class="btn-modal btn-cancel" data-close-exam-code-modal>{% trans "modal_cancel" context "accounts.assigned_exams_page" %}</button>
@@ -108,8 +109,23 @@
     const textEl = document.getElementById("exam-code-text");
     const slugInput = document.getElementById("exam-code-exam-slug");
     const codeInput = document.getElementById("exam-code-input");
+    const codeError = document.getElementById("exam-code-error");
+    const codeForm = document.getElementById("exam-code-form");
     const codeModalTitle = "{% trans 'modal_title' context 'accounts.assigned_exams_page' %}";
     const codeModalPromptTemplate = "{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}";
+    const codeRequiredText = "{% filter escapejs %}{% trans 'access_code_required' context 'exams.model.access' %}{% endfilter %}";
+    const startFailedText = "{% filter escapejs %}{% trans 'exam_start_failed' context 'exams.view.access.message' %}{% endfilter %}";
+    let codeSubmitInFlight = false;
+
+    function setExamCodeError(message) {
+        if (codeInput) {
+            codeInput.classList.toggle("is-invalid", Boolean(message));
+        }
+        if (codeError) {
+            codeError.textContent = message || "";
+            codeError.hidden = !message;
+        }
+    }
 
     function openExamCodeModal(button) {
         const slug = button.getAttribute("data-exam-slug");
@@ -127,6 +143,8 @@
             textEl.appendChild(document.createTextNode(textParts[1]));
         }
         codeInput.value = "";
+        setExamCodeError("");
+        codeSubmitInFlight = false;
 
         backdrop.style.display = "flex";
         setTimeout(() => {
@@ -151,6 +169,51 @@
     if (codeInput) {
         codeInput.addEventListener("input", function() {
             this.value = this.value.replace(/[^0-9]/g, "");
+            setExamCodeError("");
+        });
+    }
+
+    if (codeForm) {
+        codeForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            if (!codeInput || !(codeInput.value || "").trim()) {
+                setExamCodeError(codeRequiredText);
+                if (codeInput) codeInput.focus();
+                return;
+            }
+            if (codeSubmitInFlight) {
+                return;
+            }
+
+            codeSubmitInFlight = true;
+            try {
+                const response = await fetch(codeForm.getAttribute("action"), {
+                    method: "POST",
+                    body: new FormData(codeForm),
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const contentType = response.headers.get("content-type") || "";
+                if (contentType.indexOf("application/json") !== -1) {
+                    const payload = await response.json();
+                    if (response.ok && payload.success) {
+                        window.location.href = payload.redirect_url || window.location.href;
+                        return;
+                    }
+                    setExamCodeError(payload.error || startFailedText);
+                    return;
+                }
+                if (response.redirected && response.url) {
+                    window.location.href = response.url;
+                    return;
+                }
+                setExamCodeError(startFailedText);
+            } catch (error) {
+                setExamCodeError(startFailedText);
+            } finally {
+                codeSubmitInFlight = false;
+            }
         });
     }
 </script>

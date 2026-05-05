@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 
+from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam
 from core.tenancy import get_request_organization, request_has_active_organization_context, scoped_by_organization
 
@@ -10,7 +11,7 @@ def get_active_organization(request):
 
 def tenant_scoped_exams(request, queryset=None):
     base_queryset = queryset if queryset is not None else Exam.objects.all()
-    return scoped_by_organization(base_queryset, request)
+    return without_disabled_practical_exams(scoped_by_organization(base_queryset, request))
 
 
 def get_teacher_exam_or_404(request, **filters):
