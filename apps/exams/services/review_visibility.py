@@ -6,7 +6,7 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 def resolve_exam_attempt_name_visibility(attempt, *, current_time=None):
     now = current_time or timezone.now()
 
-    if attempt.exam.exam_type == "test":
+    if attempt.exam.exam_type in {"test", "coding"}:
         return True, 0
 
     organization = getattr(attempt.exam, "organization", None)
@@ -28,7 +28,7 @@ def resolve_exam_attempt_name_visibility(attempt, *, current_time=None):
 
 
 def resolve_exam_attempt_review_window_seconds(attempt, *, current_time=None):
-    if attempt.exam.exam_type == "test":
+    if attempt.exam.exam_type in {"test", "coding"}:
         return 0
 
     if not attempt.checked_by_teacher or not attempt.teacher_checked_at:
@@ -43,7 +43,7 @@ def resolve_exam_attempt_review_window_seconds(attempt, *, current_time=None):
 
 
 def attempt_review_window_locked(attempt, *, current_time=None):
-    if attempt.exam.exam_type == "test":
+    if attempt.exam.exam_type in {"test", "coding"}:
         return False
 
     if not attempt.checked_by_teacher:

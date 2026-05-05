@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ exam.title }} - {% trans "Practical Coding Exam" context "exams.template.coding_exam" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'vendor/codemirror/lib/codemirror.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/monokai.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/eclipse.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/display/fullscreen.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}">
+{% endblock %}
+
+{% block content %}
+{{ initial_files|json_script:"coding-initial-files" }}
+{{ starter_files|json_script:"coding-starter-files" }}
+{{ visible_test_cases|json_script:"coding-visible-test-cases" }}
+{{ language_modes|json_script:"coding-language-modes" }}
+
+<div class="coding-exam-shell" id="codingExamShell">
+    <header class="coding-topbar">
+        <div class="coding-title-block">
+            <a href="{{ history_url }}" class="coding-back-link" aria-label="{% trans 'Back' context 'exams.template.coding_exam' %}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1>{{ exam.title }}</h1>
+                <p>{{ coding_question.title }}</p>
+            </div>
+        </div>
+
+        <div class="coding-topbar-actions">
+            {% if exam.total_duration_minutes %}
+                <div class="coding-timer" id="codingTimer">
+                    <i class="fas fa-clock"></i>
+                    <span id="codingTimerValue">--:--</span>
+                </div>
+            {% endif %}
+            <label class="coding-select-label" for="codingLanguageSelect">
+                {% trans "Language" context "exams.template.coding_exam" %}
+            </label>
+            <select id="codingLanguageSelect" class="coding-select">
+                {% for value, label in coding_languages %}
+                    <option value="{{ value }}" {% if value == coding_question.language %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="coding-icon-btn" id="codingThemeToggle" title="{% trans 'Theme' context 'exams.template.coding_exam' %}">
+                <i class="fas fa-moon"></i>
+            </button>
+            <select id="codingFontSize" class="coding-select coding-select--small" title="{% trans 'Font size' context 'exams.template.coding_exam' %}">
+                <option value="13">13</option>
+                <option value="14" selected>14</option>
+                <option value="16">16</option>
+                <option value="18">18</option>
+            </select>
+            <button type="button" class="coding-btn coding-btn--muted" id="codingResetBtn">
+                <i class="fas fa-rotate-left"></i>
+                <span>{% trans "Reset code" context "exams.template.coding_exam" %}</span>
+            </button>
+            <button type="button" class="coding-btn coding-btn--run" id="codingRunBtn">
+                <i class="fas fa-play"></i>
+                <span>{% trans "Run Code" context "exams.template.coding_exam" %}</span>
+            </button>
+            <button type="button" class="coding-btn coding-btn--submit" id="codingSubmitBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span>{% trans "Submit Code" context "exams.template.coding_exam" %}</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="coding-workspace" id="codingWorkspace">
+        <section class="coding-editor-pane">
+            <aside class="coding-file-explorer" id="codingFileExplorer">
+                <div class="coding-file-header">
+                    <span>{% trans "Files" context "exams.template.coding_exam" %}</span>
+                    {% if coding_question.allow_file_creation %}
+                        <button type="button" id="codingCreateFileBtn" class="coding-icon-btn" title="{% trans 'Create File' context 'exams.template.coding_exam' %}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="coding-file-list" id="codingFileList"></div>
+                {% if coding_question.allow_file_creation %}
+                    <div class="coding-file-actions">
+                        <button type="button" id="codingRenameFileBtn" class="coding-mini-btn">{% trans "Rename File" context "exams.template.coding_exam" %}</button>
+                        <button type="button" id="codingDeleteFileBtn" class="coding-mini-btn coding-mini-btn--danger">{% trans "Delete File" context "exams.template.coding_exam" %}</button>
+                    </div>
+                {% endif %}
+            </aside>
+
+            <div class="coding-editor-wrap">
+                <div class="coding-editor-toolbar">
+                    <span id="codingCurrentFileName"></span>
+                    <button type="button" id="codingFullscreenBtn" class="coding-icon-btn" title="{% trans 'Fullscreen editor' context 'exams.template.coding_exam' %}">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <textarea id="codingEditor"></textarea>
+            </div>
+        </section>
+
+        <section class="coding-result-pane">
+            <article class="coding-problem-card">
+                <div class="coding-problem-heading">
+                    <span class="coding-chip">{{ coding_question.get_language_display }}</span>
+                    <span class="coding-chip">{{ coding_question.max_score }} pts</span>
+                    <span class="coding-chip">{{ coding_question.time_limit_seconds }}s</span>
+                    <span class="coding-chip">{{ coding_question.memory_limit_mb }}MB</span>
+                </div>
+                <h2>{{ coding_question.title }}</h2>
+                <div class="coding-problem-text">{{ coding_question.problem_statement|linebreaks }}</div>
+
+                {% if coding_question.input_description %}
+                    <h3>{% trans "Input description" context "exams.template.coding_exam" %}</h3>
+                    <div class="coding-problem-text">{{ coding_question.input_description|linebreaks }}</div>
+                {% endif %}
+                {% if coding_question.output_description %}
+                    <h3>{% trans "Output description" context "exams.template.coding_exam" %}</h3>
+                    <div class="coding-problem-text">{{ coding_question.output_description|linebreaks }}</div>
+                {% endif %}
+                <div class="coding-examples-grid">
+                    {% if coding_question.example_input %}
+                        <div>
+                            <h3>{% trans "Example input" context "exams.template.coding_exam" %}</h3>
+                            <pre>{{ coding_question.example_input }}</pre>
+                        </div>
+                    {% endif %}
+                    {% if coding_question.example_output %}
+                        <div>
+                            <h3>{% trans "Example output" context "exams.template.coding_exam" %}</h3>
+                            <pre>{{ coding_question.example_output }}</pre>
+                        </div>
+                    {% endif %}
+                </div>
+            </article>
+
+            <div class="coding-tabs" role="tablist">
+                <button type="button" class="coding-tab active" data-coding-tab="output">{% trans "Output" context "exams.template.coding_exam" %}</button>
+                <button type="button" class="coding-tab" data-coding-tab="errors">{% trans "Errors" context "exams.template.coding_exam" %}</button>
+                <button type="button" class="coding-tab" data-coding-tab="tests">{% trans "Test Cases" context "exams.template.coding_exam" %}</button>
+                <button type="button" class="coding-tab" data-coding-tab="preview" data-preview-tab>{% trans "Preview" context "exams.template.coding_exam" %}</button>
+                <button type="button" class="coding-tab" data-coding-tab="submission">{% trans "Submission Result" context "exams.template.coding_exam" %}</button>
+            </div>
+
+            <div class="coding-tab-panels">
+                <section class="coding-panel active" data-coding-panel="output">
+                    <label for="codingStdin">{% trans "Custom input" context "exams.template.coding_exam" %}</label>
+                    <textarea id="codingStdin" class="coding-stdin" rows="4"></textarea>
+                    <pre id="codingOutput" class="coding-output"></pre>
+                </section>
+                <section class="coding-panel" data-coding-panel="errors">
+                    <pre id="codingErrors" class="coding-output coding-output--error"></pre>
+                </section>
+                <section class="coding-panel" data-coding-panel="tests">
+                    <div id="codingTestCases" class="coding-test-cases"></div>
+                </section>
+                <section class="coding-panel" data-coding-panel="preview">
+                    <iframe id="codingPreviewFrame" class="coding-preview-frame" sandbox="allow-scripts"></iframe>
+                </section>
+                <section class="coding-panel" data-coding-panel="submission">
+                    <div id="codingSubmissionResult" class="coding-submission-result"></div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <footer class="coding-statusbar">
+        <span id="codingStatus">{% trans "Auto-saved" context "exams.template.coding_exam" %}</span>
+        <span>
+            {% if coding_question.enable_code_execution %}
+                {% trans "Execution uses the configured Docker sandbox." context "exams.template.coding_exam" %}
+            {% else %}
+                {% trans "Code execution is disabled by the teacher." context "exams.template.coding_exam" %}
+            {% endif %}
+        </span>
+    </footer>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+window.CODING_EXAM_CONFIG = {
+    autosaveUrl: "{{ autosave_url }}",
+    runUrl: "{{ run_url }}",
+    submitUrl: "{{ submit_url }}",
+    resultUrl: "{{ result_url }}",
+    csrfToken: "{{ csrf_token }}",
+    selectedLanguage: "{{ coding_question.language }}",
+    allowFileCreation: {% if coding_question.allow_file_creation %}true{% else %}false{% endif %},
+    allowMultipleFiles: {% if coding_question.allow_multiple_files %}true{% else %}false{% endif %},
+    enableExecution: {% if coding_question.enable_code_execution %}true{% else %}false{% endif %},
+    remainingSeconds: {% if remaining_seconds is not None %}{{ remaining_seconds }}{% else %}null{% endif %},
+    i18n: {
+        autoSaved: "{% filter escapejs %}{% trans 'Auto-saved' context 'exams.template.coding_exam' %}{% endfilter %}",
+        saving: "{% filter escapejs %}{% trans 'Saving...' context 'exams.template.coding_exam' %}{% endfilter %}",
+        running: "{% filter escapejs %}{% trans 'Running...' context 'exams.template.coding_exam' %}{% endfilter %}",
+        submitting: "{% filter escapejs %}{% trans 'Submitting...' context 'exams.template.coding_exam' %}{% endfilter %}",
+        submitSuccess: "{% filter escapejs %}{% trans 'Submission successful' context 'exams.template.coding_exam' %}{% endfilter %}",
+        timeOver: "{% filter escapejs %}{% trans 'Time is over' context 'exams.template.coding_exam' %}{% endfilter %}",
+        passed: "{% filter escapejs %}{% trans 'Passed' context 'exams.template.coding_exam' %}{% endfilter %}",
+        failed: "{% filter escapejs %}{% trans 'Failed' context 'exams.template.coding_exam' %}{% endfilter %}",
+        mainFile: "{% filter escapejs %}{% trans 'Main File' context 'exams.template.coding_exam' %}{% endfilter %}",
+        fileNamePrompt: "{% filter escapejs %}{% trans 'File name' context 'exams.template.coding_exam' %}{% endfilter %}"
+    }
+};
+</script>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'vendor/codemirror/lib/codemirror.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/javascript/javascript.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/python/python.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/clike/clike.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/xml/xml.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/css/css.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/mode/htmlmixed/htmlmixed.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/edit/closebrackets.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/edit/matchbrackets.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/display/fullscreen.js' %}"></script>
+    <script src="{% static 'exams/js/coding_exam.js' %}"></script>
+    {% if supervision.supervised %}
+        {{ supervision.config|json_script:"supervision-config-data" }}
+        <script src="{% static 'exams/js/exam_supervision.js' %}"></script>
+        <script nonce="{{ request.csp_nonce }}">
+        document.addEventListener("DOMContentLoaded", function() {
+            if (window.ExamSupervision) {
+                var supervisionConfig = JSON.parse(document.getElementById("supervision-config-data").textContent);
+                ExamSupervision.init({
+                    config: supervisionConfig,
+                    attemptId: {{ attempt.id }},
+                    csrfToken: "{{ csrf_token }}",
+                    logEndpoint: "{% url 'exams:supervision_log_incident' attempt.id %}",
+                    statusEndpoint: "{% url 'exams:supervision_status_api' attempt.id %}",
+                    violationCount: {{ supervision.violation_count|default:"0" }},
+                    maxViolations: {{ supervision.max_violations|default:"3" }},
+                    supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
+                });
+            }
+        });
+        </script>
+    {% endif %}
+{% endblock %}

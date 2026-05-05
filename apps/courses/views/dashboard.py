@@ -22,6 +22,7 @@ from django.views.generic import DetailView
 from apps.assignments.models import Submission
 from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
+from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
 from apps.projects.models import ProjectSubmission
@@ -246,23 +247,29 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
         if context["can_manage_course"]:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = scoped_by_organization(
-                Exam.objects.filter(course=course),
-                self.request,
+            context["course_exams"] = without_disabled_practical_exams(
+                scoped_by_organization(
+                    Exam.objects.filter(course=course),
+                    self.request,
+                )
             ).order_by("-created_at")
 
             # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
-            context["teacher_exams"] = scoped_by_organization(
-                Exam.objects.filter(author=user).exclude(course=course),
-                self.request,
+            context["teacher_exams"] = without_disabled_practical_exams(
+                scoped_by_organization(
+                    Exam.objects.filter(author=user).exclude(course=course),
+                    self.request,
+                )
             ).order_by("-created_at")[:10]
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
             all_course_exams = list(
-                scoped_by_organization(
-                    Exam.objects.filter(course=course, is_active=True),
-                    self.request,
+                without_disabled_practical_exams(
+                    scoped_by_organization(
+                        Exam.objects.filter(course=course, is_active=True),
+                        self.request,
+                    )
                 )
             )
 

@@ -117,7 +117,35 @@
                         </div>
 
                         <div class="answer-preview">
-                            {% if item.has_text_answer %}
+                            {% if exam.exam_type == "coding" and item.coding_submission %}
+                                <div class="answered-with-file">
+                                    <i class="fas fa-code"></i>
+                                    {{ item.coding_submission.get_execution_status_display }}
+                                    {% if item.coding_submission.score is not None %}
+                                        · {{ item.coding_submission.score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
+                                    {% endif %}
+                                </div>
+                                {% if item.coding_submission.output %}
+                                    <pre class="mt-2">{{ item.coding_submission.output|truncatechars:400 }}</pre>
+                                {% endif %}
+                                {% if item.coding_submission.error_message %}
+                                    <pre class="mt-2 text-danger">{{ item.coding_submission.error_message|truncatechars:400 }}</pre>
+                                {% endif %}
+                                {% if item.coding_submission.test_results %}
+                                    <ul class="list-group mt-2">
+                                        {% for case in item.coding_submission.test_results %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{% trans "Test Case" context "exams.template.teacher_check_attempt" %} {{ forloop.counter }}</span>
+                                                {% if case.passed %}
+                                                    <span class="badge bg-success">{% trans "Passed" context "exams.template.teacher_check_attempt" %}</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">{% trans "Failed" context "exams.template.teacher_check_attempt" %}</span>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% elif item.has_text_answer %}
                                 {{ ans.text_answer|truncatewords:10 }}
                             {% elif item.has_file_answer %}
                                 <span class="answered-with-file">

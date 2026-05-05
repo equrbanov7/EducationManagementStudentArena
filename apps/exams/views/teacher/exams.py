@@ -343,6 +343,26 @@ def createAndEditExamView(request, slug=None):
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
 
+            if exam_instance.exam_type == "coding":
+                from apps.exams.services.coding_definition import (
+                    build_coding_payload_from_exam_form,
+                    upsert_coding_question,
+                )
+
+                base_question = (
+                    exam_instance.questions.filter(coding_details__isnull=False)
+                    .select_related("coding_details")
+                    .order_by("order", "id")
+                    .first()
+                )
+                upsert_coding_question(
+                    exam_instance,
+                    payload=build_coding_payload_from_exam_form(form.cleaned_data),
+                    visible_cases=form.cleaned_data.get("coding_visible_test_cases") or [],
+                    hidden_cases=form.cleaned_data.get("coding_hidden_test_cases") or [],
+                    base_question=base_question,
+                )
+
             # Save supervision config from POST data
             from apps.exams.services.supervision import save_supervision_config_from_form
 
@@ -512,13 +532,13 @@ def delete_exam(request, slug):
     if organization is None:
         return _organization_selection_redirect(request)
     _ensure_teacher(request.user)
-    _ensure_exam_permission(request, "exam.delete")
     exam = _get_editable_exam_or_404(request, slug)
+    if exam.author_id != request.user.id:
+        _ensure_exam_permission(request, "exam.delete")
 
     if exam.attempts.exists():
-        # sadə variant: hazırda cəhd varsa silməyə icazə vermirik
-        # istəsən bunu sonradan dəyişərik
-        raise PermissionDenied(pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
+        messages.error(request, pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
+        return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
     if request.method == "POST":
         from apps.audit.utils import log_action

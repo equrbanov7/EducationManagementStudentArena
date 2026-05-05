@@ -14,9 +14,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
-from apps.exams.forms import ExamQuestionCreateForm
+from apps.exams.forms import CodingExamQuestionForm, ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.coding_definition import build_coding_payload_from_question_form, upsert_coding_question
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
@@ -263,6 +264,80 @@ def add_exam_question(request, slug):
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
+    if exam.exam_type == "coding":
+        if request.method == "POST":
+            form = CodingExamQuestionForm(request.POST)
+            if form.is_valid():
+                question, _ = upsert_coding_question(
+                    exam,
+                    payload=build_coding_payload_from_question_form(form.cleaned_data),
+                    visible_cases=form.cleaned_data.get("visible_test_cases") or [],
+                    hidden_cases=form.cleaned_data.get("hidden_test_cases") or [],
+                )
+                try:
+                    from core.cache import invalidate_exam_question_ids_cache
+
+                    invalidate_exam_question_ids_cache(exam.pk)
+                except Exception:
+                    pass
+
+                if is_modal_request:
+                    return JsonResponse({"success": True, "question_id": question.id})
+
+                if "save_and_continue" in request.POST:
+                    return redirect(
+                        _append_navigation_query(
+                            reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                        )
+                    )
+                return redirect(
+                    _append_navigation_query(
+                        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                        navigation_query,
+                    )
+                )
+            if is_modal_request:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "html": _render_question_form_html(
+                            request,
+                            exam=exam,
+                            form=form,
+                            editing=False,
+                            navigation_query=navigation_query,
+                        ),
+                    },
+                    status=400,
+                )
+        else:
+            form = CodingExamQuestionForm()
+
+        if is_modal_request:
+            return render(
+                request,
+                "exams/teacher/partials/_question_form.html",
+                {
+                    "exam": exam,
+                    "form": form,
+                    "editing": False,
+                    "is_modal": True,
+                    "question_navigation_query": navigation_query,
+                },
+            )
+
+        return render(
+            request,
+            "exams/teacher/add_exam_question.html",
+            {
+                "exam": exam,
+                "form": form,
+                "editing": False,
+                "is_modal": False,
+                "question_navigation_query": navigation_query,
+            },
+        )
+
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             request.POST,
@@ -375,6 +450,82 @@ def edit_exam_question(request, slug, question_id):
     # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
     # ------------------------------------------------------------
+
+    if exam.exam_type == "coding":
+        try:
+            coding_instance = question.coding_details
+        except Exception:
+            coding_instance = None
+        if request.method == "POST":
+            form = CodingExamQuestionForm(request.POST, instance=coding_instance)
+            if form.is_valid():
+                q, _ = upsert_coding_question(
+                    exam,
+                    payload=build_coding_payload_from_question_form(form.cleaned_data),
+                    visible_cases=form.cleaned_data.get("visible_test_cases") or [],
+                    hidden_cases=form.cleaned_data.get("hidden_test_cases") or [],
+                    base_question=question,
+                )
+                if is_modal_request:
+                    return JsonResponse({"success": True, "question_id": q.id})
+
+                if "save_and_continue" in request.POST:
+                    return redirect(
+                        _append_navigation_query(
+                            reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                        )
+                    )
+
+                return redirect(
+                    _append_navigation_query(
+                        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                        navigation_query,
+                    )
+                )
+            if is_modal_request:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "html": _render_question_form_html(
+                            request,
+                            exam=exam,
+                            form=form,
+                            editing=True,
+                            question=question,
+                            navigation_query=navigation_query,
+                        ),
+                    },
+                    status=400,
+                )
+        else:
+            form = CodingExamQuestionForm(instance=coding_instance)
+
+        if is_modal_request:
+            return render(
+                request,
+                "exams/teacher/partials/_question_form.html",
+                {
+                    "exam": exam,
+                    "form": form,
+                    "editing": True,
+                    "question": question,
+                    "is_modal": True,
+                    "question_navigation_query": navigation_query,
+                },
+            )
+
+        return render(
+            request,
+            "exams/teacher/add_exam_question.html",
+            {
+                "exam": exam,
+                "form": form,
+                "editing": True,
+                "question": question,
+                "is_modal": False,
+                "question_navigation_query": navigation_query,
+            },
+        )
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
