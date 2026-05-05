@@ -2,9 +2,9 @@
 (function () {
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
-    function notifyExamChange(delayMs) {
+    function notifyExamChange(delayMs, questionId) {
       if (typeof window.markExamAnswerChanged === "function") {
-        window.markExamAnswerChanged(delayMs);
+        window.markExamAnswerChanged(delayMs, questionId);
         return;
       }
 
@@ -141,7 +141,7 @@
 
         clearHidden.value = "1";
         dataHidden.value = "";
-        notifyExamChange(400);
+        notifyExamChange(400, qid);
       }
 
       function canvasHasVisiblePixels() {
@@ -165,7 +165,7 @@
           dataHidden.value = "";
           clearHidden.value = "1";
           if (notifyChange) {
-            notifyExamChange(700);
+            notifyExamChange(700, qid);
           } else if (typeof window.updateProgress === "function") {
             window.updateProgress();
           }
@@ -177,7 +177,7 @@
         clearHidden.value = "0";
 
         if (notifyChange) {
-          notifyExamChange(1000);
+          notifyExamChange(1000, qid);
         } else if (typeof window.updateProgress === "function") {
           window.updateProgress();
         }
@@ -215,7 +215,7 @@
           clearHidden.value = "1";
           dataHidden.value = "";
         }
-        notifyExamChange(500);
+        notifyExamChange(500, qid);
       });
   
       // toolbar

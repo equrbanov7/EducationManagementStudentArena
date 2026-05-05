@@ -157,7 +157,7 @@ black .
 
 # 3. Yoxla - heç bir dəyişiklik olmamalı
 isort --check --profile black .
-black --check .
+black --check . 
  
 -------
 
