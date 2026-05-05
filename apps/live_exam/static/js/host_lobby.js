@@ -1820,6 +1820,16 @@ async function postJson(url, payload = {}) {
         });
         const data = await response.json();
         if (data?.ok) {
+            if (data.settings) {
+                applySessionSettings(data.settings);
+                if (data.is_locked != null) {
+                    state.isLocked = Boolean(data.is_locked);
+                }
+                if (state.sessionState === "lobby") {
+                    renderIdleStage();
+                }
+                notifyHostShell();
+            }
             scheduleStateSyncFallback();
         }
         return data;
