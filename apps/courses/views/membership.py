@@ -30,6 +30,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView, View
 
 from apps.courses.models import Course, CourseMembership
+from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, StudentGroup
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
@@ -450,9 +451,11 @@ def link_exam_to_course(request, pk):
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam_qs = scoped_by_organization(
-            Exam.objects.filter(author=request.user),
-            request,
+        exam_qs = without_disabled_practical_exams(
+            scoped_by_organization(
+                Exam.objects.filter(author=request.user),
+                request,
+            )
         )
         exam = get_object_or_404(exam_qs, id=exam_id)
         exam.course = course
@@ -482,9 +485,11 @@ def unlink_exam_from_course(request, pk):
         exam_id = data.get("exam_id")
 
         exam = get_object_or_404(
-            scoped_by_organization(
-                Exam.objects.filter(course=course),
-                request,
+            without_disabled_practical_exams(
+                scoped_by_organization(
+                    Exam.objects.filter(course=course),
+                    request,
+                )
             ),
             id=exam_id,
         )

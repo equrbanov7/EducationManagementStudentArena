@@ -20,6 +20,8 @@
 
                  {% if exam.exam_type == "test" %}
                      <p class="info-text">{% trans "info_adding_question_for_test_exam" context "exams.template.add_exam_question" %}</p>
+                 {% elif exam.exam_type == "coding" %}
+                     <p class="info-text">{% trans "Practical Coding Exam question" context "exams.template.add_exam_question" %}</p>
                  {% else %}
                      <p class="info-text">{% trans "info_adding_question_for_written_exam" context "exams.template.add_exam_question" %}</p>
                  {% endif %}
@@ -48,6 +50,109 @@
             </div>
         {% endif %}
 
+        {% if exam.exam_type == "coding" %}
+            <div class="coding-question-form">
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.language.id_for_label }}">{{ form.language.label }}:</label>
+                        {{ form.language }}
+                        <div class="error-msg">{{ form.language.errors }}</div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="{{ form.max_score.id_for_label }}">{{ form.max_score.label }}:</label>
+                        {{ form.max_score }}
+                        <div class="error-msg">{{ form.max_score.errors }}</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">{{ form.title.label }}:</label>
+                    {{ form.title }}
+                    <div class="error-msg">{{ form.title.errors }}</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.problem_statement.id_for_label }}">{{ form.problem_statement.label }}:</label>
+                    {{ form.problem_statement }}
+                    <div class="error-msg">{{ form.problem_statement.errors }}</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.input_description.id_for_label }}">{{ form.input_description.label }}:</label>
+                        {{ form.input_description }}
+                        <div class="error-msg">{{ form.input_description.errors }}</div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="{{ form.output_description.id_for_label }}">{{ form.output_description.label }}:</label>
+                        {{ form.output_description }}
+                        <div class="error-msg">{{ form.output_description.errors }}</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.example_input.id_for_label }}">{{ form.example_input.label }}:</label>
+                        {{ form.example_input }}
+                        <div class="error-msg">{{ form.example_input.errors }}</div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="{{ form.example_output.id_for_label }}">{{ form.example_output.label }}:</label>
+                        {{ form.example_output }}
+                        <div class="error-msg">{{ form.example_output.errors }}</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
+                        {{ form.time_limit_seconds }}
+                        <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="{{ form.memory_limit_mb.id_for_label }}">{{ form.memory_limit_mb.label }}:</label>
+                        {{ form.memory_limit_mb }}
+                        <div class="error-msg">{{ form.memory_limit_mb.errors }}</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.starter_code.id_for_label }}">{{ form.starter_code.label }}:</label>
+                    {{ form.starter_code }}
+                    <div class="error-msg">{{ form.starter_code.errors }}</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="{{ form.visible_test_cases.id_for_label }}">{{ form.visible_test_cases.label }}:</label>
+                        {{ form.visible_test_cases }}
+                        {% if form.visible_test_cases.help_text %}<p class="help-text">{{ form.visible_test_cases.help_text }}</p>{% endif %}
+                        <div class="error-msg">{{ form.visible_test_cases.errors }}</div>
+                    </div>
+                    <div class="form-group half">
+                        <label for="{{ form.hidden_test_cases.id_for_label }}">{{ form.hidden_test_cases.label }}:</label>
+                        {{ form.hidden_test_cases }}
+                        {% if form.hidden_test_cases.help_text %}<p class="help-text">{{ form.hidden_test_cases.help_text }}</p>{% endif %}
+                        <div class="error-msg">{{ form.hidden_test_cases.errors }}</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-check mt-2">
+                        {{ form.allow_file_creation }}
+                        <label class="form-check-label" for="{{ form.allow_file_creation.id_for_label }}">{{ form.allow_file_creation.label }}</label>
+                    </div>
+                    <div class="form-check mt-2">
+                        {{ form.allow_multiple_files }}
+                        <label class="form-check-label" for="{{ form.allow_multiple_files.id_for_label }}">{{ form.allow_multiple_files.label }}</label>
+                    </div>
+                    <div class="form-check mt-2">
+                        {{ form.enable_code_execution }}
+                        <label class="form-check-label" for="{{ form.enable_code_execution.id_for_label }}">{{ form.enable_code_execution.label }}</label>
+                    </div>
+                </div>
+            </div>
+        {% else %}
         <div class="form-group">
             <label for="{{ form.text.id_for_label }}">{{ form.text.label }}:</label>
             {{ form.text }}
@@ -245,6 +350,7 @@
                     </div>
                 </template>
             </div>
+        {% endif %}
         {% endif %}
 
         {% if is_modal %}

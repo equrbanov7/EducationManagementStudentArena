@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.exams.models import ExamAttempt
+from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
@@ -91,6 +91,18 @@ def exam_result(request, slug, attempt_id):
     # Template-də istifadə üçün:
     questions = [a.question for a in answers_qs]
     answers_by_qid = {a.question_id: a for a in answers_qs}
+    coding_submissions_by_qid = {}
+    if exam.exam_type == "coding":
+        for submission in (
+            CodingSubmission.objects.filter(
+                attempt=attempt,
+                student=request.user,
+                is_final=True,
+            )
+            .select_related("question", "question__question")
+            .order_by("question__question__order", "-submitted_at")
+        ):
+            coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
     return render(
         request,
@@ -100,6 +112,7 @@ def exam_result(request, slug, attempt_id):
             "attempt": attempt,
             "questions": questions,
             "answers_by_qid": answers_by_qid,
+            "coding_submissions_by_qid": coding_submissions_by_qid,
             "history_url": history_url,
             "back_url": back_url,
             "previous_attempts": previous_attempts,

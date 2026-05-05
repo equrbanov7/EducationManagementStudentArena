@@ -1,6 +1,10 @@
 from django.contrib import admin
 
 from .models import (
+    CodingExamQuestion,
+    CodingFile,
+    CodingSubmission,
+    CodingTestCase,
     Exam,
     ExamAnswer,
     ExamAttempt,
@@ -22,6 +26,20 @@ class ExamQuestionOptionInline(admin.TabularInline):
     model = ExamQuestionOption
     extra = 4
     can_delete = True
+
+
+class CodingTestCaseInline(admin.TabularInline):
+    model = CodingTestCase
+    extra = 2
+    fields = ("visibility", "input_data", "expected_output", "point_value", "order")
+
+
+class CodingFileInline(admin.TabularInline):
+    model = CodingFile
+    extra = 0
+    readonly_fields = ("name", "language", "is_main", "updated_at")
+    fields = ("name", "language", "is_main", "updated_at")
+    can_delete = False
 
 
 @admin.register(Exam)
@@ -71,6 +89,28 @@ class ExamAnswerAdmin(admin.ModelAdmin):
     list_display = ("attempt", "question", "is_correct", "updated_at")
     list_filter = ("question__exam", "is_correct")
     search_fields = ("attempt__user__username", "question__text")
+
+
+@admin.register(CodingExamQuestion)
+class CodingExamQuestionAdmin(admin.ModelAdmin):
+    list_display = ("title", "language", "exam_title", "max_score", "enable_code_execution")
+    list_filter = ("language", "enable_code_execution", "allow_file_creation", "allow_multiple_files")
+    search_fields = ("title", "problem_statement", "question__exam__title")
+    inlines = [CodingTestCaseInline]
+
+    def exam_title(self, obj):
+        return obj.question.exam.title
+
+    exam_title.short_description = "Exam"
+
+
+@admin.register(CodingSubmission)
+class CodingSubmissionAdmin(admin.ModelAdmin):
+    list_display = ("student", "exam", "question", "execution_status", "score", "is_final", "submitted_at")
+    list_filter = ("execution_status", "is_final", "selected_language", "submitted_at")
+    search_fields = ("student__username", "exam__title", "question__title", "submitted_code")
+    readonly_fields = ("submitted_at", "updated_at")
+    inlines = [CodingFileInline]
 
 
 @admin.register(StudentGroup)

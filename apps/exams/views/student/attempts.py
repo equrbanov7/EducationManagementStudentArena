@@ -125,6 +125,20 @@ def take_exam(request, slug, attempt_id):
         messages.error(request, pgettext("exams.view.access.message", message_key))
         return redirect(_resolve_exam_failure_redirect(request))
 
+    # Server tərəfli Vaxt Hesablaması
+    remaining_seconds = None
+    is_time_up = False
+    if exam.total_duration_minutes and attempt.started_at:
+        now = timezone.now()
+        finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
+        diff = finish_time - now
+        total_seconds = diff.total_seconds()
+        if total_seconds <= 0:
+            is_time_up = True
+            remaining_seconds = 0
+        else:
+            remaining_seconds = int(total_seconds)
+
     previous_attempts = annotate_attempt_result_visibility(
         list(
             ExamAttempt.objects.filter(
@@ -139,6 +153,20 @@ def take_exam(request, slug, attempt_id):
     current_path = request.get_full_path()
     for previous_attempt in previous_attempts:
         previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=current_path)
+
+    if exam.exam_type == "coding":
+        from apps.exams.services.supervision import get_attempt_supervision_status
+        from apps.exams.views.student.coding import take_coding_exam
+
+        return take_coding_exam(
+            request,
+            exam=exam,
+            attempt=attempt,
+            remaining_seconds=remaining_seconds,
+            history_url=history_url,
+            previous_attempts=previous_attempts,
+            supervision=get_attempt_supervision_status(attempt),
+        )
 
     questions = [a.question for a in answers_qs]
 
@@ -157,20 +185,6 @@ def take_exam(request, slug, attempt_id):
         if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
             opts = build_shuffled_options(attempt.id, q)
         q_payload.append({"q": q, "opts": opts})
-
-    # Server tərəfli Vaxt Hesablaması
-    remaining_seconds = None
-    is_time_up = False
-    if exam.total_duration_minutes and attempt.started_at:
-        now = timezone.now()
-        finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
-        diff = finish_time - now
-        total_seconds = diff.total_seconds()
-        if total_seconds <= 0:
-            is_time_up = True
-            remaining_seconds = 0
-        else:
-            remaining_seconds = int(total_seconds)
 
     if request.method == "POST":
         action = (request.POST.get("submit_action") or "").strip()

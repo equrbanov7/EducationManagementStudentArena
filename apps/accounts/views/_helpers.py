@@ -17,6 +17,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.courses.models import Course
+from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam
 from apps.notifications.models import (
     MembershipRequestRoleType,
@@ -102,7 +103,7 @@ def _tenant_scoped_courses(request, queryset=None):
 
 def _tenant_scoped_exams(request, queryset=None):
     base_queryset = queryset if queryset is not None else Exam.objects.all()
-    return scoped_by_organization(base_queryset, request)
+    return without_disabled_practical_exams(scoped_by_organization(base_queryset, request))
 
 
 def _assigned_courses_queryset(request, user):

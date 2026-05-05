@@ -94,7 +94,7 @@
                            class="action-btn bank-btn">
                             <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
-                    {% else %}
+                    {% elif exam.exam_type == "written" %}
                         <a href="{% url 'exams:create_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn bank-btn">
                             <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
@@ -173,6 +173,19 @@
                                             </li>
                                         {% endfor %}
                                     </ul>
+                                {% elif exam.exam_type == "coding" and q.coding_details %}
+                                    <div class="options-list">
+                                        <div class="option-item">
+                                            <span class="option-indicator"><i class="fas fa-code"></i></span>
+                                            <span class="option-text">{{ q.coding_details.get_language_display }} · {{ q.coding_details.max_score }} pts · {{ q.coding_details.time_limit_seconds }}s · {{ q.coding_details.memory_limit_mb }}MB</span>
+                                        </div>
+                                        <div class="option-item">
+                                            <span class="option-indicator"><i class="fas fa-vial"></i></span>
+                                            <span class="option-text">
+                                                {% trans "Test Cases" context "exams.template.teacher_exam_detail" %}: {{ q.coding_details.test_cases.count }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 {% endif %}
                             </div>
 
