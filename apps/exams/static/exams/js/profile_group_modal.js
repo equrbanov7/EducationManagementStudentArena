@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var submitLabelEdit = modalElement.getAttribute("data-submit-edit") || "action_save_changes";
   var searchNoResultsLabel = modalElement.getAttribute("data-empty-search-result") || "empty_search_result";
   var fallbackThisLabel = modalElement.getAttribute("data-fallback-this") || "label_this";
+  var studentGroupLabel = modalElement.getAttribute("data-student-group-label") || "Group";
 
   var nameInput = form.querySelector('input[name="name"]');
   var primaryTeacherSelect = form.querySelector('select[name="primary_teacher"]');
@@ -64,11 +65,23 @@ document.addEventListener("DOMContentLoaded", function () {
       return normalize(searchInput ? searchInput.value : "");
     }
 
+    function optionStudentGroupNumber(option) {
+      return String(option.getAttribute("data-student-group-number") || "").trim();
+    }
+
+    function optionSearchText(option) {
+      return [
+        option.textContent || "",
+        option.getAttribute("data-search-text") || "",
+        optionStudentGroupNumber(option)
+      ].join(" ");
+    }
+
     function optionMatchesFilter(option, filterValue) {
       if (!filterValue) {
         return true;
       }
-      return normalize(option.textContent).indexOf(filterValue) !== -1;
+      return normalize(optionSearchText(option)).indexOf(filterValue) !== -1;
     }
 
     function updateCounter() {
@@ -98,8 +111,21 @@ document.addEventListener("DOMContentLoaded", function () {
         checkbox.type = "checkbox";
         checkbox.checked = option.selected;
 
+        var contentNode = document.createElement("span");
+        contentNode.className = "group-checklist__content";
+
         var textNode = document.createElement("span");
+        textNode.className = "group-checklist__name";
         textNode.textContent = option.textContent || "";
+        contentNode.appendChild(textNode);
+
+        var studentGroupNumber = optionStudentGroupNumber(option);
+        if (studentGroupNumber) {
+          var groupBadge = document.createElement("span");
+          groupBadge.className = "group-checklist__badge";
+          groupBadge.textContent = studentGroupLabel + ": " + studentGroupNumber;
+          contentNode.appendChild(groupBadge);
+        }
 
         checkbox.addEventListener("change", function () {
           option.selected = checkbox.checked;
@@ -110,13 +136,14 @@ document.addEventListener("DOMContentLoaded", function () {
           if (event.target === checkbox) {
             return;
           }
+          event.preventDefault();
           checkbox.checked = !checkbox.checked;
           option.selected = checkbox.checked;
           updateCounter();
         });
 
         row.appendChild(checkbox);
-        row.appendChild(textNode);
+        row.appendChild(contentNode);
         listContainer.appendChild(row);
       });
 

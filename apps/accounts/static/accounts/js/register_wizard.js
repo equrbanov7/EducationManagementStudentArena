@@ -235,6 +235,58 @@ document.addEventListener("DOMContentLoaded", function () {
         return registrationTypeMap[selected] || emptyRegistrationSelection;
     }
 
+    function setInlineFieldError(input, message) {
+        if (!input) return;
+
+        var field = input.closest(".register-form-field");
+        var errorEl = field ? field.querySelector(".register-field-error") : null;
+        if (!field) return;
+
+        if (!errorEl) {
+            errorEl = document.createElement("div");
+            errorEl.className = "register-field-error";
+            field.appendChild(errorEl);
+        }
+
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+        input.classList.add("is-invalid");
+        input.setAttribute("aria-invalid", "true");
+    }
+
+    function clearInlineFieldError(input) {
+        if (!input) return;
+
+        var field = input.closest(".register-form-field");
+        var errorEl = field ? field.querySelector(".register-field-error") : null;
+        if (errorEl) {
+            errorEl.hidden = true;
+            errorEl.textContent = "";
+        }
+        input.classList.remove("is-invalid");
+        input.removeAttribute("aria-invalid");
+    }
+
+    function validateStudentGroupNumber() {
+        var selection = currentSelection();
+        var isStudent = selection.mode === "student_join";
+        if (!groupNumberInput || !isStudent) {
+            clearInlineFieldError(groupNumberInput);
+            return true;
+        }
+
+        if ((groupNumberInput.value || "").trim()) {
+            clearInlineFieldError(groupNumberInput);
+            return true;
+        }
+
+        setInlineFieldError(
+            groupNumberInput,
+            tr("group_number_required", "Group / class is required for students.")
+        );
+        return false;
+    }
+
     function getDraftStorage() {
         try {
             return window.localStorage || null;
@@ -1017,7 +1069,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Make specialization/group required for students
         if (specializationInput) specializationInput.required = isStudent;
-        if (groupNumberInput) groupNumberInput.required = isStudent;
+        if (groupNumberInput) {
+            groupNumberInput.required = isStudent;
+            groupNumberInput.setAttribute("aria-required", isStudent ? "true" : "false");
+            if (!isStudent) {
+                clearInlineFieldError(groupNumberInput);
+            }
+        }
     }
 
     if (countrySelect) {
@@ -1124,6 +1182,27 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             privacyCheckbox.focus();
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener("submit", function (event) {
+            if (privacyCheckbox && !privacyCheckbox.checked) return;
+            if (validateStudentGroupNumber()) return;
+
+            event.preventDefault();
+            wizardNext(3);
+            if (groupNumberInput) {
+                groupNumberInput.focus();
+            }
+        });
+    }
+
+    if (groupNumberInput) {
+        groupNumberInput.addEventListener("input", function () {
+            if ((groupNumberInput.value || "").trim()) {
+                clearInlineFieldError(groupNumberInput);
+            }
         });
     }
 

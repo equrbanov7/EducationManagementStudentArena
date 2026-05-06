@@ -261,7 +261,8 @@
   const I18N_TEACHER_GROUP_LIST = {
     noDataFound: "{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list'|escapejs %}",
     modalTitleEditGroup: "{% trans 'modal_title_edit_group' context 'exams.template.teacher_group_list'|escapejs %}",
-    confirmDeleteGroup: "{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list'|escapejs %}"
+    confirmDeleteGroup: "{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list'|escapejs %}",
+    studentRegisteredGroupNumber: "{% trans 'student_registered_group_number' context 'profile.groups'|escapejs %}"
   };
 
   const groupModal = document.getElementById("groupModal");
@@ -309,16 +310,47 @@
         return;
       }
 
+      function optionGroupNumber(option) {
+        return (option.getAttribute("data-student-group-number") || "").trim();
+      }
+
+      function optionSearchText(option) {
+        return [
+          option.text || "",
+          option.getAttribute("data-search-text") || "",
+          optionGroupNumber(option)
+        ].join(" ").toLowerCase();
+      }
+
       options.forEach((option) => {
         const row = document.createElement("div");
         row.className = "student-item-row";
-        row.setAttribute("data-search", (option.text || "").toLowerCase());
-        row.innerHTML = `
-          <input type="checkbox" class="student-checkbox" value="${option.value}" id="chk_${hiddenSelect.id}_${option.value}">
-          <label class="student-label" for="chk_${hiddenSelect.id}_${option.value}">${option.text}</label>
-        `;
+        row.setAttribute("data-search", optionSearchText(option));
 
-        const checkbox = row.querySelector("input");
+        const checkboxId = `chk_${hiddenSelect.id}_${option.value}`;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "student-checkbox";
+        checkbox.value = option.value;
+        checkbox.id = checkboxId;
+
+        const label = document.createElement("label");
+        label.className = "student-label";
+        label.htmlFor = checkboxId;
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "student-label__name";
+        nameSpan.textContent = option.text || "";
+        label.appendChild(nameSpan);
+
+        const groupNumber = optionGroupNumber(option);
+        if (groupNumber) {
+          const groupBadge = document.createElement("span");
+          groupBadge.className = "student-label__group";
+          groupBadge.textContent = `${I18N_TEACHER_GROUP_LIST.studentRegisteredGroupNumber}: ${groupNumber}`;
+          label.appendChild(groupBadge);
+        }
+
         checkbox.checked = option.selected;
 
         checkbox.addEventListener("change", function () {
@@ -327,12 +359,15 @@
         });
 
         row.addEventListener("click", function (e) {
-          if (e.target !== checkbox) {
+          const clickedLabel = e.target.closest && e.target.closest("label");
+          if (e.target !== checkbox && !clickedLabel) {
             checkbox.checked = !checkbox.checked;
             checkbox.dispatchEvent(new Event("change"));
           }
         });
 
+        row.appendChild(checkbox);
+        row.appendChild(label);
         container.appendChild(row);
       });
 

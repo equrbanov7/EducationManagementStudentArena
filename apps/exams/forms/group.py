@@ -14,6 +14,22 @@ from apps.organizations.services import organization_role_user_queryset, organiz
 User = get_user_model()
 
 
+class UserMetadataSelectMultiple(forms.SelectMultiple):
+    """Expose lightweight user metadata to custom checklist renderers."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
+        user = getattr(value, "instance", None)
+        profile = getattr(user, "profile", None)
+        student_group_number = (getattr(profile, "student_group_number", "") or "").strip()
+
+        if student_group_number:
+            option["attrs"]["data-student-group-number"] = student_group_number
+            option["attrs"]["data-search-text"] = f"{label} {student_group_number}"
+
+        return option
+
+
 class StudentGroupForm(forms.ModelForm):
     MAX_MULTI_TEACHERS = 3
 
@@ -49,7 +65,7 @@ class StudentGroupForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("exams.form.group.placeholder", "name"),
                 }
             ),
-            "students": forms.SelectMultiple(
+            "students": UserMetadataSelectMultiple(
                 attrs={
                     "class": "form-select",
                 }

@@ -761,7 +761,11 @@ msgstr "Qrupdakı tələbələr"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:6
 msgctxt "profile.groups"
 msgid "placeholder_search_student"
-msgstr "Tələbə axtar..."
+msgstr "Tələbə və ya qrup nömrəsi axtar..."
+
+msgctxt "profile.groups"
+msgid "student_registered_group_number"
+msgstr "Qeydiyyat qrupu"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
@@ -10121,7 +10125,7 @@ msgstr "Tələbələr"
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_student"
-msgstr "Tələbə axtar..."
+msgstr "Tələbə və ya qrup nömrəsi axtar..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:84
 msgctxt "exams.template.create_student_group"
@@ -11046,7 +11050,7 @@ msgstr "Tələbələr"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:172
 msgctxt "exams.template.teacher_group_list"
 msgid "placeholder_search_name_or_username"
-msgstr "Search course center..."
+msgstr "Tələbə adı, istifadəçi adı və ya qrup nömrəsi axtar..."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:176
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:201
@@ -15788,6 +15792,10 @@ msgstr "Tələbələr üçün ixtisas / fakültə mütləqdir."
 msgctxt "accounts.form.register.error"
 msgid "group_number_required"
 msgstr "Tələbələr üçün qrup / sinif mütləqdir."
+
+msgctxt "accounts.register"
+msgid "required_badge"
+msgstr "Məcburi"
 
 msgctxt "accounts.register"
 msgid "step_role"
