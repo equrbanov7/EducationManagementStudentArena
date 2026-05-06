@@ -175,3 +175,13 @@ class StudentGroupFormRoleSourceTests(TestCase):
         self.assertNotIn(self.member_with_student_group.id, student_ids)
         self.assertNotIn(self.legacy_profile_teacher.id, teacher_ids)
         self.assertNotIn(self.legacy_profile_student.id, student_ids)
+
+    def test_student_options_include_registered_group_number_metadata(self):
+        self.student.profile.student_group_number = "CS-204"
+        self.student.profile.save(update_fields=["student_group_number", "updated_at"])
+
+        form = StudentGroupForm(actor=self.teacher, organization=self.org)
+
+        rendered_students = form["students"].as_widget()
+        self.assertIn('data-student-group-number="CS-204"', rendered_students)
+        self.assertIn("CS-204", rendered_students)
