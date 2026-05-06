@@ -17,9 +17,18 @@ from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamSupervisionConfig, QuestionBlock
+from apps.exams.models import (
+    Exam,
+    ExamAnswer,
+    ExamAttempt,
+    ExamQuestion,
+    ExamQuestionOption,
+    ExamSupervisionConfig,
+    QuestionBlock,
+)
 from apps.exams.services import parsing
 from apps.exams.services.ai_grading import grade_written_answer
+from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import log_supervision_incident, teacher_resume_attempt, teacher_stop_attempt
@@ -144,6 +153,68 @@ class AIWrittenGradingServiceTest(SimpleTestCase):
         self.assertTrue(parts[0]["text"].startswith("You are an expert exam grader."))
         self.assertEqual(parts[1]["inline_data"]["mime_type"], "image/png")
         self.assertEqual(parts[1]["inline_data"]["data"], base64.b64encode(_TINY_PNG_BYTES).decode("ascii"))
+
+
+class AIQuestionGenerationServiceTest(SimpleTestCase):
+    @override_settings(GEMINI_API_KEY="test-gemini-key")
+    @patch("apps.exams.services.ai_question_generation._call_gemini_text")
+    def test_generates_test_questions_in_bulk_import_format(self, mock_call_gemini_text):
+        mock_call_gemini_text.return_value = """
+        {
+          "questions": [
+            {
+              "text": "Python-da funksiya nə üçündür?",
+              "options": {
+                "A": "Kod blokunu təkrar istifadə etmək",
+                "B": "Yalnız rəng seçmək",
+                "C": "Faylı silmək",
+                "D": "Brauzeri bağlamaq",
+                "E": "Şəbəkəni söndürmək"
+              },
+              "correct": ["A"],
+              "answer_mode": "single"
+            }
+          ]
+        }
+        """
+
+        result = generate_question_bank_text(
+            exam_title="Python Quiz",
+            exam_type="test",
+            prompt_text="Funksiyalar mövzusu",
+            question_count=1,
+            language_code="az",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertIn("1. Python-da funksiya nə üçündür?", result["text"])
+        self.assertIn("A) Kod blokunu təkrar istifadə etmək", result["text"])
+        self.assertIn("Cavab: A", result["text"])
+        parsed = parsing.parse_bulk_mcq(result["text"])
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["correct"], ["A"])
+
+    @override_settings(GEMINI_API_KEY="test-gemini-key")
+    @patch("apps.exams.services.ai_question_generation._call_gemini_text")
+    def test_generates_written_questions_in_block_format(self, mock_call_gemini_text):
+        mock_call_gemini_text.return_value = """
+        {"questions": [{"text": "Dövr operatorunun məqsədini izah edin."}, {"text": "For və while fərqini yazın."}]}
+        """
+
+        result = generate_question_bank_text(
+            exam_title="Python Midterm",
+            exam_type="written",
+            prompt_text="Dövr operatorları",
+            question_count=2,
+            block_name="Bölmə 1",
+            language_code="az",
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(
+            result["text"],
+            "1. Dövr operatorunun məqsədini izah edin.\n2. For və while fərqini yazın.",
+        )
 
 
 class ExamGradingServicesTest(TestCase):
@@ -636,6 +707,47 @@ class ExamGradingServiceTest(TestCase):
         self.answer.save()
         score = calculate_attempt_score(self.attempt)
         self.assertEqual(score, Decimal("6"))
+
+    def test_calculate_test_attempt_result_uses_delivered_answers_only(self):
+        from apps.exams.services.result_calculation import calculate_test_attempt_result
+
+        for idx in range(4, 24):
+            ExamQuestion.objects.create(exam=self.exam, text=f"Bank only {idx}", points=1, order=idx)
+
+        ExamQuestionOption.objects.create(question=self.question, text="Yes", is_correct=True)
+        ExamQuestionOption.objects.create(question=self.question, text="No", is_correct=False)
+
+        correct_question = ExamQuestion.objects.create(exam=self.exam, text="Delivered correct", points=2, order=2)
+        correct_answer_option = ExamQuestionOption.objects.create(
+            question=correct_question,
+            text="Correct",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(question=correct_question, text="Wrong", is_correct=False)
+        correct_answer = ExamAnswer.objects.create(attempt=self.attempt, question=correct_question)
+        correct_answer.selected_options.add(correct_answer_option)
+
+        wrong_question = ExamQuestion.objects.create(exam=self.exam, text="Delivered wrong", points=3, order=3)
+        ExamQuestionOption.objects.create(question=wrong_question, text="Correct", is_correct=True)
+        wrong_answer_option = ExamQuestionOption.objects.create(question=wrong_question, text="Wrong", is_correct=False)
+        wrong_answer = ExamAnswer.objects.create(attempt=self.attempt, question=wrong_question)
+        wrong_answer.selected_options.add(wrong_answer_option)
+
+        result = calculate_test_attempt_result(self.attempt)
+
+        self.assertEqual(self.exam.questions.count(), 23)
+        self.assertEqual(result.delivered_count, 3)
+        self.assertEqual(result.correct_count, 1)
+        self.assertEqual(result.wrong_count, 1)
+        self.assertEqual(result.unanswered_count, 1)
+        self.assertEqual(result.score, Decimal("2"))
+        self.assertEqual(result.max_score, Decimal("15"))
+        self.assertEqual(result.percentage, Decimal("13.3"))
+
+        self.attempt.recalculate_score()
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.correct_count, 1)
+        self.assertEqual(self.attempt.wrong_count, 1)
 
     def test_parse_score_value_valid(self):
         from decimal import Decimal

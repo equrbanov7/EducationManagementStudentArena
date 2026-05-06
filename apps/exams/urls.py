@@ -81,6 +81,11 @@ urlpatterns = [
     # ==========================
     # SLUG - Teacher Question Bank
     # ==========================
+    path(
+        "<slug:slug>/question-bank/ai-generate/",
+        views.ai_generate_question_bank,
+        name="ai_generate_question_bank",
+    ),
     path("<slug:slug>/test-bank/", views.test_question_bank, name="test_question_bank"),
     path(
         "<slug:slug>/create-bank/",

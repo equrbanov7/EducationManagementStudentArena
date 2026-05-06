@@ -14,6 +14,7 @@ from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseMembership
 from apps.exams.domain.access_policy import StudentGroup
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility,
     resolve_exam_attempt_review_window_seconds,
@@ -401,8 +402,10 @@ def _collect_my_results(request, filter_type=None, search=None):
                 continue
 
             score_value = attempt.teacher_score
-            if score_value is None and is_auto_test and (attempt.correct_count + attempt.wrong_count) > 0:
-                score_value = attempt.score_percent
+            if score_value is None and is_auto_test:
+                test_result = calculate_test_attempt_result(attempt)
+                if test_result.delivered_count > 0:
+                    score_value = test_result.percentage
 
             is_graded_visible = attempt.checked_by_teacher or score_value is not None
             items.append(
