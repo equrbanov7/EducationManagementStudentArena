@@ -6,6 +6,7 @@ from .groups import (
     teacher_create_group,
     teacher_delete_group,
     teacher_group_list,
+    teacher_remove_student_from_group,
     teacher_update_group,
 )
 from .question_bank import ai_generate_question_bank, create_question_bank, process_question_bank, test_question_bank
@@ -23,6 +24,7 @@ __all__ = [
     "teacher_create_group",
     "teacher_update_group",
     "teacher_delete_group",
+    "teacher_remove_student_from_group",
     "create_student_group",
     "teacher_exam_list",
     "createAndEditExamView",
