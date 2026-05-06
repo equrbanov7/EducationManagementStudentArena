@@ -19332,3 +19332,123 @@ msgstr "AI isteği sırasında hata oluştu."
 msgctxt "profile.statistics"
 msgid "ai_remaining"
 msgstr "Kalan istek"
+msgctxt "exams.template.ai_question_bank"
+msgid "AI ilə test sualı yarat"
+msgstr "AI ile test soruları oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək."
+msgstr "Ders dosyası yükleyin veya konuyu prompt olarak yazın. AI sonucu bu sayfanın test formatına çevirecek."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "AI ilə bu blok üçün sual yarat"
+msgstr "AI ile bu blok için soru oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq."
+msgstr "Ders dosyası veya prompt temelinde sorular hazırlanacak ve bu bloğun metin alanına eklenecek."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Prompt / mövzu"
+msgstr "Prompt / konu"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat"
+msgstr "Örneğin: Python fonksiyonları konusunda uygulama düzeyinde test soruları oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mühazirə faylı"
+msgstr "Ders dosyası"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl seç"
+msgstr "Dosya seç"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl seçilməyib"
+msgstr "Dosya seçilmedi"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Sual sayı"
+msgstr "Soru sayısı"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Çətinlik"
+msgstr "Zorluk"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Asan"
+msgstr "Kolay"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Çətin"
+msgstr "Zor"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Qarışıq"
+msgstr "Karışık"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətnin sonuna əlavə et"
+msgstr "Metnin sonuna ekle"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətn sahəsini əvəz et"
+msgstr "Metin alanını değiştir"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "AI ilə yarat"
+msgstr "AI ile oluştur"
+
+#, python-format
+msgctxt "exams.template.ai_question_bank"
+msgid "Məsələn: %(block_name)s mövzusundan 5 yazılı sual yarat"
+msgstr "Örneğin: %(block_name)s konusunda 5 yazılı soru oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Məsələn: Bölmə 1 üçün 5 yazılı sual yarat"
+msgstr "Örneğin: Bölüm 1 için 5 yazılı soru oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Məsələn: {block_name} üçün 5 yazılı sual yarat"
+msgstr "Örneğin: {block_name} için 5 yazılı soru oluştur"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Yaradılır..."
+msgstr "Oluşturuluyor..."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "AI endpoint tapılmadı."
+msgstr "AI endpoint bulunamadı."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Prompt yazın və ya fayl yükləyin."
+msgstr "Prompt yazın veya dosya yükleyin."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Gemini 2.5 Pro sualları hazırlayır..."
+msgstr "Gemini 2.5 Pro soruları hazırlıyor..."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "AI sual yaratma alınmadı."
+msgstr "AI soru oluşturma başarısız oldu."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Qalan sorğu"
+msgstr "Kalan istek"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "{count} sual hazırdır. Önizləmə ilə yoxlayın."
+msgstr "{count} soru hazır. Önizleme ile kontrol edin."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətn sahəsi tapılmadı."
+msgstr "Metin alanı bulunamadı."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "AI boş cavab qaytardı."
+msgstr "AI boş yanıt döndürdü."
