@@ -87,6 +87,15 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Profil")
 
+    def test_profile_avatar_requires_login(self):
+        response = self.client.get(reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id}))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={reverse('accounts:profile_avatar', kwargs={'user_id': self.user.id})}",
+            fetch_redirect_response=False,
+        )
+
     def test_profile_creates_userprofile(self):
         """Test that profile view creates UserProfile if missing."""
         from apps.accounts.models import UserProfile
@@ -1402,6 +1411,7 @@ class ProfileViewTest(TestCase):
         )
         self.user.profile.avatar = SimpleUploadedFile("avatar.png", tiny_png, content_type="image/png")
         self.user.profile.save(update_fields=["avatar", "updated_at"])
+        self.client.login(username="testuser", password="testpass123")
 
         avatar_url = reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id})
 
