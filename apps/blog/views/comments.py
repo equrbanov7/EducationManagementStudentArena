@@ -1,6 +1,7 @@
 # blog/views/comments.py
 
 from django.contrib import messages
+from django.db.models import F
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -9,6 +10,23 @@ from django.utils.translation import pgettext
 from ..forms import CommentForm
 from ..models import Comment, Post
 from ..services import can_user_review_post
+
+VIEWED_POSTS_SESSION_KEY = "blog_viewed_post_ids"
+
+
+def _record_post_view(request, post):
+    if request.method != "GET" or not post.is_published:
+        return
+
+    post_key = str(post.pk)
+    viewed_post_ids = request.session.get(VIEWED_POSTS_SESSION_KEY, [])
+    if post_key in viewed_post_ids:
+        return
+
+    Post.objects.filter(pk=post.pk).update(view_count=F("view_count") + 1)
+    post.view_count = (post.view_count or 0) + 1
+    request.session[VIEWED_POSTS_SESSION_KEY] = [*viewed_post_ids, post_key]
+    request.session.modified = True
 
 
 def post_detail(request, slug):
@@ -22,6 +40,8 @@ def post_detail(request, slug):
     # 2) Əgər post nəşr olunmayıbsa, yalnız müəllif və ya uyğun reviewer görə bilsin.
     if not post.is_published and request.user != post.author and not can_user_review_post(request.user, post):
         raise Http404("No Post matches the given query.")
+
+    _record_post_view(request, post)
 
     comments = post.comments.select_related("user").order_by("-created_at")
 
