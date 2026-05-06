@@ -2,6 +2,8 @@ import logging
 import time
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import connection
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -66,17 +68,18 @@ def ping(request):
     return JsonResponse({"status": "ok"})
 
 
+@login_required
 def metrics_view(request):
     """Expose application metrics in Prometheus text format.
 
     This endpoint is intended to be scraped by a Prometheus server.
-    In production, access should be restricted at the reverse-proxy level
-    (e.g. allow only from the Prometheus server IP) so that internal counters
-    are not publicly accessible.
     """
     from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
     from core.metrics import REGISTRY
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
 
     data = generate_latest(REGISTRY)
     return HttpResponse(data, content_type=CONTENT_TYPE_LATEST)

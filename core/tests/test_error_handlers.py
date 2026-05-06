@@ -8,7 +8,10 @@ internals — addressing the Application Error Disclosure vulnerability.
 
 from __future__ import annotations
 
+from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
+
+User = get_user_model()
 
 
 @override_settings(DEBUG=False)
@@ -179,14 +182,34 @@ class HealthCheckViewTest(TestCase):
 class MetricsViewTest(TestCase):
     """Tests for the Prometheus metrics endpoint."""
 
-    def test_metrics_endpoint_returns_200(self):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="metrics_user",
+            email="metrics-user@example.com",
+            password="StrongPass123!",
+        )
+        self.superuser = User.objects.create_superuser(
+            username="metrics_superuser",
+            email="metrics-superuser@example.com",
+            password="StrongPass123!",
+        )
+
+    def test_metrics_endpoint_redirects_unauthenticated_user_to_login(self):
+        resp = self.client.get("/metrics/")
+        self.assertRedirects(resp, "/accounts/login/?next=/metrics/")
+
+    def test_metrics_endpoint_returns_403_for_non_superuser(self):
+        self.client.force_login(self.user)
+        resp = self.client.get("/metrics/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_metrics_content_type_is_prometheus_for_superuser(self):
+        self.client.force_login(self.superuser)
         resp = self.client.get("/metrics/")
         self.assertEqual(resp.status_code, 200)
-
-    def test_metrics_content_type_is_prometheus(self):
-        resp = self.client.get("/metrics/")
         self.assertIn("text/plain", resp["Content-Type"])
 
-    def test_metrics_contain_http_requests_total(self):
+    def test_metrics_contain_http_requests_total_for_superuser(self):
+        self.client.force_login(self.superuser)
         resp = self.client.get("/metrics/")
         self.assertIn(b"http_requests_total", resp.content)
