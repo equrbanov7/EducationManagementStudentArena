@@ -183,7 +183,11 @@
                             </td>
                             <td>
                                 {% if attempt.exam.exam_type == 'test' %}
-                                    <span class="fw-bold fs-5 text-primary-green">{{ attempt.score_percent }}%</span>
+                                    <span class="fw-bold fs-5 text-primary-green">{{ attempt.test_result.percentage_display }}%</span>
+                                    <div class="small text-muted mt-1">
+                                        {{ attempt.test_result.score_display }} / {{ attempt.test_result.max_score_display }} bal
+                                        · {{ attempt.test_result.delivered_count }} sual
+                                    </div>
                                 {% elif attempt.checked_by_teacher and attempt.can_view_result %}
                                     <span class="fw-bold fs-5 text-primary-green">
                                         {{ attempt.teacher_score }}

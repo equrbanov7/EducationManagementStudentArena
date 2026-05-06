@@ -50,6 +50,10 @@ def create_exam_attempt(exam, user):
 
 @transaction.atomic
 def submit_exam_attempt(attempt):
+    if getattr(attempt.exam, "exam_type", None) == "test":
+        from apps.exams.services.result_calculation import sync_test_attempt_counts
+
+        sync_test_attempt_counts(attempt)
     attempt.mark_finished(status="submitted")
     return attempt
 

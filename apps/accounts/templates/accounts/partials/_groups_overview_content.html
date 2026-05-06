@@ -22,10 +22,38 @@
         {% endif %}
     </div>
 
+    <form method="get" class="profile-group-search-form mb-3" role="search">
+        <input type="hidden" name="section" value="groups">
+        {% if selected_teacher_group %}
+            <input type="hidden" name="group" value="{{ selected_teacher_group.id }}">
+        {% endif %}
+        <div class="profile-group-search">
+            <i class="fas fa-search"></i>
+            <input
+                type="text"
+                class="form-control"
+                name="group_q"
+                value="{{ teacher_groups_search_query }}"
+                placeholder="Qrup adı, müəllim və ya tələbə üzrə axtar"
+            >
+            <button type="submit" class="btn btn-outline-primary">Axtar</button>
+            {% if teacher_groups_search_query %}
+                <a href="?section=groups{% if selected_teacher_group %}&group={{ selected_teacher_group.id }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
+            {% endif %}
+        </div>
+    </form>
+
     {% if teacher_groups %}
+        <div class="profile-group-count mb-2">
+            {% if teacher_groups_search_query %}
+                {{ teacher_groups_filtered_count }} nəticə · {{ teacher_groups_count }} ümumi qrup
+            {% else %}
+                {{ teacher_groups_count }} qrup
+            {% endif %}
+        </div>
         <div class="posts-grid">
             {% for group in teacher_groups %}
-                <div class="post-item post-item--group">
+                <div class="post-item post-item--group {% if selected_teacher_group and selected_teacher_group.id == group.id %}post-item--group-active{% endif %}">
                     <div class="post-icon stat-icon--blue">
                         <i class="fas fa-users"></i>
                     </div>
@@ -40,6 +68,14 @@
                     </div>
 
                     <div class="group-card-actions">
+                        <a
+                            href="?section=groups&group={{ group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}"
+                            class="btn btn-sm btn-outline-primary profile-group-open-btn"
+                            title="Qrupa bax"
+                        >
+                            <i class="fas fa-eye"></i>
+                            <span>Bax</span>
+                        </a>
                         {% if group_form %}
                             <button
                                 type="button"
@@ -72,10 +108,108 @@
                 </div>
             {% endfor %}
         </div>
+        {% include "partials/_pagination.html" with page_obj=teacher_groups_page extra_query=teacher_groups_pagination_query page_param="groups_page" %}
     {% else %}
         <div class="empty-state">
             <i class="fas fa-users-slash"></i>
-            <p>{% trans "empty_visible_groups" context "profile.groups" %}</p>
+            <p>
+                {% if teacher_groups_search_query %}
+                    Axtarışa uyğun qrup tapılmadı.
+                {% else %}
+                    {% trans "empty_visible_groups" context "profile.groups" %}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if selected_teacher_group %}
+        <div class="profile-group-detail" id="profileGroupDetail">
+            <div class="profile-group-detail__header">
+                <div>
+                    <span class="profile-group-detail__eyebrow">Qrup detalları</span>
+                    <h3>{{ selected_teacher_group.name }}</h3>
+                    <p>
+                        {% trans "primary_teacher" context "profile.groups" %}: <strong>{{ selected_teacher_group.teacher.username }}</strong>
+                        · {% trans "students" context "profile.groups" %}: {{ selected_group_students_count }}
+                        · {% trans "teachers" context "profile.groups" %}: {{ selected_teacher_group.teachers.count }}
+                    </p>
+                </div>
+                <a href="?section=groups{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary btn-sm">
+                    Bağla
+                </a>
+            </div>
+
+            {% if selected_teacher_group.teachers.all %}
+                <div class="profile-group-teacher-strip">
+                    <span>Əlavə müəllimlər</span>
+                    <div>
+                        {% for teacher in selected_teacher_group.teachers.all %}
+                            <span class="profile-group-chip">{{ teacher.get_full_name|default:teacher.username }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <form method="get" class="profile-group-student-search" role="search">
+                <input type="hidden" name="section" value="groups">
+                <input type="hidden" name="group" value="{{ selected_teacher_group.id }}">
+                {% if teacher_groups_search_query %}
+                    <input type="hidden" name="group_q" value="{{ teacher_groups_search_query }}">
+                {% endif %}
+                {% if teacher_groups_page %}
+                    <input type="hidden" name="groups_page" value="{{ teacher_groups_page.number }}">
+                {% endif %}
+                <div class="profile-group-search">
+                    <i class="fas fa-search"></i>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="student_q"
+                        value="{{ group_students_search_query }}"
+                        placeholder="Tələbə adı, istifadəçi adı və ya email üzrə axtar"
+                    >
+                    <button type="submit" class="btn btn-outline-primary">Axtar</button>
+                    {% if group_students_search_query %}
+                        <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="profile-group-student-list">
+                {% if selected_group_students_page and selected_group_students_page.object_list %}
+                    {% for student in selected_group_students_page.object_list %}
+                        <div class="profile-group-student-row">
+                            <div class="profile-group-student-avatar">
+                                {{ student.get_full_name|default:student.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ student.get_full_name|default:student.username }}</strong>
+                                <span>@{{ student.username }}</span>
+                                {% if student.email %}
+                                    <small>{{ student.email }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="profile-group-detail__empty">
+                        {% if group_students_search_query %}
+                            Bu axtarışa uyğun tələbə tapılmadı.
+                        {% else %}
+                            {% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            {% include "partials/_pagination.html" with page_obj=selected_group_students_page extra_query=group_students_pagination_query page_param="students_page" %}
+        </div>
+    {% elif teacher_groups %}
+        <div class="profile-group-detail profile-group-detail--empty">
+            <i class="fas fa-users"></i>
+            <div>
+                <h3>Qrupun tələbələrinə baxın</h3>
+                <p>İstənilən qrupda “Bax” düyməsinə klikləyərək həmin qrupun tələbə siyahısını aça bilərsiniz.</p>
+            </div>
         </div>
     {% endif %}
 </div>
