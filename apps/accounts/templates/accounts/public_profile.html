@@ -14,7 +14,7 @@
         <header class="public-profile-hero">
             <div class="public-profile-hero__identity">
                 <div class="public-profile-avatar">
-                    {% if profile.avatar %}
+                    {% if request.user.is_authenticated and profile.avatar %}
                         <img
                             src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|date:'U' }}"
                             alt="{{ display_name }}"
