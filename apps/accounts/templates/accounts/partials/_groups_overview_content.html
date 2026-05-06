@@ -137,11 +137,12 @@
 
 {% if selected_teacher_group %}
 <div
-    class="modal fade"
+    class="modal"
     id="profileGroupDetailModal"
     tabindex="-1"
     aria-labelledby="profileGroupDetailModalTitle"
     aria-hidden="true"
+    data-close-url="?section=groups{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}"
 >
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
@@ -156,12 +157,6 @@
                     </p>
                 </div>
                 <div class="d-flex gap-2 align-items-center flex-shrink-0">
-                    <a
-                        href="?section=groups{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}"
-                        class="btn btn-outline-secondary btn-sm js-group-detail-close-link"
-                    >
-                        {% trans "close" context "profile.groups" %}
-                    </a>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.groups' %}"></button>
                 </div>
             </div>
@@ -299,9 +294,9 @@
             detailModal.show();
 
             detailModalEl.addEventListener("hide.bs.modal", function () {
-                var closeLink = detailModalEl.querySelector(".js-group-detail-close-link");
-                if (closeLink) {
-                    window.location.href = closeLink.getAttribute("href");
+                var closeUrl = detailModalEl.getAttribute("data-close-url");
+                if (closeUrl) {
+                    window.location.href = closeUrl;
                 }
             });
         }

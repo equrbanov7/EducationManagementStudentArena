@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n blog_formatting %}
 
 {% block title %}{{ post.title }} | {% trans "title_suffix" context "blog.post_detail_page" %}{% endblock %}
 
@@ -34,6 +34,7 @@
                 {% if post.author %}
                     <span><a href="{% url 'accounts:public_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
                 {% endif %}
+                <span><i class="far fa-eye"></i> {{ post.view_count|compact_number }} baxış</span>
                 {% if post.average_rating %}
                     <span>• <i class="fas fa-star"></i> {{ post.average_rating|floatformat:1 }} / 5</span>
                 {% endif %}
