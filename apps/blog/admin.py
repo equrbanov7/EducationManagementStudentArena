@@ -99,6 +99,7 @@ class PostAdmin(HiddenFromSidebarAdminMixin, admin.ModelAdmin):
         "title",
         "author",
         "category",
+        "view_count",
         "approval_status",
         "is_published",
         "created_at",
