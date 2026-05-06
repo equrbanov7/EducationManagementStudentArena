@@ -282,55 +282,57 @@
 
 <script nonce="{{ request.csp_nonce }}">
 (function () {
-    if (typeof window.bootstrap === "undefined") { return; }
-    var detailModalEl = document.getElementById("profileGroupDetailModal");
-    var removeModalEl = document.getElementById("profileGroupRemoveStudentModal");
-    var removeBodyEl = document.getElementById("profileGroupRemoveStudentBody");
-    var removeFormEl = document.getElementById("profileGroupRemoveStudentForm");
-    var removeNextEl = document.getElementById("profileGroupRemoveStudentNext");
-    var removeConfirmText = "{% trans 'remove_student_confirm_body' context 'profile.groups' %}";
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof window.bootstrap === "undefined") { return; }
+        var detailModalEl = document.getElementById("profileGroupDetailModal");
+        var removeModalEl = document.getElementById("profileGroupRemoveStudentModal");
+        var removeBodyEl = document.getElementById("profileGroupRemoveStudentBody");
+        var removeFormEl = document.getElementById("profileGroupRemoveStudentForm");
+        var removeNextEl = document.getElementById("profileGroupRemoveStudentNext");
+        var removeConfirmText = "{% filter escapejs %}{% trans 'remove_student_confirm_body' context 'profile.groups' %}{% endfilter %}";
 
-    if (detailModalEl) {
-        if (detailModalEl.parentElement !== document.body) {
-            document.body.appendChild(detailModalEl);
+        if (detailModalEl) {
+            if (detailModalEl.parentElement !== document.body) {
+                document.body.appendChild(detailModalEl);
+            }
+            var detailModal = window.bootstrap.Modal.getOrCreateInstance(detailModalEl);
+            detailModal.show();
+
+            detailModalEl.addEventListener("hide.bs.modal", function () {
+                var closeLink = detailModalEl.querySelector(".js-group-detail-close-link");
+                if (closeLink) {
+                    window.location.href = closeLink.getAttribute("href");
+                }
+            });
         }
-        var detailModal = new window.bootstrap.Modal(detailModalEl);
-        detailModal.show();
 
-        detailModalEl.addEventListener("hide.bs.modal", function () {
-            var closeLink = detailModalEl.querySelector(".js-group-detail-close-link");
-            if (closeLink) {
-                window.location.href = closeLink.getAttribute("href");
+        if (removeModalEl) {
+            if (removeModalEl.parentElement !== document.body) {
+                document.body.appendChild(removeModalEl);
             }
-        });
-    }
+            var removeModal = window.bootstrap.Modal.getOrCreateInstance(removeModalEl);
 
-    if (removeModalEl) {
-        if (removeModalEl.parentElement !== document.body) {
-            document.body.appendChild(removeModalEl);
+            document.addEventListener("click", function (event) {
+                var btn = event.target.closest(".jsOpenRemoveStudentFromGroup");
+                if (!btn) { return; }
+                event.preventDefault();
+                var studentName = btn.getAttribute("data-student-name") || "";
+                var removeUrl = btn.getAttribute("data-remove-url") || "";
+                var nextUrl = btn.getAttribute("data-next-url") || "";
+
+                if (removeBodyEl) {
+                    removeBodyEl.textContent = removeConfirmText.replace("{student}", studentName);
+                }
+                if (removeFormEl) {
+                    removeFormEl.setAttribute("action", removeUrl);
+                }
+                if (removeNextEl) {
+                    removeNextEl.value = nextUrl;
+                }
+                removeModal.show();
+            });
         }
-        var removeModal = new window.bootstrap.Modal(removeModalEl);
-
-        document.addEventListener("click", function (event) {
-            var btn = event.target.closest(".jsOpenRemoveStudentFromGroup");
-            if (!btn) { return; }
-            event.preventDefault();
-            var studentName = btn.getAttribute("data-student-name") || "";
-            var removeUrl = btn.getAttribute("data-remove-url") || "";
-            var nextUrl = btn.getAttribute("data-next-url") || "";
-
-            if (removeBodyEl) {
-                removeBodyEl.textContent = removeConfirmText.replace("{student}", studentName);
-            }
-            if (removeFormEl) {
-                removeFormEl.setAttribute("action", removeUrl);
-            }
-            if (removeNextEl) {
-                removeNextEl.value = nextUrl;
-            }
-            removeModal.show();
-        });
-    }
+    });
 })();
 </script>
 {% endif %}
