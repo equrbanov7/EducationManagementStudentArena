@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n blog_formatting %}
 <article class="blog-card">
 
     <div class="card-img">
@@ -16,7 +16,9 @@
         <h2 class="card-title">
             <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
         </h2>
-        <p class="card-excerpt">{{ post.excerpt }}</p>
+        {% if post.excerpt %}
+            <p class="card-excerpt">{{ post.excerpt|striptags|truncatewords:24 }}</p>
+        {% endif %}
         <div class="card-footer">
             <div class="card-meta">
                 {% if post.author %}
@@ -26,6 +28,9 @@
                 {% endif %}
                 <span class="card-date">
                     <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}
+                </span>
+                <span class="card-views">
+                    <i class="far fa-eye"></i> {{ post.view_count|compact_number }} baxış
                 </span>
             </div>
             <a href="{% url 'article_detail' post.slug %}" class="read-more">{% trans "read_more" context "blog.partial.blog_card" %} →</a>
