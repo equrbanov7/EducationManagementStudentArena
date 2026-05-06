@@ -186,6 +186,7 @@ class PostTest(TestCase):
         self.assertEqual(post.author, self.author)
         self.assertEqual(post.category, self.category)
         self.assertTrue(post.is_published)
+        self.assertEqual(post.view_count, 0)
 
     def test_post_slug_auto_generated(self):
         """Test that slug is auto-generated from title."""
