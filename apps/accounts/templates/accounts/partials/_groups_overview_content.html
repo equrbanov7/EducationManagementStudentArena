@@ -23,7 +23,7 @@
         {% endif %}
     </div>
 
-    <form method="get" class="profile-group-search-form mb-3" role="search">
+    <form method="get" class="profile-group-search-form mb-3 js-profile-debounce-search" role="search" data-debounce-ms="500">
         <input type="hidden" name="section" value="groups">
         {% if selected_teacher_group %}
             <input type="hidden" name="group" value="{{ selected_teacher_group.id }}">
@@ -31,7 +31,7 @@
         <div class="profile-group-search">
             <i class="fas fa-search"></i>
             <input
-                type="text"
+                type="search"
                 class="form-control"
                 name="group_q"
                 value="{{ teacher_groups_search_query }}"
@@ -71,8 +71,9 @@
                     <div class="group-card-actions">
                         <a
                             href="?section=groups&group={{ group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}"
-                            class="btn btn-sm btn-outline-primary profile-group-open-btn"
-                            title="Qrupa bax"
+                            class="btn btn-sm btn-outline-primary profile-group-open-btn jsOpenGroupDetailModal"
+                            title="{% trans 'view_group_students' context 'profile.groups' %}"
+                            data-group-id="{{ group.id }}"
                         >
                             <i class="fas fa-eye"></i>
                             <span>Bax</span>
@@ -123,102 +124,216 @@
         </div>
     {% endif %}
 
-    {% if selected_teacher_group %}
-        <div class="profile-group-detail" id="profileGroupDetail">
-            <div class="profile-group-detail__header">
-                <div>
-                    <span class="profile-group-detail__eyebrow">Qrup detalları</span>
-                    <h3>{{ selected_teacher_group.name }}</h3>
-                    <p>
+    {% if not selected_teacher_group and teacher_groups %}
+        <div class="profile-group-detail profile-group-detail--empty">
+            <i class="fas fa-users"></i>
+            <div>
+                <h3>Qrupun tələbələrinə baxın</h3>
+                <p>İstənilən qrupda "Bax" düyməsinə klikləyərək həmin qrupun tələbə siyahısını aça bilərsiniz.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if selected_teacher_group %}
+<div
+    class="modal fade"
+    id="profileGroupDetailModal"
+    tabindex="-1"
+    aria-labelledby="profileGroupDetailModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header profile-group-detail__header d-flex align-items-start gap-3">
+                <div class="flex-grow-1">
+                    <span class="profile-group-detail__eyebrow">{% trans "group_details_title" context "profile.groups" %}</span>
+                    <h5 class="modal-title" id="profileGroupDetailModalTitle">{{ selected_teacher_group.name }}</h5>
+                    <p class="mb-0 text-muted small">
                         {% trans "primary_teacher" context "profile.groups" %}: <strong>{{ selected_teacher_group.teacher.username }}</strong>
                         · {% trans "students" context "profile.groups" %}: {{ selected_group_students_count }}
                         · {% trans "teachers" context "profile.groups" %}: {{ selected_teacher_group.teachers.count }}
                     </p>
                 </div>
-                <a href="?section=groups{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary btn-sm">
-                    Bağla
-                </a>
+                <div class="d-flex gap-2 align-items-center flex-shrink-0">
+                    <a
+                        href="?section=groups{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}"
+                        class="btn btn-outline-secondary btn-sm js-group-detail-close-link"
+                    >
+                        {% trans "close" context "profile.groups" %}
+                    </a>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.groups' %}"></button>
+                </div>
             </div>
 
-            {% if selected_teacher_group.teachers.all %}
-                <div class="profile-group-teacher-strip">
-                    <span>Əlavə müəllimlər</span>
-                    <div>
-                        {% for teacher in selected_teacher_group.teachers.all %}
-                            <span class="profile-group-chip">{{ teacher.get_full_name|default:teacher.username }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
-
-            <form method="get" class="profile-group-student-search" role="search">
-                <input type="hidden" name="section" value="groups">
-                <input type="hidden" name="group" value="{{ selected_teacher_group.id }}">
-                {% if teacher_groups_search_query %}
-                    <input type="hidden" name="group_q" value="{{ teacher_groups_search_query }}">
-                {% endif %}
-                {% if teacher_groups_page %}
-                    <input type="hidden" name="groups_page" value="{{ teacher_groups_page.number }}">
-                {% endif %}
-                <div class="profile-group-search">
-                    <i class="fas fa-search"></i>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="student_q"
-                        value="{{ group_students_search_query }}"
-                        placeholder="Tələbə adı, istifadəçi adı və ya email üzrə axtar"
-                    >
-                    <button type="submit" class="btn btn-outline-primary">Axtar</button>
-                    {% if group_students_search_query %}
-                        <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
-                    {% endif %}
-                </div>
-            </form>
-
-            <div class="profile-group-student-list">
-                {% if selected_group_students_page and selected_group_students_page.object_list %}
-                    {% for student in selected_group_students_page.object_list %}
-                        <div class="profile-group-student-row">
-                            <div class="profile-group-student-avatar">
-                                {{ student.get_full_name|default:student.username|slice:":1"|upper }}
-                            </div>
-                            <div>
-                                <strong>{{ student.get_full_name|default:student.username }}</strong>
-                                <span>@{{ student.username }}</span>
-                                {% if student.profile.student_group_number %}
-                                    <small class="profile-group-student-tag">
-                                        {{ groups_student_registered_group_number }}: {{ student.profile.student_group_number }}
-                                    </small>
-                                {% endif %}
-                                {% if student.email %}
-                                    <small>{{ student.email }}</small>
-                                {% endif %}
-                            </div>
+            <div class="modal-body p-0">
+                {% if selected_teacher_group.teachers.all %}
+                    <div class="profile-group-teacher-strip px-3 pt-3">
+                        <span>Əlavə müəllimlər</span>
+                        <div>
+                            {% for teacher in selected_teacher_group.teachers.all %}
+                                <span class="profile-group-chip">{{ teacher.get_full_name|default:teacher.username }}</span>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="profile-group-detail__empty">
+                    </div>
+                {% endif %}
+
+                <form method="get" class="profile-group-student-search px-3 pt-3 js-profile-debounce-search" role="search" data-debounce-ms="500">
+                    <input type="hidden" name="section" value="groups">
+                    <input type="hidden" name="group" value="{{ selected_teacher_group.id }}">
+                    {% if teacher_groups_search_query %}
+                        <input type="hidden" name="group_q" value="{{ teacher_groups_search_query }}">
+                    {% endif %}
+                    {% if teacher_groups_page %}
+                        <input type="hidden" name="groups_page" value="{{ teacher_groups_page.number }}">
+                    {% endif %}
+                    <div class="profile-group-search">
+                        <i class="fas fa-search"></i>
+                        <input
+                            type="search"
+                            class="form-control"
+                            name="student_q"
+                            value="{{ group_students_search_query }}"
+                            placeholder="Tələbə adı, istifadəçi adı və ya email üzrə axtar"
+                        >
+                        <button type="submit" class="btn btn-outline-primary">Axtar</button>
                         {% if group_students_search_query %}
-                            Bu axtarışa uyğun tələbə tapılmadı.
-                        {% else %}
-                            {% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}
+                            <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
                         {% endif %}
                     </div>
-                {% endif %}
+                </form>
+
+                <div class="profile-group-student-list">
+                    {% if selected_group_students_page and selected_group_students_page.object_list %}
+                        {% for student in selected_group_students_page.object_list %}
+                            <div class="profile-group-student-row d-flex align-items-center">
+                                <div class="profile-group-student-avatar">
+                                    {{ student.get_full_name|default:student.username|slice:":1"|upper }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ student.get_full_name|default:student.username }}</strong>
+                                    <span>@{{ student.username }}</span>
+                                    {% if student.profile.student_group_number %}
+                                        <small class="profile-group-student-tag">
+                                            {{ groups_student_registered_group_number }}: {{ student.profile.student_group_number }}
+                                        </small>
+                                    {% endif %}
+                                    {% if student.email %}
+                                        <small>{{ student.email }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if group_form %}
+                                    <div class="flex-shrink-0 ms-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger jsOpenRemoveStudentFromGroup"
+                                            data-student-id="{{ student.id }}"
+                                            data-student-name="{{ student.get_full_name|default:student.username|escape }}"
+                                            data-group-id="{{ selected_teacher_group.id }}"
+                                            data-remove-url="{% url 'exams:teacher_remove_student_from_group' selected_teacher_group.id student.id %}"
+                                            data-next-url="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}{% if group_students_search_query %}&student_q={{ group_students_search_query|urlencode }}{% endif %}"
+                                            title="{% trans 'remove_from_group' context 'profile.groups' %}"
+                                        >
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="profile-group-detail__empty px-3 py-3">
+                            {% if group_students_search_query %}
+                                Bu axtarışa uyğun tələbə tapılmadı.
+                            {% else %}
+                                {% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="px-3 pb-3">
+                    {% include "partials/_pagination.html" with page_obj=selected_group_students_page extra_query=group_students_pagination_query page_param="students_page" %}
+                </div>
             </div>
-            {% include "partials/_pagination.html" with page_obj=selected_group_students_page extra_query=group_students_pagination_query page_param="students_page" %}
         </div>
-    {% elif teacher_groups %}
-        <div class="profile-group-detail profile-group-detail--empty">
-            <i class="fas fa-users"></i>
-            <div>
-                <h3>Qrupun tələbələrinə baxın</h3>
-                <p>İstənilən qrupda “Bax” düyməsinə klikləyərək həmin qrupun tələbə siyahısını aça bilərsiniz.</p>
-            </div>
-        </div>
-    {% endif %}
+    </div>
 </div>
+
+<div class="modal fade" id="profileGroupRemoveStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "remove_student_confirm_title" context "profile.groups" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.groups' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p id="profileGroupRemoveStudentBody" class="mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "profile.groups" %}</button>
+                <form id="profileGroupRemoveStudentForm" method="post" action="" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="" id="profileGroupRemoveStudentNext">
+                    <button type="submit" class="btn btn-danger">{% trans "remove_student_confirm_button" context "profile.groups" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    if (typeof window.bootstrap === "undefined") { return; }
+    var detailModalEl = document.getElementById("profileGroupDetailModal");
+    var removeModalEl = document.getElementById("profileGroupRemoveStudentModal");
+    var removeBodyEl = document.getElementById("profileGroupRemoveStudentBody");
+    var removeFormEl = document.getElementById("profileGroupRemoveStudentForm");
+    var removeNextEl = document.getElementById("profileGroupRemoveStudentNext");
+    var removeConfirmText = "{% trans 'remove_student_confirm_body' context 'profile.groups' %}";
+
+    if (detailModalEl) {
+        if (detailModalEl.parentElement !== document.body) {
+            document.body.appendChild(detailModalEl);
+        }
+        var detailModal = new window.bootstrap.Modal(detailModalEl);
+        detailModal.show();
+
+        detailModalEl.addEventListener("hide.bs.modal", function () {
+            var closeLink = detailModalEl.querySelector(".js-group-detail-close-link");
+            if (closeLink) {
+                window.location.href = closeLink.getAttribute("href");
+            }
+        });
+    }
+
+    if (removeModalEl) {
+        if (removeModalEl.parentElement !== document.body) {
+            document.body.appendChild(removeModalEl);
+        }
+        var removeModal = new window.bootstrap.Modal(removeModalEl);
+
+        document.addEventListener("click", function (event) {
+            var btn = event.target.closest(".jsOpenRemoveStudentFromGroup");
+            if (!btn) { return; }
+            event.preventDefault();
+            var studentName = btn.getAttribute("data-student-name") || "";
+            var removeUrl = btn.getAttribute("data-remove-url") || "";
+            var nextUrl = btn.getAttribute("data-next-url") || "";
+
+            if (removeBodyEl) {
+                removeBodyEl.textContent = removeConfirmText.replace("{student}", studentName);
+            }
+            if (removeFormEl) {
+                removeFormEl.setAttribute("action", removeUrl);
+            }
+            if (removeNextEl) {
+                removeNextEl.value = nextUrl;
+            }
+            removeModal.show();
+        });
+    }
+})();
+</script>
+{% endif %}
 
 {% if group_form %}
 {{ teacher_groups_payload|json_script:"profileGroupPayloads" }}
