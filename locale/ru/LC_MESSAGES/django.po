@@ -762,7 +762,11 @@ msgstr "Студенты в группе"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:6
 msgctxt "profile.groups"
 msgid "placeholder_search_student"
-msgstr "Поиск студентов..."
+msgstr "Поиск студента или номера группы..."
+
+msgctxt "profile.groups"
+msgid "student_registered_group_number"
+msgstr "Группа при регистрации"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
@@ -10069,7 +10073,7 @@ msgstr "Студенты"
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_student"
-msgstr "Поиск студентов..."
+msgstr "Поиск студента или номера группы..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:84
 msgctxt "exams.template.create_student_group"
@@ -10994,7 +10998,7 @@ msgstr "Студенты"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:172
 msgctxt "exams.template.teacher_group_list"
 msgid "placeholder_search_name_or_username"
-msgstr "Search course center..."
+msgstr "Поиск студента, имени пользователя или номера группы..."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:176
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:201
@@ -15646,6 +15650,14 @@ msgctxt "accounts.form.register.choice"
 msgid "org_type_course_student"
 msgstr "Слушатель курса"
 
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Группа / Класс"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "например, CS-101 или Группа 3A"
+
 msgctxt "accounts.form.register.error"
 msgid "join_organization_required"
 msgstr "Выбор организации обязателен."
@@ -15661,6 +15673,14 @@ msgstr "Выбранная организация не соответствуе�
 msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Выбранная организация не соответствует выбранной стране."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Для студентов группа / класс обязательны."
+
+msgctxt "accounts.register"
+msgid "required_badge"
+msgstr "Обязательно"
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"

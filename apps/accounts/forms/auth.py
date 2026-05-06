@@ -247,6 +247,7 @@ class RegisterForm(forms.ModelForm):
             attrs={
                 "placeholder": pgettext_lazy("accounts.form.register.placeholder", "group_number"),
                 "class": "form-control",
+                "data-required-for-student": "true",
             }
         ),
     )
@@ -566,6 +567,9 @@ class RegisterForm(forms.ModelForm):
         self.fields["first_name"].widget.attrs["required"] = "required"
         self.fields["last_name"].widget.attrs["required"] = "required"
         self.fields["accept_privacy_policy"].widget.attrs["required"] = "required"
+        if selected_registration_type in STUDENT_JOIN_ORG_TYPE_MAP:
+            self.fields["group_number"].widget.attrs["required"] = "required"
+            self.fields["group_number"].widget.attrs["aria-required"] = "true"
 
     @staticmethod
     def _organization_matches_country(organization, country_code):

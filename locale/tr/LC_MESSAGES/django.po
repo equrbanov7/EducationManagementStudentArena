@@ -759,7 +759,11 @@ msgstr "Gruptaki öğrenciler"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:6
 msgctxt "profile.groups"
 msgid "placeholder_search_student"
-msgstr "Öğrencileri arayın..."
+msgstr "Öğrenci veya grup numarası arayın..."
+
+msgctxt "profile.groups"
+msgid "student_registered_group_number"
+msgstr "Kayıt grubu"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
@@ -10048,7 +10052,7 @@ msgstr "Öğrenciler"
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_student"
-msgstr "Öğrencileri arayın..."
+msgstr "Öğrenci veya grup numarası arayın..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:84
 msgctxt "exams.template.create_student_group"
@@ -10974,7 +10978,7 @@ msgstr "Öğrenciler"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:172
 msgctxt "exams.template.teacher_group_list"
 msgid "placeholder_search_name_or_username"
-msgstr "Search course center..."
+msgstr "Öğrenci, kullanıcı adı veya grup numarası arayın..."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:176
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:201
@@ -15617,6 +15621,14 @@ msgctxt "accounts.form.register.choice"
 msgid "org_type_course_student"
 msgstr "Kurs öğrencisi"
 
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Grup / Sınıf"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "örn. CS-101 veya Grup 3A"
+
 msgctxt "accounts.form.register.error"
 msgid "join_organization_required"
 msgstr "Kuruluş seçimi zorunludur."
@@ -15632,6 +15644,14 @@ msgstr "Seçilen kuruluş, seçilen kayıt türüyle eşleşmiyor."
 msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Seçilen kuruluş, seçilen ülkeyle eşleşmiyor."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Öğrenciler için grup / sınıf zorunludur."
+
+msgctxt "accounts.register"
+msgid "required_badge"
+msgstr "Zorunlu"
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"

@@ -158,6 +158,33 @@
     line-height: 1.3;
 }
 
+#profileGroupModal .group-checklist__content {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    flex: 1;
+}
+
+#profileGroupModal .group-checklist__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#profileGroupModal .group-checklist__badge {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 #profileGroupModal .group-checklist__empty {
     padding: 1rem;
     text-align: center;
@@ -222,5 +249,11 @@
 
     #profileGroupModal .profile-group-modal__body {
         padding: 0.9rem 0.9rem 0.8rem;
+    }
+
+    #profileGroupModal .group-checklist__content {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 }

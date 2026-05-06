@@ -69,6 +69,19 @@
     font-weight: 600;
 }
 
+.register-required-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
 .register-form-field input[type="text"],
 .register-form-field input[type="email"],
 .register-form-field input[type="password"],
@@ -136,6 +149,11 @@
     border-color: var(--primary-color, #2563eb);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Yüngül focus kölgəsi */
     background-color: #ffffff; /* Focus olanda ağ fon */
+}
+
+.register-form-field .is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
 }
 
 .register-native-select.is-enhanced {
