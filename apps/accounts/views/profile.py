@@ -1004,6 +1004,7 @@ def user_profile(request):
                     | Q(students__username__icontains=teacher_groups_search_query)
                     | Q(students__first_name__icontains=teacher_groups_search_query)
                     | Q(students__last_name__icontains=teacher_groups_search_query)
+                    | Q(students__profile__student_group_number__icontains=teacher_groups_search_query)
                 ).distinct()
 
             teacher_groups_filtered_count = visible_teacher_groups_qs.count()
@@ -1028,7 +1029,9 @@ def user_profile(request):
             )
 
             if selected_teacher_group:
-                students_qs = selected_teacher_group.students.order_by("first_name", "last_name", "username", "id")
+                students_qs = selected_teacher_group.students.select_related("profile").order_by(
+                    "first_name", "last_name", "username", "id"
+                )
                 selected_group_students_count = students_qs.count()
                 if group_students_search_query:
                     students_qs = students_qs.filter(
@@ -1036,6 +1039,7 @@ def user_profile(request):
                         | Q(first_name__icontains=group_students_search_query)
                         | Q(last_name__icontains=group_students_search_query)
                         | Q(email__icontains=group_students_search_query)
+                        | Q(profile__student_group_number__icontains=group_students_search_query)
                     )
                 selected_group_students_filtered_count = students_qs.count()
                 selected_group_students_page = Paginator(students_qs, 12).get_page(request.GET.get("students_page"))

@@ -7,6 +7,8 @@
     - search_placeholder: Axtarış inputu üçün placeholder
     - container_id: Unikal ID (məs: "groupSelector")
 {% endcomment %}
+{% load i18n %}
+{% trans "student_registered_group_number" context "profile.groups" as student_group_label %}
 
 <div class="form-group custom-selector-group">
     <label class="form-label-custom">{{ label }}</label>
@@ -45,6 +47,7 @@
         searchInputId: "{{ container_id }}_search",
         counterId: "{{ container_id }}_count"
     };
+    const studentGroupLabel = "{{ student_group_label|escapejs }}";
 
     function initSearchableMultiSelect(cfg) {
         const hiddenSelect = document.getElementById(cfg.selectId);
@@ -63,19 +66,48 @@
                 return;
             }
 
+            function optionGroupNumber(option) {
+                return (option.getAttribute('data-student-group-number') || '').trim();
+            }
+
+            function optionSearchText(option) {
+                return [
+                    option.text || '',
+                    option.getAttribute('data-search-text') || '',
+                    optionGroupNumber(option)
+                ].join(' ').toLowerCase();
+            }
+
             options.forEach(option => {
                 const row = document.createElement('div');
                 row.className = 'list-item-row';
-                row.setAttribute('data-search', option.text.toLowerCase());
+                row.setAttribute('data-search', optionSearchText(option));
 
                 const checkboxId = `cb_${cfg.selectId}_${option.value}`;
 
-                row.innerHTML = `
-                    <input type="checkbox" id="${checkboxId}" class="custom-item-checkbox" value="${option.value}" ${option.selected ? 'checked' : ''}>
-                    <label for="${checkboxId}" class="custom-item-label">${option.text}</label>
-                `;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = checkboxId;
+                checkbox.className = 'custom-item-checkbox';
+                checkbox.value = option.value;
+                checkbox.checked = option.selected;
 
-                const checkbox = row.querySelector('input');
+                const label = document.createElement('label');
+                label.htmlFor = checkboxId;
+                label.className = 'custom-item-label';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'custom-item-label__name';
+                nameSpan.textContent = option.text || '';
+                label.appendChild(nameSpan);
+
+                const groupNumber = optionGroupNumber(option);
+                if (groupNumber) {
+                    const groupBadge = document.createElement('span');
+                    groupBadge.className = 'custom-item-label__group';
+                    groupBadge.textContent = `${studentGroupLabel}: ${groupNumber}`;
+                    label.appendChild(groupBadge);
+                }
 
                 checkbox.addEventListener('change', function() {
                     option.selected = this.checked;
@@ -83,12 +115,15 @@
                 });
 
                 row.addEventListener('click', function(e) {
-                    if (e.target !== checkbox && e.target.tagName !== 'LABEL') {
+                    const clickedLabel = e.target.closest && e.target.closest('label');
+                    if (e.target !== checkbox && !clickedLabel) {
                         checkbox.checked = !checkbox.checked;
                         checkbox.dispatchEvent(new Event('change'));
                     }
                 });
 
+                row.appendChild(checkbox);
+                row.appendChild(label);
                 container.appendChild(row);
             });
         }
