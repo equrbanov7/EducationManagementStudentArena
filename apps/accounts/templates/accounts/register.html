@@ -281,7 +281,10 @@
                         {% endif %}
                     </div>
                     <div class="register-form-field">
-                        {{ form.group_number.label_tag }}
+                        <label for="{{ form.group_number.id_for_label }}">
+                            {{ form.group_number.label }}
+                            <span class="register-required-badge">{% trans "required_badge" context "accounts.register" %}</span>
+                        </label>
                         {{ form.group_number }}
                         {% if form.group_number.errors %}
                             <div class="register-field-error">{{ form.group_number.errors.0 }}</div>
@@ -590,7 +593,8 @@
         help_license_identifier_required: "{% trans 'help_license_identifier_required' context 'accounts.register.js' %}",
         help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}",
         no_results: "{% trans 'no_results' context 'accounts.register.js' %}",
-        privacy_policy_required: "{% trans 'privacy_policy_required' context 'accounts.form.register.error' %}"
+        privacy_policy_required: "{% trans 'privacy_policy_required' context 'accounts.form.register.error' %}",
+        group_number_required: "{% trans 'group_number_required' context 'accounts.form.register.error' %}"
     };
 </script>
 {% endblock %}

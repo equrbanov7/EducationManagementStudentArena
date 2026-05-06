@@ -4,6 +4,7 @@
 {% trans "help_assigned_teachers" context "profile.groups" as groups_help_assigned_teachers %}
 {% trans "label_group_students" context "profile.groups" as groups_label_group_students %}
 {% trans "placeholder_search_student" context "profile.groups" as groups_search_student %}
+{% trans "student_registered_group_number" context "profile.groups" as groups_student_registered_group_number %}
 <div class="section-card">
     <div class="section-title">
         <i class="fas fa-users"></i>
@@ -185,6 +186,11 @@
                             <div>
                                 <strong>{{ student.get_full_name|default:student.username }}</strong>
                                 <span>@{{ student.username }}</span>
+                                {% if student.profile.student_group_number %}
+                                    <small class="profile-group-student-tag">
+                                        {{ groups_student_registered_group_number }}: {{ student.profile.student_group_number }}
+                                    </small>
+                                {% endif %}
                                 {% if student.email %}
                                     <small>{{ student.email }}</small>
                                 {% endif %}
@@ -231,6 +237,7 @@
     data-submit-edit="{% trans 'submit_save_changes' context 'profile.groups' %}"
     data-empty-search-result="{% trans 'search_no_results' context 'profile.groups' %}"
     data-fallback-this="{% trans 'fallback_this' context 'profile.groups' %}"
+    data-student-group-label="{{ groups_student_registered_group_number }}"
 >
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable profile-group-modal">
         <div class="modal-content profile-group-modal__content">
