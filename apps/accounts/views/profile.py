@@ -5,6 +5,7 @@ Profile views: user profile management and avatar serving.
 import mimetypes
 import os
 import re
+from urllib.parse import urlencode
 from urllib.parse import urlparse as _parse_url
 
 from django.contrib import messages
@@ -938,7 +939,17 @@ def user_profile(request):
 
     teacher_groups = []
     teacher_groups_count = 0
+    teacher_groups_filtered_count = 0
     teacher_groups_payload = {}
+    teacher_groups_page = None
+    teacher_groups_search_query = (request.GET.get("group_q") or "").strip()
+    teacher_groups_pagination_query = ""
+    selected_teacher_group = None
+    selected_group_students_page = None
+    selected_group_students_count = 0
+    selected_group_students_filtered_count = 0
+    group_students_search_query = (request.GET.get("student_q") or "").strip()
+    group_students_pagination_query = ""
     student_member_groups_qs = (
         StudentGroup.objects.filter(students=request.user)
         .select_related("organization", "teacher")
@@ -981,8 +992,66 @@ def user_profile(request):
                     Q(teacher=request.user) | Q(teachers=request.user)
                 ).distinct()
 
-            teacher_groups_count = teacher_groups_qs.count()
-            teacher_groups = list(teacher_groups_qs[:20])
+            visible_teacher_groups_qs = teacher_groups_qs
+            teacher_groups_count = visible_teacher_groups_qs.count()
+
+            if teacher_groups_search_query:
+                visible_teacher_groups_qs = visible_teacher_groups_qs.filter(
+                    Q(name__icontains=teacher_groups_search_query)
+                    | Q(teacher__username__icontains=teacher_groups_search_query)
+                    | Q(teacher__first_name__icontains=teacher_groups_search_query)
+                    | Q(teacher__last_name__icontains=teacher_groups_search_query)
+                    | Q(students__username__icontains=teacher_groups_search_query)
+                    | Q(students__first_name__icontains=teacher_groups_search_query)
+                    | Q(students__last_name__icontains=teacher_groups_search_query)
+                ).distinct()
+
+            teacher_groups_filtered_count = visible_teacher_groups_qs.count()
+            teacher_groups_page = Paginator(visible_teacher_groups_qs, 8).get_page(request.GET.get("groups_page"))
+            teacher_groups = list(teacher_groups_page.object_list)
+
+            selected_group_id = (request.GET.get("group") or "").strip()
+            if selected_group_id.isdigit():
+                selected_teacher_group = teacher_groups_qs.filter(id=int(selected_group_id)).first()
+
+            teacher_groups_pagination_query = urlencode(
+                {
+                    key: value
+                    for key, value in {
+                        "section": "groups",
+                        "group_q": teacher_groups_search_query,
+                        "group": selected_teacher_group.id if selected_teacher_group else "",
+                        "student_q": group_students_search_query if selected_teacher_group else "",
+                    }.items()
+                    if value not in ("", None)
+                }
+            )
+
+            if selected_teacher_group:
+                students_qs = selected_teacher_group.students.order_by("first_name", "last_name", "username", "id")
+                selected_group_students_count = students_qs.count()
+                if group_students_search_query:
+                    students_qs = students_qs.filter(
+                        Q(username__icontains=group_students_search_query)
+                        | Q(first_name__icontains=group_students_search_query)
+                        | Q(last_name__icontains=group_students_search_query)
+                        | Q(email__icontains=group_students_search_query)
+                    )
+                selected_group_students_filtered_count = students_qs.count()
+                selected_group_students_page = Paginator(students_qs, 12).get_page(request.GET.get("students_page"))
+                group_students_pagination_query = urlencode(
+                    {
+                        key: value
+                        for key, value in {
+                            "section": "groups",
+                            "group": selected_teacher_group.id,
+                            "group_q": teacher_groups_search_query,
+                            "groups_page": teacher_groups_page.number if teacher_groups_page else "",
+                            "student_q": group_students_search_query,
+                        }.items()
+                        if value not in ("", None)
+                    }
+                )
 
             for group in teacher_groups:
                 student_ids = [student.id for student in group.students.all()]
@@ -993,6 +1062,17 @@ def user_profile(request):
                 teacher_groups_payload[str(group.id)] = {
                     "name": group.name,
                     "primary_teacher": group.teacher_id,
+                    "students": student_ids,
+                    "teachers": teacher_ids,
+                }
+            if selected_teacher_group and str(selected_teacher_group.id) not in teacher_groups_payload:
+                student_ids = [student.id for student in selected_teacher_group.students.all()]
+                teacher_ids = [teacher.id for teacher in selected_teacher_group.teachers.all()]
+                if selected_teacher_group.teacher_id and selected_teacher_group.teacher_id not in teacher_ids:
+                    teacher_ids.append(selected_teacher_group.teacher_id)
+                teacher_groups_payload[str(selected_teacher_group.id)] = {
+                    "name": selected_teacher_group.name,
+                    "primary_teacher": selected_teacher_group.teacher_id,
                     "students": student_ids,
                     "teachers": teacher_ids,
                 }
@@ -2009,7 +2089,17 @@ def user_profile(request):
         "evaluated_review_count": evaluated_review_count,
         "teacher_groups": teacher_groups,
         "teacher_groups_count": teacher_groups_count,
+        "teacher_groups_filtered_count": teacher_groups_filtered_count,
         "teacher_groups_payload": teacher_groups_payload,
+        "teacher_groups_page": teacher_groups_page,
+        "teacher_groups_search_query": teacher_groups_search_query,
+        "teacher_groups_pagination_query": teacher_groups_pagination_query,
+        "selected_teacher_group": selected_teacher_group,
+        "selected_group_students_page": selected_group_students_page,
+        "selected_group_students_count": selected_group_students_count,
+        "selected_group_students_filtered_count": selected_group_students_filtered_count,
+        "group_students_search_query": group_students_search_query,
+        "group_students_pagination_query": group_students_pagination_query,
         "organization_access_rows": organization_access_rows,
         "student_member_groups": student_member_groups,
         "student_member_groups_count": student_member_groups_count,

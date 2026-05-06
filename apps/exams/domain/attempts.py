@@ -111,6 +111,11 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
 
     @property
     def score_percent(self):
+        if getattr(self.exam, "exam_type", None) == "test":
+            from apps.exams.services.result_calculation import calculate_test_attempt_result
+
+            return float(calculate_test_attempt_result(self).percentage)
+
         total = self.correct_count + self.wrong_count
         if not total:
             return 0
@@ -144,6 +149,12 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         self.save(update_fields=list(dict.fromkeys(update_fields)))
 
     def recalculate_score(self):
+        if getattr(self.exam, "exam_type", None) == "test":
+            from apps.exams.services.result_calculation import sync_test_attempt_counts
+
+            sync_test_attempt_counts(self)
+            return
+
         qs = self.answers.all()
         self.correct_count = qs.filter(is_correct=True).count()
         self.wrong_count = qs.filter(is_correct=False).count()

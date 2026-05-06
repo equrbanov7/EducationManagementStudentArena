@@ -99,6 +99,259 @@
         line-height: 1.45;
     }
 
+    .ai-block-panel {
+        border: 1px solid #dbe4ff;
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 18px;
+        margin: 18px 0;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .ai-block-panel__head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .ai-block-panel__icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #eef4ff;
+        color: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+    }
+
+    .ai-block-panel h6 {
+        margin: 0 0 3px;
+        color: #1f2937;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .ai-block-panel p {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .ai-block-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(170px, 0.68fr) 110px 150px;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .ai-block-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 0;
+    }
+
+    .ai-block-field span {
+        color: #4b5563;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .ai-block-field textarea,
+    .ai-block-field input,
+    .ai-block-field select {
+        width: 100%;
+        border: 1px solid #d8dee9;
+        border-radius: 10px;
+        background: #fff;
+        color: #1f2937;
+        padding: 10px 12px;
+        min-height: 42px;
+        outline: none;
+    }
+
+    .ai-block-field textarea {
+        min-height: 74px;
+        resize: vertical;
+        line-height: 1.45;
+    }
+
+    .ai-block-field textarea:focus,
+    .ai-block-field input:focus,
+    .ai-block-field select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .ai-file-field {
+        cursor: pointer;
+    }
+
+    .ai-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .ai-file-picker {
+        min-height: 42px;
+        border: 1px solid #d8dee9;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #1f2937;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 12px;
+        font-weight: 800;
+        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .ai-file-picker i {
+        color: #2563eb;
+    }
+
+    .ai-file-field:hover .ai-file-picker {
+        border-color: #2563eb;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .ai-file-name {
+        display: block;
+        min-height: 18px;
+        max-width: 100%;
+        overflow: hidden;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ai-file-name.has-file {
+        color: #047857;
+    }
+
+    .ai-difficulty-select .bootstrap-single-select__toggle {
+        min-height: 42px;
+        padding: 9px 12px;
+        border-color: #d8dee9;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: none;
+        font-size: 15px;
+    }
+
+    .ai-difficulty-select .bootstrap-single-select__menu {
+        z-index: 1040;
+        border-radius: 10px;
+    }
+
+    .ai-difficulty-select .bootstrap-single-select__option {
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .ai-block-actions {
+        display: flex;
+        align-items: end;
+        gap: 10px;
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+    }
+
+    .ai-insert-toggle {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px;
+        border: 1px solid #d8dee9;
+        border-radius: 12px;
+        background: #f8fafc;
+        min-height: 42px;
+    }
+
+    .ai-insert-toggle label {
+        margin: 0;
+    }
+
+    .ai-insert-toggle input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .ai-insert-toggle span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 0 12px;
+        border-radius: 9px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ai-insert-toggle input:checked + span {
+        background: #ffffff;
+        color: #2563eb;
+        box-shadow: 0 1px 5px rgba(15, 23, 42, 0.08);
+    }
+
+    .ai-generate-btn {
+        min-width: 170px;
+        min-height: 42px;
+        border: none;
+        border-radius: 10px;
+        background: #14b8a6;
+        color: #fff;
+        font-weight: 800;
+        padding: 0 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(20, 184, 166, 0.22);
+    }
+
+    .ai-generate-btn:hover {
+        background: #0f9f91;
+    }
+
+    .ai-generate-btn:disabled {
+        opacity: 0.75;
+        cursor: wait;
+    }
+
+    .ai-question-status {
+        min-height: 20px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .ai-question-status.is-success { color: #047857; }
+    .ai-question-status.is-error { color: #dc2626; }
+    .ai-question-status.is-loading { color: #2563eb; }
+
     .paint-setting-row {
         display: flex;
         align-items: center;
@@ -252,6 +505,24 @@
     .btn-cancel-main:hover { background: #d63031; }
 
     @media (max-width: 576px) {
+        .ai-block-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-block-field--wide {
+            grid-column: auto;
+        }
+
+        .ai-insert-toggle,
+        .ai-generate-btn {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .ai-block-actions {
+            align-items: stretch;
+        }
+
         .action-bar {
             width: calc(100% - 24px);
             left: 12px;
@@ -408,9 +679,68 @@
                             </label>
                         </div>
 
+                        <div class="ai-block-panel"
+                             data-ai-question-form
+                             data-ai-context="written"
+                             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
+                            <div class="ai-block-panel__head">
+                                <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
+                                <div>
+                                    <h6>{% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" %}</h6>
+                                    <p>{% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" %}</p>
+                                </div>
+                            </div>
+                            <div class="ai-block-grid">
+                                <label class="ai-block-field ai-block-field--wide">
+                                    <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
+                                    <textarea name="prompt" rows="2" placeholder="{% blocktrans trimmed with block_name=item.obj.name context 'exams.template.ai_question_bank' %}Məsələn: {{ block_name }} mövzusundan 5 yazılı sual yarat{% endblocktrans %}"></textarea>
+                                </label>
+                                <label class="ai-block-field ai-file-field" for="writtenAiSourceFile{{ forloop.counter }}">
+                                    <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
+                                    <input id="writtenAiSourceFile{{ forloop.counter }}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                                    <span class="ai-file-picker">
+                                        <i class="fas fa-upload"></i>
+                                        <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
+                                    </span>
+                                    <small class="ai-file-name" data-ai-file-name-for="writtenAiSourceFile{{ forloop.counter }}">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
+                                </label>
+                                <label class="ai-block-field">
+                                    <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
+                                    <input type="number" name="question_count" min="1" max="50" value="5">
+                                </label>
+                                <label class="ai-block-field">
+                                    <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
+                                    <div class="bootstrap-single-select ai-difficulty-select">
+                                        <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                            <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
+                                        </select>
+                                    </div>
+                                </label>
+                                <div class="ai-block-actions">
+                                    <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+                                        <label>
+                                            <input type="radio" name="ai_insert_mode_{{ forloop.counter }}" data-ai-insert-mode value="append" checked>
+                                            <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="ai_insert_mode_{{ forloop.counter }}" data-ai-insert-mode value="replace">
+                                            <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
+                                        </label>
+                                    </div>
+                                    <button type="button" class="ai-generate-btn" data-ai-question-submit>
+                                        <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
+                                    </button>
+                                    <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
-                            <textarea name="block_content_{{ forloop.counter }}" class="form-control-custom" placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}">{{ item.text_content }}</textarea>
+                            <textarea name="block_content_{{ forloop.counter }}" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}">{{ item.text_content }}</textarea>
                             <small class="form-help-text">{% trans "help_question_formats" context "exams.template.create_question_bank" %}</small>
                         </div>
                     </div>
@@ -452,9 +782,68 @@
                             </label>
                         </div>
 
+                        <div class="ai-block-panel"
+                             data-ai-question-form
+                             data-ai-context="written"
+                             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
+                            <div class="ai-block-panel__head">
+                                <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
+                                <div>
+                                    <h6>{% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" %}</h6>
+                                    <p>{% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" %}</p>
+                                </div>
+                            </div>
+                            <div class="ai-block-grid">
+                                <label class="ai-block-field ai-block-field--wide">
+                                    <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
+                                    <textarea name="prompt" rows="2" placeholder="{% trans 'Məsələn: Bölmə 1 üçün 5 yazılı sual yarat' context 'exams.template.ai_question_bank' %}"></textarea>
+                                </label>
+                                <label class="ai-block-field ai-file-field" for="writtenAiSourceFile1">
+                                    <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
+                                    <input id="writtenAiSourceFile1" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                                    <span class="ai-file-picker">
+                                        <i class="fas fa-upload"></i>
+                                        <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
+                                    </span>
+                                    <small class="ai-file-name" data-ai-file-name-for="writtenAiSourceFile1">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
+                                </label>
+                                <label class="ai-block-field">
+                                    <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
+                                    <input type="number" name="question_count" min="1" max="50" value="5">
+                                </label>
+                                <label class="ai-block-field">
+                                    <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
+                                    <div class="bootstrap-single-select ai-difficulty-select">
+                                        <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                            <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
+                                            <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
+                                        </select>
+                                    </div>
+                                </label>
+                                <div class="ai-block-actions">
+                                    <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+                                        <label>
+                                            <input type="radio" name="ai_insert_mode_1" data-ai-insert-mode value="append" checked>
+                                            <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="ai_insert_mode_1" data-ai-insert-mode value="replace">
+                                            <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
+                                        </label>
+                                    </div>
+                                    <button type="button" class="ai-generate-btn" data-ai-question-submit>
+                                        <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
+                                    </button>
+                                    <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
-                            <textarea name="block_content_1" class="form-control-custom" placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}"></textarea>
+                            <textarea name="block_content_1" class="form-control-custom" data-written-question-textarea placeholder="{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}"></textarea>
                             <small class="form-help-text">{% trans "help_question_formats" context "exams.template.create_question_bank" %}</small>
                         </div>
                     </div>
@@ -506,6 +895,31 @@
 {% trans "help_block_enable_paint" context "exams.template.create_question_bank" as qbank_help_block_enable_paint %}
 {% trans "alert_duplicate_block_name" context "exams.template.create_question_bank" as qbank_alert_duplicate_block_name %}
 {% trans "block_default" context "exams.template.create_question_bank" as qbank_block_default %}
+{% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" as ai_qbank_block_title %}
+{% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" as ai_qbank_block_desc %}
+{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" as ai_qbank_prompt_topic %}
+{% trans "Məsələn: {block_name} üçün 5 yazılı sual yarat" context "exams.template.ai_question_bank" as ai_qbank_dynamic_placeholder %}
+{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" as ai_qbank_lecture_file %}
+{% trans "Fayl seç" context "exams.template.ai_question_bank" as ai_qbank_choose_file %}
+{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" as ai_qbank_no_file_selected %}
+{% trans "Sual sayı" context "exams.template.ai_question_bank" as ai_qbank_question_count %}
+{% trans "Çətinlik" context "exams.template.ai_question_bank" as ai_qbank_difficulty %}
+{% trans "Orta" context "exams.template.ai_question_bank" as ai_qbank_medium %}
+{% trans "Asan" context "exams.template.ai_question_bank" as ai_qbank_easy %}
+{% trans "Çətin" context "exams.template.ai_question_bank" as ai_qbank_hard %}
+{% trans "Qarışıq" context "exams.template.ai_question_bank" as ai_qbank_mixed %}
+{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" as ai_qbank_append_mode %}
+{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" as ai_qbank_replace_mode %}
+{% trans "AI ilə yarat" context "exams.template.ai_question_bank" as ai_qbank_generate %}
+{% trans "Yaradılır..." context "exams.template.ai_question_bank" as ai_i18n_generating %}
+{% trans "AI endpoint tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_endpoint_missing %}
+{% trans "Prompt yazın və ya fayl yükləyin." context "exams.template.ai_question_bank" as ai_i18n_empty_input %}
+{% trans "Gemini 2.5 Pro sualları hazırlayır..." context "exams.template.ai_question_bank" as ai_i18n_loading %}
+{% trans "AI sual yaratma alınmadı." context "exams.template.ai_question_bank" as ai_i18n_generate_failed %}
+{% trans "Qalan sorğu" context "exams.template.ai_question_bank" as ai_i18n_remaining_requests %}
+{% trans "{count} sual hazırdır. Önizləmə ilə yoxlayın." context "exams.template.ai_question_bank" as ai_i18n_ready_template %}
+{% trans "Mətn sahəsi tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_target_missing %}
+{% trans "AI boş cavab qaytardı." context "exams.template.ai_question_bank" as ai_i18n_empty_response %}
 const I18N_QBANK = {
     actionDelete: "{{ qbank_action_delete|escapejs }}",
     labelBlockName: "{{ qbank_label_block_name|escapejs }}",
@@ -517,13 +931,117 @@ const I18N_QBANK = {
     placeholderQuestionText: "{{ qbank_placeholder_question_text|escapejs }}",
     helpQuestionFormats: "{{ qbank_help_question_formats|escapejs }}",
     alertDuplicateBlockName: "{{ qbank_alert_duplicate_block_name|escapejs }}",
-    blockDefault: "{{ qbank_block_default|escapejs }}"
+    blockDefault: "{{ qbank_block_default|escapejs }}",
+    aiBlockTitle: "{{ ai_qbank_block_title|escapejs }}",
+    aiBlockDesc: "{{ ai_qbank_block_desc|escapejs }}",
+    aiPromptTopic: "{{ ai_qbank_prompt_topic|escapejs }}",
+    aiDynamicPlaceholder: "{{ ai_qbank_dynamic_placeholder|escapejs }}",
+    aiLectureFile: "{{ ai_qbank_lecture_file|escapejs }}",
+    aiChooseFile: "{{ ai_qbank_choose_file|escapejs }}",
+    aiNoFileSelected: "{{ ai_qbank_no_file_selected|escapejs }}",
+    aiQuestionCount: "{{ ai_qbank_question_count|escapejs }}",
+    aiDifficulty: "{{ ai_qbank_difficulty|escapejs }}",
+    aiMedium: "{{ ai_qbank_medium|escapejs }}",
+    aiEasy: "{{ ai_qbank_easy|escapejs }}",
+    aiHard: "{{ ai_qbank_hard|escapejs }}",
+    aiMixed: "{{ ai_qbank_mixed|escapejs }}",
+    aiAppendMode: "{{ ai_qbank_append_mode|escapejs }}",
+    aiReplaceMode: "{{ ai_qbank_replace_mode|escapejs }}",
+    aiGenerate: "{{ ai_qbank_generate|escapejs }}"
+};
+window.AI_QUESTION_BANK_I18N = {
+    generating: "{{ ai_i18n_generating|escapejs }}",
+    endpointMissing: "{{ ai_i18n_endpoint_missing|escapejs }}",
+    emptyInput: "{{ ai_i18n_empty_input|escapejs }}",
+    loading: "{{ ai_i18n_loading|escapejs }}",
+    generateFailed: "{{ ai_i18n_generate_failed|escapejs }}",
+    remainingRequests: "{{ ai_i18n_remaining_requests|escapejs }}",
+    readyTemplate: "{{ ai_i18n_ready_template|escapejs }}",
+    targetMissing: "{{ ai_i18n_target_missing|escapejs }}",
+    emptyResponse: "{{ ai_i18n_empty_response|escapejs }}",
+    noFileSelected: "{{ ai_qbank_no_file_selected|escapejs }}"
 };
 const QBANK_DEFAULT_BLOCK_PAINT_ENABLED = {% if exam.enable_paint %}true{% else %}false{% endif %};
 
 let blockToDelete = null;
 let blockCounter = {{ blocks_data|length|default:1 }};
 if (blockCounter === 0) blockCounter = 1;
+
+function escapeHtml(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function renderAiBlockPanel(uniqueID, defaultTitle) {
+    const fileInputId = `writtenAiSourceFile${uniqueID}`;
+    const promptPlaceholder = escapeHtml(
+        I18N_QBANK.aiDynamicPlaceholder.replace("{block_name}", defaultTitle)
+    );
+
+    return `
+        <div class="ai-block-panel"
+             data-ai-question-form
+             data-ai-context="written"
+             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
+            <div class="ai-block-panel__head">
+                <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
+                <div>
+                    <h6>${I18N_QBANK.aiBlockTitle}</h6>
+                    <p>${I18N_QBANK.aiBlockDesc}</p>
+                </div>
+            </div>
+            <div class="ai-block-grid">
+                <label class="ai-block-field ai-block-field--wide">
+                    <span>${I18N_QBANK.aiPromptTopic}</span>
+                    <textarea name="prompt" rows="2" placeholder="${promptPlaceholder}"></textarea>
+                </label>
+                <label class="ai-block-field ai-file-field" for="${fileInputId}">
+                    <span>${I18N_QBANK.aiLectureFile}</span>
+                    <input id="${fileInputId}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                    <span class="ai-file-picker">
+                        <i class="fas fa-upload"></i>
+                        <strong>${I18N_QBANK.aiChooseFile}</strong>
+                    </span>
+                    <small class="ai-file-name" data-ai-file-name-for="${fileInputId}">${I18N_QBANK.aiNoFileSelected}</small>
+                </label>
+                <label class="ai-block-field">
+                    <span>${I18N_QBANK.aiQuestionCount}</span>
+                    <input type="number" name="question_count" min="1" max="50" value="5">
+                </label>
+                <label class="ai-block-field">
+                    <span>${I18N_QBANK.aiDifficulty}</span>
+                    <div class="bootstrap-single-select ai-difficulty-select">
+                        <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                            <option value="medium" selected>${I18N_QBANK.aiMedium}</option>
+                            <option value="easy">${I18N_QBANK.aiEasy}</option>
+                            <option value="hard">${I18N_QBANK.aiHard}</option>
+                            <option value="mixed">${I18N_QBANK.aiMixed}</option>
+                        </select>
+                    </div>
+                </label>
+                <div class="ai-block-actions">
+                    <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+                        <label>
+                            <input type="radio" name="ai_insert_mode_${uniqueID}" data-ai-insert-mode value="append" checked>
+                            <span>${I18N_QBANK.aiAppendMode}</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="ai_insert_mode_${uniqueID}" data-ai-insert-mode value="replace">
+                            <span>${I18N_QBANK.aiReplaceMode}</span>
+                        </label>
+                    </div>
+                    <button type="button" class="ai-generate-btn" data-ai-question-submit>
+                        <i class="fas fa-magic"></i> ${I18N_QBANK.aiGenerate}
+                    </button>
+                    <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.getElementById('blocks-wrapper');
@@ -576,9 +1094,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             </span>
                         </label>
                     </div>
+                    ${renderAiBlockPanel(uniqueID, defaultTitle)}
                     <div class="form-group">
                         <label>${I18N_QBANK.labelQuestionsCopyPaste}:</label>
                         <textarea name="block_content_${uniqueID}" class="form-control-custom"
+                                  data-written-question-textarea
                                   placeholder="${I18N_QBANK.placeholderQuestionText}"></textarea>
                         <small class="form-help-text">${I18N_QBANK.helpQuestionFormats}</small>
                     </div>
@@ -588,7 +1108,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = newBlockHTML.trim();
-        wrapper.appendChild(tempDiv.firstElementChild);
+        const newBlock = tempDiv.firstElementChild;
+        wrapper.appendChild(newBlock);
+
+        if (window.initAiQuestionBankPanel) {
+            newBlock.querySelectorAll('[data-ai-question-form]').forEach(window.initAiQuestionBankPanel);
+        }
 
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
@@ -663,4 +1188,5 @@ window.addEventListener('click', function(event) {
     if (event.target === modal) closeDeleteModal();
 });
 </script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}"></script>
 {% endblock %}

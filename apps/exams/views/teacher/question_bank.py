@@ -4,14 +4,16 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.http import require_POST
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
@@ -135,6 +137,54 @@ def _sync_written_block_questions(block, question_texts):
 
     for stale_question in existing_questions[len(normalized_texts) :]:
         stale_question.delete()
+
+
+@login_required
+@require_POST
+def ai_generate_question_bank(request, slug):
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+
+    if exam.exam_type not in {"test", "written"}:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": pgettext(
+                    "exams.view.question_bank.ai.error",
+                    "Bu imtahan tipi üçün AI sual yaratma dəstəklənmir.",
+                ),
+            },
+            status=400,
+        )
+
+    source_text = (request.POST.get("source_text") or "").strip()
+    uploaded = request.FILES.get("source_file") or request.FILES.get("ai_source_file")
+    if uploaded:
+        try:
+            extracted_text = extract_text_from_upload(uploaded)
+        except Exception as exc:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": pgettext("exams.view.question_bank.message", "file_read_failed").format(error=exc),
+                },
+                status=400,
+            )
+        source_text = "\n\n".join(part for part in [source_text, extracted_text] if part.strip())
+
+    result = generate_question_bank_text(
+        exam_title=exam.title,
+        exam_type=exam.exam_type,
+        prompt_text=request.POST.get("prompt", ""),
+        source_text=source_text,
+        question_count=request.POST.get("question_count") or 5,
+        difficulty=request.POST.get("difficulty") or "medium",
+        block_name=request.POST.get("block_name") or "",
+        language_code=request.LANGUAGE_CODE,
+        user_id=request.user.pk,
+    )
+    status = 200 if result.get("ok") else 400
+    return JsonResponse(result, status=status)
 
 
 @login_required
@@ -516,6 +566,7 @@ def test_question_bank(request, slug):
                 if lab in q["options"]:
                     ExamQuestionOption.objects.create(
                         question=eq,
+                        label=lab,
                         text=q["options"][lab],
                         is_correct=(lab in q["correct"]),
                     )

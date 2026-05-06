@@ -1051,6 +1051,95 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, self.student.username)
         self.assertNotContains(response, "<th>Nəticə (%)</th>", html=True)
 
+    def test_test_exam_results_use_delivered_question_set_on_teacher_and_student_pages(self):
+        correct_option = self.exam_question.options.filter(is_correct=True).first()
+        wrong_question = ExamQuestion.objects.create(
+            exam=self.exam_visible,
+            text="Delivered wrong question",
+            order=2,
+            answer_mode="single",
+        )
+        ExamQuestionOption.objects.create(question=wrong_question, text="Correct", is_correct=True)
+        wrong_option = ExamQuestionOption.objects.create(question=wrong_question, text="Wrong", is_correct=False)
+        unanswered_question = ExamQuestion.objects.create(
+            exam=self.exam_visible,
+            text="Delivered unanswered question",
+            order=3,
+            answer_mode="single",
+        )
+        ExamQuestionOption.objects.create(question=unanswered_question, text="Correct", is_correct=True)
+        ExamQuestionOption.objects.create(question=unanswered_question, text="Wrong", is_correct=False)
+        for idx in range(4, 24):
+            ExamQuestion.objects.create(
+                exam=self.exam_visible,
+                text=f"Bank only question {idx}",
+                order=idx,
+                answer_mode="single",
+            )
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+        correct_answer = ExamAnswer.objects.create(attempt=attempt, question=self.exam_question, is_correct=True)
+        correct_answer.selected_options.add(correct_option)
+        wrong_answer = ExamAnswer.objects.create(attempt=attempt, question=wrong_question, is_correct=False)
+        wrong_answer.selected_options.add(wrong_option)
+        ExamAnswer.objects.create(attempt=attempt, question=unanswered_question, is_correct=False)
+        attempt.recalculate_score()
+
+        teacher_results = self.client.get(reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]))
+        self.assertEqual(teacher_results.status_code, 200)
+        result_item = next(
+            item for item in teacher_results.context["attempts_data"] if item["attempt"].id == attempt.id
+        )
+        self.assertEqual(self.exam_visible.questions.count(), 23)
+        self.assertEqual(result_item["test_result"].delivered_count, 3)
+        self.assertEqual(result_item["test_result"].correct_count, 1)
+        self.assertEqual(result_item["test_result"].wrong_count, 1)
+        self.assertEqual(result_item["test_result"].unanswered_count, 1)
+        self.assertEqual(result_item["test_result"].percentage_display, "33.3")
+
+        teacher_detail = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam_visible.slug, attempt.id])
+        )
+        self.assertEqual(teacher_detail.status_code, 200)
+        self.assertEqual(teacher_detail.context["test_result"].delivered_count, 3)
+        self.assertContains(teacher_detail, "3 verilmiş sual")
+
+        _login_with_org(self.client, self.student, self.org_a)
+        student_result = self.client.get(reverse("exams:exam_result", args=[self.exam_visible.slug, attempt.id]))
+        self.assertEqual(student_result.status_code, 200)
+        self.assertEqual(student_result.context["test_result"].delivered_count, 3)
+        self.assertEqual(student_result.context["test_result"].unanswered_count, 1)
+        self.assertContains(student_result, "Verilmiş sual")
+
+    def test_test_exam_result_falls_back_to_legacy_counts_without_rebuilding_finished_attempt(self):
+        for idx in range(2, 12):
+            ExamQuestion.objects.create(
+                exam=self.exam_visible,
+                text=f"Legacy bank question {idx}",
+                order=idx,
+                answer_mode="single",
+            )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+            correct_count=8,
+            wrong_count=2,
+        )
+
+        teacher_detail = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam_visible.slug, attempt.id])
+        )
+
+        self.assertEqual(teacher_detail.status_code, 200)
+        self.assertEqual(teacher_detail.context["test_result"].delivered_count, 10)
+        self.assertTrue(teacher_detail.context["test_result"].used_legacy_fallback)
+        self.assertFalse(attempt.answers.exists())
+
     def test_teacher_exam_results_keeps_written_student_name_hidden_until_review_is_completed(self):
         written_exam = Exam.objects.create(
             author=self.teacher,
@@ -2941,6 +3030,47 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_test_question_bank_shows_ai_generation_panel(self):
+        response = self.client.get(reverse("exams:test_question_bank", args=[self.exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "AI ilə test sualı yarat")
+        self.assertContains(response, 'data-ai-context="test"', html=False)
+        self.assertContains(response, reverse("exams:ai_generate_question_bank", args=[self.exam.slug]), html=False)
+        self.assertContains(response, "data-ai-file-input", html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertContains(response, "Mətnin sonuna əlavə et")
+        self.assertContains(response, "Mətn sahəsini əvəz et")
+
+    @patch("apps.exams.views.teacher.question_bank.generate_question_bank_text")
+    def test_ai_generate_question_bank_passes_prompt_and_uploaded_source_to_service(self, mock_generate):
+        mock_generate.return_value = {
+            "ok": True,
+            "text": "1. Sual\nA) A\nB) B\nC) C\nD) D\nE) E\nCavab: A",
+            "question_count": 1,
+        }
+
+        response = self.client.post(
+            reverse("exams:ai_generate_question_bank", args=[self.exam.slug]),
+            {
+                "prompt": "Python funksiyaları",
+                "question_count": "1",
+                "difficulty": "hard",
+                "source_file": SimpleUploadedFile("lecture.txt", b"Funksiyalar movzusu", content_type="text/plain"),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        mock_generate.assert_called_once()
+        kwargs = mock_generate.call_args.kwargs
+        self.assertEqual(kwargs["exam_type"], "test")
+        self.assertEqual(kwargs["prompt_text"], "Python funksiyaları")
+        self.assertEqual(kwargs["question_count"], "1")
+        self.assertEqual(kwargs["difficulty"], "hard")
+        self.assertIn("Funksiyalar movzusu", kwargs["source_text"])
+
     def test_questions_bank_bulk_delete_resequences_remaining_question_orders(self):
         response = self.client.post(
             reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
@@ -3220,6 +3350,20 @@ class WrittenExamPaintInheritanceTest(TestCase):
         self.assertTrue(self.hidden_question.disable_paint)
         self.assertFalse(self.hidden_question.paint_enabled_effective)
         self.assertEqual(self.visible_question.text, "Yenilənmiş 2")
+
+    def test_create_question_bank_shows_ai_panel_per_written_block(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.get(reverse("exams:create_question_bank", args=[self.exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "AI ilə bu blok üçün sual yarat")
+        self.assertContains(response, 'data-ai-context="written"', html=False)
+        self.assertContains(response, "data-written-question-textarea", html=False)
+        self.assertContains(response, "data-ai-file-input", html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertContains(response, "Mətnin sonuna əlavə et")
+        self.assertContains(response, "Mətn sahəsini əvəz et")
 
 
 class SupervisionTeacherApiTest(TestCase):
