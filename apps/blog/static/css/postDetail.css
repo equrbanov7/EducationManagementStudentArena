@@ -87,6 +87,10 @@
     color: var(--primary-color, #2563eb);
 }
 
+.article-meta .fa-eye {
+    color: #64748b;
+}
+
 /* --- Məqalə Şəkli --- */
 .article-featured-image {
     width: 100%;
