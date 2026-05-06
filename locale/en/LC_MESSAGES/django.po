@@ -886,6 +886,30 @@ msgctxt "profile.groups"
 msgid "delete"
 msgstr "Delete"
 
+msgctxt "profile.groups"
+msgid "view_group_students"
+msgstr "View group"
+
+msgctxt "profile.groups"
+msgid "group_details_title"
+msgstr "Group details"
+
+msgctxt "profile.groups"
+msgid "remove_from_group"
+msgstr "Remove from group"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_title"
+msgstr "Are you sure?"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_body"
+msgstr "Are you sure you want to remove {student} from this group?"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_button"
+msgstr "Remove from group"
+
 #: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
 msgctxt "profile.manage_roles"
 msgid "info_title"
@@ -11572,6 +11596,10 @@ msgstr "The group was not updated. Check the form information."
 msgctxt "exams.view.groups.message"
 msgid "group_deleted"
 msgstr "The group has been deleted."
+
+msgctxt "exams.view.groups.message"
+msgid "student_removed_from_group"
+msgstr "The student has been removed from the group."
 
 #: apps/exams/views/teacher/question_bank.py:75
 msgctxt "exams.view.question_bank.message"
