@@ -66,8 +66,231 @@
     align-items: center;
 }
 
+.post-item--group-active {
+    background: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
+}
+
 .group-card-actions {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.profile-group-open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+}
+
+.profile-group-search-form,
+.profile-group-student-search {
+    margin: 0;
+}
+
+.profile-group-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+}
+
+.profile-group-search i {
+    position: absolute;
+    left: 0.85rem;
+    color: #64748b;
+    pointer-events: none;
+}
+
+.profile-group-search .form-control {
+    min-height: 42px;
+    padding-left: 2.35rem;
+    border-radius: 0.65rem;
+    border-color: #dbe3ef;
+}
+
+.profile-group-search .btn {
+    min-height: 42px;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.profile-group-count {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.profile-group-detail {
+    margin-top: 1.25rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.85rem;
+    background: #ffffff;
+    padding: 1.1rem;
+}
+
+.profile-group-detail__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.profile-group-detail__eyebrow {
+    display: inline-flex;
+    margin-bottom: 0.2rem;
+    color: #2563eb;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.profile-group-detail h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.profile-group-detail p {
+    margin: 0.3rem 0 0;
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.profile-group-detail--empty {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: #f8fafc;
+}
+
+.profile-group-detail--empty i {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.profile-group-teacher-strip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.profile-group-teacher-strip > span {
+    min-width: 120px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.profile-group-teacher-strip > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.profile-group-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.profile-group-student-search {
+    padding: 0.9rem 0;
+}
+
+.profile-group-student-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.profile-group-student-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #edf2f7;
+    border-radius: 0.7rem;
+    background: #f8fafc;
+}
+
+.profile-group-student-avatar {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 800;
+    flex: 0 0 auto;
+}
+
+.profile-group-student-row strong,
+.profile-group-student-row span,
+.profile-group-student-row small {
+    display: block;
+}
+
+.profile-group-student-row strong {
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.profile-group-student-row span,
+.profile-group-student-row small {
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.profile-group-detail__empty {
+    padding: 1.2rem;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    color: #64748b;
+    text-align: center;
+    background: #f8fafc;
+}
+
+@media (max-width: 720px) {
+    .post-item--group,
+    .profile-group-detail__header,
+    .profile-group-search,
+    .profile-group-teacher-strip {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .group-card-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .profile-group-search .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

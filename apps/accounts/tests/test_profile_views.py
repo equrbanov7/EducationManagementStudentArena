@@ -1710,6 +1710,58 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:student_organization_request"))
         self.assertContains(response, reverse("accounts:student_leave_organization"))
 
+    def test_groups_section_supports_search_detail_and_student_pagination(self):
+        from apps.exams.models import StudentGroup
+
+        organization = Organization.objects.create(
+            name="Groups Detail Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+
+        alpha_group = StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Alpha Detail Group",
+        )
+        StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Beta Hidden Group",
+        )
+        for idx in range(15):
+            student = User.objects.create_user(
+                username=f"group_student_{idx:02d}",
+                email=f"group_student_{idx:02d}@example.com",
+                password="testpass123",
+            )
+            _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+            alpha_group.students.add(student)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "groups",
+                "group_q": "Alpha",
+                "group": str(alpha_group.id),
+                "students_page": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["teacher_groups_filtered_count"], 1)
+        self.assertEqual(response.context["selected_teacher_group"], alpha_group)
+        self.assertEqual(response.context["selected_group_students_count"], 15)
+        self.assertEqual(response.context["selected_group_students_page"].number, 2)
+        self.assertEqual([group.name for group in response.context["teacher_groups"]], ["Alpha Detail Group"])
+        self.assertContains(response, "Qrup detalları")
+        self.assertContains(response, "Alpha Detail Group")
+        self.assertContains(response, "group_student_12")
+
     def test_org_admin_profile_shows_groups_and_management_navigation(self):
         organization = Organization.objects.create(
             name="Org Admin Navigation Org",

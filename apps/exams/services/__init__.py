@@ -12,10 +12,12 @@ from apps.exams.services.grading import (
     grade_exam_answer,
     parse_score_value,
 )
+from apps.exams.services.result_calculation import calculate_test_attempt_result
 
 __all__ = [
     "bulk_grade_answers",
     "calculate_attempt_score",
+    "calculate_test_attempt_result",
     "can_user_access_exam",
     "can_user_start_new_attempt",
     "create_exam_attempt",
