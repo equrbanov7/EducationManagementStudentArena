@@ -262,6 +262,37 @@ def teacher_delete_group(request, group_id):
 
 
 @login_required
+@require_POST
+def teacher_remove_student_from_group(request, group_id, student_id):
+    _ensure_group_manager(request.user)
+    organization = _get_required_organization(request)
+    if organization is None:
+        return redirect("accounts:profile")
+
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
+    student = get_object_or_404(group.students, id=student_id)
+    group.students.remove(student)
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=group,
+        old_values={"removed_student_id": student_id},
+        reason="student_removed_from_group",
+        request=request,
+    )
+    messages.success(request, pgettext_lazy("exams.view.groups.message", "student_removed_from_group"))
+    next_url = _resolve_next_url(request)
+    if next_url:
+        return redirect(next_url)
+    return redirect("exams:teacher_group_list")
+
+
+@login_required
 def create_student_group(request):
     _ensure_group_manager(request.user)
     organization = _get_required_organization(request)

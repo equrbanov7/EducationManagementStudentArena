@@ -886,6 +886,30 @@ msgctxt "profile.groups"
 msgid "delete"
 msgstr "Sil"
 
+msgctxt "profile.groups"
+msgid "view_group_students"
+msgstr "Grubu görüntüle"
+
+msgctxt "profile.groups"
+msgid "group_details_title"
+msgstr "Grup detayları"
+
+msgctxt "profile.groups"
+msgid "remove_from_group"
+msgstr "Gruptan çıkar"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_title"
+msgstr "Emin misiniz?"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_body"
+msgstr "{student} adlı öğrenciyi bu gruptan çıkarmak istediğinizden emin misiniz?"
+
+msgctxt "profile.groups"
+msgid "remove_student_confirm_button"
+msgstr "Gruptan çıkar"
+
 #: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
 msgctxt "profile.manage_roles"
 msgid "info_title"
@@ -11560,6 +11584,10 @@ msgstr "Grup güncellenmedi. Form bilgilerini kontrol edin."
 msgctxt "exams.view.groups.message"
 msgid "group_deleted"
 msgstr "Grup silindi."
+
+msgctxt "exams.view.groups.message"
+msgid "student_removed_from_group"
+msgstr "Öğrenci gruptan çıkarıldı."
 
 #: apps/exams/views/teacher/question_bank.py:75
 msgctxt "exams.view.question_bank.message"
