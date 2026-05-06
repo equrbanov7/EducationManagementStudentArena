@@ -72,7 +72,8 @@ def ping(request):
 def metrics_view(request):
     """Expose application metrics in Prometheus text format.
 
-    This endpoint is intended to be scraped by a Prometheus server.
+    This endpoint is intended to be scraped by a Prometheus server and is
+    limited to authenticated superusers.
     """
     from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 

@@ -87,7 +87,7 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Profil")
 
-    def test_profile_avatar_requires_login(self):
+    def test_profile_avatar_redirects_unauthenticated_to_login(self):
         response = self.client.get(reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id}))
 
         self.assertRedirects(
