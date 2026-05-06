@@ -186,12 +186,12 @@ class MetricsViewTest(TestCase):
         self.user = User.objects.create_user(
             username="metrics_user",
             email="metrics-user@example.com",
-            password="StrongPass123!",
+            password="x",
         )
         self.superuser = User.objects.create_superuser(
             username="metrics_superuser",
             email="metrics-superuser@example.com",
-            password="StrongPass123!",
+            password="x",
         )
 
     def test_metrics_endpoint_redirects_unauthenticated_user_to_login(self):
