@@ -101,6 +101,7 @@
 /* Test Statistikaları Grid */
 .test-stats-grid {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 30px;
     width: 100%;

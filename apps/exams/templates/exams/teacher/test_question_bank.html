@@ -68,6 +68,71 @@
         </div>
     </header>
 
+    <section class="ai-bank-card"
+             data-ai-question-form
+             data-ai-context="test"
+             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}"
+             data-ai-target="#testRawEditor">
+        <div class="ai-bank-card__intro">
+            <div class="ai-bank-card__icon"><i class="fas fa-robot"></i></div>
+            <div>
+                <h2>{% trans "AI ilə test sualı yarat" context "exams.template.ai_question_bank" %}</h2>
+                <p>{% trans "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək." context "exams.template.ai_question_bank" %}</p>
+            </div>
+        </div>
+
+        <div class="ai-bank-grid">
+            <label class="ai-field ai-field--wide">
+                <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
+                <textarea name="prompt" rows="3" placeholder="{% trans 'Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat' context 'exams.template.ai_question_bank' %}"></textarea>
+            </label>
+
+            <label class="ai-field ai-file-field" for="testAiSourceFile">
+                <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
+                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                <span class="ai-file-picker">
+                    <i class="fas fa-upload"></i>
+                    <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
+                </span>
+                <small class="ai-file-name" data-ai-file-name-for="testAiSourceFile">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
+            </label>
+
+            <label class="ai-field ai-field--small">
+                <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
+                <input type="number" name="question_count" min="1" max="50" value="5">
+            </label>
+
+            <label class="ai-field ai-field--small">
+                <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
+                <div class="bootstrap-single-select ai-difficulty-select">
+                    <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
+                        <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
+                        <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
+                        <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
+                    </select>
+                </div>
+            </label>
+
+            <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+                <label>
+                    <input type="radio" name="insert_mode" value="append" checked>
+                    <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
+                </label>
+                <label>
+                    <input type="radio" name="insert_mode" value="replace">
+                    <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
+                </label>
+            </div>
+
+            <button type="button" class="ai-generate-btn" data-ai-question-submit>
+                <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
+            </button>
+        </div>
+
+        <div class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></div>
+    </section>
+
     <div class="main-card">
         <form method="post" enctype="multipart/form-data" class="split-layout" data-sync-bank-settings>
             {% csrf_token %}
@@ -162,7 +227,7 @@
                             </span>
                         </div>
                     </div>
-                    <textarea name="raw_text" class="custom-editor"
+                    <textarea name="raw_text" class="custom-editor" id="testRawEditor" data-ai-question-target
                     placeholder="Nümunə 1 (Standart - A düzgündür):
 1. Data Science əsasən nə ilə məşğul olur?
 A) Məlumatların analizi və qərar vermə
@@ -289,6 +354,31 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
 </div>
 
 {% block extraJs %}
+<script nonce="{{ request.csp_nonce }}">
+{% trans "Yaradılır..." context "exams.template.ai_question_bank" as ai_i18n_generating %}
+{% trans "AI endpoint tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_endpoint_missing %}
+{% trans "Prompt yazın və ya fayl yükləyin." context "exams.template.ai_question_bank" as ai_i18n_empty_input %}
+{% trans "Gemini 2.5 Pro sualları hazırlayır..." context "exams.template.ai_question_bank" as ai_i18n_loading %}
+{% trans "AI sual yaratma alınmadı." context "exams.template.ai_question_bank" as ai_i18n_generate_failed %}
+{% trans "Qalan sorğu" context "exams.template.ai_question_bank" as ai_i18n_remaining_requests %}
+{% trans "{count} sual hazırdır. Önizləmə ilə yoxlayın." context "exams.template.ai_question_bank" as ai_i18n_ready_template %}
+{% trans "Mətn sahəsi tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_target_missing %}
+{% trans "AI boş cavab qaytardı." context "exams.template.ai_question_bank" as ai_i18n_empty_response %}
+{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" as ai_i18n_no_file_selected %}
+window.AI_QUESTION_BANK_I18N = {
+    generating: "{{ ai_i18n_generating|escapejs }}",
+    endpointMissing: "{{ ai_i18n_endpoint_missing|escapejs }}",
+    emptyInput: "{{ ai_i18n_empty_input|escapejs }}",
+    loading: "{{ ai_i18n_loading|escapejs }}",
+    generateFailed: "{{ ai_i18n_generate_failed|escapejs }}",
+    remainingRequests: "{{ ai_i18n_remaining_requests|escapejs }}",
+    readyTemplate: "{{ ai_i18n_ready_template|escapejs }}",
+    targetMissing: "{{ ai_i18n_target_missing|escapejs }}",
+    emptyResponse: "{{ ai_i18n_empty_response|escapejs }}",
+    noFileSelected: "{{ ai_i18n_no_file_selected|escapejs }}"
+};
+</script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}"></script>
 <script src="{% static 'exams/js/testQuestionBank.js' %}"></script>
 
 <script nonce="{{ request.csp_nonce }}">

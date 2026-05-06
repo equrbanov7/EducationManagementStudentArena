@@ -34,17 +34,26 @@
                 
                 <div class="stat-item main-score w-100 mb-4">
                     <span class="stat-label">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
-                    <span class="stat-value text-primary">{{ attempt.score_percent }}%</span>
+                    <span class="stat-value text-primary">{{ test_result.percentage_display }}%</span>
+                    <span class="text-muted small d-block mt-1">Bal: {{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
                 </div>
 
                 <div class="test-stats-grid">
                     <div class="stat-item">
                         <span class="stat-label">{% trans "label_correct" context "exams.template.student_exam_result" %}</span>
-                        <span class="stat-value text-success">{{ attempt.correct_count }}</span>
+                        <span class="stat-value text-success">{{ test_result.correct_count }}</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">{% trans "label_wrong" context "exams.template.student_exam_result" %}</span>
-                        <span class="stat-value text-danger">{{ attempt.wrong_count }}</span>
+                        <span class="stat-value text-danger">{{ test_result.wrong_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Cavabsız</span>
+                        <span class="stat-value text-warning">{{ test_result.unanswered_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Verilmiş sual</span>
+                        <span class="stat-value text-primary">{{ test_result.delivered_count }}</span>
                     </div>
                 </div>
 
@@ -75,6 +84,7 @@
     <div class="questions-list">
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
+            {% with has_selection=answer_has_selection_by_qid|get_item:q.id %}
             <div class="question-card">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
@@ -131,7 +141,9 @@
                         
                         <div class="feedback-status mt-3 text-end">
                             {% if ans %}
-                                {% if ans.is_correct %}
+                                {% if not has_selection %}
+                                    <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
+                                {% elif ans.is_correct %}
                                     <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> {% trans "answer_correct" context "exams.template.student_exam_result" %}</span>
                                 {% else %}
                                     <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> {% trans "answer_wrong" context "exams.template.student_exam_result" %}</span>
@@ -321,6 +333,7 @@
                 </div>
             </div>
             {% endwith %}
+            {% endwith %}
         {% endfor %}
     </div>
 
@@ -348,7 +361,7 @@
                             <td>{{ previous_attempt.get_status_display }}</td>
                             <td>
                                 {% if previous_attempt.exam.exam_type == "test" %}
-                                    {{ previous_attempt.score_percent }}%
+                                    {{ previous_attempt.test_result.percentage_display }}%
                                 {% elif previous_attempt.checked_by_teacher and previous_attempt.can_view_result %}
                                     {{ previous_attempt.teacher_score|default:"-" }}
                                 {% elif previous_attempt.review_available_in_seconds > 0 %}

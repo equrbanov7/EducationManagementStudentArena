@@ -85,10 +85,16 @@
                 <span class="label">{% trans "label_result" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value">
                     {% if exam.exam_type == 'test' %}
-                        <span class="score badge {% if attempt.score_percent >= 50 %}bg-success{% else %}bg-danger{% endif %}">
-                            {{ attempt.score_percent }}%
+                        <span class="score badge {% if test_result.percentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ test_result.percentage_display }}%
                         </span>
-                        <span class="details text-muted">({{ attempt.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %}, {{ attempt.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %})</span>
+                        <span class="details text-muted">
+                            ({{ test_result.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %},
+                            {{ test_result.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %},
+                            {{ test_result.unanswered_count }} cavabsız,
+                            {{ test_result.delivered_count }} verilmiş sual,
+                            {{ test_result.score_display }} / {{ test_result.max_score_display }} bal)
+                        </span>
                     {% else %}
                         {% if attempt.checked_by_teacher %}
                             <span class="score badge bg-info text-dark">{{ attempt.teacher_score|default:"-" }}</span>
@@ -185,7 +191,12 @@
                         
                         {# Nəticə statusu #}
                         <div class="answer-status mt-3">
-                            {% if item.answer.is_correct %}
+                            {% if item.selected_options_count == 0 %}
+                                <div class="alert alert-warning d-flex align-items-center">
+                                    <i class="fas fa-exclamation-circle fa-lg me-2"></i>
+                                    <div>Cavab verilməyib (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>
+                                </div>
+                            {% elif item.answer.is_correct %}
                                 <div class="alert alert-success d-flex align-items-center">
                                     <i class="fas fa-check-circle fa-lg me-2"></i>
                                     <div>{% trans "message_answer_fully_correct" context "exams.template.teacher_view_attempt" %} (+{{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>

@@ -236,6 +236,12 @@
                                 {% endif %}
                             </a>
                         </th>
+                        {% if exam.exam_type == 'test' %}
+                            <th>Cavabsız</th>
+                            <th>Verilmiş sual</th>
+                            <th>Bal</th>
+                            <th>Faiz</th>
+                        {% endif %}
                         {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
                             <th>
                                 <a href="?{{ sort_base_query }}&sort_by=score&sort_dir={% if sort_by == 'score' and sort_dir == 'asc' %}desc{% elif sort_by == 'score' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
@@ -324,8 +330,17 @@
                                     </div>
                                 {% endif %}
                             </td>
-                            <td>{{ att.correct_count }}</td>
-                            <td>{{ att.wrong_count }}</td>
+                            {% if exam.exam_type == 'test' %}
+                                <td>{{ item.test_result.correct_count }}</td>
+                                <td>{{ item.test_result.wrong_count }}</td>
+                                <td>{{ item.test_result.unanswered_count }}</td>
+                                <td>{{ item.test_result.delivered_count }}</td>
+                                <td><strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong></td>
+                                <td><strong>{{ item.test_result.percentage_display }}%</strong></td>
+                            {% else %}
+                                <td>{{ att.correct_count }}</td>
+                                <td>{{ att.wrong_count }}</td>
+                            {% endif %}
                             {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
                                 <td><strong>{{ att.teacher_score|default:0 }}</strong></td>
                             {% endif %}

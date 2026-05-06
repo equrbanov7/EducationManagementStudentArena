@@ -18,6 +18,7 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
@@ -37,6 +38,7 @@ def _build_answer_review_item(answer):
     has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
     has_paint_answer = bool(getattr(answer, "paint_image", None)) or bool(getattr(answer, "has_paint", False))
     has_file_answer = bool(answer_files)
+    selected_options_count = len(list(answer.selected_options.all()))
     has_answer_content = has_written_answer_content(
         student_answer=answer.text_answer,
         answer_files=answer_files,
@@ -59,6 +61,7 @@ def _build_answer_review_item(answer):
         "has_text_answer": has_text_answer,
         "has_paint_answer": has_paint_answer,
         "has_file_answer": has_file_answer,
+        "selected_options_count": selected_options_count,
         "has_answer_content": has_answer_content,
         "has_ai_gradeable_content": has_ai_gradeable_answer_content(
             student_answer=answer.text_answer,
@@ -222,7 +225,10 @@ def teacher_exam_results(request, slug):
         **navigation_params,
     )
 
-    attempts = exam.attempts.select_related("user")
+    attempts = exam.attempts.select_related("user", "exam").prefetch_related(
+        "answers__question__options",
+        "answers__selected_options",
+    )
 
     selected_attempt = None
     selected_answers = None
@@ -372,8 +378,14 @@ def teacher_exam_results(request, slug):
         selected_answers = (
             ExamAnswer.objects.filter(attempt=selected_attempt)
             .select_related("question")
+            .prefetch_related("question__options", "selected_options")
             .order_by("question__order", "question__id")
         )
+        if exam.exam_type == "test":
+            selected_attempt.test_result = calculate_test_attempt_result(
+                selected_attempt,
+                answers=list(selected_answers),
+            )
 
     now = timezone.now()
     attempts_data = []
@@ -394,6 +406,7 @@ def teacher_exam_results(request, slug):
         attempts_data.append(
             {
                 "attempt": att,
+                "test_result": calculate_test_attempt_result(att) if exam.exam_type == "test" else None,
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
                 "can_view_name": can_view_name,
@@ -552,7 +565,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         .order_by("id")
     )
 
-    if not answers_qs.exists():
+    if not answers_qs.exists() and not attempt.is_finished:
         generate_random_questions_for_attempt(attempt)
         answers_qs = (
             attempt.answers.select_related("question")
@@ -561,6 +574,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         )
 
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
+    test_result = calculate_test_attempt_result(attempt, answers=list(answers_qs)) if exam.exam_type == "test" else None
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
@@ -602,6 +616,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         "qa_list": questions_page.object_list,
         "qa_page": questions_page,
         "qa_search_query": search_query,
+        "test_result": test_result,
         "qa_pagination_query": pagination_query,
         "qa_clear_search_url": clear_search_url,
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
@@ -654,7 +669,7 @@ def teacher_check_attempt(request, slug, attempt_id):
         .order_by("id")
     )
 
-    if not answers_qs.exists():
+    if not answers_qs.exists() and not attempt.is_finished:
         generate_random_questions_for_attempt(attempt)
         answers_qs = (
             attempt.answers.select_related("question")

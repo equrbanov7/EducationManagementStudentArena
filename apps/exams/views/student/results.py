@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import CodingSubmission, ExamAttempt
+from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import (
@@ -74,6 +75,7 @@ def exam_result(request, slug, attempt_id):
         .order_by("-started_at")
     )
     previous_attempts = annotate_attempt_result_visibility(previous_attempts)
+    attach_test_result_summaries(previous_attempts)
     for previous_attempt in previous_attempts:
         previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=request.get_full_path())
 
@@ -88,9 +90,13 @@ def exam_result(request, slug, attempt_id):
         .order_by("id")  # attempt yaranma ardıcıllığı ilə
     )
 
+    answers = list(answers_qs)
+
     # Template-də istifadə üçün:
-    questions = [a.question for a in answers_qs]
-    answers_by_qid = {a.question_id: a for a in answers_qs}
+    questions = [a.question for a in answers]
+    answers_by_qid = {a.question_id: a for a in answers}
+    answer_has_selection_by_qid = {a.question_id: bool(list(a.selected_options.all())) for a in answers}
+    test_result = calculate_test_attempt_result(attempt, answers=answers) if exam.exam_type == "test" else None
     coding_submissions_by_qid = {}
     if exam.exam_type == "coding":
         for submission in (
@@ -112,6 +118,8 @@ def exam_result(request, slug, attempt_id):
             "attempt": attempt,
             "questions": questions,
             "answers_by_qid": answers_by_qid,
+            "answer_has_selection_by_qid": answer_has_selection_by_qid,
+            "test_result": test_result,
             "coding_submissions_by_qid": coding_submissions_by_qid,
             "history_url": history_url,
             "back_url": back_url,
@@ -137,6 +145,7 @@ def student_exam_history(request):
             status__in=["submitted", "graded", "expired"],
         )
         .select_related("exam")
+        .prefetch_related("answers__question__options", "answers__selected_options")
         .order_by("-started_at")
     )
 
@@ -155,6 +164,7 @@ def student_exam_history(request):
     page_obj = paginator.get_page(page_number)
 
     visible_attempts = annotate_attempt_result_visibility(list(page_obj.object_list))
+    attach_test_result_summaries(visible_attempts)
     current_path = request.get_full_path()
     for attempt in visible_attempts:
         attempt.result_url = build_exam_result_url(attempt, return_to=current_path)
