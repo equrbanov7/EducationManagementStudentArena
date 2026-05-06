@@ -10,6 +10,7 @@ Covers:
 """
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -246,6 +247,25 @@ class PublicProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("accounts:profile"))
+
+    def test_public_profile_hides_avatar_image_from_anonymous_visitors(self):
+        tiny_png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDATx\x9cc`\x00"
+            b"\x00\x00\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        self.owner.profile.avatar = SimpleUploadedFile("avatar.png", tiny_png, content_type="image/png")
+        self.owner.profile.save(update_fields=["avatar", "updated_at"])
+
+        response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(
+            response,
+            reverse("accounts:profile_avatar", kwargs={"user_id": self.owner.id}),
+            html=False,
+        )
+        self.assertContains(response, "public-profile-avatar__fallback", html=False)
 
     def test_public_profile_search_and_pagination_work(self):
         search_response = self.client.get(

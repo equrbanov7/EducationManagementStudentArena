@@ -225,6 +225,7 @@ def _validate_profile_avatar_version(raw_value):
     return normalized
 
 
+@login_required
 def profile_avatar(request, user_id):
     """Serve profile avatar through Django to avoid direct MEDIA URL dependency."""
     try:
