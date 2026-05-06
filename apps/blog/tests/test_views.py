@@ -366,6 +366,28 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, reverse("accounts:public_profile", args=[self.teacher.username]))
         self.assertContains(response, "data-history-back")
 
+    def test_article_detail_increments_view_count_once_per_session(self):
+        detail_url = reverse("article_detail", args=[self.teacher_post.slug])
+
+        first_response = self.client.get(detail_url)
+        second_response = self.client.get(detail_url)
+        self.teacher_post.refresh_from_db()
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(self.teacher_post.view_count, 1)
+        self.assertContains(second_response, "1 baxış")
+
+    def test_article_detail_counts_new_browser_session_as_new_view(self):
+        detail_url = reverse("article_detail", args=[self.teacher_post.slug])
+
+        self.client.get(detail_url)
+        self.client.cookies.clear()
+        self.client.get(detail_url)
+        self.teacher_post.refresh_from_db()
+
+        self.assertEqual(self.teacher_post.view_count, 2)
+
     def test_legacy_blog_article_detail_redirects_to_article_route(self):
         response = self.client.get(f"/blog/posts/{self.teacher_post.slug}/")
 

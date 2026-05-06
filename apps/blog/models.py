@@ -240,6 +240,7 @@ class Post(models.Model):
     )  # Blank=True qoyduq ki, admin paneldə məcburi istəməsin
     excerpt = models.TextField(blank=True)
     content = models.TextField()
+    view_count = models.PositiveBigIntegerField(default=0, db_index=True)
 
     image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

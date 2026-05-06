@@ -63,15 +63,20 @@
 .card-excerpt {
     color: var(--text-light);
     font-size: 0.95rem;
-    line-height: 1.6; /* Sətirlər arası boşluq */
-    margin-bottom: 20px;
-    flex-grow: 1;
+    line-height: 1.55; /* Sətirlər arası boşluq */
+    margin-bottom: 18px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 18px;
+    margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid #eee;
     font-size: 0.85rem;
@@ -97,13 +102,19 @@
     color: var(--primary-color, #2563eb);
 }
 
-.card-author i, .card-date i {
+.card-author i, .card-date i, .card-views i {
     margin-right: 5px; /* İkon və mətn arası boşluq */
     color: #9ca3af; /* İkon rəngi */
 }
 
-.card-date {
+.card-date,
+.card-views {
     color: var(--text-light, #6b7280); /* Tarix rəngi */
+}
+
+.card-views {
+    display: inline-flex;
+    align-items: center;
 }
 
 
