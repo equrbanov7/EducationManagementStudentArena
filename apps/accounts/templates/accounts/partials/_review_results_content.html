@@ -76,6 +76,7 @@
                         <th>Növ</th>
                         <th>Qrup</th>
                         <th>Nəticə</th>
+                        <th>Müəllim</th>
                         <th>Qiymətləndirilib</th>
                         <th>Əməliyyat</th>
                     </tr>
@@ -105,6 +106,12 @@
                             <td>{{ item.group_name|default:"-" }}</td>
                             <td>
                                 <span class="pending-review-score">{{ item.score_display }}</span>
+                            </td>
+                            <td>
+                                <span class="pending-review-evaluator">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                    {{ item.evaluator_display|default:"-" }}
+                                </span>
                             </td>
                             <td>{{ item.reviewed_at|default:item.submitted_at|date:"d.m.Y H:i" }}</td>
                             <td>

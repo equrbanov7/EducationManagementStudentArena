@@ -1342,6 +1342,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "Qalan vaxt:")
 
     def test_teacher_view_attempt_shows_finished_at_and_computed_duration(self):
+        self.teacher.first_name = "View"
+        self.teacher.last_name = "Teacher"
+        self.teacher.save(update_fields=["first_name", "last_name"])
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Written Timing View Exam",
@@ -1377,6 +1380,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["attempt_timing"]["finished_at"], finished_at)
         self.assertEqual(response.context["attempt_timing"]["duration_seconds"], 35 * 60)
+        self.assertEqual(response.context["exam_evaluator_display"], "View Teacher")
+        self.assertContains(response, "Yoxlayan müəllim:")
+        self.assertContains(response, "View Teacher")
         self.assertContains(response, "Bitirib:")
         self.assertContains(response, "Ümumi müddət:")
         self.assertContains(response, "35 dəq")
@@ -1417,6 +1423,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'step="1"')
 
     def test_teacher_check_attempt_shows_exam_timing_summary(self):
+        self.teacher.first_name = "Teacher"
+        self.teacher.last_name = "Owner"
+        self.teacher.save(update_fields=["first_name", "last_name"])
         written_exam = Exam.objects.create(
             author=self.teacher,
             title="Timing Summary Exam",
@@ -1455,6 +1464,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "Başlayıb")
         self.assertContains(response, "Bitirib")
         self.assertContains(response, "Ümumi müddət")
+        self.assertContains(response, "İmtahanı yaradan müəllim:")
+        self.assertContains(response, "Teacher Owner")
         self.assertContains(response, "27 dəq")
 
     def test_teacher_check_attempt_shows_real_student_name_when_org_override_enabled(self):

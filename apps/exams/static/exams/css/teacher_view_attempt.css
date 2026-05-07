@@ -18,14 +18,27 @@
 }
 
 /* --- SƏHİFƏ BAŞLIĞI --- */
-.page-header h1 {
-    color: var(--dark-blue);
-    font-weight: 700;
+.page-header {
     border-bottom: 2px solid var(--light-blue-bg);
     padding-bottom: 15px;
     margin-bottom: 30px;
+}
+
+.page-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.page-header h1 {
+    color: var(--dark-blue);
+    font-weight: 700;
+    margin: 0;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .page-header h1 i {
@@ -39,11 +52,31 @@
     margin-left: 8px;
 }
 
+.attempt-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    border: 1px solid #0f4fc4;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1b67df 0%, #13926b 100%);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 10px 16px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.attempt-back-btn:hover {
+    color: #ffffff;
+    filter: brightness(0.95);
+}
+
 /* --- İMTAHAN MƏLUMAT KARTI --- */
 .exam-summary-card {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 28px;
     background: #fff;
     padding: 25px;
     border-radius: 12px;
@@ -52,10 +85,10 @@
 }
 
 .summary-item {
-    flex: 1 1 200px; /* Responsive genişlik */
     display: flex;
     align-items: flex-start;
     gap: 12px;
+    min-width: 0;
 }
 
 .summary-item i {
@@ -69,6 +102,7 @@
 .summary-content {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .summary-content .label {
@@ -80,15 +114,23 @@
 }
 
 .summary-content .value {
+    display: inline-flex;
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-dark);
     margin-top: 4px;
+    overflow-wrap: anywhere;
 }
 
-
+.result-item {
+    align-items: flex-start;
+}
 
 .result-item .value .score {
+    width: fit-content;
     font-size: 1.2rem;
     padding: 6px 12px;
 }
@@ -96,7 +138,14 @@
 .result-item .details {
     font-size: 0.9rem;
     font-weight: normal;
-    margin-left: 5px;
+    margin-left: 0;
+    line-height: 1.45;
+}
+
+.result-value-stack {
+    display: grid;
+    gap: 6px;
+    align-items: start;
 }
 
 /* --- AYIRICI XƏTT --- */
@@ -405,8 +454,16 @@
 
 /* --- RESPONSİV DÜZƏLİŞLƏR --- */
 @media (max-width: 768px) {
-    .summary-item {
-        flex: 1 1 100%; /* Mobildə tam genişlik */
+    .page-header-top {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .attempt-back-btn {
+        justify-content: center;
+        width: 100%;
+    }
+    .exam-summary-card {
+        grid-template-columns: 1fr;
     }
     .question-header {
         flex-direction: column;
