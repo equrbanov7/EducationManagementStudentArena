@@ -15,6 +15,10 @@
             Tələbə:
             <strong{% if not can_view_student_identity %} class="text-warning"{% endif %}>{{ student_display }}</strong>
         </p>
+        <p class="text-muted mb-0">
+            İmtahanı yaradan müəllim:
+            <strong>{{ exam_creator_display }}</strong>
+        </p>
         <div class="exam-timing-summary">
             <article class="exam-timing-card">
                 <span class="exam-timing-card__label">Başlayıb</span>
