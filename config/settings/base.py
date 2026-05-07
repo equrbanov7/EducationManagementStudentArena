@@ -254,11 +254,12 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Instruct browsers not to render this site inside a frame (clickjacking).
 X_FRAME_OPTIONS = "DENY"
+SECURE_REFERRER_POLICY = os.getenv("REFERRER_POLICY", "strict-origin-when-cross-origin")
 
 # Additional response headers that tighten browser-side defaults without
 # requiring per-view duplication.
 SECURITY_RESPONSE_HEADERS = {
-    "Referrer-Policy": os.getenv("REFERRER_POLICY", "strict-origin-when-cross-origin"),
+    "Referrer-Policy": SECURE_REFERRER_POLICY,
     "Permissions-Policy": os.getenv(
         "PERMISSIONS_POLICY",
         "camera=(), geolocation=(), microphone=()",
