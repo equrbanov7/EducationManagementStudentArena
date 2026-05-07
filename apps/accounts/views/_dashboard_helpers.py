@@ -48,6 +48,10 @@ User = get_user_model()
 SUBMISSION_DATE_ORDER_CHOICES = {"newest", "oldest"}
 
 
+def _user_display_name(user):
+    return user.get_full_name() or user.username
+
+
 def _build_student_group_map_and_available(teacher):
     """Build student→group_name mapping and available groups list from StudentGroup model."""
     teacher_groups = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
@@ -877,7 +881,7 @@ def _collect_pending_review_items(
             )
             .filter(Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
             .exclude(exam__exam_type="test")
-            .select_related("exam", "user", "exam__course")
+            .select_related("exam", "user", "exam__author", "exam__course")
         )
         if search_query:
             attempts = attempts.filter(
@@ -904,6 +908,7 @@ def _collect_pending_review_items(
                     "icon": _standard_item_type_meta("exam")[1],
                     "student": attempt.user,
                     "student_display": student_display,
+                    "creator_display": _user_display_name(attempt.exam.author),
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(attempt.user_id, ""),
@@ -1182,7 +1187,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
                 | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
             )
-            .select_related("exam", "user", "exam__course")
+            .select_related("exam", "user", "exam__author", "exam__course")
         )
         if search_query:
             attempts = attempts.filter(
@@ -1204,6 +1209,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(attempt.user_id, ""),
                     "score_display": _format_score_display(score_value),
+                    "evaluator_display": _user_display_name(attempt.exam.author),
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
                     "action_url": _append_query_params(
@@ -1225,7 +1231,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 status="graded",
             )
             .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .select_related("assignment", "assignment__course", "user")
+            .select_related("assignment", "assignment__course", "user", "graded_by")
         )
         if search_query:
             submissions = submissions.filter(
@@ -1245,6 +1251,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(submission.user_id, ""),
                     "score_display": _format_score_display(submission.grade),
+                    "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(
@@ -1265,7 +1272,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 status="graded",
             )
             .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .select_related("project", "project__course", "student")
+            .select_related("project", "project__course", "student", "graded_by")
         )
         if search_query:
             project_submissions = project_submissions.filter(
@@ -1285,6 +1292,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(submission.student_id, ""),
                     "score_display": _format_score_display(submission.grade),
+                    "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(
@@ -1305,7 +1313,13 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 status="graded",
             )
             .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+            .select_related(
+                "assignment",
+                "assignment__lab",
+                "assignment__lab__course",
+                "assignment__student",
+                "graded_by",
+            )
         )
         if search_query:
             lab_submissions = lab_submissions.filter(
@@ -1326,6 +1340,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(student.id, ""),
                     "score_display": _format_score_display(submission.score),
+                    "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
                     "submitted_at": submission.submitted_at,
                     "reviewed_at": submission.graded_at,
                     "action_url": _append_query_params(

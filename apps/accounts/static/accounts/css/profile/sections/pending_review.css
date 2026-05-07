@@ -302,6 +302,15 @@
     color: #1d4e89;
 }
 
+.pending-review-results-table th,
+.pending-review-results-table td {
+    vertical-align: middle;
+}
+
+.pending-review-results-table td {
+    color: #1f2937;
+}
+
 .pending-review-results-table tbody tr:hover {
     background: #eef8ff;
 }
@@ -347,6 +356,22 @@
     background: #d1fae5;
     color: #065f46;
     font-weight: 700;
+}
+
+.pending-review-evaluator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #334155;
+    font-weight: 700;
+    line-height: 1.25;
+    max-width: 180px;
+    overflow-wrap: anywhere;
+}
+
+.pending-review-evaluator i {
+    color: #2563eb;
+    flex-shrink: 0;
 }
 
 .pending-item-type,
