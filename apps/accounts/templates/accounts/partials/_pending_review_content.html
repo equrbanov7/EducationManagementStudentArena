@@ -97,6 +97,10 @@
                     
                     <div class="pr-item-meta">
                         <strong><i class="fas fa-user-graduate me-1 text-primary"></i>{{ item.student_display|default:"Anonim tələbə" }}</strong>
+                        {% if item.creator_display %}
+                            <span class="pr-item-meta-divider">•</span>
+                            <span><i class="fas fa-chalkboard-teacher me-1 text-primary"></i>Müəllim: {{ item.creator_display }}</span>
+                        {% endif %}
                         <span class="pr-item-meta-divider">•</span>
                         <span>{{ item.course_title|default:"-" }}</span>
                         

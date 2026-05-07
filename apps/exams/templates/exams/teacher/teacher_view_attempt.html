@@ -12,11 +12,16 @@
 {% block content %}
 <div class="container my-4 view-attempt-container">
     <div class="page-header">
-        <h1 class="h3">
-            <i class="fas fa-user-graduate me-2"></i>
-            {% trans "heading_student_answers" context "exams.template.teacher_view_attempt" %}:
-            <span class="student-name{% if not can_view_student_identity %} anonymous-name{% endif %}">{{ student_display }}</span>
-        </h1>
+        <div class="page-header-top">
+            <h1 class="h3">
+                <i class="fas fa-user-graduate me-2"></i>
+                {% trans "heading_student_answers" context "exams.template.teacher_view_attempt" %}:
+                <span class="student-name{% if not can_view_student_identity %} anonymous-name{% endif %}">{{ student_display }}</span>
+            </h1>
+            <a href="{{ profile_return_url }}" class="attempt-back-btn">
+                <i class="fas fa-arrow-left"></i> {{ source_back_label }}
+            </a>
+        </div>
     </div>
 
     {% if not can_view_student_identity and identity_window_seconds_left %}
@@ -38,6 +43,13 @@
             <div class="summary-content">
                 <span class="label">{% trans "label_type" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value badge bg-primary text-white">{{ exam.get_exam_type_display }}</span>
+            </div>
+        </div>
+        <div class="summary-item">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <div class="summary-content">
+                <span class="label">Yoxlayan müəllim:</span>
+                <span class="value">{{ exam_evaluator_display }}</span>
             </div>
         </div>
         <div class="summary-item">
@@ -85,20 +97,25 @@
                 <span class="label">{% trans "label_result" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value">
                     {% if exam.exam_type == 'test' %}
-                        <span class="score badge {% if test_result.percentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">
-                            {{ test_result.percentage_display }}%
-                        </span>
-                        <span class="details text-muted">
-                            ({{ test_result.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %},
-                            {{ test_result.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %},
-                            {{ test_result.unanswered_count }} cavabsız,
-                            {{ test_result.delivered_count }} verilmiş sual,
-                            {{ test_result.score_display }} / {{ test_result.max_score_display }} bal)
+                        <span class="result-value-stack">
+                            <span class="score badge {% if test_result.percentage >= 50 %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ test_result.percentage_display }}%
+                            </span>
+                            <span class="details text-muted">
+                                {{ test_result.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %},
+                                {{ test_result.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %},
+                                {{ test_result.unanswered_count }} cavabsız
+                            </span>
+                            <span class="details text-muted">
+                                {{ test_result.delivered_count }} verilmiş sual, {{ test_result.score_display }} / {{ test_result.max_score_display }} bal
+                            </span>
                         </span>
                     {% else %}
                         {% if attempt.checked_by_teacher %}
-                            <span class="score badge bg-info text-dark">{{ attempt.teacher_score|default:"-" }}</span>
-                            <span class="details text-muted">({% trans "teacher_score" context "exams.template.teacher_view_attempt" %})</span>
+                            <span class="result-value-stack">
+                                <span class="score badge bg-info text-dark">{{ attempt.teacher_score|default:"-" }}</span>
+                                <span class="details text-muted">{% trans "teacher_score" context "exams.template.teacher_view_attempt" %}</span>
+                            </span>
                         {% else %}
                             <span class="badge bg-warning text-dark">{% trans "status_not_checked" context "exams.template.teacher_view_attempt" %}</span>
                         {% endif %}
@@ -327,11 +344,6 @@
         {% include "partials/_pagination.html" with page_obj=qa_page extra_query=qa_pagination_query page_param='questions_page' %}
     </div>
 
-    <div class="mt-4 mb-5">
-        <a href="{{ profile_return_url }}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-arrow-left me-2"></i> {{ source_back_label }}
-        </a>
-    </div>
 </div>
 {% endblock %}
 
