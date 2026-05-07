@@ -78,7 +78,12 @@ def live_state_json(request, pin):
         return response
 
     with bypass_rls():
-        session = get_object_or_404(LiveSession, pin=pin)
+        session = LiveSession.objects.filter(pin=pin).first()
+        if session is None:
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+                status=403,
+            )
         server_time = timezone.now()
         is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
         player = None if is_host else get_request_player(request, pin=pin)
