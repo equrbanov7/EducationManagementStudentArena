@@ -190,3 +190,13 @@ class MetricsViewTest(TestCase):
     def test_metrics_contain_http_requests_total(self):
         resp = self.client.get("/metrics/")
         self.assertIn(b"http_requests_total", resp.content)
+
+
+class SecurityHeadersTest(TestCase):
+    def test_ping_includes_default_security_headers(self):
+        resp = self.client.get("/ping/")
+
+        self.assertEqual(resp["Referrer-Policy"], "strict-origin-when-cross-origin")
+        self.assertEqual(resp["Permissions-Policy"], "camera=(), geolocation=(), microphone=()")
+        self.assertEqual(resp["Cross-Origin-Resource-Policy"], "same-origin")
+        self.assertEqual(resp["Cross-Origin-Opener-Policy"], "same-origin")
