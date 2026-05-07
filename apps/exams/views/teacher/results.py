@@ -33,6 +33,10 @@ ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 ANONYMOUS_NAME_CODE_LENGTH = 6
 
 
+def _user_display_name(user):
+    return user.get_full_name() or user.username
+
+
 def _build_answer_review_item(answer):
     answer_files = list(answer.files.all())
     has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
@@ -623,6 +627,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         "profile_return_url": profile_return_url,
         "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
         "student_display": student_display,
+        "exam_evaluator_display": _user_display_name(exam.author),
         "can_view_student_identity": can_view_name,
         "identity_window_seconds_left": identity_window_seconds,
     }
@@ -770,6 +775,7 @@ def teacher_check_attempt(request, slug, attempt_id):
         "profile_return_url": profile_return_url,
         "results_return_url": results_return_url,
         "student_display": student_display,
+        "exam_creator_display": _user_display_name(exam.author),
         "can_view_student_identity": can_view_name,
         "identity_window_seconds_left": identity_window_seconds,
     }
