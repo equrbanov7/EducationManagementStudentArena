@@ -141,3 +141,19 @@ class MetricsMiddleware:
         self._requests_total.labels(method=method, path=norm_path, status_code=status).inc()
         self._duration.labels(method=method, path=norm_path).observe(elapsed)
         return response
+
+
+class SecurityHeadersMiddleware:
+    """Attach default hardening headers that are safe across the app."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.conf import settings
+
+        response = self.get_response(request)
+        for header_name, header_value in getattr(settings, "SECURITY_RESPONSE_HEADERS", {}).items():
+            if header_value:
+                response.setdefault(header_name, header_value)
+        return response
