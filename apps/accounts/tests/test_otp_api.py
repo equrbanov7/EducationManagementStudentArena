@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import Client, TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import EmailOTP
@@ -32,7 +33,7 @@ class OTPApiViewTest(TestCase):
 
     def test_send_otp_endpoint_sends_login_otp_without_exposing_code(self):
         response = self.client.post(
-            "/send-otp/",
+            reverse("accounts:send_otp_api"),
             data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
         )
 
@@ -54,7 +55,9 @@ class OTPApiViewTest(TestCase):
         self.assertFalse(otp.is_verified)
 
     def test_verify_otp_endpoint_authenticates_login_flow(self):
-        self.client.post("/send-otp/", data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN})
+        self.client.post(
+            reverse("accounts:send_otp_api"), data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN}
+        )
         message = mail.outbox[-1]
         import re
 
@@ -62,7 +65,7 @@ class OTPApiViewTest(TestCase):
         self.assertIsNotNone(match)
 
         response = self.client.post(
-            "/verify-otp/",
+            reverse("accounts:verify_otp_api"),
             data={"email": self.user.email, "otp": match.group(1), "purpose": EmailOTP.Purpose.LOGIN},
         )
 
@@ -71,10 +74,12 @@ class OTPApiViewTest(TestCase):
         self.assertEqual(str(self.client.session.get("_auth_user_id")), str(self.user.pk))
 
     def test_resend_otp_endpoint_enforces_cooldown(self):
-        self.client.post("/send-otp/", data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN})
+        self.client.post(
+            reverse("accounts:send_otp_api"), data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN}
+        )
 
         response = self.client.post(
-            "/resend-otp/",
+            reverse("accounts:resend_otp_api"),
             data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
         )
 
@@ -92,9 +97,34 @@ class OTPApiViewTest(TestCase):
             EmailOTP.objects.filter(pk=otp.pk).update(created_at=timezone.now() - timedelta(minutes=number))
 
         response = self.client.post(
-            "/send-otp/",
+            reverse("accounts:send_otp_api"),
             data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
         )
 
         self.assertEqual(response.status_code, 429)
         self.assertIn("Retry-After", response.headers)
+
+    def test_root_level_otp_routes_return_404_while_accounts_routes_exist(self):
+        send_response = self.client.post(
+            "/send-otp/",
+            data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
+        )
+        verify_response = self.client.post(
+            "/verify-otp/",
+            data={"email": self.user.email, "otp": "000000", "purpose": EmailOTP.Purpose.LOGIN},
+        )
+        resend_response = self.client.post(
+            "/resend-otp/",
+            data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
+        )
+
+        self.assertEqual(send_response.status_code, 404)
+        self.assertEqual(verify_response.status_code, 404)
+        self.assertEqual(resend_response.status_code, 404)
+
+        accounts_send_response = self.client.post(
+            reverse("accounts:send_otp_api"),
+            data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
+        )
+
+        self.assertEqual(accounts_send_response.status_code, 202)
