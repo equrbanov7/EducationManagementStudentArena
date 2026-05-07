@@ -1611,6 +1611,53 @@ class URLPatternTest(TestCase):
                 self.assertTrue(url.startswith("/"))
 
 
+class LiveExamFrontendAssetHardeningTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("asset_teacher", "asset@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.org = Organization.objects.create(
+            name="Asset Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        _create_org_role_and_membership(self.teacher, self.org, permissions=["exam.host"])
+        self.exam = Exam.objects.create(
+            title="Asset Test Exam",
+            slug="asset-test-exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+    def test_host_lobby_uses_local_chart_bundle(self):
+        self.client.force_login(self.teacher)
+        _set_active_org(self.client, self.org)
+
+        response = self.client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "vendor/chartjs/chart.umd.min.js")
+        self.assertNotContains(response, "cdn.jsdelivr.net/npm/chart.js")
+
+    def test_host_presentation_uses_local_chart_bundle(self):
+        self.client.force_login(self.teacher)
+        _set_active_org(self.client, self.org)
+
+        response = self.client.get(reverse("liveExam:host_presentation", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "vendor/chartjs/chart.umd.min.js")
+        self.assertNotContains(response, "cdn.jsdelivr.net/npm/chart.js")
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Security tests – host RBAC / org enforcement
 # ════════════════════════════════════════════════════════════════════════════
@@ -2105,11 +2152,35 @@ class LiveExamSessionStateHardeningTest(TestCase):
         response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 403)
 
+    def test_state_json_returns_403_for_anonymous_nonexistent_session(self):
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": "ZZZZZZZZZZ"}))
+        self.assertEqual(response.status_code, 403)
+
     def test_state_json_returns_200_for_authenticated_host(self):
         """An authenticated teacher (host) can access state_json."""
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
         self.assertIn(response.status_code, (200, 403))  # 403 if org RBAC needed
+
+    def test_qr_png_requires_authenticated_host(self):
+        response = self.client.get(reverse("liveExam:qr_png", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_qr_png_returns_404_for_non_host(self):
+        intruder = User.objects.create_user("qr_intruder", "qr_intruder@example.com", "StrongPass123!")
+        self.client.force_login(intruder)
+
+        response = self.client.get(reverse("liveExam:qr_png", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_qr_png_returns_image_for_host(self):
+        self.client.force_login(self.teacher)
+
+        response = self.client.get(reverse("liveExam:qr_png", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
 
     def test_join_page_returns_404_for_nonexistent_session(self):
         """Requesting a join page for an unknown PIN returns 404."""
