@@ -104,7 +104,7 @@ class OTPApiViewTest(TestCase):
         self.assertEqual(response.status_code, 429)
         self.assertIn("Retry-After", response.headers)
 
-    def test_root_level_otp_routes_return_404_while_accounts_routes_exist(self):
+    def test_root_level_otp_routes_removed(self):
         send_response = self.client.post(
             "/send-otp/",
             data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN},
