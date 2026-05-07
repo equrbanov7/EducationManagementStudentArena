@@ -611,7 +611,11 @@ def live_qr_png(request, pin):
     with bypass_rls():
         session = LiveSession.objects.filter(pin=pin).first()
 
-    if session is None or not getattr(request.user, "is_authenticated", False) or session.host_user_id != request.user.id:
+    if (
+        session is None
+        or not getattr(request.user, "is_authenticated", False)
+        or session.host_user_id != request.user.id
+    ):
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
     join_url = build_join_url(request, session)
