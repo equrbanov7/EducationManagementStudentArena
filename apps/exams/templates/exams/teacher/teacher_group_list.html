@@ -262,7 +262,7 @@
     noDataFound: "{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list'|escapejs %}",
     modalTitleEditGroup: "{% trans 'modal_title_edit_group' context 'exams.template.teacher_group_list'|escapejs %}",
     confirmDeleteGroup: "{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list'|escapejs %}",
-    studentRegisteredGroupNumber: "{% trans 'student_registered_group_number' context 'profile.groups'|escapejs %}"
+    studentGroupMemberships: "{% trans 'student_group_memberships' context 'profile.groups'|escapejs %}"
   };
 
   const groupModal = document.getElementById("groupModal");
@@ -310,15 +310,19 @@
         return;
       }
 
-      function optionGroupNumber(option) {
-        return (option.getAttribute("data-student-group-number") || "").trim();
+      function optionGroupLabels(option) {
+        return (
+          option.getAttribute("data-user-group-labels") ||
+          option.getAttribute("data-student-group-number") ||
+          ""
+        ).trim();
       }
 
       function optionSearchText(option) {
         return [
           option.text || "",
           option.getAttribute("data-search-text") || "",
-          optionGroupNumber(option)
+          optionGroupLabels(option)
         ].join(" ").toLowerCase();
       }
 
@@ -343,11 +347,11 @@
         nameSpan.textContent = option.text || "";
         label.appendChild(nameSpan);
 
-        const groupNumber = optionGroupNumber(option);
-        if (groupNumber) {
+        const groupLabels = optionGroupLabels(option);
+        if (groupLabels) {
           const groupBadge = document.createElement("span");
           groupBadge.className = "student-label__group";
-          groupBadge.textContent = `${I18N_TEACHER_GROUP_LIST.studentRegisteredGroupNumber}: ${groupNumber}`;
+          groupBadge.textContent = `${I18N_TEACHER_GROUP_LIST.studentGroupMemberships}: ${groupLabels}`;
           label.appendChild(groupBadge);
         }
 

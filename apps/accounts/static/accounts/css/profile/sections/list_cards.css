@@ -3,6 +3,40 @@
     gap: 1rem;
 }
 
+.profile-group-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-group-section-title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.profile-group-section-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+}
+
+.profile-group-section-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 42px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .post-item {
     display: flex;
     gap: 1.25rem;
@@ -46,6 +80,7 @@
 
 .post-info {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -290,6 +325,7 @@
 }
 
 @media (max-width: 720px) {
+    .profile-group-section-header,
     .post-item--group,
     .profile-group-detail__header,
     .profile-group-search,
@@ -301,6 +337,11 @@
     .group-card-actions {
         width: 100%;
         justify-content: flex-start;
+    }
+
+    .profile-group-section-actions,
+    .profile-group-section-actions .btn {
+        width: 100%;
     }
 
     .profile-group-search .btn {
