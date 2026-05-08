@@ -65,15 +65,19 @@ document.addEventListener("DOMContentLoaded", function () {
       return normalize(searchInput ? searchInput.value : "");
     }
 
-    function optionStudentGroupNumber(option) {
-      return String(option.getAttribute("data-student-group-number") || "").trim();
+    function optionGroupLabels(option) {
+      return String(
+        option.getAttribute("data-user-group-labels") ||
+        option.getAttribute("data-student-group-number") ||
+        ""
+      ).trim();
     }
 
     function optionSearchText(option) {
       return [
         option.textContent || "",
         option.getAttribute("data-search-text") || "",
-        optionStudentGroupNumber(option)
+        optionGroupLabels(option)
       ].join(" ");
     }
 
@@ -119,11 +123,11 @@ document.addEventListener("DOMContentLoaded", function () {
         textNode.textContent = option.textContent || "";
         contentNode.appendChild(textNode);
 
-        var studentGroupNumber = optionStudentGroupNumber(option);
-        if (studentGroupNumber) {
+        var groupLabels = optionGroupLabels(option);
+        if (groupLabels) {
           var groupBadge = document.createElement("span");
           groupBadge.className = "group-checklist__badge";
-          groupBadge.textContent = studentGroupLabel + ": " + studentGroupNumber;
+          groupBadge.textContent = studentGroupLabel + ": " + groupLabels;
           contentNode.appendChild(groupBadge);
         }
 

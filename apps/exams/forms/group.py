@@ -5,6 +5,7 @@ Student group forms (teacher/admin-facing).
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
@@ -17,17 +18,44 @@ User = get_user_model()
 class UserMetadataSelectMultiple(forms.SelectMultiple):
     """Expose lightweight user metadata to custom checklist renderers."""
 
+    group_membership_attrs = (
+        "_student_group_memberships_for_form",
+        "_teacher_primary_group_memberships_for_form",
+        "_teacher_assigned_group_memberships_for_form",
+    )
+
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
         option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
         user = getattr(value, "instance", None)
         profile = getattr(user, "profile", None)
         student_group_number = (getattr(profile, "student_group_number", "") or "").strip()
+        group_labels = []
 
         if student_group_number:
-            option["attrs"]["data-student-group-number"] = student_group_number
-            option["attrs"]["data-search-text"] = f"{label} {student_group_number}"
+            group_labels.append(student_group_number)
+
+        for group in self._iter_prefetched_group_memberships(user):
+            group_name = (getattr(group, "name", "") or "").strip()
+            if group_name and group_name not in group_labels:
+                group_labels.append(group_name)
+
+        if group_labels:
+            group_text = ", ".join(group_labels)
+            option["attrs"]["data-student-group-number"] = group_text
+            option["attrs"]["data-user-group-labels"] = group_text
+            option["attrs"]["data-search-text"] = f"{label} {group_text}"
 
         return option
+
+    def _iter_prefetched_group_memberships(self, user):
+        if user is None:
+            return []
+
+        memberships = []
+        for attr in self.group_membership_attrs:
+            memberships.extend(getattr(user, attr, []) or [])
+
+        return memberships
 
 
 class StudentGroupForm(forms.ModelForm):
@@ -47,7 +75,7 @@ class StudentGroupForm(forms.ModelForm):
         queryset=User.objects.none(),
         required=False,
         label=pgettext_lazy("exams.form.group.label", "assigned_teachers"),
-        widget=forms.SelectMultiple(
+        widget=UserMetadataSelectMultiple(
             attrs={
                 "class": "form-select",
             }
@@ -107,6 +135,34 @@ class StudentGroupForm(forms.ModelForm):
             self.organization,
             {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
             queryset=users_qs,
+        )
+
+        group_memberships_qs = StudentGroup.objects.none()
+        if self.organization is not None:
+            group_memberships_qs = (
+                StudentGroup.objects.filter(organization=self.organization)
+                .only("id", "name", "organization_id")
+                .order_by("name")
+            )
+
+        students_qs = students_qs.prefetch_related(
+            Prefetch(
+                "student_groups_as_student",
+                queryset=group_memberships_qs,
+                to_attr="_student_group_memberships_for_form",
+            )
+        )
+        teachers_qs = teachers_qs.prefetch_related(
+            Prefetch(
+                "student_groups",
+                queryset=group_memberships_qs,
+                to_attr="_teacher_primary_group_memberships_for_form",
+            ),
+            Prefetch(
+                "student_groups_as_teacher",
+                queryset=group_memberships_qs,
+                to_attr="_teacher_assigned_group_memberships_for_form",
+            ),
         )
 
         self.fields["students"].queryset = students_qs

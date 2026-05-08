@@ -765,6 +765,10 @@ msgctxt "profile.groups"
 msgid "student_registered_group_number"
 msgstr "Kayıt grubu"
 
+msgctxt "profile.groups"
+msgid "student_group_memberships"
+msgstr "Gruplar"
+
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
 msgid "title"
