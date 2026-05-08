@@ -9,7 +9,7 @@
         max-width: 900px;
         margin: 40px auto;
         position: relative;
-        padding: 0 12px;
+        padding: 0 12px 130px;
     }
 
     .settings-card {
@@ -459,7 +459,7 @@
     /* ===== Action bar (ortada fixed) ===== */
     .action-bar {
         position: fixed;
-        bottom: 20px;
+        bottom: max(20px, env(safe-area-inset-bottom));
         left: 50%;
         transform: translateX(-50%);
         background: rgba(255,255,255,0.97);
@@ -505,6 +505,21 @@
     .btn-cancel-main:hover { background: #d63031; }
 
     @media (max-width: 576px) {
+        .bank-container {
+            margin-top: 24px;
+            padding-bottom: 32px;
+        }
+
+        .block-header {
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .block-title {
+            min-width: 0;
+            line-height: 1.3;
+        }
+
         .ai-block-grid {
             grid-template-columns: 1fr;
         }
@@ -524,10 +539,15 @@
         }
 
         .action-bar {
-            width: calc(100% - 24px);
-            left: 12px;
+            position: static;
+            width: 100%;
             transform: none;
             justify-content: space-between;
+            margin-top: 24px;
+        }
+
+        .btn-add-block {
+            margin-bottom: 0;
         }
         .btn-save-main, .btn-cancel-main{
             flex: 1;
@@ -664,20 +684,22 @@
                                    placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
                         </div>
 
-                        <div class="form-group">
-                            <label class="paint-setting-row">
-                                <input type="checkbox"
-                                       name="block_enable_paint_{{ forloop.counter }}"
-                                       {% if item.paint_enabled %}checked{% endif %}>
-                                <span class="paint-setting-check" aria-hidden="true">
-                                    <i class="fas fa-paint-brush"></i>
-                                </span>
-                                <span class="paint-setting-copy">
-                                    <span class="paint-setting-label">{% trans "label_block_enable_paint" context "exams.template.create_question_bank" %}</span>
-                                    <span class="paint-setting-help">{% trans "help_block_enable_paint" context "exams.template.create_question_bank" %}</span>
-                                </span>
-                            </label>
-                        </div>
+                        {% if exam.exam_type == "written" %}
+                            <div class="form-group">
+                                <label class="paint-setting-row">
+                                    <input type="checkbox"
+                                           name="block_enable_paint_{{ forloop.counter }}"
+                                           {% if item.paint_enabled %}checked{% endif %}>
+                                    <span class="paint-setting-check" aria-hidden="true">
+                                        <i class="fas fa-paint-brush"></i>
+                                    </span>
+                                    <span class="paint-setting-copy">
+                                        <span class="paint-setting-label">{% trans "label_block_enable_paint" context "exams.template.create_question_bank" %}</span>
+                                        <span class="paint-setting-help">{% trans "help_block_enable_paint" context "exams.template.create_question_bank" %}</span>
+                                    </span>
+                                </label>
+                            </div>
+                        {% endif %}
 
                         <div class="ai-block-panel"
                              data-ai-question-form
@@ -767,20 +789,22 @@
                             <input type="number" name="block_time_1" class="form-control-custom" placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
                         </div>
 
-                        <div class="form-group">
-                            <label class="paint-setting-row">
-                                <input type="checkbox"
-                                       name="block_enable_paint_1"
-                                       {% if exam.enable_paint %}checked{% endif %}>
-                                <span class="paint-setting-check" aria-hidden="true">
-                                    <i class="fas fa-paint-brush"></i>
-                                </span>
-                                <span class="paint-setting-copy">
-                                    <span class="paint-setting-label">{% trans "label_block_enable_paint" context "exams.template.create_question_bank" %}</span>
-                                    <span class="paint-setting-help">{% trans "help_block_enable_paint" context "exams.template.create_question_bank" %}</span>
-                                </span>
-                            </label>
-                        </div>
+                        {% if exam.exam_type == "written" %}
+                            <div class="form-group">
+                                <label class="paint-setting-row">
+                                    <input type="checkbox"
+                                           name="block_enable_paint_1"
+                                           {% if exam.enable_paint %}checked{% endif %}>
+                                    <span class="paint-setting-check" aria-hidden="true">
+                                        <i class="fas fa-paint-brush"></i>
+                                    </span>
+                                    <span class="paint-setting-copy">
+                                        <span class="paint-setting-label">{% trans "label_block_enable_paint" context "exams.template.create_question_bank" %}</span>
+                                        <span class="paint-setting-help">{% trans "help_block_enable_paint" context "exams.template.create_question_bank" %}</span>
+                                    </span>
+                                </label>
+                            </div>
+                        {% endif %}
 
                         <div class="ai-block-panel"
                              data-ai-question-form
@@ -962,6 +986,7 @@ window.AI_QUESTION_BANK_I18N = {
     noFileSelected: "{{ ai_qbank_no_file_selected|escapejs }}"
 };
 const QBANK_DEFAULT_BLOCK_PAINT_ENABLED = {% if exam.enable_paint %}true{% else %}false{% endif %};
+const QBANK_SHOW_BLOCK_PAINT = {% if exam.exam_type == "written" %}true{% else %}false{% endif %};
 
 let blockToDelete = null;
 let blockCounter = {{ blocks_data|length|default:1 }};
@@ -1063,8 +1088,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const uniqueID = Date.now();
         const defaultTitle = `${I18N_QBANK.blockDefault} ${blockCounter}`;
 
-        const newBlockHTML = `
-            <div class="block-card block-item" id="block-card-${uniqueID}" data-default-title="${defaultTitle}">
+	    const newBlockHTML = `
+	            <div class="block-card block-item" id="block-card-${uniqueID}" data-default-title="${defaultTitle}">
                 <div class="block-header">
                     <h5 class="block-title"><i class="fas fa-cube"></i> <span class="block-title-text">${defaultTitle}</span></h5>
                     <input type="hidden" class="block-db-id" name="block_db_id_${uniqueID}" value="">
@@ -1082,18 +1107,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label><i class="far fa-clock"></i> ${I18N_QBANK.labelBlockTimeMinutes}:</label>
                         <input type="number" name="block_time_${uniqueID}" class="form-control-custom" placeholder="${I18N_QBANK.placeholderUnlimited}">
                     </div>
-                    <div class="form-group">
-                        <label class="paint-setting-row">
-                            <input type="checkbox" name="block_enable_paint_${uniqueID}" ${QBANK_DEFAULT_BLOCK_PAINT_ENABLED ? 'checked' : ''}>
-                            <span class="paint-setting-check" aria-hidden="true">
-                                <i class="fas fa-paint-brush"></i>
-                            </span>
-                            <span class="paint-setting-copy">
-                                <span class="paint-setting-label">${I18N_QBANK.labelBlockEnablePaint}</span>
-                                <span class="paint-setting-help">${I18N_QBANK.helpBlockEnablePaint}</span>
-                            </span>
-                        </label>
-                    </div>
+	                    ${QBANK_SHOW_BLOCK_PAINT ? `
+	                        <div class="form-group">
+	                            <label class="paint-setting-row">
+	                                <input type="checkbox" name="block_enable_paint_${uniqueID}" ${QBANK_DEFAULT_BLOCK_PAINT_ENABLED ? 'checked' : ''}>
+	                                <span class="paint-setting-check" aria-hidden="true">
+	                                    <i class="fas fa-paint-brush"></i>
+	                                </span>
+	                                <span class="paint-setting-copy">
+	                                    <span class="paint-setting-label">${I18N_QBANK.labelBlockEnablePaint}</span>
+	                                    <span class="paint-setting-help">${I18N_QBANK.helpBlockEnablePaint}</span>
+	                                </span>
+	                            </label>
+	                        </div>
+	                    ` : ''}
                     ${renderAiBlockPanel(uniqueID, defaultTitle)}
                     <div class="form-group">
                         <label>${I18N_QBANK.labelQuestionsCopyPaste}:</label>
@@ -1188,5 +1215,5 @@ window.addEventListener('click', function(event) {
     if (event.target === modal) closeDeleteModal();
 });
 </script>
-<script src="{% static 'exams/js/aiQuestionBank.js' %}"></script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
 {% endblock %}

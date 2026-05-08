@@ -1,9 +1,89 @@
 from apps.exams.models import CodingExamQuestion, CodingTestCase, ExamQuestion
 
+DEFAULT_PRACTICAL_STARTER_HTML = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practical preview</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <script src="script.js"></script>
+</body>
+</html>
+"""
+
 
 def _next_question_order(exam):
     last_question = exam.questions.order_by("-order", "-id").first()
     return (last_question.order + 1) if last_question else 1
+
+
+def _question_title(question):
+    text = (getattr(question, "text", "") or "").strip()
+    first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
+    return (first_line or "Practical task")[:255]
+
+
+def _question_time_limit(question):
+    return (
+        getattr(question, "time_limit_seconds", None)
+        or getattr(getattr(question, "exam", None), "default_question_time_seconds", None)
+        or 2
+    )
+
+
+def build_coding_payload_from_exam_question(question):
+    return {
+        "language": CodingExamQuestion.LANGUAGE_HTML,
+        "title": _question_title(question),
+        "problem_statement": (getattr(question, "text", "") or "").strip() or _question_title(question),
+        "input_description": "",
+        "output_description": "",
+        "example_input": "",
+        "example_output": "",
+        "time_limit_seconds": max(int(_question_time_limit(question) or 2), 1),
+        "memory_limit_mb": 128,
+        "max_score": max(int(getattr(question, "points", 1) or 1), 1),
+        "starter_code": DEFAULT_PRACTICAL_STARTER_HTML,
+        "allow_file_creation": True,
+        "allow_multiple_files": True,
+        "enable_code_execution": True,
+    }
+
+
+def ensure_coding_question_for_exam_question(question, *, sync_existing=False):
+    payload = build_coding_payload_from_exam_question(question)
+    coding_question, created = CodingExamQuestion.objects.get_or_create(
+        question=question,
+        defaults=payload,
+    )
+    if created:
+        return coding_question
+
+    coding_question.allow_file_creation = True
+    coding_question.allow_multiple_files = True
+    if sync_existing:
+        for field_name in (
+            "title",
+            "problem_statement",
+            "time_limit_seconds",
+            "max_score",
+        ):
+            setattr(coding_question, field_name, payload[field_name])
+        if not coding_question.starter_code:
+            coding_question.starter_code = payload["starter_code"]
+        if not coding_question.language:
+            coding_question.language = payload["language"]
+    coding_question.save()
+    return coding_question
+
+
+def sync_coding_questions_for_exam(exam):
+    questions = exam.questions.filter(is_active=True).select_related("exam").order_by("order", "id")
+    return [ensure_coding_question_for_exam_question(question, sync_existing=True) for question in questions]
 
 
 def build_coding_payload_from_exam_form(cleaned_data):
