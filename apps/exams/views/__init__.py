@@ -5,7 +5,7 @@
 # ═══════════════════════════════════════════════════════════════
 from .shared.access import exam_code_check
 from .student.attempts import start_exam, take_exam
-from .student.coding import coding_autosave, coding_run, coding_submit
+from .student.coding import coding_autosave, coding_run, coding_submission_download, coding_submit
 from .student.lists import assigned_student_exam_list, student_exam_list
 
 # ═══════════════════════════════════════════════════════════════
@@ -109,6 +109,7 @@ __all__ = [
     "take_exam",
     "coding_autosave",
     "coding_run",
+    "coding_submission_download",
     "coding_submit",
     # Student - Lists
     "assigned_student_exam_list",

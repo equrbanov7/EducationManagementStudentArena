@@ -457,23 +457,15 @@
             var paintLabel = paintCheckbox ? paintCheckbox.closest(".modal-check-label--paint") : null;
             var randomQuestionGroup = form.querySelector("[data-test-random-question-group]");
             var randomQuestionInput = form.querySelector('input[name="random_question_count"]');
-            var codingFields = form.querySelector("[data-coding-exam-fields]");
 
             function syncExamTypeVisibility(examType) {
                 var isTest = examType === "test";
-                var isCoding = examType === "coding";
                 if (!paintCheckbox) {
                     if (randomQuestionGroup) {
                         randomQuestionGroup.hidden = !isTest;
                     }
                     if (randomQuestionInput) {
-                        randomQuestionInput.disabled = !isTest && !isCoding;
-                    }
-                    if (codingFields) {
-                        codingFields.hidden = !isCoding;
-                        codingFields.querySelectorAll("input, textarea, select").forEach(function (field) {
-                            field.disabled = !isCoding;
-                        });
+                        randomQuestionInput.disabled = !isTest;
                     }
                     return;
                 }
@@ -483,7 +475,7 @@
                     randomQuestionGroup.hidden = !isTest;
                 }
                 if (randomQuestionInput) {
-                    randomQuestionInput.disabled = !isTest && !isCoding;
+                    randomQuestionInput.disabled = !isTest;
                 }
 
                 if (!isWritten) {
@@ -496,12 +488,6 @@
                 }
                 if (paintLabel) {
                     paintLabel.classList.toggle("is-disabled", !isWritten);
-                }
-                if (codingFields) {
-                    codingFields.hidden = !isCoding;
-                    codingFields.querySelectorAll("input, textarea, select").forEach(function (field) {
-                        field.disabled = !isCoding;
-                    });
                 }
             }
 

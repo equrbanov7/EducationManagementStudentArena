@@ -4,7 +4,7 @@
 {% block title %}{{ exam.title }} - {% trans "title_question_bank" context "exams.template.test_question_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260508-ai-form-fix">
 {% endblock %}
 
 {% block content %} 
@@ -353,6 +353,8 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
     {% endif %}
 </div>
 
+{% endblock %}
+
 {% block extraJs %}
 <script nonce="{{ request.csp_nonce }}">
 {% trans "Yaradılır..." context "exams.template.ai_question_bank" as ai_i18n_generating %}
@@ -378,8 +380,8 @@ window.AI_QUESTION_BANK_I18N = {
     noFileSelected: "{{ ai_i18n_no_file_selected|escapejs }}"
 };
 </script>
-<script src="{% static 'exams/js/aiQuestionBank.js' %}"></script>
-<script src="{% static 'exams/js/testQuestionBank.js' %}"></script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
 
 <script nonce="{{ request.csp_nonce }}">
 function syncBankSettings(){
@@ -402,6 +404,4 @@ function syncBankSettings(){
     return true;
 }
 </script>
-{% endblock %}
-
 {% endblock %}

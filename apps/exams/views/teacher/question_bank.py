@@ -1,3 +1,4 @@
+import logging
 import re
 from urllib.parse import urlencode, urlsplit
 
@@ -14,11 +15,13 @@ from django.views.decorators.http import require_POST
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_question_generation import generate_question_bank_text
+from apps.exams.services.coding_definition import sync_coding_questions_for_exam
 from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 WRITTEN_QUESTION_PREFIX_RE = re.compile(r"^\s*\d+\s*[\.\)]\s*", re.MULTILINE)
+logger = logging.getLogger(__name__)
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -99,6 +102,17 @@ def _parse_written_questions(content_text):
     return questions
 
 
+def _optional_non_negative_int(value):
+    raw = (value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed >= 0 else None
+
+
 def _sync_written_block_questions(block, question_texts):
     existing_questions = list(block.questions.order_by("order", "id"))
     normalized_texts = [text for text in question_texts if text]
@@ -145,7 +159,7 @@ def ai_generate_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
 
-    if exam.exam_type not in {"test", "written"}:
+    if exam.exam_type not in {"test", "written", "coding"}:
         return JsonResponse(
             {
                 "ok": False,
@@ -172,17 +186,31 @@ def ai_generate_question_bank(request, slug):
             )
         source_text = "\n\n".join(part for part in [source_text, extracted_text] if part.strip())
 
-    result = generate_question_bank_text(
-        exam_title=exam.title,
-        exam_type=exam.exam_type,
-        prompt_text=request.POST.get("prompt", ""),
-        source_text=source_text,
-        question_count=request.POST.get("question_count") or 5,
-        difficulty=request.POST.get("difficulty") or "medium",
-        block_name=request.POST.get("block_name") or "",
-        language_code=request.LANGUAGE_CODE,
-        user_id=request.user.pk,
-    )
+    ai_exam_type = "written" if exam.exam_type == "coding" else exam.exam_type
+    try:
+        result = generate_question_bank_text(
+            exam_title=exam.title,
+            exam_type=ai_exam_type,
+            prompt_text=request.POST.get("prompt", ""),
+            source_text=source_text,
+            question_count=request.POST.get("question_count") or 5,
+            difficulty=request.POST.get("difficulty") or "medium",
+            block_name=request.POST.get("block_name") or "",
+            language_code=request.LANGUAGE_CODE,
+            user_id=request.user.pk,
+        )
+    except Exception:
+        logger.exception("AI question bank endpoint failed for exam %s", exam.pk)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": pgettext(
+                    "exams.view.question_bank.ai.error",
+                    "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın.",
+                ),
+            },
+            status=500,
+        )
     status = 200 if result.get("ok") else 400
     return JsonResponse(result, status=status)
 
@@ -239,9 +267,9 @@ def process_question_bank(request, slug):
                 QuestionBlock.objects.filter(id=d_id, exam=exam).delete()
 
         # 2. Ümumi sual sayını yenilə
-        random_count = request.POST.get("random_question_count")
-        if random_count:
-            exam.random_question_count = int(random_count)
+        random_count = _optional_non_negative_int(request.POST.get("random_question_count"))
+        if random_count is not None:
+            exam.random_question_count = random_count
             exam.save()
 
         # Adların təkrar olub-olmadığını yoxlamaq üçün set
@@ -275,7 +303,7 @@ def process_question_bank(request, slug):
                 content_key = f"block_content_{ui_id}"
                 content_text = request.POST.get(content_key, "")
                 time_key = f"block_time_{ui_id}"
-                time_val = request.POST.get(time_key)
+                time_val = _optional_non_negative_int(request.POST.get(time_key))
                 block_paint_enabled = request.POST.get(f"block_enable_paint_{ui_id}") == "on"
                 db_id_key = f"block_db_id_{ui_id}"
                 db_id = request.POST.get(db_id_key)
@@ -307,7 +335,7 @@ def process_question_bank(request, slug):
                         if block_qs.exists():
                             block = block_qs.first()
                             block.name = block_name
-                            block.time_limit_minutes = int(time_val) if time_val else None
+                            block.time_limit_minutes = time_val
                             block.enable_paint = block_paint_enabled
                             block.order = current_order  # ✅ Düzgün order
                             block.save()
@@ -317,7 +345,7 @@ def process_question_bank(request, slug):
                         block = QuestionBlock.objects.create(
                             exam=exam,
                             name=block_name,
-                            time_limit_minutes=int(time_val) if time_val else None,
+                            time_limit_minutes=time_val,
                             enable_paint=block_paint_enabled,
                             order=current_order,  # ✅ Düzgün order (ui_id deyil)
                         )
@@ -328,6 +356,9 @@ def process_question_bank(request, slug):
                     # Sualların Parse edilməsi
                     questions = _parse_written_questions(content_text) if content_text.strip() else []
                     _sync_written_block_questions(block, questions)
+
+        if exam.exam_type == "coding":
+            sync_coding_questions_for_exam(exam)
 
         messages.success(request, pgettext_lazy("exams.view.question_bank.message", "bank_saved"))
         return redirect(

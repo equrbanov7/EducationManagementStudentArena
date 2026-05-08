@@ -137,10 +137,6 @@
             {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
         </div>
 
-        {% if form.practical_exams_enabled %}
-            {% include "exams/teacher/partials/_coding_exam_fields.html" %}
-        {% endif %}
-
         <div class="form-group form-group-full">
             <div class="create-exam-modal-section-title">
                 <h4><i class="fas fa-users" style="color:#198754;"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
