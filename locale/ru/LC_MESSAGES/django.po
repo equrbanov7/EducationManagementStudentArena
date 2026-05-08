@@ -768,6 +768,10 @@ msgctxt "profile.groups"
 msgid "student_registered_group_number"
 msgstr "Группа при регистрации"
 
+msgctxt "profile.groups"
+msgid "student_group_memberships"
+msgstr "Группы"
+
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
 msgid "title"
