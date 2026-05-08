@@ -15,11 +15,11 @@
 
         <div class="profile-group-section-actions">
             {% if group_form %}
-                <button type="button" class="btn btn-primary jsOpenCreateGroupProfile">
+                <button type="button" class="btn-create-new profile-group-create-btn jsOpenCreateGroupProfile">
                     <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
                 </button>
             {% else %}
-                <a href="{% url 'exams:create_student_group' %}" class="btn btn-primary">
+                <a href="{% url 'exams:create_student_group' %}" class="btn-create-new profile-group-create-btn">
                     <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
                 </a>
             {% endif %}
