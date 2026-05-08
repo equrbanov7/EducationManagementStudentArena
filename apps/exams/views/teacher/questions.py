@@ -14,10 +14,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
-from apps.exams.forms import CodingExamQuestionForm, ExamQuestionCreateForm
+from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.coding_definition import build_coding_payload_from_question_form, upsert_coding_question
+from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
@@ -287,80 +287,6 @@ def add_exam_question(request, slug):
     is_modal_request = _is_question_modal_request(request)
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
-    if exam.exam_type == "coding":
-        if request.method == "POST":
-            form = CodingExamQuestionForm(request.POST)
-            if form.is_valid():
-                question, _ = upsert_coding_question(
-                    exam,
-                    payload=build_coding_payload_from_question_form(form.cleaned_data),
-                    visible_cases=form.cleaned_data.get("visible_test_cases") or [],
-                    hidden_cases=form.cleaned_data.get("hidden_test_cases") or [],
-                )
-                try:
-                    from core.cache import invalidate_exam_question_ids_cache
-
-                    invalidate_exam_question_ids_cache(exam.pk)
-                except Exception:
-                    pass
-
-                if is_modal_request:
-                    return JsonResponse({"success": True, "question_id": question.id})
-
-                if "save_and_continue" in request.POST:
-                    return redirect(
-                        _append_navigation_query(
-                            reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
-                        )
-                    )
-                return redirect(
-                    _append_navigation_query(
-                        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
-                        navigation_query,
-                    )
-                )
-            if is_modal_request:
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "html": _render_question_form_html(
-                            request,
-                            exam=exam,
-                            form=form,
-                            editing=False,
-                            navigation_query=navigation_query,
-                        ),
-                    },
-                    status=400,
-                )
-        else:
-            form = CodingExamQuestionForm()
-
-        if is_modal_request:
-            return render(
-                request,
-                "exams/teacher/partials/_question_form.html",
-                {
-                    "exam": exam,
-                    "form": form,
-                    "editing": False,
-                    "is_modal": True,
-                    "question_navigation_query": navigation_query,
-                },
-            )
-
-        return render(
-            request,
-            "exams/teacher/add_exam_question.html",
-            {
-                "exam": exam,
-                "form": form,
-                "editing": False,
-                "is_modal": False,
-                "question_navigation_query": navigation_query,
-            },
-        )
-
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             _question_post_data_with_default_block(request, created_default_block),
@@ -378,12 +304,15 @@ def add_exam_question(request, slug):
             question.exam = exam
             question.order = next_order
 
-            # Yazılı imtahan üçün answer_mode-u zorla "single" edə bilərik
-            if exam.exam_type == "written":
+            # Yazılı/praktiki imtahan üçün answer_mode-u zorla "single" edə bilərik
+            if exam.exam_type in {"written", "coding"}:
                 question.answer_mode = "single"
-                question.set_paint_enabled(form.cleaned_data.get("enable_paint"))
+                if exam.exam_type == "written":
+                    question.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
             question.save()
+            if exam.exam_type == "coding":
+                ensure_coding_question_for_exam_question(question, sync_existing=True)
 
             # Invalidate the cached question ID list so live sessions see the change.
             try:
@@ -472,82 +401,6 @@ def edit_exam_question(request, slug, question_id):
 
     blocks, created_default_block = _question_form_blocks(exam)
 
-    if exam.exam_type == "coding":
-        try:
-            coding_instance = question.coding_details
-        except Exception:
-            coding_instance = None
-        if request.method == "POST":
-            form = CodingExamQuestionForm(request.POST, instance=coding_instance)
-            if form.is_valid():
-                q, _ = upsert_coding_question(
-                    exam,
-                    payload=build_coding_payload_from_question_form(form.cleaned_data),
-                    visible_cases=form.cleaned_data.get("visible_test_cases") or [],
-                    hidden_cases=form.cleaned_data.get("hidden_test_cases") or [],
-                    base_question=question,
-                )
-                if is_modal_request:
-                    return JsonResponse({"success": True, "question_id": q.id})
-
-                if "save_and_continue" in request.POST:
-                    return redirect(
-                        _append_navigation_query(
-                            reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
-                        )
-                    )
-
-                return redirect(
-                    _append_navigation_query(
-                        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
-                        navigation_query,
-                    )
-                )
-            if is_modal_request:
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "html": _render_question_form_html(
-                            request,
-                            exam=exam,
-                            form=form,
-                            editing=True,
-                            question=question,
-                            navigation_query=navigation_query,
-                        ),
-                    },
-                    status=400,
-                )
-        else:
-            form = CodingExamQuestionForm(instance=coding_instance)
-
-        if is_modal_request:
-            return render(
-                request,
-                "exams/teacher/partials/_question_form.html",
-                {
-                    "exam": exam,
-                    "form": form,
-                    "editing": True,
-                    "question": question,
-                    "is_modal": True,
-                    "question_navigation_query": navigation_query,
-                },
-            )
-
-        return render(
-            request,
-            "exams/teacher/add_exam_question.html",
-            {
-                "exam": exam,
-                "form": form,
-                "editing": True,
-                "question": question,
-                "is_modal": False,
-                "question_navigation_query": navigation_query,
-            },
-        )
-
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             _question_post_data_with_default_block(request, created_default_block),
@@ -561,11 +414,14 @@ def edit_exam_question(request, slug, question_id):
             q = form.save(commit=False)
             q.exam = exam
 
-            if exam.exam_type == "written":
+            if exam.exam_type in {"written", "coding"}:
                 q.answer_mode = "single"
-                q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
+                if exam.exam_type == "written":
+                    q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
             q.save()
+            if exam.exam_type == "coding":
+                ensure_coding_question_for_exam_question(q, sync_existing=True)
 
             if exam.exam_type == "test":
                 form.save_options(q)

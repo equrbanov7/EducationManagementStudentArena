@@ -16,57 +16,31 @@
 {{ starter_files|json_script:"coding-starter-files" }}
 {{ visible_test_cases|json_script:"coding-visible-test-cases" }}
 {{ language_modes|json_script:"coding-language-modes" }}
+{{ coding_questions|json_script:"coding-questions" }}
 
 <div class="coding-exam-shell" id="codingExamShell">
-    <header class="coding-topbar">
-        <div class="coding-title-block">
-            <a href="{{ history_url }}" class="coding-back-link" aria-label="{% trans 'Back' context 'exams.template.coding_exam' %}">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div>
-                <h1>{{ exam.title }}</h1>
-                <p>{{ coding_question.title }}</p>
+    <section class="coding-progress-card">
+        <div class="coding-progress-head">
+            <div class="coding-progress-title">
+                <h2>{{ exam.title }}</h2>
+                <p id="codingCurrentQuestionTitle">{{ coding_question.title }}</p>
+            </div>
+            <div class="coding-progress-stats">
+                <span>{% trans "Question" context "exams.template.take_exam" %}: <strong id="codingCurrentQuestionNum">1</strong> / <span id="codingTotalQuestionCount">{{ coding_questions|length }}</span></span>
+                <span class="coding-answer-count">{% trans "Answer" context "exams.template.take_exam" %}: <strong id="codingAnsweredCount">0</strong> / <span id="codingTotalAnswerCount">{{ coding_questions|length }}</span></span>
             </div>
         </div>
-
-        <div class="coding-topbar-actions">
-            {% if exam.total_duration_minutes %}
-                <div class="coding-timer" id="codingTimer">
-                    <i class="fas fa-clock"></i>
-                    <span id="codingTimerValue">--:--</span>
-                </div>
-            {% endif %}
-            <label class="coding-select-label" for="codingLanguageSelect">
-                {% trans "Language" context "exams.template.coding_exam" %}
-            </label>
-            <select id="codingLanguageSelect" class="coding-select">
-                {% for value, label in coding_languages %}
-                    <option value="{{ value }}" {% if value == coding_question.language %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-            <button type="button" class="coding-icon-btn" id="codingThemeToggle" title="{% trans 'Theme' context 'exams.template.coding_exam' %}">
-                <i class="fas fa-moon"></i>
-            </button>
-            <select id="codingFontSize" class="coding-select coding-select--small" title="{% trans 'Font size' context 'exams.template.coding_exam' %}">
-                <option value="13">13</option>
-                <option value="14" selected>14</option>
-                <option value="16">16</option>
-                <option value="18">18</option>
-            </select>
-            <button type="button" class="coding-btn coding-btn--muted" id="codingResetBtn">
-                <i class="fas fa-rotate-left"></i>
-                <span>{% trans "Reset code" context "exams.template.coding_exam" %}</span>
-            </button>
-            <button type="button" class="coding-btn coding-btn--run" id="codingRunBtn">
-                <i class="fas fa-play"></i>
-                <span>{% trans "Run Code" context "exams.template.coding_exam" %}</span>
-            </button>
-            <button type="button" class="coding-btn coding-btn--submit" id="codingSubmitBtn">
-                <i class="fas fa-paper-plane"></i>
-                <span>{% trans "Submit Code" context "exams.template.coding_exam" %}</span>
-            </button>
+        <div class="coding-progress-track" aria-hidden="true">
+            <div class="coding-progress-fill" id="codingProgressFill"></div>
         </div>
-    </header>
+    </section>
+
+    <nav class="coding-question-nav" id="codingQuestionNav" aria-label="{% trans 'Questions' context 'exams.template.coding_exam' %}"></nav>
+
+    <section class="coding-question-card">
+        <div class="coding-question-label" id="codingQuestionLabel">{% trans "QUESTION" context "exams.template.take_exam" %} 1</div>
+        <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
+    </section>
 
     <main class="coding-workspace" id="codingWorkspace">
         <section class="coding-editor-pane">
@@ -100,46 +74,52 @@
         </section>
 
         <section class="coding-result-pane">
-            <article class="coding-problem-card">
-                <div class="coding-problem-heading">
-                    <span class="coding-chip">{{ coding_question.get_language_display }}</span>
-                    <span class="coding-chip">{{ coding_question.max_score }} pts</span>
-                    <span class="coding-chip">{{ coding_question.time_limit_seconds }}s</span>
-                    <span class="coding-chip">{{ coding_question.memory_limit_mb }}MB</span>
+            <div class="coding-result-toolbar">
+                <div class="coding-tabs" role="tablist">
+                    <button type="button" class="coding-tab active" data-coding-tab="output">{% trans "Output" context "exams.template.coding_exam" %}</button>
+                    <button type="button" class="coding-tab" data-coding-tab="errors">{% trans "Errors" context "exams.template.coding_exam" %}</button>
+                    <button type="button" class="coding-tab" data-coding-tab="preview" data-preview-tab>{% trans "Preview" context "exams.template.coding_exam" %}</button>
                 </div>
-                <h2>{{ coding_question.title }}</h2>
-                <div class="coding-problem-text">{{ coding_question.problem_statement|linebreaks }}</div>
 
-                {% if coding_question.input_description %}
-                    <h3>{% trans "Input description" context "exams.template.coding_exam" %}</h3>
-                    <div class="coding-problem-text">{{ coding_question.input_description|linebreaks }}</div>
-                {% endif %}
-                {% if coding_question.output_description %}
-                    <h3>{% trans "Output description" context "exams.template.coding_exam" %}</h3>
-                    <div class="coding-problem-text">{{ coding_question.output_description|linebreaks }}</div>
-                {% endif %}
-                <div class="coding-examples-grid">
-                    {% if coding_question.example_input %}
-                        <div>
-                            <h3>{% trans "Example input" context "exams.template.coding_exam" %}</h3>
-                            <pre>{{ coding_question.example_input }}</pre>
+                <div class="coding-run-controls">
+                    {% if exam.total_duration_minutes %}
+                        <div class="coding-timer" id="codingTimer">
+                            <i class="fas fa-clock"></i>
+                            <span id="codingTimerValue">--:--</span>
                         </div>
                     {% endif %}
-                    {% if coding_question.example_output %}
-                        <div>
-                            <h3>{% trans "Example output" context "exams.template.coding_exam" %}</h3>
-                            <pre>{{ coding_question.example_output }}</pre>
+                    <div class="coding-select-group coding-select-group--language">
+                        <label class="coding-select-label" for="codingLanguageSelect">
+                            {% trans "Language" context "exams.template.coding_exam" %}
+                        </label>
+                        <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--language">
+                            <select id="codingLanguageSelect" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                {% for value, label in coding_languages %}
+                                    <option value="{{ value }}" {% if value == coding_question.language %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    {% endif %}
+                    </div>
+                    <button type="button" class="coding-icon-btn" id="codingThemeToggle" title="{% trans 'Theme' context 'exams.template.coding_exam' %}">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--font">
+                        <select id="codingFontSize" class="form-select bootstrap-single-select__native" data-bootstrap-select title="{% trans 'Font size' context 'exams.template.coding_exam' %}" aria-label="{% trans 'Font size' context 'exams.template.coding_exam' %}">
+                            <option value="13">13</option>
+                            <option value="14" selected>14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                        </select>
+                    </div>
+                    <button type="button" class="coding-btn coding-btn--muted" id="codingResetBtn">
+                        <i class="fas fa-rotate-left"></i>
+                        <span>{% trans "Reset code" context "exams.template.coding_exam" %}</span>
+                    </button>
+                    <button type="button" class="coding-btn coding-btn--run" id="codingRunBtn">
+                        <i class="fas fa-play"></i>
+                        <span>{% trans "Run Code" context "exams.template.coding_exam" %}</span>
+                    </button>
                 </div>
-            </article>
-
-            <div class="coding-tabs" role="tablist">
-                <button type="button" class="coding-tab active" data-coding-tab="output">{% trans "Output" context "exams.template.coding_exam" %}</button>
-                <button type="button" class="coding-tab" data-coding-tab="errors">{% trans "Errors" context "exams.template.coding_exam" %}</button>
-                <button type="button" class="coding-tab" data-coding-tab="tests">{% trans "Test Cases" context "exams.template.coding_exam" %}</button>
-                <button type="button" class="coding-tab" data-coding-tab="preview" data-preview-tab>{% trans "Preview" context "exams.template.coding_exam" %}</button>
-                <button type="button" class="coding-tab" data-coding-tab="submission">{% trans "Submission Result" context "exams.template.coding_exam" %}</button>
             </div>
 
             <div class="coding-tab-panels">
@@ -151,18 +131,30 @@
                 <section class="coding-panel" data-coding-panel="errors">
                     <pre id="codingErrors" class="coding-output coding-output--error"></pre>
                 </section>
-                <section class="coding-panel" data-coding-panel="tests">
-                    <div id="codingTestCases" class="coding-test-cases"></div>
-                </section>
                 <section class="coding-panel" data-coding-panel="preview">
                     <iframe id="codingPreviewFrame" class="coding-preview-frame" sandbox="allow-scripts"></iframe>
-                </section>
-                <section class="coding-panel" data-coding-panel="submission">
-                    <div id="codingSubmissionResult" class="coding-submission-result"></div>
+                    <pre id="codingPreviewConsole" class="coding-output coding-preview-console"></pre>
                 </section>
             </div>
         </section>
     </main>
+
+    <footer class="coding-exam-footer">
+        <button type="button" class="coding-footer-btn" id="codingPrevQuestionBtn">
+            <i class="fas fa-arrow-left"></i>
+            <span>{% trans "Previous" context "exams.template.take_exam" %}</span>
+        </button>
+        <div class="coding-footer-actions">
+            <button type="button" class="coding-footer-btn coding-footer-btn--primary" id="codingNextQuestionBtn">
+                <span>{% trans "Next" context "exams.template.take_exam" %}</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <button type="button" class="coding-btn coding-btn--submit" id="codingSubmitBtn" hidden>
+                <i class="fas fa-paper-plane"></i>
+                <span>{% trans "Submit Code" context "exams.template.coding_exam" %}</span>
+            </button>
+        </div>
+    </footer>
 
     <footer class="coding-statusbar">
         <span id="codingStatus">{% trans "Auto-saved" context "exams.template.coding_exam" %}</span>
@@ -176,6 +168,42 @@
     </footer>
 </div>
 
+<div class="modal fade" id="codingConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="codingConfirmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'exams.template.coding_exam' %}"></button>
+            </div>
+            <div class="modal-body" id="codingConfirmModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "common" %}</button>
+                <button type="button" class="btn btn-danger" id="codingConfirmModalConfirm">{% trans "Confirm" context "common" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="codingFileNameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" id="codingFileNameForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="codingFileNameModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' context 'exams.template.coding_exam' %}"></button>
+            </div>
+            <div class="modal-body">
+                <label for="codingFileNameInput" class="form-label">{% trans "File name" context "exams.template.coding_exam" %}</label>
+                <input type="text" class="form-control" id="codingFileNameInput" maxlength="180" autocomplete="off">
+                <div class="invalid-feedback d-block" id="codingFileNameError"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "common" %}</button>
+                <button type="submit" class="btn btn-primary" id="codingFileNameModalConfirm">{% trans "Save" context "common" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script nonce="{{ request.csp_nonce }}">
 window.CODING_EXAM_CONFIG = {
     autosaveUrl: "{{ autosave_url }}",
@@ -183,6 +211,7 @@ window.CODING_EXAM_CONFIG = {
     submitUrl: "{{ submit_url }}",
     resultUrl: "{{ result_url }}",
     csrfToken: "{{ csrf_token }}",
+    cspNonce: "{{ request.csp_nonce|escapejs }}",
     selectedLanguage: "{{ coding_question.language }}",
     allowFileCreation: {% if coding_question.allow_file_creation %}true{% else %}false{% endif %},
     allowMultipleFiles: {% if coding_question.allow_multiple_files %}true{% else %}false{% endif %},
@@ -198,7 +227,20 @@ window.CODING_EXAM_CONFIG = {
         passed: "{% filter escapejs %}{% trans 'Passed' context 'exams.template.coding_exam' %}{% endfilter %}",
         failed: "{% filter escapejs %}{% trans 'Failed' context 'exams.template.coding_exam' %}{% endfilter %}",
         mainFile: "{% filter escapejs %}{% trans 'Main File' context 'exams.template.coding_exam' %}{% endfilter %}",
-        fileNamePrompt: "{% filter escapejs %}{% trans 'File name' context 'exams.template.coding_exam' %}{% endfilter %}"
+        fileNamePrompt: "{% filter escapejs %}{% trans 'File name' context 'exams.template.coding_exam' %}{% endfilter %}",
+        question: "{% filter escapejs %}{% trans 'Question' context 'exams.template.coding_exam' %}{% endfilter %}",
+        questionUpper: "{% filter escapejs %}{% trans 'QUESTION' context 'exams.template.take_exam' %}{% endfilter %}",
+        previewUpdated: "{% filter escapejs %}{% trans 'Preview updated.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        createFile: "{% filter escapejs %}{% trans 'Create File' context 'exams.template.coding_exam' %}{% endfilter %}",
+        renameFile: "{% filter escapejs %}{% trans 'Rename File' context 'exams.template.coding_exam' %}{% endfilter %}",
+        resetConfirmTitle: "{% filter escapejs %}{% trans 'Reset code?' context 'exams.template.coding_exam' %}{% endfilter %}",
+        resetConfirmBody: "{% filter escapejs %}{% trans 'This will restore the current question files to the starter code.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        deleteConfirmTitle: "{% filter escapejs %}{% trans 'Delete file?' context 'exams.template.coding_exam' %}{% endfilter %}",
+        deleteConfirmBody: "{% filter escapejs %}{% trans 'This file will be removed from the current question.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        invalidFileName: "{% filter escapejs %}{% trans 'Use letters, numbers, dot, dash, or underscore only.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        duplicateFileName: "{% filter escapejs %}{% trans 'A file with this name already exists for this question.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        confirm: "{% filter escapejs %}{% trans 'Confirm' context 'common' %}{% endfilter %}",
+        save: "{% filter escapejs %}{% trans 'Save' context 'common' %}{% endfilter %}"
     }
 };
 </script>

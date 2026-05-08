@@ -17,6 +17,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
     """
 
     MIN_TEST_OPTIONS = 2
+    FREE_TEXT_EXAM_TYPES = {"written", "coding"}
 
     # ---- Variant field-ləri ----
     option1_text = forms.CharField(
@@ -155,8 +156,8 @@ class ExamQuestionCreateForm(forms.ModelForm):
         block_widget_attrs["class"] = "form-select bootstrap-single-select__native js-bootstrap-single-select"
         block_widget_attrs["data-bootstrap-select"] = ""
 
-        # Yazılı imtahanlarda answer_mode-u məcburi etməyək
-        if self.exam_type == "written":
+        # Yazılı/praktiki imtahanlarda answer_mode-u məcburi etməyək
+        if self.exam_type in self.FREE_TEXT_EXAM_TYPES:
             self.fields["answer_mode"].required = False
             self.fields["block"].required = True
             self.fields["block"].empty_label = None
@@ -285,12 +286,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
             )
             randomize_uploaded_filename(video)
 
-        # Yazılı imtahanda options validasiyasını skip edirik
-        if self.exam_type == "written":
+        # Yazılı/praktiki imtahanda options validasiyasını skip edirik
+        if self.exam_type in self.FREE_TEXT_EXAM_TYPES:
             if not cleaned_data.get("block"):
                 self.add_error(
                     "block",
-                    forms.ValidationError("Yazılı sual üçün mövzu bloku seçilməlidir."),
+                    forms.ValidationError("Sual üçün mövzu bloku seçilməlidir."),
                 )
             return cleaned_data
 

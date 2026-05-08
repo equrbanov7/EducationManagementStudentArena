@@ -279,9 +279,6 @@
                         {% endif %}
                     </div>
 
-                    {% if form.practical_exams_enabled %}
-                        {% include "exams/teacher/partials/_coding_exam_fields.html" %}
-                    {% endif %}
                 </div>
 
                 {# ================= İMTAHAN NƏZARƏTİ BLOKU ================= #}
@@ -507,7 +504,6 @@
             const paintCheckbox = document.getElementById("{{ form.enable_paint.id_for_label }}");
             const randomQuestionGroup = document.querySelector("[data-test-random-question-group]");
             const randomQuestionInput = document.getElementById("{{ form.random_question_count.id_for_label }}");
-            const codingFields = document.querySelector("[data-coding-exam-fields]");
 
             function syncExamTypeDependentFields() {
                 if (!examTypeSelect) return;
@@ -515,13 +511,12 @@
                 const selectedExamType = examTypeSelect.value || "test";
                 const isTest = selectedExamType === "test";
                 const isWritten = selectedExamType === "written";
-                const isCoding = selectedExamType === "coding";
 
                 if (randomQuestionGroup) {
                     randomQuestionGroup.hidden = !isTest;
                 }
                 if (randomQuestionInput) {
-                    randomQuestionInput.disabled = !isTest && !isCoding;
+                    randomQuestionInput.disabled = !isTest;
                 }
 
                 if (paintGroup) {
@@ -534,12 +529,6 @@
                     paintCheckbox.disabled = !isWritten;
                 }
 
-                if (codingFields) {
-                    codingFields.hidden = !isCoding;
-                    codingFields.querySelectorAll("input, textarea, select").forEach(function (field) {
-                        field.disabled = !isCoding;
-                    });
-                }
             }
 
             if (examTypeSelect) {
