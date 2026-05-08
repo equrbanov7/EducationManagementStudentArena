@@ -126,6 +126,15 @@ PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
     "publish-notification",
     "statistics",
 }
+PROFILE_EXAM_NAV_SECTIONS = {
+    "groups",
+    "my-exams",
+    "assigned-exams",
+    "my-results",
+    "pending-answers",
+    "pending-review",
+    "review-results",
+}
 
 
 def _build_effective_user_roles(user, profile):
@@ -2051,6 +2060,7 @@ def user_profile(request):
         "primary_user_role_label": primary_user_role_label,
         "active_section": active_section,
         "active_section_title": active_section_title,
+        "active_main_nav": "exams" if active_section in PROFILE_EXAM_NAV_SECTIONS else "",
         "allowed_sections": allowed_sections,
         "profile_base_url": reverse("accounts:profile"),
         "shortcut_sections": shortcut_sections,

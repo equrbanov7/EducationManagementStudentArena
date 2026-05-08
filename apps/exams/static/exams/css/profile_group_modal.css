@@ -15,6 +15,14 @@
     flex-direction: column;
 }
 
+#profileGroupModal .profile-group-modal__content > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
 #profileGroupModal .modal-dialog-scrollable .modal-content.profile-group-modal__content {
     overflow: hidden;
 }
@@ -35,7 +43,9 @@
     padding: 1.1rem 1.35rem 1rem;
     background: #ffffff;
     flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 #profileGroupModal .group-modal-section {
@@ -160,15 +170,14 @@
 
 #profileGroupModal .group-checklist__content {
     display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 0.55rem;
     min-width: 0;
     flex: 1;
 }
 
 #profileGroupModal .group-checklist__name {
-    flex: 1 1 190px;
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -176,8 +185,9 @@
 }
 
 #profileGroupModal .group-checklist__badge {
-    flex: 0 1 auto;
-    max-width: 100%;
+    flex: 0 0 auto;
+    max-width: min(46%, 260px);
+    margin-left: auto;
     padding: 0.15rem 0.45rem;
     border-radius: 999px;
     border: 1px solid #bfdbfe;
@@ -186,6 +196,9 @@
     font-size: 0.74rem;
     font-weight: 600;
     line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 #profileGroupModal .group-checklist__empty {
@@ -258,5 +271,10 @@
         align-items: flex-start;
         flex-direction: column;
         gap: 0.25rem;
+    }
+
+    #profileGroupModal .group-checklist__badge {
+        max-width: 100%;
+        margin-left: 0;
     }
 }
