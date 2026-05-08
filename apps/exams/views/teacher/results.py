@@ -37,6 +37,28 @@ def _user_display_name(user):
     return user.get_full_name() or user.username
 
 
+def _coding_submission_file_items(submission):
+    if not submission:
+        return []
+    code_files = list(submission.code_files.all())
+    if code_files:
+        return [
+            {
+                "name": code_file.name,
+                "content": code_file.content or "",
+            }
+            for code_file in code_files
+        ]
+    return [
+        {
+            "name": item.get("name") or "file.txt",
+            "content": item.get("content") or "",
+        }
+        for item in (submission.files or [])
+        if isinstance(item, dict)
+    ]
+
+
 def _build_answer_review_item(answer):
     answer_files = list(answer.files.all())
     has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
@@ -53,14 +75,19 @@ def _build_answer_review_item(answer):
     if getattr(answer.question.exam, "exam_type", "") == "coding":
         coding_submission = (
             answer.attempt.coding_submissions.filter(question__question=answer.question, is_final=True)
+            .prefetch_related("code_files")
             .order_by("-submitted_at")
             .first()
         )
+    coding_files = _coding_submission_file_items(coding_submission)
+    has_answer_content = has_answer_content or bool(coding_files)
 
     return {
         "question": answer.question,
         "answer": answer,
         "coding_submission": coding_submission,
+        "coding_files": coding_files,
+        "coding_file_count": len(coding_files),
         "answer_files": answer_files,
         "has_text_answer": has_text_answer,
         "has_paint_answer": has_paint_answer,

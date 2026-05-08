@@ -16,6 +16,7 @@
     }
 
     function setStatus(panel, message, state) {
+        if (!panel || typeof panel.querySelector !== "function") return;
         var status = panel.querySelector("[data-ai-question-status]");
         if (!status) return;
         status.textContent = message || "";
@@ -155,7 +156,13 @@
             }
         })
             .then(function (response) {
-                return response.json().then(function (json) {
+                return response.text().then(function (body) {
+                    var json = {};
+                    try {
+                        json = body ? JSON.parse(body) : {};
+                    } catch (error) {
+                        throw new Error(t("generateFailed", "AI sual yaratma alınmadı."));
+                    }
                     if (!response.ok || !json.ok) {
                         throw new Error(json.error || t("generateFailed", "AI sual yaratma alınmadı."));
                     }
@@ -170,6 +177,7 @@
                     quota = " " + t("remainingRequests", "Qalan sorğu") + ": " + json.remaining + "/" + json.limit + ".";
                 }
                 setStatus(
+                    panel,
                     t("readyTemplate", "{count} sual hazırdır. Önizləmə ilə yoxlayın.")
                         .replace("{count}", String(count)) + quota,
                     "success"
@@ -184,8 +192,10 @@
     }
 
     function initPanel(panel) {
+        if (!panel || panel.dataset.aiQuestionPanelReady === "true") return;
         var button = panel.querySelector("[data-ai-question-submit]");
         if (!button) return;
+        panel.dataset.aiQuestionPanelReady = "true";
 
         if (window.EMSBootstrapSelect) {
             window.EMSBootstrapSelect.init(panel);

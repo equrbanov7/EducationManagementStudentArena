@@ -80,6 +80,14 @@ def file_language_for_name(filename, fallback_language):
     return fallback_language
 
 
+def default_starter_code(language):
+    if language == CodingExamQuestion.LANGUAGE_CPP:
+        return "#include <iostream>\n" "using namespace std;\n\n" "int main() {\n" "    return 0;\n" "}\n"
+    if language == CodingExamQuestion.LANGUAGE_JAVA:
+        return "public class Main {\n" "    public static void main(String[] args) {\n" "    }\n" "}\n"
+    return ""
+
+
 def build_starter_files(coding_question):
     language = coding_question.language
     starter_code = coding_question.starter_code or ""
@@ -87,7 +95,21 @@ def build_starter_files(coding_question):
         return [
             {
                 "name": "index.html",
-                "content": starter_code or "<!doctype html>\n<html>\n<body>\n\n</body>\n</html>\n",
+                "content": starter_code
+                or (
+                    "<!doctype html>\n"
+                    '<html lang="en">\n'
+                    "<head>\n"
+                    '  <meta charset="UTF-8">\n'
+                    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+                    "  <title>Practical preview</title>\n"
+                    '  <link rel="stylesheet" href="style.css">\n'
+                    "</head>\n"
+                    "<body>\n\n"
+                    '  <script src="script.js"></script>\n'
+                    "</body>\n"
+                    "</html>\n"
+                ),
                 "language": "html",
                 "is_main": True,
             },
@@ -99,7 +121,7 @@ def build_starter_files(coding_question):
     return [
         {
             "name": filename,
-            "content": starter_code,
+            "content": starter_code or default_starter_code(language),
             "language": file_language_for_name(filename, language),
             "is_main": True,
         }
@@ -144,11 +166,6 @@ def normalize_files(files, *, coding_question):
     if not normalized:
         normalized = build_starter_files(coding_question)
 
-    if not coding_question.allow_multiple_files:
-        main_file = next((item for item in normalized if item["is_main"]), normalized[0])
-        main_file["is_main"] = True
-        normalized = [main_file]
-
     if not any(item["is_main"] for item in normalized):
         normalized[0]["is_main"] = True
     else:
@@ -167,10 +184,121 @@ def get_main_file(files):
 
 
 def truncate_capture(value):
-    encoded = (value or "").encode("utf-8", errors="ignore")
+    if isinstance(value, bytes):
+        value = value.decode("utf-8", errors="ignore")
+    elif value is None:
+        value = ""
+    elif not isinstance(value, str):
+        value = str(value)
+    encoded = value.encode("utf-8", errors="ignore")
     if len(encoded) <= MAX_CAPTURE_BYTES:
-        return value or ""
+        return value
     return encoded[:MAX_CAPTURE_BYTES].decode("utf-8", errors="ignore")
+
+
+def _cpp_contains_main(content):
+    return bool(re.search(r"\bmain\s*\(", content or ""))
+
+
+def _wrap_cpp_snippet(content):
+    prefix_lines = []
+    body_lines = []
+    for line in (content or "").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#include") or stripped.startswith("using "):
+            prefix_lines.append(line)
+        else:
+            body_lines.append(line)
+
+    header_lines = []
+    if not any(re.match(r"\s*#include\s*<iostream>", line) for line in prefix_lines):
+        header_lines.append("#include <iostream>")
+    header_lines.extend(prefix_lines)
+    if not any(re.match(r"\s*using\s+namespace\s+std\s*;", line) for line in prefix_lines):
+        header_lines.append("using namespace std;")
+
+    body = "\n".join(body_lines).strip("\n")
+    indented_body = "\n".join(("    " + line if line.strip() else "") for line in body.splitlines())
+    wrapped_lines = [*header_lines, "", "int main() {"]
+    if indented_body:
+        wrapped_lines.append(indented_body)
+    wrapped_lines.extend(["    return 0;", "}"])
+    return "\n".join(wrapped_lines) + "\n"
+
+
+def prepare_files_for_execution(language, files):
+    prepared_files = [dict(item) for item in files]
+    if language != CodingExamQuestion.LANGUAGE_CPP:
+        return prepared_files
+
+    main_file = get_main_file(prepared_files)
+    if main_file and not _cpp_contains_main(main_file.get("content", "")):
+        main_file["content"] = _wrap_cpp_snippet(main_file.get("content", ""))
+    return prepared_files
+
+
+def _is_docker_pull_noise(line):
+    stripped = line.strip()
+    lower = stripped.lower()
+    if not stripped:
+        return True
+    noise_fragments = (
+        "pulling from",
+        "pulling fs layer",
+        "waiting",
+        "download complete",
+        "pull complete",
+        "verifying checksum",
+        "already exists",
+        "downloaded newer image",
+        "image is up to date",
+    )
+    if stripped.startswith("Unable to find image ") and stripped.endswith(" locally"):
+        return True
+    if stripped.startswith("Digest: sha256:"):
+        return True
+    return any(fragment in lower for fragment in noise_fragments)
+
+
+def clean_docker_stderr(value):
+    text = truncate_capture(value)
+    lines = [line for line in text.splitlines() if not _is_docker_pull_noise(line)]
+    return truncate_capture("\n".join(lines))
+
+
+def _ensure_docker_image(image):
+    try:
+        inspect = subprocess.run(  # nosec B603 - image name is passed as one Docker argument.
+            ["docker", "image", "inspect", image],
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"Unable to inspect Docker sandbox image: {exc}"
+
+    if inspect.returncode == 0:
+        return ""
+
+    pull_timeout = int(getattr(settings, "CODING_EXECUTION_IMAGE_PULL_TIMEOUT_SECONDS", 180) or 180)
+    try:
+        pull = subprocess.run(  # nosec B603 - image name is passed as one Docker argument.
+            ["docker", "pull", image],
+            text=True,
+            capture_output=True,
+            timeout=max(pull_timeout, 30),
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return "Timed out while preparing the Docker sandbox image."
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"Unable to prepare Docker sandbox image: {exc}"
+
+    if pull.returncode != 0:
+        details = clean_docker_stderr(pull.stderr) or truncate_capture(pull.stdout)
+        return details or "Unable to prepare Docker sandbox image."
+    return ""
 
 
 def create_or_update_draft_submission(*, attempt, coding_question, selected_language, files):
@@ -294,16 +422,24 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
         )
 
     image = getattr(settings, "CODING_EXECUTION_DOCKER_IMAGES", {}).get(language) or DOCKER_IMAGES.get(language)
-    command = _container_command(language, files)
+    execution_files = prepare_files_for_execution(language, files)
+    command = _container_command(language, execution_files)
     if not image or not command:
         return ExecutionResult(
             status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
             error="No sandbox image is configured for this language.",
         )
 
+    image_error = _ensure_docker_image(image)
+    if image_error:
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+            error=image_error,
+        )
+
     with tempfile.TemporaryDirectory(prefix="emsarena-code-") as tmp:
         workspace = Path(tmp)
-        _write_files(workspace, files)
+        _write_files(workspace, execution_files)
         docker_command = [
             "docker",
             "run",
@@ -318,7 +454,7 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
             "64",
             "--read-only",
             "--tmpfs",
-            "/tmp:rw,nosuid,size=128m",
+            "/tmp:rw,exec,nosuid,size=128m",
             "-v",
             f"{workspace}:/workspace:ro",
             "-w",
@@ -327,27 +463,33 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
             *command,
         ]
         start = time.perf_counter()
+        execution_timeout = max(int(time_limit_seconds or 2), 1) + (8 if language in {"cpp", "java"} else 2)
         try:
             completed = subprocess.run(  # nosec B603 - Docker is the sandbox boundary; no shell on the host.
                 docker_command,
                 input=stdin or "",
                 text=True,
                 capture_output=True,
-                timeout=max(int(time_limit_seconds or 2), 1) + 2,
+                timeout=execution_timeout,
                 check=False,
             )
         except subprocess.TimeoutExpired as exc:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
+            timeout_error = clean_docker_stderr(exc.stderr)
+            if timeout_error:
+                timeout_error = f"{timeout_error}\nExecution timed out."
+            else:
+                timeout_error = "Execution timed out."
             return ExecutionResult(
                 status=CodingSubmission.STATUS_TIMEOUT,
                 output=truncate_capture(exc.stdout or ""),
-                error=truncate_capture(exc.stderr or "Execution timed out."),
+                error=timeout_error,
                 execution_time_ms=elapsed_ms,
             )
 
     elapsed_ms = int((time.perf_counter() - start) * 1000)
     output = truncate_capture(completed.stdout)
-    error = truncate_capture(completed.stderr)
+    error = clean_docker_stderr(completed.stderr)
     if completed.returncode == 0:
         return ExecutionResult(
             status=CodingSubmission.STATUS_SUCCESS,
