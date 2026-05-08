@@ -739,22 +739,22 @@ msgstr "Selected count"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:2
 msgctxt "profile.groups"
 msgid "label_assigned_teachers"
-msgstr "Label assigned teachers"
+msgstr "Assigned teachers"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:3
 msgctxt "profile.groups"
 msgid "placeholder_search_teacher"
-msgstr "Placeholder search teacher"
+msgstr "Search teacher..."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:4
 msgctxt "profile.groups"
 msgid "help_assigned_teachers"
-msgstr "Help assigned teachers"
+msgstr "Additional teachers who can view and manage this group."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:5
 msgctxt "profile.groups"
 msgid "label_group_students"
-msgstr "Label group students"
+msgstr "Group students"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:6
 msgctxt "profile.groups"
@@ -765,10 +765,14 @@ msgctxt "profile.groups"
 msgid "student_registered_group_number"
 msgstr "Registration group"
 
+msgctxt "profile.groups"
+msgid "student_group_memberships"
+msgstr "Groups"
+
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
 msgctxt "profile.groups"
 msgid "title"
-msgstr "Title"
+msgstr "Groups"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:16
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:20
@@ -805,39 +809,39 @@ msgstr "Delete group"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:78
 msgctxt "profile.groups"
 msgid "empty_visible_groups"
-msgstr "Empty visible groups"
+msgstr "No visible groups for this section."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:94
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:104
 msgctxt "profile.groups"
 msgid "modal_create_title"
-msgstr "Modal create title"
+msgstr "Create group"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:95
 msgctxt "profile.groups"
 msgid "modal_edit_title"
-msgstr "Modal edit title"
+msgstr "Edit group"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:96
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:156
 msgctxt "profile.groups"
 msgid "submit_create"
-msgstr "Submit create"
+msgstr "Create group"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:97
 msgctxt "profile.groups"
 msgid "submit_save_changes"
-msgstr "Submit save changes"
+msgstr "Save changes"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:98
 msgctxt "profile.groups"
 msgid "search_no_results"
-msgstr "Search no results"
+msgstr "No matching data found."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:99
 msgctxt "profile.groups"
 msgid "fallback_this"
-msgstr "Fallback this"
+msgstr "this"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:105
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:171
@@ -848,17 +852,17 @@ msgstr "Close"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:114
 msgctxt "profile.groups"
 msgid "label_group_name"
-msgstr "Label group name"
+msgstr "Group name / number"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:122
 msgctxt "profile.groups"
 msgid "label_primary_teacher"
-msgstr "Label primary teacher"
+msgstr "Primary teacher"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:128
 msgctxt "profile.groups"
 msgid "placeholder_search_primary_teacher"
-msgstr "Placeholder search primary teacher"
+msgstr "Search primary teacher..."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:154
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:180
@@ -869,17 +873,17 @@ msgstr "Cancel"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:175
 msgctxt "profile.groups"
 msgid "delete_confirm_prefix"
-msgstr "Delete confirm prefix"
+msgstr "Are you sure you want to delete"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:175
 msgctxt "profile.groups"
 msgid "delete_confirm_suffix"
-msgstr "Delete confirm suffix"
+msgstr "group?"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:176
 msgctxt "profile.groups"
 msgid "delete_confirm_warning"
-msgstr "Delete confirm warning"
+msgstr "This action cannot be undone."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:181
 msgctxt "profile.groups"

@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm, StudentGroupForm
-from apps.exams.models import Exam
+from apps.exams.models import Exam, StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -185,3 +185,17 @@ class StudentGroupFormRoleSourceTests(TestCase):
         rendered_students = form["students"].as_widget()
         self.assertIn('data-student-group-number="CS-204"', rendered_students)
         self.assertIn("CS-204", rendered_students)
+
+    def test_student_options_include_existing_group_membership_metadata(self):
+        existing_group = StudentGroup.objects.create(
+            teacher=self.teacher,
+            organization=self.org,
+            name="843i",
+        )
+        existing_group.students.add(self.student)
+
+        form = StudentGroupForm(actor=self.teacher, organization=self.org)
+
+        rendered_students = form["students"].as_widget()
+        self.assertIn('data-user-group-labels="843i"', rendered_students)
+        self.assertIn("843i", rendered_students)
