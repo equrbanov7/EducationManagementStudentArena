@@ -440,17 +440,6 @@ class ExamForm(forms.ModelForm):
         if exam_type == PRACTICAL_EXAM_TYPE and not self.practical_exams_enabled:
             self.add_error("exam_type", practical_exam_disabled_message())
 
-        if exam_type == "coding":
-            required_coding_fields = {
-                "coding_question_title": pgettext_lazy("exams.form.coding.error", "title_required"),
-                "coding_problem_statement": pgettext_lazy("exams.form.coding.error", "problem_statement_required"),
-            }
-            for field_name, error_message in required_coding_fields.items():
-                if not (cleaned_data.get(field_name) or "").strip():
-                    self.add_error(field_name, error_message)
-
-            cleaned_data["random_question_count"] = 0
-
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:
             if start_dt >= end_dt:

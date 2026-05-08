@@ -28,6 +28,26 @@ def _default_exam_back_url(exam):
     return reverse("exams:student_exam_list")
 
 
+def _coding_submission_file_items(submission):
+    code_files = list(submission.code_files.all())
+    if code_files:
+        return [
+            {
+                "name": code_file.name,
+                "content": code_file.content or "",
+            }
+            for code_file in code_files
+        ]
+    return [
+        {
+            "name": item.get("name") or "file.txt",
+            "content": item.get("content") or "",
+        }
+        for item in (submission.files or [])
+        if isinstance(item, dict)
+    ]
+
+
 def _resolve_result_navigation(request, exam, return_to):
     history_view_path = reverse("exams:student_exam_history")
     default_back_url = _default_exam_back_url(exam)
@@ -106,8 +126,10 @@ def exam_result(request, slug, attempt_id):
                 is_final=True,
             )
             .select_related("question", "question__question")
+            .prefetch_related("code_files")
             .order_by("question__question__order", "-submitted_at")
         ):
+            submission.file_items = _coding_submission_file_items(submission)
             coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
     return render(

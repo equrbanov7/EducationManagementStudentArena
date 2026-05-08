@@ -231,7 +231,32 @@
                         <div class="student-answer-block mb-4">
                             <h6 class="block-title"><i class="fas fa-pen"></i> {% trans "label_student_answer" context "exams.template.teacher_view_attempt" %}:</h6>
                             <div class="answer-content p-3 bg-light border rounded">
-                                {% if item.has_text_answer %}
+                                {% if exam.exam_type == "coding" %}
+                                    {% if item.coding_submission and item.coding_files %}
+                                        {% if item.coding_file_count == 1 %}
+                                            {% for code_file in item.coding_files %}
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <strong><i class="far fa-file-code me-2"></i>{{ code_file.name }}</strong>
+                                                </div>
+                                                <pre class="mb-0">{{ code_file.content }}</pre>
+                                            {% endfor %}
+                                        {% else %}
+                                            <ul class="list-group mb-3">
+                                                {% for code_file in item.coding_files %}
+                                                    <li class="list-group-item d-flex align-items-center justify-content-between">
+                                                        <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <a class="btn btn-sm btn-outline-primary"
+                                               href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
+                                                <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_view_attempt" %}
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" %}
+                                    {% endif %}
+                                {% elif item.has_text_answer %}
                                     {{ item.answer.text_answer|linebreaks }}
                                 {% elif item.has_file_answer %}
                                     <span class="text-muted">
@@ -278,7 +303,7 @@
 
                         {% if exam.exam_type == "coding" and item.coding_submission %}
                             <div class="student-answer-block mb-4">
-                                <h6 class="block-title"><i class="fas fa-terminal"></i> {% trans "Submission Result" context "exams.template.teacher_view_attempt" %}:</h6>
+                                <h6 class="block-title"><i class="fas fa-terminal"></i> {% trans "Run output" context "exams.template.teacher_view_attempt" %}:</h6>
                                 <div class="answer-content p-3 bg-light border rounded">
                                     <strong>{{ item.coding_submission.get_execution_status_display }}</strong>
                                     {% if item.coding_submission.score is not None %}
@@ -289,20 +314,6 @@
                                     {% endif %}
                                     {% if item.coding_submission.error_message %}
                                         <pre class="mt-3 text-danger">{{ item.coding_submission.error_message }}</pre>
-                                    {% endif %}
-                                    {% if item.coding_submission.test_results %}
-                                        <ul class="list-group mt-3">
-                                            {% for case in item.coding_submission.test_results %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span>{% trans "Test Case" context "exams.template.teacher_view_attempt" %} {{ forloop.counter }}</span>
-                                                    {% if case.passed %}
-                                                        <span class="badge bg-success">{% trans "Passed" context "exams.template.teacher_view_attempt" %}</span>
-                                                    {% else %}
-                                                        <span class="badge bg-danger">{% trans "Failed" context "exams.template.teacher_view_attempt" %}</span>
-                                                    {% endif %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
                                     {% endif %}
                                 </div>
                             </div>

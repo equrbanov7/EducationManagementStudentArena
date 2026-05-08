@@ -160,8 +160,27 @@
                                 <label class="response-label text-primary mb-2">
                                     <i class="fas fa-code"></i> {% trans "Submitted code" context "exams.template.student_exam_result" %}:
                                 </label>
-                                {% if ans and ans.text_answer %}
-                                    <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
+                                {% if coding_submission and coding_submission.file_items %}
+                                    {% if coding_submission.file_items|length == 1 %}
+                                        {% for code_file in coding_submission.file_items %}
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <strong>{{ code_file.name }}</strong>
+                                            </div>
+                                            <pre class="code-block user-answer">{{ code_file.content }}</pre>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="list-group mb-3">
+                                            {% for code_file in coding_submission.file_items %}
+                                                <div class="list-group-item d-flex align-items-center justify-content-between">
+                                                    <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           href="{% url 'exams:coding_submission_download' exam.slug attempt.id coding_submission.id %}">
+                                            <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.student_exam_result" %}
+                                        </a>
+                                    {% endif %}
                                 {% else %}
                                     <div class="alert alert-warning">
                                         <i class="fas fa-exclamation-triangle"></i> {% trans "answer_not_provided" context "exams.template.student_exam_result" %}
@@ -176,7 +195,7 @@
                                             <div class="tf-avatar">
                                                 <i class="fas fa-terminal"></i>
                                             </div>
-                                            <span class="tf-title">{% trans "Submission Result" context "exams.template.student_exam_result" %}</span>
+                                            <span class="tf-title">{% trans "Run output" context "exams.template.student_exam_result" %}</span>
                                         </div>
                                         <div class="tf-score">
                                             {% trans "label_score" context "exams.template.student_exam_result" %}:
@@ -192,23 +211,6 @@
                                         {% if coding_submission.error_message %}
                                             <label class="response-label text-danger mb-2">{% trans "Errors" context "exams.template.student_exam_result" %}</label>
                                             <pre class="code-block user-answer">{{ coding_submission.error_message }}</pre>
-                                        {% endif %}
-                                        {% if coding_submission.test_results %}
-                                            <label class="response-label text-secondary mb-2">{% trans "Test Cases" context "exams.template.student_exam_result" %}</label>
-                                            <ul class="list-group">
-                                                {% for case in coding_submission.test_results %}
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        <span>
-                                                            {% trans "Test Case" context "exams.template.student_exam_result" %} {{ forloop.counter }}
-                                                        </span>
-                                                        {% if case.passed %}
-                                                            <span class="badge bg-success">{% trans "Passed" context "exams.template.student_exam_result" %}</span>
-                                                        {% else %}
-                                                            <span class="badge bg-danger">{% trans "Failed" context "exams.template.student_exam_result" %}</span>
-                                                        {% endif %}
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
                                         {% endif %}
                                     </div>
                                 </div>
