@@ -1,4 +1,6 @@
 import json
+import zipfile
+from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -8,6 +10,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm
 from apps.exams.models import CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.coding_definition import build_coding_payload_from_exam_form, upsert_coding_question
+from apps.exams.services.coding_runtime import clean_docker_stderr, prepare_files_for_execution, truncate_capture
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -33,7 +36,7 @@ def assign_user_to_org(user, organization, role):
 
 
 class CodingExamFormTests(TestCase):
-    def test_coding_exam_form_parses_coding_fields(self):
+    def test_coding_exam_form_does_not_require_inline_coding_task_fields(self):
         form = ExamForm(
             data={
                 "title": "Algorithms practical",
@@ -41,22 +44,38 @@ class CodingExamFormTests(TestCase):
                 "exam_type": "coding",
                 "is_active": "on",
                 "random_question_count": "",
-                "coding_language": "python",
-                "coding_question_title": "Add numbers",
-                "coding_problem_statement": "Read two numbers and print their sum.",
-                "coding_time_limit_seconds": "2",
-                "coding_memory_limit_mb": "128",
-                "coding_max_score": "100",
-                "coding_visible_test_cases": '[{"input":"2 3","expected":"5","points":40}]',
-                "coding_hidden_test_cases": '[{"input":"10 15","expected":"25","points":60}]',
             }
         )
 
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["exam_type"], "coding")
-        self.assertEqual(form.cleaned_data["random_question_count"], 0)
-        self.assertEqual(len(form.cleaned_data["coding_visible_test_cases"]), 1)
-        self.assertEqual(len(form.cleaned_data["coding_hidden_test_cases"]), 1)
+        self.assertEqual(form.cleaned_data["random_question_count"], 10)
+
+    def test_truncate_capture_accepts_timeout_bytes(self):
+        self.assertEqual(truncate_capture(b"Execution timed out."), "Execution timed out.")
+
+    def test_cpp_snippet_is_wrapped_for_execution(self):
+        files = [{"name": "main.cpp", "content": 'cout << "ok";', "language": "cpp", "is_main": True}]
+
+        prepared = prepare_files_for_execution("cpp", files)
+
+        self.assertIn("#include <iostream>", prepared[0]["content"])
+        self.assertIn("int main()", prepared[0]["content"])
+        self.assertIn('cout << "ok";', prepared[0]["content"])
+        self.assertEqual(files[0]["content"], 'cout << "ok";')
+
+    def test_docker_pull_noise_is_removed_from_stderr(self):
+        stderr = "\n".join(
+            [
+                "Unable to find image 'gcc:14' locally",
+                "14: Pulling from library/gcc",
+                "159f67d2ced1: Pulling fs layer",
+                "159f67d2ced1: Download complete",
+                "main.cpp:1:1: error: expected unqualified-id",
+            ]
+        )
+
+        self.assertEqual(clean_docker_stderr(stderr), "main.cpp:1:1: error: expected unqualified-id")
 
 
 class CodingExamDefinitionTests(TestCase):
@@ -194,3 +213,57 @@ class CodingExamSubmissionApiTests(TestCase):
         self.assertEqual(final_submission.code_files.count(), 1)
         self.attempt.refresh_from_db()
         self.assertTrue(self.attempt.is_finished)
+
+    def test_submission_download_returns_all_code_files_as_zip(self):
+        payload = {
+            "selected_language": "html",
+            "files": [
+                {"name": "index.html", "content": "<h1>Hello</h1>", "language": "html", "is_main": True},
+                {"name": "style.css", "content": "h1 { color: red; }", "language": "css", "is_main": False},
+                {"name": "script.js", "content": "console.log('ok');", "language": "javascript", "is_main": False},
+            ],
+            "stdin": "",
+        }
+
+        submit_response = self.client.post(
+            reverse("exams:coding_submit", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id}),
+            data=json.dumps(payload),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(submit_response.status_code, 200)
+        submission = CodingSubmission.objects.get(is_final=True)
+
+        download_url = reverse(
+            "exams:coding_submission_download",
+            kwargs={
+                "slug": self.exam.slug,
+                "attempt_id": self.attempt.id,
+                "submission_id": submission.id,
+            },
+        )
+        response = self.client.get(download_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/zip")
+
+        with zipfile.ZipFile(BytesIO(response.content)) as archive:
+            self.assertEqual(set(archive.namelist()), {"index.html", "style.css", "script.js"})
+            self.assertEqual(archive.read("index.html").decode(), "<h1>Hello</h1>")
+            self.assertEqual(archive.read("script.js").decode(), "console.log('ok');")
+
+        result_response = self.client.get(
+            reverse("exams:exam_result", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
+        )
+        self.assertContains(result_response, "Download ZIP")
+
+        self.client.force_login(self.teacher)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        teacher_response = self.client.get(download_url)
+        self.assertEqual(teacher_response.status_code, 200)
+
+        teacher_view_response = self.client.get(
+            reverse("exams:teacher_view_attempt", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
+        )
+        self.assertContains(teacher_view_response, "Download ZIP")
