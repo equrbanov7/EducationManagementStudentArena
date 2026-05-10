@@ -26,24 +26,29 @@ class UserMetadataSelectMultiple(forms.SelectMultiple):
 
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
         option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
+        if str(name).split("-")[-1] != "students":
+            return option
+
         user = getattr(value, "instance", None)
         profile = getattr(user, "profile", None)
         student_group_number = (getattr(profile, "student_group_number", "") or "").strip()
-        group_labels = []
+        membership_labels = []
 
+        search_labels = []
         if student_group_number:
-            group_labels.append(student_group_number)
+            option["attrs"]["data-student-group-number"] = student_group_number
+            search_labels.append(student_group_number)
 
         for group in self._iter_prefetched_group_memberships(user):
             group_name = (getattr(group, "name", "") or "").strip()
-            if group_name and group_name not in group_labels:
-                group_labels.append(group_name)
+            if group_name and group_name not in membership_labels:
+                membership_labels.append(group_name)
 
-        if group_labels:
-            group_text = ", ".join(group_labels)
-            option["attrs"]["data-student-group-number"] = group_text
-            option["attrs"]["data-user-group-labels"] = group_text
-            option["attrs"]["data-search-text"] = f"{label} {group_text}"
+        search_labels.extend(membership_labels)
+        if membership_labels:
+            option["attrs"]["data-user-group-labels"] = ", ".join(membership_labels)
+        if search_labels:
+            option["attrs"]["data-search-text"] = f"{label} {', '.join(search_labels)}"
 
         return option
 
