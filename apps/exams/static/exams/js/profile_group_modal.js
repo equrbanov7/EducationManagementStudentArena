@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!hiddenSelect || !listContainer) {
       return null;
     }
+    var showStudentGroupNumber = root.getAttribute("data-show-student-group-number") === "1";
 
     function normalize(text) {
       return String(text || "").toLowerCase();
@@ -66,18 +67,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function optionGroupLabels(option) {
-      return String(
-        option.getAttribute("data-user-group-labels") ||
-        option.getAttribute("data-student-group-number") ||
-        ""
-      ).trim();
+      if (!showStudentGroupNumber) {
+        return "";
+      }
+      return String(option.getAttribute("data-student-group-number") || "").trim();
     }
 
     function optionSearchText(option) {
       return [
         option.textContent || "",
         option.getAttribute("data-search-text") || "",
-        optionGroupLabels(option)
+        optionGroupLabels(option),
+        showStudentGroupNumber ? option.getAttribute("data-user-group-labels") || "" : ""
       ].join(" ");
     }
 

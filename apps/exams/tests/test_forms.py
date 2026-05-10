@@ -199,3 +199,33 @@ class StudentGroupFormRoleSourceTests(TestCase):
         rendered_students = form["students"].as_widget()
         self.assertIn('data-user-group-labels="843i"', rendered_students)
         self.assertIn("843i", rendered_students)
+
+    def test_student_registered_group_number_is_separate_from_memberships(self):
+        self.student.profile.student_group_number = "CS-204"
+        self.student.profile.save(update_fields=["student_group_number", "updated_at"])
+        existing_group = StudentGroup.objects.create(
+            teacher=self.teacher,
+            organization=self.org,
+            name="843i",
+        )
+        existing_group.students.add(self.student)
+
+        form = StudentGroupForm(actor=self.teacher, organization=self.org)
+
+        rendered_students = form["students"].as_widget()
+        self.assertIn('data-student-group-number="CS-204"', rendered_students)
+        self.assertIn('data-user-group-labels="843i"', rendered_students)
+        self.assertNotIn('data-student-group-number="CS-204, 843i"', rendered_students)
+
+    def test_teacher_options_do_not_include_group_membership_metadata(self):
+        StudentGroup.objects.create(
+            teacher=self.teacher,
+            organization=self.org,
+            name="TeacherGroup",
+        )
+
+        form = StudentGroupForm(actor=self.teacher, organization=self.org)
+
+        rendered_teachers = form["assigned_teachers"].as_widget()
+        self.assertNotIn("data-user-group-labels", rendered_teachers)
+        self.assertNotIn("data-student-group-number", rendered_teachers)
