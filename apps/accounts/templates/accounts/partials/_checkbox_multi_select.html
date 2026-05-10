@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="group-checklist" data-checkbox-select>
+<div class="group-checklist" data-checkbox-select{% if show_student_group_number %} data-show-student-group-number="1"{% endif %}>
     <div class="group-checklist__top">
         <label class="group-modal-label mb-0">{{ label }}</label>
         <div class="group-checklist__actions">
