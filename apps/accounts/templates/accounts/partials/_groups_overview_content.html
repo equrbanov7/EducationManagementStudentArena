@@ -352,7 +352,7 @@
     data-submit-edit="{% trans 'submit_save_changes' context 'profile.groups' %}"
     data-empty-search-result="{% trans 'search_no_results' context 'profile.groups' %}"
     data-fallback-this="{% trans 'fallback_this' context 'profile.groups' %}"
-    data-student-group-label="{{ groups_student_group_memberships }}"
+    data-student-group-label="{{ groups_student_registered_group_number }}"
 >
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable profile-group-modal">
         <div class="modal-content profile-group-modal__content">
@@ -402,7 +402,7 @@
                     {% endif %}
 
                     <div class="group-modal-section group-modal-section--last">
-                        {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.students label=groups_label_group_students search_placeholder=groups_search_student container_id="profileGroupStudentSelector" %}
+                        {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.students label=groups_label_group_students search_placeholder=groups_search_student container_id="profileGroupStudentSelector" show_student_group_number=True %}
                     </div>
                 </div>
 
