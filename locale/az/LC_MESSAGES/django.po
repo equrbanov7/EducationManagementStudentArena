@@ -765,7 +765,7 @@ msgstr "Tələbə və ya qrup nömrəsi axtar..."
 
 msgctxt "profile.groups"
 msgid "student_registered_group_number"
-msgstr "Qeydiyyat qrupu"
+msgstr "Qeydiyyatdan keçdiyi qrup"
 
 msgctxt "profile.groups"
 msgid "student_group_memberships"
