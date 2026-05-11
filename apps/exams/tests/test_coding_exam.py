@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm
-from apps.exams.models import CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
+from apps.exams.models import CodingFile, CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.coding_definition import build_coding_payload_from_exam_form, upsert_coding_question
 from apps.exams.services.coding_runtime import clean_docker_stderr, prepare_files_for_execution, truncate_capture
 from apps.organizations.models import Membership, Organization
@@ -267,3 +267,84 @@ class CodingExamSubmissionApiTests(TestCase):
             reverse("exams:teacher_view_attempt", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
         )
         self.assertContains(teacher_view_response, "Download ZIP")
+
+    def test_teacher_check_attempt_syncs_missing_coding_answers_from_final_submissions(self):
+        _, second_coding_question = upsert_coding_question(
+            self.exam,
+            payload={
+                "language": "html",
+                "title": "Second page",
+                "problem_statement": "Build the second page.",
+                "input_description": "",
+                "output_description": "",
+                "example_input": "",
+                "example_output": "",
+                "time_limit_seconds": 2,
+                "memory_limit_mb": 128,
+                "max_score": 40,
+                "starter_code": "",
+                "allow_file_creation": True,
+                "allow_multiple_files": True,
+                "enable_code_execution": False,
+            },
+            visible_cases=[],
+            hidden_cases=[],
+        )
+        self.assertEqual(self.attempt.answers.count(), 1)
+
+        first_submission = CodingSubmission.objects.create(
+            student=self.student,
+            exam=self.exam,
+            attempt=self.attempt,
+            question=self.coding_question,
+            selected_language="html",
+            submitted_code="<h1>First</h1>",
+            files=[
+                {"name": "index.html", "content": "<h1>First</h1>", "language": "html", "is_main": True},
+                {"name": "style.css", "content": "h1 { color: red; }", "language": "css", "is_main": False},
+                {"name": "script.js", "content": "console.log('first');", "language": "javascript", "is_main": False},
+            ],
+            is_final=True,
+            execution_status=CodingSubmission.STATUS_SUBMITTED,
+        )
+        for file_item in first_submission.files:
+            CodingFile.objects.create(submission=first_submission, **file_item)
+
+        second_submission = CodingSubmission.objects.create(
+            student=self.student,
+            exam=self.exam,
+            attempt=self.attempt,
+            question=second_coding_question,
+            selected_language="html",
+            submitted_code="<h1>Second</h1>",
+            files=[
+                {"name": "index.html", "content": "<h1>Second</h1>", "language": "html", "is_main": True},
+                {"name": "style.css", "content": "h1 { color: blue; }", "language": "css", "is_main": False},
+            ],
+            is_final=True,
+            execution_status=CodingSubmission.STATUS_SUBMITTED,
+        )
+        for file_item in second_submission.files:
+            CodingFile.objects.create(submission=second_submission, **file_item)
+
+        self.client.force_login(self.teacher)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+
+        response = self.client.get(
+            reverse("exams:teacher_check_attempt", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["qa_list"]), 2)
+        self.assertTrue(
+            ExamAnswer.objects.filter(attempt=self.attempt, question=second_coding_question.question).exists()
+        )
+        content = response.content.decode()
+        self.assertIn("Second page", content)
+        self.assertIn("style.css", content)
+        self.assertIn("script.js", content)
+        self.assertIn("console.log", content)
+        self.assertEqual(content.count(f'name="score_{self.coding_question.question_id}"'), 1)
+        self.assertEqual(content.count(f'name="score_{second_coding_question.question_id}"'), 1)

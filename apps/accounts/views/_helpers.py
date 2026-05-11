@@ -363,9 +363,11 @@ def _normalize_review_result_item_type(raw_type):
     return ""
 
 
-def _pending_review_type_label(raw_type):
+def _pending_review_type_label(raw_type, *, exam_type=""):
     normalized = (raw_type or "").strip().lower()
     if normalized == "exam":
+        if (exam_type or "").strip().lower() == "coding":
+            return "Praktiki imtahan"
         return "Yazılı imtahan"
     if normalized == "assignment":
         return "Sərbəst iş"
