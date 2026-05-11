@@ -233,26 +233,25 @@
                             <div class="answer-content p-3 bg-light border rounded">
                                 {% if exam.exam_type == "coding" %}
                                     {% if item.coding_submission and item.coding_files %}
-                                        {% if item.coding_file_count == 1 %}
+                                        <div class="coding-files-review">
                                             {% for code_file in item.coding_files %}
-                                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                                    <strong><i class="far fa-file-code me-2"></i>{{ code_file.name }}</strong>
-                                                </div>
-                                                <pre class="mb-0">{{ code_file.content }}</pre>
-                                            {% endfor %}
-                                        {% else %}
-                                            <ul class="list-group mb-3">
-                                                {% for code_file in item.coding_files %}
-                                                    <li class="list-group-item d-flex align-items-center justify-content-between">
+                                                <details class="coding-file-detail" {% if item.coding_file_count == 1 %}open{% endif %}>
+                                                    <summary>
                                                         <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                            <a class="btn btn-sm btn-outline-primary"
-                                               href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
-                                                <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_view_attempt" %}
-                                            </a>
-                                        {% endif %}
+                                                        {% if code_file.is_main %}
+                                                            <small>{% trans "Main File" context "exams.template.coding_exam" %}</small>
+                                                        {% endif %}
+                                                    </summary>
+                                                    <pre>{{ code_file.content }}</pre>
+                                                </details>
+                                            {% endfor %}
+                                            {% if item.coding_file_count > 1 %}
+                                                <a class="btn btn-sm btn-outline-primary"
+                                                   href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
+                                                    <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_view_attempt" %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
                                     {% else %}
                                         {% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" %}
                                     {% endif %}

@@ -46,6 +46,8 @@ def _coding_submission_file_items(submission):
             {
                 "name": code_file.name,
                 "content": code_file.content or "",
+                "language": code_file.language or "",
+                "is_main": bool(code_file.is_main),
             }
             for code_file in code_files
         ]
@@ -53,10 +55,38 @@ def _coding_submission_file_items(submission):
         {
             "name": item.get("name") or "file.txt",
             "content": item.get("content") or "",
+            "language": item.get("language") or "",
+            "is_main": bool(item.get("is_main")),
         }
         for item in (submission.files or [])
         if isinstance(item, dict)
     ]
+
+
+def _sync_coding_answers_from_final_submissions(attempt):
+    if getattr(attempt.exam, "exam_type", "") != "coding":
+        return
+
+    seen_question_ids = set()
+    submissions = (
+        attempt.coding_submissions.filter(is_final=True)
+        .select_related("question", "question__question")
+        .order_by("question__question__order", "question__question_id", "-submitted_at", "-id")
+    )
+    for submission in submissions:
+        base_question = getattr(submission.question, "question", None)
+        if not base_question or base_question.id in seen_question_ids:
+            continue
+        seen_question_ids.add(base_question.id)
+
+        answer, created = ExamAnswer.objects.get_or_create(
+            attempt=attempt,
+            question=base_question,
+            defaults={"text_answer": submission.submitted_code or ""},
+        )
+        if not created and not (answer.text_answer or "").strip() and submission.submitted_code:
+            answer.text_answer = submission.submitted_code
+            answer.save(update_fields=["text_answer", "updated_at"])
 
 
 def _build_answer_review_item(answer):
@@ -588,6 +618,7 @@ def teacher_view_attempt(request, slug, attempt_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    _sync_coding_answers_from_final_submissions(attempt)
 
     # Cavabları al
     answers_qs = (
@@ -674,6 +705,7 @@ def teacher_check_attempt(request, slug, attempt_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    _sync_coding_answers_from_final_submissions(attempt)
     if navigation_params.get("from_section") == "pending-review":
         results_return_url = profile_return_url
     else:

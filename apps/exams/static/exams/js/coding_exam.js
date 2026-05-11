@@ -732,7 +732,10 @@
             options = options || {};
             var runId = options.runId || ++previewRunId;
             previewFrame.removeAttribute("src");
-            previewFrame.srcdoc = buildPreviewDocument(runId, options);
+            previewFrame.removeAttribute("srcdoc");
+            window.requestAnimationFrame(function () {
+                previewFrame.srcdoc = buildPreviewDocument(runId, options);
+            });
         }
 
         window.addEventListener("message", function (event) {
@@ -774,11 +777,12 @@
             setStatus(i18n.running || "Running...");
             runBtn.disabled = true;
 
+            var openPreview = shouldOpenPreviewAfterRun();
+            switchTab(openPreview ? "preview" : "output");
             renderPreview({
                 runId: previewRunId,
                 executeCurrentJavaScriptOnly: shouldExecuteCurrentJavaScriptOnly()
             });
-            switchTab(shouldOpenPreviewAfterRun() ? "preview" : "output");
 
             return autosave()
                 .then(function () {
