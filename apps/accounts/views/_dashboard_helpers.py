@@ -915,7 +915,7 @@ def _collect_pending_review_items(
                     "status": attempt.status,
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
-                    "type_label": _pending_review_type_label("exam"),
+                    "type_label": _pending_review_type_label("exam", exam_type=attempt.exam.exam_type),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": review_window_seconds_left,
                     "can_view_student_identity": can_view_student_identity,

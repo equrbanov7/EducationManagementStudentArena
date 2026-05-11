@@ -303,6 +303,10 @@ class ExamForm(forms.ModelForm):
         self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["random_question_count"].required = False
+        self.fields["random_question_count"].help_text = (
+            "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa default 10-dur. "
+            "Test, yazılı və praktiki imtahanlara aiddir."
+        )
         self._coding_field_names = [
             "coding_language",
             "coding_question_title",
@@ -423,7 +427,8 @@ class ExamForm(forms.ModelForm):
         value = self.cleaned_data.get("random_question_count")
         if value in (None, ""):
             if self.instance.pk:
-                return self.instance.random_question_count or 10
+                existing_value = self.instance.random_question_count
+                return 10 if existing_value is None else existing_value
             return 10
         return value
 
