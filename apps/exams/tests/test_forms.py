@@ -50,6 +50,30 @@ class ExamFormDefaultStateTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["random_question_count"], 10)
 
+    def test_random_question_count_help_applies_to_written_and_practical(self):
+        form = ExamForm()
+        self.assertIn("praktiki", str(form.fields["random_question_count"].help_text))
+
+    def test_edit_form_preserves_existing_zero_random_question_count_when_blank(self):
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="All Questions Written Exam",
+            exam_type="written",
+            random_question_count=0,
+        )
+        form = ExamForm(
+            data={
+                "title": exam.title,
+                "description": "",
+                "exam_type": "written",
+                "random_question_count": "",
+            },
+            instance=exam,
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["random_question_count"], 0)
+
     def test_edit_form_keeps_existing_is_active_value(self):
         exam = Exam.objects.create(
             author=self.teacher,

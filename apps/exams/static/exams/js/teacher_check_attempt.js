@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Kartlara klikləmə
     document.querySelectorAll('.question-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (event) => {
+            if (event.target.closest('[data-review-card-ignore], a, button, input, textarea, select, details, summary, pre')) {
+                return;
+            }
             const qId = card.getAttribute('data-question-id');
             openModal(qId);
         });
@@ -110,7 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasFileAnswer = dataStore.getAttribute('data-has-file-answer') === '1';
         const hasPaintAnswer = dataStore.getAttribute('data-has-paint-answer') === '1';
         const modalAnswerEl = document.getElementById('modalAnswerText');
-        if (ansText) {
+        const codeFilesReview = card.querySelector('.coding-files-review');
+        if (codeFilesReview) {
+            modalAnswerEl.innerHTML = '';
+            modalAnswerEl.appendChild(codeFilesReview.cloneNode(true));
+        } else if (ansText) {
             modalAnswerEl.textContent = ansText;
         } else if (hasFileAnswer || hasPaintAnswer) {
             modalAnswerEl.innerHTML = '';

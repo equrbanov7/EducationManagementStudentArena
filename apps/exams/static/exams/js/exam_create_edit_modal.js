@@ -459,23 +459,22 @@
             var randomQuestionInput = form.querySelector('input[name="random_question_count"]');
 
             function syncExamTypeVisibility(examType) {
-                var isTest = examType === "test";
                 if (!paintCheckbox) {
                     if (randomQuestionGroup) {
-                        randomQuestionGroup.hidden = !isTest;
+                        randomQuestionGroup.hidden = false;
                     }
                     if (randomQuestionInput) {
-                        randomQuestionInput.disabled = !isTest;
+                        randomQuestionInput.disabled = false;
                     }
                     return;
                 }
 
                 var isWritten = examType === "written";
                 if (randomQuestionGroup) {
-                    randomQuestionGroup.hidden = !isTest;
+                    randomQuestionGroup.hidden = false;
                 }
                 if (randomQuestionInput) {
-                    randomQuestionInput.disabled = !isTest;
+                    randomQuestionInput.disabled = false;
                 }
 
                 if (!isWritten) {

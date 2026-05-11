@@ -1,5 +1,5 @@
 .coding-exam-shell {
-    min-height: 100vh;
+    min-height: calc(100vh - 88px);
     display: flex;
     flex-direction: column;
     background: #f5f7fb;
@@ -256,8 +256,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
     gap: 0.85rem;
-    height: clamp(520px, calc(100vh - 330px), 760px);
-    min-height: 520px;
+    height: clamp(430px, calc(100vh - 520px), 680px);
+    min-height: 430px;
     margin: 0.85rem 1.25rem 0;
     flex: 1;
 }
@@ -440,6 +440,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.7rem;
+    flex-wrap: wrap;
     padding: 0.45rem 0.55rem 0.4rem;
     border-bottom: 1px solid #d9e2ec;
 }
@@ -448,7 +449,8 @@
     display: flex;
     align-items: center;
     gap: 0.2rem;
-    min-width: 0;
+    flex: 1 1 auto;
+    min-width: max-content;
     overflow-x: auto;
 }
 
@@ -476,6 +478,8 @@
     justify-content: flex-end;
     gap: 0.45rem;
     flex-wrap: wrap;
+    flex: 0 1 auto;
+    margin-left: auto;
 }
 
 .coding-tab-panels {
@@ -522,15 +526,15 @@
     width: 100%;
     flex: 1;
     height: auto;
-    min-height: 320px;
+    min-height: 0;
     border: 1px solid #d8e0ea;
     border-radius: 8px;
     background: #ffffff;
 }
 
 .coding-preview-console {
-    min-height: 5rem;
-    max-height: 12rem;
+    min-height: 4rem;
+    max-height: 8rem;
     margin-top: 0.75rem;
     overflow: auto;
 }

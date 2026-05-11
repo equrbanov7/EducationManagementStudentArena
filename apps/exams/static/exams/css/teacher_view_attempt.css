@@ -295,6 +295,72 @@
     background-color: #f8fafc !important; /* Çox açıq boz fon */
 }
 
+.coding-files-review {
+    display: grid;
+    gap: 10px;
+}
+
+.coding-file-detail {
+    border: 1px solid #cbdaf0;
+    border-radius: 10px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.coding-file-detail summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 14px;
+    color: #17458f;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+
+.coding-file-detail summary::-webkit-details-marker {
+    display: none;
+}
+
+.coding-file-detail summary::after {
+    content: "+";
+    color: #64748b;
+}
+
+.coding-file-detail[open] summary::after {
+    content: "-";
+}
+
+.coding-file-detail summary span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.coding-file-detail summary small {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.coding-file-detail pre {
+    margin: 0;
+    padding: 14px;
+    max-height: 420px;
+    overflow: auto;
+    background: #0f172a;
+    color: #e5edf8;
+    border-top: 1px solid #cbdaf0;
+    border-radius: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
 /* Fayl Siyahısı */
 .attached-files-block .list-group-item {
     padding: 10px 15px;
