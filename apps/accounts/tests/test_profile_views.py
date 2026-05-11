@@ -4232,6 +4232,32 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(exam_item["creator_display"], "Teacher Owner")
         self.assertContains(response, "Müəllim: Teacher Owner")
 
+    def test_pending_review_coding_exam_item_uses_practical_type_label(self):
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        student = User.objects.create_user(
+            username="pending_coding_student",
+            email="pending_coding_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        exam = Exam.objects.create(
+            author=self.user,
+            title="Pending Practical Exam",
+            exam_type="coding",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(user=student, exam=exam, status="submitted", checked_by_teacher=False)
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"))
+
+        self.assertEqual(response.status_code, 200)
+        exam_item = next(item for item in response.context["review_items"] if item["title"] == exam.title)
+        self.assertEqual(exam_item["type_label"], "Praktiki imtahan")
+        self.assertContains(response, "Praktiki imtahan")
+
     def test_profile_pending_review_section_renders_pr_page_pagination_links(self):
         from datetime import timedelta
 

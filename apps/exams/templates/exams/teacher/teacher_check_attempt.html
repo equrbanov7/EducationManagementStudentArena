@@ -129,26 +129,6 @@
                                         · {{ item.coding_submission.score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
                                     {% endif %}
                                 </div>
-                                {% if item.coding_files %}
-                                    {% if item.coding_file_count == 1 %}
-                                        {% for code_file in item.coding_files %}
-                                            <strong class="d-block mt-2">{{ code_file.name }}</strong>
-                                            <pre class="mt-2">{{ code_file.content|truncatechars:800 }}</pre>
-                                        {% endfor %}
-                                    {% else %}
-                                        <ul class="list-group mt-2 mb-2">
-                                            {% for code_file in item.coding_files %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                        <a class="btn btn-sm btn-outline-primary"
-                                           href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
-                                            <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_check_attempt" %}
-                                        </a>
-                                    {% endif %}
-                                {% endif %}
                                 {% if item.coding_submission.output %}
                                     <pre class="mt-2">{{ item.coding_submission.output|truncatechars:400 }}</pre>
                                 {% endif %}
@@ -171,6 +151,29 @@
                                 <span class="not-answered">{% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}</span>
                             {% endif %}
                         </div>
+
+                        {% if exam.exam_type == "coding" and item.coding_submission and item.coding_files %}
+                            <div class="coding-files-review" data-review-card-ignore>
+                                {% for code_file in item.coding_files %}
+                                    <details class="coding-file-detail" {% if item.coding_file_count == 1 %}open{% endif %}>
+                                        <summary>
+                                            <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
+                                            {% if code_file.is_main %}
+                                                <small>{% trans "Main File" context "exams.template.coding_exam" %}</small>
+                                            {% endif %}
+                                        </summary>
+                                        <pre>{{ code_file.content }}</pre>
+                                    </details>
+                                {% endfor %}
+                                {% if item.coding_file_count > 1 %}
+                                    <a class="btn btn-sm btn-outline-primary coding-download-link"
+                                       data-review-card-ignore
+                                       href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
+                                        <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_check_attempt" %}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                         
 
                         {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
