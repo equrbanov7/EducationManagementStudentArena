@@ -509,14 +509,13 @@
                 if (!examTypeSelect) return;
 
                 const selectedExamType = examTypeSelect.value || "test";
-                const isTest = selectedExamType === "test";
                 const isWritten = selectedExamType === "written";
 
                 if (randomQuestionGroup) {
-                    randomQuestionGroup.hidden = !isTest;
+                    randomQuestionGroup.hidden = false;
                 }
                 if (randomQuestionInput) {
-                    randomQuestionInput.disabled = !isTest;
+                    randomQuestionInput.disabled = false;
                 }
 
                 if (paintGroup) {
