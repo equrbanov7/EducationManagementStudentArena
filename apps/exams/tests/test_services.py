@@ -27,7 +27,7 @@ from apps.exams.models import (
     QuestionBlock,
 )
 from apps.exams.services import parsing
-from apps.exams.services.ai_grading import grade_written_answer
+from apps.exams.services.ai_grading import _parse_ai_grade, grade_written_answer
 from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
@@ -118,6 +118,24 @@ class ExamAttemptManagementServicesTest(TestCase):
 
 
 class AIWrittenGradingServiceTest(SimpleTestCase):
+    def test_parse_ai_grade_rounds_decimal_scores_like_teacher_points(self):
+        score, explanation = _parse_ai_grade("SCORE: 7.5\nEXPLANATION: Mostly correct.", 10)
+
+        self.assertEqual(score, 8)
+        self.assertEqual(explanation, "Mostly correct.")
+
+    def test_parse_ai_grade_scales_fractional_score_to_requested_max(self):
+        score, explanation = _parse_ai_grade("SCORE: 8/10\nEXPLANATION: Strong answer.", 5)
+
+        self.assertEqual(score, 4)
+        self.assertEqual(explanation, "Strong answer.")
+
+    def test_parse_ai_grade_accepts_localized_score_label(self):
+        score, explanation = _parse_ai_grade("Bal: 9\nRəy: Cavab aydındır.", 10)
+
+        self.assertEqual(score, 9)
+        self.assertEqual(explanation, "Cavab aydındır.")
+
     @override_settings(GEMINI_API_KEY="test-gemini-key")
     @patch("apps.exams.services.ai_grading.requests.post")
     def test_grade_written_answer_sends_uploaded_images_to_gemini(self, mock_post):

@@ -191,7 +191,7 @@
                         {% endif %}
                     </div>
 
-                    <div class="form-group span-full" data-test-random-question-group>
+                    <div class="form-group span-full" data-random-question-group data-test-random-question-group>
                         {{ form.random_question_count.label_tag }}
                         <div class="input-with-icon">
                             {{ form.random_question_count }}
@@ -502,7 +502,7 @@
             const examTypeSelect = document.getElementById("{{ form.exam_type.id_for_label }}");
             const paintGroup = document.querySelector("[data-exam-paint-group]");
             const paintCheckbox = document.getElementById("{{ form.enable_paint.id_for_label }}");
-            const randomQuestionGroup = document.querySelector("[data-test-random-question-group]");
+            const randomQuestionGroup = document.querySelector("[data-random-question-group], [data-test-random-question-group]");
             const randomQuestionInput = document.getElementById("{{ form.random_question_count.id_for_label }}");
 
             function syncExamTypeDependentFields() {

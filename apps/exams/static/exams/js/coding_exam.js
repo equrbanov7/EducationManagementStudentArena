@@ -91,6 +91,7 @@
         var submitBtn = document.getElementById("codingSubmitBtn");
         var resetBtn = document.getElementById("codingResetBtn");
         var createFileBtn = document.getElementById("codingCreateFileBtn");
+        var makeMainFileBtn = document.getElementById("codingMakeMainFileBtn");
         var renameFileBtn = document.getElementById("codingRenameFileBtn");
         var deleteFileBtn = document.getElementById("codingDeleteFileBtn");
         var fullscreenBtn = document.getElementById("codingFullscreenBtn");
@@ -100,12 +101,8 @@
         var timerValue = document.getElementById("codingTimerValue");
         var previewFrame = document.getElementById("codingPreviewFrame");
         var previewConsoleNode = document.getElementById("codingPreviewConsole");
-        var questionNav = document.getElementById("codingQuestionNav");
-        var currentQuestionTitleNode = document.getElementById("codingCurrentQuestionTitle");
         var currentQuestionNumNode = document.getElementById("codingCurrentQuestionNum");
         var totalQuestionCountNode = document.getElementById("codingTotalQuestionCount");
-        var answeredCountNode = document.getElementById("codingAnsweredCount");
-        var totalAnswerCountNode = document.getElementById("codingTotalAnswerCount");
         var progressFillNode = document.getElementById("codingProgressFill");
         var questionLabelNode = document.getElementById("codingQuestionLabel");
         var questionTextNode = document.getElementById("codingQuestionText");
@@ -270,12 +267,14 @@
                 btn.addEventListener("click", function () {
                     syncEditorToFile();
                     currentFileIndex = index;
+                    syncLanguageToCurrentFile();
                     renderFiles();
                     setEditorForCurrentFile();
                     updateLanguagePreviewVisibility();
                 });
                 fileList.appendChild(btn);
             });
+            updateFileActionButtons();
         }
 
         function fileSnapshot(filesToSnapshot) {
@@ -311,16 +310,16 @@
                 lines.push(question.problemStatement);
             }
             if (question.inputDescription) {
-                lines.push("Input description:\n" + question.inputDescription);
+                lines.push((i18n.inputDescription || "Input description") + ":\n" + question.inputDescription);
             }
             if (question.outputDescription) {
-                lines.push("Output description:\n" + question.outputDescription);
+                lines.push((i18n.outputDescription || "Output description") + ":\n" + question.outputDescription);
             }
             if (question.exampleInput) {
-                lines.push("Example input:\n" + question.exampleInput);
+                lines.push((i18n.exampleInput || "Example input") + ":\n" + question.exampleInput);
             }
             if (question.exampleOutput) {
-                lines.push("Example output:\n" + question.exampleOutput);
+                lines.push((i18n.exampleOutput || "Example output") + ":\n" + question.exampleOutput);
             }
             return lines.join("\n\n");
         }
@@ -330,8 +329,6 @@
             var answered = questionStates.filter(isQuestionAnswered).length;
             if (currentQuestionNumNode) currentQuestionNumNode.textContent = String(currentQuestionIndex + 1);
             if (totalQuestionCountNode) totalQuestionCountNode.textContent = String(total);
-            if (answeredCountNode) answeredCountNode.textContent = String(answered);
-            if (totalAnswerCountNode) totalAnswerCountNode.textContent = String(total);
             if (progressFillNode) {
                 progressFillNode.style.width = total ? Math.round((answered / total) * 100) + "%" : "0%";
             }
@@ -346,16 +343,10 @@
             if (nextQuestionBtn) {
                 nextQuestionBtn.hidden = isLast;
             }
-            if (submitBtn) {
-                submitBtn.hidden = !isLast;
-            }
         }
 
         function renderProblem() {
             var question = currentQuestion();
-            if (currentQuestionTitleNode) {
-                currentQuestionTitleNode.textContent = question.title || "";
-            }
             if (questionLabelNode) {
                 questionLabelNode.textContent = (i18n.questionUpper || "QUESTION") + " " + question.number;
             }
@@ -366,30 +357,38 @@
             updateQuestionControls();
         }
 
-        function renderQuestionNav() {
-            if (!questionNav) {
-                return;
-            }
-            questionNav.innerHTML = "";
-            questionStates.forEach(function (question, index) {
-                var btn = document.createElement("button");
-                btn.type = "button";
-                btn.className =
-                    "coding-question-btn" +
-                    (index === currentQuestionIndex ? " is-active" : "") +
-                    (isQuestionAnswered(question) ? " is-answered" : "");
-                btn.textContent = String(question.number);
-                btn.title = question.title || btn.textContent;
-                btn.addEventListener("click", function () {
-                    switchQuestion(index);
-                });
-                questionNav.appendChild(btn);
-            });
-            questionNav.hidden = false;
-        }
-
         function getSelectedLanguage() {
             return languageSelect ? languageSelect.value : currentQuestion().selectedLanguage;
+        }
+
+        function canSelectLanguage(value) {
+            if (!languageSelect || !value) {
+                return false;
+            }
+            return Array.prototype.some.call(languageSelect.options, function (option) {
+                return option.value === value;
+            });
+        }
+
+        function executionLanguageForFile(file, fallbackLanguage) {
+            var inferred = file ? extensionLanguage(file.name, fallbackLanguage) : fallbackLanguage;
+            if (inferred === "css") {
+                inferred = "html";
+            }
+            return canSelectLanguage(inferred) ? inferred : (fallbackLanguage || getSelectedLanguage());
+        }
+
+        function syncLanguageToCurrentFile() {
+            if (!languageSelect) {
+                return getSelectedLanguage();
+            }
+            var nextLanguage = executionLanguageForFile(currentFile(), languageSelect.value);
+            if (nextLanguage && languageSelect.value !== nextLanguage) {
+                languageSelect.value = nextLanguage;
+                syncBootstrapSelect(languageSelect);
+            }
+            currentQuestion().selectedLanguage = languageSelect.value;
+            return languageSelect.value;
         }
 
         function getActiveFileLanguage() {
@@ -428,6 +427,29 @@
             }
         }
 
+        function setMainFile(index) {
+            if (!files[index]) {
+                return;
+            }
+            files.forEach(function (file, fileIndex) {
+                file.is_main = fileIndex === index;
+            });
+            currentQuestion().files = files;
+        }
+
+        function updateFileActionButtons() {
+            var file = currentFile();
+            if (makeMainFileBtn) {
+                makeMainFileBtn.disabled = !file || Boolean(file.is_main);
+            }
+            if (renameFileBtn) {
+                renameFileBtn.disabled = !file;
+            }
+            if (deleteFileBtn) {
+                deleteFileBtn.disabled = !file || files.length <= 1;
+            }
+        }
+
         function updateLanguagePreviewVisibility() {
             var previewAllowed = canPreviewCurrentQuestion();
             document.querySelectorAll("[data-preview-tab]").forEach(function (tab) {
@@ -454,7 +476,7 @@
                 languageSelect.value = question.selectedLanguage || question.language || config.selectedLanguage;
                 syncBootstrapSelect(languageSelect);
             }
-            renderQuestionNav();
+            syncLanguageToCurrentFile();
             renderProblem();
             renderFiles();
             setEditorForCurrentFile();
@@ -470,9 +492,20 @@
 
         function collectPayload() {
             syncEditorToFile();
+            var activeFile = currentFile();
+            var selectedLanguage = executionLanguageForFile(
+                activeFile,
+                languageSelect ? languageSelect.value : currentQuestion().selectedLanguage
+            );
+            if (languageSelect && languageSelect.value !== selectedLanguage) {
+                languageSelect.value = selectedLanguage;
+                syncBootstrapSelect(languageSelect);
+            }
+            currentQuestion().selectedLanguage = selectedLanguage;
             return {
                 question_id: currentQuestion().id,
-                selected_language: languageSelect ? languageSelect.value : currentQuestion().selectedLanguage,
+                selected_language: selectedLanguage,
+                active_file_name: activeFile ? activeFile.name : "",
                 files: files,
                 stdin: stdinNode ? stdinNode.value : ""
             };
@@ -482,14 +515,25 @@
             syncEditorToFile();
             return {
                 questions: questionStates.map(function (question) {
+                    var questionFiles = question.files || [];
+                    var activeFile = questionFiles[question.fileIndex || 0] || questionFiles[0] || null;
+                    var selectedLanguage = executionLanguageForFile(
+                        activeFile,
+                        question.selectedLanguage || question.language || config.selectedLanguage
+                    );
                     return {
                         question_id: question.id,
-                        selected_language: question.selectedLanguage || question.language || config.selectedLanguage,
-                        files: question.files || [],
+                        selected_language: selectedLanguage,
+                        active_file_name: activeFile ? activeFile.name : "",
+                        files: questionFiles,
                         stdin: ""
                     };
                 })
             };
+        }
+
+        function getUnansweredCount() {
+            return Math.max(questionStates.length - questionStates.filter(isQuestionAnswered).length, 0);
         }
 
         function queueAutosave(delay) {
@@ -759,7 +803,6 @@
             if (previewConsoleNode) previewConsoleNode.textContent = submission.output || "";
             currentQuestion().latestSubmission = submission;
             updateProgress();
-            renderQuestionNav();
             switchTab(submission.error && !submission.output ? "errors" : "output");
         }
 
@@ -860,13 +903,28 @@
                 });
         }
 
+        function openFinishConfirmModal() {
+            syncEditorToFile();
+            updateProgress();
+            var unansweredCount = getUnansweredCount();
+            var summary = unansweredCount > 0
+                ? (i18n.finishUnansweredCount || "Unanswered questions: {count}.").replace("{count}", String(unansweredCount))
+                : (i18n.finishAllAnswered || "All questions have been answered.");
+            openConfirmModal({
+                title: i18n.finishConfirmTitle || "Finish the exam?",
+                body: (i18n.finishConfirmBody || "After you finish, you will not be able to return to this exam.") + " " + summary,
+                confirmText: i18n.finishConfirmText || i18n.confirm || "Confirm",
+                danger: true,
+                onConfirm: submitCode
+            });
+        }
+
         editor.on("change", function () {
             if (isSettingEditorValue) {
                 return;
             }
             syncEditorToFile();
             updateProgress();
-            renderQuestionNav();
             queueAutosave(2500);
         });
 
@@ -877,7 +935,6 @@
                 editor.setOption("mode", modeForLanguage(extensionLanguage(currentFile() && currentFile().name, languageSelect.value), languageModes));
                 updateLanguagePreviewVisibility();
                 updateProgress();
-                renderQuestionNav();
                 queueAutosave(500);
             });
         }
@@ -936,7 +993,7 @@
             runBtn.addEventListener("click", runCode);
         }
         if (submitBtn) {
-            submitBtn.addEventListener("click", submitCode);
+            submitBtn.addEventListener("click", openFinishConfirmModal);
         }
         if (prevQuestionBtn) {
             prevQuestionBtn.addEventListener("click", function () {
@@ -961,11 +1018,11 @@
                         files = question.files;
                         currentFileIndex = 0;
                         question.fileIndex = 0;
+                        syncLanguageToCurrentFile();
                         renderFiles();
                         setEditorForCurrentFile();
                         updateLanguagePreviewVisibility();
                         updateProgress();
-                        renderQuestionNav();
                         queueAutosave(100);
                     }
                 });
@@ -984,14 +1041,23 @@
                         syncEditorToFile();
                         files.push({ name: name, content: "", language: extensionLanguage(name, languageSelect.value), is_main: false });
                         currentFileIndex = files.length - 1;
+                        syncLanguageToCurrentFile();
                         renderFiles();
                         setEditorForCurrentFile();
                         updateLanguagePreviewVisibility();
                         updateProgress();
-                        renderQuestionNav();
                         queueAutosave(100);
                     }
                 });
+            });
+        }
+        if (makeMainFileBtn) {
+            makeMainFileBtn.addEventListener("click", function () {
+                setMainFile(currentFileIndex);
+                renderFiles();
+                setEditorForCurrentFile();
+                updateProgress();
+                queueAutosave(100);
             });
         }
         if (renameFileBtn) {
@@ -1009,11 +1075,11 @@
                         }
                         file.name = name;
                         file.language = extensionLanguage(name, languageSelect.value);
+                        syncLanguageToCurrentFile();
                         renderFiles();
                         setEditorForCurrentFile();
                         updateLanguagePreviewVisibility();
                         updateProgress();
-                        renderQuestionNav();
                         queueAutosave(100);
                     }
                 });
@@ -1037,11 +1103,11 @@
                         if (wasMain && files[0]) {
                             files[0].is_main = true;
                         }
+                        syncLanguageToCurrentFile();
                         renderFiles();
                         setEditorForCurrentFile();
                         updateLanguagePreviewVisibility();
                         updateProgress();
-                        renderQuestionNav();
                         queueAutosave(100);
                     }
                 });
@@ -1101,7 +1167,7 @@
             languageSelect.value = currentQuestion().selectedLanguage || currentQuestion().language || config.selectedLanguage;
             syncBootstrapSelect(languageSelect);
         }
-        renderQuestionNav();
+        syncLanguageToCurrentFile();
         renderProblem();
         renderFiles();
         setEditorForCurrentFile();

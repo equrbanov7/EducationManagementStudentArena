@@ -281,6 +281,77 @@
 .user-answer { border-left: 4px solid #3b82f6; }
 .correct-answer { border-left: 4px solid #10b981; background: #f0fdf4; }
 
+.coding-files-review {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.coding-file-detail {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.coding-file-detail summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    color: #1f2937;
+    cursor: pointer;
+    font-weight: 700;
+    list-style: none;
+    min-height: 52px;
+}
+
+.coding-file-detail summary::-webkit-details-marker {
+    display: none;
+}
+
+.coding-file-detail summary::after {
+    content: "+";
+    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.coding-file-detail[open] summary::after {
+    content: "-";
+}
+
+.coding-file-detail summary span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.coding-file-detail summary small {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.coding-file-detail pre {
+    margin: 0;
+    padding: 14px 16px;
+    max-height: 360px;
+    overflow: auto;
+    background: #0f172a;
+    color: #e5edf8;
+    border-top: 1px solid #e5e7eb;
+    border-radius: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
 /* File list */
 .answer-files {
     background: #f9fafb;

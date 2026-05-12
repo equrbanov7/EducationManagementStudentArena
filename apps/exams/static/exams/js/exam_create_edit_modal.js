@@ -455,7 +455,7 @@
             var paintCheckbox = form.querySelector('input[name="enable_paint"]');
             var paintGroup = form.querySelector("[data-exam-paint-group]");
             var paintLabel = paintCheckbox ? paintCheckbox.closest(".modal-check-label--paint") : null;
-            var randomQuestionGroup = form.querySelector("[data-test-random-question-group]");
+            var randomQuestionGroup = form.querySelector("[data-random-question-group], [data-test-random-question-group]");
             var randomQuestionInput = form.querySelector('input[name="random_question_count"]');
 
             function syncExamTypeVisibility(examType) {

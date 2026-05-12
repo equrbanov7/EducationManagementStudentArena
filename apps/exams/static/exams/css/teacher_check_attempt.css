@@ -183,8 +183,24 @@
 }
 
 .coding-download-link {
-    width: fit-content;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+}
+
+.coding-download-link__content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1;
+}
+
+.coding-download-link__content i {
+    margin: 0 !important;
+    line-height: 1;
 }
 
 .not-answered {

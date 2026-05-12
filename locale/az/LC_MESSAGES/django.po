@@ -19833,3 +19833,179 @@ msgstr "Mətn sahəsi tapılmadı."
 msgctxt "exams.template.ai_question_bank"
 msgid "AI boş cavab qaytardı."
 msgstr "AI boş cavab qaytardı."
+
+msgctxt "exams.template.coding_exam"
+msgid "Practical Coding Exam"
+msgstr "Praktiki kod imtahanı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Files"
+msgstr "Fayllar"
+
+msgctxt "exams.template.coding_exam"
+msgid "Create File"
+msgstr "Fayl yarat"
+
+msgctxt "exams.template.coding_exam"
+msgid "Rename File"
+msgstr "Faylın adını dəyiş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete File"
+msgstr "Faylı sil"
+
+msgctxt "exams.template.coding_exam"
+msgid "Fullscreen editor"
+msgstr "Redaktoru tam ekran et"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output"
+msgstr "Nəticə"
+
+msgctxt "exams.template.coding_exam"
+msgid "Errors"
+msgstr "Xətalar"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview"
+msgstr "Önizləmə"
+
+msgctxt "exams.template.coding_exam"
+msgid "Language"
+msgstr "Dil"
+
+msgctxt "exams.template.coding_exam"
+msgid "Theme"
+msgstr "Mövzu"
+
+msgctxt "exams.template.coding_exam"
+msgid "Font size"
+msgstr "Şrift ölçüsü"
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code"
+msgstr "Kodu sıfırla"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run Code"
+msgstr "Kodu işə sal"
+
+msgctxt "exams.template.coding_exam"
+msgid "Custom input"
+msgstr "Fərdi giriş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Auto-saved"
+msgstr "Avtomatik yadda saxlanıldı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Execution uses the configured Docker sandbox."
+msgstr "İcra konfiqurasiya edilmiş Docker sandbox-dan istifadə edir."
+
+msgctxt "exams.template.coding_exam"
+msgid "Code execution is disabled by the teacher."
+msgstr "Kodun icrası müəllim tərəfindən deaktiv edilib."
+
+msgctxt "exams.template.coding_exam"
+msgid "Close"
+msgstr "Bağla"
+
+msgctxt "exams.template.coding_exam"
+msgid "Cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.coding_exam"
+msgid "Confirm"
+msgstr "Təsdiqlə"
+
+msgctxt "exams.template.coding_exam"
+msgid "File name"
+msgstr "Fayl adı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Save"
+msgstr "Yadda saxla"
+
+msgctxt "exams.template.coding_exam"
+msgid "Saving..."
+msgstr "Saxlanılır..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Running..."
+msgstr "İşə salınır..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submitting..."
+msgstr "Göndərilir..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submission successful"
+msgstr "Göndərmə uğurludur"
+
+msgctxt "exams.template.coding_exam"
+msgid "Time is over"
+msgstr "Vaxt bitdi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Passed"
+msgstr "Keçdi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Failed"
+msgstr "Keçmədi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Main File"
+msgstr "Əsas fayl"
+
+msgctxt "exams.template.coding_exam"
+msgid "Make Main File"
+msgstr "Əsas fayl et"
+
+msgctxt "exams.template.coding_exam"
+msgid "Download ZIP"
+msgstr "ZIP yüklə"
+
+msgctxt "exams.template.coding_exam"
+msgid "Input description"
+msgstr "Giriş təsviri"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output description"
+msgstr "Çıxış təsviri"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example input"
+msgstr "Nümunə giriş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example output"
+msgstr "Nümunə çıxış"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview updated."
+msgstr "Önizləmə yeniləndi."
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code?"
+msgstr "Kodu sıfırlamaq?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This will restore the current question files to the starter code."
+msgstr "Bu, cari sualın fayllarını başlanğıc koduna qaytaracaq."
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete file?"
+msgstr "Faylı silmək?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This file will be removed from the current question."
+msgstr "Bu fayl cari sualdan silinəcək."
+
+msgctxt "exams.template.coding_exam"
+msgid "Use letters, numbers, dot, dash, or underscore only."
+msgstr "Yalnız hərf, rəqəm, nöqtə, tire və ya alt xətt istifadə edin."
+
+msgctxt "exams.template.coding_exam"
+msgid "A file with this name already exists for this question."
+msgstr "Bu sual üçün bu adda fayl artıq mövcuddur."
