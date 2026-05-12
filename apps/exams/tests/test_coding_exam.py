@@ -3,18 +3,66 @@ import zipfile
 from io import BytesIO
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm
 from apps.exams.models import CodingFile, CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.coding_definition import build_coding_payload_from_exam_form, upsert_coding_question
-from apps.exams.services.coding_runtime import clean_docker_stderr, prepare_files_for_execution, truncate_capture
+from apps.exams.services.coding_runtime import (
+    clean_docker_stderr,
+    execution_language_for_filename,
+    mark_file_as_main,
+    normalize_python_indentation,
+    prepare_files_for_execution,
+    truncate_capture,
+)
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+
+
+class CodingRuntimeIndentationTests(SimpleTestCase):
+    def test_execution_language_uses_file_extension(self):
+        self.assertEqual(execution_language_for_filename("solution.cpp", "python"), "cpp")
+        self.assertEqual(execution_language_for_filename("answer.py", "cpp"), "python")
+        self.assertEqual(execution_language_for_filename("style.css", "python"), "html")
+
+    def test_mark_file_as_main_switches_without_deleting_files(self):
+        files = [
+            {"name": "main.py", "content": "", "language": "python", "is_main": True},
+            {"name": "solution.cpp", "content": "", "language": "cpp", "is_main": False},
+        ]
+
+        marked = mark_file_as_main(files, "solution.cpp")
+
+        self.assertFalse(marked[0]["is_main"])
+        self.assertTrue(marked[1]["is_main"])
+        self.assertEqual([item["name"] for item in marked], ["main.py", "solution.cpp"])
+
+    def test_python_loose_top_level_unindent_is_normalized(self):
+        code = 'print("hello")\n\ndef greet(name):\n    print(f"hello {name}")\n\n greet("elvin")\n'
+
+        normalized = normalize_python_indentation(code)
+
+        self.assertIn('\ngreet("elvin")\n', normalized)
+        self.assertNotIn('\n greet("elvin")\n', normalized)
+
+    def test_python_valid_one_space_suite_indent_is_preserved(self):
+        code = 'if True:\n print("ok")\n print("still ok")\n'
+
+        self.assertEqual(normalize_python_indentation(code), code)
+
+    def test_python_multiline_string_indentation_is_preserved(self):
+        code = 'text = """\n  keep this spacing\n"""\n print(text)\n'
+
+        normalized = normalize_python_indentation(code)
+
+        self.assertIn("\n  keep this spacing\n", normalized)
+        self.assertIn("\nprint(text)\n", normalized)
 
 
 def assign_user_to_org(user, organization, role):
@@ -254,7 +302,7 @@ class CodingExamSubmissionApiTests(TestCase):
         result_response = self.client.get(
             reverse("exams:exam_result", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
         )
-        self.assertContains(result_response, "Download ZIP")
+        self.assertContains(result_response, pgettext("exams.template.coding_exam", "Download ZIP"))
 
         self.client.force_login(self.teacher)
         session = self.client.session
@@ -266,7 +314,7 @@ class CodingExamSubmissionApiTests(TestCase):
         teacher_view_response = self.client.get(
             reverse("exams:teacher_view_attempt", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
         )
-        self.assertContains(teacher_view_response, "Download ZIP")
+        self.assertContains(teacher_view_response, pgettext("exams.template.coding_exam", "Download ZIP"))
 
     def test_teacher_check_attempt_syncs_missing_coding_answers_from_final_submissions(self):
         _, second_coding_question = upsert_coding_question(

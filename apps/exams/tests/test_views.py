@@ -493,6 +493,46 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="10"')
 
+    def test_modal_edit_written_exam_includes_random_question_count(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Random Count Exam",
+            exam_type="written",
+            organization=self.org_a,
+            random_question_count=7,
+        )
+
+        response = self.client.get(
+            reverse("exams:edit_exam", args=[written_exam.slug]),
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn("data-random-question-group", content)
+        self.assertRegex(content, r'name="random_question_count"[^>]*value="7"')
+
+    def test_modal_edit_coding_exam_includes_random_question_count(self):
+        coding_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Practical Random Count Exam",
+            exam_type="coding",
+            organization=self.org_a,
+            random_question_count=4,
+        )
+
+        response = self.client.get(
+            reverse("exams:edit_exam", args=[coding_exam.slug]),
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn("data-random-question-group", content)
+        self.assertRegex(content, r'name="random_question_count"[^>]*value="4"')
+
     def test_modal_create_exam_links_new_exam_to_requested_course(self):
         response = self.client.post(
             reverse("exams:create_exam") + f"?modal=1&course={self.course.id}",
@@ -3131,6 +3171,28 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
         self.assertContains(response, 'class="btn-back-main"', html=False)
+
+    def test_create_question_bank_shows_student_question_count_setting_for_written_exam(self):
+        self.exam.exam_type = "written"
+        self.exam.random_question_count = 6
+        self.exam.save(update_fields=["exam_type", "random_question_count"])
+
+        response = self.client.get(reverse("exams:create_question_bank", args=[self.exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tələbəyə düşəcək sual sayı")
+        self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="6"')
+
+    def test_create_question_bank_shows_student_question_count_setting_for_coding_exam(self):
+        self.exam.exam_type = "coding"
+        self.exam.random_question_count = 3
+        self.exam.save(update_fields=["exam_type", "random_question_count"])
+
+        response = self.client.get(reverse("exams:create_question_bank", args=[self.exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tələbəyə düşəcək sual sayı")
+        self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="3"')
 
     def test_process_question_bank_success_redirect_preserves_return_navigation(self):
         return_to = f"{reverse('accounts:profile')}?section=my-courses"

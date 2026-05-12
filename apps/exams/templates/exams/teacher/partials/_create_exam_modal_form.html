@@ -98,7 +98,7 @@
             {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
         </div>
 
-        <div class="form-group form-group-full" data-test-random-question-group>
+        <div class="form-group form-group-full" data-random-question-group data-test-random-question-group>
             {{ form.random_question_count.label_tag }}
             {{ form.random_question_count }}
             {% if form.random_question_count.help_text %}
