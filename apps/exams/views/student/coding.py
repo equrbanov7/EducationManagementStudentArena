@@ -21,7 +21,9 @@ from apps.exams.services.coding_runtime import (
     build_starter_files,
     create_final_submission,
     create_or_update_draft_submission,
+    execution_language_for_filename,
     grade_files_against_tests,
+    mark_file_as_main,
     normalize_files,
     run_visible_code,
 )
@@ -298,11 +300,15 @@ def _build_submission_input(request, attempt):
         )
 
     allowed_languages = {value for value, _ in CodingExamQuestion.LANGUAGE_CHOICES}
+    active_file_name = data.get("active_file_name") or ""
     selected_language = data.get("selected_language") or coding_question.language
     if selected_language not in allowed_languages:
         selected_language = coding_question.language
 
     files = normalize_files(data.get("files") or [], coding_question=coding_question)
+    if active_file_name:
+        selected_language = execution_language_for_filename(active_file_name, selected_language)
+        files = mark_file_as_main(files, active_file_name)
     stdin = data.get("stdin") or ""
     return coding_question, selected_language, {"files": files, "stdin": stdin}, None
 
@@ -331,14 +337,19 @@ def _build_submission_items(request, attempt):
         coding_question = _get_attempt_coding_question(attempt, raw_item.get("question_id"))
         if coding_question is None:
             return None, _json_error(pgettext("exams.view.coding.error", "coding_question_not_found"), status=404)
+        active_file_name = raw_item.get("active_file_name") or ""
         selected_language = raw_item.get("selected_language") or coding_question.language
         if selected_language not in allowed_languages:
             selected_language = coding_question.language
+        files = normalize_files(raw_item.get("files") or [], coding_question=coding_question)
+        if active_file_name:
+            selected_language = execution_language_for_filename(active_file_name, selected_language)
+            files = mark_file_as_main(files, active_file_name)
         items.append(
             {
                 "coding_question": coding_question,
                 "selected_language": selected_language,
-                "files": normalize_files(raw_item.get("files") or [], coding_question=coding_question),
+                "files": files,
                 "stdin": raw_item.get("stdin") or "",
             }
         )
