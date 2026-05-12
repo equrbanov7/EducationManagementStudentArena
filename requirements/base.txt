@@ -126,7 +126,7 @@ packaging==25.0
 # SERIALIZATION & PERFORMANCE (Optional but included)
 # ═══════════════════════════════════════════════════════════════════════════
 msgpack==1.1.2
-ujson==5.12.0
+ujson==5.12.1
 cbor2==5.9.0
 py-ubjson==0.16.1
 
