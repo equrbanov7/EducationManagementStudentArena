@@ -23,11 +23,9 @@
         <div class="coding-progress-head">
             <div class="coding-progress-title">
                 <h2>{{ exam.title }}</h2>
-                <p id="codingCurrentQuestionTitle">{{ coding_question.title }}</p>
             </div>
             <div class="coding-progress-stats">
-                <span>{% trans "Question" context "exams.template.take_exam" %}: <strong id="codingCurrentQuestionNum">1</strong> / <span id="codingTotalQuestionCount">{{ coding_questions|length }}</span></span>
-                <span class="coding-answer-count">{% trans "Answer" context "exams.template.take_exam" %}: <strong id="codingAnsweredCount">0</strong> / <span id="codingTotalAnswerCount">{{ coding_questions|length }}</span></span>
+                <span>{% trans "label_question" context "exams.template.take_exam" %}: <strong id="codingCurrentQuestionNum">1</strong> / <span id="codingTotalQuestionCount">{{ coding_questions|length }}</span></span>
             </div>
         </div>
         <div class="coding-progress-track" aria-hidden="true">
@@ -35,10 +33,8 @@
         </div>
     </section>
 
-    <nav class="coding-question-nav" id="codingQuestionNav" aria-label="{% trans 'Questions' context 'exams.template.coding_exam' %}"></nav>
-
     <section class="coding-question-card">
-        <div class="coding-question-label" id="codingQuestionLabel">{% trans "QUESTION" context "exams.template.take_exam" %} 1</div>
+        <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
         <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
     </section>
 
@@ -54,12 +50,13 @@
                     {% endif %}
                 </div>
                 <div class="coding-file-list" id="codingFileList"></div>
-                {% if coding_question.allow_file_creation %}
-                    <div class="coding-file-actions">
+                <div class="coding-file-actions">
+                    <button type="button" id="codingMakeMainFileBtn" class="coding-mini-btn">{% trans "Make Main File" context "exams.template.coding_exam" %}</button>
+                    {% if coding_question.allow_file_creation %}
                         <button type="button" id="codingRenameFileBtn" class="coding-mini-btn">{% trans "Rename File" context "exams.template.coding_exam" %}</button>
                         <button type="button" id="codingDeleteFileBtn" class="coding-mini-btn coding-mini-btn--danger">{% trans "Delete File" context "exams.template.coding_exam" %}</button>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </aside>
 
             <div class="coding-editor-wrap">
@@ -142,29 +139,18 @@
     <footer class="coding-exam-footer">
         <button type="button" class="coding-footer-btn" id="codingPrevQuestionBtn">
             <i class="fas fa-arrow-left"></i>
-            <span>{% trans "Previous" context "exams.template.take_exam" %}</span>
+            <span>{% trans "action_previous" context "exams.template.take_exam" %}</span>
         </button>
         <div class="coding-footer-actions">
             <button type="button" class="coding-footer-btn coding-footer-btn--primary" id="codingNextQuestionBtn">
-                <span>{% trans "Next" context "exams.template.take_exam" %}</span>
+                <span>{% trans "action_next" context "exams.template.take_exam" %}</span>
                 <i class="fas fa-arrow-right"></i>
             </button>
-            <button type="button" class="coding-btn coding-btn--submit" id="codingSubmitBtn" hidden>
-                <i class="fas fa-paper-plane"></i>
-                <span>{% trans "Submit Code" context "exams.template.coding_exam" %}</span>
+            <button type="button" class="coding-footer-btn coding-footer-btn--finish" id="codingSubmitBtn">
+                <span>{% trans "action_finish_exam" context "exams.template.take_exam" %}</span>
+                <i class="fas fa-check"></i>
             </button>
         </div>
-    </footer>
-
-    <footer class="coding-statusbar">
-        <span id="codingStatus">{% trans "Auto-saved" context "exams.template.coding_exam" %}</span>
-        <span>
-            {% if coding_question.enable_code_execution %}
-                {% trans "Execution uses the configured Docker sandbox." context "exams.template.coding_exam" %}
-            {% else %}
-                {% trans "Code execution is disabled by the teacher." context "exams.template.coding_exam" %}
-            {% endif %}
-        </span>
     </footer>
 </div>
 
@@ -177,8 +163,8 @@
             </div>
             <div class="modal-body" id="codingConfirmModalBody"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "common" %}</button>
-                <button type="button" class="btn btn-danger" id="codingConfirmModalConfirm">{% trans "Confirm" context "common" %}</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "exams.template.coding_exam" %}</button>
+                <button type="button" class="btn btn-danger" id="codingConfirmModalConfirm">{% trans "Confirm" context "exams.template.coding_exam" %}</button>
             </div>
         </div>
     </div>
@@ -197,8 +183,8 @@
                 <div class="invalid-feedback d-block" id="codingFileNameError"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "common" %}</button>
-                <button type="submit" class="btn btn-primary" id="codingFileNameModalConfirm">{% trans "Save" context "common" %}</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" context "exams.template.coding_exam" %}</button>
+                <button type="submit" class="btn btn-primary" id="codingFileNameModalConfirm">{% trans "Save" context "exams.template.coding_exam" %}</button>
             </div>
         </form>
     </div>
@@ -228,19 +214,27 @@ window.CODING_EXAM_CONFIG = {
         failed: "{% filter escapejs %}{% trans 'Failed' context 'exams.template.coding_exam' %}{% endfilter %}",
         mainFile: "{% filter escapejs %}{% trans 'Main File' context 'exams.template.coding_exam' %}{% endfilter %}",
         fileNamePrompt: "{% filter escapejs %}{% trans 'File name' context 'exams.template.coding_exam' %}{% endfilter %}",
-        question: "{% filter escapejs %}{% trans 'Question' context 'exams.template.coding_exam' %}{% endfilter %}",
-        questionUpper: "{% filter escapejs %}{% trans 'QUESTION' context 'exams.template.take_exam' %}{% endfilter %}",
+        questionUpper: "{% filter escapejs %}{% trans 'label_question' context 'exams.template.take_exam' %}{% endfilter %}",
+        inputDescription: "{% filter escapejs %}{% trans 'Input description' context 'exams.template.coding_exam' %}{% endfilter %}",
+        outputDescription: "{% filter escapejs %}{% trans 'Output description' context 'exams.template.coding_exam' %}{% endfilter %}",
+        exampleInput: "{% filter escapejs %}{% trans 'Example input' context 'exams.template.coding_exam' %}{% endfilter %}",
+        exampleOutput: "{% filter escapejs %}{% trans 'Example output' context 'exams.template.coding_exam' %}{% endfilter %}",
         previewUpdated: "{% filter escapejs %}{% trans 'Preview updated.' context 'exams.template.coding_exam' %}{% endfilter %}",
         createFile: "{% filter escapejs %}{% trans 'Create File' context 'exams.template.coding_exam' %}{% endfilter %}",
         renameFile: "{% filter escapejs %}{% trans 'Rename File' context 'exams.template.coding_exam' %}{% endfilter %}",
+        finishConfirmTitle: "{% filter escapejs %}{% trans 'confirm_finish_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        finishConfirmBody: "{% filter escapejs %}{% trans 'confirm_finish_description' context 'exams.template.take_exam' %}{% endfilter %}",
+        finishUnansweredCount: "{% filter escapejs %}{% trans 'confirm_finish_unanswered_count' context 'exams.template.take_exam' %}{% endfilter %}",
+        finishAllAnswered: "{% filter escapejs %}{% trans 'confirm_finish_all_answered' context 'exams.template.take_exam' %}{% endfilter %}",
+        finishConfirmText: "{% filter escapejs %}{% trans 'confirm_finish_yes' context 'exams.template.take_exam' %}{% endfilter %}",
         resetConfirmTitle: "{% filter escapejs %}{% trans 'Reset code?' context 'exams.template.coding_exam' %}{% endfilter %}",
         resetConfirmBody: "{% filter escapejs %}{% trans 'This will restore the current question files to the starter code.' context 'exams.template.coding_exam' %}{% endfilter %}",
         deleteConfirmTitle: "{% filter escapejs %}{% trans 'Delete file?' context 'exams.template.coding_exam' %}{% endfilter %}",
         deleteConfirmBody: "{% filter escapejs %}{% trans 'This file will be removed from the current question.' context 'exams.template.coding_exam' %}{% endfilter %}",
         invalidFileName: "{% filter escapejs %}{% trans 'Use letters, numbers, dot, dash, or underscore only.' context 'exams.template.coding_exam' %}{% endfilter %}",
         duplicateFileName: "{% filter escapejs %}{% trans 'A file with this name already exists for this question.' context 'exams.template.coding_exam' %}{% endfilter %}",
-        confirm: "{% filter escapejs %}{% trans 'Confirm' context 'common' %}{% endfilter %}",
-        save: "{% filter escapejs %}{% trans 'Save' context 'common' %}{% endfilter %}"
+        confirm: "{% filter escapejs %}{% trans 'Confirm' context 'exams.template.coding_exam' %}{% endfilter %}",
+        save: "{% filter escapejs %}{% trans 'Save' context 'exams.template.coding_exam' %}{% endfilter %}"
     }
 };
 </script>

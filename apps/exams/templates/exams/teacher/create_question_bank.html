@@ -640,10 +640,11 @@
         <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
 
         <div class="settings-card">
-            <label><i class="fas fa-random"></i> {% trans "label_total_question_count" context "exams.template.create_question_bank" %}:</label>
+            <label><i class="fas fa-random"></i> {% trans "random_question_count" context "exams.form.exam.label" %}:</label>
             <input type="number"
                    name="random_question_count"
                    class="form-control-custom"
+                   min="0"
                    value="{{ exam.random_question_count|default:0 }}"
                    placeholder="{% trans 'placeholder_all_questions' context 'exams.template.create_question_bank' %}">
             <small style="color:grey">
