@@ -1,5 +1,6 @@
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -16,6 +17,7 @@ from apps.exams.models import CodingExamQuestion, CodingFile, CodingSubmission, 
 MAX_CODE_BYTES = 256_000
 MAX_CAPTURE_BYTES = 64_000
 SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.-]{1,180}$")
+TRIPLE_QUOTE_RE = re.compile(r"(?<!\\)(\"\"\"|''')")
 
 
 LANGUAGE_MODES = {
@@ -80,6 +82,14 @@ def file_language_for_name(filename, fallback_language):
     return fallback_language
 
 
+def execution_language_for_filename(filename, fallback_language):
+    language = file_language_for_name(filename, fallback_language)
+    if language == "css":
+        return CodingExamQuestion.LANGUAGE_HTML
+    allowed_languages = {value for value, _ in CodingExamQuestion.LANGUAGE_CHOICES}
+    return language if language in allowed_languages else fallback_language
+
+
 def default_starter_code(language):
     if language == CodingExamQuestion.LANGUAGE_CPP:
         return "#include <iostream>\n" "using namespace std;\n\n" "int main() {\n" "    return 0;\n" "}\n"
@@ -135,6 +145,85 @@ def sanitize_filename(filename):
     return filename
 
 
+def _line_has_unclosed_triple_quote(line, current_quote=None):
+    matches = list(TRIPLE_QUOTE_RE.finditer(line))
+    if not matches:
+        return current_quote
+
+    quote = current_quote
+    for match in matches:
+        marker = match.group(1)
+        if quote is None:
+            quote = marker
+        elif quote == marker:
+            quote = None
+    return quote
+
+
+def _line_bracket_delta(line):
+    code = line.split("#", 1)[0]
+    return sum(1 for char in code if char in "([{") - sum(1 for char in code if char in ")]}")
+
+
+def normalize_python_indentation(content):
+    """Repair accidental tiny unindents that CodeMirror can leave hard to see."""
+    text = str(content or "").replace("\r\n", "\n").replace("\r", "\n")
+    keep_trailing_newline = text.endswith("\n")
+    lines = text.split("\n")
+    if keep_trailing_newline:
+        lines = lines[:-1]
+
+    normalized_lines = []
+    indent_stack = [0]
+    bracket_depth = 0
+    triple_quote = None
+    explicit_continuation = False
+    previous_opens_suite = False
+
+    for raw_line in lines:
+        line = raw_line
+        leading_text = line[: len(line) - len(line.lstrip(" \t"))]
+        expanded_leading = leading_text.expandtabs(4)
+        leading = len(expanded_leading)
+        stripped = line.lstrip(" \t")
+
+        if stripped and triple_quote is None and bracket_depth <= 0 and not explicit_continuation:
+            target_indent = leading
+            current_indent = indent_stack[-1]
+            if previous_opens_suite and leading > current_indent:
+                if leading not in indent_stack:
+                    indent_stack.append(leading)
+            elif leading < current_indent and leading not in indent_stack:
+                lower_indents = [value for value in indent_stack if value < leading]
+                target_indent = max(lower_indents) if lower_indents else 0
+            elif current_indent == 0 and 0 < leading < 4 and not previous_opens_suite:
+                target_indent = 0
+
+            if target_indent != leading or "\t" in leading_text:
+                line = (" " * target_indent) + stripped
+                leading = target_indent
+
+            if leading < indent_stack[-1]:
+                while len(indent_stack) > 1 and indent_stack[-1] > leading:
+                    indent_stack.pop()
+
+        normalized_lines.append(line)
+
+        if not stripped:
+            continue
+
+        triple_quote = _line_has_unclosed_triple_quote(line, triple_quote)
+        if triple_quote is None:
+            bracket_depth = max(0, bracket_depth + _line_bracket_delta(line))
+            explicit_continuation = line.rstrip().endswith("\\")
+            previous_opens_suite = bracket_depth == 0 and line.rstrip().endswith(":")
+        else:
+            explicit_continuation = False
+            previous_opens_suite = False
+
+    return "\n".join(normalized_lines) + ("\n" if keep_trailing_newline else "")
+
+
 def normalize_files(files, *, coding_question):
     if not isinstance(files, list):
         files = []
@@ -153,6 +242,8 @@ def normalize_files(files, *, coding_question):
         if len(content.encode("utf-8")) > MAX_CODE_BYTES:
             content = content.encode("utf-8")[:MAX_CODE_BYTES].decode("utf-8", errors="ignore")
         language = file_language_for_name(name, coding_question.language)
+        if language == "python":
+            content = normalize_python_indentation(content)
         normalized.append(
             {
                 "name": name,
@@ -181,6 +272,15 @@ def normalize_files(files, *, coding_question):
 
 def get_main_file(files):
     return next((item for item in files if item.get("is_main")), files[0] if files else None)
+
+
+def mark_file_as_main(files, filename):
+    safe_name = sanitize_filename(filename)
+    if not safe_name:
+        return files
+    if not any(item.get("name") == safe_name for item in files):
+        return files
+    return [{**item, "is_main": item.get("name") == safe_name} for item in files]
 
 
 def truncate_capture(value):
@@ -396,11 +496,16 @@ def _container_command(language, files):
     if language == "javascript":
         return ["node", main_name or "main.js"]
     if language == "cpp":
-        source = main_name or "main.cpp"
+        source = shlex.quote(main_name or "main.cpp")
         return ["sh", "-lc", f"g++ /workspace/{source} -O2 -std=c++17 -o /tmp/main && /tmp/main"]
     if language == "java":
         source = main_name or "Main.java"
-        return ["sh", "-lc", f"cp -R /workspace /tmp/work && cd /tmp/work && javac {source} && java Main"]
+        class_name = Path(source).stem or "Main"
+        return [
+            "sh",
+            "-lc",
+            f"cp -R /workspace /tmp/work && cd /tmp/work && javac {shlex.quote(source)} && java {shlex.quote(class_name)}",
+        ]
     return []
 
 

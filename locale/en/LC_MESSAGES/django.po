@@ -19553,3 +19553,179 @@ msgstr "Text field was not found."
 msgctxt "exams.template.ai_question_bank"
 msgid "AI boş cavab qaytardı."
 msgstr "AI returned an empty response."
+
+msgctxt "exams.template.coding_exam"
+msgid "Practical Coding Exam"
+msgstr "Practical Coding Exam"
+
+msgctxt "exams.template.coding_exam"
+msgid "Files"
+msgstr "Files"
+
+msgctxt "exams.template.coding_exam"
+msgid "Create File"
+msgstr "Create File"
+
+msgctxt "exams.template.coding_exam"
+msgid "Rename File"
+msgstr "Rename File"
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete File"
+msgstr "Delete File"
+
+msgctxt "exams.template.coding_exam"
+msgid "Fullscreen editor"
+msgstr "Fullscreen editor"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output"
+msgstr "Output"
+
+msgctxt "exams.template.coding_exam"
+msgid "Errors"
+msgstr "Errors"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview"
+msgstr "Preview"
+
+msgctxt "exams.template.coding_exam"
+msgid "Language"
+msgstr "Language"
+
+msgctxt "exams.template.coding_exam"
+msgid "Theme"
+msgstr "Theme"
+
+msgctxt "exams.template.coding_exam"
+msgid "Font size"
+msgstr "Font size"
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code"
+msgstr "Reset code"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run Code"
+msgstr "Run Code"
+
+msgctxt "exams.template.coding_exam"
+msgid "Custom input"
+msgstr "Custom input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Auto-saved"
+msgstr "Auto-saved"
+
+msgctxt "exams.template.coding_exam"
+msgid "Execution uses the configured Docker sandbox."
+msgstr "Execution uses the configured Docker sandbox."
+
+msgctxt "exams.template.coding_exam"
+msgid "Code execution is disabled by the teacher."
+msgstr "Code execution is disabled by the teacher."
+
+msgctxt "exams.template.coding_exam"
+msgid "Close"
+msgstr "Close"
+
+msgctxt "exams.template.coding_exam"
+msgid "Cancel"
+msgstr "Cancel"
+
+msgctxt "exams.template.coding_exam"
+msgid "Confirm"
+msgstr "Confirm"
+
+msgctxt "exams.template.coding_exam"
+msgid "File name"
+msgstr "File name"
+
+msgctxt "exams.template.coding_exam"
+msgid "Save"
+msgstr "Save"
+
+msgctxt "exams.template.coding_exam"
+msgid "Saving..."
+msgstr "Saving..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Running..."
+msgstr "Running..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submitting..."
+msgstr "Submitting..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submission successful"
+msgstr "Submission successful"
+
+msgctxt "exams.template.coding_exam"
+msgid "Time is over"
+msgstr "Time is over"
+
+msgctxt "exams.template.coding_exam"
+msgid "Passed"
+msgstr "Passed"
+
+msgctxt "exams.template.coding_exam"
+msgid "Failed"
+msgstr "Failed"
+
+msgctxt "exams.template.coding_exam"
+msgid "Main File"
+msgstr "Main File"
+
+msgctxt "exams.template.coding_exam"
+msgid "Make Main File"
+msgstr "Make Main File"
+
+msgctxt "exams.template.coding_exam"
+msgid "Download ZIP"
+msgstr "Download ZIP"
+
+msgctxt "exams.template.coding_exam"
+msgid "Input description"
+msgstr "Input description"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output description"
+msgstr "Output description"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example input"
+msgstr "Example input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example output"
+msgstr "Example output"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview updated."
+msgstr "Preview updated."
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code?"
+msgstr "Reset code?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This will restore the current question files to the starter code."
+msgstr "This will restore the current question files to the starter code."
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete file?"
+msgstr "Delete file?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This file will be removed from the current question."
+msgstr "This file will be removed from the current question."
+
+msgctxt "exams.template.coding_exam"
+msgid "Use letters, numbers, dot, dash, or underscore only."
+msgstr "Use letters, numbers, dot, dash, or underscore only."
+
+msgctxt "exams.template.coding_exam"
+msgid "A file with this name already exists for this question."
+msgstr "A file with this name already exists for this question."

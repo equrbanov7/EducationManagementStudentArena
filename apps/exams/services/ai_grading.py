@@ -16,6 +16,7 @@ import logging
 import mimetypes
 import re
 import time
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Iterable
 from urllib.parse import quote
 
@@ -34,6 +35,7 @@ _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 _CACHE_TTL = 60 * 60 * 24  # 24 hours
 _REQUEST_TIMEOUT_SECONDS = 60
+_GRADE_PROMPT_VERSION = 2
 
 
 def _get_grading_model_chain() -> tuple[str, ...]:
@@ -95,6 +97,7 @@ def _grade_cache_key_with_attachments(
 ) -> str:
     payload = json.dumps(
         {
+            "version": _GRADE_PROMPT_VERSION,
             "question": question_text,
             "answer": student_answer,
             "max_points": max_points,
@@ -128,6 +131,17 @@ def _record_hit(user_id: int) -> None:
     record_rate_limit_hit("ai_summary", _get_rate_limit(), user_id)
 
 
+def _round_score(value: Decimal) -> int:
+    return int(value.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+
+def _parse_score_number(raw_value: str) -> Decimal | None:
+    try:
+        return Decimal((raw_value or "").strip().replace(",", "."))
+    except (InvalidOperation, ValueError):
+        return None
+
+
 def _parse_ai_grade(text: str, max_points: int) -> tuple[int, str]:
     """Extract score and explanation from AI response text.
 
@@ -137,17 +151,40 @@ def _parse_ai_grade(text: str, max_points: int) -> tuple[int, str]:
 
     Falls back to returning 0 and the full text if parsing fails.
     """
+    max_points = max(1, int(max_points or 1))
     score = 0
     explanation = text.strip()
 
-    score_match = re.search(r"SCORE:\s*(\d+(?:\.\d+)?)", text, re.IGNORECASE)
+    score_match = re.search(
+        r"(?:SCORE|BAL|Q[İI]YM[ƏE]T|XAL|PUAN|POINTS?|ОЦЕНКА|БАЛЛ)\s*[:\-]\s*"
+        r"(\d+(?:[\.,]\d+)?)"
+        r"(?:\s*/\s*(\d+(?:[\.,]\d+)?))?"
+        r"(\s*%)?",
+        text,
+        re.IGNORECASE,
+    )
     if score_match:
-        score = min(int(float(score_match.group(1))), max_points)
-        score = max(0, score)
+        raw_score = _parse_score_number(score_match.group(1))
+        raw_denominator = _parse_score_number(score_match.group(2) or "")
+        if raw_score is not None:
+            if score_match.group(3):
+                scaled_score = raw_score * Decimal(max_points) / Decimal("100")
+            elif raw_denominator and raw_denominator > 0:
+                scaled_score = raw_score * Decimal(max_points) / raw_denominator
+            else:
+                scaled_score = raw_score
+            score = min(_round_score(scaled_score), max_points)
+            score = max(0, score)
 
-    expl_match = re.search(r"EXPLANATION:\s*(.+)", text, re.IGNORECASE | re.DOTALL)
+    expl_match = re.search(
+        r"(?:EXPLANATION|IZAH|İZAH|A[ÇC]IQLAMA|R[ƏE]Y|FEEDBACK|COMMENT|Ş[ƏE]RH)\s*[:\-]\s*(.+)",
+        text,
+        re.IGNORECASE | re.DOTALL,
+    )
     if expl_match:
         explanation = expl_match.group(1).strip()
+    elif score_match:
+        explanation = (text[: score_match.start()] + text[score_match.end() :]).strip()
 
     return score, explanation
 
@@ -291,15 +328,16 @@ def _build_grading_prompt(
 **Language:** Respond ONLY in {lang_name}.
 
 **Instructions:**
-- Evaluate the student's answer for correctness, completeness, and clarity.
-- Assign a score from 0 to {max_points}.
-- Provide a brief explanation of your grading decision.
-- Be fair but thorough. Partial credit is acceptable for partially correct answers.
-- If the answer is empty or completely irrelevant, give 0 points.
+- Evaluate the student's answer for correctness, completeness, relevance, and clarity.
+- Assign an INTEGER score from 0 to {max_points}. Use the full {max_points}-point scale, not a binary correct/incorrect score.
+- Calibrate the score like a fair human teacher: excellent answers should be near {max_points}, mostly correct answers around 70-90%, partially correct answers around 40-70%, minimal but relevant answers around 10-40%, and empty or completely irrelevant answers 0.
+- If there is no reference answer, grade against a reasonable expert answer to the question and give credit for valid reasoning, terminology, examples, and partial understanding.
+- Do not give 1 point just because the answer is imperfect when the maximum score is higher; scale partial credit proportionally.
+- Provide brief, constructive teacher-style feedback that explains what is good and what is missing.
 
 **You MUST respond in EXACTLY this format:**
 
-SCORE: <number between 0 and {max_points}>
+SCORE: <integer between 0 and {max_points}>
 EXPLANATION: <your grading explanation in {lang_name}>"""
 
 
