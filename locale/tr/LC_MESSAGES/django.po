@@ -19504,3 +19504,179 @@ msgstr "Metin alanı bulunamadı."
 msgctxt "exams.template.ai_question_bank"
 msgid "AI boş cavab qaytardı."
 msgstr "AI boş yanıt döndürdü."
+
+msgctxt "exams.template.coding_exam"
+msgid "Practical Coding Exam"
+msgstr "Pratik kodlama sınavı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Files"
+msgstr "Dosyalar"
+
+msgctxt "exams.template.coding_exam"
+msgid "Create File"
+msgstr "Dosya oluştur"
+
+msgctxt "exams.template.coding_exam"
+msgid "Rename File"
+msgstr "Dosya adını değiştir"
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete File"
+msgstr "Dosyayı sil"
+
+msgctxt "exams.template.coding_exam"
+msgid "Fullscreen editor"
+msgstr "Düzenleyiciyi tam ekran yap"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output"
+msgstr "Çıktı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Errors"
+msgstr "Hatalar"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview"
+msgstr "Önizleme"
+
+msgctxt "exams.template.coding_exam"
+msgid "Language"
+msgstr "Dil"
+
+msgctxt "exams.template.coding_exam"
+msgid "Theme"
+msgstr "Tema"
+
+msgctxt "exams.template.coding_exam"
+msgid "Font size"
+msgstr "Yazı boyutu"
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code"
+msgstr "Kodu sıfırla"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run Code"
+msgstr "Kodu çalıştır"
+
+msgctxt "exams.template.coding_exam"
+msgid "Custom input"
+msgstr "Özel giriş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Auto-saved"
+msgstr "Otomatik kaydedildi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Execution uses the configured Docker sandbox."
+msgstr "Çalıştırma yapılandırılmış Docker sandbox'ını kullanır."
+
+msgctxt "exams.template.coding_exam"
+msgid "Code execution is disabled by the teacher."
+msgstr "Kod çalıştırma öğretmen tarafından devre dışı bırakıldı."
+
+msgctxt "exams.template.coding_exam"
+msgid "Close"
+msgstr "Kapat"
+
+msgctxt "exams.template.coding_exam"
+msgid "Cancel"
+msgstr "İptal"
+
+msgctxt "exams.template.coding_exam"
+msgid "Confirm"
+msgstr "Onayla"
+
+msgctxt "exams.template.coding_exam"
+msgid "File name"
+msgstr "Dosya adı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Save"
+msgstr "Kaydet"
+
+msgctxt "exams.template.coding_exam"
+msgid "Saving..."
+msgstr "Kaydediliyor..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Running..."
+msgstr "Çalıştırılıyor..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submitting..."
+msgstr "Gönderiliyor..."
+
+msgctxt "exams.template.coding_exam"
+msgid "Submission successful"
+msgstr "Gönderim başarılı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Time is over"
+msgstr "Süre doldu"
+
+msgctxt "exams.template.coding_exam"
+msgid "Passed"
+msgstr "Geçti"
+
+msgctxt "exams.template.coding_exam"
+msgid "Failed"
+msgstr "Başarısız"
+
+msgctxt "exams.template.coding_exam"
+msgid "Main File"
+msgstr "Ana dosya"
+
+msgctxt "exams.template.coding_exam"
+msgid "Make Main File"
+msgstr "Ana dosya yap"
+
+msgctxt "exams.template.coding_exam"
+msgid "Download ZIP"
+msgstr "ZIP indir"
+
+msgctxt "exams.template.coding_exam"
+msgid "Input description"
+msgstr "Girdi açıklaması"
+
+msgctxt "exams.template.coding_exam"
+msgid "Output description"
+msgstr "Çıktı açıklaması"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example input"
+msgstr "Örnek girdi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Example output"
+msgstr "Örnek çıktı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Preview updated."
+msgstr "Önizleme güncellendi."
+
+msgctxt "exams.template.coding_exam"
+msgid "Reset code?"
+msgstr "Kodu sıfırlansın mı?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This will restore the current question files to the starter code."
+msgstr "Bu işlem mevcut soru dosyalarını başlangıç koduna geri yükler."
+
+msgctxt "exams.template.coding_exam"
+msgid "Delete file?"
+msgstr "Dosya silinsin mi?"
+
+msgctxt "exams.template.coding_exam"
+msgid "This file will be removed from the current question."
+msgstr "Bu dosya mevcut sorudan kaldırılacak."
+
+msgctxt "exams.template.coding_exam"
+msgid "Use letters, numbers, dot, dash, or underscore only."
+msgstr "Yalnızca harf, rakam, nokta, tire veya alt çizgi kullanın."
+
+msgctxt "exams.template.coding_exam"
+msgid "A file with this name already exists for this question."
+msgstr "Bu soru için bu adda bir dosya zaten var."

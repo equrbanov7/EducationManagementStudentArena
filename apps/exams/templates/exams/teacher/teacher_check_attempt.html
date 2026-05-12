@@ -169,7 +169,10 @@
                                     <a class="btn btn-sm btn-outline-primary coding-download-link"
                                        data-review-card-ignore
                                        href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
-                                        <i class="fas fa-download me-1"></i> {% trans "Download ZIP" context "exams.template.teacher_check_attempt" %}
+                                        <span class="coding-download-link__content">
+                                            <i class="fas fa-download" aria-hidden="true"></i>
+                                            <span>{% trans "Download ZIP" context "exams.template.coding_exam" %}</span>
+                                        </span>
                                     </a>
                                 {% endif %}
                             </div>

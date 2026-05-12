@@ -201,7 +201,7 @@
             </button>
             
             <button type="button" name="submit_action" value="finish" 
-                    id="finish-btn" class="nav-btn btn-success" style="display: none;">
+                    id="finish-btn" class="nav-btn btn-success">
                 {% trans "action_finish_exam" context "exams.template.take_exam" %} <i class="fas fa-check"></i>
             </button>
         </div>
@@ -453,10 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
         prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
         if (index === totalSlides - 1) {
             nextBtn.style.display = 'none';
-            finishBtn.style.display = 'flex';
         } else {
             nextBtn.style.display = 'flex';
-            finishBtn.style.display = 'none';
         }
 
         currentIndex = index;
