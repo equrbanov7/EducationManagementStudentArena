@@ -14,7 +14,7 @@ from .auth import (
     OTPPasswordResetConfirmForm,
     RegisterForm,
 )
-from .otp import OTPPasswordResetConfirmForm  # noqa: F811 – canonical location
+from .otp import OTPPasswordResetCodeForm, OTPPasswordResetConfirmForm  # noqa: F811 – canonical location
 from .profile import CustomPasswordChangeForm
 
 __all__ = [
@@ -22,5 +22,6 @@ __all__ = [
     "CustomLoginForm",
     "CustomPasswordChangeForm",
     "CustomPasswordResetForm",
+    "OTPPasswordResetCodeForm",
     "OTPPasswordResetConfirmForm",
 ]

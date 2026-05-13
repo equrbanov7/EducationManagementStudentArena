@@ -9,7 +9,7 @@ from urllib.parse import quote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
-from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
+from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, SignatureExpired
 from django.http import HttpResponseNotAllowed, JsonResponse
@@ -17,6 +17,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
+from django.views.generic.edit import FormView
 
 from apps.accounts.models import EmailOTP
 from apps.organizations.services import is_tenant_accessible_organization
@@ -25,7 +26,13 @@ from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_id
 from core.tenancy import restore_request_organization_from_profile
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
-from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
+from ..forms import (
+    CustomLoginForm,
+    CustomPasswordResetForm,
+    OTPPasswordResetCodeForm,
+    OTPPasswordResetConfirmForm,
+    RegisterForm,
+)
 from ..middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ..queries import get_signup_lookup_payload
 from ..services import (
@@ -54,6 +61,7 @@ OTP_VERIFY_LIMIT_SCOPE = "accounts.otp.verify"
 OTP_RESEND_LIMIT_SCOPE = "accounts.otp.resend"
 AUTH_REDIRECT_MAX_LENGTH = 2048
 AUTH_REDIRECT_DISALLOWED_CHARS = frozenset({"'", '"', "\\", "\r", "\n", "\t"})
+PASSWORD_RESET_EMAIL_SESSION_KEY = "accounts_password_reset_email"
 
 
 def _login_limit_keys(request, username):
@@ -63,6 +71,19 @@ def _login_limit_keys(request, username):
         (LOGIN_LIMIT_SCOPE_IP, client_ip),
         (LOGIN_LIMIT_SCOPE_IDENTITY, client_ip, normalized_username),
     ]
+
+
+def _clear_login_rate_limits_after_password_reset(request, user):
+    client_ip = get_client_ip(request) or "unknown"
+    clear_rate_limit(LOGIN_LIMIT_SCOPE_IP, client_ip)
+
+    identities = {
+        getattr(user, "username", ""),
+        getattr(user, "email", ""),
+    }
+    for identity in identities:
+        if identity:
+            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, client_ip, normalize_rate_identity(identity))
 
 
 def _authenticate_superadmin_for_rate_limit_reset(request, username, password):
@@ -198,7 +219,7 @@ class CustomLoginView(LoginView):
 
 
 class NamespacedPasswordResetView(PasswordResetView):
-    """Password reset view that uses accounts namespace for redirects and email links."""
+    """Password reset view that sends an OTP and keeps the reset on-site."""
 
     template_name = "accounts/password_reset.html"
     form_class = CustomPasswordResetForm
@@ -212,14 +233,47 @@ class NamespacedPasswordResetView(PasswordResetView):
         context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
         return context
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        reset_users = getattr(form, "password_reset_users", [])
+        if reset_users:
+            reset_email = EmailOTP.normalize_email(form.cleaned_data["email"])
+            self.request.session[PASSWORD_RESET_EMAIL_SESSION_KEY] = reset_email
+        else:
+            self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return response
 
-class NamespacedPasswordResetDoneView(PasswordResetDoneView):
+
+class NamespacedPasswordResetDoneView(FormView):
     template_name = "accounts/password_reset_done.html"
+    form_class = OTPPasswordResetCodeForm
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+    def get_reset_email(self):
+        return EmailOTP.normalize_email(self.request.session.get(PASSWORD_RESET_EMAIL_SESSION_KEY, ""))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["email"] = self.get_reset_email()
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        reset_email = self.get_reset_email()
+        if reset_email:
+            context.update(get_otp_timer_context(email=reset_email, purpose=EmailOTP.Purpose.PASSWORD_RESET))
+        else:
+            context["otp_expires_at"] = None
+            context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
         context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
+        context["password_reset_email"] = reset_email
         return context
+
+    def form_valid(self, form):
+        user = form.save()
+        _clear_login_rate_limits_after_password_reset(self.request, user)
+        self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return super().form_valid(form)
 
 
 class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
@@ -238,6 +292,14 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
             context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
             context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = getattr(form, "user", None) or getattr(self, "user", None)
+        if user is not None:
+            _clear_login_rate_limits_after_password_reset(self.request, user)
+        self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return response
 
 
 def register_view(request):

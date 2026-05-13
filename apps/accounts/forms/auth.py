@@ -634,7 +634,7 @@ class CustomLoginForm(AuthenticationForm):
 
 
 class CustomPasswordResetForm(PasswordResetForm):
-    """Password reset request form that sends both a link and an OTP code."""
+    """Password reset request form that sends both a short-lived OTP and link."""
 
     email = forms.EmailField(
         label="Email",
@@ -660,8 +660,10 @@ class CustomPasswordResetForm(PasswordResetForm):
         extra_email_context=None,
     ):
         email = self.cleaned_data["email"]
+        self.password_reset_users = []
         for user in self.get_users(email):
             code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.PASSWORD_RESET)
+            self.password_reset_users.append(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
             reset_url = build_absolute_url(

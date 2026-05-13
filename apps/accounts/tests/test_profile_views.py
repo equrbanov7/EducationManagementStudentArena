@@ -3671,6 +3671,57 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, "Unified Lab")
         self.assertNotContains(response, "Unified Assignment")
 
+    def test_profile_my_results_search_filters_section_items(self):
+        self._login_student()
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "my-results", "results_search": "Unified Lab"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["my_results_search_query"], "Unified Lab")
+        self.assertEqual(len(response.context["my_result_items"].object_list), 1)
+        self.assertEqual(response.context["my_result_items"].object_list[0]["title"], "Unified Lab")
+        self.assertContains(response, 'class="results-section-search-form js-profile-debounce-search"')
+
+    def test_profile_my_results_pagination_uses_partial_and_preserves_search(self):
+        from django.utils import timezone
+
+        from apps.assignments.models import Assignment, Submission
+
+        for index in range(7):
+            assignment = Assignment.objects.create(
+                course=self.course,
+                title=f"Bulk Result Assignment {index}",
+                start_date=timezone.now(),
+                status="published",
+            )
+            Submission.objects.create(
+                assignment=assignment,
+                user=self.student,
+                content=f"Bulk answer {index}",
+                status="submitted",
+            )
+
+        self._login_student()
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "my-results",
+                "results_type": "courses",
+                "results_search": "Bulk Result",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        page_obj = response.context["my_results_page_obj"]
+        self.assertEqual(page_obj.paginator.per_page, 6)
+        self.assertTrue(page_obj.has_next())
+        self.assertIn("section=my-results", response.context["my_results_pagination_query"])
+        self.assertIn("results_type=courses", response.context["my_results_pagination_query"])
+        self.assertIn("results_search=Bulk+Result", response.context["my_results_pagination_query"])
+        self.assertContains(response, "results_page=2")
+
     def test_my_result_detail_for_assignment_submission(self):
         self._login_student()
         response = self.client.get(

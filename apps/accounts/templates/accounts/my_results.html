@@ -108,7 +108,7 @@
         </div>
 
         {% if page_obj.has_other_pages %}
-            {% include "partials/_pagination.html" with page_obj=page_obj extra_query="type="|add:active_filter %}
+            {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
         {% endif %}
 
         {% else %}
