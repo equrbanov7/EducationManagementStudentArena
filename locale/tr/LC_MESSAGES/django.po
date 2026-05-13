@@ -1317,22 +1317,22 @@ msgstr "Organizasyon bulunamadı."
 #: apps/accounts/templates/accounts/password_reset.html:4
 msgctxt "accounts.password_reset_page"
 msgid "title"
-msgstr "Reset password"
+msgstr "Şifreyi sıfırla"
 
 #: apps/accounts/templates/accounts/password_reset.html:13
 msgctxt "accounts.password_reset_page"
 msgid "heading"
-msgstr "Forgot password?"
+msgstr "Şifrenizi mi unuttunuz?"
 
 #: apps/accounts/templates/accounts/password_reset.html:14
 msgctxt "accounts.password_reset_page"
 msgid "subheading"
-msgstr "Enter your email and we will send you a password reset link."
+msgstr "E-posta adresinizi girin, şifre sıfırlama OTP kodu gönderelim."
 
 #: apps/accounts/templates/accounts/password_reset.html:26
 msgctxt "accounts.password_reset_page"
 msgid "submit"
-msgstr "Send link"
+msgstr "OTP kodu gönder"
 
 #: apps/accounts/templates/accounts/password_reset.html:30
 msgctxt "accounts.password_reset_page"
@@ -1401,28 +1401,96 @@ msgstr "Request password reset again"
 #: apps/accounts/templates/accounts/password_reset_done.html:3
 msgctxt "accounts.password_reset_done_page"
 msgid "title"
-msgstr "Email sent"
+msgstr "OTP gönderildi"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:17
 msgctxt "accounts.password_reset_done_page"
 msgid "heading"
-msgstr "Email sent!"
+msgstr "OTP kodu gönderildi!"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:20
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
 msgstr ""
-"If this email exists in our system, we sent password reset instructions."
+"Bu e-posta sistemimizde varsa, şifre sıfırlama OTP kodu gönderildi."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:21
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_2"
-msgstr "Do not forget to check your spam folder."
+msgstr "Spam klasörünü kontrol etmeyi unutmayın."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:25
 msgctxt "accounts.password_reset_done_page"
 msgid "back_to_login"
-msgstr "Back to login page"
+msgstr "Giriş sayfasına dön"
+
+msgctxt "accounts.password_reset_page"
+msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
+msgstr "E-postanıza 6 haneli OTP kodu gönderilecek. Sonraki ekranda kodu girerek yeni şifrenizi belirleyin. Kod %(minutes)s dakika geçerlidir."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "OTP code is valid for %(minutes)s minutes."
+msgstr "OTP kodu %(minutes)s dakika geçerlidir."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_expired"
+msgstr "OTP süresi doldu"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "email_section_title"
+msgstr "E-posta adresi"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_section_title"
+msgstr "OTP kodu"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "password_section_title"
+msgstr "Yeni şifre"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "submit"
+msgstr "Şifreyi güncelle"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "email"
+msgstr "E-posta"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "otp_code"
+msgstr "OTP kodu"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password"
+msgstr "Yeni şifre"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password_confirm"
+msgstr "Yeni şifreyi tekrarla"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "email"
+msgstr "E-posta adresinizi girin"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "otp_code"
+msgstr "E-postadaki 6 haneli kod"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password"
+msgstr "Yeni şifre"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password_confirm"
+msgstr "Yeni şifreyi tekrarla"
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "otp_invalid"
+msgstr "OTP kodu yanlış veya süresi dolmuş."
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "password_mismatch"
+msgstr "Şifreler eşleşmiyor."
 
 #: apps/accounts/templates/accounts/pending_review.html:4
 msgctxt "accounts.pending_review_page"

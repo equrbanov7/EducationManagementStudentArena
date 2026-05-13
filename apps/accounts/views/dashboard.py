@@ -42,6 +42,7 @@ from ._helpers import (
     _normalize_review_result_item_type,
     _parse_decimal_score,
     _pending_review_type_label,
+    _query_string,
     _result_status_badge,
     _review_window_seconds_left,
     _role_capabilities,
@@ -342,6 +343,7 @@ def my_results(request):
         "counts": counts,
         "active_filter": active_filter,
         "search_query": search_query,
+        "pagination_query": _query_string(type=active_filter, q=search_query),
     }
     return render(request, "accounts/my_results.html", context)
 
