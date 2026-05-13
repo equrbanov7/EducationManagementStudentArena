@@ -2209,6 +2209,34 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "const examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);")
         self.assertContains(response, "questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);")
         self.assertContains(response, "document.addEventListener('visibilitychange', refreshVisibleTimers);")
+        self.assertContains(response, "examTimeWarningModal")
+        self.assertContains(response, "timeWarningStorageKey")
+        self.assertContains(response, "exam_time_warning.js")
+
+    def test_take_exam_time_warning_modal_strings_are_translated_for_supported_languages(self):
+        self.course_assigned_exam.total_duration_minutes = 30
+        self.course_assigned_exam.save(update_fields=["total_duration_minutes"])
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+
+        expected_titles = {
+            "az": "İmtahanın bitməsinə 5 dəqiqə qalıb",
+            "en": "5 minutes left until the exam ends",
+            "ru": "До окончания экзамена осталось 5 минут",
+            "tr": "Sınavın bitmesine 5 dakika kaldı",
+        }
+        for language_code, expected_title in expected_titles.items():
+            with self.subTest(language_code=language_code), override(language_code):
+                response = self.client.get(
+                    reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]),
+                    HTTP_ACCEPT_LANGUAGE=language_code,
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, expected_title)
 
     def test_take_exam_autosave_updates_only_changed_questions(self):
         written_exam = Exam.objects.create(

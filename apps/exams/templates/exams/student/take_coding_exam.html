@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/eclipse.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/display/fullscreen.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -154,6 +155,36 @@
     </footer>
 </div>
 
+<div class="exam-time-warning-backdrop"
+     id="examTimeWarningModal"
+     role="alertdialog"
+     aria-modal="true"
+     aria-labelledby="examTimeWarningTitle"
+     aria-describedby="examTimeWarningBody"
+     aria-hidden="true">
+    <div class="exam-time-warning-modal">
+        <button type="button"
+                class="exam-time-warning-close"
+                data-exam-time-warning-close
+                aria-label="{% trans 'time_warning_close' context 'exams.template.take_exam' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="exam-time-warning-icon" aria-hidden="true">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h3 class="exam-time-warning-title" id="examTimeWarningTitle">
+            {% trans "time_warning_title" context "exams.template.take_exam" %}
+        </h3>
+        <p class="exam-time-warning-body" id="examTimeWarningBody">
+            {% trans "time_warning_body" context "exams.template.take_exam" %}
+        </p>
+        <span class="exam-time-warning-note">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            {% trans "time_warning_auto_close" context "exams.template.take_exam" %}
+        </span>
+    </div>
+</div>
+
 <div class="modal fade" id="codingConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -198,6 +229,8 @@ window.CODING_EXAM_CONFIG = {
     resultUrl: "{{ result_url }}",
     csrfToken: "{{ csrf_token }}",
     cspNonce: "{{ request.csp_nonce|escapejs }}",
+    examId: "{{ exam.id }}",
+    attemptId: "{{ attempt.id }}",
     selectedLanguage: "{{ coding_question.language }}",
     allowFileCreation: {% if coding_question.allow_file_creation %}true{% else %}false{% endif %},
     allowMultipleFiles: {% if coding_question.allow_multiple_files %}true{% else %}false{% endif %},
@@ -251,6 +284,7 @@ window.CODING_EXAM_CONFIG = {
     <script src="{% static 'vendor/codemirror/addon/edit/closebrackets.js' %}"></script>
     <script src="{% static 'vendor/codemirror/addon/edit/matchbrackets.js' %}"></script>
     <script src="{% static 'vendor/codemirror/addon/display/fullscreen.js' %}"></script>
+    <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/coding_exam.js' %}"></script>
     {% if supervision.supervised %}
         {{ supervision.config|json_script:"supervision-config-data" }}
