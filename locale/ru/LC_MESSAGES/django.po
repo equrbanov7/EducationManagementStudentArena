@@ -1320,22 +1320,22 @@ msgstr "Организация не найдена."
 #: apps/accounts/templates/accounts/password_reset.html:4
 msgctxt "accounts.password_reset_page"
 msgid "title"
-msgstr "Reset password"
+msgstr "Сброс пароля"
 
 #: apps/accounts/templates/accounts/password_reset.html:13
 msgctxt "accounts.password_reset_page"
 msgid "heading"
-msgstr "Forgot password?"
+msgstr "Забыли пароль?"
 
 #: apps/accounts/templates/accounts/password_reset.html:14
 msgctxt "accounts.password_reset_page"
 msgid "subheading"
-msgstr "Enter your email and we will send you a password reset link."
+msgstr "Введите email, и мы отправим OTP-код для сброса пароля."
 
 #: apps/accounts/templates/accounts/password_reset.html:26
 msgctxt "accounts.password_reset_page"
 msgid "submit"
-msgstr "Send link"
+msgstr "Отправить OTP-код"
 
 #: apps/accounts/templates/accounts/password_reset.html:30
 msgctxt "accounts.password_reset_page"
@@ -1404,28 +1404,96 @@ msgstr "Request password reset again"
 #: apps/accounts/templates/accounts/password_reset_done.html:3
 msgctxt "accounts.password_reset_done_page"
 msgid "title"
-msgstr "Email sent"
+msgstr "OTP отправлен"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:17
 msgctxt "accounts.password_reset_done_page"
 msgid "heading"
-msgstr "Email sent!"
+msgstr "OTP-код отправлен!"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:20
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
 msgstr ""
-"If this email exists in our system, we sent password reset instructions."
+"Если этот email есть в нашей системе, мы отправили OTP-код для сброса пароля."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:21
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_2"
-msgstr "Do not forget to check your spam folder."
+msgstr "Не забудьте проверить папку спама."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:25
 msgctxt "accounts.password_reset_done_page"
 msgid "back_to_login"
-msgstr "Back to login page"
+msgstr "Вернуться на страницу входа"
+
+msgctxt "accounts.password_reset_page"
+msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
+msgstr "Мы отправим 6-значный OTP-код на ваш email. Введите его на следующем экране, чтобы задать новый пароль. Код действует %(minutes)s минут."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "OTP code is valid for %(minutes)s minutes."
+msgstr "OTP-код действует %(minutes)s минут."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_expired"
+msgstr "Срок действия OTP истек"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "email_section_title"
+msgstr "Email"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_section_title"
+msgstr "OTP-код"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "password_section_title"
+msgstr "Новый пароль"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "submit"
+msgstr "Обновить пароль"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "email"
+msgstr "Email"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "otp_code"
+msgstr "OTP-код"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password"
+msgstr "Новый пароль"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password_confirm"
+msgstr "Повторите новый пароль"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "email"
+msgstr "Введите email"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "otp_code"
+msgstr "6-значный код из email"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password"
+msgstr "Новый пароль"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password_confirm"
+msgstr "Повторите новый пароль"
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "otp_invalid"
+msgstr "OTP-код неверный или срок его действия истек."
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "password_mismatch"
+msgstr "Пароли не совпадают."
 
 #: apps/accounts/templates/accounts/pending_review.html:4
 msgctxt "accounts.pending_review_page"
