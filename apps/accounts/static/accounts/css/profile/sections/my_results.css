@@ -65,6 +65,63 @@
     color: var(--teal-primary);
 }
 
+/* --- Search --- */
+.profile-section--my-results .results-section-search-form {
+    margin-bottom: 1.5rem;
+    max-width: 460px;
+}
+
+.profile-section--my-results .results-section-search-input-wrap {
+    position: relative;
+}
+
+.profile-section--my-results .results-section-search-input-wrap > i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.profile-section--my-results .results-section-search-input-wrap input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.65rem 2.5rem 0.65rem 2.25rem;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.profile-section--my-results .results-section-search-input-wrap input:focus {
+    border-color: var(--teal-border);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.16);
+    outline: none;
+}
+
+.profile-section--my-results .results-section-search-clear {
+    position: absolute;
+    top: 50%;
+    right: 0.65rem;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.profile-section--my-results .results-section-search-clear:hover {
+    background: var(--teal-light);
+    color: var(--teal-primary);
+}
+
 /* --- Nəticə Kartları Qridi --- */
 .results-cards-grid {
     display: grid;
@@ -290,8 +347,21 @@
     box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
 }
 
+.profile-section--my-results .results-section-empty-clear {
+    display: inline-flex;
+    width: auto;
+    min-width: 160px;
+    margin-top: 1rem;
+    padding: 0.65rem 1rem;
+    text-decoration: none;
+}
+
 /* Mobil Responsivlik */
 @media (max-width: 640px) {
+    .profile-section--my-results .results-section-search-form {
+        max-width: 100%;
+    }
+
     .results-cards-grid {
         grid-template-columns: 1fr;
     }
