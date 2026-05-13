@@ -118,6 +118,13 @@
         var fileNameInput = document.getElementById("codingFileNameInput");
         var fileNameError = document.getElementById("codingFileNameError");
         var fileNameModalConfirm = document.getElementById("codingFileNameModalConfirm");
+        var timeWarning = window.ExamTimeWarning
+            ? window.ExamTimeWarning.init({
+                storageKey: "coding_exam_" + String(config.examId || "") + "_attempt_" + String(config.attemptId || "") + "_five_minute_warning",
+                thresholdSeconds: 300,
+                autoCloseMs: 5000
+            })
+            : null;
 
         if (!editorTextArea || typeof CodeMirror === "undefined") {
             return;
@@ -1152,6 +1159,9 @@
                 timerValue.textContent = formatTime(remaining);
                 if (timerNode) {
                     timerNode.classList.toggle("is-danger", remaining > 0 && remaining <= 60);
+                }
+                if (timeWarning) {
+                    timeWarning.maybeShow(remaining);
                 }
                 if (remaining <= 0) {
                     window.clearInterval(timerId);

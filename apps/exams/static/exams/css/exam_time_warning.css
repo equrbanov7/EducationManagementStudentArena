@@ -1,0 +1,104 @@
+.exam-time-warning-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+.exam-time-warning-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.exam-time-warning-modal {
+    position: relative;
+    width: min(100%, 420px);
+    padding: 1.35rem 1.4rem 1.25rem;
+    border-radius: 16px;
+    border: 1px solid #fed7aa;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 180ms ease;
+}
+
+.exam-time-warning-backdrop.is-visible .exam-time-warning-modal {
+    transform: translateY(0) scale(1);
+}
+
+.exam-time-warning-close {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 50%;
+    background: #fff7ed;
+    color: #9a3412;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exam-time-warning-close:hover,
+.exam-time-warning-close:focus {
+    background: #ffedd5;
+    outline: none;
+}
+
+.exam-time-warning-icon {
+    width: 3.15rem;
+    height: 3.15rem;
+    margin-bottom: 0.85rem;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff7ed;
+    color: #ea580c;
+    font-size: 1.35rem;
+}
+
+.exam-time-warning-title {
+    margin: 0 2rem 0.45rem 0;
+    color: #111827;
+    font-size: 1.18rem;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.exam-time-warning-body {
+    margin: 0;
+    color: #475569;
+    font-size: 0.96rem;
+    line-height: 1.55;
+}
+
+.exam-time-warning-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+    color: #9a3412;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+@media (max-width: 560px) {
+    .exam-time-warning-backdrop {
+        align-items: flex-start;
+        padding-top: 5rem;
+    }
+
+    .exam-time-warning-modal {
+        border-radius: 14px;
+    }
+}
