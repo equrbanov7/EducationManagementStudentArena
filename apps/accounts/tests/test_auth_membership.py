@@ -205,6 +205,7 @@ class LoginViewTest(TestCase):
 
 @override_settings(
     CACHES=LOCMEM_CACHE_SETTINGS,
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     LOGIN_RATE_LIMIT="2/1m",
 )
 class LoginRateLimitTest(TestCase):
@@ -218,6 +219,8 @@ class LoginRateLimitTest(TestCase):
             "StrongPass123!",
         )
         self.login_url = reverse("accounts:login")
+        self.password_reset_url = reverse("accounts:password_reset")
+        self.password_reset_done_url = reverse("accounts:password_reset_done")
 
     def test_login_blocks_after_too_many_invalid_attempts(self):
         for _ in range(2):
@@ -257,6 +260,41 @@ class LoginRateLimitTest(TestCase):
             {"username": "limitedsuperadmin", "password": "wrongpassword"},
         )
         self.assertEqual(retry.status_code, 200)
+
+    def test_successful_password_reset_clears_login_rate_limit_wait(self):
+        for _ in range(2):
+            response = self.client.post(
+                self.login_url,
+                {"username": "limiteduser", "password": "wrongpassword"},
+            )
+            self.assertEqual(response.status_code, 200)
+
+        blocked = self.client.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "StrongPass123!"},
+        )
+        self.assertEqual(blocked.status_code, 429)
+
+        self.client.post(self.password_reset_url, {"email": self.user.email})
+        otp_match = re.search(r"OTP kodu:\s*([0-9]{6})", mail.outbox[-1].body)
+        self.assertIsNotNone(otp_match)
+
+        reset_response = self.client.post(
+            self.password_reset_done_url,
+            {
+                "otp_code": otp_match.group(1),
+                "new_password1": "ResetStrongPass123!",
+                "new_password2": "ResetStrongPass123!",
+            },
+        )
+        self.assertEqual(reset_response.status_code, 302)
+
+        login_after_reset = self.client.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "ResetStrongPass123!"},
+        )
+        self.assertEqual(login_after_reset.status_code, 302)
+        self.assertTrue(login_after_reset.wsgi_request.user.is_authenticated)
 
 
 class LogoutViewTest(TestCase):
@@ -320,13 +358,15 @@ class PasswordResetViewTest(TestCase):
         otp_match = re.search(r"OTP kodu:\s*([0-9]{6})", mail.outbox[0].body)
         self.assertIsNotNone(otp_match)
 
-        confirm_response = self.client.get(match.group("path"), follow=True)
+        confirm_response = self.client.get(self.password_reset_done_url)
         self.assertEqual(confirm_response.status_code, 200)
         self.assertContains(confirm_response, "data-otp-expires-at")
-        confirm_path = confirm_response.request["PATH_INFO"]
+        self.assertContains(confirm_response, 'name="otp_code"')
+        self.assertContains(confirm_response, 'name="new_password1"')
+        self.assertContains(confirm_response, 'name="new_password2"')
 
         complete_response = self.client.post(
-            confirm_path,
+            self.password_reset_done_url,
             {
                 "otp_code": otp_match.group(1),
                 "new_password1": "UpdatedStrongPass123!",
@@ -334,6 +374,39 @@ class PasswordResetViewTest(TestCase):
             },
         )
         self.assertRedirects(complete_response, self.password_reset_complete_url)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("UpdatedStrongPass123!"))
+
+    def test_password_reset_unknown_email_does_not_send_otp(self):
+        response = self.client.post(self.password_reset_url, {"email": "missing@example.com"})
+
+        self.assertRedirects(response, self.password_reset_done_url)
+        self.assertEqual(len(mail.outbox), 0)
+
+        done_response = self.client.get(self.password_reset_done_url)
+        self.assertEqual(done_response.status_code, 200)
+        self.assertContains(done_response, 'name="email"', html=False)
+
+    def test_password_reset_completes_for_user_without_organization_membership(self):
+        self.assertIsNone(self.user.profile.organization)
+        self.assertFalse(self.user.memberships.exists())
+
+        self.client.post(self.password_reset_url, {"email": self.user.email})
+        otp_match = re.search(r"OTP kodu:\s*([0-9]{6})", mail.outbox[0].body)
+        self.assertIsNotNone(otp_match)
+
+        response = self.client.post(
+            self.password_reset_done_url,
+            {
+                "otp_code": otp_match.group(1),
+                "new_password1": "AnotherStrongPass123!",
+                "new_password2": "AnotherStrongPass123!",
+            },
+        )
+
+        self.assertRedirects(response, self.password_reset_complete_url)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("AnotherStrongPass123!"))
 
     def test_password_reset_rejects_malformed_email_payloads_without_500(self):
         for payload in ("'", '"', ";", "'("):
