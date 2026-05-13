@@ -19797,3 +19797,19 @@ msgstr "Use letters, numbers, dot, dash, or underscore only."
 msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "A file with this name already exists for this question."
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_close"
+msgstr "Close warning"
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_title"
+msgstr "5 minutes left until the exam ends"
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_body"
+msgstr "Review your answers and finish the exam on time."
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_auto_close"
+msgstr "This warning will close automatically after 5 seconds."

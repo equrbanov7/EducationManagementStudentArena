@@ -19790,3 +19790,19 @@ msgstr "Используйте только буквы, цифры, точку, 
 msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "Файл с таким именем уже существует для этого вопроса."
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_close"
+msgstr "Закрыть предупреждение"
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_title"
+msgstr "До окончания экзамена осталось 5 минут"
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_body"
+msgstr "Проверьте ответы и завершите экзамен вовремя."
+
+msgctxt "exams.template.take_exam"
+msgid "time_warning_auto_close"
+msgstr "Это предупреждение автоматически закроется через 5 секунд."
