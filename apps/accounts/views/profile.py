@@ -821,6 +821,10 @@ def user_profile(request):
     assigned_courses = []
     assigned_courses_search_query = ""
     my_result_items = []
+    my_results_page_obj = None
+    my_results_search_query = ""
+    my_results_pagination_query = ""
+    my_results_page_param = "results_page"
     my_result_counts = {
         "all": 0,
         "exams": 0,
@@ -867,6 +871,15 @@ def user_profile(request):
         my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
             request,
             filter_type=request.GET.get("results_type"),
+            search=request.GET.get("results_search"),
+        )
+        my_results_search_query = (request.GET.get("results_search", "") or "").strip()
+        my_results_page_obj = Paginator(my_result_items, 6).get_page(request.GET.get(my_results_page_param))
+        my_result_items = my_results_page_obj
+        my_results_pagination_query = _query_string(
+            section="my-results",
+            results_type=my_results_active_filter,
+            results_search=my_results_search_query,
         )
         my_results_count = my_result_counts.get("all", 0)
         (
@@ -2093,8 +2106,12 @@ def user_profile(request):
         "assigned_courses_search_query": assigned_courses_search_query,
         "my_results_count": my_results_count,
         "my_result_items": my_result_items,
+        "my_results_page_obj": my_results_page_obj,
         "my_result_counts": my_result_counts,
         "my_results_active_filter": my_results_active_filter,
+        "my_results_search_query": my_results_search_query,
+        "my_results_pagination_query": my_results_pagination_query,
+        "my_results_page_param": my_results_page_param,
         "pending_answers_count": pending_answers_count,
         "pending_answer_items": pending_answer_items,
         "pending_answer_counts": pending_answer_counts,
