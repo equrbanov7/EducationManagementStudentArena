@@ -1323,12 +1323,12 @@ msgstr "Forgot password?"
 #: apps/accounts/templates/accounts/password_reset.html:14
 msgctxt "accounts.password_reset_page"
 msgid "subheading"
-msgstr "Enter your email and we will send you a password reset link."
+msgstr "Enter your email and we will send you a password reset OTP code."
 
 #: apps/accounts/templates/accounts/password_reset.html:26
 msgctxt "accounts.password_reset_page"
 msgid "submit"
-msgstr "Send link"
+msgstr "Send OTP code"
 
 #: apps/accounts/templates/accounts/password_reset.html:30
 msgctxt "accounts.password_reset_page"
@@ -1397,18 +1397,18 @@ msgstr "Request password reset again"
 #: apps/accounts/templates/accounts/password_reset_done.html:3
 msgctxt "accounts.password_reset_done_page"
 msgid "title"
-msgstr "Email sent"
+msgstr "OTP sent"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:17
 msgctxt "accounts.password_reset_done_page"
 msgid "heading"
-msgstr "Email sent!"
+msgstr "OTP code sent!"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:20
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
 msgstr ""
-"If this email exists in our system, we sent password reset instructions."
+"If this email exists in our system, we sent a password reset OTP code."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:21
 msgctxt "accounts.password_reset_done_page"
@@ -1419,6 +1419,74 @@ msgstr "Do not forget to check your spam folder."
 msgctxt "accounts.password_reset_done_page"
 msgid "back_to_login"
 msgstr "Back to login page"
+
+msgctxt "accounts.password_reset_page"
+msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
+msgstr "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "OTP code is valid for %(minutes)s minutes."
+msgstr "OTP code is valid for %(minutes)s minutes."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_expired"
+msgstr "OTP has expired"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "email_section_title"
+msgstr "Email address"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "otp_section_title"
+msgstr "OTP code"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "password_section_title"
+msgstr "New password"
+
+msgctxt "accounts.password_reset_done_page"
+msgid "submit"
+msgstr "Update password"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "email"
+msgstr "Email"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "otp_code"
+msgstr "OTP code"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password"
+msgstr "New password"
+
+msgctxt "accounts.form.password_reset_otp.label"
+msgid "new_password_confirm"
+msgstr "Confirm new password"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "email"
+msgstr "Enter your email address"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "otp_code"
+msgstr "6-digit code from your email"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password"
+msgstr "New password"
+
+msgctxt "accounts.form.password_reset_otp.placeholder"
+msgid "new_password_confirm"
+msgstr "Confirm new password"
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "otp_invalid"
+msgstr "The OTP code is incorrect or has expired."
+
+msgctxt "accounts.form.password_reset_otp.error"
+msgid "password_mismatch"
+msgstr "The two passwords do not match."
 
 #: apps/accounts/templates/accounts/pending_review.html:4
 msgctxt "accounts.pending_review_page"

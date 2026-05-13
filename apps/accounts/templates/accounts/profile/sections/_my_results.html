@@ -13,27 +13,47 @@
         </div>
 
         <div class="modern-results-tabs">
-            <a href="{{ profile_base_url }}?section=my-results&results_type=all"
+            <a href="{{ profile_base_url }}?section=my-results&results_type=all{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'all' %}active{% endif %}">
                 {% trans "tab_all" context "profile.results" %} <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
             </a>
-            <a href="{{ profile_base_url }}?section=my-results&results_type=exams"
+            <a href="{{ profile_base_url }}?section=my-results&results_type=exams{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
                 {% trans "tab_exams" context "profile.results" %} <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
             </a>
-            <a href="{{ profile_base_url }}?section=my-results&results_type=courses"
+            <a href="{{ profile_base_url }}?section=my-results&results_type=courses{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'courses' %}active{% endif %}">
                   {% trans "tab_assignments" context "profile.results" %} <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
             </a>
-            <a href="{{ profile_base_url }}?section=my-results&results_type=labs"
+            <a href="{{ profile_base_url }}?section=my-results&results_type=labs{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'labs' %}active{% endif %}">
                 {% trans "tab_labs" context "profile.results" %} <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
             </a>
-            <a href="{{ profile_base_url }}?section=my-results&results_type=independent"
+            <a href="{{ profile_base_url }}?section=my-results&results_type=independent{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'independent' %}active{% endif %}">
                {% trans "tab_independent" context "profile.results" %} <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
             </a>
         </div>
+
+        <form method="get" class="results-section-search-form js-profile-debounce-search" data-debounce-ms="700">
+            <input type="hidden" name="section" value="my-results">
+            <input type="hidden" name="results_type" value="{{ my_results_active_filter }}">
+            <div class="results-section-search-input-wrap">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search"
+                       name="results_search"
+                       value="{{ my_results_search_query }}"
+                       placeholder="Nəticə axtar..."
+                       autocomplete="off">
+                {% if my_results_search_query %}
+                <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}"
+                   class="results-section-search-clear"
+                   aria-label="Axtarışı təmizlə">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
 
         {% if my_result_items %}
         <div class="results-cards-grid">
@@ -100,6 +120,10 @@
             </div>
             {% endfor %}
         </div>
+
+        {% if my_results_page_obj.has_other_pages %}
+            {% include "partials/_pagination.html" with page_obj=my_results_page_obj extra_query=my_results_pagination_query page_param=my_results_page_param %}
+        {% endif %}
         
         {% else %}
         <div class="modern-empty-state">
@@ -108,6 +132,11 @@
             </div>
             <h3>{% trans "empty_title" context "profile.results" %}</h3>
             <p>{% trans "empty_description" context "profile.results" %}</p>
+            {% if my_results_search_query %}
+                <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}" class="btn-teal results-section-empty-clear">
+                    <i class="fas fa-times" aria-hidden="true"></i> Filtri təmizlə
+                </a>
+            {% endif %}
         </div>
         {% endif %}
         
