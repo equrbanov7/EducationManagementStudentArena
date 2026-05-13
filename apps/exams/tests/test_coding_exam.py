@@ -262,6 +262,20 @@ class CodingExamSubmissionApiTests(TestCase):
         self.attempt.refresh_from_db()
         self.assertTrue(self.attempt.is_finished)
 
+    def test_take_coding_exam_includes_five_minute_warning_modal(self):
+        self.exam.total_duration_minutes = 30
+        self.exam.save(update_fields=["total_duration_minutes"])
+
+        response = self.client.get(
+            reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "examTimeWarningModal")
+        self.assertContains(response, "exam_time_warning.js")
+        self.assertContains(response, f'examId: "{self.exam.id}"')
+        self.assertContains(response, f'attemptId: "{self.attempt.id}"')
+
     def test_submission_download_returns_all_code_files_as_zip(self):
         payload = {
             "selected_language": "html",

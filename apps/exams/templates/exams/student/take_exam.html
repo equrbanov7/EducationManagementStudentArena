@@ -7,6 +7,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/take_exam.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/paint_answer.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}">
     <style nonce="{{ request.csp_nonce }}">
         @keyframes slideIn {
             from {
@@ -208,6 +209,36 @@
     </form>
 </div>
 
+<div class="exam-time-warning-backdrop"
+     id="examTimeWarningModal"
+     role="alertdialog"
+     aria-modal="true"
+     aria-labelledby="examTimeWarningTitle"
+     aria-describedby="examTimeWarningBody"
+     aria-hidden="true">
+    <div class="exam-time-warning-modal">
+        <button type="button"
+                class="exam-time-warning-close"
+                data-exam-time-warning-close
+                aria-label="{% trans 'time_warning_close' context 'exams.template.take_exam' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="exam-time-warning-icon" aria-hidden="true">
+            <i class="fas fa-clock"></i>
+        </div>
+        <h3 class="exam-time-warning-title" id="examTimeWarningTitle">
+            {% trans "time_warning_title" context "exams.template.take_exam" %}
+        </h3>
+        <p class="exam-time-warning-body" id="examTimeWarningBody">
+            {% trans "time_warning_body" context "exams.template.take_exam" %}
+        </p>
+        <span class="exam-time-warning-note">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            {% trans "time_warning_auto_close" context "exams.template.take_exam" %}
+        </span>
+    </div>
+</div>
+
 {# ---- Bitirmə təsdiq modali ---- #}
 <div class="confirm-modal-backdrop" id="finishConfirmBackdrop">
     <div class="confirm-modal-box">
@@ -279,6 +310,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const attemptId = examForm.dataset.attemptId;
     const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
     const draftStorageKey = `exam_${examId}_attempt_${attemptId}_draft`;
+    const timeWarningStorageKey = `exam_${examId}_attempt_${attemptId}_five_minute_warning`;
+    const examTimeWarning = window.ExamTimeWarning ? window.ExamTimeWarning.init({
+        storageKey: timeWarningStorageKey,
+        thresholdSeconds: 300,
+        autoCloseMs: 5000
+    }) : null;
     const serverAutoSaveIntervalMs = Math.max(
         5000,
         parseInt(examForm.dataset.autosaveIntervalMs || "15000", 10) || 15000
@@ -743,6 +780,9 @@ document.addEventListener('DOMContentLoaded', function() {
         examTimerTick = () => {
             remainingSeconds = getSecondsUntil(examTimerDeadlineMs);
             timerValueElement.textContent = formatTime(remainingSeconds);
+            if (examTimeWarning) {
+                examTimeWarning.maybeShow(remainingSeconds);
+            }
 
             if (remainingSeconds <= 0) {
                 if (examTimerInterval) {
@@ -1160,6 +1200,7 @@ document.addEventListener('DOMContentLoaded', function() {
  
 {% block extraJs %}
     <script src="{% static 'js/review_countdown.js' %}"></script>
+    <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
     {% if supervision.supervised %}
     {{ supervision.config|json_script:"supervision-config-data" }}
