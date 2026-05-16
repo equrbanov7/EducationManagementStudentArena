@@ -171,13 +171,14 @@
 #profileGroupModal .group-checklist__content {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.55rem;
     min-width: 0;
     flex: 1;
 }
 
 #profileGroupModal .group-checklist__name {
-    flex: 1 1 auto;
+    flex: 1 1 14rem;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -185,8 +186,8 @@
 }
 
 #profileGroupModal .group-checklist__badge {
-    flex: 0 0 auto;
-    max-width: min(46%, 260px);
+    flex: 0 1 auto;
+    max-width: 100%;
     margin-left: auto;
     padding: 0.15rem 0.45rem;
     border-radius: 999px;
@@ -196,9 +197,8 @@
     font-size: 0.74rem;
     font-weight: 600;
     line-height: 1.25;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 #profileGroupModal .group-checklist__empty {
