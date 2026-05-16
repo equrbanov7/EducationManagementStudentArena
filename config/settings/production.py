@@ -149,9 +149,10 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
 
-# Practical/coding exams are available in production by default. Keep the env
-# switch so an emergency rollback can hide the feature without a code deploy.
-PRACTICAL_EXAMS_ENABLED = _env_bool("PRACTICAL_EXAMS_ENABLED", True)
+# Practical/coding exams must stay visible in production add/edit exam flows.
+# Do not read this from the environment: a stale PRACTICAL_EXAMS_ENABLED=false
+# value would hide the "coding" exam type from teacher forms.
+PRACTICAL_EXAMS_ENABLED = True
 
 ADMIN_URL_PREFIX = os.getenv("ADMIN_URL_PREFIX", "manage/")
 if ADMIN_URL_PREFIX.strip("/").lower() == "admin":
