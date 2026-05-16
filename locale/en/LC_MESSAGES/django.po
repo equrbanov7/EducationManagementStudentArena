@@ -19683,6 +19683,34 @@ msgid "Custom input"
 msgstr "Custom input"
 
 msgctxt "exams.template.coding_exam"
+msgid "Standard input"
+msgstr "Standard input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Use this data for input(), Scanner, cin, or stdin."
+msgstr "Use this data for input(), Scanner, cin, or stdin."
+
+msgctxt "exams.template.coding_exam"
+msgid "Enter input data here, then run the code."
+msgstr "Enter input data here, then run the code."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program output"
+msgstr "Program output"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see output here."
+msgstr "Run the code to see output here."
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see errors here."
+msgstr "Run the code to see errors here."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program finished with no output."
+msgstr "Program finished with no output."
+
+msgctxt "exams.template.coding_exam"
 msgid "Auto-saved"
 msgstr "Auto-saved"
 
@@ -19798,6 +19826,14 @@ msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "A file with this name already exists for this question."
 
+msgctxt "exams.template.coding_exam"
+msgid "Hide files"
+msgstr "Hide files"
+
+msgctxt "exams.template.coding_exam"
+msgid "Show files"
+msgstr "Show files"
+
 msgctxt "exams.template.take_exam"
 msgid "time_warning_close"
 msgstr "Close warning"
@@ -19813,3 +19849,47 @@ msgstr "Review your answers and finish the exam on time."
 msgctxt "exams.template.take_exam"
 msgid "time_warning_auto_close"
 msgstr "This warning will close automatically after 5 seconds."
+
+msgctxt "exams.template.take_exam"
+msgid "Exam progress"
+msgstr "Exam progress"
+
+msgctxt "exams.template.take_exam"
+msgid "of"
+msgstr "of"
+
+msgctxt "exams.template.take_exam"
+msgid "Questions"
+msgstr "Questions"
+
+msgctxt "exams.template.take_exam"
+msgid "Current"
+msgstr "Current"
+
+msgctxt "exams.template.take_exam"
+msgid "Answered"
+msgstr "Answered"
+
+msgctxt "exams.template.take_exam"
+msgid "Marked"
+msgstr "Marked"
+
+msgctxt "exams.template.take_exam"
+msgid "Unanswered"
+msgstr "Unanswered"
+
+msgctxt "exams.template.take_exam"
+msgid "Mark"
+msgstr "Mark"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program console"
+msgstr "Program console"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program input"
+msgstr "Program input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
