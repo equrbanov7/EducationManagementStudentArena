@@ -19631,7 +19631,35 @@ msgstr "Kodu çalıştır"
 
 msgctxt "exams.template.coding_exam"
 msgid "Custom input"
-msgstr "Özel giriş"
+msgstr "Standart giriş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Standard input"
+msgstr "Standart giriş"
+
+msgctxt "exams.template.coding_exam"
+msgid "Use this data for input(), Scanner, cin, or stdin."
+msgstr "Bu veriyi input(), Scanner, cin veya stdin için kullan."
+
+msgctxt "exams.template.coding_exam"
+msgid "Enter input data here, then run the code."
+msgstr "Giriş verisini buraya yazın, sonra kodu çalıştırın."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program output"
+msgstr "Program çıktısı"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see output here."
+msgstr "Çıktıyı burada görmek için kodu çalıştırın."
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see errors here."
+msgstr "Hataları burada görmek için kodu çalıştırın."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program finished with no output."
+msgstr "Program çıktı vermeden tamamlandı."
 
 msgctxt "exams.template.coding_exam"
 msgid "Auto-saved"
@@ -19749,6 +19777,14 @@ msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "Bu soru için bu adda bir dosya zaten var."
 
+msgctxt "exams.template.coding_exam"
+msgid "Hide files"
+msgstr "Dosyaları gizle"
+
+msgctxt "exams.template.coding_exam"
+msgid "Show files"
+msgstr "Dosyaları göster"
+
 msgctxt "exams.template.take_exam"
 msgid "time_warning_close"
 msgstr "Uyarıyı kapat"
@@ -19764,3 +19800,47 @@ msgstr "Yanıtlarınızı kontrol edin ve sınavı zamanında tamamlayın."
 msgctxt "exams.template.take_exam"
 msgid "time_warning_auto_close"
 msgstr "Bu uyarı 5 saniye sonra otomatik kapanacak."
+
+msgctxt "exams.template.take_exam"
+msgid "Exam progress"
+msgstr "Sınav ilerlemesi"
+
+msgctxt "exams.template.take_exam"
+msgid "of"
+msgstr "/"
+
+msgctxt "exams.template.take_exam"
+msgid "Questions"
+msgstr "Sorular"
+
+msgctxt "exams.template.take_exam"
+msgid "Current"
+msgstr "Mevcut"
+
+msgctxt "exams.template.take_exam"
+msgid "Answered"
+msgstr "Cevaplandı"
+
+msgctxt "exams.template.take_exam"
+msgid "Marked"
+msgstr "İşaretlendi"
+
+msgctxt "exams.template.take_exam"
+msgid "Unanswered"
+msgstr "Cevapsız"
+
+msgctxt "exams.template.take_exam"
+msgid "Mark"
+msgstr "İşaretle"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program console"
+msgstr "Program konsolu"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program input"
+msgstr "Program girdisi"
+
+msgctxt "exams.template.coding_exam"
+msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr "Giriş verisini buraya yazın. Her satır input(), Scanner, cin veya stdin'e gönderilecek."

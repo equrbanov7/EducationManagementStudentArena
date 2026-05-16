@@ -19673,7 +19673,35 @@ msgstr "Запустить код"
 
 msgctxt "exams.template.coding_exam"
 msgid "Custom input"
-msgstr "Пользовательский ввод"
+msgstr "Стандартный ввод"
+
+msgctxt "exams.template.coding_exam"
+msgid "Standard input"
+msgstr "Стандартный ввод"
+
+msgctxt "exams.template.coding_exam"
+msgid "Use this data for input(), Scanner, cin, or stdin."
+msgstr "Используйте эти данные для input(), Scanner, cin или stdin."
+
+msgctxt "exams.template.coding_exam"
+msgid "Enter input data here, then run the code."
+msgstr "Введите входные данные здесь, затем запустите код."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program output"
+msgstr "Вывод программы"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see output here."
+msgstr "Запустите код, чтобы увидеть вывод здесь."
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see errors here."
+msgstr "Запустите код, чтобы увидеть ошибки здесь."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program finished with no output."
+msgstr "Программа завершилась без вывода."
 
 msgctxt "exams.template.coding_exam"
 msgid "Auto-saved"
@@ -19791,6 +19819,14 @@ msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "Файл с таким именем уже существует для этого вопроса."
 
+msgctxt "exams.template.coding_exam"
+msgid "Hide files"
+msgstr "Скрыть файлы"
+
+msgctxt "exams.template.coding_exam"
+msgid "Show files"
+msgstr "Показать файлы"
+
 msgctxt "exams.template.take_exam"
 msgid "time_warning_close"
 msgstr "Закрыть предупреждение"
@@ -19806,3 +19842,47 @@ msgstr "Проверьте ответы и завершите экзамен в�
 msgctxt "exams.template.take_exam"
 msgid "time_warning_auto_close"
 msgstr "Это предупреждение автоматически закроется через 5 секунд."
+
+msgctxt "exams.template.take_exam"
+msgid "Exam progress"
+msgstr "Ход экзамена"
+
+msgctxt "exams.template.take_exam"
+msgid "of"
+msgstr "из"
+
+msgctxt "exams.template.take_exam"
+msgid "Questions"
+msgstr "Вопросы"
+
+msgctxt "exams.template.take_exam"
+msgid "Current"
+msgstr "Текущий"
+
+msgctxt "exams.template.take_exam"
+msgid "Answered"
+msgstr "Отвечено"
+
+msgctxt "exams.template.take_exam"
+msgid "Marked"
+msgstr "Отмечено"
+
+msgctxt "exams.template.take_exam"
+msgid "Unanswered"
+msgstr "Без ответа"
+
+msgctxt "exams.template.take_exam"
+msgid "Mark"
+msgstr "Отметить"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program console"
+msgstr "Консоль программы"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program input"
+msgstr "Ввод программы"
+
+msgctxt "exams.template.coding_exam"
+msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr "Введите данные здесь. Каждая строка будет отправлена в input(), Scanner, cin или stdin."
