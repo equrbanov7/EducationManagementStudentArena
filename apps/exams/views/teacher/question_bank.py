@@ -360,6 +360,10 @@ def process_question_bank(request, slug):
         if exam.exam_type == "coding":
             sync_coding_questions_for_exam(exam)
 
+        from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+
+        schedule_ai_question_difficulty_warmup(exam, force=True)
+
         messages.success(request, pgettext_lazy("exams.view.question_bank.message", "bank_saved"))
         return redirect(
             _append_navigation_query(
@@ -611,6 +615,9 @@ def test_question_bank(request, slug):
                 skipped_count=skipped_count,
             ),
         )
+        from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+
+        schedule_ai_question_difficulty_warmup(exam, force=True)
         return redirect(
             _append_navigation_query(
                 reverse("exams:test_question_bank", kwargs={"slug": exam.slug}),

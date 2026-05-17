@@ -37,6 +37,41 @@ class ExamFormDefaultStateTests(TestCase):
         form = ExamForm()
         self.assertEqual(form.initial.get("random_question_count"), 10)
 
+    def test_create_form_defaults_distribution_toggles_on(self):
+        form = ExamForm()
+        self.assertTrue(form.initial.get("fair_question_distribution_enabled"))
+        self.assertFalse(form.initial.get("ai_difficulty_balance_enabled"))
+
+    def test_legacy_create_post_defaults_distribution_toggles_on_when_omitted(self):
+        form = ExamForm(
+            data={
+                "title": "Legacy Post Exam",
+                "description": "",
+                "exam_type": "test",
+                "random_question_count": "10",
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(form.cleaned_data["fair_question_distribution_enabled"])
+        self.assertFalse(form.cleaned_data["ai_difficulty_balance_enabled"])
+
+    def test_create_post_can_disable_distribution_toggles(self):
+        form = ExamForm(
+            data={
+                "title": "Disabled Fairness Exam",
+                "description": "",
+                "exam_type": "test",
+                "random_question_count": "10",
+                "fair_question_distribution_enabled": "false",
+                "ai_difficulty_balance_enabled": "false",
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertFalse(form.cleaned_data["fair_question_distribution_enabled"])
+        self.assertFalse(form.cleaned_data["ai_difficulty_balance_enabled"])
+
     def test_blank_random_question_count_falls_back_to_ten(self):
         form = ExamForm(
             data={

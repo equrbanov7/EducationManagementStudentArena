@@ -1,8 +1,15 @@
 import random
+from collections import Counter
+
+from django.db import transaction
+from django.db.models import Count
 
 from apps.exams.constants import LABELS
-from apps.exams.models import ExamAnswer
+from apps.exams.models import Exam, ExamAnswer
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+
+_DIFFICULTY_ORDER = ("easy", "medium", "hard")
+_QUESTION_SOFT_USAGE_CAP = 4
 
 
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
@@ -43,6 +50,154 @@ def _build_block_pick_plan(blocks, total_needed):
     return plan
 
 
+def _build_fair_block_pick_plan(blocks, total_needed, block_usage_counts):
+    if total_needed <= 0 or not blocks:
+        return {}
+
+    base, remainder = divmod(total_needed, len(blocks))
+    plan = {block.id: base for block in blocks}
+
+    ranked_blocks = sorted(
+        blocks,
+        key=lambda block: (
+            block_usage_counts.get(block.id, 0),
+            getattr(block, "order", 0),
+            block.id,
+        ),
+    )
+    for block in ranked_blocks[:remainder]:
+        plan[block.id] += 1
+
+    return plan
+
+
+def _historical_question_usage(exam, attempt):
+    rows = (
+        ExamAnswer.objects.filter(attempt__exam=exam)
+        .exclude(attempt=attempt)
+        .values("question_id")
+        .annotate(total=Count("attempt__user_id", distinct=True))
+    )
+    return {row["question_id"]: row["total"] for row in rows}
+
+
+def _historical_block_usage(exam, attempt):
+    rows = (
+        ExamAnswer.objects.filter(attempt__exam=exam, question__block_id__isnull=False)
+        .exclude(attempt=attempt)
+        .values("question__block_id")
+        .annotate(total=Count("attempt__user_id", distinct=True))
+    )
+    return {row["question__block_id"]: row["total"] for row in rows}
+
+
+def _normalise_difficulty(value):
+    value = (value or "medium").strip().lower()
+    return value if value in _DIFFICULTY_ORDER else "medium"
+
+
+def _build_difficulty_targets(questions, total_needed):
+    if total_needed <= 0 or not questions:
+        return Counter()
+
+    pool_counts = Counter(_normalise_difficulty(question.difficulty) for question in questions)
+    pool_total = sum(pool_counts.values())
+    if pool_total <= 0:
+        return Counter()
+
+    targets = Counter()
+    fractional_parts = []
+    for difficulty in _DIFFICULTY_ORDER:
+        exact = (total_needed * pool_counts.get(difficulty, 0)) / pool_total
+        whole = int(exact)
+        targets[difficulty] = whole
+        fractional_parts.append((exact - whole, difficulty))
+
+    remaining = total_needed - sum(targets.values())
+    fractional_parts.sort(key=lambda item: (-item[0], _DIFFICULTY_ORDER.index(item[1])))
+
+    while remaining > 0:
+        progressed = False
+        for _, difficulty in fractional_parts:
+            if targets[difficulty] >= pool_counts.get(difficulty, 0):
+                continue
+            targets[difficulty] += 1
+            remaining -= 1
+            progressed = True
+            if remaining <= 0:
+                break
+        if not progressed:
+            break
+
+    return targets
+
+
+def _difficulty_penalty(question, difficulty_targets, use_difficulty_balance):
+    if not use_difficulty_balance or not difficulty_targets:
+        return 0
+    if sum(max(count, 0) for count in difficulty_targets.values()) <= 0:
+        return 0
+    return 0 if difficulty_targets.get(_normalise_difficulty(question.difficulty), 0) > 0 else 1
+
+
+def _question_rank(
+    question,
+    *,
+    question_usage_counts,
+    difficulty_targets,
+    random_tiebreakers,
+    use_fair_distribution,
+    use_difficulty_balance,
+):
+    usage_count = question_usage_counts.get(question.id, 0) if use_fair_distribution else 0
+    over_soft_cap = 1 if use_fair_distribution and usage_count >= _QUESTION_SOFT_USAGE_CAP else 0
+    return (
+        over_soft_cap,
+        _difficulty_penalty(question, difficulty_targets, use_difficulty_balance),
+        usage_count,
+        random_tiebreakers.get(question.id, 0),
+    )
+
+
+def _pick_questions(
+    candidates,
+    take,
+    *,
+    selected_ids,
+    question_usage_counts,
+    difficulty_targets,
+    use_fair_distribution,
+    use_difficulty_balance,
+):
+    available = [question for question in candidates if question.id not in selected_ids]
+    if take <= 0 or not available:
+        return []
+
+    random_tiebreakers = {question.id: random.random() for question in available}  # nosec B311
+    picked = []
+
+    while len(picked) < take and available:
+        available.sort(
+            key=lambda question: _question_rank(
+                question,
+                question_usage_counts=question_usage_counts,
+                difficulty_targets=difficulty_targets,
+                random_tiebreakers=random_tiebreakers,
+                use_fair_distribution=use_fair_distribution,
+                use_difficulty_balance=use_difficulty_balance,
+            )
+        )
+        question = available.pop(0)
+        picked.append(question)
+        selected_ids.add(question.id)
+
+        difficulty = _normalise_difficulty(question.difficulty)
+        if use_difficulty_balance and difficulty_targets.get(difficulty, 0) > 0:
+            difficulty_targets[difficulty] -= 1
+
+    return picked
+
+
 # Verilmiş attempt üçün sualları random seçir və ExamAnswer yaradır.
 def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = False):
     """
@@ -54,86 +209,121 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
     """
     exam = attempt.exam
 
-    # Əgər artıq suallar yaradılıbsa:
-    if attempt.answers.exists():
-        if not force_rebuild:
+    with transaction.atomic():
+        locked_exam = Exam.objects.select_for_update().get(pk=exam.pk)
+        attempt = attempt.__class__.objects.select_for_update().select_related("exam").get(pk=attempt.pk)
+        attempt.exam = locked_exam
+        exam = locked_exam
+
+        # Əgər artıq suallar yaradılıbsa:
+        if attempt.answers.exists():
+            if not force_rebuild:
+                return
+            # force rebuild istənirsə, amma tələbə cavab yazıbsa toxunmuruq
+            if _attempt_has_any_answer(attempt):
+                return
+            attempt.answers.all().delete()
+
+        total_needed = _effective_needed_count(exam)
+
+        # bütün sualları al (DB hit az olsun)
+        all_qs = list(exam.questions.filter(is_active=True))
+
+        if not all_qs:
             return
-        # force rebuild istənirsə, amma tələbə cavab yazıbsa toxunmuruq
-        if _attempt_has_any_answer(attempt):
-            return
-        attempt.answers.all().delete()
 
-    total_needed = _effective_needed_count(exam)
+        use_fair_distribution = bool(getattr(exam, "fair_question_distribution_enabled", True))
+        use_difficulty_balance = bool(getattr(exam, "ai_difficulty_balance_enabled", True))
+        question_usage_counts = _historical_question_usage(exam, attempt) if use_fair_distribution else {}
+        block_usage_counts = _historical_block_usage(exam, attempt) if use_fair_distribution else {}
+        difficulty_targets = _build_difficulty_targets(all_qs, total_needed) if use_difficulty_balance else Counter()
+        selected_ids = set()
 
-    # bütün sualları al (DB hit az olsun)
-    all_qs = list(exam.questions.filter(is_active=True))
+        # Əgər tələb olunan say hamısından çoxdursa -> hamısını götür
+        if total_needed >= len(all_qs):
+            selected_qs = _pick_questions(
+                all_qs,
+                len(all_qs),
+                selected_ids=selected_ids,
+                question_usage_counts=question_usage_counts,
+                difficulty_targets=difficulty_targets,
+                use_fair_distribution=use_fair_distribution,
+                use_difficulty_balance=use_difficulty_balance,
+            )
+        else:
+            selected_qs = []
+            blocks = list(exam.question_blocks.order_by("order", "id"))
 
-    if not all_qs:
-        return
+            if blocks:
+                block_question_map = {}
+                non_empty_blocks = []
+                for block in blocks:
+                    block_qs = list(block.questions.filter(is_active=True))
+                    if block_qs:
+                        block_question_map[block.id] = block_qs
+                        non_empty_blocks.append(block)
 
-    # Əgər tələb olunan say hamısından çoxdursa -> hamısını götür
-    if total_needed >= len(all_qs):
-        selected_qs = all_qs[:]
-        random.shuffle(selected_qs)  # “hamısı” olsa belə random sıra
-    else:
-        selected_qs = []
-        blocks = list(exam.question_blocks.order_by("order", "id"))
+                blocks = non_empty_blocks
 
-        if blocks:
-            block_question_map = {}
-            non_empty_blocks = []
-            for block in blocks:
-                block_qs = list(block.questions.filter(is_active=True))
-                random.shuffle(block_qs)
-                if block_qs:
-                    block_question_map[block.id] = block_qs
-                    non_empty_blocks.append(block)
+            if blocks:
+                if use_fair_distribution:
+                    block_pick_plan = _build_fair_block_pick_plan(blocks, total_needed, block_usage_counts)
+                else:
+                    block_pick_plan = _build_block_pick_plan(blocks, total_needed)
 
-            blocks = non_empty_blocks
-
-        if blocks:
-            block_pick_plan = _build_block_pick_plan(blocks, total_needed)
-
-            picked_ids = set()
-
-            # bloklardan payla
-            for block in blocks:
-                take = block_pick_plan.get(block.id, 0)
-                if take <= 0:
-                    continue
-
-                block_qs = block_question_map[block.id]
-                taken_from_block = 0
-
-                for q in block_qs:
-                    if len(selected_qs) >= total_needed:
-                        break
-                    if q.id in picked_ids:
+                # bloklardan payla
+                for block in blocks:
+                    take = block_pick_plan.get(block.id, 0)
+                    if take <= 0:
                         continue
-                    selected_qs.append(q)
-                    picked_ids.add(q.id)
-                    taken_from_block += 1
-                    if taken_from_block >= take:
+
+                    picked = _pick_questions(
+                        block_question_map[block.id],
+                        take,
+                        selected_ids=selected_ids,
+                        question_usage_counts=question_usage_counts,
+                        difficulty_targets=difficulty_targets,
+                        use_fair_distribution=use_fair_distribution,
+                        use_difficulty_balance=use_difficulty_balance,
+                    )
+                    selected_qs.extend(picked)
+
+                    if len(selected_qs) >= total_needed:
                         break
 
                 # blokda sual çatmadısa, problem deyil – aşağıda fill edəcəyik
 
-            # çatmayanı digər suallardan doldur
-            if len(selected_qs) < total_needed:
-                remaining = [q for q in all_qs if q.id not in picked_ids]
-                random.shuffle(remaining)
-                selected_qs.extend(remaining[: (total_needed - len(selected_qs))])
+                # çatmayanı digər suallardan doldur
+                if len(selected_qs) < total_needed:
+                    selected_qs.extend(
+                        _pick_questions(
+                            all_qs,
+                            total_needed - len(selected_qs),
+                            selected_ids=selected_ids,
+                            question_usage_counts=question_usage_counts,
+                            difficulty_targets=difficulty_targets,
+                            use_fair_distribution=use_fair_distribution,
+                            use_difficulty_balance=use_difficulty_balance,
+                        )
+                    )
 
-            # son dəfə də ümumi sıranı qarışdır (blok “izləri” qalmasın)
-            random.shuffle(selected_qs)
+                # son dəfə də ümumi sıranı qarışdır (blok “izləri” qalmasın)
+                random.shuffle(selected_qs)
 
-        else:
-            # blok yoxdursa — ümumi pool-dan random seç
-            random.shuffle(all_qs)
-            selected_qs = all_qs[:total_needed]
+            else:
+                # blok yoxdursa — ümumi pool-dan seç
+                selected_qs = _pick_questions(
+                    all_qs,
+                    total_needed,
+                    selected_ids=selected_ids,
+                    question_usage_counts=question_usage_counts,
+                    difficulty_targets=difficulty_targets,
+                    use_fair_distribution=use_fair_distribution,
+                    use_difficulty_balance=use_difficulty_balance,
+                )
 
-    # ExamAnswer-ları bulk yarat
-    ExamAnswer.objects.bulk_create(
-        [ExamAnswer(attempt=attempt, question=q) for q in selected_qs],
-        ignore_conflicts=True,
-    )
+        # ExamAnswer-ları bulk yarat
+        ExamAnswer.objects.bulk_create(
+            [ExamAnswer(attempt=attempt, question=q) for q in selected_qs],
+            ignore_conflicts=True,
+        )

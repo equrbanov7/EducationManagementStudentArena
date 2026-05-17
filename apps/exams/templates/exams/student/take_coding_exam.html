@@ -19,139 +19,206 @@
 {{ language_modes|json_script:"coding-language-modes" }}
 {{ coding_questions|json_script:"coding-questions" }}
 
-<div class="coding-exam-shell" id="codingExamShell">
-    <section class="coding-progress-card">
-        <div class="coding-progress-head">
-            <div class="coding-progress-title">
-                <h2>{{ exam.title }}</h2>
+<div class="coding-exam-shell page-enter" id="codingExamShell">
+    <header class="coding-exam-topbar">
+        <div class="coding-exam-topbar__inner">
+            <div class="coding-exam-identity">
+                <h1>{{ exam.title }}</h1>
+                <p>{% if exam.organization %}{{ exam.organization.name }} · {% endif %}{{ request.user.get_full_name|default:request.user.username }}</p>
             </div>
-            <div class="coding-progress-stats">
-                <span>{% trans "label_question" context "exams.template.take_exam" %}: <strong id="codingCurrentQuestionNum">1</strong> / <span id="codingTotalQuestionCount">{{ coding_questions|length }}</span></span>
+
+            <div class="coding-progress-center" aria-label="{% trans 'Exam progress' context 'exams.template.take_exam' %}">
+                <span><strong id="codingCurrentQuestionNum">1</strong> {% trans "of" context "exams.template.take_exam" %} <span id="codingTotalQuestionCount">{{ coding_questions|length }}</span></span>
+                <div class="coding-progress-track" aria-hidden="true">
+                    <div class="coding-progress-fill" id="codingProgressFill"></div>
+                </div>
+                <span><strong id="codingAnsweredCount">0</strong>/<span id="codingAnsweredTotalCount">{{ coding_questions|length }}</span></span>
+            </div>
+
+            <div class="coding-timer-slot">
+                {% if exam.total_duration_minutes %}
+                    <div class="coding-timer" id="codingTimer">
+                        <i class="fas fa-clock"></i>
+                        <span id="codingTimerValue">--:--</span>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        <div class="coding-progress-track" aria-hidden="true">
-            <div class="coding-progress-fill" id="codingProgressFill"></div>
-        </div>
-    </section>
+    </header>
 
-    <section class="coding-question-card">
-        <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
-        <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
-    </section>
+    <div class="coding-exam-content">
+        <aside class="coding-question-sidebar" aria-label="{% trans 'Questions' context 'exams.template.take_exam' %}">
+            <div class="coding-map-card">
+                <h2>{% trans "Questions" context "exams.template.take_exam" %}</h2>
 
-    <main class="coding-workspace" id="codingWorkspace">
-        <section class="coding-editor-pane">
-            <aside class="coding-file-explorer" id="codingFileExplorer">
-                <div class="coding-file-header">
-                    <span>{% trans "Files" context "exams.template.coding_exam" %}</span>
-                    {% if coding_question.allow_file_creation %}
-                        <button type="button" id="codingCreateFileBtn" class="coding-icon-btn" title="{% trans 'Create File' context 'exams.template.coding_exam' %}">
-                            <i class="fas fa-plus"></i>
+                <div class="coding-question-grid">
+                    {% for question in coding_questions %}
+                        <button type="button"
+                                class="coding-question-nav-btn"
+                                data-coding-question-nav
+                                data-target-index="{{ forloop.counter0 }}"
+                                aria-label="{% trans 'label_question' context 'exams.template.take_exam' %} {{ forloop.counter }}">
+                            {{ forloop.counter }}
                         </button>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-                <div class="coding-file-list" id="codingFileList"></div>
-                <div class="coding-file-actions">
-                    <button type="button" id="codingMakeMainFileBtn" class="coding-mini-btn">{% trans "Make Main File" context "exams.template.coding_exam" %}</button>
-                    {% if coding_question.allow_file_creation %}
-                        <button type="button" id="codingRenameFileBtn" class="coding-mini-btn">{% trans "Rename File" context "exams.template.coding_exam" %}</button>
-                        <button type="button" id="codingDeleteFileBtn" class="coding-mini-btn coding-mini-btn--danger">{% trans "Delete File" context "exams.template.coding_exam" %}</button>
-                    {% endif %}
-                </div>
-            </aside>
 
-            <div class="coding-editor-wrap">
-                <div class="coding-editor-toolbar">
-                    <span id="codingCurrentFileName"></span>
-                    <button type="button" id="codingFullscreenBtn" class="coding-icon-btn" title="{% trans 'Fullscreen editor' context 'exams.template.coding_exam' %}">
-                        <i class="fas fa-expand"></i>
-                    </button>
+                <div class="coding-question-legend">
+                    <span><i class="coding-legend-dot coding-legend-current"></i>{% trans "Current" context "exams.template.take_exam" %}</span>
+                    <span><i class="coding-legend-dot coding-legend-answered"></i>{% trans "Answered" context "exams.template.take_exam" %}</span>
+                    <span><i class="coding-legend-dot coding-legend-unanswered"></i>{% trans "Unanswered" context "exams.template.take_exam" %}</span>
                 </div>
-                <textarea id="codingEditor"></textarea>
+
+                <div class="coding-question-stats">
+                    <div class="coding-question-stat">
+                        <strong id="codingSidebarAnsweredCount">0</strong>
+                        <span>{% trans "Answered" context "exams.template.take_exam" %}</span>
+                    </div>
+                    <div class="coding-question-stat coding-question-stat--danger">
+                        <strong id="codingUnansweredCount">{{ coding_questions|length }}</strong>
+                        <span>{% trans "Unanswered" context "exams.template.take_exam" %}</span>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <section class="coding-result-pane">
-            <div class="coding-result-toolbar">
-                <div class="coding-tabs" role="tablist">
-                    <button type="button" class="coding-tab active" data-coding-tab="output">{% trans "Output" context "exams.template.coding_exam" %}</button>
-                    <button type="button" class="coding-tab" data-coding-tab="errors">{% trans "Errors" context "exams.template.coding_exam" %}</button>
-                    <button type="button" class="coding-tab" data-coding-tab="preview" data-preview-tab>{% trans "Preview" context "exams.template.coding_exam" %}</button>
-                </div>
+            <button type="button" class="coding-footer-btn coding-footer-btn--finish coding-sidebar-finish-btn" id="codingSubmitBtn">
+                <i class="far fa-flag" aria-hidden="true"></i>
+                <span>{% trans "action_finish_exam" context "exams.template.take_exam" %}</span>
+            </button>
+        </aside>
 
-                <div class="coding-run-controls">
-                    {% if exam.total_duration_minutes %}
-                        <div class="coding-timer" id="codingTimer">
-                            <i class="fas fa-clock"></i>
-                            <span id="codingTimerValue">--:--</span>
+        <div class="coding-stage">
+            <section class="coding-question-card">
+                <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
+                <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
+            </section>
+
+            <main class="coding-workspace" id="codingWorkspace">
+                <section class="coding-editor-pane">
+                    <aside class="coding-file-explorer" id="codingFileExplorer">
+                        <div class="coding-file-header">
+                            <span>{% trans "Files" context "exams.template.coding_exam" %}</span>
+                            {% if coding_question.allow_file_creation %}
+                                <button type="button" id="codingCreateFileBtn" class="coding-icon-btn" title="{% trans 'Create File' context 'exams.template.coding_exam' %}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            {% endif %}
                         </div>
-                    {% endif %}
-                    <div class="coding-select-group coding-select-group--language">
-                        <label class="coding-select-label" for="codingLanguageSelect">
-                            {% trans "Language" context "exams.template.coding_exam" %}
-                        </label>
-                        <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--language">
-                            <select id="codingLanguageSelect" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                                {% for value, label in coding_languages %}
-                                    <option value="{{ value }}" {% if value == coding_question.language %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
+                        <div class="coding-file-list" id="codingFileList"></div>
+                        <div class="coding-file-actions">
+                            <button type="button" id="codingMakeMainFileBtn" class="coding-mini-btn">{% trans "Make Main File" context "exams.template.coding_exam" %}</button>
+                            {% if coding_question.allow_file_creation %}
+                                <button type="button" id="codingRenameFileBtn" class="coding-mini-btn">{% trans "Rename File" context "exams.template.coding_exam" %}</button>
+                                <button type="button" id="codingDeleteFileBtn" class="coding-mini-btn coding-mini-btn--danger">{% trans "Delete File" context "exams.template.coding_exam" %}</button>
+                            {% endif %}
+                        </div>
+                    </aside>
+
+                    <div class="coding-editor-wrap">
+                        <div class="coding-editor-toolbar">
+                            <button type="button"
+                                    id="codingToggleFilesBtn"
+                                    class="coding-icon-btn coding-file-toggle-btn"
+                                    title="{% trans 'Hide files' context 'exams.template.coding_exam' %}"
+                                    aria-label="{% trans 'Hide files' context 'exams.template.coding_exam' %}"
+                                    aria-expanded="true">
+                                <i class="fas fa-folder-open" aria-hidden="true"></i>
+                            </button>
+                            <span id="codingCurrentFileName"></span>
+                            <button type="button" id="codingFullscreenBtn" class="coding-icon-btn" title="{% trans 'Fullscreen editor' context 'exams.template.coding_exam' %}">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                        <textarea id="codingEditor"></textarea>
+                    </div>
+                </section>
+
+                <section class="coding-result-pane">
+                    <div class="coding-result-toolbar">
+                        <div class="coding-tabs" role="tablist">
+                            <button type="button" class="coding-tab active" data-coding-tab="output">{% trans "Output" context "exams.template.coding_exam" %}</button>
+                            <button type="button" class="coding-tab" data-coding-tab="errors">{% trans "Errors" context "exams.template.coding_exam" %}</button>
+                            <button type="button" class="coding-tab" data-coding-tab="preview" data-preview-tab>{% trans "Preview" context "exams.template.coding_exam" %}</button>
+                        </div>
+
+                        <div class="coding-run-controls">
+                            <span class="coding-status-pill" id="codingStatus" aria-live="polite"></span>
+                            <div class="coding-select-group coding-select-group--language">
+                                <label class="coding-select-label" for="codingLanguageSelect">
+                                    {% trans "Language" context "exams.template.coding_exam" %}
+                                </label>
+                                <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--language">
+                                    <select id="codingLanguageSelect" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                        {% for value, label in coding_languages %}
+                                            <option value="{{ value }}" {% if value == coding_question.language %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" class="coding-icon-btn" id="codingThemeToggle" title="{% trans 'Theme' context 'exams.template.coding_exam' %}">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                            <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--font">
+                                <select id="codingFontSize" class="form-select bootstrap-single-select__native" data-bootstrap-select title="{% trans 'Font size' context 'exams.template.coding_exam' %}" aria-label="{% trans 'Font size' context 'exams.template.coding_exam' %}">
+                                    <option value="13">13</option>
+                                    <option value="14" selected>14</option>
+                                    <option value="16">16</option>
+                                    <option value="18">18</option>
+                                </select>
+                            </div>
+                            <button type="button" class="coding-btn coding-btn--muted" id="codingResetBtn">
+                                <i class="fas fa-rotate-left"></i>
+                                <span>{% trans "Reset code" context "exams.template.coding_exam" %}</span>
+                            </button>
+                            <button type="button" class="coding-btn coding-btn--run" id="codingRunBtn">
+                                <i class="fas fa-play"></i>
+                                <span>{% trans "Run Code" context "exams.template.coding_exam" %}</span>
+                            </button>
                         </div>
                     </div>
-                    <button type="button" class="coding-icon-btn" id="codingThemeToggle" title="{% trans 'Theme' context 'exams.template.coding_exam' %}">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <div class="bootstrap-single-select coding-bootstrap-select coding-bootstrap-select--font">
-                        <select id="codingFontSize" class="form-select bootstrap-single-select__native" data-bootstrap-select title="{% trans 'Font size' context 'exams.template.coding_exam' %}" aria-label="{% trans 'Font size' context 'exams.template.coding_exam' %}">
-                            <option value="13">13</option>
-                            <option value="14" selected>14</option>
-                            <option value="16">16</option>
-                            <option value="18">18</option>
-                        </select>
-                    </div>
-                    <button type="button" class="coding-btn coding-btn--muted" id="codingResetBtn">
-                        <i class="fas fa-rotate-left"></i>
-                        <span>{% trans "Reset code" context "exams.template.coding_exam" %}</span>
-                    </button>
-                    <button type="button" class="coding-btn coding-btn--run" id="codingRunBtn">
-                        <i class="fas fa-play"></i>
-                        <span>{% trans "Run Code" context "exams.template.coding_exam" %}</span>
-                    </button>
-                </div>
-            </div>
 
-            <div class="coding-tab-panels">
-                <section class="coding-panel active" data-coding-panel="output">
-                    <label for="codingStdin">{% trans "Custom input" context "exams.template.coding_exam" %}</label>
-                    <textarea id="codingStdin" class="coding-stdin" rows="4"></textarea>
-                    <pre id="codingOutput" class="coding-output"></pre>
+                    <div class="coding-tab-panels">
+                        <section class="coding-panel active" data-coding-panel="output">
+                            <div class="coding-console-shell"
+                                 role="group"
+                                 aria-label="{% trans 'Program console' context 'exams.template.coding_exam' %}">
+                                <pre id="codingOutput"
+                                     class="coding-output coding-console-output"
+                                     data-empty="{% trans 'Run the code to see output here.' context 'exams.template.coding_exam' %}"></pre>
+                                <label class="coding-console-input-row" for="codingStdin">
+                                    <span class="coding-console-caret" aria-hidden="true">&gt;</span>
+                                    <textarea id="codingStdin"
+                                              class="coding-stdin coding-console-input"
+                                              rows="2"
+                                              aria-label="{% trans 'Program input' context 'exams.template.coding_exam' %}"
+                                              placeholder="{% trans 'Type input here. Each line will be sent to input(), Scanner, cin, or stdin.' context 'exams.template.coding_exam' %}"></textarea>
+                                </label>
+                            </div>
+                        </section>
+                        <section class="coding-panel" data-coding-panel="errors">
+                            <pre id="codingErrors"
+                                 class="coding-output coding-output--error"
+                                 data-empty="{% trans 'Run the code to see errors here.' context 'exams.template.coding_exam' %}"></pre>
+                        </section>
+                        <section class="coding-panel" data-coding-panel="preview">
+                            <iframe id="codingPreviewFrame" class="coding-preview-frame" sandbox="allow-scripts"></iframe>
+                            <pre id="codingPreviewConsole" class="coding-output coding-preview-console"></pre>
+                        </section>
+                    </div>
                 </section>
-                <section class="coding-panel" data-coding-panel="errors">
-                    <pre id="codingErrors" class="coding-output coding-output--error"></pre>
-                </section>
-                <section class="coding-panel" data-coding-panel="preview">
-                    <iframe id="codingPreviewFrame" class="coding-preview-frame" sandbox="allow-scripts"></iframe>
-                    <pre id="codingPreviewConsole" class="coding-output coding-preview-console"></pre>
-                </section>
-            </div>
-        </section>
-    </main>
+            </main>
+        </div>
+    </div>
 
     <footer class="coding-exam-footer">
         <button type="button" class="coding-footer-btn" id="codingPrevQuestionBtn">
             <i class="fas fa-arrow-left"></i>
             <span>{% trans "action_previous" context "exams.template.take_exam" %}</span>
         </button>
-        <div class="coding-footer-actions">
-            <button type="button" class="coding-footer-btn coding-footer-btn--primary" id="codingNextQuestionBtn">
-                <span>{% trans "action_next" context "exams.template.take_exam" %}</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-            <button type="button" class="coding-footer-btn coding-footer-btn--finish" id="codingSubmitBtn">
-                <span>{% trans "action_finish_exam" context "exams.template.take_exam" %}</span>
-                <i class="fas fa-check"></i>
-            </button>
-        </div>
+        <button type="button" class="coding-footer-btn coding-footer-btn--primary" id="codingNextQuestionBtn">
+            <span>{% trans "action_next" context "exams.template.take_exam" %}</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
     </footer>
 </div>
 
@@ -266,6 +333,9 @@ window.CODING_EXAM_CONFIG = {
         deleteConfirmBody: "{% filter escapejs %}{% trans 'This file will be removed from the current question.' context 'exams.template.coding_exam' %}{% endfilter %}",
         invalidFileName: "{% filter escapejs %}{% trans 'Use letters, numbers, dot, dash, or underscore only.' context 'exams.template.coding_exam' %}{% endfilter %}",
         duplicateFileName: "{% filter escapejs %}{% trans 'A file with this name already exists for this question.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        hideFiles: "{% filter escapejs %}{% trans 'Hide files' context 'exams.template.coding_exam' %}{% endfilter %}",
+        showFiles: "{% filter escapejs %}{% trans 'Show files' context 'exams.template.coding_exam' %}{% endfilter %}",
+        noOutput: "{% filter escapejs %}{% trans 'Program finished with no output.' context 'exams.template.coding_exam' %}{% endfilter %}",
         confirm: "{% filter escapejs %}{% trans 'Confirm' context 'exams.template.coding_exam' %}{% endfilter %}",
         save: "{% filter escapejs %}{% trans 'Save' context 'exams.template.coding_exam' %}{% endfilter %}"
     }
