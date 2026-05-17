@@ -45,6 +45,8 @@ urlpatterns = [
         "notifications/",
         include(("apps.notifications.urls", "notifications"), namespace="notifications"),
     ),
+    # AI assistant API
+    path("api/ai-assistant/", include(("apps.ai_assistant.urls", "ai_assistant"), namespace="ai_assistant")),
     # API versioned endpoints
     path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),

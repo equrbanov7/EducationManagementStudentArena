@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
 
     <!-- Courses app CSS -->
     <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
@@ -57,6 +58,9 @@
     {# Footer partial #}
     {% include "partials/_footer.html" %}
 
+    {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
+    {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
+
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
@@ -82,6 +86,9 @@
     <script src="{% static 'courses/js/modal.js' %}"></script>
     <script src="{% static 'courses/js/forms.js' %}"></script>
     <script src="{% static 'courses/js/notifications.js' %}"></script>
+
+    <!-- AI Assistant Widget -->
+    {% block ai_assistant_js %}<script src="{% static 'js/ai_assistant.js' %}"></script>{% endblock %}
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}"></script>

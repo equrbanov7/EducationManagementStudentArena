@@ -1,0 +1,115 @@
+{% load static i18n %}
+{# AI Assistant Chatbot Widget — only rendered for authenticated users #}
+{% if user.is_authenticated %}
+
+{# ── Floating Bot Button ──────────────────────────────────────────── #}
+<button id="ai-bot-btn" class="ai-bot-btn" type="button" aria-label="AI Assistant">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="ai-warmWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#e8e1dd"/>
+            </linearGradient>
+            <linearGradient id="ai-screenColor" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#1e272e"/>
+                <stop offset="100%" stop-color="#0b1014"/>
+            </linearGradient>
+            <filter id="ai-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+        </defs>
+        <g>
+            {# Body #}
+            <rect x="125" y="210" width="150" height="130" rx="65" fill="url(#ai-warmWhite)"/>
+            <polygon points="250,290 253,296 260,296 255,301 257,308 250,304 243,308 245,301 240,296 247,296" fill="#ff7675"/>
+            <path d="M 155 315 C 180 325, 220 325, 245 315" stroke="#cfc8c4" stroke-width="4" stroke-linecap="round" fill="none"/>
+            {# Neck #}
+            <rect x="180" y="190" width="40" height="30" fill="#a1a6aa" rx="8"/>
+            {# Left arm (waving) #}
+            <path d="M 140 240 Q 60 210 70 140" stroke="url(#ai-warmWhite)" stroke-width="26" stroke-linecap="round" fill="none"/>
+            <circle cx="60" cy="130" r="7" fill="#d1ccc9"/>
+            <circle cx="75" cy="115" r="7" fill="#d1ccc9"/>
+            <circle cx="95" cy="125" r="7" fill="#d1ccc9"/>
+            {# Right arm #}
+            <path d="M 260 240 Q 330 260 310 320" stroke="url(#ai-warmWhite)" stroke-width="26" stroke-linecap="round" fill="none"/>
+            <circle cx="305" cy="335" r="7" fill="#d1ccc9"/>
+            <circle cx="320" cy="330" r="7" fill="#d1ccc9"/>
+            <circle cx="330" cy="315" r="7" fill="#d1ccc9"/>
+            {# Head #}
+            <rect x="75" y="105" width="40" height="50" rx="15" fill="url(#ai-warmWhite)"/>
+            <rect x="285" y="105" width="40" height="50" rx="15" fill="url(#ai-warmWhite)"/>
+            <rect x="90" y="60" width="220" height="140" rx="55" fill="url(#ai-warmWhite)"/>
+            <rect x="110" y="80" width="180" height="100" rx="35" fill="url(#ai-screenColor)"/>
+            {# Eyes #}
+            <circle cx="155" cy="125" r="18" fill="#48dbfb" filter="url(#ai-glow)"/>
+            <circle cx="151" cy="118" r="5" fill="#fff"/>
+            <circle cx="160" cy="130" r="3" fill="#fff"/>
+            <circle cx="245" cy="125" r="18" fill="#48dbfb" filter="url(#ai-glow)"/>
+            <circle cx="241" cy="118" r="5" fill="#fff"/>
+            <circle cx="250" cy="130" r="3" fill="#fff"/>
+            {# Cheeks #}
+            <ellipse cx="130" cy="145" rx="10" ry="5" fill="#ff7675" opacity="0.6"/>
+            <ellipse cx="270" cy="145" rx="10" ry="5" fill="#ff7675" opacity="0.6"/>
+            {# Mouth #}
+            <path d="M 188 150 Q 200 162 212 150" stroke="#48dbfb" stroke-width="6" stroke-linecap="round" fill="none" filter="url(#ai-glow)"/>
+        </g>
+    </svg>
+</button>
+
+{# ── Tooltip ──────────────────────────────────────────────────────── #}
+<div id="ai-bot-tooltip" class="ai-bot-tooltip">
+    {% trans "Söhbətə Başla" context "ai_assistant.tooltip" %}
+    <span class="ai-bot-tooltip-sub">{% trans "Dərhal Cavab Al" context "ai_assistant.tooltip" %}</span>
+</div>
+
+{# ── Chat Panel ───────────────────────────────────────────────────── #}
+<div id="ai-chat-panel" class="ai-chat-panel">
+    {# Header #}
+    <div class="ai-chat-header">
+        <div class="ai-chat-header-top">
+            <div class="ai-chat-header-info">
+                <div class="ai-chat-header-avatar">
+                    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                        <g>
+                            <rect x="90" y="60" width="220" height="140" rx="55" fill="rgba(255,255,255,0.3)"/>
+                            <rect x="110" y="80" width="180" height="100" rx="35" fill="rgba(0,0,0,0.25)"/>
+                            <circle cx="155" cy="125" r="16" fill="#48dbfb"/>
+                            <circle cx="151" cy="118" r="4" fill="#fff"/>
+                            <circle cx="245" cy="125" r="16" fill="#48dbfb"/>
+                            <circle cx="241" cy="118" r="4" fill="#fff"/>
+                            <path d="M 188 150 Q 200 162 212 150" stroke="#48dbfb" stroke-width="5" stroke-linecap="round" fill="none"/>
+                            <rect x="125" y="210" width="150" height="110" rx="55" fill="rgba(255,255,255,0.3)"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="ai-chat-header-title">AI Assistent</div>
+            </div>
+            <button id="ai-chat-close" class="ai-chat-close-btn" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div id="ai-chat-limit" class="ai-chat-limit-badge">{% trans "Sorğular" context "ai_assistant.limit" %}: -- / --</div>
+    </div>
+
+    {# Messages #}
+    <div id="ai-chat-messages" class="ai-chat-messages"></div>
+
+    {# Limit exceeded banner #}
+    <div id="ai-chat-limit-exceeded" class="ai-chat-limit-exceeded" style="display:none;">
+        {% trans "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin." context "ai_assistant.limit_exceeded" %}
+    </div>
+
+    {# Input #}
+    <div id="ai-chat-input-wrap" class="ai-chat-input-wrap">
+        <input id="ai-chat-input" class="ai-chat-input" type="text"
+               placeholder="{% trans 'Mesajınızı yazın...' context 'ai_assistant.input' %}"
+               autocomplete="off" maxlength="2000">
+        <button id="ai-chat-send" class="ai-chat-send-btn" type="button" aria-label="Send">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+{% endif %}
