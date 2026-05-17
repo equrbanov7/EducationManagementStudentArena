@@ -771,6 +771,8 @@ def user_profile(request):
 
         # --- Filter by exam type ---
         my_exams_filter_type = (request.GET.get("exam_type", "") or "").strip()
+        if my_exams_filter_type not in {"", "test", "written", "coding"}:
+            my_exams_filter_type = ""
         if my_exams_filter_type:
             my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
 
@@ -837,6 +839,8 @@ def user_profile(request):
     pending_answer_counts = {
         "all": 0,
         "exams": 0,
+        "written_exams": 0,
+        "practical_exams": 0,
         "courses": 0,
         "labs": 0,
         "independent": 0,
@@ -2031,7 +2035,7 @@ def user_profile(request):
         "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
         "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
         "my-results": pgettext_lazy("profile.section", "my_results"),
-        "pending-answers": "Pending cavablar",
+        "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),
         "groups": pgettext_lazy("profile.section", "groups"),
         "pending-post-approvals": "Postların idarəetməsi",
         "pending-review": pgettext_lazy("profile.section", "pending_review"),

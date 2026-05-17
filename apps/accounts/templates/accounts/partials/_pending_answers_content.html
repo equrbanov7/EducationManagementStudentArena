@@ -2,7 +2,7 @@
 <div class="section-card pending-answers-card">
     <div class="section-title">
         <i class="fas fa-hourglass-half"></i>
-        Pending cavablar ({{ pending_answers_total_count|default:pending_answer_counts.all|default:0 }})
+        {% trans "section_title" context "accounts.pending_answers" %} ({{ pending_answers_total_count|default:pending_answer_counts.all|default:0 }})
     </div>
 
     <form method="get"
@@ -12,27 +12,35 @@
             <input type="hidden" name="section" value="pending-answers">
         {% endif %}
 
-        <input
-            type="text"
-            name="pending_search"
-            value="{{ pending_answers_search_query }}"
-            placeholder="Tapşırıq və kurs üzrə axtar"
-            class="form-control"
-        >
+        <div class="pending-answers-filter-grid">
+            <input
+                type="search"
+                name="pending_search"
+                value="{{ pending_answers_search_query }}"
+                placeholder="{% trans 'search_placeholder' context 'accounts.pending_answers' %}"
+                class="pr-form-control pending-answers-search-input"
+            >
 
-        <select name="pending_type" class="form-control" style="max-width: 240px;">
-            <option value="all" {% if pending_answers_active_filter == 'all' %}selected{% endif %}>Bütün növlər</option>
-            <option value="exams" {% if pending_answers_active_filter == 'exams' %}selected{% endif %}>Yazılı imtahan</option>
-            <option value="courses" {% if pending_answers_active_filter == 'courses' %}selected{% endif %}>Sərbəst iş</option>
-            <option value="labs" {% if pending_answers_active_filter == 'labs' %}selected{% endif %}>Lab işi</option>
-            <option value="independent" {% if pending_answers_active_filter == 'independent' %}selected{% endif %}>Kurs işi</option>
-        </select>
+            <div class="bootstrap-single-select pending-answers-select-wrap">
+                <select name="pending_type"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="all" {% if pending_answers_active_filter == 'all' %}selected{% endif %}>{% trans "filter_all_types" context "accounts.pending_answers" %}</option>
+                    <option value="exams" {% if pending_answers_active_filter == 'exams' %}selected{% endif %}>{% trans "filter_all_exams" context "accounts.pending_answers" %}</option>
+                    <option value="written_exams" {% if pending_answers_active_filter == 'written_exams' %}selected{% endif %}>{% trans "filter_written" context "accounts.pending_answers" %}</option>
+                    <option value="practical_exams" {% if pending_answers_active_filter == 'practical_exams' %}selected{% endif %}>{% trans "filter_practical" context "accounts.pending_answers" %}</option>
+                    <option value="courses" {% if pending_answers_active_filter == 'courses' %}selected{% endif %}>{% trans "filter_free_work" context "accounts.pending_answers" %}</option>
+                    <option value="labs" {% if pending_answers_active_filter == 'labs' %}selected{% endif %}>{% trans "filter_lab_work" context "accounts.pending_answers" %}</option>
+                    <option value="independent" {% if pending_answers_active_filter == 'independent' %}selected{% endif %}>{% trans "filter_coursework" context "accounts.pending_answers" %}</option>
+                </select>
+            </div>
 
-        <noscript>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i> Axtar
-            </button>
-        </noscript>
+            <noscript>
+                <button type="submit" class="btn btn-primary pending-answers-search-btn">
+                    <i class="fas fa-search"></i> {% trans "action_search" context "accounts.pending_answers" %}
+                </button>
+            </noscript>
+        </div>
     </form>
 
     {% if pending_answer_items %}
@@ -69,7 +77,7 @@
     {% else %}
         <div class="empty-state">
             <i class="fas fa-inbox"></i>
-            <p>Hazırda pending cavab yoxdur.</p>
+            <p>{% trans "empty_no_pending_answers" context "accounts.pending_answers" %}</p>
         </div>
     {% endif %}
 </div>

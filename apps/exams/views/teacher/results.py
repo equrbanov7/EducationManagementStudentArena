@@ -929,15 +929,15 @@ def teacher_pending_attempts(request):
         )
 
     # ═══════════════════════════════════════════════════════════════════
-    # ✅ YENİ: Tip üzrə saylar (Yazılı və Test)
+    # ✅ YENİ: Tip üzrə saylar (Yazılı və Praktiki)
     # ═══════════════════════════════════════════════════════════════════
     essay_count = sum(1 for att in pending_attempts if att.exam.exam_type == "written")
-    test_count = sum(1 for att in pending_attempts if att.exam.exam_type == "test")
+    practical_count = sum(1 for att in pending_attempts if att.exam.exam_type == "coding")
 
     context = {
         "pending_attempts": pending_attempts,
         "attempts_data": attempts_data,  # ✅ YENİ - anonim adlar
         "essay_count": essay_count,  # ✅ YENİ - yazılı say
-        "test_count": test_count,  # ✅ YENİ - test say
+        "practical_count": practical_count,  # ✅ YENİ - praktiki say
     }
     return render(request, "exams/teacher/teacher_pending_attempts.html", context)

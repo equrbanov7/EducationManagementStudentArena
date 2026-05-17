@@ -44,6 +44,9 @@
                         <option value="written" {% if my_exams_filter_type == 'written' %}selected{% endif %}>
                             {% trans "filter_written" context "profile.my_exams" %}
                         </option>
+                        <option value="coding" {% if my_exams_filter_type == 'coding' %}selected{% endif %}>
+                            {% trans "filter_practical" context "profile.my_exams" %}
+                        </option>
                     </select>
                 </div>
             </div>
