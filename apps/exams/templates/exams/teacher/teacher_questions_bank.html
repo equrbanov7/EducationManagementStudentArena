@@ -308,6 +308,8 @@
 {% endblock %}
 
 {% block extraJs %}
+{% trans "heading_add_new_question" context "exams.template.add_exam_question" as question_create_title %}
+{% trans "heading_edit_question" context "exams.template.add_exam_question" as question_edit_title %}
 <script nonce="{{ request.csp_nonce }}">
 window.TEACHER_QUESTIONS_BANK_I18N = {
     confirmDelete: "{% trans 'confirm_delete_selected' context 'exams.template.teacher_questions_bank'|escapejs %}",
@@ -316,8 +318,8 @@ window.TEACHER_QUESTIONS_BANK_I18N = {
     selectAtLeastOne: "{% trans 'select_at_least_one' context 'exams.template.teacher_questions_bank'|escapejs %}",
     deleteQuestionBody: "{% trans 'modal_delete_question_body' context 'exams.template.teacher_questions_bank'|escapejs %}",
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal'|escapejs %}",
-    questionCreateTitle: "Yeni sual elave et",
-    questionEditTitle: "Suali redakte et",
+    questionCreateTitle: "{{ question_create_title|escapejs }}",
+    questionEditTitle: "{{ question_edit_title|escapejs }}",
     submitError: "{% trans 'retry_error' context 'courses.common.js'|escapejs %}"
 };
 </script>

@@ -13,10 +13,10 @@
     {% if not is_modal %}
         <div class="form-header">
             {% if editing %}
-                 <h1>Suali redakte et</h1>
+                 <h1>{% trans "heading_edit_question" context "exams.template.add_exam_question" %}</h1>
                  <p class="subtitle">{{ exam.title }}</p>
             {% else %}
-                 <h1>Yeni sual elave et</h1>
+                 <h1>{% trans "heading_add_new_question" context "exams.template.add_exam_question" %}</h1>
 
                  {% if exam.exam_type == "test" %}
                      <p class="info-text">{% trans "info_adding_question_for_test_exam" context "exams.template.add_exam_question" %}</p>
@@ -31,9 +31,9 @@
         <div class="question-form-modal-intro">
             <p class="question-form-modal-context">{{ exam.title }}</p>
             {% if editing %}
-                <p class="info-text">Suali redakte edirsiniz.</p>
+                <p class="info-text">{% trans "info_editing_question" context "exams.template.add_exam_question" %}</p>
             {% else %}
-                <p class="info-text">Yeni sual elave edirsiniz.</p>
+                <p class="info-text">{% trans "info_adding_question" context "exams.template.add_exam_question" %}</p>
             {% endif %}
         </div>
     {% endif %}
@@ -56,8 +56,8 @@
             <div class="error-msg">{{ form.text.errors }}</div>
 
             <div class="media-help">
-                <strong class="media-help-title">Media elavesi (isteye gore)</strong>
-                <p class="media-help-text">Soldaki sahə sekil, sagdaki sahə ise video ucundur. Lazim deyilsə, her ikisini de bos saxlaya bilersiniz.</p>
+                <strong class="media-help-title">{% trans "media_help_title" context "exams.template.add_exam_question" %}</strong>
+                <p class="media-help-text">{% trans "media_help_text" context "exams.template.add_exam_question" %}</p>
             </div>
 
             <div class="form-row">
@@ -71,16 +71,16 @@
 
                     {% if editing and form.instance.image %}
                         <div class="media-preview" data-current-image-preview>
-                            <span class="media-preview-label">Movcud sekil:</span>
-                            <img src="{{ form.instance.image.url }}" alt="Sual sekli" data-current-image>
+                            <span class="media-preview-label">{% trans "label_current_image" context "exams.template.add_exam_question" %}:</span>
+                            <img src="{{ form.instance.image.url }}" alt="{% trans 'alt_question_image' context 'exams.template.add_exam_question' %}" data-current-image>
                             <button type="button" class="clear-media-btn" data-question-clear-media="image">
-                                Sekli sil
+                                {% trans "action_remove_image" context "exams.template.add_exam_question" %}
                             </button>
                         </div>
                     {% endif %}
 
                     <div class="media-preview" data-new-image-preview hidden>
-                        <span class="media-preview-label">Secilmis sekil onizlemesi:</span>
+                        <span class="media-preview-label">{% trans "label_selected_image_preview" context "exams.template.add_exam_question" %}:</span>
                         <img src="" alt="Preview" data-new-image>
                     </div>
                 </div>
@@ -95,18 +95,18 @@
 
                     {% if editing and form.instance.video %}
                         <div class="media-preview" data-current-video-preview>
-                            <span class="media-preview-label">Movcud video:</span>
+                            <span class="media-preview-label">{% trans "label_current_video" context "exams.template.add_exam_question" %}:</span>
                             <video controls style="width:100%; border-radius:8px;" data-current-video>
                                 <source src="{{ form.instance.video.url }}">
                             </video>
                             <button type="button" class="clear-media-btn" data-question-clear-media="video">
-                                Videonu sil
+                                {% trans "action_remove_video" context "exams.template.add_exam_question" %}
                             </button>
                         </div>
                     {% endif %}
 
                     <div class="media-preview" data-new-video-preview hidden>
-                        <span class="media-preview-label">Secilmis video onizlemesi:</span>
+                        <span class="media-preview-label">{% trans "label_selected_video_preview" context "exams.template.add_exam_question" %}:</span>
                         <video controls style="width:100%; border-radius:8px;" data-new-video>
                             <source src="" data-new-video-source>
                         </video>
@@ -125,7 +125,7 @@
                                     {% trans "label_enable_paint_answer" context "exams.template.add_exam_question" %}
                                 </span>
                                 <span class="question-paint-toggle__hint">
-                                    Bu sualda tələbə cavabı mətnlə yanaşı rəsm kimi də verə biləcək.
+                                    {% trans "help_enable_paint_answer" context "exams.template.add_exam_question" %}
                                 </span>
                             </span>
                         </label>
@@ -169,7 +169,7 @@
             {{ form.block }}
             </div>
             <div class="error-msg">{{ form.block.errors }}</div>
-            <p class="help-text">Sual mütləq seçdiyiniz bölməyə əlavə olunacaq.</p>
+            <p class="help-text">{% trans "help_question_block_required" context "exams.template.add_exam_question" %}</p>
         </div>
         {% endif %}
 
@@ -185,7 +185,7 @@
                     <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
                     {{ form.time_limit_seconds }}
                     <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
-                    <p class="help-text">Meselen: 60 saniye. Bos qalarsa imtahanin default vaxti istifade olunacaq.</p>
+                    <p class="help-text">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
                 </div>
             </div>
         {% else %}
@@ -193,7 +193,7 @@
                 <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
                 {{ form.time_limit_seconds }}
                 <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
-                <p class="help-text">Meselen: 60 saniye. Bos qalarsa imtahanin default vaxti istifade olunacaq.</p>
+                <p class="help-text">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
             </div>
         {% endif %}
 
@@ -207,7 +207,7 @@
             <div class="variants-section">
                 <div class="variants-header">
                     <div>
-                        <h4>Cavab variantlari</h4>
+                        <h4>{% trans "heading_options" context "exams.template.add_exam_question" %}</h4>
                         <p class="info-text">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
                     </div>
                     <button type="button" class="variant-add-btn" data-add-option-btn>
@@ -276,7 +276,7 @@
                     {% trans "action_save" context "exams.template.add_exam_question" %}
                 </button>
                 <button type="submit" name="save_and_continue" class="btn-save-add">
-                    Yadda saxla ve yeni sual elave et
+                    {% trans "action_save_and_add_new_question" context "exams.template.add_exam_question" %}
                 </button>
                 <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_navigation_query %}?{{ question_navigation_query }}{% endif %}" class="btn-cancel">
                     {% trans "action_cancel" context "exams.template.add_exam_question" %}

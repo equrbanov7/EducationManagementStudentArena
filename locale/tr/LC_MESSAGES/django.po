@@ -2034,6 +2034,46 @@ msgctxt "profile.my_exams"
 msgid "create_first_exam"
 msgstr "İlk testi oluşturun"
 
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_placeholder"
+msgstr "Sınav ara..."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_all_types"
+msgstr "Tüm türler"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_test"
+msgstr "Test"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_written"
+msgstr "Yazılı"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_practical"
+msgstr "Pratik"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_title"
+msgstr "Sonuç bulunamadı"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_description"
+msgstr "Arama ölçütlerine uygun sınav bulunamadı."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "clear_filters"
+msgstr "Filtreleri temizle"
+
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"
 msgid "title"
@@ -7899,6 +7939,11 @@ msgctxt "exams.model.exam.choice.exam_type"
 msgid "written"
 msgstr "Yazılı"
 
+#: apps/exams/domain/exam_definition.py:18
+msgctxt "exams.model.exam.choice.exam_type"
+msgid "Practical Coding Exam"
+msgstr "Pratik sınav"
+
 #: apps/exams/models.py:157
 msgctxt "exams.model.exam.field"
 msgid "author"
@@ -9047,6 +9092,16 @@ msgctxt "exams.template.student_exam_history"
 msgid "type_test"
 msgstr "Sınav"
 
+#: apps/exams/templates/exams/student/student_exam_history.html:160
+msgctxt "exams.template.student_exam_history"
+msgid "type_written"
+msgstr "Yazılı"
+
+#: apps/exams/templates/exams/student/student_exam_history.html:158
+msgctxt "exams.template.student_exam_history"
+msgid "type_practical"
+msgstr "Pratik"
+
 #: apps/exams/templates/exams/student/student_exam_history.html:45
 msgctxt "exams.template.student_exam_history"
 msgid "type_written_practical"
@@ -9101,12 +9156,22 @@ msgstr "Öğretmen aranıyor..."
 #: apps/exams/templates/exams/student/student_exam_list.html:30
 msgctxt "exams.template.student_exam_list"
 msgid "filter_all_types"
-msgstr "Apply filters"
+msgstr "Tüm türler"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:32
 msgctxt "exams.template.student_exam_list"
 msgid "filter_test"
-msgstr "Filtre"
+msgstr "Test"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:38
+msgctxt "exams.template.student_exam_list"
+msgid "filter_written"
+msgstr "Yazılı"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:41
+msgctxt "exams.template.student_exam_list"
+msgid "filter_practical"
+msgstr "Pratik"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:35
 msgctxt "exams.template.student_exam_list"
@@ -9335,22 +9400,22 @@ msgstr "Taslak kaydedildi"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_edit_question"
-msgstr "Verilen cevaplar"
+msgstr "Soruyu düzenle"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:8
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_new_question"
-msgstr "Verilen cevaplar"
+msgstr "Yeni soru"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:69
 msgctxt "exams.template.add_exam_question"
 msgid "heading_edit_question"
-msgstr "Soru"
+msgstr "Soruyu düzenle"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:72
 msgctxt "exams.template.add_exam_question"
 msgid "heading_add_new_question"
-msgstr "Yeni Konu Ekle"
+msgstr "Yeni soru ekle"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:75
 msgctxt "exams.template.add_exam_question"
@@ -9362,6 +9427,26 @@ msgctxt "exams.template.add_exam_question"
 msgid "info_adding_question_for_written_exam"
 msgstr "Yazılı sınav için yeni soru ekliyorsunuz."
 
+msgctxt "exams.template.add_exam_question"
+msgid "Practical Coding Exam question"
+msgstr "Pratik sınav için yeni soru ekliyorsunuz."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_editing_question"
+msgstr "Soruyu düzenliyorsunuz."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_adding_question"
+msgstr "Yeni soru ekliyorsunuz."
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_title"
+msgstr "Medya eki (isteğe bağlı)"
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_text"
+msgstr "Soldaki alan resim, sağdaki alan video içindir. Gerekli değilse ikisini de boş bırakabilirsiniz."
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
 msgid "label_question_text"
@@ -9370,7 +9455,7 @@ msgstr "Soru"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:100
 msgctxt "exams.template.add_exam_question"
 msgid "label_image_optional"
-msgstr "New image optional"
+msgstr "Resim (isteğe bağlı)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:109
 msgctxt "exams.template.add_exam_question"
@@ -9380,42 +9465,54 @@ msgstr "Mevcut resim"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:110
 msgctxt "exams.template.add_exam_question"
 msgid "alt_question_image"
-msgstr "Soru"
+msgstr "Soru resmi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:112
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_image"
-msgstr "Resim Seç"
+msgstr "Resmi sil"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:118
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_image"
-msgstr "Yeni bir resim yükle"
+msgstr "Seçilen resim önizlemesi"
+
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_image_preview"
+msgstr "Seçilen resim önizlemesi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:125
 msgctxt "exams.template.add_exam_question"
 msgid "label_video_optional"
-msgstr "School optional"
+msgstr "Video (isteğe bağlı)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:134
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_video"
-msgstr "Mevcut resim"
+msgstr "Mevcut video"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:139
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_video"
-msgstr "Resim Seç"
+msgstr "Videoyu sil"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:145
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_video"
-msgstr "Yeni kategori"
+msgstr "Seçilen video önizlemesi"
+
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_video_preview"
+msgstr "Seçilen video önizlemesi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
 msgstr "Çizim cevabını etkinleştir"
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_enable_paint_answer"
+msgstr "Bu soruda öğrenci metnin yanında çizimle de cevap verebilecek."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:123
 msgctxt "exams.template.add_exam_question"
@@ -9470,13 +9567,21 @@ msgstr "İsteğe bağlı: Kaynağı belirli bir konuya bağlayın"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:178
 msgctxt "exams.template.add_exam_question"
 msgid "label_answer_mode"
-msgstr "Cevap"
+msgstr "Cevap modu"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:183
 #: apps/exams/templates/exams/teacher/add_exam_question.html:190
 msgctxt "exams.template.add_exam_question"
 msgid "label_time_limit_seconds"
-msgstr "Örn: 60 (saniye). Boşsa varsayılan kullanılır."
+msgstr "Süre sınırı (saniye)"
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_question_block_required"
+msgstr "Soru seçtiğiniz bölüme eklenecek."
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_time_limit_seconds"
+msgstr "Örneğin: 60 saniye. Boş bırakılırsa sınavın varsayılan süresi kullanılacak."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
@@ -9486,7 +9591,7 @@ msgstr "Yazılı/pratik için ideal cevap (isteğe bağlı)..."
 #: apps/exams/templates/exams/teacher/add_exam_question.html:204
 msgctxt "exams.template.add_exam_question"
 msgid "heading_options"
-msgstr "Subheading posts"
+msgstr "Cevap seçenekleri"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:205
 msgctxt "exams.template.add_exam_question"
@@ -9526,10 +9631,18 @@ msgctxt "exams.template.add_exam_question"
 msgid "action_save"
 msgstr "Kaydet"
 
+msgctxt "exams.template.add_exam_question"
+msgid "action_add_option"
+msgstr "Seçenek ekle"
+
+msgctxt "exams.template.add_exam_question"
+msgid "action_remove_option"
+msgstr "Seçeneği sil"
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:270
 msgctxt "exams.template.add_exam_question"
 msgid "action_save_and_add_new_question"
-msgstr "Yeni Konu Ekle"
+msgstr "Kaydet ve yeni soru ekle"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:273
 msgctxt "exams.template.add_exam_question"
@@ -11152,19 +11265,25 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_all"
-msgstr "Apply filters"
+msgstr "Hepsi"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:26
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:82
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_written"
-msgstr "Filtre"
+msgstr "Yazılı"
+
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:31
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:87
+msgctxt "exams.template.teacher_pending_attempts"
+msgid "filter_practical"
+msgstr "Pratik"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:30
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:86
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_test"
-msgstr "Filtre"
+msgstr "Test"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:41
 msgctxt "exams.template.teacher_pending_attempts"
@@ -19844,3 +19963,59 @@ msgstr "Program girdisi"
 msgctxt "exams.template.coding_exam"
 msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
 msgstr "Giriş verisini buraya yazın. Her satır input(), Scanner, cin veya stdin'e gönderilecek."
+
+msgctxt "accounts.pending_answers"
+msgid "page_title"
+msgstr "Bekleyen cevaplar"
+
+msgctxt "accounts.pending_answers"
+msgid "section_title"
+msgstr "Bekleyen cevaplar"
+
+msgctxt "accounts.pending_answers"
+msgid "back_to_profile"
+msgstr "Profile dön"
+
+msgctxt "accounts.pending_answers"
+msgid "search_placeholder"
+msgstr "Görev, sınav veya kursa göre ara"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_types"
+msgstr "Tüm türler"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_exams"
+msgstr "Tüm sınavlar"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_written"
+msgstr "Yazılı"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_practical"
+msgstr "Pratik"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_free_work"
+msgstr "Serbest iş"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_lab_work"
+msgstr "Lab işi"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_coursework"
+msgstr "Kurs işi"
+
+msgctxt "accounts.pending_answers"
+msgid "action_search"
+msgstr "Ara"
+
+msgctxt "accounts.pending_answers"
+msgid "empty_no_pending_answers"
+msgstr "Şu anda bekleyen cevap yok."
+
+msgctxt "accounts.common"
+msgid "back_to_profile"
+msgstr "Profile dön"

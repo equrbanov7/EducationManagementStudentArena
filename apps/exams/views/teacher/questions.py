@@ -326,6 +326,10 @@ def add_exam_question(request, slug):
             if exam.exam_type == "test":
                 form.create_options(question)
 
+            from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+
+            schedule_ai_question_difficulty_warmup(exam, force=True)
+
             if is_modal_request:
                 return JsonResponse({"success": True, "question_id": question.id})
 
@@ -425,6 +429,10 @@ def edit_exam_question(request, slug, question_id):
 
             if exam.exam_type == "test":
                 form.save_options(q)
+
+            from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+
+            schedule_ai_question_difficulty_warmup(exam, force=True)
 
             if is_modal_request:
                 return JsonResponse({"success": True, "question_id": q.id})

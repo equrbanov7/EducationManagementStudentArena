@@ -107,6 +107,30 @@
             {% if form.random_question_count.errors %}<div class="field-error">{{ form.random_question_count.errors.0 }}</div>{% endif %}
         </div>
 
+        <div class="form-group form-group-full" data-random-fairness-group>
+            <input type="hidden" name="{{ form.fair_question_distribution_enabled.html_name }}" value="false">
+            <label class="modal-check-label">
+                {{ form.fair_question_distribution_enabled }}
+                <span class="modal-check-label-text">{{ form.fair_question_distribution_enabled.label }}</span>
+            </label>
+            {% if form.fair_question_distribution_enabled.help_text %}
+                <small class="form-text text-muted">{{ form.fair_question_distribution_enabled.help_text }}</small>
+            {% endif %}
+            {% if form.fair_question_distribution_enabled.errors %}<div class="field-error">{{ form.fair_question_distribution_enabled.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full" data-ai-difficulty-balance-group>
+            <input type="hidden" name="{{ form.ai_difficulty_balance_enabled.html_name }}" value="false">
+            <label class="modal-check-label">
+                {{ form.ai_difficulty_balance_enabled }}
+                <span class="modal-check-label-text">{{ form.ai_difficulty_balance_enabled.label }}</span>
+            </label>
+            {% if form.ai_difficulty_balance_enabled.help_text %}
+                <small class="form-text text-muted">{{ form.ai_difficulty_balance_enabled.help_text }}</small>
+            {% endif %}
+            {% if form.ai_difficulty_balance_enabled.errors %}<div class="field-error">{{ form.ai_difficulty_balance_enabled.errors.0 }}</div>{% endif %}
+        </div>
+
         <div class="form-group">
             {{ form.max_attempts_per_user.label_tag }}
             {{ form.max_attempts_per_user }}
