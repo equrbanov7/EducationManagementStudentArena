@@ -10,6 +10,14 @@ from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
 
+VALID_EXAM_TYPE_FILTERS = {"test", "written", "coding"}
+
+
+def _apply_exam_type_filter(queryset, filter_type):
+    if filter_type in VALID_EXAM_TYPE_FILTERS:
+        return queryset.filter(exam_type=filter_type)
+    return queryset
+
 
 @login_required
 def assigned_student_exam_list(request):
@@ -52,8 +60,7 @@ def assigned_student_exam_list(request):
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")
-    if filter_type:
-        exams_qs = exams_qs.filter(exam_type=filter_type)
+    exams_qs = _apply_exam_type_filter(exams_qs, filter_type)
 
     # Sıralama
     exams_qs = exams_qs.order_by("-created_at")
@@ -162,8 +169,7 @@ def student_exam_list(request):
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")
-    if filter_type:
-        exams_qs = exams_qs.filter(exam_type=filter_type)
+    exams_qs = _apply_exam_type_filter(exams_qs, filter_type)
 
     exams_qs = exams_qs.order_by("-created_at")
 

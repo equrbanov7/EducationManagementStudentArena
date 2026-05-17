@@ -492,6 +492,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="10"')
+        self.assertContains(response, 'name="fair_question_distribution_enabled"', html=False)
+        self.assertContains(response, 'name="ai_difficulty_balance_enabled"', html=False)
 
     def test_modal_edit_written_exam_includes_random_question_count(self):
         written_exam = Exam.objects.create(
@@ -574,6 +576,31 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         created_exam = Exam.objects.get(title="Custom Random Count Exam")
         self.assertEqual(created_exam.random_question_count, 20)
+        self.assertTrue(created_exam.fair_question_distribution_enabled)
+        self.assertFalse(created_exam.ai_difficulty_balance_enabled)
+
+    def test_modal_create_exam_can_disable_distribution_toggles(self):
+        response = self.client.post(
+            reverse("exams:create_exam") + "?modal=1",
+            {
+                "modal": "1",
+                "title": "Manual Distribution Exam",
+                "description": "Created with fairness toggles off.",
+                "exam_type": "test",
+                "random_question_count": "10",
+                "fair_question_distribution_enabled": "false",
+                "ai_difficulty_balance_enabled": "false",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Manual Distribution Exam")
+        self.assertFalse(created_exam.fair_question_distribution_enabled)
+        self.assertFalse(created_exam.ai_difficulty_balance_enabled)
 
     def test_create_exam_requires_active_organization(self):
         from apps.exams.views.teacher.exams import createAndEditExamView
@@ -745,6 +772,30 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, 'name="option3_text"')
         self.assertContains(response, "Variant əlavə et")
 
+    def test_ru_question_add_translations_use_add_not_delete_or_topic(self):
+        with override("ru"):
+            response = self.client.get(
+                reverse("exams:add_exam_question", args=[self.exam_visible.slug]),
+                {"modal": "1"},
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+                HTTP_ACCEPT_LANGUAGE="ru",
+            )
+
+            bank_response = self.client.get(
+                reverse("exams:teacher_questions_bank", args=[self.exam_visible.slug]),
+                HTTP_ACCEPT_LANGUAGE="ru",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Вы добавляете новый вопрос.")
+        self.assertContains(response, "Добавить вариант")
+        self.assertNotContains(response, "Добавить новую тему")
+        self.assertNotContains(response, "Yeni sual")
+
+        self.assertEqual(bank_response.status_code, 200)
+        self.assertContains(bank_response, 'questionCreateTitle: "Добавить новый вопрос"', html=False)
+        self.assertNotContains(bank_response, 'questionCreateTitle: "Yeni sual elave et"', html=False)
+
     def test_modal_add_question_accepts_more_than_four_options(self):
         response = self.client.post(
             reverse("exams:add_exam_question", args=[self.exam_visible.slug]) + "?modal=1",
@@ -890,12 +941,16 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
                 "is_active": "on",
                 "is_public": "on",
                 "random_question_count": "25",
+                "fair_question_distribution_enabled": "false",
+                "ai_difficulty_balance_enabled": "false",
             },
         )
 
         self.assertEqual(response.status_code, 302)
         self.exam_visible.refresh_from_db()
         self.assertEqual(self.exam_visible.random_question_count, 25)
+        self.assertFalse(self.exam_visible.fair_question_distribution_enabled)
+        self.assertFalse(self.exam_visible.ai_difficulty_balance_enabled)
 
     def test_teacher_exam_detail_defaults_to_generic_back_with_profile_fallback(self):
         response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
@@ -2008,6 +2063,32 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:student_exam_list"), {"q": self.other_tenant_exam.title})
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
+
+    def test_student_exam_list_filters_practical_separately_from_written(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Visible Written Filter Exam",
+            exam_type="written",
+            is_active=True,
+            is_public=True,
+        )
+        ExamQuestion.objects.create(exam=written_exam, text="Written filter question", order=1, points=1)
+
+        coding_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Visible Practical Filter Exam",
+            exam_type="coding",
+            is_active=True,
+            is_public=True,
+        )
+        ExamQuestion.objects.create(exam=coding_exam, text="Practical filter question", order=1, points=1)
+
+        response = self.client.get(reverse("exams:student_exam_list"), {"type": "coding"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="coding" selected', html=False)
+        self.assertContains(response, coding_exam.title)
+        self.assertNotContains(response, written_exam.title)
 
     def test_student_exam_views_restore_profile_org_context_when_session_org_is_missing(self):
         session = self.client.session

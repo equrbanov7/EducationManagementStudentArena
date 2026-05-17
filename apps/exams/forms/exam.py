@@ -147,6 +147,8 @@ class ExamForm(forms.ModelForm):
             "total_duration_minutes",
             "default_question_time_seconds",
             "random_question_count",
+            "fair_question_distribution_enabled",
+            "ai_difficulty_balance_enabled",
             "max_attempts_per_user",
             "enable_paint",
         ]
@@ -243,6 +245,16 @@ class ExamForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("exams.form.exam.placeholder", "max_attempts_per_user"),
                 }
             ),
+            "fair_question_distribution_enabled": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
+            "ai_difficulty_balance_enabled": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
         }
         labels = {
             "title": pgettext_lazy("exams.form.exam.label", "title"),
@@ -258,10 +270,26 @@ class ExamForm(forms.ModelForm):
             "total_duration_minutes": pgettext_lazy("exams.form.exam.label", "total_duration_minutes"),
             "default_question_time_seconds": pgettext_lazy("exams.form.exam.label", "default_question_time_seconds"),
             "random_question_count": pgettext_lazy("exams.form.exam.label", "random_question_count"),
+            "fair_question_distribution_enabled": pgettext_lazy(
+                "exams.form.exam.label",
+                "Sual təkrarını azalt",
+            ),
+            "ai_difficulty_balance_enabled": pgettext_lazy(
+                "exams.form.exam.label",
+                "AI ağırlıq balansı",
+            ),
             "max_attempts_per_user": pgettext_lazy("exams.form.exam.label", "max_attempts_per_user"),
         }
         help_texts = {
             "random_question_count": pgettext_lazy("exams.form.exam.help", "random_question_count"),
+            "fair_question_distribution_enabled": pgettext_lazy(
+                "exams.form.exam.help",
+                "Eyni sualın çox tələbəyə düşməməsi və blokların mümkün qədər növbəli paylanması üçün.",
+            ),
+            "ai_difficulty_balance_enabled": pgettext_lazy(
+                "exams.form.exam.help",
+                "AI sual çətinliyini yoxlayır və hər tələbəyə oxşar ağırlıqda sual dəsti verməyə çalışır.",
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -307,6 +335,14 @@ class ExamForm(forms.ModelForm):
             "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa default 10-dur. "
             "Test, yazılı və praktiki imtahanlara aiddir."
         )
+        self.fields["fair_question_distribution_enabled"].help_text = (
+            "Eyni sualın çox tələbəyə düşməməsi, mümkün olduqca hər tələbəyə fərqli sualların "
+            "və kifayət qədər blok varsa fərqli blokların düşməsi üçün."
+        )
+        self.fields["ai_difficulty_balance_enabled"].help_text = (
+            "AI sualların ağırlıq dərəcəsini yoxlayır və tələbələrə oxşar çətinlikdə sual dəsti "
+            "düşməsinə çalışır. AI açarı yoxdursa mövcud difficulty dəyərləri istifadə olunur."
+        )
         self._coding_field_names = [
             "coding_language",
             "coding_question_title",
@@ -332,6 +368,10 @@ class ExamForm(forms.ModelForm):
             self.initial.setdefault("is_active", True)
             self.fields["random_question_count"].initial = 10
             self.initial.setdefault("random_question_count", 10)
+            self.fields["fair_question_distribution_enabled"].initial = True
+            self.initial.setdefault("fair_question_distribution_enabled", True)
+            self.fields["ai_difficulty_balance_enabled"].initial = False
+            self.initial.setdefault("ai_difficulty_balance_enabled", False)
             self.initial.setdefault("coding_language", CodingExamQuestion.LANGUAGE_PYTHON)
             self.initial.setdefault("coding_time_limit_seconds", 2)
             self.initial.setdefault("coding_memory_limit_mb", 128)
@@ -431,6 +471,20 @@ class ExamForm(forms.ModelForm):
                 return 10 if existing_value is None else existing_value
             return 10
         return value
+
+    def _clean_enabled_toggle(self, field_name, *, default):
+        value = bool(self.cleaned_data.get(field_name))
+        if self.is_bound and field_name not in self.data:
+            if self.instance.pk:
+                return bool(getattr(self.instance, field_name, default))
+            return default
+        return value
+
+    def clean_fair_question_distribution_enabled(self):
+        return self._clean_enabled_toggle("fair_question_distribution_enabled", default=True)
+
+    def clean_ai_difficulty_balance_enabled(self):
+        return self._clean_enabled_toggle("ai_difficulty_balance_enabled", default=False)
 
     def clean(self):
         cleaned_data = super().clean()
