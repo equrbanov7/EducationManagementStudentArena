@@ -2037,6 +2037,46 @@ msgctxt "profile.my_exams"
 msgid "create_first_exam"
 msgstr "Создайте первый тест"
 
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_placeholder"
+msgstr "Поиск экзамена..."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_all_types"
+msgstr "Все типы"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_test"
+msgstr "Тест"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_written"
+msgstr "Письменный"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_practical"
+msgstr "Практический"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_title"
+msgstr "Результаты не найдены"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_description"
+msgstr "Экзамены по заданным критериям не найдены."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "clear_filters"
+msgstr "Очистить фильтры"
+
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"
 msgid "title"
@@ -7917,6 +7957,11 @@ msgctxt "exams.model.exam.choice.exam_type"
 msgid "written"
 msgstr "Письменный"
 
+#: apps/exams/domain/exam_definition.py:18
+msgctxt "exams.model.exam.choice.exam_type"
+msgid "Practical Coding Exam"
+msgstr "Практический экзамен"
+
 #: apps/exams/models.py:157
 msgctxt "exams.model.exam.field"
 msgid "author"
@@ -9062,7 +9107,17 @@ msgstr "Операция"
 #: apps/exams/templates/exams/student/student_exam_history.html:43
 msgctxt "exams.template.student_exam_history"
 msgid "type_test"
-msgstr "Экзамен"
+msgstr "Тест"
+
+#: apps/exams/templates/exams/student/student_exam_history.html:160
+msgctxt "exams.template.student_exam_history"
+msgid "type_written"
+msgstr "Письменный"
+
+#: apps/exams/templates/exams/student/student_exam_history.html:158
+msgctxt "exams.template.student_exam_history"
+msgid "type_practical"
+msgstr "Практический"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:45
 msgctxt "exams.template.student_exam_history"
@@ -9118,12 +9173,22 @@ msgstr "Ищу учителя..."
 #: apps/exams/templates/exams/student/student_exam_list.html:30
 msgctxt "exams.template.student_exam_list"
 msgid "filter_all_types"
-msgstr "Apply filters"
+msgstr "Все типы"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:32
 msgctxt "exams.template.student_exam_list"
 msgid "filter_test"
-msgstr "Фильтр"
+msgstr "Тест"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:38
+msgctxt "exams.template.student_exam_list"
+msgid "filter_written"
+msgstr "Письменный"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:41
+msgctxt "exams.template.student_exam_list"
+msgid "filter_practical"
+msgstr "Практический"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:35
 msgctxt "exams.template.student_exam_list"
@@ -9352,22 +9417,22 @@ msgstr "Черновик сохранен"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_edit_question"
-msgstr "Ответы предоставлены"
+msgstr "Редактировать вопрос"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:8
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_new_question"
-msgstr "Ответы предоставлены"
+msgstr "Новый вопрос"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:69
 msgctxt "exams.template.add_exam_question"
 msgid "heading_edit_question"
-msgstr "Вопрос"
+msgstr "Редактировать вопрос"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:72
 msgctxt "exams.template.add_exam_question"
 msgid "heading_add_new_question"
-msgstr "Добавить новую тему"
+msgstr "Добавить новый вопрос"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:75
 msgctxt "exams.template.add_exam_question"
@@ -9379,6 +9444,26 @@ msgctxt "exams.template.add_exam_question"
 msgid "info_adding_question_for_written_exam"
 msgstr "Вы добавляете новый вопрос для письменного экзамена."
 
+msgctxt "exams.template.add_exam_question"
+msgid "Practical Coding Exam question"
+msgstr "Вы добавляете новый вопрос для практического экзамена."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_editing_question"
+msgstr "Вы редактируете вопрос."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_adding_question"
+msgstr "Вы добавляете новый вопрос."
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_title"
+msgstr "Медиафайл (необязательно)"
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_text"
+msgstr "Поле слева предназначено для изображения, а поле справа — для видео. Если они не нужны, оставьте оба поля пустыми."
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
 msgid "label_question_text"
@@ -9387,7 +9472,7 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:100
 msgctxt "exams.template.add_exam_question"
 msgid "label_image_optional"
-msgstr "New image optional"
+msgstr "Изображение (необязательно)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:109
 msgctxt "exams.template.add_exam_question"
@@ -9397,42 +9482,54 @@ msgstr "Существующее изображение"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:110
 msgctxt "exams.template.add_exam_question"
 msgid "alt_question_image"
-msgstr "Вопрос"
+msgstr "Изображение вопроса"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:112
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_image"
-msgstr "Выберите изображение"
+msgstr "Удалить изображение"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:118
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_image"
-msgstr "Загрузите новое изображение"
+msgstr "Предпросмотр выбранного изображения"
+
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_image_preview"
+msgstr "Предпросмотр выбранного изображения"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:125
 msgctxt "exams.template.add_exam_question"
 msgid "label_video_optional"
-msgstr "School optional"
+msgstr "Видео (необязательно)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:134
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_video"
-msgstr "Существующее изображение"
+msgstr "Текущее видео"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:139
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_video"
-msgstr "Выберите изображение"
+msgstr "Удалить видео"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:145
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_video"
-msgstr "Новая категория"
+msgstr "Предпросмотр выбранного видео"
+
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_video_preview"
+msgstr "Предпросмотр выбранного видео"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
 msgstr "Включить графический ответ"
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_enable_paint_answer"
+msgstr "В этом вопросе студент сможет ответить не только текстом, но и рисунком."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:123
 msgctxt "exams.template.add_exam_question"
@@ -9487,13 +9584,21 @@ msgstr "Необязательно: свяжите ресурс с опреде�
 #: apps/exams/templates/exams/teacher/add_exam_question.html:178
 msgctxt "exams.template.add_exam_question"
 msgid "label_answer_mode"
-msgstr "Ответ"
+msgstr "Режим ответа"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:183
 #: apps/exams/templates/exams/teacher/add_exam_question.html:190
 msgctxt "exams.template.add_exam_question"
 msgid "label_time_limit_seconds"
-msgstr "Пример: 60 (секунд). Если пусто, используется значение по умолчанию."
+msgstr "Лимит времени (секунды)"
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_question_block_required"
+msgstr "Вопрос будет добавлен в выбранный вами блок."
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_time_limit_seconds"
+msgstr "Например: 60 секунд. Если оставить пустым, будет использовано время экзамена по умолчанию."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
@@ -9503,7 +9608,7 @@ msgstr "Идеальный ответ для письменного/практи
 #: apps/exams/templates/exams/teacher/add_exam_question.html:204
 msgctxt "exams.template.add_exam_question"
 msgid "heading_options"
-msgstr "Subheading posts"
+msgstr "Варианты ответа"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:205
 msgctxt "exams.template.add_exam_question"
@@ -9543,15 +9648,23 @@ msgctxt "exams.template.add_exam_question"
 msgid "action_save"
 msgstr "Сохранить"
 
+msgctxt "exams.template.add_exam_question"
+msgid "action_add_option"
+msgstr "Добавить вариант"
+
+msgctxt "exams.template.add_exam_question"
+msgid "action_remove_option"
+msgstr "Удалить вариант"
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:270
 msgctxt "exams.template.add_exam_question"
 msgid "action_save_and_add_new_question"
-msgstr "Добавить новую тему"
+msgstr "Сохранить и добавить новый вопрос"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:273
 msgctxt "exams.template.add_exam_question"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:281
 msgctxt "exams.template.add_exam_question"
@@ -11172,19 +11285,25 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_all"
-msgstr "Apply filters"
+msgstr "Все"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:26
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:82
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_written"
-msgstr "Фильтр"
+msgstr "Письменный"
+
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:31
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:87
+msgctxt "exams.template.teacher_pending_attempts"
+msgid "filter_practical"
+msgstr "Практический"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:30
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:86
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_test"
-msgstr "Фильтр"
+msgstr "Тест"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:41
 msgctxt "exams.template.teacher_pending_attempts"
@@ -19886,3 +20005,59 @@ msgstr "Ввод программы"
 msgctxt "exams.template.coding_exam"
 msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
 msgstr "Введите данные здесь. Каждая строка будет отправлена в input(), Scanner, cin или stdin."
+
+msgctxt "accounts.pending_answers"
+msgid "page_title"
+msgstr "Ответы в ожидании"
+
+msgctxt "accounts.pending_answers"
+msgid "section_title"
+msgstr "Ответы в ожидании"
+
+msgctxt "accounts.pending_answers"
+msgid "back_to_profile"
+msgstr "Вернуться в профиль"
+
+msgctxt "accounts.pending_answers"
+msgid "search_placeholder"
+msgstr "Поиск по заданию, экзамену или курсу"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_types"
+msgstr "Все типы"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_exams"
+msgstr "Все экзамены"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_written"
+msgstr "Письменный"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_practical"
+msgstr "Практический"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_free_work"
+msgstr "Самостоятельная работа"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_lab_work"
+msgstr "Лабораторная работа"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_coursework"
+msgstr "Курсовая работа"
+
+msgctxt "accounts.pending_answers"
+msgid "action_search"
+msgstr "Поиск"
+
+msgctxt "accounts.pending_answers"
+msgid "empty_no_pending_answers"
+msgstr "Сейчас нет ответов в ожидании."
+
+msgctxt "accounts.common"
+msgid "back_to_profile"
+msgstr "Вернуться в профиль"

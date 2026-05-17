@@ -205,6 +205,40 @@
                         {% endif %}
                     </div>
 
+                    <div class="form-group checkbox-group span-full" data-random-fairness-group>
+                        <input type="hidden" name="{{ form.fair_question_distribution_enabled.html_name }}" value="false">
+                        <label for="{{ form.fair_question_distribution_enabled.id_for_label }}" class="checkbox-label-wrapper">
+                            {{ form.fair_question_distribution_enabled }}
+                            <span class="custom-checkbox-box"></span>
+                            <span>
+                                {{ form.fair_question_distribution_enabled.label }}
+                                {% if form.fair_question_distribution_enabled.help_text %}
+                                    <small class="checkbox-help">{{ form.fair_question_distribution_enabled.help_text }}</small>
+                                {% endif %}
+                            </span>
+                        </label>
+                        {% if form.fair_question_distribution_enabled.errors %}
+                            <div class="field-error">{{ form.fair_question_distribution_enabled.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group checkbox-group span-full" data-ai-difficulty-balance-group>
+                        <input type="hidden" name="{{ form.ai_difficulty_balance_enabled.html_name }}" value="false">
+                        <label for="{{ form.ai_difficulty_balance_enabled.id_for_label }}" class="checkbox-label-wrapper">
+                            {{ form.ai_difficulty_balance_enabled }}
+                            <span class="custom-checkbox-box"></span>
+                            <span>
+                                {{ form.ai_difficulty_balance_enabled.label }}
+                                {% if form.ai_difficulty_balance_enabled.help_text %}
+                                    <small class="checkbox-help">{{ form.ai_difficulty_balance_enabled.help_text }}</small>
+                                {% endif %}
+                            </span>
+                        </label>
+                        {% if form.ai_difficulty_balance_enabled.errors %}
+                            <div class="field-error">{{ form.ai_difficulty_balance_enabled.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
                     <div class="form-group">
                         {{ form.max_attempts_per_user.label_tag }}
                         <div class="input-with-icon">
