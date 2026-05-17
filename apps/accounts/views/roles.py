@@ -12,7 +12,7 @@ from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -41,7 +41,6 @@ from ._helpers import (
     _normalized_org_name,
     _pending_student_request_queryset,
     _permission_is_grantable,
-    _query_string,
     _resolve_next_url,
     _sync_user_role_memberships,
 )
@@ -220,17 +219,7 @@ def manage_roles(request):
         actor_user=request.user,
     )
 
-    context = {
-        "profiles": profiles_page_obj,
-        "assignable_roles": assignable_roles,
-        "search_query": search,
-        "organization": user_org,
-        "profiles_page_param": "manage_roles_page",
-        "profiles_pagination_query": _query_string(search=search),
-        "post_next_url": _append_query_params(reverse("accounts:manage_roles"), search=search),
-    }
-
-    return render(request, "accounts/manage_roles.html", context)
+    return redirect(reverse("accounts:profile") + "?section=manage-roles")
 
 
 @login_required
@@ -1103,7 +1092,7 @@ def role_assignment(request):
 def permission_editor(request):
     """Organization-scoped permission editor with add/remove enforcement."""
     from apps.organizations.models import Role
-    from apps.organizations.permissions import PERMISSION_CATEGORIES, get_all_permissions, has_permission
+    from apps.organizations.permissions import get_all_permissions, has_permission
     from apps.organizations.services import create_audit_log, get_user_org_role_level
 
     org = _get_active_organization(request)
@@ -1255,14 +1244,4 @@ def permission_editor(request):
     if selected_role is None:
         selected_role = roles.first()
 
-    context = {
-        "organization": org,
-        "roles": roles,
-        "selected_role": selected_role,
-        "permission_categories": PERMISSION_CATEGORIES,
-        "user_level": user_level,
-        "actor_permissions": sorted(actor_permissions),
-        "grantable_permissions": sorted(grantable_permissions),
-        "can_manage_permissions": can_manage_permissions,
-    }
-    return render(request, "accounts/permission_editor.html", context)
+    return redirect(reverse("accounts:profile") + "?section=permission-editor")
