@@ -20019,3 +20019,103 @@ msgstr "Şu anda bekleyen cevap yok."
 msgctxt "accounts.common"
 msgid "back_to_profile"
 msgstr "Profile dön"
+
+msgctxt "ai_assistant.aria"
+msgid "AI Assistant"
+msgstr "AI Asistan"
+
+msgctxt "ai_assistant.tooltip"
+msgid "Söhbətə Başla"
+msgstr "Sohbete Başla"
+
+msgctxt "ai_assistant.tooltip"
+msgid "Dərhal Cavab Al"
+msgstr "Hemen Cevap Al"
+
+msgctxt "ai_assistant.limit"
+msgid "Sorğular"
+msgstr "Sorgular"
+
+msgctxt "ai_assistant.limit"
+msgid "yüklənir..."
+msgstr "yükleniyor..."
+
+msgctxt "ai_assistant.greeting"
+msgid "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+msgstr "Merhaba! Ben EMSArena AI. Sorularınızı cevaplamaya hazırım. Size nasıl yardımcı olabilirim?"
+
+msgctxt "ai_assistant.error"
+msgid "AI sorğu limiti hazırda aktiv deyil."
+msgstr "AI sorgu limiti şu anda aktif değil."
+
+msgctxt "ai_assistant.error"
+msgid "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Sorgu gönderilemedi. Sayfayı yenileyip tekrar deneyin."
+
+msgctxt "ai_assistant.error"
+msgid "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
+msgstr "Bir hata oluştu. Lütfen tekrar deneyin."
+
+msgctxt "ai_assistant.error"
+msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
+msgstr "Ağ hatası. Lütfen tekrar deneyin."
+
+msgctxt "ai_assistant.action"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "ai_assistant.action"
+msgid "Emoji"
+msgstr "Emoji"
+
+msgctxt "ai_assistant.action"
+msgid "Göndər"
+msgstr "Gönder"
+
+msgctxt "ai_assistant.title"
+msgid "AI Assistent"
+msgstr "AI Asistan"
+
+msgctxt "ai_assistant.limit_exceeded"
+msgid "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "Saatlik AI sorgu limitine ulaştınız. Lütfen biraz sonra tekrar deneyin."
+
+msgctxt "ai_assistant.input"
+msgid "Mesajınızı yazın..."
+msgstr "Mesajınızı yazın..."
+
+msgctxt "ai_assistant.blocked"
+msgid "Zəhmət olmasa mesajınızı daxil edin."
+msgstr "Lütfen mesajınızı girin."
+
+msgctxt "ai_assistant.blocked"
+msgid "Mesajınız çox uzundur. Zəhmət olmasa qısaldın."
+msgstr "Mesajınız çok uzun. Lütfen kısaltın."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu növ sorğu icazəli deyil."
+msgstr "Bu tür sorguya izin verilmez."
+
+msgctxt "ai_assistant.blocked"
+msgid "Sistem təlimatlarına baxmaq mümkün deyil."
+msgstr "Sistem talimatları görüntülenemez."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu məlumata giriş icazəli deyil."
+msgstr "Bu bilgiye erişime izin verilmez."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu sahəyə giriş hüququnuz yoxdur."
+msgstr "Bu alana erişim hakkınız yok."
+
+msgctxt "ai_assistant.blocked"
+msgid "Başqa istifadəçilərin məlumatlarına giriş icazəli deyil."
+msgstr "Diğer kullanıcıların verilerine erişime izin verilmez."
+
+msgctxt "ai_assistant.blocked"
+msgid "İcazə qaydalarını keçmək mümkün deyil."
+msgstr "İzin kuralları atlanamaz."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu sorğu blok olundu."
+msgstr "Bu sorgu engellendi."

@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import json
 import logging
-import time
-from datetime import timedelta
+from datetime import datetime, timedelta
+from datetime import timezone as datetime_timezone
 
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
 
@@ -49,7 +50,7 @@ def _get_quota_info(user_id: int) -> dict:
 
     expires_at_ts = rl_cache.get(expires_key)
     if expires_at_ts is not None:
-        reset_at = timezone.datetime.fromtimestamp(expires_at_ts, tz=timezone.utc).isoformat()
+        reset_at = datetime.fromtimestamp(float(expires_at_ts), tz=datetime_timezone.utc).isoformat()
     else:
         reset_at = (timezone.now() + timedelta(seconds=parsed.window_seconds)).isoformat()
 
@@ -58,6 +59,15 @@ def _get_quota_info(user_id: int) -> dict:
         "limit": parsed.limit,
         "reset_at": reset_at,
     }
+
+
+@require_GET
+def quota_view(request):
+    """Return the authenticated user's current AI assistant quota."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
+
+    return JsonResponse(_get_quota_info(request.user.id))
 
 
 @require_POST
@@ -114,15 +124,19 @@ def chat_view(request):
         return JsonResponse(
             {
                 "error": "rate_limit_exceeded",
-                "answer": "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+                "answer": pgettext(
+                    "ai_assistant.limit_exceeded",
+                    "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+                ),
                 **_get_quota_info(user.id),
             },
             status=429,
         )
 
     # ── Build permission-filtered context ─────────────────────────────
+    current_page = (body.get("current_page") or "").strip()[:500]
     try:
-        context = build_user_context(request)
+        context = build_user_context(request, current_page=current_page)
     except Exception:
         logger.exception("Failed to build AI assistant context")
         context = f"[User: {user.username}]\nContext unavailable."
@@ -141,7 +155,8 @@ def chat_view(request):
         )
         return JsonResponse(
             {
-                "answer": result.get("error", "An error occurred."),
+                "error": "ai_service_error",
+                "answer": pgettext("ai_assistant.error", "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."),
                 **_get_quota_info(user.id),
             },
             status=502,
@@ -183,7 +198,7 @@ def _log_request(
 ):
     """Write an audit log entry for this AI assistant interaction."""
     role_names = []
-    for m in (memberships or []):
+    for m in memberships or []:
         role = getattr(m, "role", None)
         if role:
             role_names.append(getattr(role, "display_name", "") or getattr(role, "name", ""))
@@ -207,15 +222,17 @@ def _log_request(
 def _blocked_response(reason: str) -> str:
     """Return a user-friendly message for blocked requests."""
     messages = {
-        "empty_message": "Zəhmət olmasa mesajınızı daxil edin.",
-        "message_too_long": "Mesajınız çox uzundur. Zəhmət olmasa qısaldın.",
-        "prompt_injection_override": "Bu növ sorğu icazəli deyil.",
-        "prompt_injection_role_change": "Bu növ sorğu icazəli deyil.",
-        "system_prompt_extraction": "Sistem təlimatlarına baxmaq mümkün deyil.",
-        "sensitive_info_extraction": "Bu məlumata giriş icazəli deyil.",
-        "admin_url_probe": "Bu sahəyə giriş hüququnuz yoxdur.",
-        "cross_user_data_probe": "Başqa istifadəçilərin məlumatlarına giriş icazəli deyil.",
-        "data_dump_or_injection": "Bu növ sorğu icazəli deyil.",
-        "permission_bypass_request": "İcazə qaydalarını keçmək mümkün deyil.",
+        "empty_message": pgettext("ai_assistant.blocked", "Zəhmət olmasa mesajınızı daxil edin."),
+        "message_too_long": pgettext("ai_assistant.blocked", "Mesajınız çox uzundur. Zəhmət olmasa qısaldın."),
+        "prompt_injection_override": pgettext("ai_assistant.blocked", "Bu növ sorğu icazəli deyil."),
+        "prompt_injection_role_change": pgettext("ai_assistant.blocked", "Bu növ sorğu icazəli deyil."),
+        "system_prompt_extraction": pgettext("ai_assistant.blocked", "Sistem təlimatlarına baxmaq mümkün deyil."),
+        "sensitive_info_extraction": pgettext("ai_assistant.blocked", "Bu məlumata giriş icazəli deyil."),
+        "admin_url_probe": pgettext("ai_assistant.blocked", "Bu sahəyə giriş hüququnuz yoxdur."),
+        "cross_user_data_probe": pgettext(
+            "ai_assistant.blocked", "Başqa istifadəçilərin məlumatlarına giriş icazəli deyil."
+        ),
+        "data_dump_or_injection": pgettext("ai_assistant.blocked", "Bu növ sorğu icazəli deyil."),
+        "permission_bypass_request": pgettext("ai_assistant.blocked", "İcazə qaydalarını keçmək mümkün deyil."),
     }
-    return messages.get(reason, "Bu sorğu blok olundu.")
+    return messages.get(reason, pgettext("ai_assistant.blocked", "Bu sorğu blok olundu."))
