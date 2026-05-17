@@ -95,6 +95,7 @@
         var renameFileBtn = document.getElementById("codingRenameFileBtn");
         var deleteFileBtn = document.getElementById("codingDeleteFileBtn");
         var fullscreenBtn = document.getElementById("codingFullscreenBtn");
+        var toggleFilesBtn = document.getElementById("codingToggleFilesBtn");
         var themeToggle = document.getElementById("codingThemeToggle");
         var fontSizeSelect = document.getElementById("codingFontSize");
         var timerNode = document.getElementById("codingTimer");
@@ -103,11 +104,16 @@
         var previewConsoleNode = document.getElementById("codingPreviewConsole");
         var currentQuestionNumNode = document.getElementById("codingCurrentQuestionNum");
         var totalQuestionCountNode = document.getElementById("codingTotalQuestionCount");
+        var answeredCountNode = document.getElementById("codingAnsweredCount");
+        var answeredTotalCountNode = document.getElementById("codingAnsweredTotalCount");
+        var sidebarAnsweredCountNode = document.getElementById("codingSidebarAnsweredCount");
+        var unansweredCountNode = document.getElementById("codingUnansweredCount");
         var progressFillNode = document.getElementById("codingProgressFill");
         var questionLabelNode = document.getElementById("codingQuestionLabel");
         var questionTextNode = document.getElementById("codingQuestionText");
         var prevQuestionBtn = document.getElementById("codingPrevQuestionBtn");
         var nextQuestionBtn = document.getElementById("codingNextQuestionBtn");
+        var questionNavButtons = document.querySelectorAll("[data-coding-question-nav]");
         var confirmModalNode = document.getElementById("codingConfirmModal");
         var confirmModalTitle = document.getElementById("codingConfirmModalTitle");
         var confirmModalBody = document.getElementById("codingConfirmModalBody");
@@ -180,7 +186,8 @@
                 visibleTests: Array.isArray(rawQuestion.visible_test_cases) ? rawQuestion.visible_test_cases : [],
                 selectedLanguage: rawQuestion.selected_language || rawQuestion.language || config.selectedLanguage || "html",
                 fileIndex: 0,
-                latestSubmission: rawQuestion.latest_submission || null
+                latestSubmission: rawQuestion.latest_submission || null,
+                stdin: ""
             };
         }
 
@@ -224,6 +231,13 @@
                 question.files = files;
                 question.fileIndex = currentFileIndex;
                 question.selectedLanguage = languageSelect ? languageSelect.value : question.selectedLanguage;
+            }
+        }
+
+        function syncStdinToQuestion() {
+            var question = currentQuestion();
+            if (question && stdinNode) {
+                question.stdin = stdinNode.value || "";
             }
         }
 
@@ -311,6 +325,19 @@
             return false;
         }
 
+        function updateQuestionNav() {
+            questionNavButtons.forEach(function (button) {
+                var index = parseInt(button.getAttribute("data-target-index"), 10) || 0;
+                var question = questionStates[index];
+                var isCurrent = index === currentQuestionIndex;
+                var isAnswered = isQuestionAnswered(question);
+
+                button.classList.toggle("is-current", isCurrent);
+                button.classList.toggle("is-answered", isAnswered);
+                button.setAttribute("aria-current", isCurrent ? "step" : "false");
+            });
+        }
+
         function questionBodyText(question) {
             var lines = [];
             if (question.problemStatement) {
@@ -334,11 +361,17 @@
         function updateProgress() {
             var total = questionStates.length || 1;
             var answered = questionStates.filter(isQuestionAnswered).length;
+            var unanswered = Math.max(total - answered, 0);
             if (currentQuestionNumNode) currentQuestionNumNode.textContent = String(currentQuestionIndex + 1);
             if (totalQuestionCountNode) totalQuestionCountNode.textContent = String(total);
+            if (answeredCountNode) answeredCountNode.textContent = String(answered);
+            if (answeredTotalCountNode) answeredTotalCountNode.textContent = String(total);
+            if (sidebarAnsweredCountNode) sidebarAnsweredCountNode.textContent = String(answered);
+            if (unansweredCountNode) unansweredCountNode.textContent = String(unanswered);
             if (progressFillNode) {
-                progressFillNode.style.width = total ? Math.round((answered / total) * 100) + "%" : "0%";
+                progressFillNode.style.width = total ? Math.round(((currentQuestionIndex + 1) / total) * 100) + "%" : "0%";
             }
+            updateQuestionNav();
         }
 
         function updateQuestionControls() {
@@ -355,7 +388,7 @@
         function renderProblem() {
             var question = currentQuestion();
             if (questionLabelNode) {
-                questionLabelNode.textContent = (i18n.questionUpper || "QUESTION") + " " + question.number;
+                questionLabelNode.textContent = "Q" + question.number;
             }
             if (questionTextNode) {
                 questionTextNode.textContent = questionBodyText(question) || question.title || "";
@@ -457,6 +490,24 @@
             }
         }
 
+        function setFilesCollapsed(collapsed) {
+            var editorPane = document.querySelector(".coding-editor-pane");
+            if (!editorPane || !toggleFilesBtn) {
+                return;
+            }
+            var icon = toggleFilesBtn.querySelector("i");
+            editorPane.classList.toggle("is-files-collapsed", collapsed);
+            toggleFilesBtn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+            toggleFilesBtn.setAttribute("title", collapsed ? (i18n.showFiles || "Show files") : (i18n.hideFiles || "Hide files"));
+            toggleFilesBtn.setAttribute("aria-label", collapsed ? (i18n.showFiles || "Show files") : (i18n.hideFiles || "Hide files"));
+            if (icon) {
+                icon.className = collapsed ? "fas fa-folder" : "fas fa-folder-open";
+            }
+            setTimeout(function () {
+                editor.refresh();
+            }, 230);
+        }
+
         function updateLanguagePreviewVisibility() {
             var previewAllowed = canPreviewCurrentQuestion();
             document.querySelectorAll("[data-preview-tab]").forEach(function (tab) {
@@ -475,6 +526,7 @@
                 autosave();
             }
             syncEditorToFile();
+            syncStdinToQuestion();
             currentQuestionIndex = index;
             var question = currentQuestion();
             files = question.files;
@@ -489,6 +541,7 @@
             setEditorForCurrentFile();
             if (outputNode) outputNode.textContent = "";
             if (errorsNode) errorsNode.textContent = "";
+            if (stdinNode) stdinNode.value = question.stdin || "";
             if (previewConsoleNode) previewConsoleNode.textContent = "";
             if (previewFrame) {
                 previewFrame.removeAttribute("src");
@@ -499,6 +552,7 @@
 
         function collectPayload() {
             syncEditorToFile();
+            syncStdinToQuestion();
             var activeFile = currentFile();
             var selectedLanguage = executionLanguageForFile(
                 activeFile,
@@ -514,7 +568,7 @@
                 selected_language: selectedLanguage,
                 active_file_name: activeFile ? activeFile.name : "",
                 files: files,
-                stdin: stdinNode ? stdinNode.value : ""
+                stdin: currentQuestion().stdin || ""
             };
         }
 
@@ -800,12 +854,35 @@
             appendConsoleLine(data.kind, data.message);
         });
 
+        function normalizeConsoleText(value) {
+            return String(value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        }
+
+        function outputWithInlineInput(output, stdin, fallback) {
+            var text = normalizeConsoleText(output);
+            var input = normalizeConsoleText(stdin).replace(/\n+$/g, "");
+            if (!text) {
+                return fallback || "";
+            }
+            if (!input || /\n$/.test(text)) {
+                return text;
+            }
+            var firstInputLine = input.split("\n")[0] || "";
+            if (!firstInputLine || text.endsWith(firstInputLine)) {
+                return text;
+            }
+            return text + firstInputLine;
+        }
+
         function applyRunResult(submission) {
             var outputText = submission.output || "";
             if (!outputText && submission.error) {
                 outputText = submission.error;
             }
-            if (outputNode) outputNode.textContent = outputText;
+            if (!outputText && !submission.error) {
+                outputText = i18n.noOutput || "Program finished with no output.";
+            }
+            if (outputNode) outputNode.textContent = outputWithInlineInput(outputText, currentQuestion().stdin || "", i18n.noOutput || "Program finished with no output.");
             if (errorsNode) errorsNode.textContent = submission.error || "";
             if (previewConsoleNode) previewConsoleNode.textContent = submission.output || "";
             currentQuestion().latestSubmission = submission;
@@ -814,11 +891,14 @@
         }
 
         function shouldRunInBrowser() {
-            return canPreviewCurrentQuestion();
+            var selected = getSelectedLanguage();
+            var activeLanguage = getActiveFileLanguage();
+            return selected === "html" || activeLanguage === "html" || activeLanguage === "css";
         }
 
         function runBrowserCode() {
             clearTimeout(autosaveTimer);
+            syncStdinToQuestion();
             browserRunHasOutput = false;
             previewRunId += 1;
             if (outputNode) outputNode.textContent = "";
@@ -850,8 +930,12 @@
             }
 
             clearTimeout(autosaveTimer);
+            syncStdinToQuestion();
+            if (outputNode) outputNode.textContent = "";
+            if (errorsNode) errorsNode.textContent = "";
             setStatus(i18n.running || "Running...");
             runBtn.disabled = true;
+            switchTab("output");
 
             requestJson(config.runUrl, collectPayload())
                 .then(function (body) {
@@ -946,6 +1030,10 @@
             });
         }
 
+        if (stdinNode) {
+            stdinNode.addEventListener("input", syncStdinToQuestion);
+        }
+
         document.querySelectorAll("[data-coding-tab]").forEach(function (tab) {
             tab.addEventListener("click", function () {
                 switchTab(tab.getAttribute("data-coding-tab"));
@@ -1012,6 +1100,12 @@
                 switchQuestion(currentQuestionIndex + 1);
             });
         }
+        questionNavButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                var index = parseInt(button.getAttribute("data-target-index"), 10) || 0;
+                switchQuestion(index);
+            });
+        });
         if (resetBtn) {
             resetBtn.addEventListener("click", function () {
                 openConfirmModal({
@@ -1128,6 +1222,12 @@
                 }, 30);
             });
         }
+        if (toggleFilesBtn) {
+            toggleFilesBtn.addEventListener("click", function () {
+                var editorPane = document.querySelector(".coding-editor-pane");
+                setFilesCollapsed(!(editorPane && editorPane.classList.contains("is-files-collapsed")));
+            });
+        }
         if (themeToggle) {
             themeToggle.addEventListener("click", function () {
                 isDark = !isDark;
@@ -1181,6 +1281,9 @@
         renderProblem();
         renderFiles();
         setEditorForCurrentFile();
+        if (stdinNode) {
+            stdinNode.value = currentQuestion().stdin || "";
+        }
         updateLanguagePreviewVisibility();
     });
 })();

@@ -36,7 +36,10 @@
                         {% trans "filter_test" context "exams.template.student_exam_list" %}
                     </option>
                     <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
-                        {% trans "filter_written_practical" context "exams.template.student_exam_list" %}
+                        {% trans "filter_written" context "exams.template.student_exam_list" %}
+                    </option>
+                    <option value="coding" {% if request.GET.type == 'coding' %}selected{% endif %}>
+                        {% trans "filter_practical" context "exams.template.student_exam_list" %}
                     </option>
                 </select>
             </div>

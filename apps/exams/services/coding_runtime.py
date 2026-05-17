@@ -548,6 +548,7 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
         docker_command = [
             "docker",
             "run",
+            "-i",
             "--rm",
             "--network",
             "none",
@@ -626,6 +627,24 @@ def run_visible_code(*, coding_question, selected_language, files, stdin=""):
         }
 
     files = normalize_files(files, coding_question=coding_question)
+    if str(stdin or ""):
+        result = execute_code(
+            language=selected_language,
+            files=files,
+            stdin=stdin,
+            time_limit_seconds=coding_question.time_limit_seconds,
+            memory_limit_mb=coding_question.memory_limit_mb,
+        )
+        return {
+            "status": result.status,
+            "output": result.output,
+            "error": result.error,
+            "test_results": [],
+            "score": None,
+            "execution_time_ms": result.execution_time_ms,
+            "memory_usage_kb": result.memory_usage_kb,
+        }
+
     visible_cases = list(coding_question.test_cases.filter(visibility=CodingTestCase.VISIBILITY_VISIBLE))
     if not visible_cases:
         result = execute_code(
