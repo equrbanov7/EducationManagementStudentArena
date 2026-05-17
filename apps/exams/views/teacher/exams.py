@@ -383,6 +383,10 @@ def createAndEditExamView(request, slug=None):
             except Exception:
                 pass
 
+            from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
+
+            schedule_ai_question_difficulty_warmup(exam_instance)
+
             messages.success(
                 request,
                 (
@@ -492,8 +496,10 @@ def toggle_exam_active(request, slug):
         exam.is_active = not exam.is_active
         exam.save()
         if exam.is_active:
+            from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
             from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
 
+            schedule_ai_question_difficulty_warmup(exam)
             notify_task_assignment(
                 task=exam,
                 user_ids=get_exam_assigned_user_ids(exam),

@@ -23,41 +23,62 @@
 {% endblock %}
 
 {% block content %}
-<div class="exam-container">
-    
-    <div class="exam-header">
-        <div class="header-top">
+<div class="exam-loading-screen" id="examLoadingScreen" aria-hidden="true">
+    <div class="exam-loading-shell">
+        <div class="exam-loading-header">
             <div>
-                <h2 class="exam-title">{{ exam.title }}</h2>
+                <span class="skeleton skeleton-title"></span>
+                <span class="skeleton skeleton-subtitle"></span>
+            </div>
+            <span class="skeleton skeleton-timer"></span>
+        </div>
+        <div class="exam-loading-layout">
+            <div class="skeleton skeleton-sidebar"></div>
+            <div class="exam-loading-card">
+                <span class="skeleton skeleton-pill"></span>
+                <span class="skeleton skeleton-question"></span>
+                <span class="skeleton skeleton-option"></span>
+                <span class="skeleton skeleton-option"></span>
+                <span class="skeleton skeleton-option"></span>
+                <span class="skeleton skeleton-option"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="exam-shell page-enter">
+    <header class="exam-topbar">
+        <div class="exam-topbar__inner">
+            <div class="exam-meta">
+                <h1 class="exam-title">{{ exam.title }}</h1>
+                <p class="exam-student">
+                    {{ request.user.get_full_name|default:request.user.username }} · {{ request.user.username }}
+                </p>
             </div>
 
-            <div style="display: flex; gap: 10px;">
-                {# Sual timeri #}
-                <div class="question-timer-badge" id="question-timer-container" style="display: none;">
-                    <i class="fas fa-hourglass-half"></i> 
-                    {% trans "label_question_time" context "exams.template.take_exam" %}: <span id="question-timer-value">--:--</span>
+            <div class="exam-progress-center" aria-label="{% trans 'Exam progress' context 'exams.template.take_exam' %}">
+                <span><strong id="current-question-num">1</strong> {% trans "of" context "exams.template.take_exam" %} {{ q_payload|length }}</span>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span><strong id="answered-count">0</strong>/{{ q_payload|length }}</span>
+            </div>
+
+            <div class="timer-strip">
+                <div class="question-timer-badge" id="question-timer-container">
+                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                    <span id="question-timer-value">--:--</span>
                 </div>
 
-                {# Ümumi imtahan timeri #}
                 {% if exam.total_duration_minutes %}
                 <div class="timer-badge" id="exam-timer-container">
-                    <i class="fas fa-clock"></i> 
-                    {% trans "label_total_time" context "exams.template.take_exam" %}: <span id="timer-value">--:--</span>
+                    <i class="far fa-clock" aria-hidden="true"></i>
+                    <span id="timer-value">--:--</span>
                 </div>
                 {% endif %}
             </div>
         </div>
-        
-        <div class="progress-area">
-            <div class="progress-info">
-                <span>{% trans "label_question" context "exams.template.take_exam" %}: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
-                <span class="answered-status">{% trans "label_answered" context "exams.template.take_exam" %}: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
-            </div>
-        </div>
-    </div>
+    </header>
 
     <form method="post"
           id="exam-form"
@@ -65,21 +86,99 @@
           data-exam-id="{{ exam.id }}"
           data-attempt-id="{{ attempt.id }}"
           data-exam-type="{{ exam.exam_type }}"
-          data-autosave-interval-ms="15000">
+          data-autosave-interval-ms="15000"
+          class="modern-exam-form">
         {% csrf_token %}
- 
-        <div class="slides-wrapper">
+
+        <div class="exam-workspace">
+            <aside class="question-sidebar" aria-label="{% trans 'Questions' context 'exams.template.take_exam' %}">
+                <div class="exam-card question-map-card">
+                    <h2>{% trans "Questions" context "exams.template.take_exam" %}</h2>
+
+                    <div class="question-grid">
+                        {% for item in q_payload %}
+                            {% with q=item.q %}
+                            <button type="button"
+                                    class="question-nav-btn"
+                                    data-question-nav
+                                    data-target-index="{{ forloop.counter0 }}"
+                                    data-question-id="{{ q.id }}"
+                                    aria-label="{% trans 'label_question' context 'exams.template.take_exam' %} {{ forloop.counter }}">
+                                {{ forloop.counter }}
+                            </button>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="question-legend">
+                        <span><i class="legend-dot legend-current"></i>{% trans "Current" context "exams.template.take_exam" %}</span>
+                        <span><i class="legend-dot legend-answered"></i>{% trans "Answered" context "exams.template.take_exam" %}</span>
+                        <span><i class="legend-dot legend-marked"></i>{% trans "Marked" context "exams.template.take_exam" %}</span>
+                        <span><i class="legend-dot legend-unanswered"></i>{% trans "Unanswered" context "exams.template.take_exam" %}</span>
+                    </div>
+
+                    <div class="question-stats">
+                        <div class="question-stat">
+                            <strong id="sidebar-answered-count">0</strong>
+                            <span>{% trans "Answered" context "exams.template.take_exam" %}</span>
+                        </div>
+                        <div class="question-stat question-stat--danger">
+                            <strong id="unanswered-count">{{ q_payload|length }}</strong>
+                            <span>{% trans "Unanswered" context "exams.template.take_exam" %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" name="submit_action" value="finish"
+                        id="finish-btn" class="nav-btn btn-danger sidebar-finish-btn">
+                    <i class="far fa-flag" aria-hidden="true"></i> {% trans "action_finish_exam" context "exams.template.take_exam" %}
+                </button>
+            </aside>
+
+            <section class="question-stage">
+                <div class="slides-wrapper">
+                    <div class="question-transition-skeleton" id="questionTransitionSkeleton" aria-hidden="true">
+                        <div class="question-transition-card">
+                            <div class="transition-skeleton-head">
+                                <span class="skeleton skeleton-pill"></span>
+                                <span class="skeleton transition-skeleton-mark"></span>
+                            </div>
+                            <span class="skeleton transition-skeleton-question"></span>
+                            <span class="skeleton transition-skeleton-question transition-skeleton-question--short"></span>
+                            <div class="transition-skeleton-options">
+                                <span class="skeleton transition-skeleton-option"></span>
+                                <span class="skeleton transition-skeleton-option"></span>
+                                <span class="skeleton transition-skeleton-option"></span>
+                                <span class="skeleton transition-skeleton-option"></span>
+                            </div>
+                        </div>
+                    </div>
             {% for item in q_payload %}
                 {% with q=item.q %}
                 {% with ans_data=answers_by_qid|get_item:q.id %}
                 <div class="question-slide{% if forloop.first %} active{% endif %}" 
                      data-index="{{ forloop.counter0 }}" 
+                     data-question-id="{{ q.id }}"
                      id="slide-{{ forloop.counter0 }}"
                      data-time-limit="{{ q.effective_time_limit|default:0 }}">
                     
                     <div class="question-content">
-                        <span class="q-number">{% trans "label_question" context "exams.template.take_exam" %} {{ forloop.counter }}</span>
-                        <p class="q-text">{{ q.text|linebreaks }}</p>
+                        <div class="question-card-header">
+                            <div class="question-kicker">
+                                <span class="q-number">Q{{ forloop.counter }}</span>
+                                <span>{% trans "label_question" context "exams.template.take_exam" %} {{ forloop.counter }} {% trans "of" context "exams.template.take_exam" %} {{ q_payload|length }}</span>
+                            </div>
+                            <button type="button"
+                                    class="mark-question-btn"
+                                    data-mark-question
+                                    data-question-id="{{ q.id }}"
+                                    aria-pressed="false">
+                                <i class="far fa-bookmark" aria-hidden="true"></i>
+                                <span data-mark-label>{% trans "Mark" context "exams.template.take_exam" %}</span>
+                            </button>
+                        </div>
+
+                        <div class="q-text">{{ q.text|linebreaks }}</div>
 
                         {% if q.image %}
                             <div class="question-media">
@@ -109,8 +208,8 @@
                                                value="{{ opt.id }}"
                                                data-question-id="{{ q.id }}"
                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
-                                        <span class="circle-mark"></span>
-                                        <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
+                                        <span class="option-letter circle-mark">{{ opt.label }}</span>
+                                        <span class="opt-text">{{ opt.text }}</span>
                                     </label>
                                 {% endfor %}
                             </div>
@@ -124,8 +223,8 @@
                                                 value="{{ opt.id }}"
                                                 data-question-id="{{ q.id }}"
                                                 {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
-                                            <span class="box-mark"></span>
-                                            <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
+                                            <span class="option-letter box-mark">{{ opt.label }}</span>
+                                            <span class="opt-text">{{ opt.text }}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
@@ -185,6 +284,8 @@
                 {% endwith %}
                 {% endwith %}
             {% endfor %}
+                </div>
+            </section>
         </div>
 
         <div class="exam-footer">
@@ -192,18 +293,13 @@
                 <i class="fas fa-arrow-left"></i> {% trans "action_previous" context "exams.template.take_exam" %}
             </button>
         
-            <button type="button" id="next-btn" class="nav-btn btn-primary">
+            <button type="button" id="next-btn" class="nav-btn btn-outline">
                 {% trans "action_next" context "exams.template.take_exam" %} <i class="fas fa-arrow-right"></i>
             </button>
         
             {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
             <button style = "display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
                 <i class="fas fa-save"></i> {% trans "action_save_as_draft" context "exams.template.take_exam" %}
-            </button>
-            
-            <button type="button" name="submit_action" value="finish" 
-                    id="finish-btn" class="nav-btn btn-success">
-                {% trans "action_finish_exam" context "exams.template.take_exam" %} <i class="fas fa-check"></i>
             </button>
         </div>
     </form>
@@ -271,7 +367,9 @@ const I18N_TAKE_EXAM = {
     btnDraftSaved: "{% filter escapejs %}{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}{% endfilter %}",
     finishUnansweredCount: "{% filter escapejs %}{% trans 'confirm_finish_unanswered_count' context 'exams.template.take_exam' %}{% endfilter %}",
     finishAllAnswered: "{% filter escapejs %}{% trans 'confirm_finish_all_answered' context 'exams.template.take_exam' %}{% endfilter %}",
-    timeUpMessage: "{% filter escapejs %}{% trans 'time_up_auto_submit' context 'exams.template.take_exam' %}{% endfilter %}"
+    timeUpMessage: "{% filter escapejs %}{% trans 'time_up_auto_submit' context 'exams.template.take_exam' %}{% endfilter %}",
+    mark: "{% filter escapejs %}{% trans 'Mark' context 'exams.template.take_exam' %}{% endfilter %}",
+    marked: "{% filter escapejs %}{% trans 'Marked' context 'exams.template.take_exam' %}{% endfilter %}"
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -281,9 +379,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const finishBtn = document.getElementById('finish-btn');
     const currentQNum = document.getElementById('current-question-num');
     const answeredCountEl = document.getElementById('answered-count');
+    const sidebarAnsweredCountEl = document.getElementById('sidebar-answered-count');
+    const unansweredCountEl = document.getElementById('unanswered-count');
     const progressFill = document.getElementById('progress-fill');
     const examForm = document.getElementById('exam-form');
     const saveDraftBtn = document.getElementById('save-draft-btn');
+    const loadingScreen = document.getElementById('examLoadingScreen');
+    const questionTransitionSkeleton = document.getElementById('questionTransitionSkeleton');
+    const questionNavButtons = document.querySelectorAll('[data-question-nav]');
+    const markButtons = document.querySelectorAll('[data-mark-question]');
 
     const qTimerContainer = document.getElementById('question-timer-container');
     const qTimerValue = document.getElementById('question-timer-value');
@@ -300,6 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let autoSaveTimer = null;
     let autoSaveRequestInFlight = false;
     let answerRevision = 0;
+    let questionTransitionTimer = null;
+    let questionTransitionHideTimer = null;
     const dirtyQuestionIds = new Set();
 
     // Exam type
@@ -310,7 +416,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const attemptId = examForm.dataset.attemptId;
     const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
     const draftStorageKey = `exam_${examId}_attempt_${attemptId}_draft`;
+    const markedStorageKey = `exam_${examId}_attempt_${attemptId}_marked`;
     const timeWarningStorageKey = `exam_${examId}_attempt_${attemptId}_five_minute_warning`;
+    const markedQuestionIds = new Set(loadMarkedQuestionIds());
     const examTimeWarning = window.ExamTimeWarning ? window.ExamTimeWarning.init({
         storageKey: timeWarningStorageKey,
         thresholdSeconds: 300,
@@ -437,6 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showSlide(currentIndex + 1);
         } else {
             localStorage.removeItem(storageKey);
+            localStorage.removeItem(markedStorageKey);
             examForm.submit();
         }
         updateProgress();
@@ -498,6 +607,28 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem(storageKey, index);
         startQuestionTimer(currentSlide);
         updateProgress();
+    }
+
+    function navigateToSlide(index) {
+        if (index < 0 || index >= totalSlides || index === currentIndex) {
+            return;
+        }
+
+        if (!questionTransitionSkeleton) {
+            showSlide(index);
+            return;
+        }
+
+        clearTimeout(questionTransitionTimer);
+        clearTimeout(questionTransitionHideTimer);
+        questionTransitionSkeleton.classList.add('is-visible');
+
+        questionTransitionTimer = setTimeout(() => {
+            showSlide(index);
+            questionTransitionHideTimer = setTimeout(() => {
+                questionTransitionSkeleton.classList.remove('is-visible');
+            }, 120);
+        }, 180);
     }
 
     function slideHasSelectedOption(slide) {
@@ -568,11 +699,89 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.max(totalSlides - getAnsweredCount(), 0);
     }
 
+    function getSlideQuestionId(slide) {
+        return slide && slide.dataset ? String(slide.dataset.questionId || '') : '';
+    }
+
+    function loadMarkedQuestionIds() {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(markedStorageKey) || "[]");
+            return Array.isArray(parsed) ? parsed.map(String) : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function persistMarkedQuestionIds() {
+        try {
+            localStorage.setItem(markedStorageKey, JSON.stringify(Array.from(markedQuestionIds)));
+        } catch (error) {
+            // Mark state is a convenience helper; exam submission must continue even if storage fails.
+        }
+    }
+
+    function toggleMarkedQuestion(questionId) {
+        const normalizedId = String(questionId || '');
+        if (!normalizedId) {
+            return;
+        }
+        if (markedQuestionIds.has(normalizedId)) {
+            markedQuestionIds.delete(normalizedId);
+        } else {
+            markedQuestionIds.add(normalizedId);
+        }
+        persistMarkedQuestionIds();
+        updateProgress();
+    }
+
+    function updateMarkedButtons() {
+        markButtons.forEach(button => {
+            const questionId = String(button.dataset.questionId || '');
+            const isMarked = markedQuestionIds.has(questionId);
+            const icon = button.querySelector('i');
+            const label = button.querySelector('[data-mark-label]');
+
+            button.classList.toggle('is-marked', isMarked);
+            button.setAttribute('aria-pressed', isMarked ? 'true' : 'false');
+            if (icon) {
+                icon.className = isMarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+            }
+            if (label) {
+                label.textContent = isMarked ? I18N_TAKE_EXAM.marked : I18N_TAKE_EXAM.mark;
+            }
+        });
+    }
+
+    function updateQuestionNav() {
+        questionNavButtons.forEach(button => {
+            const index = Number(button.dataset.targetIndex || 0);
+            const slide = slides[index];
+            const questionId = String(button.dataset.questionId || getSlideQuestionId(slide));
+            const isCurrent = index === currentIndex;
+            const isAnswered = slide ? isSlideAnswered(slide) : false;
+            const isMarked = markedQuestionIds.has(questionId);
+
+            button.classList.toggle('is-current', isCurrent);
+            button.classList.toggle('is-answered', isAnswered);
+            button.classList.toggle('is-marked', isMarked);
+            button.setAttribute('aria-current', isCurrent ? 'step' : 'false');
+        });
+    }
+
     function updateProgress() {
         const answeredCount = getAnsweredCount();
+        const unansweredCount = getUnansweredCount();
         answeredCountEl.textContent = answeredCount;
-        const percent = totalSlides > 0 ? (answeredCount / totalSlides) * 100 : 0;
+        if (sidebarAnsweredCountEl) {
+            sidebarAnsweredCountEl.textContent = answeredCount;
+        }
+        if (unansweredCountEl) {
+            unansweredCountEl.textContent = unansweredCount;
+        }
+        const percent = totalSlides > 0 ? ((currentIndex + 1) / totalSlides) * 100 : 0;
         progressFill.style.width = percent + '%';
+        updateQuestionNav();
+        updateMarkedButtons();
     }
 
     window.updateProgress = updateProgress;
@@ -808,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 examForm.appendChild(hiddenInput);
 
                 localStorage.removeItem(storageKey);
+                localStorage.removeItem(markedStorageKey);
 
                 // Short delay so user sees the time-up message before redirect
                 setTimeout(function() {
@@ -996,6 +1206,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.finished && data.redirect_url) {
                 localStorage.removeItem(storageKey);
+                localStorage.removeItem(markedStorageKey);
                 clearLocalDraft();
                 window.location.href = data.redirect_url;
                 return;
@@ -1082,6 +1293,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (data.finished && data.redirect_url) {
                     localStorage.removeItem(storageKey);
+                    localStorage.removeItem(markedStorageKey);
                     clearLocalDraft();
                     window.location.href = data.redirect_url;
                     return;
@@ -1174,15 +1386,32 @@ document.addEventListener('DOMContentLoaded', function() {
         examForm.appendChild(hiddenInput);
 
         localStorage.removeItem(storageKey);
+        localStorage.removeItem(markedStorageKey);
+        clearLocalDraft();
         examForm.submit();
     });
 
     // Navigasiya düymələri
     nextBtn.addEventListener('click', () => {
-        if (currentIndex < totalSlides - 1) showSlide(currentIndex + 1);
+        if (currentIndex < totalSlides - 1) navigateToSlide(currentIndex + 1);
     });
     prevBtn.addEventListener('click', () => {
-        if (currentIndex > 0) showSlide(currentIndex - 1);
+        if (currentIndex > 0) navigateToSlide(currentIndex - 1);
+    });
+
+    questionNavButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const index = Number(button.dataset.targetIndex || 0);
+            if (index >= 0 && index < totalSlides) {
+                navigateToSlide(index);
+            }
+        });
+    });
+
+    markButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            toggleMarkedQuestion(button.dataset.questionId);
+        });
     });
 
     restoreLocalDraft();
@@ -1195,6 +1424,11 @@ document.addEventListener('DOMContentLoaded', function() {
         currentIndex = 0;
     }
     showSlide(currentIndex);
+    if (loadingScreen) {
+        window.setTimeout(() => {
+            loadingScreen.classList.add('is-hidden');
+        }, 420);
+    }
 });
 </script>
  

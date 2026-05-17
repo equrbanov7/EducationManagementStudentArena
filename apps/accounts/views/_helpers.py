@@ -57,7 +57,7 @@ signer = TimestampSigner()
 
 # Constants
 RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
-PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES
+PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES | {"written_exams", "practical_exams"}
 PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
 PROFILE_ROLE_LABELS = dict(ProfileRole.CHOICES)

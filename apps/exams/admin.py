@@ -50,16 +50,25 @@ class ExamAdmin(admin.ModelAdmin):
         "author",
         "is_active",
         "is_public",
+        "fair_question_distribution_enabled",
+        "ai_difficulty_balance_enabled",
         "created_at",
     )
-    list_filter = ("exam_type", "is_active", "is_public", "author")
+    list_filter = (
+        "exam_type",
+        "is_active",
+        "is_public",
+        "fair_question_distribution_enabled",
+        "ai_difficulty_balance_enabled",
+        "author",
+    )
     search_fields = ("title", "description", "author__username")
 
 
 @admin.register(ExamQuestion)
 class ExamQuestionAdmin(admin.ModelAdmin):
-    list_display = ("exam", "order", "answer_mode", "short_text")
-    list_filter = ("exam", "answer_mode")
+    list_display = ("exam", "order", "answer_mode", "difficulty", "difficulty_source", "short_text")
+    list_filter = ("exam", "answer_mode", "difficulty", "difficulty_source")
     search_fields = ("text",)
     inlines = [ExamQuestionOptionInline]
 

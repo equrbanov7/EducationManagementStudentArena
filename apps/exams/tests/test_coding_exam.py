@@ -1,6 +1,8 @@
 import json
+import subprocess
 import zipfile
 from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
@@ -12,11 +14,14 @@ from apps.exams.forms import ExamForm
 from apps.exams.models import CodingFile, CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.coding_definition import build_coding_payload_from_exam_form, upsert_coding_question
 from apps.exams.services.coding_runtime import (
+    ExecutionResult,
     clean_docker_stderr,
+    execute_code,
     execution_language_for_filename,
     mark_file_as_main,
     normalize_python_indentation,
     prepare_files_for_execution,
+    run_visible_code,
     truncate_capture,
 )
 from apps.organizations.models import Membership, Organization
@@ -63,6 +68,25 @@ class CodingRuntimeIndentationTests(SimpleTestCase):
 
         self.assertIn("\n  keep this spacing\n", normalized)
         self.assertIn("\nprint(text)\n", normalized)
+
+    @patch("apps.exams.services.coding_runtime.shutil.which", return_value="/usr/bin/docker")
+    @patch("apps.exams.services.coding_runtime._ensure_docker_image", return_value="")
+    @patch("apps.exams.services.coding_runtime.subprocess.run")
+    def test_execute_code_keeps_stdin_open_for_docker(self, run_mock, _image_mock, _which_mock):
+        run_mock.return_value = subprocess.CompletedProcess(args=[], returncode=0, stdout="Salam, Elvin\n", stderr="")
+
+        result = execute_code(
+            language="python",
+            files=[{"name": "main.py", "content": "name=input(); print(name)", "language": "python", "is_main": True}],
+            stdin="Elvin\n",
+            time_limit_seconds=2,
+            memory_limit_mb=128,
+        )
+
+        docker_command = run_mock.call_args.args[0]
+        self.assertIn("-i", docker_command)
+        self.assertEqual(run_mock.call_args.kwargs["input"], "Elvin\n")
+        self.assertEqual(result.output, "Salam, Elvin\n")
 
 
 def assign_user_to_org(user, organization, role):
@@ -275,6 +299,84 @@ class CodingExamSubmissionApiTests(TestCase):
         self.assertContains(response, "exam_time_warning.js")
         self.assertContains(response, f'examId: "{self.exam.id}"')
         self.assertContains(response, f'attemptId: "{self.attempt.id}"')
+
+    def test_run_uses_active_python_file_and_custom_stdin(self):
+        self.coding_question.enable_code_execution = True
+        self.coding_question.save(update_fields=["enable_code_execution"])
+        CodingTestCase.objects.create(
+            coding_question=self.coding_question,
+            input_data="teacher case\n",
+            expected_output="teacher output\n",
+            visibility=CodingTestCase.VISIBILITY_VISIBLE,
+        )
+        payload = {
+            "selected_language": "html",
+            "active_file_name": "solution.py",
+            "files": [
+                {"name": "index.html", "content": "<h1>Preview</h1>", "language": "html", "is_main": False},
+                {"name": "solution.py", "content": "name=input(); print(name)", "language": "python", "is_main": True},
+            ],
+            "stdin": "student input\n",
+        }
+
+        with patch("apps.exams.services.coding_runtime.execute_code") as execute_code:
+            execute_code.return_value = ExecutionResult(
+                status=CodingSubmission.STATUS_SUCCESS,
+                output="student input\n",
+                error="",
+                execution_time_ms=12,
+            )
+            response = self.client.post(
+                reverse("exams:coding_run", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id}),
+                data=json.dumps(payload),
+                content_type="application/json",
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        execute_code.assert_called_once()
+        call_kwargs = execute_code.call_args.kwargs
+        self.assertEqual(call_kwargs["language"], "python")
+        self.assertEqual(call_kwargs["stdin"], "student input\n")
+        self.assertEqual(call_kwargs["files"][0]["name"], "index.html")
+        self.assertEqual(call_kwargs["files"][1]["name"], "solution.py")
+        body = response.json()
+        self.assertEqual(body["submission"]["output"], "student input\n")
+        self.assertEqual(body["submission"]["test_results"], [])
+
+    def test_run_visible_code_returns_output_for_supported_sandbox_languages(self):
+        self.coding_question.enable_code_execution = True
+        self.coding_question.save(update_fields=["enable_code_execution"])
+        cases = [
+            ("javascript", "main.js", "const fs=require('fs'); console.log(fs.readFileSync(0,'utf8'))"),
+            ("python", "main.py", "print(input())"),
+            ("cpp", "main.cpp", "#include <iostream>\nint main(){ std::string s; std::cin >> s; std::cout << s; }"),
+            (
+                "java",
+                "Main.java",
+                "import java.util.*; public class Main { public static void main(String[] args){ System.out.print(new Scanner(System.in).next()); }}",
+            ),
+        ]
+
+        for language, filename, content in cases:
+            with self.subTest(language=language):
+                with patch("apps.exams.services.coding_runtime.execute_code") as execute_code:
+                    execute_code.return_value = ExecutionResult(
+                        status=CodingSubmission.STATUS_SUCCESS,
+                        output=f"{language}: ok\n",
+                        error="",
+                    )
+                    result = run_visible_code(
+                        coding_question=self.coding_question,
+                        selected_language=language,
+                        files=[{"name": filename, "content": content, "language": language, "is_main": True}],
+                        stdin="ok\n",
+                    )
+
+                self.assertEqual(result["status"], CodingSubmission.STATUS_SUCCESS)
+                self.assertEqual(result["output"], f"{language}: ok\n")
+                self.assertEqual(execute_code.call_args.kwargs["language"], language)
+                self.assertEqual(execute_code.call_args.kwargs["stdin"], "ok\n")
 
     def test_submission_download_returns_all_code_files_as_zip(self):
         payload = {

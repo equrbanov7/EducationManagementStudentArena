@@ -155,9 +155,11 @@
                                 <div class="fw-semibold text-dark">{{ attempt.exam.title }}</div>
                                 <div class="small text-muted mt-1">
                                     {% if attempt.exam.exam_type == 'test' %}
-                                        Test
+                                        {% trans "type_test" context "exams.template.student_exam_history" %}
+                                    {% elif attempt.exam.exam_type == 'coding' %}
+                                        {% trans "type_practical" context "exams.template.student_exam_history" %}
                                     {% else %}
-                                        Yazılı / Praktik
+                                        {% trans "type_written" context "exams.template.student_exam_history" %}
                                     {% endif %}
                                     · Cəhd #{{ attempt.attempt_number }}
                                 </div>

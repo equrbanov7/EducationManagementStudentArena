@@ -228,11 +228,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=pending-answers"
                data-section="pending-answers"
-               data-title="Pending cavablar"
+               data-title="{% trans 'section_title' context 'accounts.pending_answers' %}"
                data-source-url="{% url 'accounts:pending_answers' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-answers' %}active{% endif %}">
                 <i class="fas fa-hourglass-half sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Pending cavablar</span>
+                <span class="sidebar-menu-text">{% trans "section_title" context "accounts.pending_answers" %}</span>
                 {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_answers_count }}</span>{% endif %}
             </a>
         </li>

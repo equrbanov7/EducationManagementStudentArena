@@ -451,6 +451,51 @@
     margin-bottom: 1rem;
 }
 
+.pending-answers-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(220px, 260px);
+    gap: 0.75rem;
+    align-items: center;
+    width: 100%;
+}
+
+.pending-answers-search-input {
+    min-height: 48px;
+    padding-inline: 1rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.pending-answers-select-wrap {
+    width: 100%;
+}
+
+.pending-answers-select-wrap .bootstrap-single-select__toggle {
+    min-height: 48px;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    border-color: #cbdcf2;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.pending-answers-select-wrap .bootstrap-single-select__toggle:hover {
+    border-color: #9ec5fe;
+    background: #ffffff;
+}
+
+.pending-answers-select-wrap .bootstrap-single-select__toggle:focus,
+.pending-answers-select-wrap .bootstrap-single-select__toggle.show {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.pending-answers-select-wrap .bootstrap-single-select__menu {
+    margin-top: 0.35rem;
+    border-radius: 0.85rem;
+}
+
 .pending-answer-item {
     border: 1px solid #d5e8fb;
 }
@@ -476,6 +521,10 @@
 }
 
 @media (max-width: 768px) {
+    .pending-answers-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
     .pending-review-results-filter-grid {
         grid-template-columns: 1fr;
     }

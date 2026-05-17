@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Pending cavablar - EMSArena{% endblock %}
+{% block title %}{% trans "page_title" context "accounts.pending_answers" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
@@ -12,13 +12,13 @@
     <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-hourglass-half"></i> Pending cavablar
+                <i class="fas fa-hourglass-half"></i> {% trans "page_title" context "accounts.pending_answers" %}
                 {% if pending_answers_total_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_answers_total_count }}</span>
                 {% endif %}
             </h1>
             <a href="{% url 'accounts:profile' %}?section=pending-answers" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Profile geri dön
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.pending_answers" %}
             </a>
         </div>
 
