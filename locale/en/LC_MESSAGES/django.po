@@ -2030,6 +2030,46 @@ msgctxt "profile.my_exams"
 msgid "create_first_exam"
 msgstr "Create first exam"
 
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_placeholder"
+msgstr "Search exam..."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_all_types"
+msgstr "All types"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_test"
+msgstr "Test"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_written"
+msgstr "Written"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "filter_practical"
+msgstr "Practical"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_title"
+msgstr "No results found"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "search_empty_description"
+msgstr "No exams match the search criteria."
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html
+msgctxt "profile.my_exams"
+msgid "clear_filters"
+msgstr "Clear filters"
+
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"
 msgid "title"
@@ -7892,6 +7932,11 @@ msgctxt "exams.model.exam.choice.exam_type"
 msgid "written"
 msgstr "Written"
 
+#: apps/exams/domain/exam_definition.py:18
+msgctxt "exams.model.exam.choice.exam_type"
+msgid "Practical Coding Exam"
+msgstr "Practical exam"
+
 #: apps/exams/models.py:157
 msgctxt "exams.model.exam.field"
 msgid "author"
@@ -9037,7 +9082,17 @@ msgstr "Table action"
 #: apps/exams/templates/exams/student/student_exam_history.html:43
 msgctxt "exams.template.student_exam_history"
 msgid "type_test"
-msgstr "Type exam"
+msgstr "Test"
+
+#: apps/exams/templates/exams/student/student_exam_history.html:160
+msgctxt "exams.template.student_exam_history"
+msgid "type_written"
+msgstr "Written"
+
+#: apps/exams/templates/exams/student/student_exam_history.html:158
+msgctxt "exams.template.student_exam_history"
+msgid "type_practical"
+msgstr "Practical"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:45
 msgctxt "exams.template.student_exam_history"
@@ -9093,12 +9148,22 @@ msgstr "Placeholder search teacher"
 #: apps/exams/templates/exams/student/student_exam_list.html:30
 msgctxt "exams.template.student_exam_list"
 msgid "filter_all_types"
-msgstr "Apply filters"
+msgstr "All types"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:32
 msgctxt "exams.template.student_exam_list"
 msgid "filter_test"
-msgstr "Filter button"
+msgstr "Test"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:38
+msgctxt "exams.template.student_exam_list"
+msgid "filter_written"
+msgstr "Written"
+
+#: apps/exams/templates/exams/student/student_exam_list.html:41
+msgctxt "exams.template.student_exam_list"
+msgid "filter_practical"
+msgstr "Practical"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:35
 msgctxt "exams.template.student_exam_list"
@@ -9327,22 +9392,22 @@ msgstr "Draft saved"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_edit_question"
-msgstr "Title suffix"
+msgstr "Edit question"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:8
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_new_question"
-msgstr "Title suffix"
+msgstr "New question"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:69
 msgctxt "exams.template.add_exam_question"
 msgid "heading_edit_question"
-msgstr "Question"
+msgstr "Edit question"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:72
 msgctxt "exams.template.add_exam_question"
 msgid "heading_add_new_question"
-msgstr "Add New Topic"
+msgstr "Add new question"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:75
 msgctxt "exams.template.add_exam_question"
@@ -9353,6 +9418,26 @@ msgstr "You are adding a new question for a test exam."
 msgctxt "exams.template.add_exam_question"
 msgid "info_adding_question_for_written_exam"
 msgstr "You are adding a new question for a written exam."
+
+msgctxt "exams.template.add_exam_question"
+msgid "Practical Coding Exam question"
+msgstr "You are adding a new question for a practical exam."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_editing_question"
+msgstr "You are editing this question."
+
+msgctxt "exams.template.add_exam_question"
+msgid "info_adding_question"
+msgstr "You are adding a new question."
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_title"
+msgstr "Media attachment (optional)"
+
+msgctxt "exams.template.add_exam_question"
+msgid "media_help_text"
+msgstr "The field on the left is for an image, and the field on the right is for a video. Leave both empty if you do not need them."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
@@ -9384,6 +9469,10 @@ msgctxt "exams.template.add_exam_question"
 msgid "label_new_image"
 msgstr "Selected image preview"
 
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_image_preview"
+msgstr "Selected image preview"
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:125
 msgctxt "exams.template.add_exam_question"
 msgid "label_video_optional"
@@ -9404,10 +9493,18 @@ msgctxt "exams.template.add_exam_question"
 msgid "label_new_video"
 msgstr "Selected video preview"
 
+msgctxt "exams.template.add_exam_question"
+msgid "label_selected_video_preview"
+msgstr "Selected video preview"
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
 msgstr "Enable drawing answer"
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_enable_paint_answer"
+msgstr "For this question, the student will be able to answer with a drawing as well as text."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:123
 msgctxt "exams.template.add_exam_question"
@@ -9470,6 +9567,14 @@ msgctxt "exams.template.add_exam_question"
 msgid "label_time_limit_seconds"
 msgstr "Time limit (seconds)"
 
+msgctxt "exams.template.add_exam_question"
+msgid "help_question_block_required"
+msgstr "The question will be added to the selected block."
+
+msgctxt "exams.template.add_exam_question"
+msgid "help_time_limit_seconds"
+msgstr "For example: 60 seconds. If left empty, the exam default time will be used."
+
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
 msgid "label_sample_correct_answer"
@@ -9517,6 +9622,14 @@ msgstr "Option 4"
 msgctxt "exams.template.add_exam_question"
 msgid "action_save"
 msgstr "Save"
+
+msgctxt "exams.template.add_exam_question"
+msgid "action_add_option"
+msgstr "Add option"
+
+msgctxt "exams.template.add_exam_question"
+msgid "action_remove_option"
+msgstr "Remove option"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:270
 msgctxt "exams.template.add_exam_question"
@@ -11135,19 +11248,25 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_all"
-msgstr "Apply filters"
+msgstr "All"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:26
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:82
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_written"
-msgstr "Filter button"
+msgstr "Written"
+
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:31
+#: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:87
+msgctxt "exams.template.teacher_pending_attempts"
+msgid "filter_practical"
+msgstr "Practical"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:30
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:86
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "filter_test"
-msgstr "Filter button"
+msgstr "Test"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:41
 msgctxt "exams.template.teacher_pending_attempts"
@@ -19683,6 +19802,34 @@ msgid "Custom input"
 msgstr "Custom input"
 
 msgctxt "exams.template.coding_exam"
+msgid "Standard input"
+msgstr "Standard input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Use this data for input(), Scanner, cin, or stdin."
+msgstr "Use this data for input(), Scanner, cin, or stdin."
+
+msgctxt "exams.template.coding_exam"
+msgid "Enter input data here, then run the code."
+msgstr "Enter input data here, then run the code."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program output"
+msgstr "Program output"
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see output here."
+msgstr "Run the code to see output here."
+
+msgctxt "exams.template.coding_exam"
+msgid "Run the code to see errors here."
+msgstr "Run the code to see errors here."
+
+msgctxt "exams.template.coding_exam"
+msgid "Program finished with no output."
+msgstr "Program finished with no output."
+
+msgctxt "exams.template.coding_exam"
 msgid "Auto-saved"
 msgstr "Auto-saved"
 
@@ -19798,6 +19945,14 @@ msgctxt "exams.template.coding_exam"
 msgid "A file with this name already exists for this question."
 msgstr "A file with this name already exists for this question."
 
+msgctxt "exams.template.coding_exam"
+msgid "Hide files"
+msgstr "Hide files"
+
+msgctxt "exams.template.coding_exam"
+msgid "Show files"
+msgstr "Show files"
+
 msgctxt "exams.template.take_exam"
 msgid "time_warning_close"
 msgstr "Close warning"
@@ -19813,3 +19968,103 @@ msgstr "Review your answers and finish the exam on time."
 msgctxt "exams.template.take_exam"
 msgid "time_warning_auto_close"
 msgstr "This warning will close automatically after 5 seconds."
+
+msgctxt "exams.template.take_exam"
+msgid "Exam progress"
+msgstr "Exam progress"
+
+msgctxt "exams.template.take_exam"
+msgid "of"
+msgstr "of"
+
+msgctxt "exams.template.take_exam"
+msgid "Questions"
+msgstr "Questions"
+
+msgctxt "exams.template.take_exam"
+msgid "Current"
+msgstr "Current"
+
+msgctxt "exams.template.take_exam"
+msgid "Answered"
+msgstr "Answered"
+
+msgctxt "exams.template.take_exam"
+msgid "Marked"
+msgstr "Marked"
+
+msgctxt "exams.template.take_exam"
+msgid "Unanswered"
+msgstr "Unanswered"
+
+msgctxt "exams.template.take_exam"
+msgid "Mark"
+msgstr "Mark"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program console"
+msgstr "Program console"
+
+msgctxt "exams.template.coding_exam"
+msgid "Program input"
+msgstr "Program input"
+
+msgctxt "exams.template.coding_exam"
+msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+
+msgctxt "accounts.pending_answers"
+msgid "page_title"
+msgstr "Pending answers"
+
+msgctxt "accounts.pending_answers"
+msgid "section_title"
+msgstr "Pending answers"
+
+msgctxt "accounts.pending_answers"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+msgctxt "accounts.pending_answers"
+msgid "search_placeholder"
+msgstr "Search by task, exam, or course"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_types"
+msgstr "All types"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_all_exams"
+msgstr "All exams"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_written"
+msgstr "Written"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_practical"
+msgstr "Practical"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_free_work"
+msgstr "Free work"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_lab_work"
+msgstr "Lab work"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_coursework"
+msgstr "Coursework"
+
+msgctxt "accounts.pending_answers"
+msgid "action_search"
+msgstr "Search"
+
+msgctxt "accounts.pending_answers"
+msgid "empty_no_pending_answers"
+msgstr "There are no pending answers right now."
+
+msgctxt "accounts.common"
+msgid "back_to_profile"
+msgstr "Back to profile"

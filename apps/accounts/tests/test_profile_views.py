@@ -859,6 +859,40 @@ class ProfileViewTest(TestCase):
         expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
         self.assertContains(response, f"return_to={expected_return_to}")
 
+    def test_profile_my_exams_filters_practical_separately_from_written(self):
+        from apps.exams.models import Exam
+
+        organization = Organization.objects.create(
+            name="Teacher Practical Filter Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+
+        written_exam = Exam.objects.create(
+            author=self.user,
+            title="Profile Written Filter Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        coding_exam = Exam.objects.create(
+            author=self.user,
+            title="Profile Practical Filter Exam",
+            exam_type="coding",
+            is_active=True,
+        )
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=my-exams&exam_type=coding")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["my_exams_filter_type"], "coding")
+        self.assertContains(response, 'value="coding" selected', html=False)
+        self.assertContains(response, coding_exam.title)
+        self.assertNotContains(response, written_exam.title)
+
     def test_publish_notification_section_renders_search_and_scrollable_targets(self):
         from apps.exams.models import StudentGroup
 
@@ -3932,6 +3966,19 @@ class PendingAnswersViewTest(TestCase):
             checked_by_teacher=False,
         )
 
+        self.practical_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Async Practical Exam",
+            exam_type="coding",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.practical_exam,
+            status="submitted",
+            checked_by_teacher=False,
+        )
+
         self.project = Project.objects.create(
             course=self.course,
             title="Pending Project Work",
@@ -3957,9 +4004,16 @@ class PendingAnswersViewTest(TestCase):
         self._login_student()
         response = self.client.get(reverse("accounts:pending_answers"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Gözləmədə olan cavablar")
+        self.assertContains(response, "Profilə qayıt")
+        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertContains(response, "Tapşırıq, imtahan və kurs üzrə axtar")
+        self.assertNotContains(response, "Pending cavablar")
+        self.assertNotContains(response, "Profile geri dön")
         self.assertContains(response, "Pending Assignment Visible")
         self.assertContains(response, "Recently Graded Hidden Assignment")
         self.assertContains(response, "Async Written Exam")
+        self.assertContains(response, "Async Practical Exam")
         self.assertContains(response, "Pending Project Work")
         self.assertNotContains(response, "Old Finalized Assignment")
 
@@ -3974,6 +4028,16 @@ class PendingAnswersViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Async Written Exam")
         self.assertNotContains(response, "Pending Assignment Visible")
+
+    def test_pending_answers_filters_practical_separately_from_written(self):
+        self._login_student()
+        response = self.client.get(reverse("accounts:pending_answers") + "?pending_type=practical_exams")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pending_answers_active_filter"], "practical_exams")
+        self.assertContains(response, 'value="practical_exams" selected', html=False)
+        self.assertContains(response, "Async Practical Exam")
+        self.assertNotContains(response, "Async Written Exam")
 
 
 class StudentDashboardAssignmentVisibilityTest(TestCase):

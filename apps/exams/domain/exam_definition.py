@@ -95,6 +95,16 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         default=10,
         help_text=pgettext_lazy("exams.model.exam.help", "random_question_count"),
     )
+    fair_question_distribution_enabled = models.BooleanField(
+        pgettext_lazy("exams.model.exam.field", "fair_question_distribution_enabled"),
+        default=True,
+        help_text=pgettext_lazy("exams.model.exam.help", "fair_question_distribution_enabled"),
+    )
+    ai_difficulty_balance_enabled = models.BooleanField(
+        pgettext_lazy("exams.model.exam.field", "ai_difficulty_balance_enabled"),
+        default=False,
+        help_text=pgettext_lazy("exams.model.exam.help", "ai_difficulty_balance_enabled"),
+    )
     default_question_points = models.PositiveIntegerField(default=1)
     course = models.ForeignKey(
         "courses.Course",

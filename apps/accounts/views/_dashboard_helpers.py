@@ -629,7 +629,14 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
     scoped_course_ids = scoped_courses.values_list("id", flat=True)
 
     items = []
-    counts = {"exams": 0, "courses": 0, "labs": 0, "independent": 0}
+    counts = {
+        "exams": 0,
+        "written_exams": 0,
+        "practical_exams": 0,
+        "courses": 0,
+        "labs": 0,
+        "independent": 0,
+    }
     search_token = search_query.lower()
 
     def matches_search(*values):
@@ -640,9 +647,22 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
                 return True
         return False
 
-    def add_item(*, category, title, kind, submitted_at, status_label, status_class, detail_url, countdown_seconds=0):
+    def add_item(
+        *,
+        category,
+        title,
+        kind,
+        submitted_at,
+        status_label,
+        status_class,
+        detail_url,
+        countdown_seconds=0,
+        filter_aliases=(),
+    ):
         counts[category] += 1
-        if filter_type not in {"all", category}:
+        for alias in filter_aliases:
+            counts[alias] += 1
+        if filter_type not in {"all", category, *filter_aliases}:
             return
         items.append(
             {
@@ -689,6 +709,7 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
             status_label = "Gözləmədə"
             status_class = "pending"
             countdown_seconds = 0
+        filter_alias = "practical_exams" if attempt.exam.exam_type == "coding" else "written_exams"
         add_item(
             category="exams",
             title=attempt.exam.title,
@@ -703,6 +724,7 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
                 pending_search=search_query,
             ),
             countdown_seconds=countdown_seconds,
+            filter_aliases=(filter_alias,),
         )
 
     assignment_submissions = (

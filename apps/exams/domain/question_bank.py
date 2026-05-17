@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
 User = get_user_model()
@@ -103,6 +104,10 @@ class ExamQuestion(models.Model):
         ("medium", pgettext_lazy("exams.model.question.choice.difficulty", "medium")),
         ("hard", pgettext_lazy("exams.model.question.choice.difficulty", "hard")),
     )
+    DIFFICULTY_SOURCE_CHOICES = (
+        ("manual", pgettext_lazy("exams.model.question.choice.difficulty_source", "manual")),
+        ("ai", pgettext_lazy("exams.model.question.choice.difficulty_source", "ai")),
+    )
 
     points = models.PositiveIntegerField(default=1)
     fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
@@ -134,6 +139,17 @@ class ExamQuestion(models.Model):
         choices=DIFFICULTY_CHOICES,
         default="medium",
         verbose_name=pgettext_lazy("exams.model.question.field", "difficulty"),
+    )
+    difficulty_source = models.CharField(
+        max_length=20,
+        choices=DIFFICULTY_SOURCE_CHOICES,
+        default="manual",
+        verbose_name=pgettext_lazy("exams.model.question.field", "difficulty_source"),
+    )
+    difficulty_checked_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.question.field", "difficulty_checked_at"),
     )
     tags = models.JSONField(
         default=list,
@@ -282,6 +298,13 @@ class ExamQuestion(models.Model):
         else:
             self.enable_paint = False
             self.disable_paint = True
+
+    def mark_ai_difficulty(self, difficulty):
+        if difficulty not in {"easy", "medium", "hard"}:
+            return
+        self.difficulty = difficulty
+        self.difficulty_source = "ai"
+        self.difficulty_checked_at = timezone.now()
 
 
 class ExamQuestionOption(models.Model):
