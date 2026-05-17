@@ -3,6 +3,7 @@ Service tests for exams app.
 """
 
 import base64
+from collections import Counter
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
@@ -30,6 +31,7 @@ from apps.exams.services import parsing
 from apps.exams.services.ai_grading import _parse_ai_grade, grade_written_answer
 from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
+from apps.exams.services.difficulty import ensure_ai_question_difficulties, schedule_ai_question_difficulty_warmup
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import log_supervision_incident, teacher_resume_attempt, teacher_stop_attempt
 from apps.organizations.models import Membership, Organization
@@ -310,6 +312,7 @@ class ExamQuestionRandomizerServicesTest(TestCase):
             organization=self.org,
             is_active=True,
             random_question_count=5,
+            ai_difficulty_balance_enabled=False,
         )
 
     def test_generate_random_questions_for_attempt_balances_one_question_per_block(self):
@@ -418,6 +421,163 @@ class ExamQuestionRandomizerServicesTest(TestCase):
 
         ordered_counts = [block_counts[block.id] for block in blocks]
         self.assertEqual(ordered_counts, [2, 1, 1, 1])
+
+    def test_generate_random_questions_for_attempt_avoids_questions_already_seen_by_four_students(self):
+        self.exam.random_question_count = 2
+        self.exam.fair_question_distribution_enabled = True
+        self.exam.save(update_fields=["random_question_count", "fair_question_distribution_enabled"])
+
+        questions = [
+            ExamQuestion.objects.create(
+                exam=self.exam,
+                text=f"Question {index + 1}",
+                points=1,
+                is_active=True,
+            )
+            for index in range(6)
+        ]
+        overused_question_ids = {questions[0].id, questions[1].id}
+
+        for user_index in range(4):
+            user = User.objects.create_user(
+                username=f"prior_student_{user_index}",
+                email=f"prior_student_{user_index}@example.com",
+                password="pass123",
+            )
+            prior_attempt = ExamAttempt.objects.create(
+                user=user,
+                exam=self.exam,
+                attempt_number=1,
+                status="submitted",
+            )
+            for question in questions[:2]:
+                ExamAnswer.objects.create(attempt=prior_attempt, question=question)
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        selected_question_ids = set(attempt.answers.values_list("question_id", flat=True))
+        self.assertEqual(len(selected_question_ids), 2)
+        self.assertTrue(selected_question_ids.isdisjoint(overused_question_ids))
+
+    def test_generate_random_questions_for_attempt_rotates_blocks_when_enough_blocks_exist(self):
+        self.exam.random_question_count = 3
+        self.exam.fair_question_distribution_enabled = True
+        self.exam.save(update_fields=["random_question_count", "fair_question_distribution_enabled"])
+
+        blocks = [
+            QuestionBlock.objects.create(exam=self.exam, name=f"Block {index + 1}", order=index + 1)
+            for index in range(5)
+        ]
+        questions = []
+        for block in blocks:
+            questions.append(
+                ExamQuestion.objects.create(
+                    exam=self.exam,
+                    block=block,
+                    text=f"{block.name} Question",
+                    points=1,
+                    is_active=True,
+                )
+            )
+
+        prior_attempt = ExamAttempt.objects.create(
+            user=User.objects.create_user("prior_block_student", "pbs@example.com", "pass123"),
+            exam=self.exam,
+            attempt_number=1,
+            status="submitted",
+        )
+        for question in questions[:3]:
+            ExamAnswer.objects.create(attempt=prior_attempt, question=question)
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        selected_block_ids = set(
+            attempt.answers.select_related("question__block").values_list("question__block_id", flat=True)
+        )
+        self.assertEqual(len(selected_block_ids), 3)
+        self.assertIn(blocks[3].id, selected_block_ids)
+        self.assertIn(blocks[4].id, selected_block_ids)
+
+    def test_generate_random_questions_for_attempt_balances_existing_difficulty_levels(self):
+        self.exam.random_question_count = 3
+        self.exam.ai_difficulty_balance_enabled = True
+        self.exam.save(update_fields=["random_question_count", "ai_difficulty_balance_enabled"])
+
+        for difficulty in ("easy", "medium", "hard"):
+            for index in range(3):
+                ExamQuestion.objects.create(
+                    exam=self.exam,
+                    text=f"{difficulty} Question {index + 1}",
+                    difficulty=difficulty,
+                    difficulty_source="ai",
+                    points=1,
+                    is_active=True,
+                )
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        generate_random_questions_for_attempt(attempt)
+
+        self.assertEqual(
+            Counter(attempt.answers.select_related("question").values_list("question__difficulty", flat=True)),
+            Counter({"easy": 1, "medium": 1, "hard": 1}),
+        )
+
+    @patch("apps.exams.services.difficulty.classify_question_difficulties_with_ai")
+    @patch("apps.exams.services.difficulty._get_api_key", return_value="test-key")
+    @patch("apps.exams.services.difficulty._is_ai_enabled", return_value=True)
+    def test_ensure_ai_question_difficulties_updates_questions(self, _mock_enabled, _mock_key, mock_classify):
+        self.exam.ai_difficulty_balance_enabled = True
+        self.exam.save(update_fields=["ai_difficulty_balance_enabled"])
+        question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Explain a multi-step algorithm.",
+            points=1,
+            is_active=True,
+        )
+        mock_classify.return_value = {question.id: "hard"}
+
+        updated_count = ensure_ai_question_difficulties(self.exam)
+
+        self.assertEqual(updated_count, 1)
+        question.refresh_from_db()
+        self.assertEqual(question.difficulty, "hard")
+        self.assertEqual(question.difficulty_source, "ai")
+        self.assertIsNotNone(question.difficulty_checked_at)
+
+    @patch("core.tasks.defer")
+    def test_schedule_ai_question_difficulty_warmup_only_when_active_and_enabled(self, mock_defer):
+        self.exam.is_active = True
+        self.exam.ai_difficulty_balance_enabled = False
+        self.exam.save(update_fields=["is_active", "ai_difficulty_balance_enabled"])
+
+        self.assertFalse(schedule_ai_question_difficulty_warmup(self.exam))
+        mock_defer.assert_not_called()
+
+        self.exam.ai_difficulty_balance_enabled = True
+        self.exam.save(update_fields=["ai_difficulty_balance_enabled"])
+
+        self.assertTrue(schedule_ai_question_difficulty_warmup(self.exam))
+        mock_defer.assert_called_once()
 
 
 class ExamSupervisionServicesTest(TestCase):
