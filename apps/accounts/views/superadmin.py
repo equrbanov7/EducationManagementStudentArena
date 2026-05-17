@@ -3,15 +3,12 @@ Superadmin views for organization oversight and AI settings.
 """
 
 import logging
-from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Count, Q
 from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
@@ -23,8 +20,6 @@ from apps.organizations.services import ensure_owner_membership
 
 from ._helpers import (
     _append_query_params,
-    _build_user_organization_access_rows,
-    _get_active_organization,
     _is_superadmin_user,
     _resolve_next_url,
 )
@@ -117,10 +112,6 @@ def superadmin_organizations(request):
     if not _is_superadmin_user(request.user):
         return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
 
-    profile_next_url = _append_query_params(
-        reverse("accounts:profile"),
-        section="superadmin-organizations",
-    )
     fallback_next_url = reverse("accounts:superadmin_organizations")
 
     if request.method == "POST":
@@ -228,85 +219,7 @@ def superadmin_organizations(request):
 
         return redirect(next_url)
 
-    search_query = request.GET.get("search", "").strip()
-    org_type_filter = request.GET.get("org_type", "").strip().lower()
-    status_filter = request.GET.get("status", "").strip().lower()
-
-    organizations = (
-        Organization.objects.filter(owner__is_active=True)
-        .select_related("owner")
-        .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
-        .order_by("-created_at")
-    )
-
-    if search_query:
-        organizations = organizations.filter(
-            Q(name__icontains=search_query)
-            | Q(slug__icontains=search_query)
-            | Q(organization_identifier__icontains=search_query)
-            | Q(license_identifier__icontains=search_query)
-            | Q(owner__username__icontains=search_query)
-            | Q(owner__email__icontains=search_query)
-        )
-
-    if org_type_filter:
-        organizations = organizations.filter(org_type=org_type_filter)
-
-    if status_filter == "active":
-        organizations = organizations.filter(is_active=True, status="active")
-    elif status_filter == "pending":
-        organizations = organizations.filter(status="pending")
-    elif status_filter == "suspended":
-        organizations = organizations.filter(status="suspended")
-    elif status_filter == "inactive":
-        organizations = organizations.filter(is_active=False)
-
-    # Always annotate pending count for the badge in navigation.
-    pending_count = Organization.objects.filter(status="pending", owner__is_active=True).count()
-
-    paginator = Paginator(organizations, 20)
-    page_number = request.GET.get("page")
-    organizations_page = paginator.get_page(page_number)
-
-    context = {
-        "organizations": organizations_page,
-        "organization_access_rows": _build_user_organization_access_rows(
-            request.user,
-            active_organization=_get_active_organization(request),
-            include_active_superadmin_org=True,
-            profile_section="superadmin-organizations",
-        ),
-        "all_modules": [
-            "accounts",
-            "organizations",
-            "courses",
-            "exams",
-            "assignments",
-            "projects",
-            "labs",
-            "live_exam",
-            "blog",
-            "audit",
-        ],
-        "search_query": search_query,
-        "org_type_filter": org_type_filter,
-        "status_filter": status_filter,
-        "pending_count": pending_count,
-        "post_next_url": profile_next_url,
-        "organizations_pagination_query": urlencode(
-            {
-                key: value
-                for key, value in {
-                    "search": search_query,
-                    "org_type": org_type_filter,
-                    "status": status_filter,
-                }.items()
-                if value not in ("", None)
-            }
-        ),
-        "organizations_page_param": "page",
-    }
-    return render(request, "accounts/superadmin_organizations.html", context)
+    return redirect(reverse("accounts:profile") + "?section=superadmin-organizations")
 
 
 @login_required
@@ -343,8 +256,7 @@ def superadmin_ai_settings(request):
 
         return redirect(_resolve_next_url(request, fallback_next_url))
 
-    context = build_superadmin_ai_settings_context()
-    return render(request, "accounts/superadmin_ai_settings.html", context)
+    return redirect(reverse("accounts:profile") + "?section=superadmin-ai")
 
 
 def _estimate_monthly_cost(config):

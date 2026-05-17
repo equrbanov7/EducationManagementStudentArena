@@ -9,6 +9,29 @@ from apps.organizations.permissions import has_permission
 register = template.Library()
 
 
+@register.filter
+def initials(value):
+    """
+    Return compact initials for organization/user display badges.
+
+    Preserves short acronyms, otherwise uses the first letter of the first two
+    words; for one-word names, falls back to the first two characters.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    words = [word for word in text.replace("-", " ").split() if word]
+    first = words[0]
+    if len(first) <= 3 and first.upper() == first:
+        return first.upper()
+
+    if len(words) == 1:
+        return first[:2].upper()
+
+    return "".join(word[0] for word in words[:2]).upper()
+
+
 @register.simple_tag(takes_context=True)
 def has_perm(context, permission):
     """
