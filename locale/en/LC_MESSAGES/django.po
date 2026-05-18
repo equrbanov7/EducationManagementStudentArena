@@ -20068,3 +20068,103 @@ msgstr "There are no pending answers right now."
 msgctxt "accounts.common"
 msgid "back_to_profile"
 msgstr "Back to profile"
+
+msgctxt "ai_assistant.aria"
+msgid "AI Assistant"
+msgstr "AI Assistant"
+
+msgctxt "ai_assistant.tooltip"
+msgid "Söhbətə Başla"
+msgstr "Start Chat"
+
+msgctxt "ai_assistant.tooltip"
+msgid "Dərhal Cavab Al"
+msgstr "Get an instant answer"
+
+msgctxt "ai_assistant.limit"
+msgid "Sorğular"
+msgstr "Requests"
+
+msgctxt "ai_assistant.limit"
+msgid "yüklənir..."
+msgstr "loading..."
+
+msgctxt "ai_assistant.greeting"
+msgid "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+msgstr "Hello! I am EMSArena AI. I am ready to answer your questions. How can I help?"
+
+msgctxt "ai_assistant.error"
+msgid "AI sorğu limiti hazırda aktiv deyil."
+msgstr "AI request limit is currently not active."
+
+msgctxt "ai_assistant.error"
+msgid "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "The request could not be sent. Refresh the page and try again."
+
+msgctxt "ai_assistant.error"
+msgid "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."
+msgstr "Something went wrong. Please try again."
+
+msgctxt "ai_assistant.error"
+msgid "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."
+msgstr "Network error. Please try again."
+
+msgctxt "ai_assistant.action"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "ai_assistant.action"
+msgid "Emoji"
+msgstr "Emoji"
+
+msgctxt "ai_assistant.action"
+msgid "Göndər"
+msgstr "Send"
+
+msgctxt "ai_assistant.title"
+msgid "AI Assistent"
+msgstr "AI Assistant"
+
+msgctxt "ai_assistant.limit_exceeded"
+msgid "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "You have reached the hourly AI request limit. Please try again a little later."
+
+msgctxt "ai_assistant.input"
+msgid "Mesajınızı yazın..."
+msgstr "Type your message..."
+
+msgctxt "ai_assistant.blocked"
+msgid "Zəhmət olmasa mesajınızı daxil edin."
+msgstr "Please enter your message."
+
+msgctxt "ai_assistant.blocked"
+msgid "Mesajınız çox uzundur. Zəhmət olmasa qısaldın."
+msgstr "Your message is too long. Please shorten it."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu növ sorğu icazəli deyil."
+msgstr "This type of request is not allowed."
+
+msgctxt "ai_assistant.blocked"
+msgid "Sistem təlimatlarına baxmaq mümkün deyil."
+msgstr "System instructions cannot be viewed."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu məlumata giriş icazəli deyil."
+msgstr "Access to this information is not allowed."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu sahəyə giriş hüququnuz yoxdur."
+msgstr "You do not have access to this area."
+
+msgctxt "ai_assistant.blocked"
+msgid "Başqa istifadəçilərin məlumatlarına giriş icazəli deyil."
+msgstr "Access to other users' data is not allowed."
+
+msgctxt "ai_assistant.blocked"
+msgid "İcazə qaydalarını keçmək mümkün deyil."
+msgstr "Permission rules cannot be bypassed."
+
+msgctxt "ai_assistant.blocked"
+msgid "Bu sorğu blok olundu."
+msgstr "This request was blocked."
