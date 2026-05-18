@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "apps.labs",
     "apps.organizations.apps.OrganizationsConfig",
     "apps.audit.apps.AuditConfig",
+    "apps.ai_assistant.apps.AIAssistantConfig",
     "daphne",
     "apps.exams",
     "core.admin_apps.SecureAdminConfig",
@@ -172,6 +173,7 @@ LIVE_WS_MSG_RATE_LIMIT = os.getenv("LIVE_WS_MSG_RATE_LIMIT", "60/1m")
 # Paid Tier 1: 10K RPD / 1K RPM on gemini-2.5-flash.  100 req/h is safe
 # for a platform with <50 teachers sharing a $5/mo budget.
 AI_RATE_LIMIT = os.getenv("AI_RATE_LIMIT", "100/1h")
+AI_ASSISTANT_RATE_LIMIT = os.getenv("AI_ASSISTANT_RATE_LIMIT", "25/1h")
 # Practical/coding exams are still being hardened. Keep them available in
 # local/test by default, but let production disable the feature explicitly.
 PRACTICAL_EXAMS_ENABLED = os.getenv("PRACTICAL_EXAMS_ENABLED", "True").strip().lower() in {
