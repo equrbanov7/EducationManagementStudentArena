@@ -185,7 +185,7 @@ Rules:
 - Do not include answers, rubrics, numbering, markdown, or extra commentary.
 """
 
-    return f"""You are an expert exam question writer for Learn Hub.
+    return f"""You are an expert exam question writer for EMSArena.
 Language: Respond in {lang_name}.
 Exam title: {exam_title}
 Exam type: {exam_type}

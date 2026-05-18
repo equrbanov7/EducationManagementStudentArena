@@ -949,6 +949,18 @@ def _build_student_org_management_section(
         "pending_teacher_requests": [],
         "pending_staff_requests": [],
         "pending_teacher_staff_requests": [],
+        "students_total_count": 0,
+        "pending_requested_students_total_count": 0,
+        "unassigned_students_total_count": 0,
+        "sent_student_invites_total_count": 0,
+        "teacher_members_total_count": 0,
+        "pending_teacher_requests_total_count": 0,
+        "unassigned_teachers_total_count": 0,
+        "sent_teacher_invites_total_count": 0,
+        "staff_members_total_count": 0,
+        "pending_staff_requests_total_count": 0,
+        "unassigned_staff_total_count": 0,
+        "sent_staff_invites_total_count": 0,
         "organization_records": [],
         "student_search_query": student_search,
         "pending_search_query": pending_search,
@@ -1094,6 +1106,10 @@ def _build_student_org_management_section(
         else:
             sent_staff_invites.append(invite_membership)
 
+    section["sent_student_invites_total_count"] = len(sent_student_invites)
+    section["sent_teacher_invites_total_count"] = len(sent_teacher_invites)
+    section["sent_staff_invites_total_count"] = len(sent_staff_invites)
+
     if sent_invite_search:
         search_lower = sent_invite_search.lower()
 
@@ -1166,10 +1182,13 @@ def _build_student_org_management_section(
                 StudentOrganizationRequest.objects.bulk_create(missing_pending_requests)
 
     students = (
-        UserProfile.objects.filter(user__is_active=True, organization=organization)
+        UserProfile.objects.filter(user__is_active=True)
         .exclude(user__id__in=superadmin_user_ids)
         .filter(
-            Q(role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
+            Q(
+                organization=organization,
+                role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT],
+            )
             | Q(
                 user__memberships__organization=organization,
                 user__memberships__is_active=True,
@@ -1180,6 +1199,7 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    section["students_total_count"] = students.count()
     if student_search:
         students = students.filter(
             Q(user__username__icontains=student_search)
@@ -1203,6 +1223,7 @@ def _build_student_org_management_section(
         .select_related("user", "organization", "user__profile", "user__profile__organization")
         .order_by("-created_at", "user__username")
     )
+    section["pending_requested_students_total_count"] = pending_requested_students.count()
     if pending_search:
         pending_requested_students = pending_requested_students.filter(
             Q(user__username__icontains=pending_search)
@@ -1240,6 +1261,7 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    section["unassigned_students_total_count"] = unassigned_students.count()
     if unassigned_search:
         unassigned_students = unassigned_students.filter(
             Q(user__username__icontains=unassigned_search)
@@ -1268,6 +1290,7 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    section["unassigned_teachers_total_count"] = unassigned_teachers.count()
     if teacher_staff_search:
         unassigned_teachers = unassigned_teachers.filter(
             Q(user__username__icontains=teacher_staff_search)
@@ -1297,6 +1320,7 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    section["unassigned_staff_total_count"] = unassigned_staff.count()
     if teacher_staff_search:
         unassigned_staff = unassigned_staff.filter(
             Q(user__username__icontains=teacher_staff_search)
@@ -1337,6 +1361,12 @@ def _build_student_org_management_section(
         .select_related("user", "user__profile")
         .order_by("-created_at", "user__username")
     )
+    section["pending_teacher_requests_total_count"] = teacher_staff_pending_qs.filter(
+        role_type=MembershipRequestRoleType.TEACHER
+    ).count()
+    section["pending_staff_requests_total_count"] = teacher_staff_pending_qs.filter(
+        role_type=MembershipRequestRoleType.STAFF
+    ).count()
     if teacher_staff_search:
         teacher_staff_pending_qs = teacher_staff_pending_qs.filter(
             Q(user__username__icontains=teacher_staff_search)
@@ -1368,6 +1398,48 @@ def _build_student_org_management_section(
         .select_related("user", "role", "user__profile")
         .order_by("user_id", "-is_primary", "-role__level", "role__display_name")
     )
+
+    def _split_non_student_members(memberships):
+        teacher_member_list = []
+        staff_member_list = []
+        seen_member_user_ids = set()
+        removable_member_roles = {
+            ProfileRole.STUDENT,
+            ProfileRole.LEAD_STUDENT,
+            ProfileRole.TEACHER,
+            ProfileRole.ASSISTANT_TEACHER,
+            ProfileRole.MEMBER,
+            ProfileRole.HR,
+        }
+        for membership in memberships:
+            if membership.user_id in seen_member_user_ids:
+                continue
+            seen_member_user_ids.add(membership.user_id)
+            mapped_role = _map_org_role_to_profile_role(membership.role)
+            membership.management_role_key = mapped_role
+            membership.management_role_label = getattr(
+                membership.role,
+                "display_name",
+                "",
+            ) or PROFILE_ROLE_LABELS.get(mapped_role, membership.role.name)
+            membership.management_position = (getattr(membership.user.profile, "staff_position", "") or "").strip()
+            membership.management_can_remove = mapped_role in removable_member_roles and membership.user_id != getattr(
+                organization, "owner_id", None
+            )
+
+            if mapped_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
+                continue
+            if mapped_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
+                teacher_member_list.append(membership)
+                continue
+            staff_member_list.append(membership)
+
+        return teacher_member_list, staff_member_list
+
+    all_teacher_members, all_staff_members = _split_non_student_members(active_member_qs)
+    section["teacher_members_total_count"] = len(all_teacher_members)
+    section["staff_members_total_count"] = len(all_staff_members)
+
     if teacher_staff_search:
         active_member_qs = active_member_qs.filter(
             Q(user__username__icontains=teacher_staff_search)
@@ -1378,37 +1450,7 @@ def _build_student_org_management_section(
             | Q(role__name__icontains=teacher_staff_search)
         )
 
-    teacher_members = []
-    staff_members = []
-    seen_member_user_ids = set()
-    removable_member_roles = {
-        ProfileRole.STUDENT,
-        ProfileRole.LEAD_STUDENT,
-        ProfileRole.TEACHER,
-        ProfileRole.ASSISTANT_TEACHER,
-        ProfileRole.MEMBER,
-        ProfileRole.HR,
-    }
-    for membership in active_member_qs:
-        if membership.user_id in seen_member_user_ids:
-            continue
-        seen_member_user_ids.add(membership.user_id)
-        mapped_role = _map_org_role_to_profile_role(membership.role)
-        membership.management_role_key = mapped_role
-        membership.management_role_label = getattr(membership.role, "display_name", "") or PROFILE_ROLE_LABELS.get(
-            mapped_role, membership.role.name
-        )
-        membership.management_position = (getattr(membership.user.profile, "staff_position", "") or "").strip()
-        membership.management_can_remove = mapped_role in removable_member_roles and membership.user_id != getattr(
-            organization, "owner_id", None
-        )
-
-        if mapped_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-            continue
-        if mapped_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
-            teacher_members.append(membership)
-            continue
-        staff_members.append(membership)
+    teacher_members, staff_members = _split_non_student_members(active_member_qs)
 
     section["teacher_members"] = Paginator(
         teacher_members,
@@ -1535,92 +1577,92 @@ def _build_student_org_management_section(
         {
             "value": "members",
             "label": "Tələbələr",
-            "count": section["students"].paginator.count,
+            "count": section["students_total_count"],
         },
         {
             "value": "pending",
             "label": "Müraciətlər",
-            "count": section["pending_requested_students"].paginator.count,
+            "count": section["pending_requested_students_total_count"],
         },
         {
             "value": "unassigned",
             "label": "Dəvətsizlər",
-            "count": section["unassigned_students"].paginator.count,
+            "count": section["unassigned_students_total_count"],
         },
         {
             "value": "invites",
             "label": "Dəvətlər",
-            "count": section["sent_student_invites"].paginator.count,
+            "count": section["sent_student_invites_total_count"],
         },
     ]
     section["teacher_tab_options"] = [
         {
             "value": "members",
             "label": "Müəllimlər",
-            "count": section["teacher_members"].paginator.count,
+            "count": section["teacher_members_total_count"],
         },
         {
             "value": "requests",
             "label": "Müraciətlər",
-            "count": section["pending_teacher_requests"].paginator.count,
+            "count": section["pending_teacher_requests_total_count"],
         },
         {
             "value": "unassigned",
             "label": "Dəvətsizlər",
-            "count": section["unassigned_teachers"].paginator.count,
+            "count": section["unassigned_teachers_total_count"],
         },
         {
             "value": "invites",
             "label": "Dəvətlər",
-            "count": section["sent_teacher_invites"].paginator.count,
+            "count": section["sent_teacher_invites_total_count"],
         },
     ]
     section["staff_tab_options"] = [
         {
             "value": "members",
             "label": "Staff",
-            "count": section["staff_members"].paginator.count,
+            "count": section["staff_members_total_count"],
         },
         {
             "value": "requests",
             "label": "Müraciətlər",
-            "count": section["pending_staff_requests"].paginator.count,
+            "count": section["pending_staff_requests_total_count"],
         },
         {
             "value": "unassigned",
             "label": "Dəvətsizlər",
-            "count": section["unassigned_staff"].paginator.count,
+            "count": section["unassigned_staff_total_count"],
         },
         {
             "value": "invites",
             "label": "Dəvətlər",
-            "count": section["sent_staff_invites"].paginator.count,
+            "count": section["sent_staff_invites_total_count"],
         },
     ]
     section["management_view_options"] = [
         {
             "value": "students",
             "label": "Tələbələr",
-            "count": section["students"].paginator.count,
+            "count": section["students_total_count"],
         },
         {
             "value": "teachers",
             "label": "Müəllimlər",
             "count": (
-                section["teacher_members"].paginator.count
-                + section["pending_teacher_requests"].paginator.count
-                + section["unassigned_teachers"].paginator.count
-                + section["sent_teacher_invites"].paginator.count
+                section["teacher_members_total_count"]
+                + section["pending_teacher_requests_total_count"]
+                + section["unassigned_teachers_total_count"]
+                + section["sent_teacher_invites_total_count"]
             ),
         },
         {
             "value": "staff",
             "label": "Staff",
             "count": (
-                section["staff_members"].paginator.count
-                + section["pending_staff_requests"].paginator.count
-                + section["unassigned_staff"].paginator.count
-                + section["sent_staff_invites"].paginator.count
+                section["staff_members_total_count"]
+                + section["pending_staff_requests_total_count"]
+                + section["unassigned_staff_total_count"]
+                + section["sent_staff_invites_total_count"]
             ),
         },
     ]

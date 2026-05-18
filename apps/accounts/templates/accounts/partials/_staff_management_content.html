@@ -64,74 +64,74 @@
                 class="org-management-chip is-active"
                 data-management-chip="student-members">
             <span>{% trans "Students" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ students.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ students_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-pending">
             <span>{% trans "Student requests" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ pending_requested_students.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ pending_requested_students_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-unassigned">
             <span>{% trans "Unassigned" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ unassigned_students.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ unassigned_students_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="student-invites">
             <span>{% trans "Invites" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ sent_student_invites.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ sent_student_invites_total_count }}</span>
         </button>
         {% if not teacher_student_only %}
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-members">
             <span>{% trans "Teachers" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ teacher_members.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ teacher_members_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-requests">
             <span>{% trans "Teacher requests" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ pending_teacher_requests.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ pending_teacher_requests_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-unassigned">
             <span>{% trans "Unassigned teachers" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ unassigned_teachers.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ unassigned_teachers_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="teacher-invites">
             <span>{% trans "Teacher invites" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ sent_teacher_invites.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ sent_teacher_invites_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-members">
             <span>{% trans "Staff" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ staff_members.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ staff_members_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-requests">
             <span>{% trans "Staff requests" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ pending_staff_requests.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ pending_staff_requests_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-unassigned">
             <span>{% trans "Unassigned staff" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ unassigned_staff.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ unassigned_staff_total_count }}</span>
         </button>
         <button type="button"
                 class="org-management-chip is-active"
                 data-management-chip="staff-invites">
             <span>{% trans "Staff invites" context "staff.management" %}</span>
-            <span class="org-management-chip__count">{{ sent_staff_invites.paginator.count }}</span>
+            <span class="org-management-chip__count">{{ sent_staff_invites_total_count }}</span>
         </button>
         {% endif %}
         {% endif %}
