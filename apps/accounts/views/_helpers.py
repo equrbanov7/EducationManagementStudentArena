@@ -86,6 +86,18 @@ def _get_active_organization(request):
     return get_request_organization(request)
 
 
+def _render_profile_section(request, section):
+    """
+    Render the profile shell with a specific section active while preserving filters.
+    """
+    request.direct_profile_section = section
+    request.GET = request.GET.copy()
+    request.GET["section"] = section
+    from .profile import user_profile
+
+    return user_profile(request)
+
+
 def _bind_active_role_context(user, organization, *, memberships=None, permissions=None):
     if user and hasattr(user, "set_active_organization_context"):
         user.set_active_organization_context(

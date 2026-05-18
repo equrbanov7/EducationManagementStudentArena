@@ -41,6 +41,7 @@ from ._helpers import (
     _normalized_org_name,
     _pending_student_request_queryset,
     _profile_role_for_membership_request_type,
+    _render_profile_section,
     _resolve_membership_role,
     _resolve_next_url,
     _role_capabilities,
@@ -971,7 +972,7 @@ def student_organization_management(request):
         messages.error(request, "Naməlum əməliyyat.")
         return redirect(next_url)
 
-    return redirect(reverse("accounts:profile") + "?section=student-organization-management")
+    return _render_profile_section(request, "student-organization-management")
 
 
 @login_required
@@ -1167,7 +1168,7 @@ def student_organization_request(request):
         messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
         return redirect("accounts:profile")
 
-    return redirect(reverse("accounts:profile") + "?section=student-organization-request")
+    return _render_profile_section(request, "student-organization-request")
 
 
 @login_required
