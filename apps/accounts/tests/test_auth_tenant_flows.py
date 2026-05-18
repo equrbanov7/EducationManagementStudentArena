@@ -1348,6 +1348,72 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertNotContains(response, hidden_staff_super.username)
         self.assertNotContains(response, hidden_teacher_request_super.username)
 
+    def test_student_org_management_badge_counts_ignore_active_search(self):
+        student_user = User.objects.create_user(
+            username="visible_student",
+            email="visible_student@example.com",
+            password="StrongPass123!",
+        )
+        student_profile = student_user.profile
+        student_profile.organization = self.org_a
+        student_profile.organization_type = self.org_a.org_type
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        Membership.objects.create(
+            user=student_user,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "student-organization-management",
+                "student_org_search": "does-not-match",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        section = response.context["student_org_management_section"]
+        self.assertEqual(section["students"].paginator.count, 0)
+        self.assertEqual(section["students_total_count"], 1)
+        self.assertEqual(section["student_tab_options"][0]["count"], 1)
+        self.assertEqual(section["management_view_options"][0]["count"], 1)
+
+    def test_student_org_management_includes_membership_only_students(self):
+        student_user = User.objects.create_user(
+            username="membership_only_student",
+            email="membership_only_student@example.com",
+            password="StrongPass123!",
+        )
+        student_profile = student_user.profile
+        student_profile.organization = None
+        student_profile.organization_type = OrganizationType.INDIVIDUAL
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        Membership.objects.create(
+            user=student_user,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "student-organization-management",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        section = response.context["student_org_management_section"]
+        student_ids = {profile.user_id for profile in section["students"].object_list}
+        self.assertIn(student_user.id, student_ids)
+        self.assertEqual(section["students_total_count"], 1)
+
     def test_org_admin_can_approve_teacher_request_from_requests_tab(self):
         teacher_user = User.objects.create_user(
             username="teacher_request_user",
