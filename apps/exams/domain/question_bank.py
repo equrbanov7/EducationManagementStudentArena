@@ -323,8 +323,7 @@ class ExamQuestionOption(models.Model):
         related_name="options",
         verbose_name=pgettext_lazy("exams.model.question_option.field", "question"),
     )
-    text = models.CharField(
-        max_length=255,
+    text = models.TextField(
         verbose_name=pgettext_lazy("exams.model.question_option.field", "text"),
     )
     is_correct = models.BooleanField(
