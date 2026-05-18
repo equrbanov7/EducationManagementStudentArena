@@ -4,6 +4,9 @@
 
 {% block title %}{{ exam.title }} - {% trans "title_exam" context "exams.template.take_exam" %}{% endblock %}
 
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/take_exam.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/paint_answer.css' %}">
