@@ -29,6 +29,9 @@
             {% include "accounts/profile/_header.html" %}
 
         <div class="profile-sections">
+            {% if direct_profile_section_template %}
+            {% include direct_profile_section_template %}
+            {% else %}
             {% include "accounts/profile/sections/_profile_info.html" %}
             {% include "accounts/profile/sections/_notifications.html" %}
             {% include "accounts/profile/sections/_publish_notification.html" %}
@@ -61,6 +64,7 @@
             {% include "accounts/profile/sections/_change_password.html" %}
             {% include "accounts/profile/sections/_delete_account.html" %}
             {% include "accounts/profile/sections/_shortcut_sections.html" %}
+            {% endif %}
         </div>
     </main>
 </div>

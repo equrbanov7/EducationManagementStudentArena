@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "core.middleware.RequestQueueMiddleware",
     "apps.accounts.middleware.SessionTimeoutMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "apps.accounts.middleware.PostLoginRedirectGuardMiddleware",
@@ -184,6 +185,63 @@ PRACTICAL_EXAMS_ENABLED = os.getenv("PRACTICAL_EXAMS_ENABLED", "True").strip().l
 }
 # Post management delete endpoints
 POST_DELETE_RATE_LIMIT = os.getenv("POST_DELETE_RATE_LIMIT", "10/5m")
+
+
+def _env_bool_setting(name: str, default: bool) -> bool:
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int_setting(name: str, default: int, *, minimum: int | None = None) -> int:
+    try:
+        value = int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
+def _env_float_setting(name: str, default: float, *, minimum: float | None = None) -> float:
+    try:
+        value = float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
+# Request queueing for mutating HTTP calls. This protects every app view from
+# duplicate/bursty writes by serialising unsafe methods per user/session and by
+# limiting concurrent write requests per worker process.
+# Set REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT=1 if deployment needs strict
+# one-write-at-a-time behaviour.
+REQUEST_QUEUE_ENABLED = _env_bool_setting("REQUEST_QUEUE_ENABLED", True)
+REQUEST_QUEUE_UNSAFE_METHODS = tuple(
+    method.strip().upper()
+    for method in os.getenv("REQUEST_QUEUE_UNSAFE_METHODS", "POST,PUT,PATCH,DELETE").split(",")
+    if method.strip()
+)
+REQUEST_QUEUE_PER_ACTOR_SERIALIZATION = _env_bool_setting("REQUEST_QUEUE_PER_ACTOR_SERIALIZATION", True)
+REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT = _env_int_setting("REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT", 8, minimum=0)
+REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS = _env_float_setting("REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS", 60.0, minimum=0.0)
+REQUEST_QUEUE_LOCK_POLL_INTERVAL_SECONDS = _env_float_setting(
+    "REQUEST_QUEUE_LOCK_POLL_INTERVAL_SECONDS",
+    0.05,
+    minimum=0.01,
+)
+REQUEST_QUEUE_LOCK_LEASE_SECONDS = _env_int_setting("REQUEST_QUEUE_LOCK_LEASE_SECONDS", 600, minimum=1)
+REQUEST_QUEUE_LOCAL_LOCK_TTL_SECONDS = _env_int_setting("REQUEST_QUEUE_LOCAL_LOCK_TTL_SECONDS", 300, minimum=1)
+REQUEST_QUEUE_RETRY_AFTER_SECONDS = _env_int_setting("REQUEST_QUEUE_RETRY_AFTER_SECONDS", 2, minimum=1)
+REQUEST_QUEUE_CACHE_ALIAS = os.getenv("REQUEST_QUEUE_CACHE_ALIAS", RATELIMIT_USE_CACHE)
+REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
+    prefix.strip()
+    for prefix in os.getenv(
+        "REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES",
+        "/static/,/media/,/metrics/,/ping/,/health/",
+    ).split(",")
+    if prefix.strip()
+)
 AUTH_OTP_EXPIRY_SECONDS = int(os.getenv("AUTH_OTP_EXPIRY_SECONDS", "300"))
 AUTH_OTP_RESEND_COOLDOWN_SECONDS = int(os.getenv("AUTH_OTP_RESEND_COOLDOWN_SECONDS", "60"))
 AUTH_OTP_MAX_ATTEMPTS = int(os.getenv("AUTH_OTP_MAX_ATTEMPTS", "5"))

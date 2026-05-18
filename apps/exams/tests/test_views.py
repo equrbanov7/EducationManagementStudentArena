@@ -3202,6 +3202,48 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertContains(response, "Mətnin sonuna əlavə et")
         self.assertContains(response, "Mətn sahəsini əvəz et")
 
+    @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
+    def test_test_question_bank_saves_large_import_with_long_option_text(self, mock_schedule_warmup):
+        long_option_text = " ".join(["Uzun variant mətni"] * 20)
+        raw_text = "\n\n".join(
+            [
+                "\n".join(
+                    [
+                        f"{index}. Import sualı {index}?",
+                        f"A) {long_option_text if index == 21 else f'Düzgün cavab {index}'}",
+                        f"B) Yanlış cavab {index}",
+                        f"C) Başqa cavab {index}",
+                        f"D) Alternativ cavab {index}",
+                        f"E) Əlavə cavab {index}",
+                        "Cavab: A",
+                    ]
+                )
+                for index in range(1, 301)
+            ]
+        )
+
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "save",
+                "raw_text": raw_text,
+                "selected": [str(index) for index in range(1, 301)],
+                "random_question_count": "300",
+                "default_points": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        imported_questions = self.exam.questions.filter(order__gte=15).order_by("order")
+        self.assertEqual(imported_questions.count(), 300)
+        self.assertEqual(ExamQuestionOption.objects.filter(question__in=imported_questions).count(), 1500)
+        self.assertEqual(imported_questions.first().points, 2)
+        self.assertGreater(
+            len(imported_questions.get(order=35).options.get(label="A").text),
+            255,
+        )
+        mock_schedule_warmup.assert_called_once()
+
     @patch("apps.exams.views.teacher.question_bank.generate_question_bank_text")
     def test_ai_generate_question_bank_passes_prompt_and_uploaded_source_to_service(self, mock_generate):
         mock_generate.return_value = {

@@ -41,6 +41,7 @@ from ._helpers import (
     _normalized_org_name,
     _pending_student_request_queryset,
     _permission_is_grantable,
+    _render_profile_section,
     _resolve_next_url,
     _sync_user_role_memberships,
 )
@@ -219,7 +220,7 @@ def manage_roles(request):
         actor_user=request.user,
     )
 
-    return redirect(reverse("accounts:profile") + "?section=manage-roles")
+    return _render_profile_section(request, "manage-roles")
 
 
 @login_required
@@ -1244,4 +1245,4 @@ def permission_editor(request):
     if selected_role is None:
         selected_role = roles.first()
 
-    return redirect(reverse("accounts:profile") + "?section=permission-editor")
+    return _render_profile_section(request, "permission-editor")
