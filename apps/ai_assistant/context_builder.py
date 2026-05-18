@@ -308,7 +308,7 @@ def _courses_section(user, organization, memberships, permissions) -> str:
         enrolled = Course.objects.filter(id__in=enrolled_course_ids).values_list("title", "slug", "status")
         if enrolled:
             lines.append("Courses I'm enrolled in:")
-            for title, slug, status in enrolled:
+            for title, slug in enrolled:
                 lines.append(f"  - {title} (/{slug}/)")
 
     if len(lines) == 1:
