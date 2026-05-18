@@ -1637,6 +1637,16 @@ def user_profile(request):
             .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
             .order_by("name")
         )
+        organization_status_filter = (request.GET.get("status") or "").strip().lower()
+        if organization_status_filter in {"active", "pending", "suspended"}:
+            superadmin_organizations_queryset = superadmin_organizations_queryset.filter(
+                status=organization_status_filter
+            )
+        elif organization_status_filter == "inactive":
+            superadmin_organizations_queryset = superadmin_organizations_queryset.filter(is_active=False).exclude(
+                status="suspended"
+            )
+
         if "superadmin-org-features" in allowed_sections:
             superadmin_feature_org_page = request.GET.get("superadmin_feature_org_page")
             superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
@@ -2070,6 +2080,18 @@ def user_profile(request):
         )
 
     active_section_title = section_titles.get(active_section, pgettext_lazy("profile.sidebar", "title"))
+    direct_profile_section = getattr(request, "direct_profile_section", "")
+    direct_profile_section_templates = {
+        "pending-answers": "accounts/profile/sections/_pending_answers.html",
+        "pending-review": "accounts/profile/sections/_pending_review.html",
+        "review-results": "accounts/profile/sections/_review_results.html",
+        "student-organization-management": "accounts/profile/sections/_student_org_management.html",
+        "student-organization-request": "accounts/profile/sections/_student_org_request.html",
+        "manage-roles": "accounts/profile/sections/_manage_roles.html",
+        "permission-editor": "accounts/profile/sections/_permission_editor.html",
+        "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
+        "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
+    }
 
     context = {
         "profile": profile,
@@ -2077,6 +2099,8 @@ def user_profile(request):
         "primary_user_role_label": primary_user_role_label,
         "active_section": active_section,
         "active_section_title": active_section_title,
+        "direct_profile_section": direct_profile_section,
+        "direct_profile_section_template": direct_profile_section_templates.get(direct_profile_section, ""),
         "active_main_nav": "exams" if active_section in PROFILE_EXAM_NAV_SECTIONS else "",
         "allowed_sections": allowed_sections,
         "profile_base_url": reverse("accounts:profile"),
@@ -2246,6 +2270,24 @@ def user_profile(request):
         "statistics_group_pagination_query": statistics_group_pagination_query,
         "statistics_teacher_course_pagination_query": statistics_teacher_course_pagination_query,
     }
+
+    context.update(
+        {
+            "review_items": context["pending_review_items"],
+            "search_query": pending_review_search_query,
+            "filter_type": pending_review_filter_type,
+            "filter_status": pending_review_filter_status,
+            "total_count": context["pending_review_total_count"],
+            "pagination_query": pending_review_pagination_query,
+            "organizations": superadmin_organizations_section.get("organizations", []),
+            "all_modules": superadmin_organizations_section.get("all_modules", []),
+            "profiles": manage_roles_section.get("profiles", []),
+            "assignable_roles": manage_roles_section.get("assignable_roles", []),
+            "roles": permission_editor_section.get("roles", []),
+            "selected_role": permission_editor_section.get("selected_role"),
+        }
+    )
+    context.update(student_org_management_section)
 
     return render(request, "accounts/profile.html", context)
 

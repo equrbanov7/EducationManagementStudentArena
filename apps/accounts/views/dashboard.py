@@ -24,7 +24,6 @@ from core.tenancy import restore_request_organization_from_profile
 
 from ._dashboard_helpers import (
     _collect_my_results,
-    _collect_pending_answer_items,
 )
 from ._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -41,6 +40,7 @@ from ._helpers import (
     _parse_decimal_score,
     _pending_review_type_label,
     _query_string,
+    _render_profile_section,
     _result_status_badge,
     _review_window_seconds_left,
     _role_capabilities,
@@ -356,19 +356,7 @@ def pending_answers(request):
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
-    pending_search = request.GET.get("pending_search")
-    if pending_search is None:
-        pending_search = request.GET.get("search")
-    pending_type = request.GET.get("pending_type")
-    if pending_type is None:
-        pending_type = request.GET.get("type")
-
-    items, counts, active_filter, search_query = _collect_pending_answer_items(
-        request,
-        search=pending_search,
-        filter_type=pending_type,
-    )
-    return redirect(reverse("accounts:profile") + "?section=pending-answers")
+    return _render_profile_section(request, "pending-answers")
 
 
 @login_required
@@ -564,7 +552,7 @@ def pending_review(request):
         messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
         return redirect("accounts:profile")
 
-    return redirect(reverse("accounts:profile") + "?section=pending-review")
+    return _render_profile_section(request, "pending-review")
 
 
 @login_required
@@ -896,7 +884,7 @@ def review_results(request):
         messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
         return redirect("accounts:profile")
 
-    return redirect(reverse("accounts:profile") + "?section=review-results")
+    return _render_profile_section(request, "review-results")
 
 
 @login_required

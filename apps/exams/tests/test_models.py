@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.test import TestCase
 from django.utils import timezone
 
@@ -308,6 +309,10 @@ class ExamQuestionTest(TestCase):
         self.assertEqual(question.options.count(), 2)
         self.assertTrue(option1.is_correct)
         self.assertFalse(option2.is_correct)
+
+    def test_exam_question_option_text_allows_long_imported_variants(self):
+        field = ExamQuestionOption._meta.get_field("text")
+        self.assertIsInstance(field, models.TextField)
 
     def test_exam_question_effective_time_limit(self):
         """Test effective_time_limit property."""
