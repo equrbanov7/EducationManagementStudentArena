@@ -21,6 +21,7 @@ from apps.organizations.services import ensure_owner_membership
 from ._helpers import (
     _append_query_params,
     _is_superadmin_user,
+    _render_profile_section,
     _resolve_next_url,
 )
 
@@ -219,7 +220,7 @@ def superadmin_organizations(request):
 
         return redirect(next_url)
 
-    return redirect(reverse("accounts:profile") + "?section=superadmin-organizations")
+    return _render_profile_section(request, "superadmin-organizations")
 
 
 @login_required
@@ -256,7 +257,7 @@ def superadmin_ai_settings(request):
 
         return redirect(_resolve_next_url(request, fallback_next_url))
 
-    return redirect(reverse("accounts:profile") + "?section=superadmin-ai")
+    return _render_profile_section(request, "superadmin-ai")
 
 
 def _estimate_monthly_cost(config):

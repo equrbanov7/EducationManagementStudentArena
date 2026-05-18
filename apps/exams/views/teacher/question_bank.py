@@ -4,6 +4,7 @@ from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Max
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
@@ -553,60 +554,74 @@ def test_question_bank(request, slug):
             exam.default_question_points = default_points
             update_fields.append("default_question_points")
 
-        if update_fields:
-            exam.save(update_fields=update_fields)
-
-        # ---- blok seçimi / yeni blok ----
-        block_id = request.POST.get("block_id")
-        new_block_name = (request.POST.get("new_block_name") or "").strip()
-        block_obj = None
-
-        if new_block_name:
-            max_order = blocks.aggregate(m=Max("order")).get("m") or 0
-            block_obj = QuestionBlock.objects.create(exam=exam, name=new_block_name, order=max_order + 1)
-        elif block_id:
-            block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
-
-        # ---- order başlanğıcı ----
-        start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
-
         created_count = 0
         skipped_count = 0
 
-        for idx, q in enumerate(parsed, start=1):
-            if idx not in selected:
-                continue
+        with transaction.atomic():
+            if update_fields:
+                exam.save(update_fields=update_fields)
 
-            # minimum şərt: A-D olsun
-            if any(x not in q["options"] for x in ["A", "B", "C", "D"]):
-                skipped_count += 1
-                continue
+            # ---- blok seçimi / yeni blok ----
+            block_id = request.POST.get("block_id")
+            new_block_name = (request.POST.get("new_block_name") or "").strip()
+            block_obj = None
 
-            # per-question points (opsional input: points_1, points_2, ...)
-            p_raw = (request.POST.get(f"points_{idx}") or "").strip()
-            points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
+            if new_block_name:
+                max_order = blocks.aggregate(m=Max("order")).get("m") or 0
+                block_obj = QuestionBlock.objects.create(exam=exam, name=new_block_name, order=max_order + 1)
+            elif block_id:
+                block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
 
-            eq = ExamQuestion.objects.create(
-                exam=exam,
-                block=block_obj,
-                text=q["text"],
-                answer_mode=q["answer_mode"],
-                order=start_order,
-                points=points,
-            )
-            start_order += 1
+            # ---- order başlanğıcı ----
+            start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
 
-            # options create (A–E varsa)
-            for lab in "ABCDE":
-                if lab in q["options"]:
-                    ExamQuestionOption.objects.create(
-                        question=eq,
-                        label=lab,
-                        text=q["options"][lab],
-                        is_correct=(lab in q["correct"]),
+            question_rows = []
+            option_payloads = []
+
+            for idx, q in enumerate(parsed, start=1):
+                if idx not in selected:
+                    continue
+
+                # minimum şərt: A-D olsun
+                if any(x not in q["options"] for x in ["A", "B", "C", "D"]):
+                    skipped_count += 1
+                    continue
+
+                # per-question points (opsional input: points_1, points_2, ...)
+                p_raw = (request.POST.get(f"points_{idx}") or "").strip()
+                points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
+
+                question_rows.append(
+                    ExamQuestion(
+                        exam=exam,
+                        block=block_obj,
+                        text=q["text"],
+                        answer_mode=q["answer_mode"],
+                        order=start_order,
+                        points=points,
                     )
+                )
+                option_payloads.append((q["options"], set(q["correct"])))
+                start_order += 1
 
-            created_count += 1
+            created_questions = ExamQuestion.objects.bulk_create(question_rows, batch_size=100)
+            created_count = len(created_questions)
+
+            option_rows = []
+            for eq, (options, correct) in zip(created_questions, option_payloads):
+                for lab in "ABCDE":
+                    if lab in options:
+                        option_rows.append(
+                            ExamQuestionOption(
+                                question=eq,
+                                label=lab,
+                                text=options[lab],
+                                is_correct=(lab in correct),
+                            )
+                        )
+
+            if option_rows:
+                ExamQuestionOption.objects.bulk_create(option_rows, batch_size=500)
 
         messages.success(
             request,
