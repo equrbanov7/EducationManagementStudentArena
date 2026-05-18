@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 
@@ -29,8 +29,6 @@ from ._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
     STUDENT_PENDING_INVITE_TITLE,
-    _build_student_org_management_section,
-    _build_student_org_request_section,
     _close_other_pending_student_requests,
     _collect_actor_permissions,
     _csv_to_int_set,
@@ -973,20 +971,7 @@ def student_organization_management(request):
         messages.error(request, "Naməlum əməliyyat.")
         return redirect(next_url)
 
-    context = _build_student_org_management_section(
-        request=request,
-        organization=org,
-        is_superadmin=is_superadmin,
-        user_level=user_level,
-        teacher_student_only=teacher_student_only,
-        can_manage_students=is_superadmin
-        or user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
-        or teacher_can_manage_students,
-        can_invite_members=is_superadmin
-        or user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
-        or teacher_can_invite_members,
-    )
-    return render(request, "accounts/student_organization_management.html", context)
+    return redirect(reverse("accounts:profile") + "?section=student-organization-management")
 
 
 @login_required
@@ -1182,8 +1167,7 @@ def student_organization_request(request):
         messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
         return redirect("accounts:profile")
 
-    context = _build_student_org_request_section(request=request, profile=profile)
-    return render(request, "accounts/student_organization_request.html", context)
+    return redirect(reverse("accounts:profile") + "?section=student-organization-request")
 
 
 @login_required

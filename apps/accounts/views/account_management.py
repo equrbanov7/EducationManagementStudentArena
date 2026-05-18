@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
@@ -421,9 +421,4 @@ def superadmin_user_management(request):
 
         return redirect(next_url)
 
-    context = build_superadmin_user_management_context(
-        request,
-        base_url=fallback_next_url,
-        include_section=False,
-    )
-    return render(request, "accounts/superadmin_user_management.html", context)
+    return redirect(reverse("accounts:profile") + "?section=superadmin-users")

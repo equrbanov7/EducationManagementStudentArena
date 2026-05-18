@@ -1,0 +1,156 @@
+{% load static i18n org_tags %}
+{# AI Assistant Chatbot Widget — only rendered for authenticated users #}
+{% if user.is_authenticated %}
+
+{# ── Floating Bot Button ──────────────────────────────────────────── #}
+<button id="ai-bot-btn" class="ai-bot-btn" type="button" aria-label="{% trans 'AI Assistant' context 'ai_assistant.aria' %}">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="ai-warmWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#e8e1dd"/>
+            </linearGradient>
+            <linearGradient id="ai-screenColor" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#1e272e"/>
+                <stop offset="100%" stop-color="#0b1014"/>
+            </linearGradient>
+            <filter id="ai-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+        </defs>
+        <ellipse class="ai-bot-svg-shadow" cx="200" cy="380" rx="75" ry="12" fill="#b2bec3" opacity="0.4"/>
+        <g class="ai-bot-svg-float">
+            <g class="ai-bot-svg-wave">
+                <path d="M 140 240 Q 60 210 70 140" stroke="url(#ai-warmWhite)" stroke-width="26" stroke-linecap="round" fill="none"/>
+                <circle cx="60" cy="130" r="7" fill="#d1ccc9"/>
+                <circle cx="75" cy="115" r="7" fill="#d1ccc9"/>
+                <circle cx="95" cy="125" r="7" fill="#d1ccc9"/>
+            </g>
+
+            <g>
+                <path d="M 260 240 Q 330 260 310 320" stroke="url(#ai-warmWhite)" stroke-width="26" stroke-linecap="round" fill="none"/>
+                <circle cx="305" cy="335" r="7" fill="#d1ccc9"/>
+                <circle cx="320" cy="330" r="7" fill="#d1ccc9"/>
+                <circle cx="330" cy="315" r="7" fill="#d1ccc9"/>
+            </g>
+
+            <rect x="125" y="210" width="150" height="130" rx="65" fill="url(#ai-warmWhite)"/>
+            <polygon points="250,290 253,296 260,296 255,301 257,308 250,304 243,308 245,301 240,296 247,296" fill="#ff7675"/>
+            <path d="M 155 315 C 180 325, 220 325, 245 315" stroke="#cfc8c4" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <rect x="180" y="190" width="40" height="30" fill="#a1a6aa" rx="8"/>
+
+            <g class="ai-bot-svg-head">
+                <rect x="75" y="105" width="40" height="50" rx="15" fill="url(#ai-warmWhite)"/>
+                <rect x="285" y="105" width="40" height="50" rx="15" fill="url(#ai-warmWhite)"/>
+                <rect x="90" y="60" width="220" height="140" rx="55" fill="url(#ai-warmWhite)"/>
+                <rect x="110" y="80" width="180" height="100" rx="35" fill="url(#ai-screenColor)"/>
+                <circle cx="155" cy="125" r="18" fill="#48dbfb" filter="url(#ai-glow)"/>
+                <circle cx="150" cy="118" r="6" fill="#ffffff"/>
+                <circle cx="162" cy="128" r="3" fill="#ffffff"/>
+                <circle cx="245" cy="125" r="18" fill="#48dbfb" filter="url(#ai-glow)"/>
+                <circle cx="240" cy="118" r="6" fill="#ffffff"/>
+                <circle cx="252" cy="128" r="3" fill="#ffffff"/>
+                <ellipse cx="130" cy="145" rx="10" ry="5" fill="#ff7675" opacity="0.6"/>
+                <ellipse cx="270" cy="145" rx="10" ry="5" fill="#ff7675" opacity="0.6"/>
+                <path d="M 188 150 Q 200 162 212 150" stroke="#48dbfb" stroke-width="6" stroke-linecap="round" fill="none" filter="url(#ai-glow)"/>
+            </g>
+        </g>
+    </svg>
+</button>
+
+{# ── Tooltip ──────────────────────────────────────────────────────── #}
+<div id="ai-bot-tooltip" class="ai-bot-tooltip">
+    {% trans "Söhbətə Başla" context "ai_assistant.tooltip" %}
+    <span class="ai-bot-tooltip-sub">{% trans "Dərhal Cavab Al" context "ai_assistant.tooltip" %}</span>
+</div>
+
+{# ── Chat Panel ───────────────────────────────────────────────────── #}
+<div id="ai-chat-panel"
+     class="ai-chat-panel"
+     data-chat-url="{% url 'ai_assistant:chat' %}"
+     data-quota-url="{% url 'ai_assistant:quota' %}"
+     data-csrf-token="{{ csrf_token }}"
+     data-storage-key="emsa.aiAssistant.v2.{{ user.id }}.{% if current_organization %}{{ current_organization.id }}{% else %}global{% endif %}.{{ LANGUAGE_CODE|default:'az' }}"
+     data-history-ttl-ms="900000"
+     data-limit-label="{% trans 'Sorğular' context 'ai_assistant.limit' %}"
+     data-loading-label="{% trans 'yüklənir...' context 'ai_assistant.limit' %}"
+     data-greeting="{% trans 'Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?' context 'ai_assistant.greeting' %}"
+     data-limit-disabled-message="{% trans 'AI sorğu limiti hazırda aktiv deyil.' context 'ai_assistant.error' %}"
+     data-send-failed-message="{% trans 'Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin.' context 'ai_assistant.error' %}"
+     data-generic-error-message="{% trans 'Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.' context 'ai_assistant.error' %}"
+     data-network-error-message="{% trans 'Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin.' context 'ai_assistant.error' %}">
+    {# Header #}
+    <div class="ai-chat-header">
+        <div class="ai-chat-header-bar">
+            {% with org_name=current_organization.name|default:"EMSArena" %}
+            <div class="ai-chat-org-logo{% if not current_organization.logo %} ai-chat-org-logo--fallback{% endif %}" title="{{ org_name }}">
+                {% if current_organization.logo %}
+                    <img src="{{ current_organization.logo.url }}" alt="{{ org_name }}">
+                    <span class="ai-chat-org-initials">{{ org_name|initials }}</span>
+                {% else %}
+                    <span class="ai-chat-org-initials">{{ org_name|initials }}</span>
+                {% endif %}
+            </div>
+            {% endwith %}
+            <button id="ai-chat-close" class="ai-chat-close-btn" type="button" aria-label="{% trans 'Bağla' context 'ai_assistant.action' %}">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="ai-chat-hero-avatar" aria-hidden="true">
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="ai-headerShell" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff"/>
+                        <stop offset="100%" stop-color="#e9eef8"/>
+                    </linearGradient>
+                    <linearGradient id="ai-headerScreen" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#25313a"/>
+                        <stop offset="100%" stop-color="#111827"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="200" cy="200" r="176" fill="#eef5ff"/>
+                <circle cx="200" cy="200" r="150" fill="#ffffff" opacity="0.7"/>
+                <rect x="92" y="115" width="52" height="72" rx="20" fill="url(#ai-headerShell)"/>
+                <rect x="256" y="115" width="52" height="72" rx="20" fill="url(#ai-headerShell)"/>
+                <rect x="116" y="88" width="168" height="128" rx="54" fill="url(#ai-headerShell)"/>
+                <rect x="138" y="112" width="124" height="78" rx="26" fill="url(#ai-headerScreen)"/>
+                <circle cx="174" cy="150" r="13" fill="#5ee7ff"/>
+                <circle cx="226" cy="150" r="13" fill="#5ee7ff"/>
+                <path d="M 188 171 Q 200 181 212 171" stroke="#5ee7ff" stroke-width="7" stroke-linecap="round" fill="none"/>
+                <rect x="150" y="220" width="100" height="94" rx="45" fill="url(#ai-headerShell)"/>
+                <path d="M 153 260 C 126 276 116 304 126 332" stroke="#ffffff" stroke-width="24" stroke-linecap="round" fill="none"/>
+                <path d="M 247 260 C 274 276 284 304 274 332" stroke="#ffffff" stroke-width="24" stroke-linecap="round" fill="none"/>
+            </svg>
+        </div>
+
+        <div class="ai-chat-header-title">{% trans "AI Assistent" context "ai_assistant.title" %}</div>
+        <div id="ai-chat-limit" class="ai-chat-limit-badge" aria-live="polite">
+            {% trans "Sorğular" context "ai_assistant.limit" %}: {% trans "yüklənir..." context "ai_assistant.limit" %}
+        </div>
+    </div>
+
+    {# Messages #}
+    <div id="ai-chat-messages" class="ai-chat-messages"></div>
+
+    {# Limit exceeded banner #}
+    <div id="ai-chat-limit-exceeded" class="ai-chat-limit-exceeded" style="display:none;">
+        {% trans "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin." context "ai_assistant.limit_exceeded" %}
+    </div>
+
+    {# Input #}
+    <div id="ai-chat-input-wrap" class="ai-chat-input-wrap">
+        <input id="ai-chat-input" class="ai-chat-input" type="text"
+               placeholder="{% trans 'Mesajınızı yazın...' context 'ai_assistant.input' %}"
+               autocomplete="off" maxlength="2000">
+        <button id="ai-chat-emoji" class="ai-chat-emoji-btn" type="button" aria-label="{% trans 'Emoji' context 'ai_assistant.action' %}">
+            <i class="far fa-smile" aria-hidden="true"></i>
+        </button>
+        <button id="ai-chat-send" class="ai-chat-send-btn" type="button" aria-label="{% trans 'Göndər' context 'ai_assistant.action' %}">
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+
+{% endif %}
