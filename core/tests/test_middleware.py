@@ -7,8 +7,11 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
+import time
+from types import SimpleNamespace
 
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 
 class RequestIdMiddlewareTest(TestCase):
@@ -262,3 +265,166 @@ class MetricsMiddlewareTest(TestCase):
         mw(request)
         after = http_requests_total.labels(method="GET", path="/test-path/", status_code="200")._value.get()
         self.assertGreater(after, before)
+
+
+@override_settings(
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "request-queue-middleware-tests",
+        }
+    },
+    REQUEST_QUEUE_CACHE_ALIAS="default",
+    REQUEST_QUEUE_ENABLED=True,
+    REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT=10,
+    REQUEST_QUEUE_LOCK_POLL_INTERVAL_SECONDS=0.01,
+    REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS=1.0,
+)
+class RequestQueueMiddlewareTest(TestCase):
+    """RequestQueueMiddleware serialises mutating requests."""
+
+    def setUp(self):
+        from django.core.cache import caches
+
+        caches["default"].clear()
+        self.factory = RequestFactory()
+
+    @staticmethod
+    def _user(user_id):
+        return SimpleNamespace(is_authenticated=True, pk=user_id)
+
+    def _post_request(self, *, user_id=1, path="/submit/"):
+        request = self.factory.post(path, HTTP_ACCEPT="application/json")
+        request.user = self._user(user_id)
+        return request
+
+    def test_safe_methods_bypass_queue(self):
+        from django.http import HttpResponse
+
+        calls = []
+
+        def get_response(request):
+            calls.append(request.method)
+            return HttpResponse("ok")
+
+        from core.middleware import RequestQueueMiddleware
+
+        middleware = RequestQueueMiddleware(get_response)
+        request = self.factory.get("/submit/")
+        request.user = self._user(1)
+
+        response = middleware(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(calls, ["GET"])
+        self.assertNotIn("X-Request-Queue-Wait-Ms", response)
+
+    def test_unsafe_requests_for_same_actor_are_serialised(self):
+        from django.http import HttpResponse
+
+        entered_first = threading.Event()
+        release_first = threading.Event()
+        events = []
+        responses = []
+
+        def get_response(request):
+            name = request.META["REQUEST_NAME"]
+            events.append(name)
+            if name == "first":
+                entered_first.set()
+                release_first.wait(2)
+            return HttpResponse("ok")
+
+        from core.middleware import RequestQueueMiddleware
+
+        middleware = RequestQueueMiddleware(get_response)
+        first = self._post_request(user_id=77)
+        first.META["REQUEST_NAME"] = "first"
+        second = self._post_request(user_id=77)
+        second.META["REQUEST_NAME"] = "second"
+
+        first_thread = threading.Thread(target=lambda: responses.append(middleware(first)))
+        second_thread = threading.Thread(target=lambda: responses.append(middleware(second)))
+
+        first_thread.start()
+        self.assertTrue(entered_first.wait(1))
+        second_thread.start()
+        time.sleep(0.05)
+
+        self.assertEqual(events, ["first"])
+
+        release_first.set()
+        first_thread.join(1)
+        second_thread.join(1)
+
+        self.assertEqual(events, ["first", "second"])
+        self.assertEqual(sorted(response.status_code for response in responses), [200, 200])
+
+    @override_settings(REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS=0.05)
+    def test_same_actor_timeout_returns_503_not_500(self):
+        from django.http import HttpResponse
+
+        entered_first = threading.Event()
+        release_first = threading.Event()
+
+        def get_response(request):
+            if request.META["REQUEST_NAME"] == "first":
+                entered_first.set()
+                release_first.wait(2)
+            return HttpResponse("ok")
+
+        from core.middleware import RequestQueueMiddleware
+
+        middleware = RequestQueueMiddleware(get_response)
+        first = self._post_request(user_id=88)
+        first.META["REQUEST_NAME"] = "first"
+        second = self._post_request(user_id=88)
+        second.META["REQUEST_NAME"] = "second"
+
+        first_thread = threading.Thread(target=lambda: middleware(first))
+        first_thread.start()
+        self.assertTrue(entered_first.wait(1))
+
+        response = middleware(second)
+        release_first.set()
+        first_thread.join(1)
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response["Retry-After"], "2")
+        self.assertEqual(json.loads(response.content)["ok"], False)
+
+    @override_settings(
+        REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT=1,
+        REQUEST_QUEUE_PER_ACTOR_SERIALIZATION=False,
+        REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS=0.05,
+    )
+    def test_global_unsafe_limit_timeout_returns_503(self):
+        from django.http import HttpResponse
+
+        entered_first = threading.Event()
+        release_first = threading.Event()
+
+        def get_response(request):
+            if request.META["REQUEST_NAME"] == "first":
+                entered_first.set()
+                release_first.wait(2)
+            return HttpResponse("ok")
+
+        from core.middleware import RequestQueueMiddleware
+
+        middleware = RequestQueueMiddleware(get_response)
+        first = self._post_request(user_id=101)
+        first.META["REQUEST_NAME"] = "first"
+        second = self._post_request(user_id=102)
+        second.META["REQUEST_NAME"] = "second"
+
+        first_thread = threading.Thread(target=lambda: middleware(first))
+        first_thread.start()
+        self.assertTrue(entered_first.wait(1))
+
+        response = middleware(second)
+        release_first.set()
+        first_thread.join(1)
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response["X-Request-Queued"], "timeout")
