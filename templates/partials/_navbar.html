@@ -60,7 +60,7 @@
                             aria-expanded="false"
                         >
                             {% with nav_profile=request.user.profile %}
-                            <span class="blog-header__user-avatar">
+                            <span class="blog-header__user-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
                                 {% if nav_profile and nav_profile.avatar %}
                                     <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
                                          alt="{{ request.user.username }}"

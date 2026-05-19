@@ -89,6 +89,7 @@ const nowMs = () => Date.now() + Number(state.serverTimeOffsetMs || 0);
 const avatarMarkup = (player, size, className = "") =>
     window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
 const showQuestionsOnDevices = () => Boolean(SESSION_SETTINGS.show_questions_on_devices);
+const OPTION_SHAPES = ["triangle", "diamond", "circle", "square", "pentagon", "hexagon"];
 const topSignature = (rows) =>
     (Array.isArray(rows) ? rows : [])
         .map((row) =>
@@ -420,6 +421,28 @@ function buildQuestionCard(question, extraMarkup = "") {
     `;
 }
 
+function optionShapeKey(option, index) {
+    const fallback = OPTION_SHAPES[index % OPTION_SHAPES.length] || "circle";
+    const raw = String(option?.shape || fallback).toLowerCase();
+    return raw.replace(/[^a-z0-9_-]/g, "") || fallback;
+}
+
+function optionMarkerLabel(option, index) {
+    if (option?.shape_label) return option.shape_label;
+    const shape = optionShapeKey(option, index).replace(/[-_]/g, " ");
+    return shape.charAt(0).toUpperCase() + shape.slice(1);
+}
+
+function optionMarkerMarkup(option, index) {
+    const shape = optionShapeKey(option, index);
+    const label = optionMarkerLabel(option, index);
+    return `
+        <span class="option-letter option-letter--shape" aria-label="${esc(label)}" title="${esc(label)}">
+            <span class="answer-shape answer-shape--${shape}" aria-hidden="true"></span>
+        </span>
+    `;
+}
+
 function getAudioContext() {
     if (!AudioCtor) return null;
     if (!state.audioContext) {
@@ -683,7 +706,6 @@ function updateIntroProgress(question) {
 }
 
 function renderOptions(question) {
-    const letters = ["A", "B", "C", "D", "E", "F"];
     UI.optionsContainer.innerHTML = "";
 
     (question.options || []).forEach((option, index) => {
@@ -695,7 +717,7 @@ function renderOptions(question) {
             button.classList.add("selected");
         }
         button.innerHTML = `
-            <span class="option-letter">${esc(option.label || letters[index] || String(index + 1))}</span>
+            ${optionMarkerMarkup(option, index)}
             <span class="option-text">${esc(
                 showQuestionsOnDevices() ? option.text || "" : tr("optionHiddenBody", "Match this answer on the main screen.")
             )}</span>

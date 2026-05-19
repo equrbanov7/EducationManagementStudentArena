@@ -774,6 +774,97 @@ class ExamAccessControlServicesTest(TestCase):
 
 
 class ExamParsingServicesTest(TestCase):
+    def test_parse_bulk_mcq_supports_end_question_unlabeled_format(self):
+        raw = """
+        Təsdiq edirəm:
+        “Proqramlaşdırma və informasiya təhlükəsizliyi” kafedrasının müdiri
+        Semestr: 2025-2026(payız)
+        Kibertəhlükəsizlik nəyi ifadə edir?
+        İnformasiya sistemlərinin və şəbəkələrinin qorunması
+        Rəqəmsal mühitdə xidmətlərin davamlılığının təmin olunması
+        İnformasiya resurslarının təhlükəsizlik qaydaları ilə idarə edilməsi
+        Elektron sistemlərdə risklərin azaldılmasına yönələn tədbirlər
+        Şəbəkə fəaliyyətinin nəzarət mexanizmləri ilə qorunması
+        END_QUESTION
+
+        2. Kibercinayət anlayışı hansıdır?
+        İnformasiya texnologiyalarından istifadə etməklə törədilən cinayət
+        Polis tərəfindən həyata keçirilən əməliyyat
+        İnternet üzərindən hüquqi sənədin göndərilməsi
+        Elektron məktubun silinməsi
+        Şifrənin dəyişdirilməsi
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 2)
+        self.assertEqual(parsed[0]["text"], "Kibertəhlükəsizlik nəyi ifadə edir?")
+        self.assertEqual(parsed[0]["correct"], ["A"])
+        self.assertEqual(
+            parsed[0]["options"]["E"],
+            "Şəbəkə fəaliyyətinin nəzarət mexanizmləri ilə qorunması",
+        )
+        self.assertEqual(parsed[1]["q_no"], "2")
+        self.assertEqual(
+            parsed[1]["options"]["A"], "İnformasiya texnologiyalarından istifadə etməklə törədilən cinayət"
+        )
+
+    def test_parse_bulk_mcq_end_question_keeps_e_option_separate(self):
+        raw = """
+        Aşağıdakılardan hansı kibertəhlükə hesab olunur?
+        Şəbəkəyə icazəsiz müdaxilə
+        Sosial şəbəkədə şəkil paylaşmaq
+        Elektron kitab oxumaq
+        Online oyun oynamaq
+        Kompüterə antivirus yükləmək
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["options"]["E"], "Kompüterə antivirus yükləmək")
+        self.assertNotIn("END_QUESTION", parsed[0]["options"]["E"])
+
+    def test_parse_bulk_mcq_end_question_merges_wrapped_unlabeled_option(self):
+        raw = """
+        İnternet azadlığını qorumaq üçün hansı fəaliyyətlər görülməlidir?
+        Hökumətlərin mətbuat və məlumat azadlığını təmin etməsi
+        Sadəcə şifrə qoymaq
+        Routeri dəyişmək
+        Sosial şəbəkələrdə izləyici sayını artırmaq üçün sponsorlu reklamların
+        verilməsi və media strategiyasının qurulması
+        İnternet provayderlərinin tarif paketlərini yeniləməsi
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(
+            parsed[0]["options"]["D"],
+            "Sosial şəbəkələrdə izləyici sayını artırmaq üçün sponsorlu reklamların "
+            "verilməsi və media strategiyasının qurulması",
+        )
+        self.assertEqual(parsed[0]["options"]["E"], "İnternet provayderlərinin tarif paketlərini yeniləməsi")
+
+    def test_parse_bulk_mcq_end_question_splits_joined_missing_e_option(self):
+        raw = """
+        Kriptovalyutaların hüquqi çərçivəsində hansı əsas məsələ mövcuddur?
+        Mərkəzsiz fəaliyyətin tənzimlənməsi və cinayətkar fəaliyyətin qarşısının alınması
+        Elektron poçtların şifrələnməsi
+        Sosial şəbəkələrdə təhqir yayılması
+        Şəbəkə xidmətlərinin optimallaşdırılmasıCihazların şəbəkəyə qoşulması
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["options"]["D"], "Şəbəkə xidmətlərinin optimallaşdırılması")
+        self.assertEqual(parsed[0]["options"]["E"], "Cihazların şəbəkəyə qoşulması")
+
     def test_extract_text_from_upload_reads_pdf_with_pypdf(self):
         uploaded = SimpleUploadedFile("questions.pdf", b"%PDF-1.4 fake", content_type="application/pdf")
         fake_page = Mock()
