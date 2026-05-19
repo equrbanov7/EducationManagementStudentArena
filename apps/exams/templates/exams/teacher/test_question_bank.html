@@ -295,12 +295,20 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
             <input type="hidden" name="default_points" id="dpHiddenSave" value="{{ dp_value }}">
 
             <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+            <input type="hidden" name="selected_indices" id="selectedIndicesInput" value="">
+            <input type="hidden" name="points_payload" id="pointsPayloadInput" value="">
 
             <div class="question-list">
                 {% for q in parsed %}
-                <div class="q-card" data-toggle-row-card>
+                <div class="q-card{% if forloop.counter in selected %} is-selected{% endif %}" data-toggle-row-card>
                     <div class="q-checkbox-wrapper">
-                        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}">
+                        <input
+                            class="custom-checkbox qcheck"
+                            type="checkbox"
+                            name="selected"
+                            value="{{ forloop.counter }}"
+                            {% if forloop.counter in selected %}checked{% endif %}
+                        >
                     </div>
 
                     <div class="points-mini">
@@ -381,7 +389,7 @@ window.AI_QUESTION_BANK_I18N = {
 };
 </script>
 <script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
-<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260520-compact-save"></script>
 
 <script nonce="{{ request.csp_nonce }}">
 function syncBankSettings(){
