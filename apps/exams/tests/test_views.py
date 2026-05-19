@@ -3,6 +3,7 @@ View tests for exams app.
 """
 
 import base64
+import json
 from datetime import timedelta
 from unittest.mock import patch
 from urllib.parse import quote, urlencode
@@ -10,7 +11,7 @@ from urllib.parse import quote, urlencode
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import override
@@ -3201,6 +3202,110 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertContains(response, "data-bootstrap-select", html=False)
         self.assertContains(response, "Mətnin sonuna əlavə et")
         self.assertContains(response, "Mətn sahəsini əvəz et")
+
+    def _end_question_import_text(self, count):
+        return "\n\n".join(
+            [
+                "\n".join(
+                    [
+                        f"{index}. Import question {index}?",
+                        f"Correct answer {index}",
+                        f"Wrong answer {index}",
+                        f"Other answer {index}",
+                        f"Alternative answer {index}",
+                        f"Extra answer {index}",
+                        "END_QUESTION",
+                    ]
+                )
+                for index in range(1, count + 1)
+            ]
+        )
+
+    def test_test_question_bank_preview_checks_all_questions_and_adds_compact_save_fields(self):
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "preview",
+                "raw_text": self._end_question_import_text(2),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn('id="selectedIndicesInput"', html)
+        self.assertIn('id="pointsPayloadInput"', html)
+        self.assertEqual(html.count('class="custom-checkbox qcheck"'), 2)
+        self.assertEqual(html.count('class="q-card is-selected"'), 2)
+
+    @override_settings(DATA_UPLOAD_MAX_NUMBER_FIELDS=1000)
+    @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
+    def test_test_question_bank_saves_500_end_question_import_with_compact_payload(self, mock_schedule_warmup):
+        question_count = 500
+        points_payload = {str(index): "2" for index in range(1, question_count + 1)}
+        points_payload["17"] = "5"
+
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "save",
+                "raw_text": self._end_question_import_text(question_count),
+                "selected_indices": ",".join(str(index) for index in range(1, question_count + 1)),
+                "points_payload": json.dumps(points_payload),
+                "random_question_count": str(question_count),
+                "default_points": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        imported_questions = self.exam.questions.filter(order__gte=15).order_by("order")
+        self.assertEqual(imported_questions.count(), question_count)
+        self.assertEqual(ExamQuestionOption.objects.filter(question__in=imported_questions).count(), 2500)
+        self.assertEqual(imported_questions.get(order=31).points, 5)
+        first_imported = imported_questions.first()
+        self.assertEqual(first_imported.options.get(label="A").text, "Correct answer 1")
+        self.assertTrue(first_imported.options.get(label="A").is_correct)
+        mock_schedule_warmup.assert_called_once()
+
+    @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
+    def test_test_question_bank_compact_empty_selection_saves_no_questions(self, mock_schedule_warmup):
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "save",
+                "raw_text": self._end_question_import_text(3),
+                "selected_indices": "",
+                "points_payload": "{}",
+                "random_question_count": "3",
+                "default_points": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.exam.questions.count(), 14)
+        mock_schedule_warmup.assert_called_once()
+
+    @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
+    def test_test_question_bank_empty_compact_field_falls_back_to_legacy_selection(self, mock_schedule_warmup):
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "save",
+                "raw_text": self._end_question_import_text(2),
+                "selected_indices": "",
+                "selected": ["2"],
+                "points_payload": "",
+                "points_2": "4",
+                "random_question_count": "2",
+                "default_points": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        imported_questions = self.exam.questions.filter(order__gte=15).order_by("order")
+        self.assertEqual(imported_questions.count(), 1)
+        self.assertEqual(imported_questions.first().text, "Import question 2?")
+        self.assertEqual(imported_questions.first().points, 4)
+        mock_schedule_warmup.assert_called_once()
 
     @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
     def test_test_question_bank_saves_large_import_with_long_option_text(self, mock_schedule_warmup):

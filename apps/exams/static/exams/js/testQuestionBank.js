@@ -111,6 +111,29 @@ document.addEventListener("DOMContentLoaded", function () {
     const saveForm = document.getElementById("saveForm");
     if (saveForm) {
       saveForm.addEventListener("submit", function () {
+        const selectedInput = document.getElementById("selectedIndicesInput");
+        if (selectedInput) {
+          selectedInput.value = Array.from(document.querySelectorAll(".qcheck:checked"))
+            .map(cb => cb.value)
+            .join(",");
+        }
+
+        const pointsInput = document.getElementById("pointsPayloadInput");
+        if (pointsInput) {
+          const pointsPayload = {};
+          document.querySelectorAll('input[name^="points_"]').forEach(input => {
+            const match = input.name.match(/^points_(\d+)$/);
+            if (match) pointsPayload[match[1]] = input.value || "";
+          });
+          pointsInput.value = JSON.stringify(pointsPayload);
+        }
+
+        document.querySelectorAll(".qcheck").forEach(cb => {
+          cb.disabled = true;
+        });
+        document.querySelectorAll('input[name^="points_"]').forEach(input => {
+          input.disabled = true;
+        });
         clearFileState();
       });
     }
@@ -177,4 +200,3 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     };
   });
-  
