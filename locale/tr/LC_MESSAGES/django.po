@@ -20119,3 +20119,27 @@ msgstr "İzin kuralları atlanamaz."
 msgctxt "ai_assistant.blocked"
 msgid "Bu sorğu blok olundu."
 msgstr "Bu sorgu engellendi."
+
+msgctxt "accounts.register"
+msgid "step_institution"
+msgstr "Kurum"
+
+msgctxt "accounts.register"
+msgid "choose_institution"
+msgstr "Kurum seçin"
+
+msgctxt "accounts.register"
+msgid "choose_university"
+msgstr "Üniversite seçin"
+
+msgctxt "accounts.register"
+msgid "choose_school"
+msgstr "Okul seçin"
+
+msgctxt "accounts.register"
+msgid "choose_course_center"
+msgstr "Kurs merkezi seçin"
+
+msgctxt "accounts.register"
+msgid "no_organization_affiliation"
+msgstr "Şu anda herhangi bir kuruluşa bağlı değilim"

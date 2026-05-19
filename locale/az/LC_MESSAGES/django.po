@@ -20405,3 +20405,27 @@ msgstr "İcazə qaydalarını keçmək mümkün deyil."
 msgctxt "ai_assistant.blocked"
 msgid "Bu sorğu blok olundu."
 msgstr "Bu sorğu blok olundu."
+
+msgctxt "accounts.register"
+msgid "step_institution"
+msgstr "Təşkilat"
+
+msgctxt "accounts.register"
+msgid "choose_institution"
+msgstr "Təşkilat seçin"
+
+msgctxt "accounts.register"
+msgid "choose_university"
+msgstr "Universitet seçin"
+
+msgctxt "accounts.register"
+msgid "choose_school"
+msgstr "Məktəb seçin"
+
+msgctxt "accounts.register"
+msgid "choose_course_center"
+msgstr "Kurs mərkəzi seçin"
+
+msgctxt "accounts.register"
+msgid "no_organization_affiliation"
+msgstr "Hazırda heç bir təşkilata aid deyiləm"
