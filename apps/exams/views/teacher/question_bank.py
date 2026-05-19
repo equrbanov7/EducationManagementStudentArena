@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from urllib.parse import urlencode, urlsplit
@@ -112,6 +113,48 @@ def _optional_non_negative_int(value):
     except (TypeError, ValueError):
         return None
     return parsed if parsed >= 0 else None
+
+
+def _parse_selected_question_indices(post_data):
+    if "selected_indices" in post_data:
+        compact_value = (post_data.get("selected_indices") or "").strip()
+        if compact_value:
+            raw_values = compact_value.split(",")
+        else:
+            legacy_values = post_data.getlist("selected")
+            if legacy_values:
+                raw_values = legacy_values
+            else:
+                return set()
+    else:
+        raw_values = post_data.getlist("selected")
+        if not raw_values:
+            return None
+
+    selected = set()
+    for raw_value in raw_values:
+        try:
+            value = int(str(raw_value).strip())
+        except (TypeError, ValueError):
+            continue
+        if value > 0:
+            selected.add(value)
+    return selected
+
+
+def _parse_points_payload(post_data):
+    raw_payload = (post_data.get("points_payload") or "").strip()
+    if not raw_payload:
+        return {}
+
+    try:
+        payload = json.loads(raw_payload)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return {}
+
+    if not isinstance(payload, dict):
+        return {}
+    return payload
 
 
 def _sync_written_block_questions(block, question_texts):
@@ -515,11 +558,11 @@ def test_question_bank(request, slug):
                 )
 
         # ---- Seçilən suallar ----
-        selected_list = request.POST.getlist("selected")
-        if selected_list:
-            selected = set(int(x) for x in selected_list)
-        else:
+        selected_from_request = _parse_selected_question_indices(request.POST)
+        if selected_from_request is None:
             selected = set(range(1, len(parsed) + 1))
+        else:
+            selected = selected_from_request
 
         # ---- warning sayları (üst panel üçün) ----
         warning_count = sum(len(q.get("warnings", [])) for q in parsed)
@@ -556,6 +599,7 @@ def test_question_bank(request, slug):
 
         created_count = 0
         skipped_count = 0
+        points_payload = _parse_points_payload(request.POST)
 
         with transaction.atomic():
             if update_fields:
@@ -587,8 +631,9 @@ def test_question_bank(request, slug):
                     skipped_count += 1
                     continue
 
-                # per-question points (opsional input: points_1, points_2, ...)
-                p_raw = (request.POST.get(f"points_{idx}") or "").strip()
+                # per-question points: compact payload first, legacy input fallback second.
+                p_value = points_payload.get(str(idx), request.POST.get(f"points_{idx}"))
+                p_raw = str(p_value or "").strip()
                 points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
 
                 question_rows.append(
