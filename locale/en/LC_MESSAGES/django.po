@@ -20168,3 +20168,27 @@ msgstr "Permission rules cannot be bypassed."
 msgctxt "ai_assistant.blocked"
 msgid "Bu sorğu blok olundu."
 msgstr "This request was blocked."
+
+msgctxt "accounts.register"
+msgid "step_institution"
+msgstr "Institution"
+
+msgctxt "accounts.register"
+msgid "choose_institution"
+msgstr "Select institution"
+
+msgctxt "accounts.register"
+msgid "choose_university"
+msgstr "Select university"
+
+msgctxt "accounts.register"
+msgid "choose_school"
+msgstr "Select school"
+
+msgctxt "accounts.register"
+msgid "choose_course_center"
+msgstr "Select course center"
+
+msgctxt "accounts.register"
+msgid "no_organization_affiliation"
+msgstr "I am not currently affiliated with any organization"

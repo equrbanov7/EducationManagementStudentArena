@@ -176,7 +176,7 @@ class RegisterForm(forms.ModelForm):
         label=pgettext_lazy("accounts.form.register.label", "join_organization"),
         queryset=Organization.objects.none(),
         required=False,
-        empty_label=pgettext_lazy("accounts.form.register.choice", "organization_empty"),
+        empty_label=pgettext_lazy("accounts.register", "no_organization_affiliation"),
         error_messages={
             "invalid_choice": "Düzgün seçim edin. Bu seçim mövcud seçimlərdən biri deyil.",
         },
