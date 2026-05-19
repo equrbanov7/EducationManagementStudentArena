@@ -1138,11 +1138,35 @@ function optionTone(index) {
     return ["red", "blue", "yellow", "green"][index % 4];
 }
 
+const OPTION_SHAPES = ["triangle", "diamond", "circle", "square", "pentagon", "hexagon"];
+
+function optionShapeKey(option, index) {
+    const fallback = OPTION_SHAPES[index % OPTION_SHAPES.length] || "circle";
+    const raw = String(option?.shape || fallback).toLowerCase();
+    return raw.replace(/[^a-z0-9_-]/g, "") || fallback;
+}
+
+function optionMarkerLabel(option, index) {
+    if (option?.shape_label) return option.shape_label;
+    const shape = optionShapeKey(option, index).replace(/[-_]/g, " ");
+    return shape.charAt(0).toUpperCase() + shape.slice(1);
+}
+
+function optionMarkerMarkup(option, index, className) {
+    const shape = optionShapeKey(option, index);
+    const label = optionMarkerLabel(option, index);
+    return `
+        <span class="${className} ${className}--shape" aria-label="${esc(label)}" title="${esc(label)}">
+            <span class="answer-shape answer-shape--${shape}" aria-hidden="true"></span>
+        </span>
+    `;
+}
+
 function answerOptionMarkup(option, index) {
     return `
         <article class="host-option host-option--${optionTone(index)}">
             <div class="host-option__main">
-                <span class="host-option__label">${esc(option?.label || String.fromCharCode(65 + index))}</span>
+                ${optionMarkerMarkup(option, index, "host-option__label")}
                 <span class="host-option__text">${esc(option?.text || "")}</span>
             </div>
         </article>
@@ -1226,7 +1250,7 @@ function revealOptionMarkup(option, index, distribution, correctOptionIds) {
     return `
         <article class="host-option host-option--${optionTone(index)} is-reveal ${isCorrect ? "is-correct" : "is-wrong"}">
             <div class="host-option__main">
-                <span class="host-option__label">${esc(option?.label || String.fromCharCode(65 + index))}</span>
+                ${optionMarkerMarkup(option, index, "host-option__label")}
                 <span class="host-option__text">${esc(option?.text || "")}</span>
                 <span class="host-option__verdict">${isCorrect ? "✓" : "✕"}</span>
             </div>
@@ -1245,7 +1269,7 @@ function distributionBarMarkup(option, index, distribution, correctOptionIds) {
         <div class="distribution-bar distribution-bar--${optionTone(index)} ${isCorrect ? "is-correct" : ""}">
             <div class="distribution-bar__meta">
                 <div class="distribution-bar__label-wrap">
-                    <span class="distribution-bar__label">${esc(option?.label || String.fromCharCode(65 + index))}</span>
+                    ${optionMarkerMarkup(option, index, "distribution-bar__label")}
                     <span class="distribution-bar__answer">${esc(option?.text || "")}</span>
                 </div>
                 <div class="distribution-bar__stats">
@@ -1315,7 +1339,7 @@ function renderRevealStage(question, payload) {
             }
 
             const options = question?.options || [];
-            const labels = options.map((opt, i) => opt?.label || String.fromCharCode(65 + i));
+            const labels = options.map((opt, i) => optionMarkerLabel(opt, i));
             const counts = options.map(opt => Number(distribution.counts.get(Number(opt?.id || 0)) || 0));
             const barColors = ["#f0205f", "#2563eb", "#ff8b16", "#11b981"];
             const borderColors = ["#ff5b79", "#4f9cff", "#f8c325", "#4fd39a"];

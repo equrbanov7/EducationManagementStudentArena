@@ -536,6 +536,47 @@ body.live-player-page {
     font-size: 1.25rem;
 }
 
+.option-letter--shape {
+    color: #fff;
+}
+
+.answer-shape {
+    display: block;
+    width: 24px;
+    height: 24px;
+    background: currentColor;
+}
+
+.answer-shape--triangle {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-bottom: 23px solid currentColor;
+}
+
+.answer-shape--diamond {
+    transform: rotate(45deg);
+    border-radius: 4px;
+}
+
+.answer-shape--circle {
+    border-radius: 50%;
+}
+
+.answer-shape--square {
+    border-radius: 5px;
+}
+
+.answer-shape--pentagon {
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+}
+
+.answer-shape--hexagon {
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
 .option-text {
     position: relative;
     z-index: 1;
