@@ -1864,6 +1864,48 @@ body.host-presentation-page .host-option {
     flex-shrink: 0;
 }
 
+.host-option__label--shape,
+.distribution-bar__label--shape {
+    color: #fff;
+}
+
+.answer-shape {
+    display: block;
+    width: 28px;
+    height: 28px;
+    background: currentColor;
+}
+
+.answer-shape--triangle {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 27px solid currentColor;
+}
+
+.answer-shape--diamond {
+    transform: rotate(45deg);
+    border-radius: 4px;
+}
+
+.answer-shape--circle {
+    border-radius: 50%;
+}
+
+.answer-shape--square {
+    border-radius: 5px;
+}
+
+.answer-shape--pentagon {
+    clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+}
+
+.answer-shape--hexagon {
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+
 body.host-presentation-page .host-option__label {
     width: 52px;
     height: 52px;
@@ -2000,6 +2042,19 @@ body.host-presentation-page .distribution-bar {
     background: rgba(255,255,255,0.16);
     font-weight: 900;
     flex-shrink: 0;
+}
+
+.distribution-bar__label .answer-shape {
+    width: 17px;
+    height: 17px;
+}
+
+.distribution-bar__label .answer-shape--triangle {
+    width: 0;
+    height: 0;
+    border-left-width: 9px;
+    border-right-width: 9px;
+    border-bottom-width: 16px;
 }
 
 body.host-presentation-page .distribution-bar__label {
