@@ -350,7 +350,7 @@
 /* --- Registration Wizard Steps --- */
 .register-wizard-steps {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: start;
     gap: 0.9rem;
     margin: 1.5rem 0;
@@ -481,6 +481,11 @@
 .register-search-option:hover,
 .register-search-option.is-selected {
     background: #eff6ff;
+}
+
+.register-search-option--neutral {
+    color: #4b5563;
+    font-weight: 600;
 }
 
 .register-search-empty {
