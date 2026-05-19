@@ -16,7 +16,6 @@ from django.utils.translation import pgettext
 
 from apps.live_exam.domain.session import (
     detect_multi,
-    get_option_label,
     get_option_text,
     get_question_text,
     question_points,
@@ -217,6 +216,14 @@ def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
 
 def build_options(exam_question, *, seed: int | None = None, randomize: bool = True) -> list[dict[str, Any]]:
     letters = ["A", "B", "C", "D", "E", "F"]
+    shapes = [
+        {"key": "triangle", "label": "Triangle"},
+        {"key": "diamond", "label": "Diamond"},
+        {"key": "circle", "label": "Circle"},
+        {"key": "square", "label": "Square"},
+        {"key": "pentagon", "label": "Pentagon"},
+        {"key": "hexagon", "label": "Hexagon"},
+    ]
     # Materialize with list() first so we always iterate the queryset / prefetch cache exactly once.
     options = sorted(list(exam_question.options.all()), key=lambda o: o.id)
     if randomize:
@@ -225,9 +232,18 @@ def build_options(exam_question, *, seed: int | None = None, randomize: bool = T
 
     payload: list[dict[str, Any]] = []
     for index, option in enumerate(options):
-        label = get_option_label(option) or (letters[index] if index < len(letters) else str(index + 1))
+        label = letters[index] if index < len(letters) else str(index + 1)
+        shape = shapes[index % len(shapes)]
         text = get_option_text(option) or pgettext("live_exam.view.option", "option_fallback_text").format(label=label)
-        payload.append({"id": option.id, "label": label, "text": text})
+        payload.append(
+            {
+                "id": option.id,
+                "label": label,
+                "shape": shape["key"],
+                "shape_label": shape["label"],
+                "text": text,
+            }
+        )
 
     return payload
 
