@@ -76,6 +76,18 @@ class RegisterViewTest(TestCase):
         self.assertNotContains(response, 'data-org-type="individual"', html=False)
         self.assertContains(response, 'data-org-type="university"', html=False)
 
+    def test_register_page_uses_four_step_wizard_with_institution_step(self):
+        response = self.client.get(self.register_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-step="4"', html=False)
+        self.assertContains(response, "Təşkilat")
+        self.assertContains(response, 'id="step3Title"', html=False)
+        self.assertContains(response, 'id="step4"', html=False)
+        self.assertContains(response, 'data-wizard-back="2"', count=1, html=False)
+        self.assertContains(response, 'data-wizard-back="3"', count=1, html=False)
+        self.assertContains(response, "Hazırda heç bir təşkilata aid deyiləm")
+
     def test_register_creates_user_and_profile(self):
         """Registration should stay pending until OTP verification completes."""
         response = self.client.post(

@@ -20161,3 +20161,27 @@ msgstr "Нельзя обойти правила доступа."
 msgctxt "ai_assistant.blocked"
 msgid "Bu sorğu blok olundu."
 msgstr "Этот запрос был заблокирован."
+
+msgctxt "accounts.register"
+msgid "step_institution"
+msgstr "Организация"
+
+msgctxt "accounts.register"
+msgid "choose_institution"
+msgstr "Выберите организацию"
+
+msgctxt "accounts.register"
+msgid "choose_university"
+msgstr "Выберите университет"
+
+msgctxt "accounts.register"
+msgid "choose_school"
+msgstr "Выберите школу"
+
+msgctxt "accounts.register"
+msgid "choose_course_center"
+msgstr "Выберите учебный центр"
+
+msgctxt "accounts.register"
+msgid "no_organization_affiliation"
+msgstr "В настоящее время я не связан(а) ни с одной организацией"
