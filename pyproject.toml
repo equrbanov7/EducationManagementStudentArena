@@ -46,7 +46,7 @@ dependencies = [
     "beautifulsoup4==4.12.3",
     "soupsieve==2.6",
     "urllib3==2.6.3",
-    "idna==3.11",
+    "idna==3.15",
     "charset-normalizer==3.4.4",
     "certifi==2026.1.4",
     "python-dateutil==2.9.0.post0",
