@@ -77,6 +77,19 @@ class LiveExamPayloadSecurityTest(TestCase):
         for option in options:
             self.assertNotIn("is_correct", option, "is_correct must not be exposed in question options")
 
+    def test_build_options_uses_display_order_labels_and_shapes(self):
+        """Live labels must follow the displayed order, not the stored option label."""
+        self.correct_option.label = "D"
+        self.correct_option.save(update_fields=["label"])
+        self.wrong_option.label = "A"
+        self.wrong_option.save(update_fields=["label"])
+
+        options = build_options(self.question, randomize=False)
+
+        self.assertEqual([option["label"] for option in options], ["A", "B"])
+        self.assertEqual([option["shape"] for option in options], ["triangle", "diamond"])
+        self.assertEqual([option["shape_label"] for option in options], ["Triangle", "Diamond"])
+
     def test_serialize_question_does_not_expose_correct_option_ids(self):
         """The question_published payload must not reveal which options are correct."""
         now = timezone.now()
