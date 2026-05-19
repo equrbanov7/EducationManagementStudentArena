@@ -4,7 +4,8 @@
  * 1) Country
  * 2a) Organization type card selection
  * 2b) Role/persona card selection + org-specific fields
- * 3) Account details (with persona-specific fields)
+ * 3) Institution selection for join flows
+ * 4) Account details (with persona-specific fields)
  */
 document.addEventListener("DOMContentLoaded", function () {
     var i18n = window.REGISTER_I18N || {};
@@ -47,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var step2a = document.getElementById("step2a");
     var step2b = document.getElementById("step2b");
     var step2bTitle = document.getElementById("step2bTitle");
+    var step3Title = document.getElementById("step3Title");
     var orgTypeCards = document.getElementById("orgTypeCards");
     var roleCards = document.getElementById("roleCards");
     var roleCardOwner = document.getElementById("roleCardOwner");
@@ -101,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var signupSummaryOrganization = document.getElementById("signupSummaryOrganization");
     var signupSummaryOrganizationItem = document.getElementById("signupSummaryOrganizationItem");
 
-    // Step 3 persona-specific elements
+    // Step 4 persona-specific elements
     var phoneField = document.getElementById("phoneField");
     var studentSpecificFields = document.getElementById("studentSpecificFields");
     var teacherSpecificFields = document.getElementById("teacherSpecificFields");
@@ -320,6 +322,38 @@ document.addEventListener("DOMContentLoaded", function () {
         return mode === "student_join" || mode === "teacher_join" || mode === "staff_join";
     }
 
+    function shouldShowInstitutionStep() {
+        return isJoinMode(currentSelection().mode);
+    }
+
+    function noOrganizationAffiliationLabel() {
+        return tr("no_organization_affiliation", "Hazırda heç bir təşkilata aid deyiləm");
+    }
+
+    function isNoOrganizationSelected() {
+        return organizationSearchInput && organizationSearchInput.dataset.noOrganizationSelected === "1";
+    }
+
+    function clearNoOrganizationSelection() {
+        if (!organizationSearchInput) return;
+        organizationSearchInput.dataset.noOrganizationSelected = "";
+    }
+
+    function selectNoOrganization() {
+        if (organizationSelect) {
+            organizationSelect.value = "";
+            organizationSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        if (organizationSearchInput) {
+            organizationSearchInput.value = noOrganizationAffiliationLabel();
+            organizationSearchInput.dataset.selectedValue = "";
+            organizationSearchInput.dataset.noOrganizationSelected = "1";
+        }
+        hideOrganizationSearchList();
+        updateSelectionSummary();
+        saveSignupDraft();
+    }
+
     function selectedOptionText(select) {
         if (!select || !select.options || select.selectedIndex < 0) return "";
         var selectedOption = select.options[select.selectedIndex];
@@ -420,15 +454,20 @@ document.addEventListener("DOMContentLoaded", function () {
         if (selection.mode === "organization_create" && organizationNameInput) {
             organizationLabel = organizationNameInput.value.trim();
         } else if (isJoinMode(selection.mode)) {
-            var hasSelectedOrganization =
-                organizationSearchInput && organizationSearchInput.dataset.selectedValue
-                    ? organizationSearchInput.dataset.selectedValue
-                    : organizationSelect
-                      ? organizationSelect.value
-                      : "";
-            organizationLabel = hasSelectedOrganization
-                ? selectedOptionText(organizationSelect) || (organizationSearchInput ? organizationSearchInput.value.trim() : "")
-                : "";
+            if (isNoOrganizationSelected()) {
+                organizationLabel = noOrganizationAffiliationLabel();
+            } else {
+                var hasSelectedOrganization =
+                    organizationSearchInput && organizationSearchInput.dataset.selectedValue
+                        ? organizationSearchInput.dataset.selectedValue
+                        : organizationSelect
+                          ? organizationSelect.value
+                          : "";
+                organizationLabel = hasSelectedOrganization
+                    ? selectedOptionText(organizationSelect) ||
+                      (organizationSearchInput ? organizationSearchInput.value.trim() : "")
+                    : "";
+            }
         }
 
         if (signupSummaryCountry) {
@@ -577,7 +616,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var previousValue = organizationSelect.value;
         var options = filteredOrganizations(searchText);
 
-        organizationSelect.innerHTML = '<option value="">' + tr("select_empty_organization", "Təşkilat seçin") + "</option>";
+        organizationSelect.innerHTML = '<option value="">' + noOrganizationAffiliationLabel() + "</option>";
         options.forEach(function (organization) {
             var option = document.createElement("option");
             option.value = String(organization.id);
@@ -594,6 +633,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!organizationSearchList || !organizationSearchInput) return;
         var options = filteredOrganizations(searchText);
         organizationSearchList.innerHTML = "";
+
+        var noOrganizationButton = document.createElement("button");
+        noOrganizationButton.type = "button";
+        noOrganizationButton.className = "register-search-option register-search-option--neutral";
+        noOrganizationButton.textContent = noOrganizationAffiliationLabel();
+        noOrganizationButton.dataset.value = "";
+        if (isNoOrganizationSelected()) {
+            noOrganizationButton.classList.add("is-selected");
+        }
+        noOrganizationButton.addEventListener("click", selectNoOrganization);
+        organizationSearchList.appendChild(noOrganizationButton);
 
         if (!options.length) {
             var empty = document.createElement("div");
@@ -621,6 +671,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 organizationSearchInput.value = organizationOptionLabel(organization);
                 organizationSearchInput.dataset.selectedValue = String(organization.id);
+                clearNoOrganizationSelection();
                 hideOrganizationSearchList();
                 updateSelectionSummary();
                 saveSignupDraft();
@@ -637,6 +688,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (selectedOption && selectedOption.value) {
             organizationSearchInput.value = selectedOption.textContent;
             organizationSearchInput.dataset.selectedValue = selectedOption.value;
+            clearNoOrganizationSelection();
+        } else if (isNoOrganizationSelected()) {
+            organizationSearchInput.value = noOrganizationAffiliationLabel();
+            organizationSearchInput.dataset.selectedValue = "";
         } else {
             organizationSearchInput.dataset.selectedValue = "";
         }
@@ -708,6 +763,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var selectedCountry = (countrySelect ? countrySelect.value : "").toUpperCase();
 
         if (orgType === "university") {
+            if (step3Title) step3Title.textContent = tr("choose_university", "Universitet seçin");
             organizationSearchLabel.textContent = tr("label_search_university", "Universitet axtar");
             organizationSearchInput.placeholder = tr("placeholder_search_university", "Universitet axtar...");
             studentJoinHint.textContent =
@@ -715,6 +771,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ? tr("hint_university_az", "Azərbaycandakı universitetləri siyahıdan seçə bilərsiniz.")
                     : tr("hint_university_global", "Ölkənizə uyğun universitet siyahısından seçim edin.");
         } else if (orgType === "school") {
+            if (step3Title) step3Title.textContent = tr("choose_school", "Məktəb seçin");
             organizationSearchLabel.textContent = tr("label_search_school", "Məktəb axtar (ad və ya nömrə)");
             organizationSearchInput.placeholder = tr(
                 "placeholder_search_school",
@@ -722,6 +779,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             studentJoinHint.textContent = tr("hint_school", "Məktəbinizi siyahıdan seçin və ya əl ilə daxil edin.");
         } else if (orgType === "course_center") {
+            if (step3Title) step3Title.textContent = tr("choose_course_center", "Kurs mərkəzi seçin");
             organizationSearchLabel.textContent = tr("label_search_course_center", "Kurs mərkəzi axtar");
             organizationSearchInput.placeholder = tr("placeholder_search_course_center", "Kurs mərkəzi axtar...");
             studentJoinHint.textContent = tr(
@@ -729,6 +787,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Kurs mərkəzini siyahıdan seçin və ya əl ilə daxil edin."
             );
         } else {
+            if (step3Title) step3Title.textContent = tr("choose_institution", "Təşkilat seçin");
             organizationSearchLabel.textContent = tr("label_search_default", "Müəssisə axtar");
             organizationSearchInput.placeholder = tr("placeholder_search_default", "Müəssisə axtar...");
             studentJoinHint.textContent = "";
@@ -758,7 +817,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function normalizeWizardStep(step) {
         var parsed = parseInt(step, 10);
-        if (parsed >= 1 && parsed <= 3) {
+        if (parsed >= 1 && parsed <= 4) {
             return parsed;
         }
         return 1;
@@ -847,6 +906,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (organizationSearchInput) {
             values.organizationSearchInput = organizationSearchInput.value;
+            values.organizationSearchNoOrganization = organizationSearchInput.dataset.noOrganizationSelected === "1";
         }
 
         return {
@@ -888,7 +948,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var restoredSelectFields = [];
 
             Object.keys(values).forEach(function (name) {
-                if (name === "organizationSearchInput") return;
+                if (name === "organizationSearchInput" || name === "organizationSearchNoOrganization") return;
 
                 var field = registerForm ? registerForm.elements.namedItem(name) : null;
                 if (!field || field.type === "password") return;
@@ -913,6 +973,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (organizationSearchInput && typeof values.organizationSearchInput === "string") {
                 organizationSearchInput.value = values.organizationSearchInput;
                 organizationSearchInput.dataset.selectedValue = organizationSelect ? organizationSelect.value : "";
+                organizationSearchInput.dataset.noOrganizationSelected = values.organizationSearchNoOrganization
+                    ? "1"
+                    : "";
             }
 
             clearUnsupportedIndividualSelection();
@@ -927,6 +990,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 syncSearchInputWithSelectedOrganization();
                 if (organizationSearchInput && typeof values.organizationSearchInput === "string") {
                     organizationSearchInput.value = values.organizationSearchInput;
+                    organizationSearchInput.dataset.noOrganizationSelected = values.organizationSearchNoOrganization
+                        ? "1"
+                        : "";
                 }
             }
 
@@ -944,6 +1010,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.persistRegisterWizardStep = persistWizardStep;
     window.saveRegisterSignupDraft = saveSignupDraft;
+    window.resolveRegisterWizardStep = function (step, direction) {
+        var normalizedStep = normalizeWizardStep(step);
+        if (normalizedStep === 3 && !shouldShowInstitutionStep()) {
+            return direction === "back" ? 2 : 4;
+        }
+        return normalizedStep;
+    };
 
     migrateLegacySignupDraft();
 
@@ -1023,7 +1096,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (organizationSelect) {
             organizationSelect.required = false;
-            if (!isJoinAny) organizationSelect.value = "";
+            if (!isJoinAny) {
+                organizationSelect.value = "";
+            } else if (organizationSelect.value) {
+                clearNoOrganizationSelection();
+            }
         }
 
         if (isCreatorMode) {
@@ -1042,13 +1119,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (organizationSearchInput) {
                 organizationSearchInput.value = "";
                 organizationSearchInput.dataset.selectedValue = "";
+                organizationSearchInput.dataset.noOrganizationSelected = "";
             }
             hideOrganizationSearchList();
         }
 
         syncStep2CardSelection();
 
-        // Also update step 3 persona fields
+        // Also update step 4 persona fields
         updateStep3State();
         updateSelectionSummary();
     }
@@ -1094,6 +1172,13 @@ document.addEventListener("DOMContentLoaded", function () {
         organizationSearchInput.addEventListener("input", function () {
             if (!isJoinMode(currentSelection().mode)) return;
 
+            if (
+                organizationSearchInput.dataset.noOrganizationSelected === "1" &&
+                organizationSearchInput.value !== noOrganizationAffiliationLabel()
+            ) {
+                clearNoOrganizationSelection();
+            }
+
             var selectedValue = organizationSearchInput.dataset.selectedValue || "";
             if (selectedValue && organizationSelect) {
                 var selectedOption = organizationSelect.querySelector('option[value="' + selectedValue + '"]');
@@ -1125,6 +1210,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (organizationSelect) {
         organizationSelect.addEventListener("change", function () {
+            if (organizationSelect.value) {
+                clearNoOrganizationSelection();
+            }
             syncSearchInputWithSelectedOrganization();
             updateSelectionSummary();
         });
@@ -1167,7 +1255,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (privacyCheckbox.checked) return;
 
             event.preventDefault();
-            wizardNext(3);
+            wizardNext(4);
 
             if (privacyClientError) {
                 privacyClientError.textContent = tr(
@@ -1191,7 +1279,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (validateStudentGroupNumber()) return;
 
             event.preventDefault();
-            wizardNext(3);
+            wizardNext(4);
             if (groupNumberInput) {
                 groupNumberInput.focus();
             }
@@ -1245,8 +1333,10 @@ document.addEventListener("DOMContentLoaded", function () {
             wizardNext(2);
             if (step2a) step2a.hidden = true;
             if (step2b) step2b.hidden = false;
-        } else {
+        } else if (document.querySelector("#step3 .register-field-error")) {
             wizardNext(3);
+        } else {
+            wizardNext(4);
         }
         return;
     }
@@ -1263,8 +1353,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-function wizardNext(step) {
-    var normalizedStep = Math.max(1, Math.min(3, parseInt(step, 10) || 1));
+function wizardNext(step, direction) {
+    var normalizedStep = Math.max(1, Math.min(4, parseInt(step, 10) || 1));
+    if (typeof window.resolveRegisterWizardStep === "function") {
+        normalizedStep = window.resolveRegisterWizardStep(normalizedStep, direction || "next");
+    }
     var panels = document.querySelectorAll(".wizard-panel");
     panels.forEach(function (panel) {
         panel.hidden = true;
@@ -1290,5 +1383,5 @@ function wizardNext(step) {
 }
 
 function wizardBack(step) {
-    wizardNext(step);
+    wizardNext(step, "back");
 }
