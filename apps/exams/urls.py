@@ -137,6 +137,11 @@ urlpatterns = [
         views.toggle_exam_active,
         name="toggle_exam_active",
     ),
+    path(
+        "<slug:slug>/toggle-results-visibility/",
+        views.toggle_exam_results_visibility,
+        name="toggle_exam_results_visibility",
+    ),
     path("<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
     # ==========================

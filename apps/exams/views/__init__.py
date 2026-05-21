@@ -18,6 +18,7 @@ from .teacher.exams import (
     teacher_exam_detail,
     teacher_exam_list,
     toggle_exam_active,
+    toggle_exam_results_visibility,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -74,6 +75,7 @@ __all__ = [
     "createAndEditExamView",
     "teacher_exam_detail",
     "toggle_exam_active",
+    "toggle_exam_results_visibility",
     "delete_exam",
     # Teacher - Questions
     "add_exam_question",

@@ -72,6 +72,11 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         default=False,
         help_text=pgettext_lazy("exams.model.exam.help", "is_active"),
     )
+    results_hidden_from_students = models.BooleanField(
+        pgettext_lazy("exams.model.exam.field", "results_hidden_from_students"),
+        default=False,
+        help_text=pgettext_lazy("exams.model.exam.help", "results_hidden_from_students"),
+    )
     total_duration_minutes = models.PositiveIntegerField(
         pgettext_lazy("exams.model.exam.field", "total_duration_minutes"),
         blank=True,
