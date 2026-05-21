@@ -135,7 +135,7 @@ jobs:
           retention-days: 7
 
       - name: 📈 Coverage Report to PR
-        uses: orgoro/coverage@v3.2
+        uses: orgoro/coverage@v3.3
         if: github.event_name == 'pull_request' && startsWith(inputs.python-version, '3.11')
         with:
           coverageFile: coverage.xml
