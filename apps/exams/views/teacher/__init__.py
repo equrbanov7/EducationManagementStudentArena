@@ -1,6 +1,13 @@
 # exams/views/teacher/__init__.py
 
-from .exams import createAndEditExamView, delete_exam, teacher_exam_detail, teacher_exam_list, toggle_exam_active
+from .exams import (
+    createAndEditExamView,
+    delete_exam,
+    teacher_exam_detail,
+    teacher_exam_list,
+    toggle_exam_active,
+    toggle_exam_results_visibility,
+)
 from .groups import (
     create_student_group,
     teacher_create_group,
@@ -30,6 +37,7 @@ __all__ = [
     "createAndEditExamView",
     "teacher_exam_detail",
     "toggle_exam_active",
+    "toggle_exam_results_visibility",
     "delete_exam",
     "add_exam_question",
     "edit_exam_question",

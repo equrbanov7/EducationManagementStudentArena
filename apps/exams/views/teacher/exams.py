@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.http import require_POST
 
 from apps.courses.models import CourseMembership
 from apps.exams.forms import ExamForm
@@ -509,10 +510,41 @@ def toggle_exam_active(request, slug):
 
 
 @login_required
+@require_POST
+def toggle_exam_results_visibility(request, slug):
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
+    _ensure_exam_permission(request, "exam.edit")
+    exam = get_teacher_exam_or_404(request, slug=slug)
+
+    exam.results_hidden_from_students = not exam.results_hidden_from_students
+    exam.save(update_fields=["results_hidden_from_students"])
+
+    if exam.results_hidden_from_students:
+        messages.success(
+            request,
+            pgettext_lazy("exams.view.exams.message", "İmtahan nəticələri tələbələrdən gizlədildi."),
+        )
+    else:
+        messages.success(
+            request,
+            pgettext_lazy("exams.view.exams.message", "İmtahan nəticələri tələbələrə açıldı."),
+        )
+
+    redirect_url = reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+    query_string = request.GET.urlencode()
+    if query_string:
+        redirect_url = f"{redirect_url}?{query_string}"
+    return redirect(redirect_url)
+
+
+@login_required
 def delete_exam(request, slug):
     """
     İmtahanı silmək – amma əvvəlcə təsdiq istəyəciyik.
-    Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
+    İmtahan üzrə cəhdlər varsa, onlar da CASCADE ilə birlikdə silinir.
     """
     organization = _resolve_required_organization(request)
     if organization is None:
@@ -521,10 +553,6 @@ def delete_exam(request, slug):
     exam = _get_editable_exam_or_404(request, slug)
     if exam.author_id != request.user.id:
         _ensure_exam_permission(request, "exam.delete")
-
-    if exam.attempts.exists():
-        messages.error(request, pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
-        return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
     if request.method == "POST":
         from apps.audit.utils import log_action

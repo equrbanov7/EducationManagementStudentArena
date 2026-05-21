@@ -170,6 +170,11 @@
     flex-wrap: wrap;
 }
 
+.action-group form,
+.inline-action-form {
+    margin: 0;
+}
+
 .action-btn {
     padding: 10px 18px;
     border-radius: 8px;
@@ -205,6 +210,30 @@
     background-color: #4b5563;
     transform: translateY(-1px);
     color: white;
+}
+
+.visibility-hide-btn {
+    background-color: #475569;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(71, 85, 105, 0.28);
+}
+
+.visibility-hide-btn:hover {
+    background-color: #334155;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.visibility-show-btn {
+    background-color: #0f766e;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(15, 118, 110, 0.28);
+}
+
+.visibility-show-btn:hover {
+    background-color: #0d5f59;
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 .bank-btn {
@@ -441,6 +470,9 @@
     .action-group {
         flex-direction: column;
         gap: 10px;
+    }
+    .action-group form {
+        width: 100%;
     }
     .action-btn {
         width: 100%;
