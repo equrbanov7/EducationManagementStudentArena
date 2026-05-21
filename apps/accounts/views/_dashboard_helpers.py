@@ -390,6 +390,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             ExamAttempt.objects.filter(
                 user=user,
                 exam_id__in=scoped_exam_ids,
+                exam__results_hidden_from_students=False,
                 status__in=["submitted", "expired"],
             )
             .select_related("exam")
@@ -582,6 +583,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             "exams": ExamAttempt.objects.filter(
                 user=user,
                 exam_id__in=scoped_exam_ids,
+                exam__results_hidden_from_students=False,
                 status__in=["submitted", "expired"],
             )
             .filter(
