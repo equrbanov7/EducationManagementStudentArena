@@ -60,7 +60,7 @@ jobs:
       # The "security-extended" query pack includes the default security
       # queries plus additional experimental/beta queries for broader coverage.
       - name: 🔧 Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: python
           # Use the security-extended suite for deeper analysis while keeping
@@ -72,13 +72,13 @@ jobs:
       # step to improve dependency resolution.  The autobuild action handles
       # this transparently for Python.
       - name: 🏗️ Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       # ── 4. Run analysis & upload SARIF results ────────────────────────
       # Results are published to the "Security → Code scanning" tab.
       # The action exits non-zero if any alerts of severity ERROR are found,
       # which blocks the PR check.
       - name: 🔬 Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:python"
