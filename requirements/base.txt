@@ -46,7 +46,7 @@ redis==7.1.0
 # ═══════════════════════════════════════════════════════════════════════════
 # BACKGROUND TASK PROCESSING (Celery + Redis broker)
 # ═══════════════════════════════════════════════════════════════════════════
-celery==5.5.2
+celery==5.6.3
 
 # Channels/Daphne Dependencies (WebSocket Support)
 attrs==25.4.0
