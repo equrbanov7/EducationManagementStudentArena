@@ -14,8 +14,10 @@ These tests cover:
 from __future__ import annotations
 
 import uuid
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core import signing
 from django.db.models.signals import post_save
 from django.test import TestCase
 from django.utils import timezone
@@ -207,24 +209,11 @@ class PlayerTokenSecurityTest(TestCase):
 
     def test_expired_token_is_rejected(self):
         """A token whose ``exp`` claim is in the past must be rejected."""
-        import time
+        token = build_player_token(self.player, self.session)
 
-        from django.conf import settings
+        with patch.object(signing, "loads", side_effect=signing.SignatureExpired("expired")):
+            payload = load_player_token_payload(token, self.session)
 
-        import jwt
-
-        past_exp = int(time.time()) - 3600
-        secret = getattr(settings, "SECRET_KEY", "fallback-secret")
-        expired_token = jwt.encode(
-            {
-                "player_id": self.player.id,
-                "session_pin": self.session.pin,
-                "exp": past_exp,
-            },
-            secret,
-            algorithm="HS256",
-        )
-        payload = load_player_token_payload(expired_token, self.session)
         self.assertIsNone(payload, "Expired token must be rejected")
 
 
