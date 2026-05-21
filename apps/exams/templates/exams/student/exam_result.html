@@ -336,10 +336,12 @@
                             <td>{{ previous_attempt.started_at|date:"d.m.Y H:i" }}</td>
                             <td>{{ previous_attempt.get_status_display }}</td>
                             <td>
-                                {% if previous_attempt.exam.exam_type == "test" %}
+                                {% if previous_attempt.exam.exam_type == "test" and previous_attempt.can_view_result %}
                                     {{ previous_attempt.test_result.percentage_display }}%
                                 {% elif previous_attempt.checked_by_teacher and previous_attempt.can_view_result %}
                                     {{ previous_attempt.teacher_score|default:"-" }}
+                                {% elif previous_attempt.result_hidden_by_teacher %}
+                                    <span class="text-muted">Gizlidir</span>
                                 {% elif previous_attempt.review_available_in_seconds > 0 %}
                                     <span class="text-muted small">
                                         <i class="far fa-clock me-1"></i>
@@ -352,6 +354,8 @@
                             <td class="text-end">
                                 {% if previous_attempt.can_view_result %}
                                 <a href="{{ previous_attempt.result_url }}" class="btn btn-sm btn-outline-primary">Bax</a>
+                                {% elif previous_attempt.result_hidden_by_teacher %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gizlidir</button>
                                 {% else %}
                                 <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gözləyir</button>
                                 {% endif %}

@@ -163,7 +163,7 @@
                                     {% if item.last_attempt %}
                                         {% if item.last_attempt.status == 'submitted' %}
                                             <span class="badge bg-success">{% trans "status_completed" context "exams.partial.exam_section" %}</span>
-                                            {% if item.last_attempt.score_percent %}
+                                            {% if not exam.results_hidden_from_students and item.last_attempt.score_percent %}
                                             <span class="badge bg-primary ms-1">{{ item.last_attempt.score_percent }}%</span>
                                             {% endif %}
                                         {% endif %}
