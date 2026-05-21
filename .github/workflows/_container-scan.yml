@@ -31,7 +31,7 @@ jobs:
       # Rebuild from the GHA layer cache and load into local Docker daemon.
       # Only changed layers are fetched; unchanged layers come from cache.
       - name: 🏗️ Load production image from cache
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile.prod

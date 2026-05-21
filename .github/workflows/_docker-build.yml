@@ -30,7 +30,7 @@ jobs:
       # Build ARGs supply dummy values so collectstatic can run at build
       # time without real runtime secrets (see Dockerfile.prod).
       - name: 🏗️ Build production Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/Dockerfile.prod
