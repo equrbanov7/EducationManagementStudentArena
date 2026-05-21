@@ -395,6 +395,9 @@ def my_result_detail(request, item_type, item_id):
             user=request.user,
             exam__in=_tenant_scoped_exams(request),
         )
+        if attempt.exam.results_hidden_from_students:
+            messages.info(request, "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib.")
+            return redirect(back_url)
         if (
             attempt.exam.exam_type != "test"
             and attempt.checked_by_teacher

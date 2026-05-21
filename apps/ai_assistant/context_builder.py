@@ -128,7 +128,7 @@ _PAGE_CONTEXT_MAP = [
         },
     ),
     (
-        r"/courses/?$",
+        r"/courses/(?:my-courses|my-enrolled)/?$",
         {
             "name": "Kurslarım / My Courses",
             "description": "Lists courses the user teaches or is enrolled in.",
@@ -136,7 +136,7 @@ _PAGE_CONTEXT_MAP = [
         },
     ),
     (
-        r"/courses/create/?$",
+        r"/courses/create_course/?$",
         {
             "name": "Kurs Yaratmaq / Create Course",
             "description": "Form to create a new course.",
@@ -240,13 +240,13 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
 
     slug = organization.slug
 
-    lines.append(f"- Organization dashboard: /organizations/{slug}/dashboard/")
+    lines.append(f"- Organization dashboard: /organizations/{slug}/")
 
     if request_has_permission_from_list(permissions, "course.view"):
-        lines.append("- My courses: /courses/")
+        lines.append("- My courses: /courses/my-courses/")
 
     if request_has_permission_from_list(permissions, "course.create"):
-        lines.append("- Create course: /courses/create/")
+        lines.append("- Create course: /courses/create_course/")
 
     if request_has_permission_from_list(permissions, "exam.view"):
         lines.append("- Exams: /exams/")

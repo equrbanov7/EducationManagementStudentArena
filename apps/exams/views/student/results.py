@@ -75,13 +75,19 @@ def exam_result(request, slug, attempt_id):
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
 
-    if not annotate_attempt_result_visibility([attempt])[0].can_view_result:
-        messages.info(
-            request,
-            pgettext(
+    attempt = annotate_attempt_result_visibility([attempt])[0]
+    if not attempt.can_view_result:
+        message = (
+            "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib."
+            if getattr(attempt, "result_hidden_by_teacher", False)
+            else pgettext(
                 "exams.view.student.result.message",
                 "Result is not available yet. It will appear after the teacher review window closes.",
-            ),
+            )
+        )
+        messages.info(
+            request,
+            message,
         )
         return redirect(return_to or f"{reverse('accounts:profile')}?section=my-results")
 
