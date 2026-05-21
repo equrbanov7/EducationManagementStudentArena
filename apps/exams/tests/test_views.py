@@ -928,6 +928,19 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
         self.assertFalse(Exam.objects.filter(id=self.exam_visible.id).exists())
 
+    def test_delete_exam_with_attempts_cascades_attempts(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+
+        response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Exam.objects.filter(id=self.exam_visible.id).exists())
+        self.assertFalse(ExamAttempt.objects.filter(id=attempt.id).exists())
+
     def test_edit_other_tenant_exam_is_not_found(self):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
         self.assertEqual(response.status_code, 404)
@@ -1011,6 +1024,57 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_teacher_can_toggle_exam_results_visibility(self):
+        response = self.client.post(
+            reverse("exams:toggle_exam_results_visibility", args=[self.exam_visible.slug]),
+            {
+                "from_section": "my-exams",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.exam_visible.refresh_from_db()
+        self.assertTrue(self.exam_visible.results_hidden_from_students)
+
+        detail_response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+        self.assertContains(detail_response, "Nəticələri tələbələrə göstər")
+        self.assertContains(detail_response, "Tələbələrdən gizlidir")
+
+        self.client.post(reverse("exams:toggle_exam_results_visibility", args=[self.exam_visible.slug]))
+        self.exam_visible.refresh_from_db()
+        self.assertFalse(self.exam_visible.results_hidden_from_students)
+
+    def test_hidden_exam_results_are_not_visible_to_student(self):
+        self.exam_visible.results_hidden_from_students = True
+        self.exam_visible.save(update_fields=["results_hidden_from_students"])
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+            attempt_number=1,
+        )
+
+        _login_with_org(self.client, self.student, self.org_a)
+
+        result_response = self.client.get(reverse("exams:exam_result", args=[self.exam_visible.slug, attempt.id]))
+        self.assertEqual(result_response.status_code, 302)
+        self.assertIn("section=my-results", result_response.url)
+
+        history_response = self.client.get(
+            reverse("exams:student_exam_history"),
+            {"exam": self.exam_visible.slug},
+        )
+        self.assertEqual(history_response.status_code, 200)
+        self.assertContains(history_response, "Gizlidir")
+        self.assertNotContains(history_response, "Bax")
+
+        profile_response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "my-results", "results_type": "exams"},
+        )
+        self.assertEqual(profile_response.status_code, 200)
+        self.assertEqual(profile_response.context["my_result_counts"]["exams"], 0)
 
     def test_teacher_exam_detail_disables_live_start_when_exam_is_passive(self):
         self.exam_visible.is_active = False

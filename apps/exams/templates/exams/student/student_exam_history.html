@@ -184,7 +184,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if attempt.exam.exam_type == 'test' %}
+                                {% if attempt.exam.exam_type == 'test' and attempt.can_view_result %}
                                     <span class="fw-bold fs-5 text-primary-green">{{ attempt.test_result.percentage_display }}%</span>
                                     <div class="small text-muted mt-1">
                                         {{ attempt.test_result.score_display }} / {{ attempt.test_result.max_score_display }} bal
@@ -196,6 +196,10 @@
                                         {% if exam and history_max_score is not None %}
                                             <span class="fs-6 text-muted fw-medium">/ {{ history_max_score }}</span>
                                         {% endif %}
+                                    </span>
+                                {% elif attempt.result_hidden_by_teacher %}
+                                    <span class="text-muted small">
+                                        <i class="fa-solid fa-eye-slash me-1"></i> Gizlidir
                                     </span>
                                 {% elif attempt.review_available_in_seconds > 0 %}
                                     <span class="text-muted small">
@@ -211,6 +215,10 @@
                                 <a href="{{ attempt.result_url }}" class="btn btn-sm btn-outline-custom px-3">
                                     <i class="fa-solid fa-eye me-1"></i> Bax
                                 </a>
+                                {% elif attempt.result_hidden_by_teacher %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary px-3" disabled>
+                                    <i class="fa-solid fa-eye-slash me-1"></i> Gizlidir
+                                </button>
                                 {% else %}
                                 <button type="button" class="btn btn-sm btn-outline-secondary px-3" disabled>
                                     <i class="fa-solid fa-hourglass-half me-1"></i> Gözləyir

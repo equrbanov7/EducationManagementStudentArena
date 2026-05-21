@@ -4,14 +4,14 @@ courses/urls.py
 Kurs modulu üçün URL routları.
 
 Nə üçün:
-- /courses/create/ → Kurs yaratma
+- /courses/create_course/ → Kurs yaratma
 - /courses/<id>/dashboard/ → Kurs dashboard (accordion)
 - /courses/<id>/topic/add/ → Mövzu əlavə et (modal)
 - /courses/<id>/resource/add/ → Resurs əlavə et (modal)
 - ... və s.
 
 Namespace: courses:
-- reverse('courses:create_course') → /courses/create/
+- reverse('courses:create_course') → /courses/create_course/
 - reverse('courses:course_dashboard', args=[1]) → /courses/1/dashboard/
 """
 
@@ -25,8 +25,8 @@ urlpatterns = [
     # ════════════════════════════════════════════════════════════════════════
     # Kurs Yaratma & Görüntüləmə
     # ════════════════════════════════════════════════════════════════════════
-    # GET /courses/create/ → Kurs yaratma forması
-    # POST /courses/create/ → Kurs yaradılır → Redirect dashboard-a
+    # GET /courses/create_course/ → Kurs yaratma forması
+    # POST /courses/create_course/ → Kurs yaradılır → Redirect dashboard-a
     path("create_course/", views.CreateCourseView.as_view(), name="create_course"),
     path("my-courses/", views.MyCoursesListView.as_view(), name="my_courses"),
     # GET /courses/<id>/dashboard/ → Kurs profil səhifəsi (accordion)
