@@ -388,14 +388,28 @@ class UserProfile(models.Model):
         help_text="İşçinin vəzifəsi (yalnız staff üçün)",
     )
 
-    # RBAC role field – single source of truth for role checks
+    # RBAC role field.
+    #
+    # DENORMALIZED CACHE — NOT the source of truth (FAZA 10 clarification).
+    #
+    # The authoritative role for a user inside an organization is the
+    # tenant-scoped ``organizations.Membership.role`` row. This ``profile.role``
+    # field is a convenience denormalization kept in sync by the role-assignment
+    # views (see apps/accounts/views/roles.py, which writes both Membership.role
+    # and profile.role together).
+    #
+    # When the two ever disagree, trust Membership.role — it is per-organization
+    # and RLS-protected, whereas profile.role is a single global value that
+    # cannot represent a user who belongs to multiple organizations with
+    # different roles. New code MUST resolve roles via the membership /
+    # ``request.org_memberships`` path, not via this field.
     role = models.CharField(
         max_length=30,
         choices=ProfileRole.CHOICES,
         default=ProfileRole.MEMBER,
         db_index=True,
         verbose_name="Rol",
-        help_text="İstifadəçinin sistəmdəki rolu",
+        help_text="Denormalizə keş — əsl rol Membership.role-dadır",
     )
 
     avatar = models.ImageField(
