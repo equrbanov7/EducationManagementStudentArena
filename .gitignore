@@ -62,6 +62,12 @@ redis_data/
 *.bak
 
 # =========================
+# Test / QA artifacts (Playwright screenshots, generated PDFs)
+# =========================
+output/
+tmp/
+
+# =========================
 # Test / Coverage
 # =========================
 htmlcov/
