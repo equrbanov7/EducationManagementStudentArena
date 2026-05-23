@@ -56,6 +56,10 @@ class Project(models.Model):
         ordering = ["-created_at"]
         verbose_name = pgettext_lazy("projects.model.project.meta", "singular")
         verbose_name_plural = pgettext_lazy("projects.model.project.meta", "plural")
+        indexes = [
+            # Course detail pages list a course's projects, often by status.
+            models.Index(fields=["course", "status", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
@@ -115,3 +119,9 @@ class ProjectSubmission(models.Model):
         ordering = ["-submitted_at"]
         verbose_name = pgettext_lazy("projects.model.submission.meta", "singular")
         verbose_name_plural = pgettext_lazy("projects.model.submission.meta", "plural")
+        indexes = [
+            # Teacher review queue: a project's submissions filtered by status.
+            models.Index(fields=["project", "status", "-submitted_at"]),
+            # A student's own submissions across projects.
+            models.Index(fields=["student", "-submitted_at"]),
+        ]
