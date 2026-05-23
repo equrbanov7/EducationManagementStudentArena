@@ -572,3 +572,36 @@ class ProfileActionsServiceTest(TestCase):
                 title="Elan", notification_type=NotificationType.SYSTEM
             ).exists()
         )
+
+
+class OrgManagementServiceTest(TestCase):
+    """FAZA 9 — superadmin organizations view extracted from _helpers."""
+
+    def test_build_superadmin_organizations_view_populates_records(self):
+        from django.test import RequestFactory
+
+        from apps.accounts.services.org_management import build_superadmin_organizations_view
+
+        owner = User.objects.create_user("om_owner", "om_owner@example.com", "pw")
+        Organization.objects.create(
+            name="Org Management Test Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        request = RequestFactory().get("/accounts/student-organization-management/")
+        section = {"organizations_page_param": "organization_page"}
+
+        result = build_superadmin_organizations_view(
+            request=request,
+            section=section,
+            organization_search="",
+            organization_status_filter="",
+            organization_type_filter="",
+        )
+
+        self.assertGreaterEqual(result["organization_records"].paginator.count, 1)
+        self.assertEqual(result["management_view_options"][-1]["value"], "organizations")
+        self.assertIn("management_view=organizations", result["post_next_url"])
