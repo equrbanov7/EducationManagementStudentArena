@@ -36,3 +36,11 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+markers = [
+    # PostgreSQL-only tests. RLS policies (and their fail-closed behaviour)
+    # cannot be exercised on SQLite, so these tests must run against the
+    # PostgreSQL service in CI. They also self-skip on non-PostgreSQL backends.
+    #   Run only these:  pytest -m postgres
+    #   Skip these:      pytest -m "not postgres"
+    "postgres: test requires a PostgreSQL database (RLS / DB-engine specific)",
+]
