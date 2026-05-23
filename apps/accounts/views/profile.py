@@ -1798,16 +1798,47 @@ def user_profile(request):
                 _SG.objects.filter(organization=statistics_scope_org).order_by("name").values("id", "name")[:100]
             )
 
+        # Dashboard statistics are expensive (~44 aggregate queries) but do not
+        # need to be real-time, so each (role, scope, filters) result is cached
+        # briefly via core.cache.get_or_set_cached_statistics (FAZA 12).
+        from core.cache import get_or_set_cached_statistics
+
         if capabilities["is_superadmin"]:
-            statistics_data = get_superadmin_statistics(filters=statistics_filters)
+            statistics_data = get_or_set_cached_statistics(
+                role="superadmin",
+                scope_id="global",
+                filters=statistics_filters,
+                compute=lambda: get_superadmin_statistics(filters=statistics_filters),
+            )
         elif capabilities["is_org_admin"]:
             if stat_org:
-                statistics_data = get_org_admin_statistics(organization=stat_org, filters=statistics_filters)
+                statistics_data = get_or_set_cached_statistics(
+                    role="org_admin",
+                    scope_id=stat_org.pk,
+                    filters=statistics_filters,
+                    compute=lambda: get_org_admin_statistics(
+                        organization=stat_org, filters=statistics_filters
+                    ),
+                )
         elif capabilities["is_teacher"]:
-            statistics_data = get_teacher_statistics(request.user, organization=stat_org, filters=statistics_filters)
+            statistics_data = get_or_set_cached_statistics(
+                role="teacher",
+                scope_id=request.user.pk,
+                filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
+                compute=lambda: get_teacher_statistics(
+                    request.user, organization=stat_org, filters=statistics_filters
+                ),
+            )
         else:
             # Student / lead student / member
-            statistics_data = get_student_statistics(request.user, organization=stat_org, filters=statistics_filters)
+            statistics_data = get_or_set_cached_statistics(
+                role="student",
+                scope_id=request.user.pk,
+                filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
+                compute=lambda: get_student_statistics(
+                    request.user, organization=stat_org, filters=statistics_filters
+                ),
+            )
 
         statistics_base_query = _query_string(
             section="statistics",
@@ -2175,14 +2206,38 @@ def statistics_export_csv(request):
         "organization": (request.GET.get("stat_organization") or "").strip() or None,
     }
 
+    # Reuse the same short-lived statistics cache as the dashboard view
+    # (FAZA 12) — identical (role, scope, filters) hits the same cache entry.
+    from core.cache import get_or_set_cached_statistics
+
     if capabilities["is_superadmin"]:
-        stats = get_superadmin_statistics(filters=filters)
+        stats = get_or_set_cached_statistics(
+            role="superadmin",
+            scope_id="global",
+            filters=filters,
+            compute=lambda: get_superadmin_statistics(filters=filters),
+        )
     elif capabilities["is_org_admin"] and org:
-        stats = get_org_admin_statistics(organization=org, filters=filters)
+        stats = get_or_set_cached_statistics(
+            role="org_admin",
+            scope_id=org.pk,
+            filters=filters,
+            compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
+        )
     elif capabilities["is_teacher"]:
-        stats = get_teacher_statistics(request.user, organization=org, filters=filters)
+        stats = get_or_set_cached_statistics(
+            role="teacher",
+            scope_id=request.user.pk,
+            filters={**filters, "_org": getattr(org, "pk", None)},
+            compute=lambda: get_teacher_statistics(request.user, organization=org, filters=filters),
+        )
     else:
-        stats = get_student_statistics(request.user, organization=org, filters=filters)
+        stats = get_or_set_cached_statistics(
+            role="student",
+            scope_id=request.user.pk,
+            filters={**filters, "_org": getattr(org, "pk", None)},
+            compute=lambda: get_student_statistics(request.user, organization=org, filters=filters),
+        )
 
     output = io.StringIO()
     writer = csv.writer(output)
