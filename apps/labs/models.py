@@ -538,7 +538,10 @@ class LabSubmission(models.Model):
         verbose_name_plural = "Lab Cavabları"
         indexes = [
             # Teacher grading queue: a lab assignment's submissions by status.
-            models.Index(fields=["assignment", "status", "-submitted_at"]),
+            models.Index(
+                fields=["assignment", "status", "-submitted_at"],
+                name="labsub_assign_status_idx",
+            ),
         ]
 
     def __str__(self):

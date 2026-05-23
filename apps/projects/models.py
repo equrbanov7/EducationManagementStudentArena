@@ -58,7 +58,10 @@ class Project(models.Model):
         verbose_name_plural = pgettext_lazy("projects.model.project.meta", "plural")
         indexes = [
             # Course detail pages list a course's projects, often by status.
-            models.Index(fields=["course", "status", "-created_at"]),
+            models.Index(
+                fields=["course", "status", "-created_at"],
+                name="project_course_status_idx",
+            ),
         ]
 
     def __str__(self):
@@ -121,7 +124,10 @@ class ProjectSubmission(models.Model):
         verbose_name_plural = pgettext_lazy("projects.model.submission.meta", "plural")
         indexes = [
             # Teacher review queue: a project's submissions filtered by status.
-            models.Index(fields=["project", "status", "-submitted_at"]),
+            models.Index(
+                fields=["project", "status", "-submitted_at"],
+                name="projsub_project_status_idx",
+            ),
             # A student's own submissions across projects.
-            models.Index(fields=["student", "-submitted_at"]),
+            models.Index(fields=["student", "-submitted_at"], name="projsub_student_idx"),
         ]
