@@ -3,17 +3,13 @@ Profile views: user profile management and avatar serving.
 """
 
 import mimetypes
-import os
 import re
 from urllib.parse import urlencode
-from urllib.parse import urlparse as _parse_url
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.core.files.images import get_image_dimensions
-from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.db.models.deletion import ProtectedError
@@ -32,20 +28,20 @@ from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabSubmission
-from apps.notifications.models import NotificationType, StudentOrganizationRequestStatus
+from apps.notifications.models import StudentOrganizationRequestStatus
 from apps.notifications.services import (
     build_profile_notification_state,
-    create_notification_for_users,
     get_unread_count,
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
 from core.rls import bypass_rls
 from core.tenancy import restore_request_organization_from_profile
-from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
+from core.upload_security import randomize_uploaded_filename
 
 from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
+from ..services.profile_actions import publish_system_notification, validate_profile_avatar_upload
 from ._dashboard_helpers import (
     _collect_assigned_tasks,
     _collect_evaluated_review_items,
@@ -323,52 +319,8 @@ def _get_publish_notification_targets(user, capabilities):
     return targets
 
 
-def _get_notification_recipients(user, capabilities, target: str):
-    """Resolve notification target to a queryset of recipient users.
-
-    Returns a queryset/list of users, or None if target is invalid/unauthorized.
-    """
-    from apps.exams.models import StudentGroup
-    from apps.organizations.models import Membership, Organization
-
-    is_superadmin = capabilities["is_superadmin"]
-    User = get_user_model()
-
-    if target == "all":
-        if not is_superadmin:
-            return None
-        return User.objects.filter(is_active=True)
-
-    if target.startswith("org_"):
-        org_id = (target[4:] or "").strip()
-        if not org_id:
-            return None
-        try:
-            org = Organization.objects.get(pk=org_id, is_active=True, status="active")
-        except (ValidationError, Organization.DoesNotExist):
-            return None
-        # Superadmin can target any org; org admin only their own
-        if not is_superadmin:
-            if not Membership.objects.filter(user=user, organization=org, is_active=True).exists():
-                return None
-        member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
-        return User.objects.filter(pk__in=member_user_ids, is_active=True)
-
-    if target.startswith("group_"):
-        try:
-            grp_id = int(target[6:])
-        except (ValueError, IndexError):
-            return None
-        try:
-            group = StudentGroup.objects.get(pk=grp_id)
-        except StudentGroup.DoesNotExist:
-            return None
-        # Only the teacher who owns the group (or superadmin) may target it
-        if not is_superadmin and group.teacher_id != user.pk:
-            return None
-        return group.students.filter(is_active=True)
-
-    return None
+# _get_notification_recipients() was moved to
+# services.profile_actions.resolve_notification_recipients (FAZA 8).
 
 
 @login_required
@@ -405,37 +357,9 @@ def user_profile(request):
     in_app_unread_count = get_unread_count(user=request.user)
     notifications_unread_count = org_notification_count + in_app_unread_count
 
-    def _validate_avatar_upload(uploaded_avatar):
-        if uploaded_avatar is None:
-            return "Profil şəkli seçilməyib."
-
-        if getattr(uploaded_avatar, "size", 0) > MAX_PROFILE_AVATAR_SIZE_BYTES:
-            max_size_mb = MAX_PROFILE_AVATAR_SIZE_BYTES // (1024 * 1024)
-            return f"Profil şəkli maksimum {max_size_mb} MB ola bilər."
-
-        try:
-            validate_uploaded_file(
-                uploaded_avatar,
-                allowed_extensions=PROFILE_AVATAR_ALLOWED_EXTENSIONS,
-                max_size_mb=MAX_PROFILE_AVATAR_SIZE_BYTES // (1024 * 1024),
-                allowed_mime_types=set(),
-                allowed_mime_prefixes=("image/",),
-            )
-        except ValidationError as exc:
-            return exc.messages[0]
-
-        try:
-            width, height = get_image_dimensions(uploaded_avatar)
-            if not width or not height:
-                return "Yüklənən fayl şəkil kimi oxunmadı."
-        except Exception:
-            return "Yüklənən fayl şəkil formatında deyil və ya zədəlidir."
-        finally:
-            try:
-                uploaded_avatar.seek(0)
-            except Exception:
-                pass
-        return ""
+    # Avatar validation moved to services.profile_actions.validate_profile_avatar_upload
+    # (FAZA 8). Kept as a thin local alias so the call sites below read cleanly.
+    _validate_avatar_upload = validate_profile_avatar_upload
 
     # Get active section from URL parameter (default: profile-info)
     allowed_sections = capabilities["allowed_sections"]
@@ -490,92 +414,12 @@ def user_profile(request):
             if "publish-notification" not in allowed_sections:
                 messages.error(request, "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur.")
                 return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-            notif_title = (request.POST.get("notif_title") or "").strip()
-            notif_message = (request.POST.get("notif_message") or "").strip()
-            # Accept multiple targets submitted as a checkbox list
-            notif_targets_raw = request.POST.getlist("notif_targets")
-            notif_targets = [t.strip() for t in notif_targets_raw if t.strip()]
-            # Fall back to the old single-value field for backward-compat
-            if not notif_targets:
-                single = (request.POST.get("notif_target") or "").strip()
-                if single:
-                    notif_targets = [single]
-            if not notif_targets:
-                notif_targets = ["all"]
-            notif_link = (request.POST.get("notif_link") or "").strip()
-            notif_image_file = request.FILES.get("notif_image")
-
-            if not notif_title:
-                messages.error(request, _("notif_title_required"))
-                return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-
-            # Validate optional link — require explicit http/https scheme
-            if notif_link:
-                try:
-                    parsed_link = _parse_url(notif_link)
-                    if parsed_link.scheme not in ("http", "https"):
-                        raise ValueError("invalid scheme")
-                except Exception:
-                    messages.error(request, _("notif_link_invalid"))
-                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-
-            # Validate + save optional image
-            notif_image_url = ""
-            if notif_image_file:
-                _img_max_mb = 5
-                _img_max_bytes = _img_max_mb * 1024 * 1024
-                if getattr(notif_image_file, "size", 0) > _img_max_bytes:
-                    messages.error(request, _("notif_image_too_large"))
-                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-                try:
-                    validate_uploaded_file(
-                        notif_image_file,
-                        allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
-                        max_size_mb=_img_max_mb,
-                        allowed_mime_types=set(),
-                        allowed_mime_prefixes=("image/",),
-                    )
-                except ValidationError as exc:
-                    messages.error(request, exc.messages[0] if exc.messages else _("notif_image_invalid"))
-                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-                # Save image to media/notifications/images/
-                randomize_uploaded_filename(notif_image_file)
-                saved_path = default_storage.save(
-                    os.path.join("notifications", "images", notif_image_file.name),
-                    notif_image_file,
-                )
-                notif_image_url = default_storage.url(saved_path)
-
-            metadata = {}
-            if notif_image_url:
-                metadata["image_url"] = notif_image_url
-
-            # Resolve each selected target and collect unique recipients
-            UserModel = get_user_model()
-            sent_to_user_ids: set = set()
-            for notif_target in notif_targets:
-                recipients = _get_notification_recipients(request.user, capabilities, notif_target)
-                if recipients is None:
-                    continue
-                # Avoid duplicate notifications to the same user
-                qs_ids = list(recipients.values_list("pk", flat=True).exclude(pk__in=sent_to_user_ids))
-                if not qs_ids:
-                    continue
-                target_recipients = UserModel.objects.filter(pk__in=qs_ids)
-                create_notification_for_users(
-                    recipients=target_recipients,
-                    title=notif_title,
-                    message=notif_message,
-                    link=notif_link,
-                    notification_type=NotificationType.SYSTEM,
-                    metadata=metadata or None,
-                )
-                sent_to_user_ids.update(qs_ids)
-
-            if sent_to_user_ids:
-                messages.success(request, _("notif_sent_success"))
+            # Validation + fan-out lives in services.profile_actions (FAZA 8).
+            ok, message_key = publish_system_notification(request=request, capabilities=capabilities)
+            if ok:
+                messages.success(request, _(message_key))
             else:
-                messages.error(request, _("notif_no_recipients"))
+                messages.error(request, _(message_key))
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form in {"category-create", "category-management-save", "category-management-delete"}:
             if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(

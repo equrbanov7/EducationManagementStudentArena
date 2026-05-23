@@ -68,8 +68,13 @@ REVIEW_EDIT_WINDOW = timedelta(minutes=REVIEW_EDIT_WINDOW_MINUTES)
 STUDENT_ORG_MANAGEMENT_MIN_LEVEL = ProfileRole.LEVELS.get(ProfileRole.HR, 65)
 STUDENT_PENDING_INVITE_TITLE = "__student_pending_invite__"
 STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH = 280
-MAX_PROFILE_AVATAR_SIZE_BYTES = 10 * 1024 * 1024
-PROFILE_AVATAR_ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+# Avatar limits now live in services.profile_actions (single source of truth).
+# Re-exported here so existing `from views._helpers import ...` callers keep working.
+from ..services.profile_actions import (  # noqa: E402,F401
+    MAX_PROFILE_AVATAR_SIZE_BYTES,
+    PROFILE_AVATAR_ALLOWED_EXTENSIONS,
+)
+
 STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT = 50
 ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT = "accounts.role_assignment.operation"  # nosec B105
 ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS = 60 * 5
