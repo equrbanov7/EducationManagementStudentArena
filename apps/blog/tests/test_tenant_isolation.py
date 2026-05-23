@@ -293,6 +293,39 @@ class BlogPostReadIsolationTest(TestCase):
 
 
 # ---------------------------------------------------------------------------
+# Test: Blog post creation is audit-logged (FAZA 3)
+# ---------------------------------------------------------------------------
+
+
+class BlogPostAuditLogTest(TestCase):
+    """Creating a blog post must leave an audit-trail entry so that
+    unapproved-content attempts are reviewable."""
+
+    def setUp(self):
+        self.client = Client()
+        self.author = User.objects.create_user(
+            username="audit_author", email="audit_author@example.com", password="StrongPass123!"
+        )
+
+    def test_post_creation_writes_audit_log(self):
+        from apps.audit.models import AuditLog
+
+        self.client.force_login(self.author)
+        before = AuditLog.objects.count()
+
+        response = self.client.post(
+            reverse("create_post"),
+            data={"title": "Audit Test Post", "content": "Body content for audit."},
+        )
+        self.assertIn(response.status_code, (200, 302))
+
+        self.assertEqual(AuditLog.objects.count(), before + 1)
+        log = AuditLog.objects.latest("created_at")
+        self.assertEqual(log.user_id, self.author.id)
+        self.assertEqual(log.resource_type, "blog.Post")
+
+
+# ---------------------------------------------------------------------------
 # Test: Question ownership & visibility isolation
 # ---------------------------------------------------------------------------
 
