@@ -4,6 +4,17 @@ Permission definitions and checking functions for the organizations app.
 
 from typing import List, Set
 
+# DEPRECATED (FAZA 10) — legacy permission-prefix aliases.
+#
+# Canonical names are: grade.*, course.*, exam.*, member.*, role.*, unit.*.
+# default_roles.py now emits only the canonical names, and migration
+# organizations.0006 rewrites every existing Role.permissions row to the
+# canonical spelling.
+#
+# This map is kept ONLY as a transitional safety net so that any role data
+# that somehow still carries a legacy spelling keeps working. Once it is
+# confirmed in production that no legacy spellings remain (e.g. a DB audit),
+# this map and the alias-handling branches below can be deleted outright.
 PERMISSION_PREFIX_ALIASES = {
     "grade": "grading",
     "grading": "grade",
