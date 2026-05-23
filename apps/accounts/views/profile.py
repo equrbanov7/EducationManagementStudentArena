@@ -40,6 +40,7 @@ from apps.notifications.services import (
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
+from core.rls import bypass_rls
 from core.tenancy import restore_request_organization_from_profile
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
@@ -1729,8 +1730,13 @@ def user_profile(request):
         filter_by=notif_filter,
         search_query=notif_search_query,
     )
+    # recipient=user is the security boundary; bypass RLS so the profile inbox
+    # shows the user's notifications across every organisation (see
+    # get_user_notifications docstring).
     in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
-    in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+    with bypass_rls():
+        in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+        in_app_notifications_page.object_list = list(in_app_notifications_page.object_list)
     notif_pagination_query = _query_string(
         section="notifications",
         notif_filter=notif_filter,
