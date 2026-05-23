@@ -70,6 +70,12 @@ from apps.organizations.models import Membership, OrgUnit, Role
 from core.constants import OrganizationType, RoleScopeType
 from core.rls import bypass_rls
 
+# FAZA 5: every test in this module exercises PostgreSQL Row-Level Security
+# and is meaningless on SQLite. The module-level marker lets CI/devs target
+# them explicitly (`pytest -m postgres`) or exclude them (`-m "not postgres"`).
+# The individual `_skip_if_not_pg()` calls remain as a runtime safety net.
+pytestmark = pytest.mark.postgres
+
 # ---------------------------------------------------------------------------
 # Low-level DB helpers
 # ---------------------------------------------------------------------------
