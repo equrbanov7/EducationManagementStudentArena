@@ -143,7 +143,7 @@ class InAppNotification(models.Model):
             models.Index(fields=["recipient", "deleted_at", "is_read"]),
             models.Index(fields=["recipient", "deleted_at", "created_at"]),
             # Backs the RLS policy's tenant predicate.
-            models.Index(fields=["organization", "recipient"]),
+            models.Index(fields=["organization", "recipient"], name="notif_org_recipient_idx"),
         ]
 
     def __str__(self):
