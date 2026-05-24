@@ -70,6 +70,12 @@ from apps.organizations.models import Membership, OrgUnit, Role
 from core.constants import OrganizationType, RoleScopeType
 from core.rls import bypass_rls
 
+# FAZA 5: every test in this module exercises PostgreSQL Row-Level Security
+# and is meaningless on SQLite. The module-level marker lets CI/devs target
+# them explicitly (`pytest -m postgres`) or exclude them (`-m "not postgres"`).
+# The individual `_skip_if_not_pg()` calls remain as a runtime safety net.
+pytestmark = pytest.mark.postgres
+
 # ---------------------------------------------------------------------------
 # Low-level DB helpers
 # ---------------------------------------------------------------------------
@@ -798,6 +804,13 @@ class TestRLSNotificationInbox:
     """RLS isolation for per-recipient notification inbox rows."""
 
     def test_in_app_notifications_require_matching_recipient_and_tenant(self, two_orgs):
+        """FAZA 4: RLS now keys on the real organization FK column.
+
+        A row is visible only when recipient matches AND (organization is NULL
+        — a deliberately global notification — OR organization is the active
+        tenant). A NULL organization is fail-CLOSED-safe because the recipient
+        predicate still applies.
+        """
         _skip_if_not_pg()
         org_a, org_b = two_orgs
 
@@ -809,19 +822,23 @@ class TestRLSNotificationInbox:
 
         tenant_note = InAppNotification.objects.create(
             recipient=recipient_a,
+            organization=org_a,
             title="Tenant A Notification",
-            metadata={"organization_id": str(org_a.id)},
         )
         InAppNotification.objects.create(
             recipient=recipient_a,
+            organization=org_b,
             title="Tenant B Notification",
-            metadata={"organization_id": str(org_b.id)},
         )
-        global_note = InAppNotification.objects.create(recipient=recipient_a, title="Global Notification")
+        global_note = InAppNotification.objects.create(
+            recipient=recipient_a,
+            organization=None,
+            title="Global Notification",
+        )
         InAppNotification.objects.create(
             recipient=other_user,
+            organization=org_a,
             title="Other User Notification",
-            metadata={"organization_id": str(org_a.id)},
         )
 
         _enable_rls()
@@ -829,7 +846,32 @@ class TestRLSNotificationInbox:
         _set_tenant(org_a.pk)
 
         results = list(InAppNotification.objects.order_by("id"))
+        # Tenant A row + global row visible; Tenant B row and other-user row hidden.
         assert {note.pk for note in results} == {tenant_note.pk, global_note.pk}
+
+    def test_notification_without_organization_is_hidden_from_wrong_tenant(self, two_orgs):
+        """FAZA 4 fail-closed: a tenant-B notification must never leak to a
+        session whose active tenant is A — even if metadata is empty."""
+        _skip_if_not_pg()
+        org_a, org_b = two_orgs
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        recipient = User.objects.create_user("notif_failclosed", "nfc@rls.test", "pw")
+
+        org_b_note = InAppNotification.objects.create(
+            recipient=recipient,
+            organization=org_b,
+            title="Org B only",
+        )
+
+        _enable_rls()
+        _set_user(recipient.pk)
+        _set_tenant(org_a.pk)
+
+        # Active tenant is A → the org-B notification must be invisible.
+        assert not InAppNotification.objects.filter(pk=org_b_note.pk).exists()
 
     def test_notification_service_allows_cross_user_single_insert(self, two_orgs):
         _skip_if_not_pg()

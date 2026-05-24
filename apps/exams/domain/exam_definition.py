@@ -189,6 +189,25 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         verbose_name = pgettext_lazy("exams.model.exam.meta", "singular")
         verbose_name_plural = pgettext_lazy("exams.model.exam.meta", "plural")
         ordering = ["-created_at"]
+        indexes = [
+            # Tenant-scoped exam lists are the hottest query on this table:
+            # dashboards and exam pages always filter by organization, then
+            # narrow by active state / type, and order newest-first.
+            # Explicit name= keeps the DB index name readable and stops Django
+            # from generating a RenameIndex migration.
+            models.Index(
+                fields=["organization", "is_active", "-created_at"],
+                name="exam_org_active_created_idx",
+            ),
+            models.Index(
+                fields=["organization", "exam_type", "-created_at"],
+                name="exam_org_type_created_idx",
+            ),
+            # Course detail pages list a course's exams newest-first.
+            models.Index(fields=["course", "-created_at"], name="exam_course_created_idx"),
+            # "My exams" (teacher) — exams authored by a given user.
+            models.Index(fields=["author", "-created_at"], name="exam_author_created_idx"),
+        ]
 
     def __str__(self):
         return f"{self.title} ({self.get_exam_type_display()})"

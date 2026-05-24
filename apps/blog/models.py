@@ -216,6 +216,27 @@ class Category(models.Model):
 
 
 class Post(models.Model):
+    """Platform-wide (global) blog post.
+
+    TENANT SCOPE — INTENTIONALLY GLOBAL
+    -----------------------------------
+    The blog is the platform's PUBLIC marketing / knowledge-base content. It is
+    deliberately NOT tenant-scoped: there is no ``organization`` FK and the blog
+    tables are intentionally excluded from the PostgreSQL RLS policies.
+
+    Do NOT add an ``organization`` field here — public pages (home/about/
+    technology) and the newsletter ``Subscriber`` flow depend on posts being
+    globally visible. If org-private articles are ever needed, model them as a
+    SEPARATE tenant-scoped model rather than overloading this one.
+
+    WRITE ACCESS is still controlled, even though READ is public:
+    * ``services.can_user_publish_post`` blocks members of an organization whose
+      membership has not been approved yet.
+    * ``services.author_requires_post_approval`` forces students and users
+      outside any active organization into the superadmin review queue
+      (``approval_status = PENDING``), so unapproved content is never published.
+    """
+
     class ApprovalStatus(models.TextChoices):
         APPROVED = "approved", "Approved"
         PENDING = "pending", "Pending approval"
@@ -267,6 +288,19 @@ class Post(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            # Public list pages: published, approved posts newest-first.
+            models.Index(
+                fields=["is_published", "approval_status", "-created_at"],
+                name="blog_post_public_list_idx",
+            ),
+            # Category landing pages.
+            models.Index(fields=["category", "-created_at"], name="blog_post_category_idx"),
+            # Author's own posts (profile → posts section).
+            models.Index(fields=["author", "-created_at"], name="blog_post_author_idx"),
+            # Superadmin review queue.
+            models.Index(fields=["approval_status", "-approval_requested_at"], name="blog_post_review_idx"),
+        ]
 
     def __str__(self):
         return self.title

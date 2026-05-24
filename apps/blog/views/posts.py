@@ -14,7 +14,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from core.constants import AuditAction
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
+
+from apps.audit.utils import log_action
 
 from ..forms import PostForm
 from ..models import Category, Post, PostApprovalLog
@@ -73,6 +76,28 @@ def create_post(request):
             # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
 
             post.save()
+
+            # Audit trail: record who created the post and whether it went
+            # straight to PUBLISHED or into the approval queue. This makes
+            # unapproved-content attempts reviewable.
+            try:
+                log_action(
+                    action=AuditAction.CREATE,
+                    user=request.user,
+                    obj=post,
+                    request=request,
+                    resource_type="blog.Post",
+                    resource_id=str(post.pk),
+                    resource_repr=post.title[:200],
+                    new_values={
+                        "approval_status": post.approval_status,
+                        "requires_approval": post.requires_approval,
+                        "is_published": post.is_published,
+                    },
+                )
+            except Exception:  # audit must never break the user flow
+                logger.exception("Failed to write audit log for blog post creation")
+
             if is_ajax:
                 return JsonResponse(
                     {
