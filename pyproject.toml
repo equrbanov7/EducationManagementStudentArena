@@ -36,3 +36,47 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+markers = [
+    # PostgreSQL-only tests. RLS policies (and their fail-closed behaviour)
+    # cannot be exercised on SQLite, so these tests must run against the
+    # PostgreSQL service in CI. They also self-skip on non-PostgreSQL backends.
+    #   Run only these:  pytest -m postgres
+    #   Skip these:      pytest -m "not postgres"
+    "postgres: test requires a PostgreSQL database (RLS / DB-engine specific)",
+]
+
+# ── Coverage measurement (FAZA 11) ─────────────────────────────────────────
+# The global gate stays at 60% (see CI _unit-tests.yml --cov-fail-under). This
+# section makes the measurement honest by excluding non-product code, and
+# documents which modules are SECURITY-CRITICAL and should be held to a far
+# higher bar during review (tenant isolation, RBAC, exam scoring, AI scoping).
+[tool.coverage.run]
+branch = true
+source = ["apps", "core", "config"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/tests.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "manage.py",
+    "config/asgi.py",
+    "config/wsgi.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# SECURITY-CRITICAL modules — reviewers should require ~90%+ here even though
+# the CI gate is a project-wide 60%:
+#   core/rls.py                         — RLS context helpers
+#   apps/organizations/middleware.py    — tenant resolution
+#   apps/organizations/permissions.py   — RBAC permission checks
+#   apps/exams/services/result_calculation.py — exam scoring
+#   apps/ai_assistant/security.py       — AI input/output guards
+#   apps/ai_assistant/context_builder.py — AI permission-scoped context
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

@@ -188,3 +188,56 @@ def invalidate_exam_metadata_cache(exam_pk: int) -> None:
         cache.delete(_exam_metadata_key(exam_pk))
     except Exception:
         logger.warning("Redis unavailable; could not invalidate exam metadata cache for exam %s", exam_pk)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Dashboard statistics (FAZA 12)
+# ──────────────────────────────────────────────────────────────────────────────
+# The statistics_selectors functions run ~44 aggregate/annotate/count queries.
+# Statistics do not need to be real-time, so the result is cached briefly per
+# (role, scope, filters) combination. A short TTL keeps the data fresh enough
+# while absorbing repeated dashboard opens / refreshes.
+
+import hashlib
+import json
+
+STATISTICS_TTL = 180  # seconds — small staleness is acceptable for dashboards
+
+
+def _statistics_key(*, role: str, scope_id, filters: dict | None) -> str:
+    """Build a cache key unique to a role + scope + filter combination.
+
+    *scope_id* is the user id (student/teacher) or organization id (org admin),
+    or "global" for superadmin. *filters* (date ranges, content-type, etc.) are
+    hashed so different filter sets never collide.
+    """
+    try:
+        filters_blob = json.dumps(filters or {}, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        filters_blob = repr(filters)
+    filters_hash = hashlib.sha1(filters_blob.encode("utf-8")).hexdigest()[:12]  # noqa: S324 (cache key only)
+    return f"{_PREFIX}:accounts:statistics:{role}:{scope_id}:{filters_hash}"
+
+
+def get_or_set_cached_statistics(*, role: str, scope_id, filters: dict | None, compute):
+    """Return cached statistics for the given key, computing + caching on a miss.
+
+    Args:
+        role: "student" | "teacher" | "org_admin" | "superadmin".
+        scope_id: user id, organization id, or "global".
+        filters: the filter dict passed to the statistics selector.
+        compute: zero-arg callable that runs the expensive selector and returns
+            the statistics payload. Only called on a cache miss.
+
+    On any Redis error this degrades gracefully — it just calls *compute*.
+    """
+    key = _statistics_key(role=role, scope_id=scope_id, filters=filters)
+    cached = _safe_cache_get(key)
+    if cached is not None:
+        return cached
+    payload = compute()
+    try:
+        cache.set(key, payload, timeout=STATISTICS_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; statistics cache not populated for %s", key)
+    return payload

@@ -58,6 +58,15 @@ def _get_model() -> str:
     return os.getenv("GEMINI_MODEL", _DEFAULT_MODEL)
 
 
+def _get_max_output_tokens() -> int:
+    """Output token cap. Default raised to 4096 so structured answers with
+    bullet lists and multiple links are not cut off mid-sentence."""
+    try:
+        return max(256, int(os.getenv("GEMINI_MAX_OUTPUT_TOKENS", "4096")))
+    except (TypeError, ValueError):
+        return 4096
+
+
 def _get_api_key() -> str | None:
     key = getattr(settings, "GEMINI_API_KEY", "") or ""
     return key.strip() or None
@@ -188,7 +197,7 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
         "contents": contents,
         "generationConfig": {
             "temperature": 0.3,
-            "maxOutputTokens": 2048,
+            "maxOutputTokens": _get_max_output_tokens(),
         },
     }
 

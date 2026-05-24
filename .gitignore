@@ -62,6 +62,12 @@ redis_data/
 *.bak
 
 # =========================
+# Test / QA artifacts (Playwright screenshots, generated PDFs)
+# =========================
+output/
+tmp/
+
+# =========================
 # Test / Coverage
 # =========================
 htmlcov/
@@ -126,8 +132,18 @@ yarn.lock
 # =========================
 *.pem
 *.key
+*.crt
+*.p12
+*.pfx
+id_rsa
+id_ed25519
 secrets/
+credentials/
 credentials/.env
+*.token
+*_token.txt
+service-account*.json
+gcp-credentials*.json
 logs/*.log
 db.sqlite3
 .vercel
