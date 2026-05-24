@@ -118,9 +118,7 @@ class LegacyPermissionMigrationTest(TestCase):
         # via importlib rather than a normal import statement.
         import importlib
 
-        mod = importlib.import_module(
-            "apps.organizations.migrations.0006_migrate_legacy_permission_aliases"
-        )
+        mod = importlib.import_module("apps.organizations.migrations.0006_migrate_legacy_permission_aliases")
         canonical = mod._canonicalize
         self.assertEqual(canonical("grading.input"), "grade.input")
         self.assertEqual(canonical("courses.*"), "course.*")
