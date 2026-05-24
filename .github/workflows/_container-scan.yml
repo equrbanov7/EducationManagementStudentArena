@@ -43,6 +43,7 @@ jobs:
             BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
             BUILD_DATABASE_URL=sqlite:////tmp/build.db
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+            APT_SECURITY_REFRESH=${{ github.run_id }}-${{ github.run_attempt }}
 
       # Trivy — scan the local image for OS and library CVEs.
       # ignore-unfixed: true — only CVEs that HAVE a fix are considered.
