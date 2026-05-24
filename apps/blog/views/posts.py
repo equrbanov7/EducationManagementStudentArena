@@ -14,10 +14,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from apps.audit.utils import log_action
 from core.constants import AuditAction
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
-
-from apps.audit.utils import log_action
 
 from ..forms import PostForm
 from ..models import Category, Post, PostApprovalLog

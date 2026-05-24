@@ -539,9 +539,7 @@ class ProfileActionsServiceTest(TestCase):
         request = RequestFactory().post("/accounts/profile/", {"notif_title": "", "notif_message": "body"})
         request.user = owner
 
-        ok, message_key = publish_system_notification(
-            request=request, capabilities={"is_superadmin": True}
-        )
+        ok, message_key = publish_system_notification(request=request, capabilities={"is_superadmin": True})
         self.assertFalse(ok)
         self.assertEqual(message_key, PUBLISH_NOTIFICATION_TITLE_REQUIRED)
 
@@ -562,15 +560,11 @@ class ProfileActionsServiceTest(TestCase):
         )
         request.user = sender
 
-        ok, message_key = publish_system_notification(
-            request=request, capabilities={"is_superadmin": True}
-        )
+        ok, message_key = publish_system_notification(request=request, capabilities={"is_superadmin": True})
         self.assertTrue(ok)
         self.assertEqual(message_key, PUBLISH_NOTIFICATION_SENT)
         self.assertTrue(
-            InAppNotification.objects.filter(
-                title="Elan", notification_type=NotificationType.SYSTEM
-            ).exists()
+            InAppNotification.objects.filter(title="Elan", notification_type=NotificationType.SYSTEM).exists()
         )
 
 
