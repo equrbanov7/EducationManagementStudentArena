@@ -14,14 +14,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Apply all available OS security patches.
-# libpq-dev, gcc and python3-dev are required to compile psycopg2 from source
-# (production uses psycopg2, not psycopg2-binary).
+# APT_SECURITY_REFRESH is passed by CI so the package-upgrade layer is rebuilt
+# on each workflow run instead of reusing stale cached CVE-bearing packages.
+# libpq-dev, libc6-dev and gcc are required to compile psycopg2 from source;
+# the official Python image already contains headers for /usr/local/bin/python.
+ARG APT_SECURITY_REFRESH=manual
 RUN apt-get update \
+    && echo "APT security refresh: ${APT_SECURITY_REFRESH}" \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
+        libpq5 \
         libpq-dev \
+        libc6-dev \
         gcc \
-        python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a dedicated non-root user for runtime security.
@@ -31,7 +36,9 @@ RUN groupadd --system appgroup \
 # Upgrade pip, then install Python dependencies.
 COPY requirements /app/requirements
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r /app/requirements/production.txt
+    && pip install --no-cache-dir -r /app/requirements/production.txt \
+    && apt-get purge -y --auto-remove gcc libpq-dev libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy project and make entrypoints executable.
 COPY . /app/
