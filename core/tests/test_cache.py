@@ -3,9 +3,16 @@ Tests for core.cache statistics helpers (FAZA 12).
 """
 
 from django.core.cache import cache
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
 from core.cache import _statistics_key, get_or_set_cached_statistics
+
+LOCMEM_CACHE_SETTINGS = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "statistics-cache-tests",
+    }
+}
 
 
 class StatisticsCacheKeyTests(SimpleTestCase):
@@ -32,6 +39,7 @@ class StatisticsCacheKeyTests(SimpleTestCase):
         self.assertNotEqual(k1, k2)
 
 
+@override_settings(CACHES=LOCMEM_CACHE_SETTINGS)
 class GetOrSetCachedStatisticsTests(SimpleTestCase):
     """get_or_set_cached_statistics: compute on miss, serve from cache on hit."""
 

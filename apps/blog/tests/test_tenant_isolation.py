@@ -306,6 +306,7 @@ class BlogPostAuditLogTest(TestCase):
         self.author = User.objects.create_user(
             username="audit_author", email="audit_author@example.com", password="StrongPass123!"
         )
+        self.category = Category.objects.create(name="Audit", slug="audit")
 
     def test_post_creation_writes_audit_log(self):
         from apps.audit.models import AuditLog
@@ -315,7 +316,11 @@ class BlogPostAuditLogTest(TestCase):
 
         response = self.client.post(
             reverse("create_post"),
-            data={"title": "Audit Test Post", "content": "Body content for audit."},
+            data={
+                "title": "Audit Test Post",
+                "content": "Body content for audit.",
+                "category": self.category.pk,
+            },
         )
         self.assertIn(response.status_code, (200, 302))
 

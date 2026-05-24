@@ -25,15 +25,11 @@ def _backfill_organization_from_metadata(apps, schema_editor):
     schema_editor.execute(
         """
         UPDATE notifications_inappnotification AS n
-        SET organization_id = (
-            NULLIF(COALESCE(n.metadata, '{}'::jsonb) ->> 'organization_id', '')
-        )::bigint
+        SET organization_id = o.id
         FROM organizations_organization AS o
         WHERE n.organization_id IS NULL
-          AND NULLIF(COALESCE(n.metadata, '{}'::jsonb) ->> 'organization_id', '') ~ '^[0-9]+$'
-          AND o.id = (
-              NULLIF(COALESCE(n.metadata, '{}'::jsonb) ->> 'organization_id', '')
-          )::bigint;
+          AND NULLIF(COALESCE(n.metadata, '{}'::jsonb) ->> 'organization_id', '') IS NOT NULL
+          AND o.id::text = NULLIF(COALESCE(n.metadata, '{}'::jsonb) ->> 'organization_id', '');
         """
     )
 
