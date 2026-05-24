@@ -211,9 +211,7 @@ class AIContextBuilderRegressionTests(TestCase):
     """
 
     def test_build_context_with_enrolled_course_does_not_raise(self):
-        owner = User.objects.create_user(
-            username="ctx_owner", email="ctx_owner@example.com", password="testpass123"
-        )
+        owner = User.objects.create_user(username="ctx_owner", email="ctx_owner@example.com", password="testpass123")
         student = User.objects.create_user(
             username="ctx_student", email="ctx_student@example.com", password="testpass123"
         )
@@ -280,12 +278,8 @@ class AIContextTenantIsolationTests(TestCase):
 
         Course.objects.create(title="ORG-A-SECRET-COURSE", organization=org_a, owner=teacher_a)
         Course.objects.create(title="ORG-B-SECRET-COURSE", organization=org_b, owner=teacher_b)
-        Exam.objects.create(
-            title="ORG-A-SECRET-EXAM", author=teacher_a, organization=org_a, exam_type="test"
-        )
-        Exam.objects.create(
-            title="ORG-B-SECRET-EXAM", author=teacher_b, organization=org_b, exam_type="test"
-        )
+        Exam.objects.create(title="ORG-A-SECRET-EXAM", author=teacher_a, organization=org_a, exam_type="test")
+        Exam.objects.create(title="ORG-B-SECRET-EXAM", author=teacher_b, organization=org_b, exam_type="test")
 
         membership_a = Membership.objects.create(
             user=teacher_a,

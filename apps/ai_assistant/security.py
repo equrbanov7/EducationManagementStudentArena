@@ -138,10 +138,7 @@ _LEAK_PATTERNS: list[re.Pattern] = [
     re.compile(r"\bgithub_pat_[0-9A-Za-z_]{22,}\b"),
     re.compile(r"\bghp_[0-9A-Za-z]{36}\b"),
     # Generic "KEY = value" / "SECRET: value" leaks of long opaque strings.
-    re.compile(
-        r"(?i)\b(?:secret[_\s-]?key|api[_\s-]?key|access[_\s-]?token|"
-        r"password|passwd)\b\s*[:=]\s*\S{8,}"
-    ),
+    re.compile(r"(?i)\b(?:secret[_\s-]?key|api[_\s-]?key|access[_\s-]?token|" r"password|passwd)\b\s*[:=]\s*\S{8,}"),
     # Database connection URIs with embedded credentials.
     re.compile(r"\b(?:postgres(?:ql)?|mysql|redis|mongodb)://[^\s/@]+:[^\s/@]+@\S+"),
     # Private key blocks.

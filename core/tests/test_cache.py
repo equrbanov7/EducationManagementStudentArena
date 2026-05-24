@@ -56,12 +56,8 @@ class GetOrSetCachedStatisticsTests(SimpleTestCase):
             calls["count"] += 1
             return {"value": 42}
 
-        first = get_or_set_cached_statistics(
-            role="superadmin", scope_id="global", filters={"x": 1}, compute=_compute
-        )
-        second = get_or_set_cached_statistics(
-            role="superadmin", scope_id="global", filters={"x": 1}, compute=_compute
-        )
+        first = get_or_set_cached_statistics(role="superadmin", scope_id="global", filters={"x": 1}, compute=_compute)
+        second = get_or_set_cached_statistics(role="superadmin", scope_id="global", filters={"x": 1}, compute=_compute)
 
         self.assertEqual(first, {"value": 42})
         self.assertEqual(second, {"value": 42})
