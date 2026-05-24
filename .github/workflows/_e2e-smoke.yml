@@ -51,6 +51,7 @@ jobs:
             BUILD_DATABASE_URL=sqlite:////tmp/build.db
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
             BUILD_ADMIN_ALLOWED_IPS=127.0.0.1
+            APT_SECURITY_REFRESH=${{ github.run_id }}-${{ github.run_attempt }}
 
       # Start the production stack with CI-safe dummy secrets.
       # SECURE_SSL_REDIRECT=False prevents HTTPS redirects inside plain-HTTP
