@@ -146,8 +146,11 @@ class TestResultCalculation(TestCase):
     def test_empty_attempt_falls_back_to_legacy_counts(self):
         """An attempt with no ExamAnswer rows uses the stored legacy counts."""
         attempt = ExamAttempt.objects.create(
-            user=self.student, exam=self.exam, status="submitted",
-            correct_count=7, wrong_count=3,
+            user=self.student,
+            exam=self.exam,
+            status="submitted",
+            correct_count=7,
+            wrong_count=3,
         )
         result = calculate_test_attempt_result(attempt)
         self.assertTrue(result.used_legacy_fallback)

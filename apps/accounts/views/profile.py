@@ -50,8 +50,8 @@ from ._dashboard_helpers import (
     _collect_pending_review_items,
 )
 from ._helpers import (
-    MAX_PROFILE_AVATAR_SIZE_BYTES,
-    PROFILE_AVATAR_ALLOWED_EXTENSIONS,
+    # MAX_PROFILE_AVATAR_SIZE_BYTES,
+    # PROFILE_AVATAR_ALLOWED_EXTENSIONS,
     PROFILE_ROLE_LABELS,
     REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
@@ -1816,18 +1816,14 @@ def user_profile(request):
                     role="org_admin",
                     scope_id=stat_org.pk,
                     filters=statistics_filters,
-                    compute=lambda: get_org_admin_statistics(
-                        organization=stat_org, filters=statistics_filters
-                    ),
+                    compute=lambda: get_org_admin_statistics(organization=stat_org, filters=statistics_filters),
                 )
         elif capabilities["is_teacher"]:
             statistics_data = get_or_set_cached_statistics(
                 role="teacher",
                 scope_id=request.user.pk,
                 filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
-                compute=lambda: get_teacher_statistics(
-                    request.user, organization=stat_org, filters=statistics_filters
-                ),
+                compute=lambda: get_teacher_statistics(request.user, organization=stat_org, filters=statistics_filters),
             )
         else:
             # Student / lead student / member
@@ -1835,9 +1831,7 @@ def user_profile(request):
                 role="student",
                 scope_id=request.user.pk,
                 filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
-                compute=lambda: get_student_statistics(
-                    request.user, organization=stat_org, filters=statistics_filters
-                ),
+                compute=lambda: get_student_statistics(request.user, organization=stat_org, filters=statistics_filters),
             )
 
         statistics_base_query = _query_string(
