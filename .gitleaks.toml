@@ -39,6 +39,10 @@ regexes = [
     # SQLite paths used for build-time checks (no real DB)
     '''^sqlite:////tmp/build\.db$''',
     '''^sqlite:///db\.sqlite3$''',
+
+    # AI assistant sanitizer tests use fake fixture values to prove redaction.
+    '''^AIzaSyBvgGTd3zRxAuuymMcOSYZyCOB1uWf_7A0$''',
+    '''^abcd1234efgh5678$''',
 ]
 
 # Specific file paths to exclude entirely from scanning.
