@@ -536,6 +536,13 @@ class LabSubmission(models.Model):
         ordering = ["-submitted_at"]
         verbose_name = "Lab Cavabı"
         verbose_name_plural = "Lab Cavabları"
+        indexes = [
+            # Teacher grading queue: a lab assignment's submissions by status.
+            models.Index(
+                fields=["assignment", "status", "-submitted_at"],
+                name="labsub_assign_status_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.assignment.student.username} - {self.assignment.lab.title} (Cəhd {self.attempt_number})"
