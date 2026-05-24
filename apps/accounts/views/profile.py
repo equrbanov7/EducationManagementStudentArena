@@ -50,8 +50,6 @@ from ._dashboard_helpers import (
     _collect_pending_review_items,
 )
 from ._helpers import (
-    # MAX_PROFILE_AVATAR_SIZE_BYTES,
-    # PROFILE_AVATAR_ALLOWED_EXTENSIONS,
     PROFILE_ROLE_LABELS,
     REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
