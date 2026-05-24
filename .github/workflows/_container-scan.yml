@@ -45,8 +45,12 @@ jobs:
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
 
       # Trivy — scan the local image for OS and library CVEs.
-      # ignore-unfixed: true — only CVEs that HAVE a fix block the build.
-      - name: 🛡️ Run Trivy vulnerability scan
+      # ignore-unfixed: true — only CVEs that HAVE a fix are considered.
+      #
+      # FAZA 5: this first pass produces the SARIF report and intentionally
+      # keeps exit-code "0" so the SARIF upload step below always runs, even
+      # when vulnerabilities are present.
+      - name: 🛡️ Run Trivy vulnerability scan (SARIF)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           version: v0.69.3
@@ -65,8 +69,10 @@ jobs:
           sarif_file: trivy-results.sarif
           category: trivy-container-scan
 
-      - name: 📊 Print Trivy table report (for log readability)
-        if: always()
+      # FAZA 5: this second pass prints the human-readable table AND now
+      # BLOCKS the build (exit-code "1") when a FIXABLE HIGH/CRITICAL CVE is
+      # found. ignore-unfixed keeps it from failing on CVEs with no patch yet.
+      - name: 🛡️ Trivy gate — fail on fixable HIGH/CRITICAL CVEs
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           version: v0.69.3
@@ -74,4 +80,4 @@ jobs:
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          exit-code: "0"
+          exit-code: "1"

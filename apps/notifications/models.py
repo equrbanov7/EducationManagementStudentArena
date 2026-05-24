@@ -106,6 +106,19 @@ class InAppNotification(models.Model):
         related_name="in_app_notifications",
         db_index=True,
     )
+    # Tenant scope. A real, indexed FK — not a JSON key — so the PostgreSQL
+    # RLS policy can enforce tenant isolation reliably (fail-closed).
+    # NULL means a deliberately GLOBAL notification (e.g. platform/system or
+    # blog notifications that belong to no single organization). Such rows are
+    # still protected by the recipient_id check in the RLS policy.
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="in_app_notifications",
+        null=True,
+        blank=True,
+        db_index=True,
+    )
     title = models.CharField(max_length=255)
     message = models.TextField(blank=True, default="")
     link = models.CharField(max_length=500, blank=True, default="")
@@ -129,6 +142,8 @@ class InAppNotification(models.Model):
         indexes = [
             models.Index(fields=["recipient", "deleted_at", "is_read"]),
             models.Index(fields=["recipient", "deleted_at", "created_at"]),
+            # Backs the RLS policy's tenant predicate.
+            models.Index(fields=["organization", "recipient"], name="notif_org_recipient_idx"),
         ]
 
     def __str__(self):

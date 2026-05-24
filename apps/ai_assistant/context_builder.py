@@ -305,7 +305,10 @@ def _courses_section(user, organization, memberships, permissions) -> str:
         user=user, course__organization=organization, role="student"
     ).values_list("course_id", flat=True)[:20]
     if enrolled_course_ids:
-        enrolled = Course.objects.filter(id__in=enrolled_course_ids).values_list("title", "slug", "status")
+        # NOTE: values_list() must match the loop unpacking below. Previously this
+        # selected ("title", "slug", "status") but the loop unpacked only two
+        # values, raising ValueError for every user with an enrolled course.
+        enrolled = Course.objects.filter(id__in=enrolled_course_ids).values_list("title", "slug")
         if enrolled:
             lines.append("Courses I'm enrolled in:")
             for title, slug in enrolled:

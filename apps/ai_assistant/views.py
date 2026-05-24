@@ -23,7 +23,7 @@ from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
 from .context_builder import build_user_context
 from .gemini_client import ask_gemini
 from .models import AIAssistantLog
-from .security import check_message_safety
+from .security import check_message_safety, sanitize_ai_response
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +162,14 @@ def chat_view(request):
             status=502,
         )
 
+    # ── Output sanitisation ───────────────────────────────────────────
+    # Final guard: redact any leaked secret / system-prompt echo from the
+    # model response before it reaches the user. The context fed to Gemini is
+    # already permission-filtered, so a redaction here means either a prompt
+    # injection slipped past the input screen or the model misbehaved — either
+    # way it is recorded in the audit log for review.
+    answer, was_redacted = sanitize_ai_response(result["answer"])
+
     # ── Record rate limit hit and log ─────────────────────────────────
     record_rate_limit_hit(_RATE_SCOPE, rate, user.id)
 
@@ -171,14 +179,21 @@ def chat_view(request):
         memberships=memberships,
         prompt=message[:500],
         status=AIAssistantLog.Status.SUCCESS,
-        response_summary=result["answer"][:500],
+        response_summary=answer[:500],
+        block_reason="response_redacted" if was_redacted else "",
         prompt_tokens=result.get("prompt_tokens", 0),
         response_tokens=result.get("response_tokens", 0),
     )
 
+    if was_redacted:
+        logger.warning(
+            "AI assistant response was redacted for user %s (possible leak/injection)",
+            user.id,
+        )
+
     return JsonResponse(
         {
-            "answer": result["answer"],
+            "answer": answer,
             **_get_quota_info(user.id),
         }
     )

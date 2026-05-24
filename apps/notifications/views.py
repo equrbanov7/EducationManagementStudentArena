@@ -33,6 +33,7 @@ from apps.notifications.services import (
     mark_notification_read,
     mark_notification_unread,
 )
+from core.rls import bypass_rls
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +45,14 @@ PAGE_SIZE = 15
 
 
 def _get_own_notification_or_404(pk, user):
-    """Return InAppNotification if it belongs to *user*, else 404."""
-    return get_object_or_404(InAppNotification, pk=pk, recipient=user, deleted_at__isnull=True)
+    """Return InAppNotification if it belongs to *user*, else 404.
+
+    Runs under bypass_rls(): ``recipient=user`` is the security boundary, and a
+    user must be able to open/mark/delete their own notification regardless of
+    which organisation (if any) is currently active in the session.
+    """
+    with bypass_rls():
+        return get_object_or_404(InAppNotification, pk=pk, recipient=user, deleted_at__isnull=True)
 
 
 def _safe_next_url(request):
@@ -100,9 +107,17 @@ def notification_list(request):
         search_query=search_query,
     )
 
+    # The inbox query is scoped by recipient=user, so it is safe — and
+    # necessary — to read it under bypass_rls(): a user must see their whole
+    # inbox across every organisation, even before picking an active org.
+    # Paginator evaluates the queryset, so the bypass must wrap get_page().
     paginator = Paginator(qs, PAGE_SIZE)
     page_number = request.GET.get("page", 1)
-    page_obj = paginator.get_page(page_number)
+    with bypass_rls():
+        page_obj = paginator.get_page(page_number)
+        # Force evaluation while RLS is bypassed so the template render
+        # (outside this block) does not re-hit the database under RLS.
+        page_obj.object_list = list(page_obj.object_list)
     pagination_query = urlencode(
         {
             key: value

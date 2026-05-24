@@ -3,6 +3,12 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # Runs collectstatic and checks for missing Django migrations.
 # Called by ci.yml via workflow_call.
+#
+# FAZA 5: this job now runs against PostgreSQL instead of SQLite. The project
+# relies on PostgreSQL-only features (Row-Level Security policies in
+# organizations.0003/0004/0005, notifications.0003 backfill). On SQLite those
+# migrations are silent no-ops, so `makemigrations --check` and migration
+# integrity could not be trusted. Building against PostgreSQL closes that gap.
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: 🏗️ Build Check (reusable)
@@ -26,6 +32,21 @@ jobs:
       PIP_NO_CACHE_DIR: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: build_user
+          POSTGRES_PASSWORD: build_password
+          POSTGRES_DB: build_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v6
@@ -47,13 +68,15 @@ jobs:
       - name: 📥 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/base.txt
+          # base.txt has no PostgreSQL driver; add psycopg2-binary so the
+          # build check can connect to the PostgreSQL service above.
+          pip install -r requirements/base.txt psycopg2-binary==2.9.9
 
       - name: 📦 Collect static files
         env:
           SECRET_KEY: build-check-secret-key
           DEBUG: "False"
-          DATABASE_URL: sqlite:///db.sqlite3
+          DATABASE_URL: postgres://build_user:build_password@localhost:5432/build_db
         run: |
           echo "::group::📦 Collecting Static Files"
           python manage.py collectstatic --noinput --clear
@@ -63,7 +86,7 @@ jobs:
         env:
           SECRET_KEY: build-check-secret-key
           DEBUG: "False"
-          DATABASE_URL: sqlite:///db.sqlite3
+          DATABASE_URL: postgres://build_user:build_password@localhost:5432/build_db
         run: |
           echo "::group::🔍 Migration Check"
           python manage.py makemigrations --check --dry-run || {
@@ -71,4 +94,17 @@ jobs:
             exit 1
           }
           echo "✅ No missing migrations."
+          echo "::endgroup::"
+
+      - name: 🗃️ Apply migrations against PostgreSQL
+        env:
+          SECRET_KEY: build-check-secret-key
+          DEBUG: "False"
+          DATABASE_URL: postgres://build_user:build_password@localhost:5432/build_db
+        run: |
+          echo "::group::🗃️ Migration Apply (RLS policies included)"
+          # Applying every migration on a real PostgreSQL instance verifies
+          # that the RLS / backfill migrations execute cleanly end-to-end.
+          python manage.py migrate --noinput
+          echo "✅ All migrations apply cleanly on PostgreSQL."
           echo "::endgroup::"
