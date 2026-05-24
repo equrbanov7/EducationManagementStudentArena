@@ -44,13 +44,12 @@ Usage
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 from typing import Any
 
 from django.core.cache import cache
-
-import hashlib
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +214,7 @@ def _statistics_key(*, role: str, scope_id, filters: dict | None) -> str:
         filters_blob = json.dumps(filters or {}, sort_keys=True, default=str)
     except (TypeError, ValueError):
         filters_blob = repr(filters)
-    filters_hash = hashlib.sha1(filters_blob.encode("utf-8")).hexdigest()[:12]  # noqa: S324 (cache key only)
+    filters_hash = hashlib.sha1(filters_blob.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
     return f"{_PREFIX}:accounts:statistics:{role}:{scope_id}:{filters_hash}"
 
 
