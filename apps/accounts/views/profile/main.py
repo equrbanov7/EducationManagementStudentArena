@@ -1,29 +1,27 @@
 """
-Profile views: user profile management and avatar serving.
+Main profile view: ``user_profile``.
+
+This is a GET-oriented context builder that assembles the (large) template
+context for ``accounts/profile.html``. POST-form handling is delegated to
+``post_handler.handle_profile_post``; input sanitization lives in ``search``;
+shared helpers come from the ``_helpers`` and ``_dashboard_helpers`` packages.
+
+Behavior is identical to the pre-refactor single-file implementation.
 """
 
-import mimetypes
-import re
 from urllib.parse import urlencode
 
-from django.contrib import messages
-from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.db.models.deletion import ProtectedError
-from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import http_date
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
-from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
-from apps.audit.utils import log_action
 from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
@@ -37,19 +35,18 @@ from apps.notifications.services import (
 from apps.projects.models import ProjectSubmission
 from core.rls import bypass_rls
 from core.tenancy import restore_request_organization_from_profile
-from core.upload_security import randomize_uploaded_filename
 
-from ..forms import CustomPasswordChangeForm
-from ..models import ProfileRole, UserProfile
-from ..services.profile_actions import publish_system_notification, validate_profile_avatar_upload
-from ._dashboard_helpers import (
+from ...forms import CustomPasswordChangeForm
+from ...models import ProfileRole, UserProfile
+from ...services.profile_actions import validate_profile_avatar_upload
+from .._dashboard_helpers import (
     _collect_assigned_tasks,
     _collect_evaluated_review_items,
     _collect_my_results,
     _collect_pending_answer_items,
     _collect_pending_review_items,
 )
-from ._helpers import (
+from .._helpers import (
     PROFILE_ROLE_LABELS,
     REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
@@ -74,62 +71,17 @@ from ._helpers import (
     _tenant_scoped_exams,
     _user_has_any_role,
 )
-from .account_management import build_superadmin_user_management_context
-from .superadmin import build_superadmin_ai_settings_context
+from ..account_management import build_superadmin_user_management_context
+from ..superadmin import build_superadmin_ai_settings_context
+from .constants import (
+    PROFILE_EXAM_NAV_SECTIONS,
+    PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK,
+    PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT,
+)
+from .post_handler import _load_managed_category, handle_profile_post
+from .search import _normalize_public_profile_query_value
 
 User = get_user_model()
-PUBLIC_PROFILE_SEARCH_MAX_LENGTH = 100
-PUBLIC_PROFILE_CATEGORY_MAX_LENGTH = 120
-PROFILE_AVATAR_VERSION_MAX_LENGTH = 64
-PUBLIC_PROFILE_PAGE_NUMBER_PATTERN = re.compile(r"^[0-9]+$")
-PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION = frozenset({" ", "-", "_", ".", ",", "@", "#", "+"})
-PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-zA-Z]")
-PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
-PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
-PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
-    "profile-info",
-    "courses",
-    "assigned-exams",
-    "assigned-courses",
-    "my-results",
-    "pending-answers",
-    "groups",
-    "my-courses",
-    "my-exams",
-    "pending-post-approvals",
-    "pending-review",
-    "review-results",
-    "role-assignment",
-    "student-organization-management",
-    "permission-editor",
-    "manage-roles",
-    "publish-notification",
-    "statistics",
-}
-PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
-    "groups",
-    "my-courses",
-    "my-exams",
-    "courses",
-    "pending-post-approvals",
-    "pending-review",
-    "review-results",
-    "role-assignment",
-    "student-organization-management",
-    "permission-editor",
-    "manage-roles",
-    "publish-notification",
-    "statistics",
-}
-PROFILE_EXAM_NAV_SECTIONS = {
-    "groups",
-    "my-exams",
-    "assigned-exams",
-    "my-results",
-    "pending-answers",
-    "pending-review",
-    "review-results",
-}
 
 
 def _build_effective_user_roles(user, profile):
@@ -158,41 +110,6 @@ def _build_effective_user_roles(user, profile):
     ]
 
 
-def _normalize_public_profile_query_value(raw_value, *, max_length):
-    normalized = " ".join(str(raw_value or "").split())
-    return normalized[:max_length]
-
-
-def _sanitize_public_profile_search_query(raw_value):
-    normalized = _normalize_public_profile_query_value(raw_value, max_length=PUBLIC_PROFILE_SEARCH_MAX_LENGTH)
-    if not normalized:
-        return "", False
-
-    if PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN.search(normalized):
-        return "", True
-
-    sanitized = "".join(
-        character
-        for character in normalized
-        if character.isalnum() or character in PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION
-    ).strip()
-    return sanitized[:PUBLIC_PROFILE_SEARCH_MAX_LENGTH], sanitized != normalized
-
-
-def _validate_public_profile_category(raw_value, *, allowed_slugs):
-    normalized = _normalize_public_profile_query_value(raw_value, max_length=PUBLIC_PROFILE_CATEGORY_MAX_LENGTH).lower()
-    if not normalized:
-        return "", False
-
-    if not PUBLIC_PROFILE_CATEGORY_PATTERN.fullmatch(normalized):
-        return "", True
-
-    if normalized not in allowed_slugs:
-        return "", True
-
-    return normalized, False
-
-
 def _restore_profile_org_context(request, profile, active_section):
     """
     Re-hydrate the active organization for org-bound profile sections when the
@@ -205,55 +122,6 @@ def _restore_profile_org_context(request, profile, active_section):
         profile=profile,
         allow_multi_org_restore=active_section in PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK,
     )
-
-
-def _parse_public_profile_page_number(raw_value):
-    normalized = str(raw_value or "").strip()
-    if not normalized:
-        return None
-
-    if not PUBLIC_PROFILE_PAGE_NUMBER_PATTERN.fullmatch(normalized):
-        return None
-
-    return int(normalized)
-
-
-def _validate_profile_avatar_version(raw_value):
-    normalized = _normalize_public_profile_query_value(raw_value, max_length=PROFILE_AVATAR_VERSION_MAX_LENGTH)
-    if not normalized:
-        return ""
-
-    if not PROFILE_AVATAR_VERSION_PATTERN.fullmatch(normalized):
-        raise ValidationError("Invalid avatar version parameter.")
-
-    return normalized
-
-
-@login_required
-def profile_avatar(request, user_id):
-    """Serve a logged-in user's requested profile avatar through Django."""
-    try:
-        _validate_profile_avatar_version(request.GET.get("v"))
-    except ValidationError:
-        return HttpResponseBadRequest("Invalid avatar version parameter.")
-
-    target_user = get_object_or_404(User, id=user_id, is_active=True)
-    target_profile = UserProfile.objects.filter(user=target_user).only("avatar", "updated_at").first()
-    if not target_profile or not target_profile.avatar:
-        raise Http404("Avatar tapılmadı.")
-
-    avatar_field = target_profile.avatar
-    try:
-        avatar_stream = avatar_field.storage.open(avatar_field.name, "rb")
-    except Exception as exc:
-        raise Http404("Avatar faylı açılmadı.") from exc
-
-    content_type = mimetypes.guess_type(avatar_field.name or "")[0] or "application/octet-stream"
-    response = FileResponse(avatar_stream, content_type=content_type)
-    response["Cache-Control"] = "private, max-age=300"
-    response["Last-Modified"] = http_date(target_profile.updated_at.timestamp())
-    response["X-Content-Type-Options"] = "nosniff"
-    return response
 
 
 def _get_publish_notification_targets(user, capabilities):
@@ -317,10 +185,6 @@ def _get_publish_notification_targets(user, capabilities):
     return targets
 
 
-# _get_notification_recipients() was moved to
-# services.profile_actions.resolve_notification_recipients (FAZA 8).
-
-
 @login_required
 def user_profile(request):
     """
@@ -333,7 +197,6 @@ def user_profile(request):
     from apps.blog.selectors import build_post_category_picker_options, get_post_category_tree
     from apps.blog.services import (
         author_requires_post_approval,
-        can_user_manage_categories,
         can_user_publish_post,
         collect_reviewable_posts,
         count_pending_reviewable_posts,
@@ -369,209 +232,23 @@ def user_profile(request):
     category_management_edit_form = None
     category_management_edit_item = None
 
-    def _category_section_url(*, section="category-management", edit_category=None):
-        query_params = QueryDict(mutable=True)
-        query_params["section"] = section
-        if edit_category:
-            query_params["edit_category"] = str(edit_category)
-        return f"{reverse('accounts:profile')}?{query_params.urlencode()}"
-
-    def _load_managed_category(raw_category_id):
-        try:
-            category_id = int(str(raw_category_id or "").strip())
-        except (TypeError, ValueError):
-            return None
-        return Category.objects.select_related("parent").filter(pk=category_id).first()
-
     if request.method == "POST":
-        submitted_form = (request.POST.get("profile_form") or "").strip()
-        if submitted_form == "update-avatar":
-            uploaded_avatar = request.FILES.get("avatar")
-            avatar_error = _validate_avatar_upload(uploaded_avatar)
-            if avatar_error:
-                messages.error(request, avatar_error)
-                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-
-            randomize_uploaded_filename(uploaded_avatar)
-            profile.avatar = uploaded_avatar
-            profile.save(update_fields=["avatar", "updated_at"])
-            messages.success(request, "Profil şəkli uğurla yeniləndi.")
-            return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-
-        if submitted_form == "change-password":
-            password_change_form = CustomPasswordChangeForm(request.user, request.POST)
-            if password_change_form.is_valid():
-                user = password_change_form.save()
-                update_session_auth_hash(request, user)
-                messages.success(request, "Şifrə uğurla yeniləndi.")
-                return redirect(f"{reverse('accounts:profile')}?section=change-password")
-
-            messages.error(request, "Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin.")
-            active_section = "change-password"
-        elif submitted_form == "publish-notification":
-            if "publish-notification" not in allowed_sections:
-                messages.error(request, "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur.")
-                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-            # Validation + fan-out lives in services.profile_actions (FAZA 8).
-            ok, message_key = publish_system_notification(request=request, capabilities=capabilities)
-            if ok:
-                messages.success(request, _(message_key))
-            else:
-                messages.error(request, _(message_key))
-            return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-        elif submitted_form in {"category-create", "category-management-save", "category-management-delete"}:
-            if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(
-                request.user
-            ):
-                messages.error(request, "Bu bölməni yalnız SuperAdmin idarə edə bilər.")
-                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-
-            if submitted_form == "category-management-delete":
-                active_section = "category-management"
-                category_to_delete = _load_managed_category(request.POST.get("category_id"))
-                if category_to_delete is None:
-                    messages.error(request, "Silinəcək kateqoriya tapılmadı.")
-                    return redirect(_category_section_url(section="category-management"))
-
-                deleted_category_name = category_to_delete.localized_full_name
-                try:
-                    category_to_delete.delete()
-                except ProtectedError:
-                    messages.error(
-                        request,
-                        "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur.",
-                    )
-                else:
-                    messages.success(request, f'"{deleted_category_name}" uğurla silindi.')
-                return redirect(_category_section_url(section="category-management"))
-
-            if submitted_form == "category-create":
-                active_section = "create-category"
-                category_management_bound_form = CategoryManagementForm(request.POST)
-
-                if category_management_bound_form.is_valid():
-                    saved_category = category_management_bound_form.save()
-                    saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-                    messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yaradıldı.')
-                    return redirect(_category_section_url(section="create-category"))
-
-                category_management_create_form = category_management_bound_form
-                messages.error(request, "Kateqoriya yaradılmadı. Zəhmət olmasa xətaları düzəldin.")
-            else:
-                active_section = "category-management"
-
-                submitted_category_id = request.POST.get("category_id")
-                category_management_edit_item = _load_managed_category(submitted_category_id)
-                if submitted_category_id and category_management_edit_item is None:
-                    messages.error(request, "Redaktə ediləcək kateqoriya tapılmadı.")
-                    return redirect(_category_section_url(section="category-management"))
-
-                category_management_bound_form = CategoryManagementForm(
-                    request.POST,
-                    instance=category_management_edit_item,
-                )
-
-                if category_management_bound_form.is_valid():
-                    saved_category = category_management_bound_form.save()
-                    saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-                    messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yeniləndi.')
-                    return redirect(_category_section_url(section="category-management"))
-
-                category_management_edit_form = category_management_bound_form
-                messages.error(request, "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin.")
-        elif submitted_form != "edit-profile":
-            target_section = request.GET.get("section") or request.POST.get("section") or active_section
-            if target_section not in allowed_sections:
-                target_section = "profile-info"
-            return redirect(f"{reverse('accounts:profile')}?section={target_section}")
-
-        if submitted_form == "edit-profile":
-            allowed_user_fields = ["first_name", "last_name", "email"]
-            user_update_payload = {
-                "first_name": (request.POST.get("first_name", request.user.first_name) or "").strip(),
-                "last_name": (request.POST.get("last_name", request.user.last_name) or "").strip(),
-                "email": (request.POST.get("email", request.user.email) or "").strip().lower(),
-            }
-            first_name = user_update_payload["first_name"]
-            last_name = user_update_payload["last_name"]
-            new_email = user_update_payload["email"]
-            student_university_name = (
-                request.POST.get("student_university_name", profile.student_university_name) or ""
-            ).strip()
-            student_school_identifier = (
-                request.POST.get("student_school_identifier", profile.student_school_identifier) or ""
-            ).strip()
-
-            if not first_name or not last_name or not new_email:
-                messages.error(request, pgettext_lazy("accounts.profile_edit.message", "required_fields_missing"))
-                return redirect("accounts:profile" + "?section=edit-profile")
-
-            if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
-                messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
-                return redirect("accounts:profile" + "?section=edit-profile")
-
-            # Update user info
-            for field_name, field_value in user_update_payload.items():
-                setattr(request.user, field_name, field_value)
-            request.user.save(update_fields=allowed_user_fields)
-
-            # Update profile
-            profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
-            profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
-            profile.location = (request.POST.get("location", profile.location) or "").strip()
-            profile.student_university_name = student_university_name
-            profile.student_school_identifier = student_school_identifier
-
-            # Update enhanced profile fields
-            profile.student_specialization = (
-                request.POST.get("student_specialization", profile.student_specialization) or ""
-            ).strip()
-            profile.student_group_number = (
-                request.POST.get("student_group_number", profile.student_group_number) or ""
-            ).strip()
-            profile.department = (request.POST.get("department", profile.department) or "").strip()
-
-            # Handle avatar upload
-            uploaded_avatar = request.FILES.get("avatar")
-            if uploaded_avatar is not None:
-                avatar_error = _validate_avatar_upload(uploaded_avatar)
-                if avatar_error:
-                    messages.error(request, avatar_error)
-                    return redirect("accounts:profile" + "?section=edit-profile")
-                randomize_uploaded_filename(uploaded_avatar)
-                profile.avatar = uploaded_avatar
-
-            # Only admins can change supervisor_code
-            if getattr(request.user, "is_admin_level", False):
-                profile.supervisor_code = request.POST.get("supervisor_code", "")
-
-            if _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}) and not (
-                profile.student_university_name or profile.student_school_identifier
-            ):
-                messages.error(
-                    request,
-                    pgettext_lazy("accounts.profile_edit.message", "student_university_or_school_required"),
-                )
-                return redirect("accounts:profile" + "?section=edit-profile")
-
-            profile.save()
-
-            # Audit log for profile update
-            from core.constants import AuditAction
-
-            log_action(
-                action=AuditAction.UPDATE,
-                user=request.user,
-                obj=profile,
-                reason="Profile updated by user",
-                request=request,
-                resource_type="UserProfile",
-                resource_id=str(profile.pk),
-                resource_repr=f"{request.user.username}",
-            )
-
-            messages.success(request, pgettext_lazy("accounts.profile_edit.message", "profile_updated_successfully"))
-            return redirect("accounts:profile")
+        post_result = handle_profile_post(
+            request,
+            profile=profile,
+            capabilities=capabilities,
+            allowed_sections=allowed_sections,
+            active_section=active_section,
+            password_change_form=password_change_form,
+            validate_avatar_upload=_validate_avatar_upload,
+        )
+        if post_result["response"] is not None:
+            return post_result["response"]
+        active_section = post_result["active_section"]
+        password_change_form = post_result["password_change_form"]
+        category_management_create_form = post_result["category_management_create_form"]
+        category_management_edit_form = post_result["category_management_edit_form"]
+        category_management_edit_item = post_result["category_management_edit_item"]
 
     # Get user's roles
     user_roles = _build_effective_user_roles(request.user, profile)
@@ -2163,171 +1840,3 @@ def user_profile(request):
     context.update(student_org_management_section)
 
     return render(request, "accounts/profile.html", context)
-
-
-@login_required
-def statistics_export_csv(request):
-    """Export current statistics data as CSV."""
-    import csv
-    import io
-
-    from apps.accounts.services.statistics_selectors import (
-        get_org_admin_statistics,
-        get_student_statistics,
-        get_superadmin_statistics,
-        get_teacher_statistics,
-    )
-
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    capabilities = _role_capabilities(request.user, profile)
-    if "statistics" not in capabilities["allowed_sections"]:
-        raise Http404
-
-    org = _get_active_organization(request)
-    filters = {
-        "date_from": (request.GET.get("stat_date_from") or "").strip(),
-        "date_to": (request.GET.get("stat_date_to") or "").strip(),
-        "course": (request.GET.get("stat_course") or "").strip() or None,
-        "group": (request.GET.get("stat_group") or "").strip() or None,
-        "content_type": (
-            (request.GET.get("stat_content_type") or "all").strip().lower()
-            if (request.GET.get("stat_content_type") or "all").strip().lower()
-            in {"all", "exam", "assignment", "lab", "project"}
-            else "all"
-        ),
-        "organization": (request.GET.get("stat_organization") or "").strip() or None,
-    }
-
-    # Reuse the same short-lived statistics cache as the dashboard view
-    # (FAZA 12) — identical (role, scope, filters) hits the same cache entry.
-    from core.cache import get_or_set_cached_statistics
-
-    if capabilities["is_superadmin"]:
-        stats = get_or_set_cached_statistics(
-            role="superadmin",
-            scope_id="global",
-            filters=filters,
-            compute=lambda: get_superadmin_statistics(filters=filters),
-        )
-    elif capabilities["is_org_admin"] and org:
-        stats = get_or_set_cached_statistics(
-            role="org_admin",
-            scope_id=org.pk,
-            filters=filters,
-            compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
-        )
-    elif capabilities["is_teacher"]:
-        stats = get_or_set_cached_statistics(
-            role="teacher",
-            scope_id=request.user.pk,
-            filters={**filters, "_org": getattr(org, "pk", None)},
-            compute=lambda: get_teacher_statistics(request.user, organization=org, filters=filters),
-        )
-    else:
-        stats = get_or_set_cached_statistics(
-            role="student",
-            scope_id=request.user.pk,
-            filters={**filters, "_org": getattr(org, "pk", None)},
-            compute=lambda: get_student_statistics(request.user, organization=org, filters=filters),
-        )
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    summary = stats.get("summary", {})
-    writer.writerow(
-        [
-            str(pgettext_lazy("profile.statistics", "csv_header_metric")),
-            str(pgettext_lazy("profile.statistics", "csv_header_value")),
-        ]
-    )
-    for key, value in summary.items():
-        writer.writerow([key.replace("_", " ").title(), value])
-
-    from django.http import HttpResponse as _HR
-
-    response = _HR(output.getvalue(), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = 'attachment; filename="statistics.csv"'
-    return response
-
-
-@require_safe
-def public_user_profile(request, username):
-    """
-    Public user profile showing only published posts and non-confidential profile information.
-    """
-    from django.db.models import Q
-
-    from apps.blog.models import Category, Post
-    from apps.blog.selectors import filter_posts_by_category_scope, get_flat_category_tree
-
-    profile_user = get_object_or_404(User, username=username)
-
-    if request.user.is_authenticated and request.user == profile_user:
-        return redirect("accounts:profile")
-
-    profile, _created = UserProfile.objects.get_or_create(user=profile_user)
-
-    published_posts = (
-        Post.objects.filter(author=profile_user, is_published=True).select_related("category").order_by("-created_at")
-    )
-
-    allowed_category_slugs = set(Category.objects.values_list("slug", flat=True))
-    search_query, invalid_search_query = _sanitize_public_profile_search_query(request.GET.get("q"))
-    selected_category, invalid_category = _validate_public_profile_category(
-        request.GET.get("category"),
-        allowed_slugs=allowed_category_slugs,
-    )
-
-    user_posts_list = published_posts
-    if invalid_search_query and not search_query:
-        user_posts_list = user_posts_list.none()
-    elif search_query:
-        user_posts_list = user_posts_list.filter(
-            Q(title__icontains=search_query) | Q(excerpt__icontains=search_query) | Q(content__icontains=search_query)
-        )
-
-    if invalid_category:
-        user_posts_list = user_posts_list.none()
-    elif selected_category:
-        selected_category_obj = Category.objects.select_related("parent").filter(slug=selected_category).first()
-        if selected_category_obj:
-            user_posts_list = filter_posts_by_category_scope(user_posts_list, selected_category_obj)
-        else:
-            user_posts_list = user_posts_list.none()
-
-    category_items = get_flat_category_tree(posts_queryset=published_posts, include_empty=False)
-
-    raw_page_number = request.GET.get("page")
-    page_number = _parse_public_profile_page_number(raw_page_number)
-    if raw_page_number not in (None, "") and page_number is None:
-        return HttpResponseBadRequest("Invalid page parameter.")
-
-    paginator = Paginator(user_posts_list, 6)
-    posts = paginator.get_page(page_number)
-
-    display_name = (f"{profile_user.first_name} {profile_user.last_name}").strip() or profile_user.username
-    profile_bio = (profile.bio or "").strip()
-    profile_location = (profile.location or "").strip()
-
-    query_params = QueryDict(mutable=True)
-    if search_query:
-        query_params["q"] = search_query
-    if selected_category:
-        query_params["category"] = selected_category
-    extra_query = query_params.urlencode()
-
-    context = {
-        "profile_user": profile_user,
-        "profile": profile,
-        "display_name": display_name,
-        "search_query": search_query,
-        "selected_category": selected_category,
-        "extra_query": extra_query,
-        "category_items": category_items,
-        "published_posts_count": published_posts.count(),
-        "category_count": len(category_items),
-        "profile_bio": profile_bio,
-        "profile_location": profile_location,
-        "posts": posts,
-    }
-    return render(request, "accounts/public_profile.html", context)
