@@ -21,8 +21,9 @@ from django.urls import reverse
 from apps.accounts.views._helpers import _append_query_params
 
 
-def build_superadmin_organizations_view(*, request, section, organization_search,
-                                        organization_status_filter, organization_type_filter):
+def build_superadmin_organizations_view(
+    *, request, section, organization_search, organization_status_filter, organization_type_filter
+):
     """Populate *section* with the superadmin "organizations" management view.
 
     Extracted verbatim from ``_build_student_org_management_section``'s
