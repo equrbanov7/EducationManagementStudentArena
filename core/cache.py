@@ -49,6 +49,9 @@ from typing import Any
 
 from django.core.cache import cache
 
+import hashlib
+import json
+
 logger = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -197,9 +200,6 @@ def invalidate_exam_metadata_cache(exam_pk: int) -> None:
 # Statistics do not need to be real-time, so the result is cached briefly per
 # (role, scope, filters) combination. A short TTL keeps the data fresh enough
 # while absorbing repeated dashboard opens / refreshes.
-
-import hashlib
-import json
 
 STATISTICS_TTL = 180  # seconds — small staleness is acceptable for dashboards
 
