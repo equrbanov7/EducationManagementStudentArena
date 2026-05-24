@@ -499,3 +499,109 @@ class TeacherStaffRequestFlowTest(TestCase):
             any(r.user_id == user.pk for r in ts_requests),
             "Teacher's pending request not found in management section",
         )
+
+
+class ProfileActionsServiceTest(TestCase):
+    """FAZA 8 — services extracted from the user_profile view."""
+
+    def test_validate_avatar_rejects_missing_file(self):
+        from apps.accounts.services.profile_actions import validate_profile_avatar_upload
+
+        error = validate_profile_avatar_upload(None)
+        self.assertNotEqual(error, "")
+
+    def test_validate_avatar_rejects_oversized_file(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from apps.accounts.services.profile_actions import (
+            MAX_PROFILE_AVATAR_SIZE_BYTES,
+            validate_profile_avatar_upload,
+        )
+
+        oversized = SimpleUploadedFile(
+            "big.png",
+            b"x" * (MAX_PROFILE_AVATAR_SIZE_BYTES + 1),
+            content_type="image/png",
+        )
+        error = validate_profile_avatar_upload(oversized)
+        self.assertIn("MB", error)
+
+    def test_publish_notification_requires_title(self):
+        """publish_system_notification must reject an empty title."""
+        from django.test import RequestFactory
+
+        from apps.accounts.services.profile_actions import (
+            PUBLISH_NOTIFICATION_TITLE_REQUIRED,
+            publish_system_notification,
+        )
+
+        owner = User.objects.create_user("pa_owner", "pa_owner@example.com", "pw")
+        request = RequestFactory().post("/accounts/profile/", {"notif_title": "", "notif_message": "body"})
+        request.user = owner
+
+        ok, message_key = publish_system_notification(
+            request=request, capabilities={"is_superadmin": True}
+        )
+        self.assertFalse(ok)
+        self.assertEqual(message_key, PUBLISH_NOTIFICATION_TITLE_REQUIRED)
+
+    def test_publish_notification_sends_to_all_for_superadmin(self):
+        """A valid title + 'all' target fans out a SYSTEM notification."""
+        from django.test import RequestFactory
+
+        from apps.accounts.services.profile_actions import (
+            PUBLISH_NOTIFICATION_SENT,
+            publish_system_notification,
+        )
+
+        sender = User.objects.create_user("pa_sender", "pa_sender@example.com", "pw")
+        User.objects.create_user("pa_recv", "pa_recv@example.com", "pw")
+        request = RequestFactory().post(
+            "/accounts/profile/",
+            {"notif_title": "Elan", "notif_message": "Mətn", "notif_targets": "all"},
+        )
+        request.user = sender
+
+        ok, message_key = publish_system_notification(
+            request=request, capabilities={"is_superadmin": True}
+        )
+        self.assertTrue(ok)
+        self.assertEqual(message_key, PUBLISH_NOTIFICATION_SENT)
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                title="Elan", notification_type=NotificationType.SYSTEM
+            ).exists()
+        )
+
+
+class OrgManagementServiceTest(TestCase):
+    """FAZA 9 — superadmin organizations view extracted from _helpers."""
+
+    def test_build_superadmin_organizations_view_populates_records(self):
+        from django.test import RequestFactory
+
+        from apps.accounts.services.org_management import build_superadmin_organizations_view
+
+        owner = User.objects.create_user("om_owner", "om_owner@example.com", "pw")
+        Organization.objects.create(
+            name="Org Management Test Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+
+        request = RequestFactory().get("/accounts/student-organization-management/")
+        section = {"organizations_page_param": "organization_page"}
+
+        result = build_superadmin_organizations_view(
+            request=request,
+            section=section,
+            organization_search="",
+            organization_status_filter="",
+            organization_type_filter="",
+        )
+
+        self.assertGreaterEqual(result["organization_records"].paginator.count, 1)
+        self.assertEqual(result["management_view_options"][-1]["value"], "organizations")
+        self.assertIn("management_view=organizations", result["post_next_url"])

@@ -8,6 +8,7 @@ import os
 from django.core.management.utils import get_random_secret_key
 
 import dj_database_url
+from dotenv import load_dotenv
 
 from .base import (
     ADMIN_2FA_REQUIRED,
@@ -89,6 +90,11 @@ from .base import (
     WSGI_APPLICATION,
     X_FRAME_OPTIONS,
 )
+
+# Load local test credentials when running pytest outside CI. Existing
+# environment variables still win because python-dotenv does not override them
+# by default.
+load_dotenv(BASE_DIR / ".env")
 
 # Use environment secret for tests when provided; otherwise generate ephemeral key.
 SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
