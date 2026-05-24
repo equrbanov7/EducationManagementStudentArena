@@ -92,6 +92,23 @@ PENDING_ORG_OWNER_NOTIFICATION_EVENT = "organization_pending_approval"
 # ────────────────────────────────────────────────────────────────────────────
 
 
+def _resolve_organization_id(organization, metadata: dict | None):
+    """Resolve the tenant-scope organization id for a notification.
+
+    Priority: explicit *organization* argument, then a legacy
+    ``organization_id`` key inside *metadata*. Returns ``None`` for
+    deliberately global notifications (platform/system, blog, etc.).
+    """
+    if organization is not None:
+        org_id = getattr(organization, "pk", organization)
+        return org_id or None
+    if metadata:
+        raw = metadata.get("organization_id")
+        if raw not in (None, "", "None"):
+            return raw
+    return None
+
+
 def create_notification(
     *,
     recipient,
@@ -100,6 +117,7 @@ def create_notification(
     link: str = "",
     notification_type: str = NotificationType.SYSTEM,
     metadata: dict | None = None,
+    organization=None,
 ) -> InAppNotification:
     """
     Create a single in-app notification for *recipient*.
@@ -111,6 +129,10 @@ def create_notification(
         link: Optional URL the notification points to.
         notification_type: One of the ``NotificationType`` choices.
         metadata: Optional free-form dict stored as JSON.
+        organization: Tenant scope. Pass the Organization (or its id) the
+            notification belongs to. Leave ``None`` ONLY for genuinely global
+            notifications (platform/system, blog). Falls back to a legacy
+            ``metadata['organization_id']`` value when not given.
 
     Returns:
         The newly created :class:`InAppNotification` instance.
@@ -118,6 +140,7 @@ def create_notification(
     with bypass_rls():
         return InAppNotification.objects.create(
             recipient=recipient,
+            organization_id=_resolve_organization_id(organization, metadata),
             title=title,
             message=message,
             link=link,
@@ -134,6 +157,7 @@ def create_notification_for_users(
     link: str = "",
     notification_type: str = NotificationType.SYSTEM,
     metadata: dict | None = None,
+    organization=None,
 ) -> list[InAppNotification]:
     """
     Create the same notification for multiple users in a single bulk insert.
@@ -145,14 +169,19 @@ def create_notification_for_users(
         link: Optional target URL.
         notification_type: One of the ``NotificationType`` choices.
         metadata: Optional free-form dict (shared across all recipients).
+        organization: Tenant scope shared by all recipients. ``None`` only for
+            genuinely global notifications. Falls back to a legacy
+            ``metadata['organization_id']`` value when not given.
 
     Returns:
         List of created :class:`InAppNotification` instances.
     """
     payload = _serialize_metadata(metadata or {})
+    org_id = _resolve_organization_id(organization, metadata)
     notifications = [
         InAppNotification(
             recipient=user,
+            organization_id=org_id,
             title=title,
             message=message,
             link=link,
@@ -223,11 +252,16 @@ def mark_notification_read(*, notification: InAppNotification, user) -> bool:
 
     Returns True if the state changed, False if it was already read.
     Raises PermissionError if *notification* does not belong to *user*.
+
+    The write runs under bypass_rls(): _assert_owner already enforces
+    ownership, and the row may belong to an organisation other than the
+    currently active one.
     """
     _assert_owner(notification, user)
     if notification.is_read:
         return False
-    notification.mark_read()
+    with bypass_rls():
+        notification.mark_read()
     return True
 
 
@@ -241,7 +275,8 @@ def mark_notification_unread(*, notification: InAppNotification, user) -> bool:
     _assert_owner(notification, user)
     if not notification.is_read:
         return False
-    notification.mark_unread()
+    with bypass_rls():
+        notification.mark_unread()
     return True
 
 
@@ -250,13 +285,18 @@ def mark_all_notifications_read(*, user) -> int:
     Mark all non-deleted, unread notifications for *user* as read.
 
     Returns the number of notifications updated.
+
+    The ``recipient=user`` filter is the security boundary here, so the call
+    runs under ``bypass_rls()``: a user's own inbox must be reachable across
+    every organisation they belong to, even before they pick an active org.
     """
     now = timezone.now()
-    updated = InAppNotification.objects.filter(
-        recipient=user,
-        deleted_at__isnull=True,
-        is_read=False,
-    ).update(is_read=True, read_at=now)
+    with bypass_rls():
+        updated = InAppNotification.objects.filter(
+            recipient=user,
+            deleted_at__isnull=True,
+            is_read=False,
+        ).update(is_read=True, read_at=now)
     return updated
 
 
@@ -272,7 +312,8 @@ def delete_notification(*, notification: InAppNotification, user) -> None:
     Raises PermissionError if *notification* does not belong to *user*.
     """
     _assert_owner(notification, user)
-    notification.soft_delete()
+    with bypass_rls():
+        notification.soft_delete()
 
 
 def bulk_delete_notifications(*, notification_ids: list[int], user) -> int:
@@ -283,11 +324,12 @@ def bulk_delete_notifications(*, notification_ids: list[int], user) -> int:
     Returns the number of notifications deleted.
     """
     now = timezone.now()
-    updated = InAppNotification.objects.filter(
-        pk__in=notification_ids,
-        recipient=user,
-        deleted_at__isnull=True,
-    ).update(deleted_at=now)
+    with bypass_rls():
+        updated = InAppNotification.objects.filter(
+            pk__in=notification_ids,
+            recipient=user,
+            deleted_at__isnull=True,
+        ).update(deleted_at=now)
     return updated
 
 
@@ -306,6 +348,12 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
         filter_by: ``"all"`` | ``"unread"`` | ``"read"``
         notification_type: Optional ``NotificationType`` value to narrow results.
         search_query: Optional search term matched against notification title/message.
+
+    NOTE: A lazy QuerySet is returned. It is scoped by ``recipient=user`` (the
+    real security boundary). Because notifications now carry an ``organization``
+    FK enforced by RLS, callers that must show a user's FULL inbox regardless
+    of the active organisation should evaluate this queryset inside
+    ``core.rls.bypass_rls()`` — see ``notifications.views.notification_list``.
     """
     qs = InAppNotification.objects.filter(
         recipient=user,
@@ -328,12 +376,18 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
 
 
 def get_unread_count(*, user) -> int:
-    """Return the number of non-deleted unread notifications for *user*."""
-    return InAppNotification.objects.filter(
-        recipient=user,
-        deleted_at__isnull=True,
-        is_read=False,
-    ).count()
+    """Return the number of non-deleted unread notifications for *user*.
+
+    Runs under ``bypass_rls()``: the badge count must reflect a user's entire
+    inbox regardless of the currently selected organisation. ``recipient=user``
+    is the security boundary.
+    """
+    with bypass_rls():
+        return InAppNotification.objects.filter(
+            recipient=user,
+            deleted_at__isnull=True,
+            is_read=False,
+        ).count()
 
 
 def get_membership_request_role_label(role_type: str) -> str:
