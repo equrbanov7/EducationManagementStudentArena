@@ -64,6 +64,9 @@ ROOT_ASSET_MAP = {
     "og-image.jpg": "brand/og-image.jpg",
 }
 
+GOOGLE_SITE_VERIFICATION_FILENAME = "google241689ad56ccbec6.html"
+GOOGLE_SITE_VERIFICATION_CONTENT = f"google-site-verification: {GOOGLE_SITE_VERIFICATION_FILENAME}"
+
 
 @require_GET
 @cache_control(max_age=86400, public=True)
@@ -80,6 +83,13 @@ def root_asset(request, asset_name: str):
     if static_name is None:
         raise Http404("Unknown asset")
     return HttpResponsePermanentRedirect(static(static_name))
+
+
+@require_GET
+@cache_control(max_age=86400, public=True)
+def google_site_verification(request):
+    """Serve the Google Search Console verification file at the domain root."""
+    return HttpResponse(GOOGLE_SITE_VERIFICATION_CONTENT, content_type="text/html; charset=utf-8")
 
 
 @require_GET
