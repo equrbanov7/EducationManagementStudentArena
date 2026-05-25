@@ -40,7 +40,7 @@ PROFILE_URL: str = f"{BASE_URL}/accounts/profile/"
 def login(page: Page) -> None:
     """Navigate to the login page and submit valid credentials."""
     page.goto(f"{BASE_URL}/accounts/login/")
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
     if not E2E_USERNAME or not E2E_PASSWORD:
         return
@@ -58,7 +58,7 @@ def login(page: Page) -> None:
     login_form.locator("input[name='username']").fill(E2E_USERNAME)
     login_form.locator("input[name='password']").fill(E2E_PASSWORD)
     login_form.locator("button[type='submit']").click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
 
 def _base_url_is_reachable() -> bool:
@@ -127,7 +127,7 @@ class TestDashboardLoading:
         response = page.goto(DASHBOARD_URL)
         assert response is not None
         assert response.status == 200, f"Dashboard page returned unexpected HTTP {response.status}"
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # The final page should render a dashboard shell, regardless of which
         # role-specific variant the logged-in user lands on.
@@ -141,7 +141,7 @@ class TestDashboardLoading:
         """The navigation bar must be visible on the dashboard."""
         login(page)
         page.goto(DASHBOARD_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # Teacher and student dashboards expose different navigation shells.
         expect(page.locator("nav, [role='navigation'], .sidebar-nav, .quick-actions").first).to_be_visible()
@@ -169,7 +169,7 @@ class TestPrimaryAction:
         response = page.goto(f"{BASE_URL}/exams/")
         assert response is not None
         assert response.status == 200, f"/exams/ returned HTTP {response.status} after login"
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # The page must not be blank.
         expect(page.locator("body")).to_be_visible()
@@ -190,7 +190,7 @@ class TestProfileExperience:
         response = page.goto(f"{PROFILE_URL}?section={section}")
         assert response is not None
         assert response.status == 200, f"Profile section returned HTTP {response.status}"
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         active_panel = page.locator(f'[data-profile-section-panel="{section}"].is-active')
         expect(active_panel).to_be_visible()
@@ -206,7 +206,7 @@ class TestProfileExperience:
             .locator('button[type="submit"]')
         )
         english_option.click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         query = parse_qs(urlsplit(page.url).query)
         assert query.get("section") == [section], f"Language switch redirected away from {section}: {page.url}"
@@ -223,7 +223,7 @@ class TestProfileExperience:
         response = page.goto(f"{PROFILE_URL}?section=publish-notification")
         assert response is not None
         assert response.status == 200, f"Publish notification section returned HTTP {response.status}"
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         search_input = page.locator("#pnTargetSearch")
         scroll_container = page.locator(".pn-target-scroll")
@@ -246,6 +246,6 @@ class TestProfileExperience:
         response = page.goto(f"{BASE_URL}/exams/available/")
         assert response is not None
         assert response.status == 200, f"/exams/available/ returned HTTP {response.status} after login"
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         expect(page.locator("body")).to_be_visible()
