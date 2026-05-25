@@ -6,6 +6,13 @@ from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
 
 from core.media_views import protected_media
+from core.seo_views import (
+    ROOT_ASSET_MAP,
+    robots_txt,
+    root_asset,
+    site_webmanifest,
+    sitemap_xml,
+)
 from core.views import handler400 as handler400  # noqa: F401
 from core.views import handler403 as handler403  # noqa: F401
 from core.views import handler404 as handler404  # noqa: F401
@@ -19,9 +26,23 @@ admin.site.site_url = reverse_lazy("home")
 # exposing the well-known endpoint).
 _admin_prefix = getattr(settings, "ADMIN_URL_PREFIX", "admin/").lstrip("/")
 
+# Well-known root-path SEO files.  Crawlers and browsers request these at
+# the site root; the views below either serve generated content (robots.txt,
+# sitemap.xml, the web manifest) or 301-redirect to the cache-busted static
+# brand asset (favicon.ico, logo.png, og-image.jpg, ...).
+_seo_urlpatterns = [
+    path("robots.txt", robots_txt, name="robots_txt"),
+    path("sitemap.xml", sitemap_xml, name="sitemap_xml"),
+    path("site.webmanifest", site_webmanifest, name="site_webmanifest"),
+] + [
+    path(asset_name, root_asset, {"asset_name": asset_name}, name=f"root_asset_{asset_name}")
+    for asset_name in ROOT_ASSET_MAP
+]
+
 urlpatterns = [
     path(_admin_prefix, admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
+    *_seo_urlpatterns,
     path("blog/", include("apps.blog.legacy_urls")),
     path("", include("apps.blog.urls")),
     path("", include("apps.live_exam.urls")),

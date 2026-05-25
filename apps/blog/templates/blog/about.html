@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% block title %}{% trans "title" context "blog.about_page" %}{% endblock %}
+{# SEO: brand title supplied by the about view (seo_title). #}
+{% block title %}{{ seo_title }}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/about.css' %}">
