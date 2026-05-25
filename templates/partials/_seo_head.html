@@ -1,0 +1,163 @@
+{% load static i18n %}
+{% comment %}
+================================================================================
+  EMSArena — shared SEO <head> fragment
+--------------------------------------------------------------------------------
+  Renders: meta description / keywords / robots, canonical URL, favicons,
+  web manifest, Open Graph + Twitter cards, hreflang alternates and JSON-LD
+  structured data (Organization / WebSite / SoftwareApplication / Breadcrumb).
+
+  Driven by the `seo` dict from core.context_processors.seo_context, plus
+  optional per-view overrides. A view overrides a value simply by putting it
+  in its render() context:
+
+      seo_title          -> <title> + og:title + twitter:title
+      seo_description    -> meta description + og/twitter description
+      seo_keywords       -> meta keywords
+      seo_robots         -> meta robots   (e.g. "noindex, nofollow")
+      seo_canonical      -> canonical / og:url   (absolute URL)
+      seo_og_type        -> og:type      (default "website")
+      seo_og_image       -> og:image     (absolute URL)
+      seo_is_home        -> True on the homepage only (emits brand JSON-LD)
+      seo_breadcrumbs    -> list of {"name": .., "url": ..} for BreadcrumbList
+
+  CSP note: every inline <script> carries the per-request nonce, as required
+  by the project's strict Content-Security-Policy (no 'unsafe-inline').
+================================================================================
+{% endcomment %}
+
+{# ---- resolve effective values (per-view override OR seo default) ----
+   Django forbids template variable names starting with "_", so the
+   resolved values use the eff* prefix. #}
+{% firstof seo_title seo.title as effTitle %}
+{% firstof seo_description seo.description as effDesc %}
+{% firstof seo_keywords seo.keywords as effKeywords %}
+{% firstof seo_robots seo.robots as effRobots %}
+{% firstof seo_canonical seo.canonical as effCanonical %}
+{% firstof seo_og_type seo.og_type as effOgType %}
+{% firstof seo_og_image seo.og_image as effOgImage %}
+
+{# ---- primary meta ---- #}
+<meta name="description" content="{{ effDesc }}">
+<meta name="keywords" content="{{ effKeywords }}">
+<meta name="robots" content="{{ effRobots }}">
+<meta name="author" content="{{ seo.site_name }}">
+<meta name="theme-color" content="{{ seo.theme_color }}">
+<meta name="application-name" content="{{ seo.site_name }}">
+
+{# ---- canonical + hreflang alternates ---- #}
+<link rel="canonical" href="{{ effCanonical }}">
+{% for code, url in seo.hreflang %}
+<link rel="alternate" hreflang="{{ code }}" href="{{ url }}">
+{% endfor %}
+
+{# ---- favicons (square, multi-size, served from the site root) ---- #}
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+{# ---- Open Graph ---- #}
+<meta property="og:site_name" content="{{ seo.site_name }}">
+<meta property="og:type" content="{{ effOgType }}">
+<meta property="og:title" content="{{ effTitle }}">
+<meta property="og:description" content="{{ effDesc }}">
+<meta property="og:url" content="{{ effCanonical }}">
+<meta property="og:image" content="{{ effOgImage }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="{{ seo.lang }}">
+
+{# ---- Twitter Card ---- #}
+<meta name="twitter:card" content="{{ seo.twitter_card }}">
+<meta name="twitter:title" content="{{ effTitle }}">
+<meta name="twitter:description" content="{{ effDesc }}">
+<meta name="twitter:image" content="{{ effOgImage }}">
+
+{# ============================ JSON-LD ============================ #}
+
+{# Organization + WebSite + SoftwareApplication: homepage only.
+   Emitting these on every page would be redundant and can dilute the
+   brand signal Google reads. #}
+{% if seo_is_home %}
+<script type="application/ld+json" nonce="{{ request.csp_nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "EMSArena",
+  "url": "{{ seo.site_origin }}/",
+  "logo": "{{ seo.logo_url }}",
+  "description": "{{ seo.description|escapejs }}"{% if seo.social_profiles %},
+  "sameAs": [{% for url in seo.social_profiles %}"{{ url }}"{% if not forloop.last %}, {% endif %}{% endfor %}]{% endif %}
+}
+</script>
+<script type="application/ld+json" nonce="{{ request.csp_nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "EMSArena",
+  "alternateName": "EMSArena LMS",
+  "url": "{{ seo.site_origin }}/",
+  "inLanguage": "{{ seo.lang }}"
+}
+</script>
+<script type="application/ld+json" nonce="{{ request.csp_nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "EMSArena",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "url": "{{ seo.site_origin }}/",
+  "description": "{{ seo.description|escapejs }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "AZN"
+  },
+  "areaServed": ["Azerbaijan", "Turkey", "Uzbekistan", "Central Asia", "Global"]
+}
+</script>
+{% endif %}
+
+{# BreadcrumbList: any inner page that supplies `seo_breadcrumbs`. #}
+{% if seo_breadcrumbs %}
+<script type="application/ld+json" nonce="{{ request.csp_nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{% for crumb in seo_breadcrumbs %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "name": "{{ crumb.name|escapejs }}",
+      "item": "{{ crumb.url }}"
+    }{% if not forloop.last %},{% endif %}{% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
+{# FAQPage: pages that supply `seo_faq` (list of {question, answer}). #}
+{% if seo_faq %}
+<script type="application/ld+json" nonce="{{ request.csp_nonce }}">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{% for item in seo_faq %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question|escapejs }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}{% endfor %}
+  ]
+}
+</script>
+{% endif %}

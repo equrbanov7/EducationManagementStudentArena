@@ -19,6 +19,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import CourseMembership
+from core.helpers import parse_form_datetime
 
 from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
 
@@ -63,8 +64,8 @@ def create_assignment(request, course_id):
             course=course,
             title=request.POST.get("title"),
             description=request.POST.get("description", ""),
-            start_date=request.POST.get("start_date"),
-            deadline=request.POST.get("deadline"),
+            start_date=parse_form_datetime(request.POST.get("start_date")),
+            deadline=parse_form_datetime(request.POST.get("deadline")),
             max_attempts=request.POST.get("max_attempts", 1),
             max_score=request.POST.get("max_score", 100),
             status=request.POST.get("status", "active"),
@@ -174,8 +175,8 @@ def edit_assignment(request, pk):
         previous_recipient_ids = set(assignment.assigned_students.values_list("id", flat=True))
         assignment.title = request.POST.get("title")
         assignment.description = request.POST.get("description", "")
-        assignment.start_date = request.POST.get("start_date")
-        assignment.deadline = request.POST.get("deadline")
+        assignment.start_date = parse_form_datetime(request.POST.get("start_date"))
+        assignment.deadline = parse_form_datetime(request.POST.get("deadline"))
         assignment.max_attempts = request.POST.get("max_attempts", 1)
         assignment.max_score = request.POST.get("max_score", 100)
         assignment.status = request.POST.get("status", "active")
