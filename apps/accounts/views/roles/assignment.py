@@ -1,5 +1,9 @@
 """
-Role management views: manage roles, role assignment, permission editor.
+Role-assignment view.
+
+Organization-scoped role assignment UI with strict server-side permission
+checks (operation tokens, role-change guards, owner/admin assignment rules).
+Behavior is identical to the pre-refactor single-file implementation.
 """
 
 from uuid import UUID
@@ -7,220 +11,35 @@ from uuid import UUID
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import StudentOrganizationRequestStatus
 from apps.organizations.models import Membership
 
-from ..models import ProfileRole, UserProfile
-from ._helpers import (
-    PROFILE_ROLE_LABELS,
-    PROFILE_ROLE_NAMES,
+from ...models import ProfileRole, UserProfile
+from .._helpers import (
     ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS,
     ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT,
     _append_query_params,
-    _assignable_profile_roles_for_user,
-    _bind_active_role_context,
     _close_other_pending_student_requests,
     _collect_actor_permissions,
-    _decorate_manage_role_profiles,
     _ensure_profile_admin_membership,
-    _extract_profile_roles_for_user,
     _get_active_organization,
     _is_superadmin_user,
     _map_org_role_to_profile_role,
     _normalized_org_name,
     _pending_student_request_queryset,
-    _permission_is_grantable,
-    _render_profile_section,
     _resolve_next_url,
-    _sync_user_role_memberships,
 )
 
 User = get_user_model()
-
-
-@login_required
-def manage_roles(request):
-    """
-    Organization-scoped multi-role assignment view.
-    Effective roles are derived from memberships in the active organization.
-    """
-    is_superadmin = _is_superadmin_user(request.user)
-    if not is_superadmin and not getattr(request.user, "is_admin_level", False):
-        messages.error(request, pgettext_lazy("accounts.manage_roles.message", "admin_only"))
-        return redirect("home")
-
-    user_org = _get_active_organization(request)
-    if not user_org:
-        messages.error(request, pgettext_lazy("accounts.manage_roles.message", "active_organization_not_found"))
-        return redirect("accounts:profile")
-
-    _bind_active_role_context(
-        request.user,
-        user_org,
-        memberships=getattr(request, "org_memberships", []),
-        permissions=getattr(request, "org_permissions", []),
-    )
-    actor_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
-    assignable_roles = _assignable_profile_roles_for_user(request.user)
-    assignable_role_names = {name for name, _ in assignable_roles}
-    can_self_manage_extra_roles = is_superadmin or getattr(user_org, "owner_id", None) == request.user.id
-
-    if request.method == "POST":
-        user_id = request.POST.get("user_id")
-        action = request.POST.get("action")  # "assign" or "remove"
-        next_url = _resolve_next_url(request, reverse("accounts:manage_roles"))
-
-        if not user_id:
-            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "user_not_selected"))
-            return redirect(next_url)
-
-        target_user = get_object_or_404(User, id=user_id)
-
-        target_is_superadmin = target_user.is_superuser or getattr(target_user, "is_superadmin", False)
-        target_has_membership = Membership.objects.filter(
-            user=target_user,
-            organization=user_org,
-            is_active=True,
-        ).exists()
-        if not target_has_membership and not target_is_superadmin:
-            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "manage_only_own_org_users"))
-            return redirect(next_url)
-
-        _bind_active_role_context(target_user, user_org)
-        target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
-        if target_user == request.user and not can_self_manage_extra_roles:
-            messages.error(
-                request, "Öz rol kombinasiyanızı dəyişmək üçün təşkilat sahibi və ya superadmin olmalısınız."
-            )
-            return redirect(next_url)
-        if not is_superadmin and target_user != request.user and target_level >= actor_level:
-            messages.error(
-                request, pgettext_lazy("accounts.manage_roles.message", "insufficient_level_for_target_user")
-            )
-            return redirect(next_url)
-
-        selected_role_names = set(request.POST.getlist("role_names"))
-        single_role_name = (request.POST.get("role_name") or "").strip()
-        if single_role_name:
-            selected_role_names.add(single_role_name)
-
-        if action == "remove":
-            selected_role_names = {ProfileRole.MEMBER}
-        if not selected_role_names:
-            selected_role_names = {ProfileRole.MEMBER}
-
-        invalid_roles = selected_role_names - PROFILE_ROLE_NAMES
-        if invalid_roles:
-            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "invalid_roles_selected"))
-            return redirect(next_url)
-
-        disallowed_roles = selected_role_names - assignable_role_names
-        if disallowed_roles:
-            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "not_allowed_to_assign_some_roles"))
-            return redirect(next_url)
-
-        current_roles = set(_extract_profile_roles_for_user(target_user))
-        protected_roles = current_roles - assignable_role_names
-        effective_roles = protected_roles | selected_role_names
-
-        if not effective_roles:
-            effective_roles = {ProfileRole.MEMBER}
-
-        added_roles = effective_roles - current_roles
-        removed_roles = current_roles - effective_roles
-
-        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
-
-        with transaction.atomic():
-            final_memberships = _sync_user_role_memberships(
-                target_user,
-                user_org,
-                effective_roles,
-                actor=request.user,
-                editable_role_names=assignable_role_names,
-            )
-            _bind_active_role_context(target_user, user_org, memberships=final_memberships)
-            refreshed_roles = _extract_profile_roles_for_user(target_user)
-            if not refreshed_roles:
-                refreshed_roles = [ProfileRole.MEMBER]
-            primary_role = max(refreshed_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
-            target_profile.role = primary_role
-            target_profile.save(update_fields=["role", "updated_at"])
-
-        assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
-        added_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(added_roles)]
-        removed_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(removed_roles)]
-        diff_parts = []
-        if added_labels:
-            diff_parts.append("Əlavə edildi: " + ", ".join(added_labels))
-        if removed_labels:
-            diff_parts.append("Silindi: " + ", ".join(removed_labels))
-        if not diff_parts:
-            diff_parts.append("Dəyişiklik yoxdur.")
-
-        messages.success(
-            request,
-            (
-                pgettext_lazy("accounts.manage_roles.message", "roles_updated_for_user")
-                % {"username": target_user.username, "roles": ", ".join(assigned_labels)}
-            )
-            + " "
-            + " / ".join(diff_parts),
-        )
-        return redirect(next_url)
-
-    profiles = (
-        UserProfile.objects.filter(
-            user__memberships__organization=user_org,
-            user__memberships__is_active=True,
-        )
-        .select_related("user")
-        .prefetch_related("user__memberships__role")
-        .distinct()
-    )
-
-    # Include the requesting superadmin's own profile even if they have no formal membership
-    if is_superadmin and not profiles.filter(user=request.user).exists():
-        own_profile_qs = (
-            UserProfile.objects.filter(user=request.user)
-            .select_related("user")
-            .prefetch_related("user__memberships__role")
-            .distinct()
-        )
-        profiles = (profiles | own_profile_qs).distinct()
-
-    # Search
-    search = request.GET.get("search", "")
-    if search:
-        profiles = profiles.filter(
-            Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
-
-    profiles_page = request.GET.get("manage_roles_page")
-    profiles_page_obj = Paginator(profiles.order_by("user__username"), 12).get_page(profiles_page)
-    _decorate_manage_role_profiles(
-        profiles_page_obj.object_list,
-        actor_level=actor_level,
-        is_superadmin=is_superadmin,
-        organization=user_org,
-        actor_user=request.user,
-    )
-
-    return _render_profile_section(request, "manage-roles")
 
 
 @login_required
@@ -1087,162 +906,3 @@ def role_assignment(request):
         return redirect(next_url)
 
     return redirect(profile_section_url)
-
-
-@login_required
-def permission_editor(request):
-    """Organization-scoped permission editor with add/remove enforcement."""
-    from apps.organizations.models import Role
-    from apps.organizations.permissions import get_all_permissions, has_permission
-    from apps.organizations.services import create_audit_log, get_user_org_role_level
-
-    org = _get_active_organization(request)
-    if not org:
-        messages.error(request, pgettext_lazy("accounts.permission_editor.message", "active_organization_not_found"))
-        return redirect("accounts:profile")
-
-    _ensure_profile_admin_membership(request.user, org)
-
-    is_superadmin = _is_superadmin_user(request.user)
-    user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
-    actor_permissions, grantable_permissions = _collect_actor_permissions(request.user, org)
-
-    can_manage_permissions = is_superadmin or has_permission(list(actor_permissions), "role.assign")
-    if not is_superadmin and not can_manage_permissions:
-        messages.error(request, pgettext_lazy("accounts.permission_editor.message", "role_assign_permission_required"))
-        return redirect("accounts:profile")
-
-    roles = Role.objects.filter(organization=org, is_active=True).order_by("-level")
-    if not is_superadmin:
-        roles = roles.filter(level__lt=user_level)
-
-    selected_role = None
-    selected_role_id = request.GET.get("role")
-    if request.method == "POST":
-        selected_role_id = request.POST.get("role_id")
-        action = request.POST.get("action")
-        selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
-        next_url = (request.POST.get("next") or "").strip()
-
-        if not is_superadmin and selected_role.level >= user_level:
-            messages.error(
-                request, pgettext_lazy("accounts.permission_editor.message", "manage_lower_role_permissions_only")
-            )
-            return redirect(f"{request.path}?role={selected_role.id}")
-
-        all_permissions = set(get_all_permissions())
-        role_permissions = list(selected_role.permissions or [])
-        role_permissions_set = set(role_permissions)
-        old_permissions = sorted(role_permissions_set)
-        result_message = ""
-
-        if next_url and not url_has_allowed_host_and_scheme(
-            next_url,
-            allowed_hosts={request.get_host()},
-            require_https=request.is_secure(),
-        ):
-            next_url = ""
-
-        def _safe_redirect():
-            return redirect(next_url or f"{request.path}?role={selected_role.id}")
-
-        if action in {"add", "remove"}:
-            selected_permission = request.POST.get("permission")
-            if selected_permission not in all_permissions:
-                messages.error(
-                    request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection")
-                )
-                return _safe_redirect()
-
-            if action == "add":
-                if (
-                    not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
-                    and not is_superadmin
-                ):
-                    messages.error(
-                        request,
-                        pgettext_lazy(
-                            "accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"
-                        ),
-                    )
-                    return _safe_redirect()
-                role_permissions_set.add(selected_permission)
-                result_message = pgettext_lazy("accounts.permission_editor.message", "permission_added") % {
-                    "permission": selected_permission
-                }
-            else:
-                role_permissions_set.discard(selected_permission)
-                result_message = pgettext_lazy("accounts.permission_editor.message", "permission_removed") % {
-                    "permission": selected_permission
-                }
-        elif action in {"bulk_add", "bulk_remove"}:
-            selected_permissions = [perm for perm in request.POST.getlist("permissions") if perm]
-            selected_permissions = list(dict.fromkeys(selected_permissions))
-            if not selected_permissions:
-                messages.error(request, "Əməliyyat üçün ən azı bir permission seçin.")
-                return _safe_redirect()
-
-            invalid_permissions = [perm for perm in selected_permissions if perm not in all_permissions]
-            if invalid_permissions:
-                messages.error(
-                    request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection")
-                )
-                return _safe_redirect()
-
-            if action == "bulk_add":
-                if not is_superadmin:
-                    not_grantable = [
-                        perm
-                        for perm in selected_permissions
-                        if not _permission_is_grantable(perm, actor_permissions, grantable_permissions)
-                    ]
-                    if not_grantable:
-                        messages.error(
-                            request,
-                            pgettext_lazy(
-                                "accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"
-                            ),
-                        )
-                        return _safe_redirect()
-
-                before_count = len(role_permissions_set)
-                role_permissions_set.update(selected_permissions)
-                changed_count = len(role_permissions_set) - before_count
-                result_message = f"{changed_count} permission əlavə edildi."
-            else:
-                before_count = len(role_permissions_set)
-                role_permissions_set.difference_update(selected_permissions)
-                changed_count = before_count - len(role_permissions_set)
-                result_message = f"{changed_count} permission silindi."
-        else:
-            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "unknown_action"))
-            return _safe_redirect()
-
-        if sorted(role_permissions_set) == old_permissions:
-            messages.success(request, result_message)
-            return _safe_redirect()
-
-        selected_role.permissions = sorted(role_permissions_set)
-        selected_role.save(update_fields=["permissions", "updated_at"])
-
-        create_audit_log(
-            user=request.user,
-            organization=org,
-            action="update",
-            resource_type="role",
-            resource_id=selected_role.id,
-            resource_repr=selected_role.display_name,
-            old_values={"permissions": old_permissions},
-            new_values={"permissions": selected_role.permissions},
-            request=request,
-        )
-
-        messages.success(request, result_message)
-        return _safe_redirect()
-
-    if selected_role_id:
-        selected_role = roles.filter(id=selected_role_id).first()
-    if selected_role is None:
-        selected_role = roles.first()
-
-    return _render_profile_section(request, "permission-editor")
