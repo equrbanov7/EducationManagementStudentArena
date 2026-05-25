@@ -76,7 +76,7 @@ class TestPublicRoutesSafety:
     def test_public_route_body_is_not_empty(self, page: Page, public_path: str) -> None:
         """Public pages must render a non-empty HTML body."""
         page.goto(f"{BASE_URL}{public_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         body_text = page.locator("body").inner_text()
         assert len(body_text.strip()) > 10, f"Public route {public_path!r} rendered an empty body"
 
@@ -96,7 +96,7 @@ class TestProtectedRoutesNeverReturn5xx:
     def test_protected_route_does_not_crash(self, page: Page, protected_path: str) -> None:
         """Anonymous access to a protected route must not produce a server error."""
         response = page.goto(f"{BASE_URL}{protected_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         if response is not None:
             assert (
                 response.status < 500
@@ -106,7 +106,7 @@ class TestProtectedRoutesNeverReturn5xx:
     def test_protected_route_redirects_to_login(self, page: Page, protected_path: str) -> None:
         """After following all redirects, an anonymous user must land on the login page or get 403."""
         response = page.goto(f"{BASE_URL}{protected_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         status = response.status if response is not None else 0
         is_login_redirect = "/accounts/login/" in page.url
@@ -135,7 +135,7 @@ class TestCsrfPresence:
     def test_public_form_has_csrf_token(self, page: Page, form_page: str) -> None:
         """Every public HTML form must embed a CSRF token to prevent cross-site forgery."""
         page.goto(f"{BASE_URL}{form_page}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         csrf_inputs = page.locator("input[name='csrfmiddlewaretoken']")
         assert csrf_inputs.count() > 0, f"No CSRF token found in any form on {form_page!r}"
@@ -162,7 +162,7 @@ class TestMissingResourceHandling:
     def test_missing_resource_does_not_cause_server_error(self, page: Page, missing_path: str) -> None:
         """A request for a non-existent resource must return 404 or a login redirect, not 5xx."""
         response = page.goto(f"{BASE_URL}{missing_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert (
@@ -179,7 +179,7 @@ class TestNoSensitiveDataLeakage:
     def test_login_page_does_not_expose_stack_trace(self, page: Page) -> None:
         """The login page must not contain Django debug/stack-trace text."""
         page.goto(f"{BASE_URL}/accounts/login/")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         page_source = page.content()
         # Django debug page markers
         for marker in ["Traceback (most recent call last)", "django.db.utils.", "DEBUG = True"]:
@@ -188,7 +188,7 @@ class TestNoSensitiveDataLeakage:
     def test_home_page_does_not_expose_stack_trace(self, page: Page) -> None:
         """The home page must not contain Django debug/stack-trace text."""
         page.goto(f"{BASE_URL}/")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         page_source = page.content()
         for marker in ["Traceback (most recent call last)", "django.db.utils."]:
             assert marker not in page_source, f"Sensitive debug text {marker!r} found on the public home page"
