@@ -141,7 +141,7 @@ def login(page: Page, username: str | None = None, password: str | None = None) 
     password = password or E2E_PASSWORD
 
     page.goto(build_url("/accounts/login/"))
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
     if not username or not password:
         return
@@ -157,13 +157,13 @@ def login(page: Page, username: str | None = None, password: str | None = None) 
     login_form.locator("input[name='username']").fill(username)
     login_form.locator("input[name='password']").fill(password)
     login_form.locator("button[type='submit']").click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
 
 def logout(page: Page) -> None:
     """Log out the current browser page session."""
     page.goto(build_url("/accounts/logout/"))
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
 
 def select_organization(page: Page, organization_slug: str = E2E_ORG_SLUG) -> None:
@@ -172,7 +172,7 @@ def select_organization(page: Page, organization_slug: str = E2E_ORG_SLUG) -> No
         return
 
     response = page.goto(build_url(f"/organizations/switch/{organization_slug}/"))
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
     if response is not None and response.status >= 500:
         pytest.fail(f"Organization switch for '{organization_slug}' returned HTTP {response.status}")

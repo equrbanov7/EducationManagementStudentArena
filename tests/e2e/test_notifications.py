@@ -39,7 +39,7 @@ class TestNotificationsUnauthenticatedAccess:
     def test_notification_path_blocks_anonymous_user(self, page: Page, notif_path: str) -> None:
         """Anonymous access to notification endpoints must redirect to login and not return 5xx."""
         response = page.goto(f"{BASE_URL}{notif_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert (
@@ -68,7 +68,7 @@ class TestNotificationInbox:
         response = authenticated_page.goto(NOTIFICATION_LIST_URL)
         assert response is not None
         assert response.status < 500, f"Notification list returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -80,7 +80,7 @@ class TestNotificationInbox:
         response = authenticated_page.goto(NOTIFICATION_LIST_URL)
         if response is None or response.status != 200:
             pytest.skip(f"Notification list returned HTTP {response.status if response else 'None'}")
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         body_text = authenticated_page.locator("body").inner_text()
         assert len(body_text.strip()) > 0, "Notification list page body is empty"
 
@@ -139,7 +139,7 @@ class TestNotificationMarkAllRead:
         """
         # First visit the notification list so we have a CSRF cookie.
         authenticated_page.goto(NOTIFICATION_LIST_URL)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
 
         # Retrieve CSRF token from the cookie.
         csrf_token = authenticated_page.evaluate("""() => {
