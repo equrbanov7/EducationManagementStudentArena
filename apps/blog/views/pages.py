@@ -97,13 +97,39 @@ def home(request):
         "search_query": query,
         "query": query,  # Also pass as 'query' for template compatibility
         "extra_query": extra_query,
+        # --- SEO ---------------------------------------------------------
+        # `seo_is_home` makes the shared head partial emit the homepage-only
+        # Organization / WebSite / SoftwareApplication JSON-LD that helps
+        # Google understand the brand (and become eligible for sitelinks).
+        "seo_is_home": True,
+        "seo_title": "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması",
+        "seo_description": (
+            "EMSArena universitetlər, məktəblər, kurs mərkəzləri və müəllimlər "
+            "üçün LMS, onlayn imtahan, elektron jurnal, qiymətləndirmə və "
+            "analitika platformasıdır."
+        ),
     }
 
     return render(request, "blog/home.html", context)
 
 
 def about(request):
-    return render(request, "blog/about.html")
+    return render(
+        request,
+        "blog/about.html",
+        {
+            "seo_title": "Haqqımızda – EMSArena",
+            "seo_description": (
+                "EMSArena təhsil idarəetmə, LMS və onlayn imtahan "
+                "platformasıdır. Komandamız, missiyamız və platformanın "
+                "imkanları haqqında məlumat."
+            ),
+            "seo_breadcrumbs": [
+                {"name": "Ana səhifə", "url": request.build_absolute_uri("/")},
+                {"name": "Haqqımızda", "url": request.build_absolute_uri()},
+            ],
+        },
+    )
 
 
 def technology(request):
