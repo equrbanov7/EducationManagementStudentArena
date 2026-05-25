@@ -44,7 +44,7 @@ class TestExamUnauthenticatedAccess:
     def test_exam_path_blocks_anonymous_user(self, page: Page, exam_path: str) -> None:
         """Anonymous access to an exam path must redirect to login and not return 5xx."""
         response = page.goto(f"{BASE_URL}{exam_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert response.status < 500, f"Exam path {exam_path!r} returned server error HTTP {response.status}"
@@ -68,7 +68,7 @@ class TestTeacherExamPages:
         response = authenticated_page.goto(TEACHER_EXAM_LIST_URL)
         assert response is not None
         assert response.status < 500, f"Teacher exam list returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -80,7 +80,7 @@ class TestTeacherExamPages:
         response = authenticated_page.goto(CREATE_EXAM_URL)
         assert response is not None
         assert response.status < 500, f"Create exam page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -92,7 +92,7 @@ class TestTeacherExamPages:
         response = authenticated_page.goto(CREATE_EXAM_URL)
         assert response is not None
         if response.status == 200:
-            authenticated_page.wait_for_load_state("networkidle")
+            authenticated_page.wait_for_load_state("domcontentloaded")
             form = authenticated_page.locator("form")
             assert form.count() > 0, "No form found on the create exam page"
 
@@ -122,7 +122,7 @@ class TestStudentExamPages:
         response = authenticated_page.goto(STUDENT_EXAM_LIST_URL)
         assert response is not None
         assert response.status < 500, f"Available exams page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -172,7 +172,7 @@ class TestLiveExamPages:
     def test_live_pin_entry_page_renders_form_or_input(self, page: Page) -> None:
         """The PIN entry page must display a form or input field for the exam PIN."""
         page.goto(LIVE_PIN_ENTRY_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         pin_input = page.locator("input[name='pin'], input[type='text'], input[type='number']")
         form = page.locator("form")

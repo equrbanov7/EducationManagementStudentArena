@@ -43,7 +43,7 @@ class TestPublicBlogPages:
     def test_home_page_renders_content(self, page: Page) -> None:
         """The home page must render a non-trivially empty body."""
         page.goto(HOME_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         body_text = page.locator("body").inner_text()
         assert len(body_text.strip()) > 20, "Home page body appears to be empty"
 
@@ -62,7 +62,7 @@ class TestPublicBlogPages:
     def test_home_page_does_not_expose_debug_info(self, page: Page) -> None:
         """The home page must not leak Django debug or stack-trace information."""
         page.goto(HOME_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         source = page.content()
         for sensitive_marker in ["Traceback (most recent call last)", "django.db.utils."]:
             assert (
@@ -79,7 +79,7 @@ class TestPostCreation:
     def test_create_post_blocks_anonymous_user(self, page: Page) -> None:
         """Anonymous access to the post-creation page must redirect to login."""
         response = page.goto(CREATE_POST_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert response.status < 500, f"Create post page returned server error HTTP {response.status}"
@@ -96,7 +96,7 @@ class TestPostCreation:
         response = authenticated_page.goto(CREATE_POST_URL)
         assert response is not None
         assert response.status < 500, f"Create post page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
 
@@ -146,7 +146,7 @@ class TestAuditPages:
     def test_audit_log_blocks_anonymous_user(self, page: Page) -> None:
         """Audit log page must redirect an anonymous user to login."""
         response = page.goto(f"{BASE_URL}/audit/")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert response.status < 500, f"Audit log page returned server error HTTP {response.status}"
