@@ -53,7 +53,7 @@ class TestLoginPage:
     def test_login_page_has_submit_button(self, page: Page) -> None:
         """The login form must have a submit button."""
         page.goto(LOGIN_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         login_form = (
             page.locator("form")
             .filter(has=page.locator("input[name='username']"))
@@ -64,7 +64,7 @@ class TestLoginPage:
     def test_login_page_has_forgot_password_link(self, page: Page) -> None:
         """The login page must show a 'forgot password' link."""
         page.goto(LOGIN_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         # The link should point to the password reset URL
         forgot_link = page.locator("a[href*='password-reset']")
         expect(forgot_link.first).to_be_visible()
@@ -122,7 +122,7 @@ class TestLoginLogoutFlow:
         login(page)
         # Navigate to logout URL (GET or POST depending on implementation)
         response = page.goto(LOGOUT_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # After logout the user should land on a public page (login or home).
         # The exact URL may vary; what matters is that the response is not 5xx.
@@ -131,7 +131,7 @@ class TestLoginLogoutFlow:
 
         # Attempting to access the dashboard now must redirect back to login.
         dash_response = page.goto(DASHBOARD_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         # Either the dashboard redirected to login, or we're on a public page.
         assert "/accounts/login/" in page.url or (
             dash_response is not None and dash_response.status in {200, 302}
@@ -147,7 +147,7 @@ class TestInvalidCredentials:
     def test_invalid_credentials_stay_on_login_page(self, page: Page) -> None:
         """Submitting wrong credentials must keep the user on the login page."""
         page.goto(LOGIN_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         login_form = (
             page.locator("form")
@@ -158,7 +158,7 @@ class TestInvalidCredentials:
         login_form.locator("input[name='username']").fill("nonexistent_user_xyz_12345")
         login_form.locator("input[name='password']").fill("wrong_password_xyz_12345!")
         login_form.locator("button[type='submit']").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # Must remain on the login page after failed attempt.
         assert (
@@ -168,7 +168,7 @@ class TestInvalidCredentials:
     def test_invalid_credentials_show_error_message(self, page: Page) -> None:
         """A failed login attempt must display a user-visible error message."""
         page.goto(LOGIN_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         login_form = (
             page.locator("form")
@@ -179,7 +179,7 @@ class TestInvalidCredentials:
         login_form.locator("input[name='username']").fill("nonexistent_user_xyz_12345")
         login_form.locator("input[name='password']").fill("wrong_password_xyz_12345!")
         login_form.locator("button[type='submit']").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # The page must render an error block (non-field errors or field errors).
         error_selectors = [
@@ -194,7 +194,7 @@ class TestInvalidCredentials:
     def test_empty_credentials_show_error(self, page: Page) -> None:
         """Submitting the login form with empty fields must not cause a server error."""
         page.goto(LOGIN_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         login_form = (
             page.locator("form")
@@ -202,7 +202,7 @@ class TestInvalidCredentials:
             .filter(has=page.locator("input[name='password']"))
         )
         login_form.locator("button[type='submit']").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         # Must not produce a 5xx error.
         assert "/accounts/login/" in page.url or page.url.startswith(
@@ -225,14 +225,14 @@ class TestRegistrationPage:
     def test_register_page_has_form(self, page: Page) -> None:
         """The registration page must contain a form element."""
         page.goto(REGISTER_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         form = page.locator("form.register-form, form#registerForm, form")
         assert form.count() > 0, "No form element found on the registration page"
 
     def test_register_page_has_wizard_steps(self, page: Page) -> None:
         """The registration wizard must show step indicators."""
         page.goto(REGISTER_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         # The register template uses .register-wizard-steps and .wizard-step elements.
         wizard = page.locator(".register-wizard-steps, .wizard-step")
         assert wizard.count() > 0, "No wizard step indicators found on the registration page"
@@ -259,7 +259,7 @@ class TestPasswordResetFlow:
     def test_password_reset_page_has_email_field(self, page: Page) -> None:
         """The password reset form must contain an email field."""
         page.goto(PASSWORD_RESET_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         email_field = page.locator("input[name='email'], input[type='email']")
         assert email_field.count() > 0, "No email field found on password reset page"
 
@@ -287,7 +287,7 @@ class TestOtpVerificationPages:
     def test_resend_code_page_redirects_gracefully(self, page: Page) -> None:
         """Accessing the resend-code URL without a session must redirect, not crash."""
         response = page.goto(RESEND_CODE_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         if response is not None:
             assert response.status < 500, f"Resend code page returned server error HTTP {response.status}"
 
@@ -314,7 +314,7 @@ class TestUnauthenticatedRedirects:
     def test_protected_path_redirects_to_login(self, page: Page, protected_path: str) -> None:
         """Every protected account path must redirect an anonymous user to login, not 5xx."""
         response = page.goto(f"{BASE_URL}{protected_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert (

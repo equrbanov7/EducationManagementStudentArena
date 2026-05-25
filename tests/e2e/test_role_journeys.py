@@ -8,6 +8,7 @@ deeper, role-specific workflows than the original smoke-level page-load checks.
 from __future__ import annotations
 
 import re
+from urllib.parse import urlencode
 
 from playwright.sync_api import Page, expect
 
@@ -25,7 +26,7 @@ from .conftest import (
 def _open_seeded_course_dashboard(page: Page, listing_path: str) -> None:
     """Navigate from a course listing page into the seeded scenario course dashboard."""
     page.goto(build_url(listing_path))
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
     expect(page.get_by_text(E2E_SCENARIO_COURSE_TITLE)).to_be_visible()
 
     dashboard_url = page.evaluate(
@@ -46,7 +47,7 @@ def _open_seeded_course_dashboard(page: Page, listing_path: str) -> None:
 
     assert dashboard_url, "Could not find any course dashboard link on the enrolled-course page."
     page.goto(dashboard_url)
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
 
 
 def _open_seeded_assignment_detail(page: Page) -> None:
@@ -69,7 +70,14 @@ def _open_seeded_assignment_detail(page: Page) -> None:
 
     assert assignment_url, "Could not find the seeded assignment detail link on the course dashboard."
     page.goto(assignment_url)
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("domcontentloaded")
+
+
+def _open_seeded_assigned_exam_list(page: Page) -> None:
+    """Open the assigned-exams page filtered to the deterministic seeded exam."""
+    query = urlencode({"q": E2E_SCENARIO_EXAM_TITLE})
+    page.goto(build_url(f"/exams/assigned/?{query}"))
+    page.wait_for_load_state("domcontentloaded")
 
 
 class TestRoleJourneys:
@@ -77,7 +85,7 @@ class TestRoleJourneys:
 
     def test_org_owner_can_open_org_settings(self, owner_page: Page) -> None:
         owner_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/settings/"))
-        owner_page.wait_for_load_state("networkidle")
+        owner_page.wait_for_load_state("domcontentloaded")
 
         assert owner_page.url.endswith(f"/organizations/{E2E_ORG_SLUG}/settings/")
         expect(owner_page.locator("form")).to_be_visible()
@@ -85,7 +93,7 @@ class TestRoleJourneys:
 
     def test_org_admin_can_open_org_settings(self, org_admin_page: Page) -> None:
         org_admin_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/settings/"))
-        org_admin_page.wait_for_load_state("networkidle")
+        org_admin_page.wait_for_load_state("domcontentloaded")
 
         assert org_admin_page.url.endswith(f"/organizations/{E2E_ORG_SLUG}/settings/")
         expect(org_admin_page.locator("form")).to_be_visible()
@@ -93,11 +101,11 @@ class TestRoleJourneys:
 
     def test_teacher_sees_seeded_course_and_exam(self, teacher_page: Page) -> None:
         teacher_page.goto(build_url("/courses/my-courses/"))
-        teacher_page.wait_for_load_state("networkidle")
+        teacher_page.wait_for_load_state("domcontentloaded")
         expect(teacher_page.get_by_text(E2E_SCENARIO_COURSE_TITLE)).to_be_visible()
 
         teacher_page.goto(build_url("/exams/"))
-        teacher_page.wait_for_load_state("networkidle")
+        teacher_page.wait_for_load_state("domcontentloaded")
         expect(teacher_page.get_by_text(E2E_SCENARIO_EXAM_TITLE)).to_be_visible()
 
     def test_student_sees_seeded_course_assignment_and_exam(self, student_page: Page) -> None:
@@ -108,8 +116,7 @@ class TestRoleJourneys:
             student_page.get_by_role("heading", name=re.compile(E2E_SCENARIO_ASSIGNMENT_TITLE, re.I))
         ).to_be_visible()
 
-        student_page.goto(build_url("/exams/assigned/"))
-        student_page.wait_for_load_state("networkidle")
+        _open_seeded_assigned_exam_list(student_page)
         expect(student_page.get_by_text(E2E_SCENARIO_EXAM_TITLE)).to_be_visible()
 
     def test_late_student_inherits_group_based_access(self, late_student_page: Page) -> None:
@@ -120,13 +127,12 @@ class TestRoleJourneys:
             late_student_page.get_by_role("heading", name=re.compile(E2E_SCENARIO_ASSIGNMENT_TITLE, re.I))
         ).to_be_visible()
 
-        late_student_page.goto(build_url("/exams/assigned/"))
-        late_student_page.wait_for_load_state("networkidle")
+        _open_seeded_assigned_exam_list(late_student_page)
         expect(late_student_page.get_by_text(E2E_SCENARIO_EXAM_TITLE)).to_be_visible()
 
     def test_cross_tenant_org_and_exam_are_blocked_for_student(self, student_page: Page) -> None:
         response = student_page.goto(build_url(f"/organizations/{E2E_ISOLATED_ORG_SLUG}/"))
-        student_page.wait_for_load_state("networkidle")
+        student_page.wait_for_load_state("domcontentloaded")
 
         assert response is not None
         assert response.status < 500
@@ -135,7 +141,7 @@ class TestRoleJourneys:
         ), "Student from the seeded org should not land inside the isolated org dashboard."
 
         exam_response = student_page.goto(build_url(f"/exams/{E2E_ISOLATED_EXAM_SLUG}/start/"))
-        student_page.wait_for_load_state("networkidle")
+        student_page.wait_for_load_state("domcontentloaded")
 
         assert exam_response is not None
         assert exam_response.status == 404, "Cross-tenant exam start should be hidden behind a 404."
