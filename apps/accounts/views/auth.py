@@ -171,8 +171,7 @@ class CustomLoginView(LoginView):
     extra_context = {
         "seo_title": "Daxil ol | EMSArena",
         "seo_description": (
-            "EMSArena hesabınıza daxil olun və təhsil, imtahan, kurs və "
-            "idarəetmə panelindən istifadə edin."
+            "EMSArena hesabınıza daxil olun və təhsil, imtahan, kurs və " "idarəetmə panelindən istifadə edin."
         ),
     }
 
@@ -317,8 +316,7 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 _REGISTER_SEO = {
     "seo_title": "Hesab yaradın | EMSArena",
     "seo_description": (
-        "EMSArena-da təşkilat, müəllim və ya tələbə hesabı yaradın və "
-        "rəqəmsal təhsil platformasına qoşulun."
+        "EMSArena-da təşkilat, müəllim və ya tələbə hesabı yaradın və " "rəqəmsal təhsil platformasına qoşulun."
     ),
 }
 
