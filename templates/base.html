@@ -5,10 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}EMSArena{% endblock %}</title>
+    {# Title precedence: a child template's {% block title %} wins; otherwise
+       a view-supplied `seo_title`; otherwise the default brand title. #}
+    <title>{% block title %}{% firstof seo_title "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" %}{% endblock %}</title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔷</text></svg>">
+    {# SEO: meta tags, favicons, manifest, Open Graph / Twitter, hreflang and
+       JSON-LD structured data. Driven by core.context_processors.seo_context
+       plus per-view `seo_*` overrides. See templates/partials/_seo_head.html #}
+    {% include "partials/_seo_head.html" %}
+
+    {% block extraHead %}{% endblock %}
 
     <!-- Bootstrap 5 -->
     <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
