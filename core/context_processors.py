@@ -20,6 +20,7 @@ The processor merges those overrides on top of the site-wide defaults, so a
 view only needs to specify what differs.  It performs **no** database
 queries — everything is derived from ``settings`` and the ``request``.
 """
+
 from __future__ import annotations
 
 from django.conf import settings
@@ -48,10 +49,7 @@ DEFAULT_DESCRIPTIONS = {
         "EMSArena — современная платформа LMS, управления образованием и "
         "онлайн-экзаменов для университетов, школ и учебных центров."
     ),
-    "tr": (
-        "EMSArena; üniversiteler, okullar ve kurs merkezleri için LMS, "
-        "online sınav ve e-günlük platformudur."
-    ),
+    "tr": ("EMSArena; üniversiteler, okullar ve kurs merkezleri için LMS, " "online sınav ve e-günlük platformudur."),
 }
 
 DEFAULT_KEYWORDS = (
