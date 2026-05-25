@@ -10,7 +10,6 @@ keeping them isolated here keeps the rest of the helpers package readable.
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-
 from django.urls import reverse
 
 from apps.notifications.models import (
