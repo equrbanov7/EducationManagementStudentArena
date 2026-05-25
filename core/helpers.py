@@ -10,6 +10,8 @@ to avoid code duplication and centralize common functionality.
 from datetime import timedelta
 from urllib.parse import urlsplit
 
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from apps.courses.models import Course
@@ -83,3 +85,37 @@ def _safe_same_origin_redirect_path(request, candidate_url):
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
     return f"{path}{query}{fragment}"
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Datetime Helpers
+# ════════════════════════════════════════════════════════════════════════════
+
+
+def parse_form_datetime(raw_value):
+    """
+    Parse a datetime value coming from an HTML ``datetime-local`` form field.
+
+    Browsers submit ``datetime-local`` inputs without timezone information
+    (e.g. ``"2026-05-24T21:12"``). Saving such a naive value to a
+    ``DateTimeField`` while ``USE_TZ`` is active triggers a ``RuntimeWarning``
+    and may store the wrong instant. This helper parses the string and, if the
+    result is naive, attaches the project's current timezone.
+
+    Returns ``None`` for empty/blank input and passes through values that are
+    already ``datetime`` instances (making the result timezone-aware if needed).
+    """
+    if raw_value in (None, ""):
+        return None
+
+    if isinstance(raw_value, str):
+        parsed = parse_datetime(raw_value.strip())
+        if parsed is None:
+            # Let the model field raise its normal validation error.
+            return raw_value
+    else:
+        parsed = raw_value
+
+    if timezone.is_naive(parsed):
+        return timezone.make_aware(parsed, timezone.get_current_timezone())
+    return parsed
