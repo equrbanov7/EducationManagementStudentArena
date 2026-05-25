@@ -60,7 +60,7 @@ class TestAnonymousAccessBlocked:
     def test_anonymous_access_does_not_return_5xx(self, page: Page, protected_path: str) -> None:
         """Anonymous access to a protected path must not produce a server error."""
         response = page.goto(f"{BASE_URL}{protected_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert (
@@ -71,7 +71,7 @@ class TestAnonymousAccessBlocked:
     def test_anonymous_access_redirects_to_login_or_returns_403(self, page: Page, protected_path: str) -> None:
         """Anonymous access must redirect to login or return 403, not expose the content."""
         response = page.goto(f"{BASE_URL}{protected_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         status = response.status if response is not None else 0
         # 403 is an acceptable explicit denial; login redirect is also correct.
@@ -99,7 +99,7 @@ class TestOrganizationSelectionPage:
         response = authenticated_page.goto(ORGANIZATION_SELECT_URL)
         assert response is not None
         assert response.status < 500, f"Organization select page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         # The page should render a body without crashing.
         expect(authenticated_page.locator("body")).to_be_visible()
 
@@ -110,7 +110,7 @@ class TestOrganizationSelectionPage:
     def test_organization_select_has_content(self, authenticated_page: Page) -> None:
         """Organization select page must show organization cards or an empty-state message."""
         authenticated_page.goto(ORGANIZATION_SELECT_URL)
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         # Either organization cards or a "no organizations" message.
         has_org_card = authenticated_page.locator(".org-card, .organization-card").count() > 0
         has_body_text = len(authenticated_page.locator("body").inner_text()) > 0
@@ -178,7 +178,7 @@ class TestSuperadminOrganizationsPage:
     def test_superadmin_orgs_page_blocks_anonymous_user(self, page: Page) -> None:
         """Unauthenticated access to the superadmin oversight page must redirect to login."""
         response = page.goto(SUPERADMIN_ORGS_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
         if response is not None:
             assert response.status < 500
         # Must redirect to login (or 403) — not expose the admin data.
@@ -202,7 +202,7 @@ class TestDashboardAccess:
         response = authenticated_page.goto(f"{BASE_URL}/accounts/dashboard/")
         assert response is not None
         assert response.status == 200, f"Dashboard returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("main, .main-content, .student-dashboard").first).to_be_visible()
 
     @pytest.mark.skipif(
