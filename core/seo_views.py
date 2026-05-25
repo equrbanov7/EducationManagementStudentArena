@@ -22,6 +22,7 @@ Design notes
   excluded (and also ``Disallow``-ed in robots.txt).
 * All responses are cacheable for a day; crawlers do not need fresher.
 """
+
 from __future__ import annotations
 
 from django.conf import settings
@@ -96,8 +97,7 @@ def site_webmanifest(request):
         "name": "EMSArena",
         "short_name": "EMSArena",
         "description": (
-            "Education management, LMS and online exam platform for "
-            "universities, schools and training centers."
+            "Education management, LMS and online exam platform for " "universities, schools and training centers."
         ),
         "start_url": "/",
         "scope": "/",
@@ -133,15 +133,15 @@ def site_webmanifest(request):
 # would waste crawl budget).
 ROBOTS_DISALLOW = [
     "/admin/",
-    "/manage/",          # ADMIN_URL_PREFIX may relocate admin here
+    "/manage/",  # ADMIN_URL_PREFIX may relocate admin here
     "/dashboard/",
     "/teacher/",
     "/student/",
     "/organization/",
     "/organizations/",
     "/api/",
-    "/accounts/",        # login/register handled separately below
-    "/exams/",           # exam taking, teacher exam mgmt — all private
+    "/accounts/",  # login/register handled separately below
+    "/exams/",  # exam taking, teacher exam mgmt — all private
     "/courses/",
     "/assignments/",
     "/projects/",
@@ -228,6 +228,4 @@ def sitemap_xml(request):
             "  </url>",
         ]
     parts.append("</urlset>")
-    return HttpResponse(
-        "\n".join(parts), content_type="application/xml; charset=utf-8"
-    )
+    return HttpResponse("\n".join(parts), content_type="application/xml; charset=utf-8")

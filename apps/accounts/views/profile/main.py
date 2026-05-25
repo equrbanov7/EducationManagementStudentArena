@@ -69,7 +69,6 @@ from .._helpers import (
     _role_capabilities,
     _tenant_scoped_courses,
     _tenant_scoped_exams,
-    _user_has_any_role,
 )
 from ..account_management import build_superadmin_user_management_context
 from ..superadmin import build_superadmin_ai_settings_context
