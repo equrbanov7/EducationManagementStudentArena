@@ -166,6 +166,15 @@ class CustomLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
+    # SEO: the login page is indexable (it carries brand keywords) but
+    # ranks low. These values flow into the shared head partial.
+    extra_context = {
+        "seo_title": "Daxil ol | EMSArena",
+        "seo_description": (
+            "EMSArena hesabınıza daxil olun və təhsil, imtahan, kurs və "
+            "idarəetmə panelindən istifadə edin."
+        ),
+    }
 
     def get_redirect_url(self):
         redirect_to = self.request.POST.get(
@@ -302,6 +311,18 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
         return response
 
 
+# SEO metadata for the public register page. Merged into the GET-render
+# context so the shared head partial (templates/partials/_seo_head.html)
+# renders a brand-appropriate title and description.
+_REGISTER_SEO = {
+    "seo_title": "Hesab yaradın | EMSArena",
+    "seo_description": (
+        "EMSArena-da təşkilat, müəllim və ya tələbə hesabı yaradın və "
+        "rəqəmsal təhsil platformasına qoşulun."
+    ),
+}
+
+
 def register_view(request):
     """Start registration by caching the payload and sending a signup OTP."""
     if request.method == "POST":
@@ -369,6 +390,7 @@ def register_view(request):
         {
             "form": form,
             "lookup_payload": get_signup_lookup_payload(),
+            **_REGISTER_SEO,
         },
     )
 
