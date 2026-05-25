@@ -14,7 +14,7 @@ from .conftest import E2E_ORG_SLUG, E2E_PENDING_ORG_SLUG, E2E_RESUME_EXAM_SLUG, 
 
 def test_pending_owner_cannot_access_pending_org_dashboard(pending_owner_page: Page) -> None:
     pending_owner_page.goto(build_url(f"/organizations/{E2E_PENDING_ORG_SLUG}/"))
-    pending_owner_page.wait_for_load_state("networkidle")
+    pending_owner_page.wait_for_load_state("domcontentloaded")
 
     assert pending_owner_page.url.endswith(
         "/organizations/select/"
@@ -23,7 +23,7 @@ def test_pending_owner_cannot_access_pending_org_dashboard(pending_owner_page: P
 
 def test_student_cannot_open_org_members_page(student_page: Page) -> None:
     student_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/members/"))
-    student_page.wait_for_load_state("networkidle")
+    student_page.wait_for_load_state("domcontentloaded")
 
     assert student_page.url.endswith(
         "/organizations/select/"
@@ -32,7 +32,7 @@ def test_student_cannot_open_org_members_page(student_page: Page) -> None:
 
 def test_student_cannot_open_org_roles_page(student_page: Page) -> None:
     student_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/roles/"))
-    student_page.wait_for_load_state("networkidle")
+    student_page.wait_for_load_state("domcontentloaded")
 
     assert student_page.url.endswith(
         "/organizations/select/"
@@ -41,7 +41,7 @@ def test_student_cannot_open_org_roles_page(student_page: Page) -> None:
 
 def test_in_progress_exam_can_resume_via_start_url(resume_student_page: Page) -> None:
     resume_student_page.goto(build_url(f"/exams/{E2E_RESUME_EXAM_SLUG}/start/"))
-    resume_student_page.wait_for_load_state("networkidle")
+    resume_student_page.wait_for_load_state("domcontentloaded")
 
     assert (
         "/attempt/" in resume_student_page.url

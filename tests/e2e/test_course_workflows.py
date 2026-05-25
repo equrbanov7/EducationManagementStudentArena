@@ -39,7 +39,7 @@ class TestCourseUnauthenticated:
     def test_course_path_blocks_anonymous_user(self, page: Page, course_path: str) -> None:
         """Anonymous access to course management must redirect to login, not 5xx."""
         response = page.goto(f"{BASE_URL}{course_path}")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("domcontentloaded")
 
         if response is not None:
             assert response.status < 500, f"Course path {course_path!r} returned server error HTTP {response.status}"
@@ -63,7 +63,7 @@ class TestTeacherCoursePages:
         response = authenticated_page.goto(CREATE_COURSE_URL)
         assert response is not None
         assert response.status < 500, f"Course creation page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -75,7 +75,7 @@ class TestTeacherCoursePages:
         response = authenticated_page.goto(MY_COURSES_URL)
         assert response is not None
         assert response.status < 500, f"My courses page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -87,7 +87,7 @@ class TestTeacherCoursePages:
         response = authenticated_page.goto(CREATE_COURSE_URL)
         assert response is not None
         if response.status == 200:
-            authenticated_page.wait_for_load_state("networkidle")
+            authenticated_page.wait_for_load_state("domcontentloaded")
             form = authenticated_page.locator("form")
             assert form.count() > 0, "No form found on the course creation page"
 
@@ -127,7 +127,7 @@ class TestStudentCoursePages:
         response = authenticated_page.goto(ENROLLED_COURSES_URL)
         assert response is not None
         assert response.status < 500, f"Enrolled courses page returned HTTP {response.status}"
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
     @pytest.mark.skipif(
@@ -139,6 +139,6 @@ class TestStudentCoursePages:
         response = authenticated_page.goto(ENROLLED_COURSES_URL)
         if response is None or response.status != 200:
             pytest.skip(f"Enrolled courses page returned HTTP {response.status if response else 'None'}")
-        authenticated_page.wait_for_load_state("networkidle")
+        authenticated_page.wait_for_load_state("domcontentloaded")
         body_text = authenticated_page.locator("body").inner_text()
         assert len(body_text.strip()) > 0, "Enrolled courses page body is empty"
