@@ -5,13 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {# Title precedence: a child template's title block wins; otherwise
-       a view-supplied `seo_title`; otherwise the default brand title. #}
+    {% comment %}
+    Title precedence: a child template's title block wins; otherwise
+    a view-supplied `seo_title`; otherwise the default brand title.
+    {% endcomment %}
     <title>{% block title %}{% firstof seo_title "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" %}{% endblock %}</title>
 
-    {# SEO: meta tags, favicons, manifest, Open Graph / Twitter, hreflang and
-       JSON-LD structured data. Driven by core.context_processors.seo_context
-       plus per-view `seo_*` overrides. See templates/partials/_seo_head.html #}
+    {% comment %}
+    SEO: meta tags, favicons, manifest, Open Graph / Twitter, hreflang and
+    JSON-LD structured data. Driven by core.context_processors.seo_context
+    plus per-view `seo_*` overrides. See templates/partials/_seo_head.html
+    {% endcomment %}
     {% include "partials/_seo_head.html" %}
 
     {% block extraHead %}{% endblock %}
