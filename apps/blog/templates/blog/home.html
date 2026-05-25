@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{# SEO: use the brand title supplied by the home view (seo_title) so the
-   <title> tag, og:title and twitter:title stay consistent. #}
+{% comment %}
+SEO: use the brand title supplied by the home view (seo_title) so the
+title tag, og:title and twitter:title stay consistent.
+{% endcomment %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">

@@ -26,9 +26,11 @@
 ================================================================================
 {% endcomment %}
 
-{# ---- resolve effective values (per-view override OR seo default) ----
-   Django forbids template variable names starting with "_", so the
-   resolved values use the eff* prefix. #}
+{% comment %}
+Resolve effective values (per-view override OR seo default).
+Django forbids template variable names starting with "_", so the resolved
+values use the eff* prefix.
+{% endcomment %}
 {% firstof seo_title seo.title as effTitle %}
 {% firstof seo_description seo.description as effDesc %}
 {% firstof seo_keywords seo.keywords as effKeywords %}
@@ -80,9 +82,11 @@
 
 {# ============================ JSON-LD ============================ #}
 
-{# Organization + WebSite + SoftwareApplication: homepage only.
-   Emitting these on every page would be redundant and can dilute the
-   brand signal Google reads. #}
+{% comment %}
+Organization + WebSite + SoftwareApplication: homepage only.
+Emitting these on every page would be redundant and can dilute the brand
+signal Google reads.
+{% endcomment %}
 {% if seo_is_home %}
 <script type="application/ld+json" nonce="{{ request.csp_nonce }}">
 {

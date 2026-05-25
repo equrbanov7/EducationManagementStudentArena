@@ -7,7 +7,9 @@ from django.urls import include, path, re_path, reverse_lazy
 
 from core.media_views import protected_media
 from core.seo_views import (
+    GOOGLE_SITE_VERIFICATION_FILENAME,
     ROOT_ASSET_MAP,
+    google_site_verification,
     robots_txt,
     root_asset,
     site_webmanifest,
@@ -31,6 +33,7 @@ _admin_prefix = getattr(settings, "ADMIN_URL_PREFIX", "admin/").lstrip("/")
 # sitemap.xml, the web manifest) or 301-redirect to the cache-busted static
 # brand asset (favicon.ico, logo.png, og-image.jpg, ...).
 _seo_urlpatterns = [
+    path(GOOGLE_SITE_VERIFICATION_FILENAME, google_site_verification, name="google_site_verification"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path("sitemap.xml", sitemap_xml, name="sitemap_xml"),
     path("site.webmanifest", site_webmanifest, name="site_webmanifest"),
