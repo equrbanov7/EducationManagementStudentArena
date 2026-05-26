@@ -97,9 +97,7 @@ class DashboardDispatchTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_dashboard_redirects_student_to_student_dashboard(self):
-        student = User.objects.create_user(
-            username="dash_student", email="ds@example.com", password="pw12345678"
-        )
+        student = User.objects.create_user(username="dash_student", email="ds@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)
@@ -108,9 +106,7 @@ class DashboardDispatchTest(TestCase):
         self.assertEqual(resp.url, reverse("accounts:student_dashboard"))
 
     def test_dashboard_redirects_teacher_to_teacher_dashboard(self):
-        admin = User.objects.create_superuser(
-            username="dash_teacher", email="dt@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="dash_teacher", email="dt@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:dashboard"))
         self.assertEqual(resp.status_code, 302)
@@ -129,9 +125,7 @@ class TeacherDashboardTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_non_teacher_redirected_home(self):
-        student = User.objects.create_user(
-            username="td_student", email="tds@example.com", password="pw12345678"
-        )
+        student = User.objects.create_user(username="td_student", email="tds@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)
@@ -140,9 +134,7 @@ class TeacherDashboardTest(TestCase):
         self.assertEqual(resp.url, reverse("home"))
 
     def test_teacher_renders_200(self):
-        admin = User.objects.create_superuser(
-            username="td_teacher", email="tdt@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="td_teacher", email="tdt@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:teacher_dashboard"))
         self.assertEqual(resp.status_code, 200)
@@ -160,9 +152,7 @@ class StudentDashboardTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_student_renders_200(self):
-        student = User.objects.create_user(
-            username="sd_student", email="sds@example.com", password="pw12345678"
-        )
+        student = User.objects.create_user(username="sd_student", email="sds@example.com", password="pw12345678")
         self.client.force_login(student)
         resp = self.client.get(reverse("accounts:student_dashboard"))
         self.assertEqual(resp.status_code, 200)
@@ -180,9 +170,7 @@ class GradingQueueTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_non_teacher_redirected_home(self):
-        student = User.objects.create_user(
-            username="gq_student", email="gqs@example.com", password="pw12345678"
-        )
+        student = User.objects.create_user(username="gq_student", email="gqs@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)
@@ -191,9 +179,7 @@ class GradingQueueTest(TestCase):
         self.assertEqual(resp.url, reverse("home"))
 
     def test_teacher_renders_200(self):
-        admin = User.objects.create_superuser(
-            username="gq_teacher", email="gqt@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="gq_teacher", email="gqt@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:grading_queue"))
         self.assertEqual(resp.status_code, 200)
@@ -236,9 +222,7 @@ class ResultViewsLoginGateTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_pending_review_redirects_non_teacher(self):
-        student = User.objects.create_user(
-            username="pr_student", email="prs@example.com", password="pw12345678"
-        )
+        student = User.objects.create_user(username="pr_student", email="prs@example.com", password="pw12345678")
         student.profile.role = ProfileRole.STUDENT
         student.profile.save(update_fields=["role", "updated_at"])
         self.client.force_login(student)

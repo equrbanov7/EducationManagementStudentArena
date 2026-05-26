@@ -12,7 +12,6 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
-from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
@@ -21,7 +20,6 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import StudentOrganizationRequestStatus
-from apps.organizations.models import Membership
 
 from ...models import ProfileRole, UserProfile
 from .._helpers import (

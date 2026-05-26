@@ -2,50 +2,32 @@
 Pending-review collector for the teacher review section.
 """
 
-from decimal import Decimal, InvalidOperation
-
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import pgettext_lazy
 
-from apps.assignments.models import Assignment, Submission
-from apps.courses.models import Course, CourseMembership
-from apps.exams.domain.access_policy import StudentGroup
+from apps.assignments.models import Submission
+from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility,
     resolve_exam_attempt_review_window_seconds,
 )
-from apps.labs.models import Lab, LabSubmission
-from apps.projects.models import Project, ProjectSubmission
+from apps.labs.models import LabSubmission
+from apps.projects.models import ProjectSubmission
 from apps.task_submission_core.review import resolve_identity_window as resolve_submission_identity_window
 from apps.task_submission_core.review import resolve_recheck_window as resolve_submission_recheck_window
 
 from .._helpers import (
-    PENDING_REVIEW_STATUS_CHOICES,
-    PENDING_REVIEW_TYPE_CHOICES,
     REVIEW_EDIT_WINDOW,
     _append_query_params,
-    _assigned_courses_queryset,
-    _assigned_exams_queryset,
-    _csv_to_lower_token_set,
-    _is_result_visible_to_student,
-    _normalize_assigned_tasks_filter,
-    _normalize_pending_answers_filter,
-    _normalize_results_filter,
     _pending_review_type_label,
-    _result_status_badge,
-    _review_window_seconds_left,
-    _task_state_badge_data,
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
 from .formatters import (
     _build_student_group_map_and_available,
-    _format_score_display,
     _normalize_pending_review_status,
     _normalize_pending_review_type,
     _normalize_submission_date_order,
