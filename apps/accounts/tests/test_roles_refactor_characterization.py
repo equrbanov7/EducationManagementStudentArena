@@ -68,9 +68,7 @@ class ManageRolesViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.owner = User.objects.create_user(
-            username="mr_owner", email="mro@example.com", password="pw12345678"
-        )
+        self.owner = User.objects.create_user(username="mr_owner", email="mro@example.com", password="pw12345678")
         self.org = _make_org("Manage Roles Org", "manage-roles-org", self.owner)
 
     def test_requires_login(self):
@@ -79,9 +77,7 @@ class ManageRolesViewTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_non_admin_redirected_home(self):
-        plain = User.objects.create_user(
-            username="mr_plain", email="mrp@example.com", password="pw12345678"
-        )
+        plain = User.objects.create_user(username="mr_plain", email="mrp@example.com", password="pw12345678")
         _assign_user_to_org(plain, self.org, ProfileRole.STUDENT)
         _login_with_org(self.client, plain, self.org)
         resp = self.client.get(reverse("accounts:manage_roles"))
@@ -89,9 +85,7 @@ class ManageRolesViewTest(TestCase):
         self.assertEqual(resp.url, reverse("home"))
 
     def test_admin_without_active_org_redirected_to_profile(self):
-        admin = User.objects.create_superuser(
-            username="mr_superadmin", email="mrs@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="mr_superadmin", email="mrs@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:manage_roles"))
         self.assertEqual(resp.status_code, 302)
@@ -113,9 +107,7 @@ class RoleAssignmentViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.owner = User.objects.create_user(
-            username="ra_owner", email="rao@example.com", password="pw12345678"
-        )
+        self.owner = User.objects.create_user(username="ra_owner", email="rao@example.com", password="pw12345678")
         self.org = _make_org("Role Assignment Org", "role-assignment-org", self.owner)
 
     def test_requires_login(self):
@@ -124,9 +116,7 @@ class RoleAssignmentViewTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_no_active_org_redirects_to_profile(self):
-        admin = User.objects.create_superuser(
-            username="ra_superadmin", email="ras@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="ra_superadmin", email="ras@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:role_assignment"))
         self.assertEqual(resp.status_code, 302)
@@ -144,9 +134,7 @@ class RoleAssignmentViewTest(TestCase):
         self.assertIn("section=role-assignment", resp.url)
 
     def test_superadmin_get_with_org_redirects_to_profile_section(self):
-        admin = User.objects.create_superuser(
-            username="ra_sa2", email="ras2@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="ra_sa2", email="ras2@example.com", password="pw12345678")
         _login_with_org(self.client, admin, self.org)
         resp = self.client.get(reverse("accounts:role_assignment"))
         self.assertEqual(resp.status_code, 302)
@@ -158,9 +146,7 @@ class PermissionEditorViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.owner = User.objects.create_user(
-            username="pe_owner", email="peo@example.com", password="pw12345678"
-        )
+        self.owner = User.objects.create_user(username="pe_owner", email="peo@example.com", password="pw12345678")
         self.org = _make_org("Permission Editor Org", "permission-editor-org", self.owner)
 
     def test_requires_login(self):
@@ -169,18 +155,14 @@ class PermissionEditorViewTest(TestCase):
         self.assertIn("/login", resp.url)
 
     def test_no_active_org_redirects_to_profile(self):
-        admin = User.objects.create_superuser(
-            username="pe_superadmin", email="pes@example.com", password="pw12345678"
-        )
+        admin = User.objects.create_superuser(username="pe_superadmin", email="pes@example.com", password="pw12345678")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:permission_editor"))
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.url, reverse("accounts:profile"))
 
     def test_member_without_role_assign_permission_redirected(self):
-        member = User.objects.create_user(
-            username="pe_member", email="pem@example.com", password="pw12345678"
-        )
+        member = User.objects.create_user(username="pe_member", email="pem@example.com", password="pw12345678")
         _assign_user_to_org(member, self.org, ProfileRole.STUDENT)
         _login_with_org(self.client, member, self.org)
         resp = self.client.get(reverse("accounts:permission_editor"))
