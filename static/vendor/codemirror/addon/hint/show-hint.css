@@ -1,0 +1,67 @@
+/* CodeMirror 5 show-hint addon — EMSArena vendor copy.
+   Visual style is customised to fit the coding-exam shell (VS Code-like). */
+.CodeMirror-hints {
+    position: absolute;
+    z-index: 12010;
+    overflow: hidden;
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.45);
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    background: #1e1f2b;
+    color: #e6edf7;
+    font-size: 0.85rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    max-height: 18em;
+    overflow-y: auto;
+    min-width: 12rem;
+}
+
+.CodeMirror-hint {
+    margin: 0;
+    padding: 5px 10px;
+    white-space: pre;
+    color: #e6edf7;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.CodeMirror-hint:hover {
+    background: rgba(99, 102, 241, 0.18);
+}
+
+li.CodeMirror-hint-active {
+    background: #6366f1;
+    color: #ffffff;
+}
+
+.CodeMirror-hint .CodeMirror-hint-kind {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-left: auto;
+    text-transform: lowercase;
+}
+
+.cm-light .CodeMirror-hints,
+.coding-exam-shell.is-light-editor .CodeMirror-hints {
+    background: #ffffff;
+    color: #1f2937;
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 14px 28px rgba(99, 102, 241, 0.14);
+}
+
+.cm-light .CodeMirror-hint,
+.coding-exam-shell.is-light-editor .CodeMirror-hint {
+    color: #1f2937;
+}
+
+.cm-light li.CodeMirror-hint-active,
+.coding-exam-shell.is-light-editor li.CodeMirror-hint-active {
+    background: #4f46e5;
+    color: #ffffff;
+}
