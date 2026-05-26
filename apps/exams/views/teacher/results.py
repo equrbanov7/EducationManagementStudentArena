@@ -229,14 +229,6 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_secon
             "countdown_mode": "",
         }
 
-    if attempt.exam.exam_type == "coding":
-        return {
-            "label": "Yenidən yoxla" if attempt.checked_by_teacher else "Yoxla",
-            "url_name": "exams:teacher_check_attempt",
-            "countdown_seconds": 0,
-            "countdown_mode": "",
-        }
-
     if attempt.checked_by_teacher:
         if review_window_seconds:
             return {
