@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/monokai.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/eclipse.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/display/fullscreen.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}?v=20260519-1">
+    <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/hint/show-hint.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}?v=20260527-3">
     <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}?v=20260519-1">
 {% endblock %}
 
@@ -185,17 +186,47 @@
                             <div class="coding-console-shell"
                                  role="group"
                                  aria-label="{% trans 'Program console' context 'exams.template.coding_exam' %}">
-                                <pre id="codingOutput"
+                                <div class="coding-console-header">
+                                    <div class="coding-console-header__left">
+                                        <span class="coding-console-dot coding-console-dot--red" aria-hidden="true"></span>
+                                        <span class="coding-console-dot coding-console-dot--yellow" aria-hidden="true"></span>
+                                        <span class="coding-console-dot coding-console-dot--green" aria-hidden="true"></span>
+                                        <span class="coding-console-header__title">{% trans "Terminal" context "exams.template.coding_exam" %}</span>
+                                    </div>
+                                    <div class="coding-console-header__right">
+                                        <span class="coding-console-meta" id="codingConsoleMeta" aria-live="polite"></span>
+                                        <button type="button"
+                                                class="coding-console-clear"
+                                                id="codingConsoleClear"
+                                                title="{% trans 'Clear output' context 'exams.template.coding_exam' %}">
+                                            <i class="fas fa-eraser" aria-hidden="true"></i>
+                                            <span>{% trans "Clear" context "exams.template.coding_exam" %}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="codingOutput"
                                      class="coding-output coding-console-output"
-                                     data-empty="{% trans 'Run the code to see output here.' context 'exams.template.coding_exam' %}"></pre>
-                                <label class="coding-console-input-row" for="codingStdin">
-                                    <span class="coding-console-caret" aria-hidden="true">&gt;</span>
-                                    <textarea id="codingStdin"
-                                              class="coding-stdin coding-console-input"
-                                              rows="2"
-                                              aria-label="{% trans 'Program input' context 'exams.template.coding_exam' %}"
-                                              placeholder="{% trans 'Type input here. Each line will be sent to input(), Scanner, cin, or stdin.' context 'exams.template.coding_exam' %}"></textarea>
-                                </label>
+                                     tabindex="0"
+                                     data-empty="{% trans 'Run the code to see output here.' context 'exams.template.coding_exam' %}"></div>
+                                <details class="coding-console-advanced" id="codingStdinAdvanced">
+                                    <summary>
+                                        <i class="fas fa-keyboard" aria-hidden="true"></i>
+                                        <span>{% trans "Advanced: paste all stdin values manually" context "exams.template.coding_exam" %}</span>
+                                        <span class="coding-console-input-hint" id="codingStdinHint"></span>
+                                    </summary>
+                                    <label class="coding-console-input-row" for="codingStdin">
+                                        <span class="coding-console-caret" aria-hidden="true">&gt;</span>
+                                        <textarea id="codingStdin"
+                                                  class="coding-stdin coding-console-input"
+                                                  rows="3"
+                                                  spellcheck="false"
+                                                  autocomplete="off"
+                                                  autocapitalize="off"
+                                                  autocorrect="off"
+                                                  aria-label="{% trans 'Program input' context 'exams.template.coding_exam' %}"
+                                                  placeholder="{% trans 'One value per line. Each line is consumed by input(), Scanner, cin, or stdin in order.' context 'exams.template.coding_exam' %}"></textarea>
+                                    </label>
+                                </details>
                             </div>
                         </section>
                         <section class="coding-panel" data-coding-panel="errors">
@@ -340,7 +371,15 @@ window.CODING_EXAM_CONFIG = {
         showFiles: "{% filter escapejs %}{% trans 'Show files' context 'exams.template.coding_exam' %}{% endfilter %}",
         noOutput: "{% filter escapejs %}{% trans 'Program finished with no output.' context 'exams.template.coding_exam' %}{% endfilter %}",
         confirm: "{% filter escapejs %}{% trans 'Confirm' context 'exams.template.coding_exam' %}{% endfilter %}",
-        save: "{% filter escapejs %}{% trans 'Save' context 'exams.template.coding_exam' %}{% endfilter %}"
+        save: "{% filter escapejs %}{% trans 'Save' context 'exams.template.coding_exam' %}{% endfilter %}",
+        stdinNeeded: "{% filter escapejs %}{% trans 'Program expects {count} input value(s). Provide them above before running.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        stdinReady: "{% filter escapejs %}{% trans 'Stdin ready ({count} line(s)).' context 'exams.template.coding_exam' %}{% endfilter %}",
+        stdinExtra: "{% filter escapejs %}{% trans '{extra} extra input line(s) will be ignored.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        runFinished: "{% filter escapejs %}{% trans 'Finished in {ms} ms' context 'exams.template.coding_exam' %}{% endfilter %}",
+        runWaiting: "{% filter escapejs %}{% trans 'Waiting for runner...' context 'exams.template.coding_exam' %}{% endfilter %}",
+        consoleCleared: "{% filter escapejs %}{% trans 'Console cleared.' context 'exams.template.coding_exam' %}{% endfilter %}",
+        shortcutHint: "{% filter escapejs %}{% trans 'Tip: Ctrl+Enter runs · Ctrl+Space autocomplete · Ctrl+/ comment' context 'exams.template.coding_exam' %}{% endfilter %}",
+        inlineTerminalHint: "{% filter escapejs %}{% trans 'Type the value here and press Enter.' context 'exams.template.coding_exam' %}{% endfilter %}"
     }
 };
 </script>
@@ -357,8 +396,17 @@ window.CODING_EXAM_CONFIG = {
     <script src="{% static 'vendor/codemirror/addon/edit/closebrackets.js' %}"></script>
     <script src="{% static 'vendor/codemirror/addon/edit/matchbrackets.js' %}"></script>
     <script src="{% static 'vendor/codemirror/addon/display/fullscreen.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/show-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/anyword-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/javascript-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/python-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/html-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/hint/clike-hint.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/comment/comment.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/selection/active-line.js' %}"></script>
+    <script src="{% static 'vendor/codemirror/addon/search/searchcursor.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
-    <script src="{% static 'exams/js/coding_exam.js' %}"></script>
+    <script src="{% static 'exams/js/coding_exam.js' %}?v=20260527-3"></script>
     {% if supervision.supervised %}
         {{ supervision.config|json_script:"supervision-config-data" }}
         <script nonce="{{ request.csp_nonce }}">

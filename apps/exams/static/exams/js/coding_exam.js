@@ -58,6 +58,157 @@
         return String(value || "").replace(/<\/script/gi, "<\\/script");
     }
 
+    // Language-specific hint helper name. CodeMirror lookups go through this
+    // so that adding a language only requires registering a matching helper.
+    function hintHelperFor(language) {
+        switch (language) {
+            case "python":
+                return "python";
+            case "javascript":
+                return "javascript";
+            case "cpp":
+                return "cpp";
+            case "java":
+                return "java";
+            case "html":
+                return "html";
+            case "css":
+                return "css";
+            default:
+                return "anyword";
+        }
+    }
+
+    // Detect how many stdin reads the current code is likely to perform so we
+    // can render a clear hint to the student before they run. This is a static
+    // heuristic (regex over the main file), not a perfect parse — see
+    // coding_runtime.execute_code for the actual sandboxed execution.
+    function detectStdinReadCount(language, mainContent) {
+        return detectStdinPrompts(language, mainContent).length;
+    }
+
+    // Pull each stdin read from the main file together with its prompt text
+    // when one is available. The result feeds the pre-run input dialog so the
+    // student sees exactly what each value is for. We intentionally use simple
+    // regexes — anything more invasive would need a per-language parser, which
+    // is overkill for the heuristic UX we are building here.
+    function detectStdinPrompts(language, mainContent) {
+        var content = String(mainContent || "");
+        if (!content) return [];
+
+        // Strip comments so we don't pick up commented-out reads.
+        // Quick and language-agnostic: line and block comments.
+        var sanitized = content
+            .replace(/\/\*[\s\S]*?\*\//g, " ")
+            .replace(/\/\/[^\n]*/g, "")
+            .replace(/#[^\n]*/g, function (match) {
+                // Keep "#include" headers etc. that are not comments in C++/Java.
+                return /^#\s*(include|define|pragma|ifdef|ifndef|endif|else|elif|undef)/.test(match) ? match : "";
+            });
+
+        var prompts = [];
+
+        function addPrompt(rawPrompt, fallbackLabel) {
+            var prompt = String(rawPrompt || "").trim();
+            // Strip surrounding quotes.
+            prompt = prompt.replace(/^[\s,]*['"`]/, "").replace(/['"`][\s,]*$/, "");
+            prompts.push({
+                prompt: prompt,
+                label: prompt || fallbackLabel,
+                index: prompts.length
+            });
+        }
+
+        if (language === "python") {
+            // input("prompt") and input()
+            var pyRe = /\binput\s*\(([^)]*)\)/g;
+            var m;
+            while ((m = pyRe.exec(sanitized))) {
+                addPrompt(m[1], "input()");
+            }
+            return prompts;
+        }
+
+        if (language === "javascript") {
+            // prompt("..."), readline(), readlineSync()
+            var jsRe = /\b(?:prompt|readline|readlineSync)\s*\(([^)]*)\)/g;
+            var m;
+            while ((m = jsRe.exec(sanitized))) {
+                addPrompt(m[1], "prompt()");
+            }
+            return prompts;
+        }
+
+        if (language === "cpp") {
+            // For C++ the prompt isn't an argument; it's almost always a
+            // preceding cout << "..." statement. Walk top-to-bottom and pair
+            // them up.
+            var lastPromptText = "";
+            var lineRe = /[^\n]+/g;
+            var lines = sanitized.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                // Pull literal strings from a cout chain.
+                var coutMatch = line.match(/cout\s*<<\s*([\s\S]*?);?$/);
+                if (coutMatch) {
+                    var strings = coutMatch[1].match(/"([^"\\]|\\.)*"/g);
+                    if (strings && strings.length) {
+                        lastPromptText = strings.map(function (s) { return s.slice(1, -1); }).join("");
+                    }
+                }
+                // Count one prompt per cin>>x or getline(cin, x).
+                var cinTokens = line.match(/\bcin\s*>>\s*\w+/g) || [];
+                cinTokens.forEach(function () {
+                    addPrompt(lastPromptText, "cin >>");
+                    lastPromptText = "";
+                });
+                var getlineTokens = line.match(/\bgetline\s*\(\s*cin\s*,\s*\w+\s*\)/g) || [];
+                getlineTokens.forEach(function () {
+                    addPrompt(lastPromptText, "getline(cin, ...)");
+                    lastPromptText = "";
+                });
+            }
+            return prompts;
+        }
+
+        if (language === "java") {
+            var lines = sanitized.split("\n");
+            var lastPromptText = "";
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var printMatch = line.match(/(System\.out\.(?:print|println)|printf)\s*\(([\s\S]*?)\)/);
+                if (printMatch) {
+                    var strings = printMatch[2].match(/"([^"\\]|\\.)*"/g);
+                    if (strings && strings.length) {
+                        lastPromptText = strings.map(function (s) { return s.slice(1, -1); }).join("");
+                    }
+                }
+                var scannerCalls = line.match(/\b\w+\s*\.\s*(?:nextLine|next|nextInt|nextDouble|nextLong|nextFloat|nextBoolean|hasNext\w*)\s*\(/g) || [];
+                scannerCalls.forEach(function () {
+                    addPrompt(lastPromptText, "Scanner.next…");
+                    lastPromptText = "";
+                });
+                var readerCalls = line.match(/\.readLine\s*\(/g) || [];
+                readerCalls.forEach(function () {
+                    addPrompt(lastPromptText, "readLine()");
+                    lastPromptText = "";
+                });
+            }
+            return prompts;
+        }
+
+        return prompts;
+    }
+
+    function countNonEmptyLines(value) {
+        return String(value || "")
+            .split("\n")
+            .map(function (line) {
+                return line.trim();
+            })
+            .filter(Boolean).length;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         var config = window.CODING_EXAM_CONFIG || {};
         var i18n = config.i18n || {};
@@ -195,6 +346,10 @@
             .map(normalizeQuestion);
         var files = questionStates[0].files;
 
+        var consoleMetaNode = document.getElementById("codingConsoleMeta");
+        var consoleClearBtn = document.getElementById("codingConsoleClear");
+        var stdinHintNode = document.getElementById("codingStdinHint");
+
         var editor = CodeMirror.fromTextArea(editorTextArea, {
             lineNumbers: true,
             indentUnit: 4,
@@ -204,7 +359,80 @@
             autoCloseBrackets: true,
             theme: "monokai",
             mode: modeForLanguage(questionStates[0].selectedLanguage || "html", languageModes),
-            viewportMargin: Infinity
+            viewportMargin: Infinity,
+            styleActiveLine: true,
+            // VS Code-style keyboard shortcuts. Defined here (rather than via
+            // extraKeys per-call) so the bindings live with the editor and can
+            // be reasoned about as a single block.
+            extraKeys: {
+                "Ctrl-Space": triggerAutocomplete,
+                "Cmd-Space": triggerAutocomplete,
+                "Ctrl-Enter": function () { runCode(); },
+                "Cmd-Enter": function () { runCode(); },
+                "Ctrl-S": function () { autosave(); },
+                "Cmd-S": function () { autosave(); },
+                "Ctrl-/": function (cm) { cm.toggleComment(); },
+                "Cmd-/": function (cm) { cm.toggleComment(); },
+                "F11": function () {
+                    if (workspace) {
+                        workspace.classList.toggle("is-fullscreen");
+                        setTimeout(function () { editor.refresh(); }, 30);
+                    }
+                },
+                "Esc": function () {
+                    if (workspace && workspace.classList.contains("is-fullscreen")) {
+                        workspace.classList.remove("is-fullscreen");
+                        setTimeout(function () { editor.refresh(); }, 30);
+                    }
+                },
+                "Tab": function (cm) {
+                    if (cm.somethingSelected()) {
+                        cm.indentSelection("add");
+                    } else {
+                        cm.replaceSelection(Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
+                    }
+                }
+            },
+            hintOptions: {
+                completeSingle: false,
+                closeOnUnfocus: true,
+                alignWithWord: true
+            }
+        });
+
+        // Trigger autocomplete using the helper appropriate for the current
+        // file's language. This indirection keeps add-language work small:
+        // register a helper, list it in hintHelperFor, done.
+        function triggerAutocomplete(cm) {
+            if (!CodeMirror.showHint) {
+                return;
+            }
+            var language = getActiveFileLanguage();
+            var helperName = hintHelperFor(language);
+            var helper = CodeMirror.helpers && CodeMirror.helpers.hint && CodeMirror.helpers.hint[helperName];
+            cm.showHint({
+                hint: helper || CodeMirror.hint.anyword,
+                completeSingle: false,
+                closeOnUnfocus: true
+            });
+        }
+
+        // Open the hint widget as the user types alpha-numeric identifiers.
+        // We skip whitespace and punctuation to avoid noisy popups; cm.state
+        // gating prevents recursive triggers while a hint is already open.
+        editor.on("inputRead", function (cm, change) {
+            if (!CodeMirror.showHint || cm.state.completionActive) {
+                return;
+            }
+            var text = change.text && change.text[0];
+            if (!text || text.length !== 1) {
+                return;
+            }
+            if (!/[A-Za-z_<.\-]/.test(text)) {
+                return;
+            }
+            // Defer so the change is committed first.
+            setTimeout(function () { triggerAutocomplete(cm); }, 50);
         });
 
         function currentQuestion() {
@@ -238,6 +466,53 @@
             var question = currentQuestion();
             if (question && stdinNode) {
                 question.stdin = stdinNode.value || "";
+            }
+            updateStdinHint();
+        }
+
+        // Inline coaching for the stdin box. Compares input lines provided by
+        // the student with the static count of stdin reads the program looks
+        // like it performs. Mirrors what the backend Docker sandbox will see.
+        function updateStdinHint() {
+            if (!stdinHintNode) {
+                return;
+            }
+            var question = currentQuestion();
+            if (!question) {
+                stdinHintNode.textContent = "";
+                stdinHintNode.className = "coding-console-input-hint";
+                return;
+            }
+            var language = getSelectedLanguage();
+            // Use the executable file (not necessarily the question's main
+            // file) so the hint reflects what the runner will actually see.
+            var execFile = resolveExecutionFile();
+            var requiredReads = detectStdinReadCount(language, execFile && execFile.content);
+            var providedLines = countNonEmptyLines(stdinNode ? stdinNode.value : "");
+
+            if (requiredReads === 0) {
+                stdinHintNode.textContent = "";
+                stdinHintNode.className = "coding-console-input-hint";
+                return;
+            }
+            if (providedLines < requiredReads) {
+                stdinHintNode.textContent = (i18n.stdinNeeded || "Program expects {count} input value(s).").replace("{count}", String(requiredReads));
+                stdinHintNode.className = "coding-console-input-hint coding-console-input-hint--warn";
+                return;
+            }
+            var extra = providedLines - requiredReads;
+            if (extra > 0) {
+                stdinHintNode.textContent = (i18n.stdinExtra || "{extra} extra input line(s) will be ignored.").replace("{extra}", String(extra));
+                stdinHintNode.className = "coding-console-input-hint coding-console-input-hint--muted";
+                return;
+            }
+            stdinHintNode.textContent = (i18n.stdinReady || "Stdin ready ({count} line(s)).").replace("{count}", String(providedLines));
+            stdinHintNode.className = "coding-console-input-hint coding-console-input-hint--ok";
+        }
+
+        function setConsoleMeta(text) {
+            if (consoleMetaNode) {
+                consoleMetaNode.textContent = text || "";
             }
         }
 
@@ -539,7 +814,7 @@
             renderProblem();
             renderFiles();
             setEditorForCurrentFile();
-            if (outputNode) outputNode.textContent = "";
+            if (outputNode) outputNode.innerHTML = "";
             if (errorsNode) errorsNode.textContent = "";
             if (stdinNode) stdinNode.value = question.stdin || "";
             if (previewConsoleNode) previewConsoleNode.textContent = "";
@@ -720,7 +995,16 @@
             var line = prefix + (message || "");
             browserRunHasOutput = true;
             if (outputNode) {
-                outputNode.textContent += (outputNode.textContent ? "\n" : "") + line;
+                // Ensure a <pre> child exists so accumulated lines stay in a
+                // single mono-spaced block matching the terminal style.
+                var pre = outputNode.querySelector(".coding-terminal-history");
+                if (!pre) {
+                    outputNode.innerHTML = "";
+                    pre = document.createElement("pre");
+                    pre.className = "coding-terminal-history";
+                    outputNode.appendChild(pre);
+                }
+                pre.textContent += (pre.textContent ? "\n" : "") + line;
             }
             if (previewConsoleNode) {
                 previewConsoleNode.textContent += (previewConsoleNode.textContent ? "\n" : "") + line;
@@ -858,20 +1142,103 @@
             return String(value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
         }
 
-        function outputWithInlineInput(output, stdin, fallback) {
+        // Build a VS Code–style terminal transcript that interleaves stdin
+        // values with the program's own output. Output looks like:
+        //
+        //   eded daxil et: 10        <- prompt + value (joined on same line)
+        //   15                        <- print/console.log between prompts
+        //   eded daxil et2: 2
+        //   30
+        //
+        // Strategy:
+        //   1. If we know the explicit prompts the student answered (via the
+        //      inline terminal), walk the output and split it AT EACH known
+        //      prompt occurrence. Insert "prompt + value\n" exactly where the
+        //      backend printed the prompt, replacing the prompt text itself.
+        //   2. Fallback (no prompts known): treat any line that ends without
+        //      a newline as a "trailing prompt" and append stdin to it.
+        function outputWithInlineInput(output, stdin, fallback, knownPrompts, knownValues) {
             var text = normalizeConsoleText(output);
             var input = normalizeConsoleText(stdin).replace(/\n+$/g, "");
             if (!text) {
                 return fallback || "";
             }
-            if (!input || /\n$/.test(text)) {
+            if (!input) {
                 return text;
             }
-            var firstInputLine = input.split("\n")[0] || "";
-            if (!firstInputLine || text.endsWith(firstInputLine)) {
-                return text;
+
+            var inputLines = input.split("\n");
+            var prompts = Array.isArray(knownPrompts) ? knownPrompts : [];
+            var values = Array.isArray(knownValues) ? knownValues : inputLines;
+
+            // --- Path 1: we know the prompt texts. Splice each one in place.
+            if (prompts.length) {
+                var rendered = text;
+                var stdinIdx = 0;
+                for (var i = 0; i < prompts.length; i++) {
+                    var promptText = prompts[i] && prompts[i].prompt;
+                    var value = i < values.length ? values[i] : "";
+                    if (!promptText) continue;
+
+                    var idx = rendered.indexOf(promptText);
+                    if (idx === -1) continue;
+
+                    var before = rendered.slice(0, idx);
+                    var after = rendered.slice(idx + promptText.length);
+                    // The character immediately after the prompt in the raw
+                    // backend output is what the program printed next (e.g.
+                    // `15\n` for `print(a+b)`). We splice the answer between
+                    // the prompt and that next character; if `after` does NOT
+                    // already start with a newline, we also add one so the
+                    // next print starts on its own line.
+                    var needsBreak = after.length && after.charAt(0) !== "\n";
+                    rendered = before + promptText + value + (needsBreak ? "\n" : "") + after;
+                    stdinIdx = i + 1;
+                }
+
+                // Show any leftover stdin lines in a small footer.
+                if (stdinIdx < values.length) {
+                    rendered += (rendered.endsWith("\n") ? "" : "\n") + "\n[stdin] " + values.slice(stdinIdx).join(" · ");
+                }
+                return rendered;
             }
-            return text + firstInputLine;
+
+            // --- Path 2 fallback: walk segments, splice stdin into trailing
+            //     prompt-style lines. Used when the runner emitted output we
+            //     have not paired with explicit prompts (e.g. browser preview).
+            var endedWithNewline = /\n$/.test(text);
+            var raw = text.split("\n");
+            var hasTrailingEmpty = raw[raw.length - 1] === "";
+            var segments = hasTrailingEmpty ? raw.slice(0, -1) : raw;
+            var renderedFallback = [];
+            var idx2 = 0;
+            for (var s = 0; s < segments.length; s++) {
+                var seg = segments[s];
+                var isLast = s === segments.length - 1;
+                if (isLast && !endedWithNewline && idx2 < inputLines.length) {
+                    renderedFallback.push(seg + inputLines[idx2]);
+                    idx2 += 1;
+                } else {
+                    renderedFallback.push(seg);
+                }
+            }
+            if (idx2 < inputLines.length) {
+                renderedFallback.push("");
+                renderedFallback.push("[stdin] " + inputLines.slice(idx2).join(" · "));
+            }
+            return renderedFallback.join("\n");
+        }
+
+        // Wrapper that always renders the terminal as a single <pre> block
+        // inside the output div. Used so plain text replaces any inline
+        // <input> elements that the interactive terminal may have left.
+        function setTerminalText(node, text) {
+            if (!node) return;
+            node.innerHTML = "";
+            var pre = document.createElement("pre");
+            pre.className = "coding-terminal-history";
+            pre.textContent = String(text || "");
+            node.appendChild(pre);
         }
 
         function applyRunResult(submission) {
@@ -882,9 +1249,30 @@
             if (!outputText && !submission.error) {
                 outputText = i18n.noOutput || "Program finished with no output.";
             }
-            if (outputNode) outputNode.textContent = outputWithInlineInput(outputText, currentQuestion().stdin || "", i18n.noOutput || "Program finished with no output.");
-            if (errorsNode) errorsNode.textContent = submission.error || "";
-            if (previewConsoleNode) previewConsoleNode.textContent = submission.output || "";
+            if (outputNode) {
+                var transcript = outputWithInlineInput(
+                    outputText,
+                    currentQuestion().stdin || "",
+                    i18n.noOutput || "Program finished with no output.",
+                    lastInteractivePrompts,
+                    lastInteractiveValues
+                );
+                setTerminalText(outputNode, transcript);
+            }
+            if (errorsNode) {
+                errorsNode.textContent = submission.error || "";
+            }
+            if (previewConsoleNode) {
+                previewConsoleNode.textContent = submission.output || "";
+            }
+            // Render a compact metadata line in the console header so students
+            // see exit status, runtime and memory at a glance — matches the
+            // "Run finished in X ms" affordance VS Code shows.
+            if (typeof submission.execution_time_ms === "number") {
+                setConsoleMeta((i18n.runFinished || "Finished in {ms} ms").replace("{ms}", String(submission.execution_time_ms)));
+            } else {
+                setConsoleMeta("");
+            }
             currentQuestion().latestSubmission = submission;
             updateProgress();
             switchTab(submission.error && !submission.output ? "errors" : "output");
@@ -901,7 +1289,7 @@
             syncStdinToQuestion();
             browserRunHasOutput = false;
             previewRunId += 1;
-            if (outputNode) outputNode.textContent = "";
+            if (outputNode) outputNode.innerHTML = "";
             if (errorsNode) errorsNode.textContent = "";
             if (previewConsoleNode) previewConsoleNode.textContent = "";
             setStatus(i18n.running || "Running...");
@@ -923,19 +1311,153 @@
                 });
         }
 
-        function runCode() {
-            if (shouldRunInBrowser()) {
-                runBrowserCode();
-                return;
-            }
+        // Guard against double-run while a request is in flight. Previously the
+        // Run button could trigger two backend requests (one from autosave +
+        // one from runCode) and surface results out of order.
+        var isRunInFlight = false;
 
-            clearTimeout(autosaveTimer);
+        // Inline terminal state — when the program needs stdin we render each
+        // prompt followed by an editable input directly inside the output
+        // panel, so the student types the value next to the prompt text (like
+        // a real terminal). This replaces the old modal dialog.
+        var inlineTerminalActive = false;
+        var inlineTerminalPrompts = [];
+        var inlineTerminalValues = [];
+        var inlineTerminalIndex = 0;
+
+        // Helper: render the current "history" (already-answered prompts) and
+        // the next prompt with an inline input. Always called when prompt
+        // index advances so the DOM matches state.
+        function renderInlineTerminal() {
+            if (!outputNode) return;
+            outputNode.innerHTML = "";
+
+            // History block: previously-resolved prompts with the value the
+            // student typed, monospace pre to match the rest of the terminal.
+            var history = document.createElement("pre");
+            history.className = "coding-terminal-history";
+            for (var i = 0; i < inlineTerminalIndex; i++) {
+                var p = inlineTerminalPrompts[i];
+                var v = inlineTerminalValues[i] || "";
+                history.appendChild(document.createTextNode((p.prompt || "") + v + "\n"));
+            }
+            outputNode.appendChild(history);
+
+            // Active prompt line + inline input.
+            if (inlineTerminalIndex < inlineTerminalPrompts.length) {
+                var line = document.createElement("div");
+                line.className = "coding-terminal-line";
+
+                var promptSpan = document.createElement("span");
+                promptSpan.className = "coding-terminal-prompt";
+                promptSpan.textContent = inlineTerminalPrompts[inlineTerminalIndex].prompt || "";
+                line.appendChild(promptSpan);
+
+                var input = document.createElement("input");
+                input.type = "text";
+                input.className = "coding-terminal-input";
+                input.setAttribute("autocomplete", "off");
+                input.setAttribute("spellcheck", "false");
+                input.setAttribute("autocapitalize", "off");
+                input.setAttribute("autocorrect", "off");
+                input.setAttribute("aria-label", inlineTerminalPrompts[inlineTerminalIndex].label || "stdin");
+                line.appendChild(input);
+
+                outputNode.appendChild(line);
+
+                input.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter") return;
+                    event.preventDefault();
+                    inlineTerminalValues[inlineTerminalIndex] = input.value;
+                    inlineTerminalIndex += 1;
+                    if (inlineTerminalIndex < inlineTerminalPrompts.length) {
+                        renderInlineTerminal();
+                    } else {
+                        completeInlineTerminal();
+                    }
+                });
+
+                // Defer focus so the input is in the DOM and visible.
+                window.setTimeout(function () { input.focus(); }, 30);
+
+                // Friendly hint for the very first prompt only.
+                if (inlineTerminalIndex === 0) {
+                    var hint = document.createElement("div");
+                    hint.className = "coding-terminal-hint";
+                    hint.textContent = (i18n.inlineTerminalHint || "Type the value here and press Enter.");
+                    outputNode.appendChild(hint);
+                }
+            }
+        }
+
+        // Snapshot of prompts/values that backend output will be interleaved
+        // against. Captured at the moment the inline terminal completes so
+        // applyRunResult can still see them after inlineTerminal* state has
+        // been cleared.
+        var lastInteractivePrompts = [];
+        var lastInteractiveValues = [];
+
+        function completeInlineTerminal() {
+            lastInteractivePrompts = inlineTerminalPrompts.slice();
+            lastInteractiveValues = inlineTerminalValues.slice();
+            inlineTerminalActive = false;
+            // Render the full transcript (history) so the student sees what
+            // was provided, then submit the assembled stdin to the backend.
+            var stdin = inlineTerminalValues.join("\n");
+            if (stdinNode) stdinNode.value = stdin;
             syncStdinToQuestion();
-            if (outputNode) outputNode.textContent = "";
+            performBackendRun();
+        }
+
+        function startInlineTerminal(prompts) {
+            inlineTerminalActive = true;
+            inlineTerminalPrompts = prompts;
+            inlineTerminalValues = [];
+            inlineTerminalIndex = 0;
+            switchTab("output");
+            setStatus(i18n.running || "Running...");
+            setConsoleMeta("");
+            renderInlineTerminal();
+        }
+
+        // The terminal short-circuits when: the student already wrote stdin
+        // manually (so respect their choice), or the code doesn't actually
+        // read stdin.
+        // Returns the file the backend will actually execute. Mirrors the
+        // logic the user sees on screen: prefer the file the student
+        // currently has open in the editor, so a Python tab with input()
+        // triggers the inline terminal even when an HTML index.html is the
+        // question's main file. Falls back to a file matching the selected
+        // language, then the explicit main file, then the first file.
+        function resolveExecutionFile() {
+            var question = currentQuestion();
+            if (!question) return null;
+            var allFiles = question.files || files || [];
+            var selectedLang = getSelectedLanguage();
+            var active = currentFile();
+            if (active && extensionLanguage(active.name, selectedLang) === selectedLang) {
+                return active;
+            }
+            var byLanguage = allFiles.find(function (f) {
+                return extensionLanguage(f.name, selectedLang) === selectedLang;
+            });
+            if (byLanguage) return byLanguage;
+            var explicitMain = allFiles.find(function (f) { return f.is_main; });
+            return active || explicitMain || allFiles[0] || null;
+        }
+
+        // Pure backend run — extracted so we can call it both directly (when
+        // no inline terminal is needed) and at the tail of an inline session.
+        function performBackendRun() {
+            isRunInFlight = true;
+            clearTimeout(autosaveTimer);
+            syncEditorToFile();
+            syncStdinToQuestion();
+            // Output node may currently hold the inline transcript — keep it.
             if (errorsNode) errorsNode.textContent = "";
             setStatus(i18n.running || "Running...");
-            runBtn.disabled = true;
-            switchTab("output");
+            setConsoleMeta(i18n.runWaiting || "Waiting for runner...");
+            if (runBtn) runBtn.disabled = true;
 
             requestJson(config.runUrl, collectPayload())
                 .then(function (body) {
@@ -952,14 +1474,47 @@
                         window.location.href = error.payload.redirect_url;
                         return;
                     }
-                    if (outputNode) outputNode.textContent = error.message || "Run failed";
+                    setTerminalText(outputNode, error.message || "Run failed");
                     if (errorsNode) errorsNode.textContent = error.message || "Run failed";
+                    setConsoleMeta("");
                     switchTab("errors");
                     setStatus(error.message || "Run failed");
                 })
                 .finally(function () {
-                    runBtn.disabled = false;
+                    isRunInFlight = false;
+                    if (runBtn) runBtn.disabled = false;
                 });
+        }
+
+        function runCode() {
+            if (isRunInFlight || inlineTerminalActive) {
+                return;
+            }
+            // Each Run starts from a clean slate: clear stdin from the last
+            // session so the inline terminal can re-prompt instead of silently
+            // reusing stale values. Without this the second click on Run reuses
+            // the previous answers and skips the interactive prompt loop.
+            var execFile = resolveExecutionFile();
+            var prompts = detectStdinPrompts(getSelectedLanguage(), execFile && execFile.content);
+            if (prompts.length) {
+                if (stdinNode) stdinNode.value = "";
+                var question = currentQuestion();
+                if (question) question.stdin = "";
+                lastInteractivePrompts = [];
+                lastInteractiveValues = [];
+                updateStdinHint();
+                startInlineTerminal(prompts);
+                return;
+            }
+            if (shouldRunInBrowser()) {
+                runBrowserCode();
+                return;
+            }
+
+            // No interactive prompts — empty the terminal and submit.
+            setTerminalText(outputNode, "");
+            switchTab("output");
+            performBackendRun();
         }
 
         function submitCode() {
@@ -1016,6 +1571,7 @@
             }
             syncEditorToFile();
             updateProgress();
+            updateStdinHint();
             queueAutosave(2500);
         });
 
@@ -1026,6 +1582,7 @@
                 editor.setOption("mode", modeForLanguage(extensionLanguage(currentFile() && currentFile().name, languageSelect.value), languageModes));
                 updateLanguagePreviewVisibility();
                 updateProgress();
+                updateStdinHint();
                 queueAutosave(500);
             });
         }
@@ -1277,6 +1834,40 @@
             languageSelect.value = currentQuestion().selectedLanguage || currentQuestion().language || config.selectedLanguage;
             syncBootstrapSelect(languageSelect);
         }
+        // Console "Clear" button — wipe output/errors and re-show the empty
+        // state placeholder. Doesn't touch stdin or the editor, since those
+        // are independent of run output.
+        if (consoleClearBtn) {
+            consoleClearBtn.addEventListener("click", function () {
+                if (outputNode) outputNode.innerHTML = "";
+                if (errorsNode) errorsNode.textContent = "";
+                if (previewConsoleNode) previewConsoleNode.textContent = "";
+                // Reset stdin so a subsequent Run starts from scratch.
+                // (runCode also clears stdin before opening the inline
+                // terminal, but Clear gives the student an explicit way to
+                // wipe everything without triggering a run.)
+                if (stdinNode) stdinNode.value = "";
+                var question = currentQuestion();
+                if (question) question.stdin = "";
+                updateStdinHint();
+                // Reset any in-flight inline terminal session so the next Run
+                // starts from a clean slate.
+                inlineTerminalActive = false;
+                inlineTerminalPrompts = [];
+                inlineTerminalValues = [];
+                inlineTerminalIndex = 0;
+                lastInteractivePrompts = [];
+                lastInteractiveValues = [];
+                setConsoleMeta("");
+                setStatus(i18n.consoleCleared || "Console cleared.");
+            });
+        }
+
+        // Show a one-time tip about shortcuts so students discover Ctrl+Enter.
+        if (i18n.shortcutHint) {
+            setStatus(i18n.shortcutHint);
+        }
+
         syncLanguageToCurrentFile();
         renderProblem();
         renderFiles();
@@ -1284,6 +1875,7 @@
         if (stdinNode) {
             stdinNode.value = currentQuestion().stdin || "";
         }
+        updateStdinHint();
         updateLanguagePreviewVisibility();
     });
 })();
