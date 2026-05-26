@@ -4373,6 +4373,82 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(exam_item["type_label"], "Praktiki imtahan")
         self.assertContains(response, "Praktiki imtahan")
 
+    def test_pending_review_coding_exam_shows_recheck_during_review_window(self):
+        from django.utils import timezone
+
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        student = User.objects.create_user(
+            username="pending_coding_recheck_student",
+            email="pending_coding_recheck_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        exam = Exam.objects.create(
+            author=self.user,
+            title="Recent Practical Review Exam",
+            exam_type="coding",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(
+            user=student,
+            exam=exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_score=80,
+            teacher_checked_at=timezone.now(),
+        )
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"))
+
+        self.assertEqual(response.status_code, 200)
+        exam_item = next(item for item in response.context["review_items"] if item["title"] == exam.title)
+        self.assertTrue(exam_item["is_recheck"])
+        self.assertEqual(exam_item["action_label"], "Yenidən yoxla")
+        self.assertEqual(exam_item["countdown_mode"], "recheck")
+        self.assertGreater(exam_item["review_window_seconds_left"], 0)
+        self.assertContains(response, "Yenidən yoxla")
+
+    def test_coding_exam_moves_to_review_results_after_review_window(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import Exam, ExamAttempt
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        student = User.objects.create_user(
+            username="old_coding_review_student",
+            email="old_coding_review_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        exam = Exam.objects.create(
+            author=self.user,
+            title="Finalized Practical Review Exam",
+            exam_type="coding",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(
+            user=student,
+            exam=exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_score=88,
+            teacher_checked_at=timezone.now() - timedelta(minutes=6),
+        )
+
+        self._login_user()
+        pending_response = self.client.get(reverse("accounts:pending_review"))
+        results_response = self.client.get(reverse("accounts:review_results"))
+
+        self.assertEqual(pending_response.status_code, 200)
+        self.assertEqual(results_response.status_code, 200)
+        self.assertNotContains(pending_response, "Finalized Practical Review Exam")
+        self.assertContains(results_response, "Finalized Practical Review Exam")
+
     def test_profile_pending_review_section_renders_pr_page_pagination_links(self):
         from datetime import timedelta
 
