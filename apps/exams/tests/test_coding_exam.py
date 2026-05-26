@@ -14,6 +14,7 @@ from apps.exams.forms import ExamForm
 from apps.exams.models import CodingFile, CodingSubmission, CodingTestCase, Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.coding_definition import build_coding_payload_from_exam_form, upsert_coding_question
 from apps.exams.services.coding_runtime import (
+    NODE_PROMPT_POLYFILL,
     ExecutionResult,
     clean_docker_stderr,
     execute_code,
@@ -135,6 +136,66 @@ class CodingExamFormTests(TestCase):
         self.assertIn("int main()", prepared[0]["content"])
         self.assertIn('cout << "ok";', prepared[0]["content"])
         self.assertEqual(files[0]["content"], 'cout << "ok";')
+
+    def test_javascript_main_gets_prompt_polyfill_injected(self):
+        # The student's source must not be mutated in-place; only the copy
+        # handed to the sandbox should receive the polyfill prefix.
+        student_source = 'let a = +prompt("eded daxil et: ");\nconsole.log(a + 5);\n'
+        files = [{"name": "main.js", "content": student_source, "language": "javascript", "is_main": True}]
+
+        prepared = prepare_files_for_execution("javascript", files)
+
+        self.assertIn("globalThis.prompt", prepared[0]["content"])
+        self.assertTrue(prepared[0]["content"].endswith(student_source))
+        # Original list and dict were copied; the original content is preserved.
+        self.assertEqual(files[0]["content"], student_source)
+
+    def test_javascript_polyfill_is_not_double_injected(self):
+        # If the student already wired up their own prompt shim we leave the
+        # file alone — otherwise we would compound polyfills on each run.
+        source_with_shim = "globalThis.prompt = function () { return '42'; };\nconsole.log(prompt());\n"
+        files = [{"name": "main.js", "content": source_with_shim, "language": "javascript", "is_main": True}]
+
+        prepared = prepare_files_for_execution("javascript", files)
+
+        # The prepared content should NOT have the EMSArena polyfill banner.
+        self.assertNotIn("EMSArena: prompt()/alert()/confirm() polyfill", prepared[0]["content"])
+        self.assertEqual(prepared[0]["content"], source_with_shim)
+
+    def test_node_prompt_polyfill_does_not_echo_stdin(self):
+        # The frontend transcript layer is the only place that should splice
+        # the typed value back into visible output; the polyfill itself must
+        # NOT echo stdin or the value would appear twice in the terminal.
+        # Detect this by checking the polyfill body does not write the
+        # returned chunk to stdout.
+        self.assertIn("globalThis.prompt", NODE_PROMPT_POLYFILL)
+        # Find the body of the prompt() function in the polyfill.
+        prompt_body_start = NODE_PROMPT_POLYFILL.index("globalThis.prompt = function")
+        prompt_body_end = NODE_PROMPT_POLYFILL.index("};", prompt_body_start)
+        prompt_body = NODE_PROMPT_POLYFILL[prompt_body_start:prompt_body_end]
+        # The body should NOT write the next chunk to stdout — only the
+        # message (prompt text) is written, then nextChunk() is returned.
+        self.assertNotIn("process.stdout.write(String(value)", prompt_body)
+        self.assertIn("return nextChunk()", prompt_body)
+
+    def test_non_javascript_languages_are_unchanged_by_polyfill(self):
+        # Python, Java, HTML etc. should not receive the JS polyfill.
+        py_files = [{"name": "main.py", "content": 'print(input("x: "))', "language": "python", "is_main": True}]
+        prepared = prepare_files_for_execution("python", py_files)
+        self.assertNotIn("globalThis.prompt", prepared[0]["content"])
+        self.assertEqual(prepared[0]["content"], py_files[0]["content"])
+
+    def test_polyfill_module_exports_match_runtime_re_export(self):
+        # The polyfill body lives in coding_polyfills.py — coding_runtime.py
+        # re-exports it. Both import paths must resolve to the same object so
+        # downstream code (and existing tests) can keep using either.
+        from apps.exams.services import coding_polyfills, coding_runtime
+
+        self.assertIs(coding_runtime.NODE_PROMPT_POLYFILL, coding_polyfills.NODE_PROMPT_POLYFILL)
+        self.assertIs(
+            coding_runtime.javascript_main_has_top_level_input_loop,
+            coding_polyfills.javascript_main_has_top_level_input_loop,
+        )
 
     def test_docker_pull_noise_is_removed_from_stderr(self):
         stderr = "\n".join(

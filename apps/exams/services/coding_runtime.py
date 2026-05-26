@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db import transaction
 
 from apps.exams.models import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase, ExamAnswer
+from apps.exams.services.coding_polyfills import NODE_PROMPT_POLYFILL, javascript_main_has_top_level_input_loop
 
 MAX_CODE_BYTES = 256_000
 MAX_CAPTURE_BYTES = 64_000
@@ -328,12 +329,19 @@ def _wrap_cpp_snippet(content):
 
 def prepare_files_for_execution(language, files):
     prepared_files = [dict(item) for item in files]
-    if language != CodingExamQuestion.LANGUAGE_CPP:
+
+    if language == CodingExamQuestion.LANGUAGE_CPP:
+        main_file = get_main_file(prepared_files)
+        if main_file and not _cpp_contains_main(main_file.get("content", "")):
+            main_file["content"] = _wrap_cpp_snippet(main_file.get("content", ""))
         return prepared_files
 
-    main_file = get_main_file(prepared_files)
-    if main_file and not _cpp_contains_main(main_file.get("content", "")):
-        main_file["content"] = _wrap_cpp_snippet(main_file.get("content", ""))
+    if language == CodingExamQuestion.LANGUAGE_JAVASCRIPT:
+        main_file = get_main_file(prepared_files)
+        if main_file and not javascript_main_has_top_level_input_loop(main_file.get("content", "")):
+            main_file["content"] = NODE_PROMPT_POLYFILL + (main_file.get("content", "") or "")
+        return prepared_files
+
     return prepared_files
 
 
