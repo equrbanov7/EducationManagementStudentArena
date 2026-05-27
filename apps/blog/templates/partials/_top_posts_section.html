@@ -1,0 +1,76 @@
+{% load i18n blog_formatting %}
+{% comment %}
+================================================================================
+  Homepage "Top posts" widget — compact horizontal cards for the
+  "Most read" / "Most engaged" rails.
+
+  Required context:
+    title       — section heading (already translated)
+    icon_class  — Font Awesome class to render next to the heading
+    posts       — iterable of Post instances
+    metric      — one of "views" | "engagement"; selects the meta line
+    accent      — one of "primary" | "rose"; switches color tokens
+    section_id  — unique anchor / aria-label id
+
+  Designed to render in a 2-column row at desktop and stack neatly on mobile.
+================================================================================
+{% endcomment %}
+{% if posts %}
+<section class="top-posts-rail top-posts-rail--{{ accent|default:'primary' }}"
+         id="{{ section_id }}"
+         aria-labelledby="{{ section_id }}-title">
+    <header class="top-posts-rail__header">
+        <h2 class="top-posts-rail__title" id="{{ section_id }}-title">
+            <span class="top-posts-rail__title-icon" aria-hidden="true">
+                <i class="{{ icon_class }}"></i>
+            </span>
+            {{ title }}
+        </h2>
+    </header>
+
+    <ol class="top-posts-rail__list" role="list">
+        {% for post in posts %}
+        <li class="top-posts-rail__item">
+            <a href="{% url 'article_detail' post.slug %}"
+               class="top-posts-card"
+               aria-label="{{ post.title }}">
+                <span class="top-posts-card__rank" aria-hidden="true">{{ forloop.counter }}</span>
+
+                <span class="top-posts-card__media">
+                    <img src="{{ post.get_image }}"
+                         alt=""
+                         loading="lazy"
+                         decoding="async">
+                </span>
+
+                <span class="top-posts-card__body">
+                    {% if post.category %}
+                    <span class="top-posts-card__category">
+                        {{ post.category.localized_name }}
+                    </span>
+                    {% endif %}
+                    <span class="top-posts-card__title">{{ post.title }}</span>
+                    <span class="top-posts-card__meta">
+                        {% if metric == "engagement" %}
+                            <i class="far fa-comment-dots" aria-hidden="true"></i>
+                            {{ post.engagement_count|default:0 }}
+                            <span class="visually-hidden">{% trans "comments_label" context "blog.home_page" %}</span>
+                            <span aria-hidden="true">·</span>
+                            <i class="far fa-eye" aria-hidden="true"></i>
+                            {{ post.view_count|compact_number }}
+                        {% else %}
+                            <i class="far fa-eye" aria-hidden="true"></i>
+                            {{ post.view_count|compact_number }}
+                            <span class="visually-hidden">{% trans "views_label" context "blog.home_page" %}</span>
+                            <span aria-hidden="true">·</span>
+                            <i class="far fa-calendar-alt" aria-hidden="true"></i>
+                            {{ post.created_at|date:"d M Y" }}
+                        {% endif %}
+                    </span>
+                </span>
+            </a>
+        </li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}

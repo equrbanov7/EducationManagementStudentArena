@@ -11,7 +11,9 @@ title tag, og:title and twitter:title stay consistent.
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/sideBar.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-{% endblock %} 
+    <link rel="stylesheet" href="{% static 'css/topPosts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/blogFilterBar.css' %}">
+{% endblock %}
 
 {% block content %}
 <section class="home-hero-section">
@@ -23,35 +25,75 @@ title tag, og:title and twitter:title stay consistent.
 
 <div class="site-main-container">
   <div class="home-search-wrapper">
-    <form method="get" action="{% url 'home' %}" class="search-form">
+    <form method="get" action="{% url 'home' %}" class="search-form" role="search">
         {% if selected_category %}
         <input type="hidden" name="category" value="{{ selected_category.slug }}">
         {% endif %}
-        <input 
-            type="text" 
-            name="q" 
-            value="{{ query|default:'' }}" 
-            id="searchInput" 
-            class="home-search-input" 
+        <label for="searchInput" class="visually-hidden">
+            {% trans "search_placeholder" context "blog.home_page" %}
+        </label>
+        <input
+            type="text"
+            name="q"
+            value="{{ query|default:'' }}"
+            id="searchInput"
+            class="home-search-input"
             placeholder="{% trans 'search_placeholder' context 'blog.home_page' %}"
+            autocomplete="off"
         />
     </form>
   </div>
 
-  <div id="homeListingShell" class="home-listing-shell">
+  {# Mobile / tablet üçün kompakt filter rail — yuxarıda, postlardan əvvəl #}
+  {% include "partials/_blogFilterBar.html" with categories=categories popular_topics=popular_topics active_category_slug=active_category_slug search_query=search_query %}
+
+  <div id="homeListingShell" class="home-listing-shell" data-page-loaded="false">
     {% if selected_category %}
-    <section class="home-active-filter-bar" aria-label="Seçilmiş kateqoriya">
+    <section class="home-active-filter-bar" aria-label="{% trans 'active_category_aria' context 'blog.home_page' %}">
       <div class="home-active-filter-copy">
-        <span class="home-active-filter-label">Seçilmiş kateqoriya</span>
+        <span class="home-active-filter-label">{% trans "active_category_label" context "blog.home_page" %}</span>
         <span class="home-active-filter-chip">{{ selected_category_display_name }}</span>
       </div>
-      <a href="{{ clear_category_filter_url }}" class="home-clear-filter-link">Hamısını göstər</a>
+      <a href="{{ clear_category_filter_url }}" class="home-clear-filter-link">{% trans "show_all_posts" context "blog.home_page" %}</a>
     </section>
+    {% endif %}
+
+    {% if show_top_widgets %}
+      {% if top_viewed_posts or top_liked_posts %}
+      <section class="home-top-posts-grid" aria-label="{% trans 'top_widgets_aria' context 'blog.home_page' %}">
+        {% trans "most_read_title" context "blog.home_page" as most_read_title %}
+        {% include "partials/_top_posts_section.html" with title=most_read_title icon_class="fas fa-fire" posts=top_viewed_posts metric="views" accent="primary" section_id="top-viewed" %}
+        {% trans "most_liked_title" context "blog.home_page" as most_liked_title %}
+        {% include "partials/_top_posts_section.html" with title=most_liked_title icon_class="fas fa-heart" posts=top_liked_posts metric="engagement" accent="rose" section_id="top-liked" %}
+      </section>
+      {% endif %}
     {% endif %}
 
     <div class="home-content-layout">
       <div class="home-left-column">
-          <section id="blogContainer" class="home-blog-grid">
+          <section id="blogContainer"
+                   class="home-blog-grid"
+                   aria-busy="false"
+                   aria-live="polite">
+            {# Skeleton placeholder cards — hidden once content is in the DOM. #}
+            <div class="blog-skeleton-grid" aria-hidden="true">
+              {% for i in "xxxxxx" %}
+              <article class="blog-card-skeleton">
+                <div class="skeleton skeleton-img"></div>
+                <div class="blog-card-skeleton__body">
+                  <div class="skeleton skeleton-tag"></div>
+                  <div class="skeleton skeleton-line skeleton-line--lg"></div>
+                  <div class="skeleton skeleton-line"></div>
+                  <div class="skeleton skeleton-line skeleton-line--sm"></div>
+                  <div class="blog-card-skeleton__footer">
+                    <div class="skeleton skeleton-pill"></div>
+                    <div class="skeleton skeleton-pill"></div>
+                  </div>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+
             {% for post in page_obj %}
              {% include "partials/_blogCard.html" with post=post %}
             {% empty %}

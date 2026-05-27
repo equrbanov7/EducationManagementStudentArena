@@ -15,6 +15,8 @@ from ..selectors import (
     filter_posts_by_category_scope,
     get_popular_topics,
     get_sidebar_categories,
+    get_top_liked_posts,
+    get_top_viewed_posts,
 )
 from .categories import render_category_page
 
@@ -78,6 +80,13 @@ def home(request):
     )
     popular_topics = get_popular_topics(limit=5)
 
+    # Homepage "Ən çox oxunan / bəyənilən" widgetləri — yalnız default home
+    # görünüşündə (filter/search aktiv olmayanda) göstərilir ki, filter
+    # nəticələri ilə vizual qarışıq yaratmasın.
+    show_top_widgets = not selected_category and not query
+    top_viewed_posts = get_top_viewed_posts(limit=3) if show_top_widgets else []
+    top_liked_posts = get_top_liked_posts(limit=3) if show_top_widgets else []
+
     clear_filter_query = urlencode({"q": query}) if query else ""
     clear_category_filter_url = reverse("home")
     if clear_filter_query:
@@ -98,6 +107,9 @@ def home(request):
         "search_query": query,
         "query": query,  # Also pass as 'query' for template compatibility
         "extra_query": extra_query,
+        "show_top_widgets": show_top_widgets,
+        "top_viewed_posts": top_viewed_posts,
+        "top_liked_posts": top_liked_posts,
         # --- SEO ---------------------------------------------------------
         # `seo_is_home` makes the shared head partial emit the homepage-only
         # Organization / WebSite / SoftwareApplication JSON-LD that helps
