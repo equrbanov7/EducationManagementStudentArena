@@ -572,6 +572,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 card.classList.add("is-selected");
                 setRegistrationValue(orgType, role);
                 updateStep2State();
+                if (shouldShowInstitutionStep()) {
+                    wizardNext(3);
+                }
             });
         });
     }
