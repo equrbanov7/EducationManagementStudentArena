@@ -37,14 +37,14 @@
         </div>
         <div class="ems-hero__visual">
             <img src="{% static 'brand/logo-stacked.svg' %}"
-                 alt="EMSArena loqo"
+                 alt="{% trans 'EMSArena loqo' %}"
                  class="ems-hero__logo"
                  loading="eager">
         </div>
     </header>
 
     {# ---------- Platform highlights (realistic for early-stage product) ---------- #}
-    <section class="ems-stats animate-fade-in delay-1" aria-label="EMSArena platform xüsusiyyətləri">
+    <section class="ems-stats animate-fade-in delay-1" aria-label="{% trans 'EMSArena platform xüsusiyyətləri' %}">
         <div class="ems-stat">
             <p class="ems-stat__number">4</p>
             <p class="ems-stat__label">{% trans "Dəstəklənən dil" %}</p>
@@ -65,7 +65,7 @@
 
     {# ---------- Mission & Vision ---------- #}
     <section class="ems-mission" aria-labelledby="mission-vision-title">
-        <h2 id="mission-vision-title" class="visually-hidden">Missiya və Vizyon</h2>
+        <h2 id="mission-vision-title" class="visually-hidden">{% trans "Missiya və Vizyon" %}</h2>
         <article class="ems-mission__card animate-slide-up delay-1">
             <span class="ems-mission__icon"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
             <h3 class="ems-mission__title">{% trans "Missiyamız" %}</h3>

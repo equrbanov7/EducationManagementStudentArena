@@ -20367,3 +20367,587 @@ msgstr "Tüm hakları saklıdır."
 #: contact/about/footer/navbar
 msgid "Hazırladı"
 msgstr "Hazırlayan"
+
+#: contact/about/footer/navbar
+msgid "Email"
+msgstr "E-posta"
+
+#: contact/about/footer/navbar
+msgid "EMSArena loqo"
+msgstr "EMSArena logosu"
+
+#: contact/about/footer/navbar
+msgid "EMSArena platform xüsusiyyətləri"
+msgstr "EMSArena platform özellikleri"
+
+#: contact/about/footer/navbar
+msgid "Missiya və Vizyon"
+msgstr "Misyon ve vizyon"
+
+#: contact/about/footer/navbar
+msgid "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən platforma ilə tədrisi sadələşdirmək."
+msgstr "Eğitim kurumlarını bürokrasiden kurtarıp öğretmen-öğrenci etkileşimine odaklanmalarını sağlamak. Tek, güvenilir ve ölçeklenebilir bir platformla öğretimi sadeleştirmek."
+
+#: contact/about/footer/navbar
+msgid "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün uyğun."
+msgstr "Azerbaycan ve bölgede en çok tercih edilen eğitim teknolojileri platformu olmak: yapay zekâ destekli, çok kiracılı, güvenli ve her ölçekte kuruma uygun."
+
+#: contact/about/footer/navbar
+msgid "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım olan hər şey."
+msgstr "Kurslardan sınavlara, değerlendirmeden analitiğe kadar ihtiyacınız olan her şey tek abonelikte."
+
+#: contact/about/footer/navbar
+msgid "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün sadə, tələbə üçün aydın."
+msgstr "Konular, dersler, materyaller ve grup yönetimi tek yerde. Öğretmen için sade, öğrenci için anlaşılır."
+
+#: contact/about/footer/navbar
+msgid "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə qarışmır, RBAC ciddi tətbiq olunur."
+msgstr "Her kurum tamamen izole edilmiş bir alana sahiptir. Veriler birbirine karışmaz, RBAC sıkı şekilde uygulanır."
+
+#: contact/about/footer/navbar
+msgid "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs yalnız ona icazə verilən məlumatı görür."
+msgstr "Superadmin, kurum sahibi, öğretmen, öğrenci ve personel rolleri: herkes yalnızca izin verilen verileri görür."
+
+#: contact/about/footer/navbar
+msgid "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, analitika və anti-cheat parametrləri."
+msgstr "Test, yazılı, uygulamalı ve canlı sınavlar; otomatik değerlendirme, analitik ve anti-cheat ayarları."
+
+#: contact/about/footer/navbar
+msgid "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və CSP siyasətləri ilə qorunan."
+msgstr "Her kritik işlem audit log'a yazılır; dahili güvenlik testleri ve CSP politikalarıyla korunur."
+
+#: contact/about/footer/navbar
+msgid "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya kömək edən ağıllı assistent."
+msgstr "Kullanıcının izinleri kapsamında soruları yanıtlayan ve gezinmeye yardımcı olan akıllı asistan."
+
+#: contact/about/footer/navbar
+msgid "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
+msgstr "EMSArena deneyimli mühendisler ve eğitimciler tarafından geliştirilmiştir. Kullanıcı odaklı tasarım ve güvenilir teknoloji temel önceliklerimizdir."
+
+#: contact/about/footer/navbar
+msgid "Founder · Full-stack Engineer"
+msgstr "Kurucu · Full-stack mühendis"
+
+#: contact/about/footer/navbar
+msgid "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan sistemlər sahəsində mütəxəssis."
+msgstr "EMSArena'nın baş mimarı ve ana mühendisi; Django, React ve paylaşımlı sistemler konusunda uzmandır."
+
+#: contact/about/footer/navbar
+msgid "Mühəndislik komandası"
+msgstr "Mühendislik ekibi"
+
+#: contact/about/footer/navbar
+msgid "Backend · Frontend · DevOps"
+msgstr "Backend · Frontend · DevOps"
+
+#: contact/about/footer/navbar
+msgid "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli mühəndislər."
+msgstr "Performans, güvenilirlik ve güvenliği üstlenen deneyimli mühendisler."
+
+#: contact/about/footer/navbar
+msgid "Pedaqoji məsləhətçilər"
+msgstr "Pedagojik danışmanlar"
+
+#: contact/about/footer/navbar
+msgid "Təhsil eksperti · Metodoloq"
+msgstr "Eğitim uzmanı · Metodolog"
+
+#: contact/about/footer/navbar
+msgid "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji düzgünlüyünü təmin edirlər."
+msgstr "Öğretmenlik ve üniversite deneyimine sahip uzmanlar platformanın pedagojik doğruluğunu sağlar."
+
+#: contact/about/footer/navbar
+msgid "Təhsilinizi növbəti səviyyəyə qaldıraq"
+msgstr "Eğitiminizi bir sonraki seviyeye taşıyalım"
+
+#: contact/about/footer/navbar
+msgid "Bir abunəlikdə kurs, imtahan, audit və AI — hamısı bir yerdə."
+msgstr "Kurs, sınav, denetim ve yapay zekâ tek abonelikte, tek yerde."
+
+#: contact/about/footer/navbar
+msgid "Haqqımızda – EMSArena"
+msgstr "Hakkımızda – EMSArena"
+
+#: contact/about/footer/navbar
+msgid "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
+msgstr "EMSArena bir eğitim yönetimi, LMS ve çevrimiçi sınav platformudur. Ekibimiz, misyonumuz ve platform özelliklerimiz hakkında bilgi alın."
+
+#: contact/about/footer/navbar
+msgid "Adınız və soyadınız"
+msgstr "Adınız ve soyadınız"
+
+#: contact/about/footer/navbar
+msgid "Mesajınızı yazın..."
+msgstr "Mesajınızı yazın..."
+
+#: contact/about/footer/navbar
+msgid "Ad ən azı 2 simvol olmalıdır."
+msgstr "Ad en az 2 karakter olmalıdır."
+
+#: contact/about/footer/navbar
+msgid "Ad daxilində link ola bilməz."
+msgstr "Ad içinde bağlantı olamaz."
+
+#: contact/about/footer/navbar
+msgid "Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
+msgstr "Telefon numarası yalnızca rakam ve +, -, (, ) karakterlerinden oluşabilir."
+
+#: contact/about/footer/navbar
+msgid "Mesaj ən azı 10 simvol olmalıdır."
+msgstr "Mesaj en az 10 karakter olmalıdır."
+
+#: contact/about/footer/navbar
+msgid "Mesajda çox sayda link aşkar edildi."
+msgstr "Mesajda çok sayıda bağlantı tespit edildi."
+
+#: contact/about/footer/navbar
+msgid "Forma doğrulanmadı."
+msgstr "Form doğrulanamadı."
+
+#: contact/about/footer/navbar
+msgid "Ümumi sual"
+msgstr "Genel soru"
+
+#: contact/about/footer/navbar
+msgid "Satış / Demo"
+msgstr "Satış / Demo"
+
+#: contact/about/footer/navbar
+msgid "Texniki dəstək"
+msgstr "Teknik destek"
+
+#: contact/about/footer/navbar
+msgid "Əməkdaşlıq"
+msgstr "İş birliği"
+
+#: contact/about/footer/navbar
+msgid "Rəy və təklif"
+msgstr "Geri bildirim ve öneri"
+
+#: contact/about/footer/navbar
+msgid "Digər"
+msgstr "Diğer"
+
+#: contact/about/footer/navbar
+msgid "Göndərilir"
+msgstr "Gönderiliyor"
+
+#: contact/about/footer/navbar
+msgid "Göndərildi"
+msgstr "Gönderildi"
+
+#: contact/about/footer/navbar
+msgid "Göndərilmədi"
+msgstr "Gönderilemedi"
+
+#: contact/about/footer/navbar
+msgid "Qeyd edildi"
+msgstr "Kaydedildi"
+
+#: contact/about/footer/navbar
+msgid "IP ünvan"
+msgstr "IP adresi"
+
+#: contact/about/footer/navbar
+msgid "User-Agent"
+msgstr "User-Agent"
+
+#: contact/about/footer/navbar
+msgid "Cavablandırılıb"
+msgstr "Yanıtlandı"
+
+#: contact/about/footer/navbar
+msgid "Göndərilmə tarixi"
+msgstr "Gönderim tarihi"
+
+#: contact/about/footer/navbar
+msgid "Cavab tarixi"
+msgstr "Yanıt tarihi"
+
+#: contact/about/footer/navbar
+msgid "Cavab mətni"
+msgstr "Yanıt metni"
+
+#: contact/about/footer/navbar
+msgid "Hansı maildən"
+msgstr "Hangi e-postadan"
+
+#: contact/about/footer/navbar
+msgid "Cavab email statusu"
+msgstr "Yanıt e-posta durumu"
+
+#: contact/about/footer/navbar
+msgid "Cavab email xətası"
+msgstr "Yanıt e-posta hatası"
+
+#: contact/about/footer/navbar
+msgid "Cavab göndərilmə tarixi"
+msgstr "Yanıt gönderim tarihi"
+
+#: contact/about/footer/navbar
+msgid "Cavab verən admin"
+msgstr "Yanıtlayan admin"
+
+#: contact/about/footer/navbar
+msgid "Əlaqə mesajı"
+msgstr "İletişim mesajı"
+
+#: contact/about/footer/navbar
+msgid "Əlaqə mesajları"
+msgstr "İletişim mesajları"
+
+#: contact/about/footer/navbar
+msgid "Əlaqə – EMSArena"
+msgstr "İletişim – EMSArena"
+
+#: contact/about/footer/navbar
+msgid "EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
+msgstr "EMSArena ile iletişime geçin. Sorularınız, önerileriniz ve iş birliği talepleriniz için bize yazın."
+
+#: contact/about/footer/navbar
+msgid "Çox sayda mesaj göndərilib. Zəhmət olmasa bir az gözləyin."
+msgstr "Çok sayıda mesaj gönderildi. Lütfen biraz bekleyin."
+
+#: contact/about/footer/navbar
+msgid "Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
+msgstr "Bu e-posta adresinden çok sayıda mesaj gönderildi. Yarın tekrar deneyin."
+
+#: contact/about/footer/navbar
+msgid "Mesajınızı qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
+msgstr "Mesajınızı alamadık. Lütfen daha sonra tekrar deneyin."
+
+#: contact/about/footer/navbar
+msgid "Mesajınız uğurla qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq."
+msgstr "Mesajınız başarıyla alındı. Kısa süre içinde sizinle iletişime geçeceğiz."
+
+#: contact/about/footer/navbar
+msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
+msgstr "EMSArena hangi kurumlar için uygundur?"
+
+#: contact/about/footer/navbar
+msgid "Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər təşkilat öz məkanını idarə edir."
+msgstr "Üniversiteler, okullar, kurs merkezleri, kurumsal eğitim birimleri ve bireysel öğretmenler için uygundur. Çok kiracılı yapı sayesinde her kurum kendi alanını yönetir."
+
+#: contact/about/footer/navbar
+msgid "Demo və ya pulsuz sınaq müddəti var?"
+msgstr "Demo veya ücretsiz deneme var mı?"
+
+#: contact/about/footer/navbar
+msgid "Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. Formada 'Satış / Demo' mövzusunu seçin."
+msgstr "Evet. Satış ekibimizle iletişime geçerek ücretsiz demo düzenleyebilirsiniz. Formda 'Satış / Demo' konusunu seçin."
+
+#: contact/about/footer/navbar
+msgid "Texniki dəstək necə alınır?"
+msgstr "Teknik destek nasıl alınır?"
+
+#: contact/about/footer/navbar
+msgid "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
+msgstr "Mevcut müşterilerimiz hesap içinden talep oluşturabilir. Yeni gelenler formda 'Teknik destek' konusunu seçerek yazabilir."
+
+#: contact/about/footer/navbar
+msgid "Məlumatlarım təhlükəsizdir?"
+msgstr "Verilerim güvende mi?"
+
+#: contact/about/footer/navbar
+msgid "Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
+msgstr "Evet. Çok kiracılı izolasyon, rol tabanlı izin sistemi (RBAC), şifreli saklama ve audit log sayesinde veriler güçlü şekilde korunur."
+
+#: contact/about/footer/navbar
+msgid "AI köməkçi necə işləyir?"
+msgstr "Yapay zekâ asistanı nasıl çalışır?"
+
+#: contact/about/footer/navbar
+msgid "AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında suallar verə bilər."
+msgstr "Yapay zekâ asistanı yalnızca izinli olduğunuz verileri görür. Öğrenci kendi kursları, öğretmen kendi grupları, admin ise kendi kurumu hakkında soru sorabilir."
+
+#: contact/about/footer/navbar
+msgid "EMSArena – Cavab"
+msgstr "EMSArena – Yanıt"
+
+#: contact/about/footer/navbar
+msgid "Mesajınıza cavab"
+msgstr "Mesajınıza yanıt"
+
+#: contact/about/footer/navbar
+msgid "Salam"
+msgstr "Merhaba"
+
+#: contact/about/footer/navbar
+msgid "EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
+msgstr "EMSArena sitesindeki mesajınız için teşekkür ederiz. Yanıtımızı aşağıda bulabilirsiniz."
+
+#: contact/about/footer/navbar
+msgid "Sizin orijinal mesajınız:"
+msgstr "Orijinal mesajınız:"
+
+#: contact/about/footer/navbar
+msgid "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək."
+msgstr "Bu mesaja doğrudan yanıt verebilirsiniz; yanıtınız ekibimize geri gelecektir."
+
+#: contact/about/footer/navbar
+msgid "Təhsil idarəetmə platforması"
+msgstr "Eğitim yönetimi platformu"
+
+#: contact/about/footer/navbar
+msgid "EMSArena – Yeni əlaqə mesajı"
+msgstr "EMSArena – Yeni iletişim mesajı"
+
+#: contact/about/footer/navbar
+msgid "Yeni əlaqə mesajı"
+msgstr "Yeni iletişim mesajı"
+
+#: contact/about/footer/navbar
+msgid "EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
+msgstr "EMSArena iletişim formundan yeni bir mesaj gönderildi. Mesaj kaydedildi ve admin panelinden görüntülenebilir."
+
+#: contact/about/footer/navbar
+msgid "Tarix"
+msgstr "Tarih"
+
+#: contact/about/footer/navbar
+msgid "Admin paneldə cavablandır"
+msgstr "Admin panelde yanıtla"
+
+#: contact/about/footer/navbar
+msgid "Mesaj detalları"
+msgstr "Mesaj detayları"
+
+#: contact/about/footer/navbar
+msgid "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək."
+msgstr "Yanıt müşteriye <strong>info@</strong> veya <strong>support@emsarena.com</strong> üzerinden gidecek; kişisel Gmail adresiniz görünmeyecek."
+
+#: contact/about/footer/navbar
+msgid "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin."
+msgstr "Bu mesaja yanıt vermek için EMSArena admin paneline gidin."
+
+#: contact/about/footer/navbar
+msgid "Avtomatik göndərilmiş bildiriş"
+msgstr "Otomatik gönderilmiş bildirim"
+
+#: contact/about/footer/navbar
+msgid "[EMSArena Contact] %(subject)s — %(name)s"
+msgstr "[EMSArena İletişim] %(subject)s — %(name)s"
+
+#: contact/about/footer/navbar
+msgid "Re: [EMSArena] %(subject)s"
+msgstr "Re: [EMSArena] %(subject)s"
+
+#: contact/about/footer/navbar
+msgid "Göndərən"
+msgstr "Gönderen"
+
+#: contact/about/footer/navbar
+msgid "Cavab"
+msgstr "Yanıt"
+
+#: contact/about/footer/navbar
+msgid "Status"
+msgstr "Durum"
+
+#: contact/about/footer/navbar
+msgid "Metadata"
+msgstr "Metadata"
+
+#: contact/about/footer/navbar
+msgid "✓ Cavablandı"
+msgstr "✓ Yanıtlandı"
+
+#: contact/about/footer/navbar
+msgid "Cavabsız bağlandı"
+msgstr "Yanıtsız kapatıldı"
+
+#: contact/about/footer/navbar
+msgid "✓ Cavablandı — yenidən göndər"
+msgstr "✓ Yanıtlandı — yeniden gönder"
+
+#: contact/about/footer/navbar
+msgid "Yenidən cəhd et"
+msgstr "Tekrar dene"
+
+#: contact/about/footer/navbar
+msgid "Göndərişi təsdiqlə"
+msgstr "Gönderimi onayla"
+
+#: contact/about/footer/navbar
+msgid "✉ Müştəriyə cavablandır"
+msgstr "✉ Müşteriye yanıtla"
+
+#: contact/about/footer/navbar
+msgid "Cavablandırılmış kimi işarələ"
+msgstr "Yanıtlanmış olarak işaretle"
+
+#: contact/about/footer/navbar
+msgid "Hansı maildən cavab göndərilsin"
+msgstr "Yanıt hangi e-postadan gönderilsin"
+
+#: contact/about/footer/navbar
+msgid "Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq görünəcək."
+msgstr "Müşteriye gönderilecek yanıt. Markdown desteklenmez; düz metin olarak görünür."
+
+#: contact/about/footer/navbar
+msgid "Cavab qeyd edildi və %(email)s ünvanına göndərilməyə çalışılır."
+msgstr "Yanıt kaydedildi ve %(email)s adresine gönderilmeye çalışılıyor."
+
+#: contact/about/footer/navbar
+msgid "Cavablandır: %(name)s"
+msgstr "Yanıtla: %(name)s"
+
+#: contact/about/footer/navbar
+msgid "Cavablandır"
+msgstr "Yanıtla"
+
+#: contact/about/footer/navbar
+msgid "Müştəri mesajı"
+msgstr "Müşteri mesajı"
+
+#: contact/about/footer/navbar
+msgid "Ad"
+msgstr "Ad"
+
+#: contact/about/footer/navbar
+msgid "Yenidən cavab göndər"
+msgstr "Yanıtı yeniden gönder"
+
+#: contact/about/footer/navbar
+msgid "Yenidən göndər"
+msgstr "Yeniden gönder"
+
+#: contact/about/footer/navbar
+msgid "Cavab yaz və göndər"
+msgstr "Yanıt yaz ve gönder"
+
+#: contact/about/footer/navbar
+msgid "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa qayıdacaq."
+msgstr "Müşteri yanıtın bu adresten geldiğini görecek. Onun yanıtı da bu gelen kutusuna dönecek."
+
+#: contact/about/footer/navbar
+msgid "Cavabı göndər"
+msgstr "Yanıtı gönder"
+
+#: contact/about/footer/navbar
+msgid "Ləğv et"
+msgstr "İptal et"
+
+#: contact/about/footer/navbar
+msgid "Son cavab cəhdi"
+msgstr "Son yanıt denemesi"
+
+#: contact/about/footer/navbar
+msgid "Superadmin inbox"
+msgstr "Superadmin gelen kutusu"
+
+#: contact/about/footer/navbar
+msgid "Customer contact inbox"
+msgstr "Müşteri iletişim gelen kutusu"
+
+#: contact/about/footer/navbar
+msgid "Review public contact form messages and reply from the official EMSArena mailboxes."
+msgstr "Herkese açık iletişim formu mesajlarını inceleyin ve resmi EMSArena posta kutularından yanıtlayın."
+
+#: contact/about/footer/navbar
+msgid "Back to inbox"
+msgstr "Gelen kutusuna dön"
+
+#: contact/about/footer/navbar
+msgid "Sent"
+msgstr "Gönderildi"
+
+#: contact/about/footer/navbar
+msgid "Sending"
+msgstr "Gönderiliyor"
+
+#: contact/about/footer/navbar
+msgid "Failed"
+msgstr "Başarısız"
+
+#: contact/about/footer/navbar
+msgid "Saved"
+msgstr "Kaydedildi"
+
+#: contact/about/footer/navbar
+msgid "New"
+msgstr "Yeni"
+
+#: contact/about/footer/navbar
+msgid "Customer message"
+msgstr "Müşteri mesajı"
+
+#: contact/about/footer/navbar
+msgid "Email was not delivered."
+msgstr "E-posta teslim edilmedi."
+
+#: contact/about/footer/navbar
+msgid "Email delivery is still pending."
+msgstr "E-posta teslimi hâlâ beklemede."
+
+#: contact/about/footer/navbar
+msgid "Refresh shortly to see the final status."
+msgstr "Son durumu görmek için kısa süre sonra yenileyin."
+
+#: contact/about/footer/navbar
+msgid "Reply is saved, but delivery was not confirmed."
+msgstr "Yanıt kaydedildi, ancak teslimat doğrulanmadı."
+
+#: contact/about/footer/navbar
+msgid "Send it again to get a fresh delivery status."
+msgstr "Güncel teslimat durumu almak için yeniden gönderin."
+
+#: contact/about/footer/navbar
+msgid "Send from"
+msgstr "Gönderen posta"
+
+#: contact/about/footer/navbar
+msgid "Mailbox"
+msgstr "Posta kutusu"
+
+#: contact/about/footer/navbar
+msgid "Reply"
+msgstr "Yanıt"
+
+#: contact/about/footer/navbar
+msgid "Write your reply..."
+msgstr "Yanıtınızı yazın..."
+
+#: contact/about/footer/navbar
+msgid "Plain text. Min 10, max 10000 characters."
+msgstr "Düz metin. En az 10, en fazla 10000 karakter."
+
+#: contact/about/footer/navbar
+msgid "Send Reply"
+msgstr "Yanıt gönder"
+
+#: contact/about/footer/navbar
+msgid "Cancel"
+msgstr "İptal"
+
+#: contact/about/footer/navbar
+msgid "Last reply attempt"
+msgstr "Son yanıt denemesi"
+
+#: contact/about/footer/navbar
+msgid "From"
+msgstr "Kimden"
+
+#: contact/about/footer/navbar
+msgid "Total"
+msgstr "Toplam"
+
+#: contact/about/footer/navbar
+msgid "Search name, email, message..."
+msgstr "Ad, e-posta, mesaj ara..."
+
+#: contact/about/footer/navbar
+msgid "No contact messages yet."
+msgstr "Henüz iletişim mesajı yok."
+
+#: contact/about/footer/navbar
+msgid "Contact Messages"
+msgstr "İletişim mesajları"
+
+#: contact/about/footer/navbar
+msgid "Create category"
+msgstr "Kategori oluştur"
+
+#: contact/about/footer/navbar
+msgid "Categories"
+msgstr "Kategoriler"
