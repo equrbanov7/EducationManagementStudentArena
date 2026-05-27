@@ -47,6 +47,8 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     *_seo_urlpatterns,
     path("blog/", include("apps.blog.legacy_urls")),
+    # Public contact page (registered before catch-all blog urls so /contact/ resolves first)
+    path("", include("apps.contact.urls")),
     path("", include("apps.blog.urls")),
     path("", include("apps.live_exam.urls")),
     path("courses/", include("apps.courses.urls")),

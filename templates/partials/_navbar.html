@@ -1,12 +1,20 @@
 {% load static i18n notification_tags %}
 {% url 'home' as home_url %}
 {% url 'about' as about_url %}
+{% url 'contact' as contact_url %}
 {% url 'subscribe' as subscribe_url %}
 {% with technology_url=home_url|add:'?category=technology' education_url=home_url|add:'?category=education' %}
 <header class="blog-header">
     <div class="blog-header__container">
         <nav class="blog-header__nav">
-            <a href="{{ home_url }}" class="blog-header__logo">EMSArena</a>
+            <a href="{{ home_url }}" class="blog-header__logo" aria-label="EMSArena ana səhifə">
+                <img src="{% static 'brand/logo-horizontal.svg' %}"
+                     alt="EMSArena"
+                     class="blog-header__logo-img"
+                     width="160" height="44"
+                     loading="eager"
+                     decoding="async">
+            </a>
 
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
                 <li class="blog-header__nav-item">
@@ -31,6 +39,12 @@
                     <a href="{{ about_url }}"
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
                         {% trans "about" context "nav" %}
+                    </a>
+                </li>
+                <li class="blog-header__nav-item">
+                    <a href="{{ contact_url }}"
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "contact" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
@@ -148,6 +162,12 @@
         <a href="{{ about_url }}"
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
             {% trans "about" context "nav" %}
+        </a>
+    </li>
+    <li class="blog-header__nav-item">
+        <a href="{{ contact_url }}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
+            {% trans "contact" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
