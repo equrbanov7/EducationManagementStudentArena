@@ -3,10 +3,9 @@
 {% url 'about' as about_url %}
 {% url 'contact' as contact_url %}
 {% url 'subscribe' as subscribe_url %}
-{% with technology_url=home_url|add:'?category=technology' education_url=home_url|add:'?category=education' %}
 <header class="blog-header">
     <div class="blog-header__container">
-        <nav class="blog-header__nav">
+        <nav class="blog-header__nav" aria-label="{% trans 'main_nav_aria' context 'nav' %}">
             <a href="{{ home_url }}" class="blog-header__logo" aria-label="EMSArena ana səhifə">
                 <img src="{% static 'brand/logo-horizontal.svg' %}"
                      alt="EMSArena"
@@ -19,36 +18,28 @@
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
                 <li class="blog-header__nav-item">
                     <a href="{{ home_url }}"
+                       {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
                         {% trans "home" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
-                       class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "technology" context "nav" %}
-                    </a>
-                </li>
-                <li class="blog-header__nav-item">
-                    <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
-                       class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "education" context "nav" %}
-                    </a>
-                </li>
-                <li class="blog-header__nav-item">
                     <a href="{{ about_url }}"
+                       {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
                         {% trans "about" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{{ contact_url }}"
+                       {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "Əlaqə" %}
+                        {% trans "contact" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
+                       {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
                        class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
                         {% trans "exams" context "nav" %}
                     </a>
@@ -139,39 +130,31 @@
 </header>
 
 <div class="mobile-nav-overlay"></div>
-<ul class="blog-header__nav-list mobile-nav-panel">
+<ul class="blog-header__nav-list mobile-nav-panel" aria-label="{% trans 'mobile_nav_aria' context 'nav' %}">
     <li class="blog-header__nav-item">
         <a href="{{ home_url }}"
+           {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
             {% trans "home" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
-        <a href="{{ technology_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
-           class="blog-header__nav-link {% if active_blog_nav_slug == 'technology' %}blog-header__nav-link--active{% endif %}">
-            {% trans "technology" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
-        <a href="{{ education_url }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
-           class="blog-header__nav-link {% if active_blog_nav_slug == 'education' %}blog-header__nav-link--active{% endif %}">
-            {% trans "education" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
         <a href="{{ about_url }}"
+           {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
             {% trans "about" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="{{ contact_url }}"
+           {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
-            {% trans "Əlaqə" %}
+            {% trans "contact" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="{% url 'exams:student_exam_list' %}"
+           {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
            class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
             {% trans "exams" context "nav" %}
         </a>
@@ -211,4 +194,3 @@
         {% include "partials/_language_switcher.html" with switcher_variant="mobile" %}
     </li>
 </ul>
-{% endwith %}

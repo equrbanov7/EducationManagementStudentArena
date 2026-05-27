@@ -31,10 +31,11 @@
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20260520-1">
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}">
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
-    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260528-1">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}">
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
+    <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
 
     <!-- Courses app CSS -->
     <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
@@ -43,6 +44,13 @@
 </head>
 
 <body>
+
+    {% comment %}
+    Top-of-page route progress bar — animated by static/js/route_loading.js.
+    Sits outside the navbar so it overlays at the very top even when the
+    header has its own shadow.
+    {% endcomment %}
+    <div class="route-progress" role="presentation"></div>
 
     {# Navbar partial #}
     {% include "partials/_navbar.html" %}
@@ -82,6 +90,7 @@
     <script src="{% static 'js/bootstrap_select.js' %}"></script>
     <script src="{% static 'js/csp_event_handlers.js' %}"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
+    <script src="{% static 'js/route_loading.js' %}"></script>
 
     <script nonce="{{ request.csp_nonce }}">
         window.COURSES_I18N = {

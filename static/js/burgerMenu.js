@@ -1,7 +1,36 @@
 document.addEventListener('DOMContentLoaded', function () {
     initMobileNav();
     initUserMenu();
+    initStickyNavScrollState();
 });
+
+/**
+ * Add `blog-header--scrolled` modifier once the user has scrolled past the top
+ * of the page so the sticky navbar can gain a deeper shadow / heavier opacity.
+ * Uses a passive scroll listener with rAF throttling to stay cheap.
+ */
+function initStickyNavScrollState() {
+    const header = document.querySelector('.blog-header');
+    if (!header) return;
+
+    const THRESHOLD = 8;
+    let ticking = false;
+
+    function update() {
+        const scrolled = window.scrollY > THRESHOLD;
+        header.classList.toggle('blog-header--scrolled', scrolled);
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            window.requestAnimationFrame(update);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    update();
+}
 
 function initMobileNav() {
     const navToggle = document.querySelector('.blog-header__toggle');
