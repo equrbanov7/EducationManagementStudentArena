@@ -1278,10 +1278,44 @@
             switchTab(submission.error && !submission.output ? "errors" : "output");
         }
 
+        // Heuristic: code that touches browser globals (document, window,
+        // alert, innerHTML, addEventListener, onclick, …) cannot run in the
+        // Node sandbox — Node has no DOM. When we spot such usage AND the
+        // question already ships an HTML file we can host it in, defer to
+        // the iframe-based browser runner instead.
+        function jsUsesBrowserGlobals(content) {
+            if (!content) return false;
+            var probe = String(content);
+            // Strip line and block comments so commented-out DOM calls don't
+            // count as real usage.
+            probe = probe.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+            return /\b(document|window|alert|confirm|navigator|location|history|localStorage|sessionStorage|getElementById|querySelector|querySelectorAll|innerHTML|innerText|textContent|addEventListener|onclick|onchange|onsubmit|onload|onkeydown|requestAnimationFrame|fetch)\b/.test(probe);
+        }
+
+        function activeJsFilesUseBrowserGlobals() {
+            var question = currentQuestion();
+            if (!question) return false;
+            return (question.files || []).some(function (file) {
+                var lower = String(file.name || "").toLowerCase();
+                if (!lower.endsWith(".js")) return false;
+                return jsUsesBrowserGlobals(file.content);
+            });
+        }
+
         function shouldRunInBrowser() {
             var selected = getSelectedLanguage();
             var activeLanguage = getActiveFileLanguage();
-            return selected === "html" || activeLanguage === "html" || activeLanguage === "css";
+            if (selected === "html" || activeLanguage === "html" || activeLanguage === "css") {
+                return true;
+            }
+            // JavaScript that uses DOM/browser APIs: only safe to host in the
+            // iframe runner, which requires an HTML shell to attach to.
+            if (selected === "javascript" || activeLanguage === "javascript") {
+                if (hasHtmlFile() && activeJsFilesUseBrowserGlobals()) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function runBrowserCode() {
@@ -1490,6 +1524,13 @@
             if (isRunInFlight || inlineTerminalActive) {
                 return;
             }
+            // Browser-targeted code (HTML/CSS, or JS that touches the DOM)
+            // skips the inline terminal entirely — its prompts cannot be
+            // satisfied with the Node-style stdin pipe.
+            if (shouldRunInBrowser()) {
+                runBrowserCode();
+                return;
+            }
             // Each Run starts from a clean slate: clear stdin from the last
             // session so the inline terminal can re-prompt instead of silently
             // reusing stale values. Without this the second click on Run reuses
@@ -1504,10 +1545,6 @@
                 lastInteractiveValues = [];
                 updateStdinHint();
                 startInlineTerminal(prompts);
-                return;
-            }
-            if (shouldRunInBrowser()) {
-                runBrowserCode();
                 return;
             }
 
