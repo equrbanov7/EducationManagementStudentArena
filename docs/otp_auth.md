@@ -13,6 +13,7 @@ Use the variables in `.env.example`:
 - `BREVO_EMAIL=no-reply@emsarena.com`
 - `BREVO_FROM_EMAIL=no-reply@emsarena.com`
 - `BREVO_SMTP_KEY=...`
+- `BREVO_API_KEY=...` (optional HTTP fallback for contact replies when SMTP is unavailable)
 - `DEFAULT_FROM_EMAIL=no-reply@emsarena.com`
 
 `BREVO_SMTP_LOGIN` is the SMTP username Brevo expects for authentication. Keep

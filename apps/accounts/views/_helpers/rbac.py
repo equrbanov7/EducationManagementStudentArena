@@ -190,6 +190,7 @@ def _role_capabilities(user, profile):
             "superadmin-organizations",
             "superadmin-users",
             "superadmin-ai",
+            "superadmin-contact-messages",  # public contact form inbox
             "pending-post-approvals",
             "blog",
             "edit-profile",

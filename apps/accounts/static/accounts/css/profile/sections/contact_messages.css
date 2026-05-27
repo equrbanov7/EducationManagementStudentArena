@@ -1,0 +1,541 @@
+/* Contact inbox inside the profile workspace. */
+
+.profile-section--contact-messages {
+    --contact-blue: #2563eb;
+    --contact-blue-dark: #1e40af;
+    --contact-green: #0f766e;
+    --contact-amber: #f59e0b;
+    --contact-red: #dc2626;
+    --contact-ink: #0f172a;
+    --contact-muted: #64748b;
+    --contact-soft: #f8fafc;
+    --contact-border: rgba(15, 23, 42, 0.1);
+}
+
+.contact-msg-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    background: #ffffff;
+    border: 1px solid var(--contact-border);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.contact-msg-hero__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 12px;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--contact-blue), var(--contact-green));
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.18);
+}
+
+.contact-msg-hero h2 {
+    margin: 0;
+    color: var(--contact-ink);
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.contact-msg-hero p {
+    margin: 4px 0 0;
+    color: var(--contact-muted);
+    line-height: 1.5;
+}
+
+.contact-msg-eyebrow {
+    margin: 0 0 3px !important;
+    color: var(--contact-green) !important;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.contact-msg-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.contact-msg-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.contact-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    background: #e2e8f0;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.contact-pill--new {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.contact-pill--ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.contact-pill--pending {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.contact-pill--failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.contact-pill--recorded {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.contact-msg-search {
+    display: flex;
+    min-width: min(100%, 380px);
+}
+
+.contact-msg-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--contact-border);
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
+    font-size: 14px;
+    color: var(--contact-ink);
+    background: #ffffff;
+}
+
+.contact-msg-search input:focus {
+    outline: none;
+    border-color: var(--contact-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.contact-msg-search button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    border: 0;
+    border-radius: 0 10px 10px 0;
+    background: var(--contact-blue-dark);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.contact-msg-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-msg-item {
+    background: #ffffff;
+    border: 1px solid var(--contact-border);
+    border-left: 4px solid transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.contact-msg-item:hover {
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.contact-msg-item--unread {
+    border-left-color: var(--contact-amber);
+}
+
+.contact-msg-item--pending {
+    border-left-color: var(--contact-blue);
+}
+
+.contact-msg-item--failed {
+    border-left-color: var(--contact-red);
+}
+
+.contact-msg-item--recorded {
+    border-left-color: #94a3b8;
+}
+
+.contact-msg-link {
+    display: block;
+    padding: 16px 18px;
+    text-decoration: none;
+    color: var(--contact-ink);
+}
+
+.contact-msg-row-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.contact-msg-sender {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+
+.contact-msg-sender strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+}
+
+.contact-msg-email {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--contact-blue-dark);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.contact-msg-row-sub {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--contact-muted);
+}
+
+.contact-msg-subject {
+    color: var(--contact-green);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.contact-msg-snippet {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.contact-msg-date {
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.contact-msg-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: #94a3b8;
+}
+
+.contact-msg-empty i {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 40px;
+    opacity: 0.45;
+}
+
+.contact-msg-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contact-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    color: var(--contact-blue-dark);
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.contact-back-link:hover {
+    text-decoration: underline;
+}
+
+.contact-msg-card,
+.contact-reply-form,
+.contact-delivery-alert {
+    background: #ffffff;
+    border: 1px solid var(--contact-border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.contact-msg-card--previous-reply {
+    border-left: 4px solid var(--contact-blue);
+}
+
+.contact-msg-card h4 {
+    margin: 0 0 8px;
+    color: var(--contact-ink);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.contact-msg-card__label {
+    margin: 0 0 8px;
+    color: var(--contact-muted);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.contact-msg-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 8px;
+    color: var(--contact-ink);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.contact-msg-meta {
+    margin: 0 0 14px;
+    color: var(--contact-muted);
+    font-size: 13px;
+}
+
+.contact-msg-meta a {
+    color: var(--contact-blue-dark);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.contact-msg-body {
+    padding: 14px 16px;
+    border-left: 4px solid var(--contact-green);
+    border-radius: 8px;
+    background: var(--contact-soft);
+    color: #334155;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.contact-delivery-alert {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.contact-delivery-alert i {
+    margin-top: 2px;
+}
+
+.contact-delivery-alert strong,
+.contact-delivery-alert span {
+    display: block;
+}
+
+.contact-delivery-alert span {
+    margin-top: 3px;
+    color: var(--contact-muted);
+    font-size: 13px;
+}
+
+.contact-delivery-alert--failed {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.contact-delivery-alert--pending {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.contact-delivery-alert--recorded {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+}
+
+.contact-reply-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.contact-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.contact-form-row label {
+    color: var(--contact-ink);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.contact-form-row select,
+.contact-form-row textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1.5px solid var(--contact-border);
+    border-radius: 10px;
+    background: var(--contact-soft);
+    color: var(--contact-ink);
+    font: inherit;
+    font-size: 14px;
+}
+
+.contact-form-row textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.contact-form-row select:focus,
+.contact-form-row textarea:focus {
+    outline: none;
+    border-color: var(--contact-blue);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.contact-form-row small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.contact-form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.contact-btn--primary {
+    border: 0;
+    background: var(--contact-blue-dark);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(30, 64, 175, 0.2);
+}
+
+.contact-btn--primary:hover {
+    transform: translateY(-1px);
+}
+
+.contact-btn--ghost {
+    background: #ffffff;
+    color: var(--contact-blue-dark);
+    border-color: #bfdbfe;
+}
+
+.contact-btn--ghost:hover {
+    background: #eff6ff;
+}
+
+@media (max-width: 900px) {
+    .contact-msg-row-main {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .contact-msg-date {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .contact-msg-hero {
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .contact-msg-hero__icon {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+    }
+
+    .contact-msg-search {
+        width: 100%;
+    }
+
+    .contact-msg-row-main,
+    .contact-msg-row-sub {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .contact-msg-sender {
+        width: 100%;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .contact-msg-sender strong,
+    .contact-msg-email,
+    .contact-msg-snippet {
+        width: 100%;
+    }
+
+    .contact-msg-card,
+    .contact-reply-form,
+    .contact-delivery-alert {
+        padding: 16px;
+    }
+
+    .contact-btn {
+        width: 100%;
+    }
+}

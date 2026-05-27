@@ -1,0 +1,462 @@
+/* apps/contact/static/contact/css/contact.css
+   EMSArena – Contact page. Modern, responsive, accessible. */
+
+:root {
+    --ems-blue-900: #1e3a8a;
+    --ems-blue-800: #1e40af;
+    --ems-blue-700: #1d4ed8;
+    --ems-teal-700: #0f766e;
+    --ems-teal-500: #14b8a6;
+    --ems-green-500: #10b981;
+    --ems-bg: #f8fafc;
+    --ems-surface: #ffffff;
+    --ems-text: #0f172a;
+    --ems-text-muted: #475569;
+    --ems-border: rgba(15, 23, 42, 0.1);
+    --ems-error: #dc2626;
+    --ems-success: #16a34a;
+    --ems-gradient: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
+    --ems-gradient-soft: linear-gradient(135deg, rgba(30, 64, 175, 0.08), rgba(16, 185, 129, 0.08));
+}
+
+.ems-contact {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--ems-text);
+    background-color: var(--ems-bg);
+    padding: 0 0 96px;
+}
+
+/* ---------- Hero ---------- */
+.ems-contact__hero {
+    background: var(--ems-gradient);
+    color: #ffffff;
+    padding: 80px 24px 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ems-contact__hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.18), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12), transparent 50%);
+    pointer-events: none;
+}
+
+.ems-contact__hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.ems-contact__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    backdrop-filter: blur(8px);
+}
+
+.ems-contact__title {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    letter-spacing: -0.03em;
+}
+
+.ems-contact__lead {
+    font-size: 1.1rem;
+    line-height: 1.65;
+    opacity: 0.95;
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+/* ---------- Main grid ---------- */
+.ems-contact__grid {
+    max-width: 1200px;
+    margin: -60px auto 64px;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 28px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ---------- Info cards ---------- */
+.ems-contact__info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ems-contact__info-card {
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ems-contact__info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+}
+
+.ems-contact__info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--ems-gradient-soft);
+    color: var(--ems-blue-700);
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+}
+
+.ems-contact__info-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--ems-text);
+}
+
+.ems-contact__info-link {
+    display: block;
+    color: var(--ems-blue-800);
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+.ems-contact__info-link:hover {
+    color: var(--ems-blue-900);
+    text-decoration: underline;
+}
+
+.ems-contact__info-hint {
+    color: var(--ems-text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Socials */
+.ems-contact__socials {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.ems-contact__social {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-gradient-soft);
+    color: var(--ems-blue-800);
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.ems-contact__social:hover {
+    background: var(--ems-gradient);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(30, 64, 175, 0.25);
+}
+
+/* ---------- Form ---------- */
+.ems-contact__form-wrapper {
+    min-width: 0;
+}
+
+.ems-contact__form-card {
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 22px;
+    padding: 40px;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+.ems-contact__form-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+}
+
+.ems-contact__form-sub {
+    color: var(--ems-text-muted);
+    margin: 0 0 28px;
+    font-size: 0.95rem;
+}
+
+.ems-contact__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.ems-contact__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.ems-contact__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ems-contact__label {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.ems-contact__required {
+    color: var(--ems-error);
+}
+
+.ems-contact__input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--ems-border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ems-text);
+    background-color: var(--ems-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.ems-contact__input:focus {
+    outline: none;
+    border-color: var(--ems-blue-700);
+    background-color: var(--ems-surface);
+    box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.12);
+}
+
+.ems-contact__textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.6;
+}
+
+.ems-contact__select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 8px;
+    padding-right: 40px;
+}
+
+.ems-contact__hint {
+    color: var(--ems-text-muted);
+    font-size: 0.8rem;
+}
+
+.ems-contact__error {
+    color: var(--ems-error);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.ems-contact__alert {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
+.ems-contact__alert--error {
+    background-color: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    color: var(--ems-error);
+}
+
+/* Honeypot — hidden from real users, visible to bots */
+.ems-contact__honeypot {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Buttons */
+.ems-contact__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-family: inherit;
+}
+
+.ems-contact__btn--primary {
+    background: var(--ems-gradient);
+    color: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 118, 110, 0.25);
+}
+
+.ems-contact__btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(15, 118, 110, 0.35);
+    color: #ffffff;
+}
+
+.ems-contact__btn--ghost {
+    background: transparent;
+    border-color: var(--ems-blue-700);
+    color: var(--ems-blue-800);
+}
+
+.ems-contact__btn--ghost:hover {
+    background: var(--ems-blue-800);
+    color: #ffffff;
+}
+
+/* Success state */
+.ems-contact__success {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.ems-contact__success-icon {
+    display: inline-flex;
+    width: 80px;
+    height: 80px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 163, 74, 0.1);
+    color: var(--ems-success);
+    border-radius: 50%;
+    font-size: 2.5rem;
+    margin-bottom: 18px;
+}
+
+.ems-contact__success h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+}
+
+.ems-contact__success p {
+    color: var(--ems-text-muted);
+    line-height: 1.6;
+    margin: 0 0 22px;
+}
+
+/* ---------- FAQ ---------- */
+.ems-contact__faq {
+    max-width: 900px;
+    margin: 80px auto 0;
+    padding: 0 24px;
+}
+
+.ems-contact__faq-title {
+    text-align: center;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 36px;
+    letter-spacing: -0.02em;
+}
+
+.ems-contact__faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ems-contact__faq-item {
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+    padding: 4px 22px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ems-contact__faq-item[open] {
+    border-color: rgba(30, 64, 175, 0.3);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.ems-contact__faq-item summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 18px 0;
+    font-weight: 600;
+    font-size: 1.02rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.ems-contact__faq-item summary::-webkit-details-marker { display: none; }
+
+.ems-contact__faq-item summary::after {
+    content: "+";
+    font-size: 1.4rem;
+    color: var(--ems-blue-700);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.ems-contact__faq-item[open] summary::after {
+    content: "−";
+}
+
+.ems-contact__faq-item p {
+    color: var(--ems-text-muted);
+    line-height: 1.7;
+    padding-bottom: 18px;
+    margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .ems-contact__grid {
+        grid-template-columns: 1fr;
+        margin-top: -40px;
+    }
+    .ems-contact__form-card { padding: 28px 22px; }
+    .ems-contact__row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .ems-contact__hero { padding: 60px 18px 80px; }
+    .ems-contact__form-card { padding: 24px 18px; border-radius: 18px; }
+    .ems-contact__faq { padding: 0 18px; }
+}
