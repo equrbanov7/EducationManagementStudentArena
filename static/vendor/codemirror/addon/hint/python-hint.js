@@ -24,15 +24,23 @@
     var commonModules = ["math", "os", "sys", "re", "json", "random", "datetime", "time", "collections", "itertools", "functools", "typing", "pathlib", "subprocess", "urllib", "http"];
 
     var memberMap = {
-        os: ["path", "getenv", "environ", "listdir", "mkdir", "remove", "rename", "walk", "system", "getcwd"],
-        sys: ["argv", "exit", "stdin", "stdout", "stderr", "version", "platform", "path"],
-        math: ["pi", "e", "tau", "inf", "nan", "sqrt", "pow", "log", "log2", "log10", "ceil", "floor", "factorial", "gcd", "isnan", "isinf", "sin", "cos", "tan", "asin", "acos", "atan"],
-        re: ["match", "search", "findall", "sub", "compile", "split"],
+        os: ["path", "getenv", "environ", "listdir", "mkdir", "makedirs", "remove", "rename", "walk", "system", "getcwd", "chdir", "rmdir"],
+        sys: ["argv", "exit", "stdin", "stdout", "stderr", "version", "platform", "path", "maxsize", "modules"],
+        math: ["pi", "e", "tau", "inf", "nan", "sqrt", "pow", "log", "log2", "log10", "ceil", "floor", "factorial", "gcd", "isnan", "isinf", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "degrees", "radians", "fabs"],
+        re: ["match", "search", "findall", "finditer", "sub", "subn", "compile", "split", "fullmatch", "escape"],
         json: ["dumps", "loads", "dump", "load"],
-        random: ["random", "randint", "choice", "shuffle", "sample", "uniform", "seed"],
-        datetime: ["datetime", "date", "time", "timedelta"],
-        collections: ["Counter", "defaultdict", "OrderedDict", "deque", "namedtuple"],
-        itertools: ["chain", "count", "cycle", "product", "permutations", "combinations", "groupby", "islice"]
+        random: ["random", "randint", "choice", "choices", "shuffle", "sample", "uniform", "seed", "randrange"],
+        datetime: ["datetime", "date", "time", "timedelta", "now", "today", "fromtimestamp", "strptime"],
+        collections: ["Counter", "defaultdict", "OrderedDict", "deque", "namedtuple", "ChainMap"],
+        itertools: ["chain", "count", "cycle", "product", "permutations", "combinations", "groupby", "islice", "takewhile", "dropwhile", "starmap", "tee", "zip_longest"],
+        // Built-in type prototypes — surface them when the student types
+        // something like `name.<TAB>` and we cannot infer the type. The hint
+        // helper falls back to this list before showing buffer identifiers.
+        str: ["upper", "lower", "title", "capitalize", "strip", "lstrip", "rstrip", "split", "rsplit", "join", "replace", "startswith", "endswith", "find", "rfind", "index", "count", "format", "encode", "isdigit", "isalpha", "isalnum", "isspace", "zfill", "center", "ljust", "rjust"],
+        list: ["append", "extend", "insert", "remove", "pop", "clear", "index", "count", "sort", "reverse", "copy"],
+        dict: ["keys", "values", "items", "get", "pop", "popitem", "update", "setdefault", "clear", "copy"],
+        set: ["add", "remove", "discard", "pop", "clear", "copy", "union", "intersection", "difference", "symmetric_difference", "issubset", "issuperset"],
+        tuple: ["count", "index"]
     };
 
     function getCurrentWord(cm) {
