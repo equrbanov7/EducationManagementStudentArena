@@ -132,6 +132,29 @@ class StaticFilesStorageTest(TestCase):
             "STATICFILES_STORAGE must not be empty.",
         )
 
+    def test_production_staticfiles_storage_uses_django_5_storages_setting(self):
+        """Production must set STORAGES so hashed WhiteNoise URLs work on Django 5."""
+        env = {
+            "SECRET_KEY": "test-secret-key",
+            "DATABASE_URL": "sqlite:////tmp/emsarena-production-settings-test.sqlite3",
+            "ALLOWED_HOSTS": "example.com",
+            "ADMIN_ALLOWED_IPS": "127.0.0.1",
+            "SECURE_SSL_REDIRECT": "False",
+        }
+        with patch.dict(os.environ, env):
+            import config.settings.production as production_settings
+
+            production_settings = importlib.reload(production_settings)
+
+        self.assertEqual(
+            production_settings.STORAGES["staticfiles"]["BACKEND"],
+            "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        )
+        self.assertEqual(
+            production_settings.STORAGES["staticfiles"]["BACKEND"],
+            production_settings.STATICFILES_STORAGE,
+        )
+
 
 class DebugEnvParsingTest(TestCase):
     """Verify that the DEBUG env-bool helper works correctly for all input values."""

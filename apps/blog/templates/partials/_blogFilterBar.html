@@ -1,0 +1,58 @@
+{% load i18n %}
+{% url 'home' as home_url %}
+{% comment %}
+================================================================================
+  Compact, horizontally-scrollable category + tag chip rail.
+  Used on small viewports (mobile / tablet) ABOVE the post grid so the user
+  doesn't have to scroll past every post just to filter.
+  Desktop keeps the sticky sidebar (templates/partials/_sideBar.html), so this
+  partial is hidden via CSS at >=992px.
+================================================================================
+{% endcomment %}
+<aside class="blog-filter-rail" aria-label="{% trans 'filter_rail_aria' context 'blog.home_page' %}">
+
+    {% if categories %}
+    <div class="blog-filter-rail__group">
+        <h3 class="blog-filter-rail__heading">
+            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            {% trans "categories" context "blog.partial.sidebar" %}
+        </h3>
+        <div class="blog-filter-rail__chips" role="list">
+            <a href="{{ home_url }}"
+               class="blog-filter-chip {% if not active_category_slug %}is-active{% endif %}"
+               role="listitem">
+                {% trans "all" context "blog.home_page" %}
+            </a>
+            {% for category in categories %}
+                {% if category.tree_depth == 0 %}
+                <a href="{{ home_url }}?category={{ category.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                   class="blog-filter-chip {% if active_category_slug == category.slug %}is-active{% endif %}"
+                   role="listitem">
+                    <span class="blog-filter-chip__label">{{ category.localized_name }}</span>
+                    <span class="blog-filter-chip__count">{{ category.post_count }}</span>
+                </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if popular_topics %}
+    <div class="blog-filter-rail__group blog-filter-rail__group--tags">
+        <h3 class="blog-filter-rail__heading">
+            <i class="fas fa-hashtag" aria-hidden="true"></i>
+            {% trans "popular_tags" context "blog.partial.sidebar" %}
+        </h3>
+        <div class="blog-filter-rail__chips" role="list">
+            {% for topic in popular_topics %}
+            <a href="{{ home_url }}?category={{ topic.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+               class="blog-filter-chip blog-filter-chip--tag {% if active_category_slug == topic.slug %}is-active{% endif %}"
+               role="listitem">
+                #{{ topic.localized_name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</aside>

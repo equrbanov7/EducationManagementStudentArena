@@ -5433,6 +5433,46 @@ msgctxt "blog.home_page"
 msgid "title"
 msgstr "Minimal Blog | Ana səhifə"
 
+msgctxt "blog.home_page"
+msgid "most_read_title"
+msgstr "Ən çox oxunan məqalələr"
+
+msgctxt "blog.home_page"
+msgid "most_liked_title"
+msgstr "Ən çox bəyənilən məqalələr"
+
+msgctxt "blog.home_page"
+msgid "top_widgets_aria"
+msgstr "Populyar məqalələr"
+
+msgctxt "blog.home_page"
+msgid "filter_rail_aria"
+msgstr "Kateqoriya və etiket filtrləri"
+
+msgctxt "blog.home_page"
+msgid "all"
+msgstr "Hamısı"
+
+msgctxt "blog.home_page"
+msgid "comments_label"
+msgstr "şərh"
+
+msgctxt "blog.home_page"
+msgid "views_label"
+msgstr "baxış"
+
+msgctxt "blog.home_page"
+msgid "active_category_aria"
+msgstr "Seçilmiş kateqoriya"
+
+msgctxt "blog.home_page"
+msgid "active_category_label"
+msgstr "Seçilmiş kateqoriya"
+
+msgctxt "blog.home_page"
+msgid "show_all_posts"
+msgstr "Hamısını göstər"
+
 #: apps/blog/templates/blog/home.html:16
 msgctxt "blog.home_page"
 msgid "hero_title"
@@ -13498,6 +13538,18 @@ msgstr "Qeydiyyat"
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Menyunu aç və ya bağla"
+
+msgctxt "nav"
+msgid "contact"
+msgstr "Əlaqə"
+
+msgctxt "nav"
+msgid "main_nav_aria"
+msgstr "Əsas naviqasiya"
+
+msgctxt "nav"
+msgid "mobile_nav_aria"
+msgstr "Mobil naviqasiya"
 
 #: apps/live_exam/templates/liveExam/join.html
 msgctxt "live_exam.join"
