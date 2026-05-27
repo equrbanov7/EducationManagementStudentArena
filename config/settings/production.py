@@ -42,6 +42,9 @@ from .base import (
     CELERY_TASK_TRACK_STARTED,
     CELERY_TIMEZONE,
     CHANNEL_LAYERS,
+    CONTACT_NOTIFY_EMAIL,
+    CONTACT_PUBLIC_EMAIL,
+    CONTACT_SUPPORT_EMAIL,
     CONTENT_SECURITY_POLICY,
     CSRF_COOKIE_HTTPONLY,
     CSRF_COOKIE_SAMESITE,
@@ -148,6 +151,11 @@ def _csp_connect_sources(*values: str) -> tuple[str, ...]:
 
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
+
+CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL") or CONTACT_NOTIFY_EMAIL
+CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL") or CONTACT_SUPPORT_EMAIL
+CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL") or CONTACT_PUBLIC_EMAIL
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 
 # SECURITY WARNING: Secret key must be set in environment
 SECRET_KEY = os.environ["SECRET_KEY"]

@@ -1,4 +1,119 @@
-<footer>
-    <p>&copy; <span id="footerCurrentYear">2025</span> Elvin Qurbanov - Bütün hüquqlar qorunur.</p>
-    <p class="footer-location">Bakı, Azərbaycan</p>
+{% load static i18n %}
+{% url 'home' as home_url %}
+{% url 'about' as about_url %}
+{% url 'contact' as contact_url %}
+
+<footer class="ems-footer" role="contentinfo">
+    <div class="ems-footer__container">
+
+        {# ---------- Top: Brand + Columns ---------- #}
+        <div class="ems-footer__top">
+
+            {# Brand column #}
+            <div class="ems-footer__brand">
+                <a href="{{ home_url }}" class="ems-footer__logo" aria-label="EMSArena ana səhifə">
+                    <img src="{% static 'brand/logo-horizontal.svg' %}"
+                         alt="EMSArena"
+                         class="ems-footer__logo-img"
+                         loading="lazy">
+                </a>
+                <p class="ems-footer__tagline">
+                    {% trans "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli." %}
+                </p>
+                <div class="ems-footer__socials" aria-label="{% trans 'Sosial şəbəkələr' %}">
+                    <a href="https://instagram.com/emsarena_edtech"
+                       target="_blank" rel="noopener noreferrer"
+                       class="ems-footer__social"
+                       aria-label="Instagram – emsarena_edtech">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://wa.me/994000000000"
+                       target="_blank" rel="noopener noreferrer"
+                       class="ems-footer__social"
+                       aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                    </a>
+                    <a href="mailto:info@emsarena.com"
+                       class="ems-footer__social"
+                       aria-label="Email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            {# Platform column #}
+            <nav class="ems-footer__col" aria-label="{% trans 'Platforma' %}">
+                <h3 class="ems-footer__col-title">{% trans "Platforma" %}</h3>
+                <ul class="ems-footer__list">
+                    <li><a href="{{ home_url }}" class="ems-footer__link">{% trans "Ana səhifə" %}</a></li>
+                    <li><a href="{{ about_url }}" class="ems-footer__link">{% trans "Haqqımızda" %}</a></li>
+                    <li><a href="{{ contact_url }}" class="ems-footer__link">{% trans "Əlaqə" %}</a></li>
+                    <li><a href="{% url 'exams:student_exam_list' %}" class="ems-footer__link">{% trans "İmtahanlar" %}</a></li>
+                </ul>
+            </nav>
+
+            {# Resources column #}
+            <nav class="ems-footer__col" aria-label="{% trans 'Resurslar' %}">
+                <h3 class="ems-footer__col-title">{% trans "Resurslar" %}</h3>
+                <ul class="ems-footer__list">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'accounts:profile' %}" class="ems-footer__link">{% trans "Profilim" %}</a></li>
+                    {% else %}
+                        <li><a href="{% url 'accounts:login' %}" class="ems-footer__link">{% trans "Daxil ol" %}</a></li>
+                        <li><a href="{% url 'accounts:register' %}" class="ems-footer__link">{% trans "Qeydiyyat" %}</a></li>
+                    {% endif %}
+                    <li><a href="{{ home_url }}?category=technology" class="ems-footer__link">{% trans "Texnologiya" %}</a></li>
+                    <li><a href="{{ home_url }}?category=education" class="ems-footer__link">{% trans "Təhsil" %}</a></li>
+                    <li><a href="/sitemap.xml" class="ems-footer__link">{% trans "Sayt xəritəsi" %}</a></li>
+                </ul>
+            </nav>
+
+            {# Contact column #}
+            <div class="ems-footer__col">
+                <h3 class="ems-footer__col-title">{% trans "Əlaqə" %}</h3>
+                <ul class="ems-footer__contact-list">
+                    <li class="ems-footer__contact-item">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <a href="mailto:info@emsarena.com" class="ems-footer__link">info@emsarena.com</a>
+                    </li>
+                    <li class="ems-footer__contact-item">
+                        <i class="fas fa-life-ring" aria-hidden="true"></i>
+                        <a href="mailto:support@emsarena.com" class="ems-footer__link">support@emsarena.com</a>
+                    </li>
+                    <li class="ems-footer__contact-item">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        <a href="https://wa.me/994000000000" target="_blank" rel="noopener noreferrer" class="ems-footer__link">WhatsApp</a>
+                    </li>
+                    <li class="ems-footer__contact-item">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                        <a href="https://instagram.com/emsarena_edtech"
+                           target="_blank" rel="noopener noreferrer"
+                           class="ems-footer__link">@emsarena_edtech</a>
+                    </li>
+                    <li class="ems-footer__contact-item">
+                        <i class="fas fa-location-dot" aria-hidden="true"></i>
+                        <span>Bakı, Azərbaycan</span>
+                    </li>
+                </ul>
+                <a href="{{ contact_url }}" class="ems-footer__cta">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    {% trans "Bizə yazın" %}
+                </a>
+            </div>
+        </div>
+
+        {# ---------- Bottom: Legal + Copyright ---------- #}
+        <div class="ems-footer__bottom">
+            <p class="ems-footer__copy">
+                © <span id="footerCurrentYear">2026</span> EMSArena. {% trans "Bütün hüquqlar qorunur." %}
+            </p>
+            <p class="ems-footer__made-by">
+                {% trans "Hazırladı" %}:
+                <a href="https://instagram.com/emsarena_edtech"
+                   target="_blank" rel="noopener noreferrer"
+                   class="ems-footer__link ems-footer__link--accent">Elvin Qurbanov</a>
+            </p>
+        </div>
+
+    </div>
 </footer>

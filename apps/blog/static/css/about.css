@@ -1,254 +1,473 @@
-/* static/css/about.css */
+/* static/css/about.css
+   EMSArena – About / Haqqımızda
+   Modern, responsive, accessible design.
+   Brand palette is centralised in CSS custom properties so the same
+   tokens can be reused across hero, sections and CTA blocks. */
 
-/* --- Dəyişənlər --- */
 :root {
-    --primary-blue: #2563eb; /* Əsas vurğu rəngi */
-    --primary-dark: #1e40af;
-    --accent-light: #dbeafe; /* İkon arxası açıq rəng */
-    --text-dark: #111827;
-    --text-medium: #4b5563;
-    --bg-page: #f9fafb;
-    --card-bg: #ffffff;
+    --ems-blue-900: #1e3a8a;
+    --ems-blue-800: #1e40af;
+    --ems-blue-700: #1d4ed8;
+    --ems-blue-600: #2563eb;
+    --ems-teal-700: #0f766e;
+    --ems-teal-500: #14b8a6;
+    --ems-green-500: #10b981;
+    --ems-bg: #f8fafc;
+    --ems-surface: #ffffff;
+    --ems-surface-2: #f1f5f9;
+    --ems-text: #0f172a;
+    --ems-text-muted: #475569;
+    --ems-border: rgba(15, 23, 42, 0.08);
+    --ems-gradient: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
+    --ems-gradient-soft: linear-gradient(135deg, rgba(30, 64, 175, 0.08), rgba(16, 185, 129, 0.08));
 }
 
-/* --- Ümumi Layout --- */
 .ems-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 60px 24px 100px;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-page);
-    overflow: hidden; /* Animasiyaların daşmasının qarşısını alır */
+    padding: 64px 24px 96px;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--ems-text);
+    background-color: var(--ems-bg);
+    overflow: hidden;
 }
 
-/* --- Hero Bölməsi (Başlıq) --- */
+/* ---------- Hero ---------- */
 .ems-hero {
-    text-align: center;
-    max-width: 900px;
-    margin: 0 auto 80px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 56px;
+    align-items: center;
+    margin-bottom: 96px;
+}
+
+.ems-hero__content {
+    text-align: left;
+}
+
+.ems-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--ems-gradient-soft);
+    color: var(--ems-blue-800);
+    border: 1px solid rgba(30, 64, 175, 0.15);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.ems-hero__eyebrow i {
+    color: var(--ems-teal-700);
 }
 
 .main-title {
-    font-size: 3rem;
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
     font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1.2;
-    margin-bottom: 24px;
+    color: var(--ems-text);
+    line-height: 1.15;
+    margin-bottom: 22px;
     letter-spacing: -0.03em;
 }
 
 .main-title .highlight {
-    color: var(--primary-blue);
+    background: var(--ems-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     position: relative;
     display: inline-block;
 }
 
-/* Vurğulanan sözün altından xətt çəkmək effekti (opsional) */
-.main-title .highlight::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 30%;
-    background-color: var(--accent-light);
-    z-index: -1;
-    opacity: 0.7;
-    border-radius: 4px;
+.hero-description {
+    font-size: 1.15rem;
+    color: var(--ems-text-muted);
+    line-height: 1.75;
+    margin-bottom: 28px;
 }
 
-.hero-description {
-    font-size: 1.25rem;
-    color: var(--text-medium);
+.ems-hero__actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.ems-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.ems-btn--primary {
+    background: var(--ems-gradient);
+    color: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 118, 110, 0.25);
+}
+
+.ems-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(15, 118, 110, 0.35);
+    color: #ffffff;
+}
+
+.ems-btn--ghost {
+    background: var(--ems-surface);
+    color: var(--ems-blue-800);
+    border-color: var(--ems-border);
+}
+
+.ems-btn--ghost:hover {
+    transform: translateY(-2px);
+    border-color: var(--ems-blue-700);
+    color: var(--ems-blue-900);
+}
+
+.ems-hero__visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ems-hero__logo {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    filter: drop-shadow(0 20px 40px rgba(30, 64, 175, 0.18));
+}
+
+/* ---------- Stat band ---------- */
+.ems-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    padding: 32px;
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+    margin-bottom: 96px;
+}
+
+.ems-stat {
+    text-align: center;
+    padding: 12px;
+}
+
+.ems-stat__number {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 800;
+    background: var(--ems-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.1;
+    margin: 0 0 6px;
+}
+
+.ems-stat__label {
+    color: var(--ems-text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* ---------- Mission / Vision ---------- */
+.ems-mission {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 96px;
+}
+
+.ems-mission__card {
+    padding: 36px;
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 24px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ems-mission__card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+}
+
+.ems-mission__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--ems-gradient);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+}
+
+.ems-mission__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.ems-mission__text {
+    color: var(--ems-text-muted);
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+/* ---------- Features section ---------- */
+.ems-features-section {
+    margin-bottom: 96px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: clamp(1.6rem, 2.6vw, 2rem);
+    font-weight: 800;
+    color: var(--ems-text);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--ems-text-muted);
+    font-size: 1.05rem;
+    max-width: 680px;
+    margin: 0 auto 48px;
     line-height: 1.7;
 }
 
-/* --- Xüsusiyyətlər Bölməsi --- */
-.section-title {
-    text-align: center;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 50px;
-    position: relative;
-    padding-bottom: 15px;
-}
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 4px;
-    background-color: var(--primary-blue);
-    border-radius: 2px;
-}
-
-/* Grid Sistemi */
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Responsiv grid */
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
     align-items: stretch;
 }
 
-/* --- Funksiya Kartı Dizaynı --- */
 .feature-card {
-    background-color: var(--card-bg);
-    padding: 40px;
+    background-color: var(--ems-surface);
+    padding: 32px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+    transition: all 0.25s ease;
+    border: 1px solid var(--ems-border);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
 .feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
-    border-color: var(--accent-light);
+    transform: translateY(-8px);
+    box-shadow: 0 22px 48px rgba(30, 64, 175, 0.12);
+    border-color: rgba(30, 64, 175, 0.25);
 }
 
 .icon-wrapper {
-    width: 64px;
-    height: 64px;
-    background-color: var(--accent-light);
-    color: var(--primary-blue);
+    width: 60px;
+    height: 60px;
+    background: var(--ems-gradient-soft);
+    color: var(--ems-blue-700);
     border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
-    margin-bottom: 25px;
+    font-size: 1.6rem;
+    margin-bottom: 22px;
     transition: all 0.3s ease;
 }
 
 .feature-card:hover .icon-wrapper {
-    background-color: var(--primary-blue);
-    color: white;
-    transform: rotate(-5deg) scale(1.1);
+    background: var(--ems-gradient);
+    color: #ffffff;
+    transform: rotate(-4deg) scale(1.05);
 }
 
 .feature-title {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 15px;
+    color: var(--ems-text);
+    margin-bottom: 12px;
 }
 
 .feature-text {
-    font-size: 1.05rem;
-    color: var(--text-medium);
+    font-size: 1rem;
+    color: var(--ems-text-muted);
+    line-height: 1.65;
+}
+
+/* ---------- Team ---------- */
+.ems-team {
+    margin-bottom: 96px;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.team-card {
+    background: var(--ems-surface);
+    border: 1px solid var(--ems-border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.team-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.team-card__avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--ems-gradient);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.team-card__name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.team-card__role {
+    color: var(--ems-teal-700);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.team-card__bio {
+    color: var(--ems-text-muted);
+    font-size: 0.95rem;
     line-height: 1.6;
 }
 
-/* --- CTA (Hərəkətə çağırış) --- */
+/* ---------- CTA ---------- */
 .cta-section {
     text-align: center;
-    margin-top: 80px;
-    padding: 40px;
-    background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
-    border-radius: 20px;
-    color: white;
+    padding: 48px 32px;
+    background: var(--ems-gradient);
+    border-radius: 24px;
+    color: #ffffff;
+    box-shadow: 0 24px 48px rgba(15, 118, 110, 0.25);
+}
+
+.cta-section h3 {
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
 .cta-section p {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 25px;
+    font-size: 1.1rem;
+    margin-bottom: 28px;
+    opacity: 0.95;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .cta-button {
-    display: inline-block;
-    background-color: white;
-    color: var(--primary-blue);
-    padding: 12px 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    color: var(--ems-blue-800);
+    padding: 14px 28px;
     border-radius: 999px;
     text-decoration: none;
     font-weight: 700;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .cta-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transform: scale(1.04);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    color: var(--ems-blue-900);
 }
 
-/* =========================================
-   SADƏ CSS ANİMASİYALARI
-   ========================================= */
+.cta-button--outline {
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
 
-/* Yuxarıdan aşağı süzülmə */
+.cta-button--outline:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+/* ---------- Animations ---------- */
 @keyframes fadeDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-24px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-
-/* Olduğu yerdə görünmə */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Aşağıdan yuxarı süzülmə */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Animasiya sinifləri */
-.animate-fade-down {
-    animation: fadeDown 0.8s ease-out forwards;
+.animate-fade-down { animation: fadeDown 0.7s ease-out forwards; }
+.animate-fade-in   { animation: fadeIn 0.9s ease-out forwards; opacity: 0; }
+.animate-slide-up  { animation: slideUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; opacity: 0; }
+
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.45s; }
+.delay-4 { animation-delay: 0.6s; }
+.delay-5 { animation-delay: 0.75s; }
+.delay-6 { animation-delay: 0.9s; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+    .ems-hero { grid-template-columns: 1fr; gap: 36px; }
+    .ems-hero__content { text-align: center; }
+    .ems-hero__eyebrow,
+    .ems-hero__actions { justify-content: center; }
+    .ems-hero__actions { display: inline-flex; }
+    .ems-stats { grid-template-columns: repeat(2, 1fr); }
+    .ems-mission { grid-template-columns: 1fr; }
 }
 
-.animate-fade-in {
-    animation: fadeIn 1s ease-out forwards;
-    opacity: 0; /* Başlanğıcda gizli */
+@media (max-width: 600px) {
+    .ems-container { padding: 40px 18px 72px; }
+    .ems-stats { padding: 22px; }
+    .feature-card, .ems-mission__card, .team-card { padding: 26px; }
+    .cta-section { padding: 36px 22px; }
 }
 
-.animate-slide-up {
-    animation: slideUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    opacity: 0; /* Başlanğıcda gizli */
-}
-
-/* Gecikmələr (Elementlərin ardıcıl gəlməsi üçün) */
-.delay-1 { animation-delay: 0.2s; }
-.delay-2 { animation-delay: 0.4s; }
-.delay-3 { animation-delay: 0.6s; }
-.delay-4 { animation-delay: 0.8s; }
-.delay-5 { animation-delay: 1.0s; }
-.delay-6 { animation-delay: 1.2s; }
-
-/* --- Responsive --- */
-@media (max-width: 768px) {
-    .main-title {
-        font-size: 2.2rem;
-    }
-    .hero-description {
-        font-size: 1.1rem;
-    }
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-    .feature-card {
-        padding: 30px;
-        align-items: center;
-        text-align: center;
+@media (prefers-reduced-motion: reduce) {
+    .animate-fade-down, .animate-fade-in, .animate-slide-up {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
     }
 }
