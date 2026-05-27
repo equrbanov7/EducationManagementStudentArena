@@ -5415,6 +5415,46 @@ msgctxt "blog.home_page"
 msgid "title"
 msgstr "Minimal Blog | Ana sayfa"
 
+msgctxt "blog.home_page"
+msgid "most_read_title"
+msgstr "En çok okunan yazılar"
+
+msgctxt "blog.home_page"
+msgid "most_liked_title"
+msgstr "En çok etkileşim alan yazılar"
+
+msgctxt "blog.home_page"
+msgid "top_widgets_aria"
+msgstr "Popüler yazılar"
+
+msgctxt "blog.home_page"
+msgid "filter_rail_aria"
+msgstr "Kategori ve etiket filtreleri"
+
+msgctxt "blog.home_page"
+msgid "all"
+msgstr "Tümü"
+
+msgctxt "blog.home_page"
+msgid "comments_label"
+msgstr "yorum"
+
+msgctxt "blog.home_page"
+msgid "views_label"
+msgstr "görüntülenme"
+
+msgctxt "blog.home_page"
+msgid "active_category_aria"
+msgstr "Seçili kategori"
+
+msgctxt "blog.home_page"
+msgid "active_category_label"
+msgstr "Seçili kategori"
+
+msgctxt "blog.home_page"
+msgid "show_all_posts"
+msgstr "Tümünü göster"
+
 #: apps/blog/templates/blog/home.html:16
 msgctxt "blog.home_page"
 msgid "hero_title"
@@ -13459,6 +13499,18 @@ msgstr "Kayıt"
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Menüyü aç veya kapat"
+
+msgctxt "nav"
+msgid "contact"
+msgstr "İletişim"
+
+msgctxt "nav"
+msgid "main_nav_aria"
+msgstr "Ana navigasyon"
+
+msgctxt "nav"
+msgid "mobile_nav_aria"
+msgstr "Mobil navigasyon"
 
 #: apps/live_exam/templates/liveExam/join.html
 msgctxt "live_exam.join"

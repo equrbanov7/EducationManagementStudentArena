@@ -53,14 +53,21 @@ values use the eff* prefix.
 <link rel="alternate" hreflang="{{ code }}" href="{{ url }}">
 {% endfor %}
 
-{# ---- favicons (square, multi-size, served from the site root) ---- #}
+{% comment %}
+Favicons: square, multi-size, served from the site root.
+SVG favicon is loaded first so modern browsers render the crisp vector version
+on tabs / bookmarks / Google search previews; older browsers fall back to the
+multi-size PNG/ICO bundle below.
+{% endcomment %}
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/favicon.svg" color="#0F766E">
 <link rel="manifest" href="/site.webmanifest">
 
 {# ---- Open Graph ---- #}

@@ -3,23 +3,43 @@
 /* --- Ümumi Header Stilləri --- */
 .blog-header {
     background-color: var(--card-bg, #ffffff);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* Daha incə, modern shadow + alt sərhəd */
+    box-shadow:
+        0 1px 0 rgba(15, 23, 42, 0.06),
+        0 4px 16px -8px rgba(15, 23, 42, 0.08);
     position: sticky;
     top: 0;
     z-index: 100; /* Header-in digər elementlərin üstündə olması üçün */
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    background: rgba(255, 255, 255, 0.92);
+    transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.blog-header--scrolled {
+    box-shadow:
+        0 1px 0 rgba(15, 23, 42, 0.08),
+        0 8px 24px -10px rgba(15, 23, 42, 0.16);
+    background: rgba(255, 255, 255, 0.97);
 }
 
 .blog-header__container {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
 }
 
 .blog-header__nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
+    height: 72px;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .blog-header__container { padding: 0 16px; }
+    .blog-header__nav { height: 64px; gap: 12px; }
 }
 
 .blog-header__logo {
@@ -83,10 +103,10 @@
 }
 
 /* --- Desktop Naviqasiyası Stilləri --- */
-.blog-header__nav-list--desktop { /* Desktop naviqasiyasının sinifi */
-    display: flex; /* Desktop-da görünür */
+.blog-header__nav-list--desktop {
+    display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 4px;            /* item arası daha kompakt, spacing item-in özündədir */
     margin: 0;
     padding: 0;
     list-style: none;
@@ -98,33 +118,61 @@
 }
 
 .blog-header__nav-list--desktop .blog-header__nav-item a {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    padding: 8px 14px;
     color: var(--text-dark, #1f2937);
     font-weight: 500;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
     text-decoration: none;
+    border-radius: 10px;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .blog-header__nav-list--desktop .blog-header__nav-item a:hover {
     color: var(--primary-color, #2563eb);
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.blog-header__nav-list--desktop .blog-header__nav-item a:focus-visible {
+    outline: 2px solid var(--primary-color, #2563eb);
+    outline-offset: 2px;
 }
 
 .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams {
-    display: inline-flex;
-    align-items: center;
-    padding: 7px 12px;
-    border-radius: 8px;
+    margin-left: 8px;
+    padding: 9px 18px;
+    border-radius: 10px;
     background: var(--primary-color, #2563eb);
     color: #fff;
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
-    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    font-weight: 600;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.12) inset,
+        0 6px 16px -6px rgba(37, 99, 235, 0.45);
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
 
-.blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams:hover,
+.blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams:hover {
+    color: #fff;
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.16) inset,
+        0 10px 22px -8px rgba(29, 78, 216, 0.55);
+}
+
 .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams.blog-header__nav-link--active {
     color: #fff;
     background: #1d4ed8;
-    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
 }
 
 .blog-header__nav-link--exams.blog-header__nav-link--active::after {
@@ -143,21 +191,28 @@
     background-color: #1e40af;
 }
 
-.blog-header__nav-link--active {
+/* Active link: rəng + qalın yazı, primary nav-da incə underline */
+.blog-header__nav-list--desktop .blog-header__nav-link--active {
     color: var(--primary-color);
     font-weight: 600;
-    position: relative;
+    background: rgba(37, 99, 235, 0.08);
 }
 
-.blog-header__nav-link--active::after {
+.blog-header__nav-list--desktop .blog-header__nav-link--active:not(.blog-header__nav-link--exams)::after {
     content: "";
     position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 100%;
+    left: 14px;
+    right: 14px;
+    bottom: 4px;
     height: 2px;
     border-radius: 999px;
     background: var(--primary-color);
+    animation: navUnderlineIn 0.25s ease forwards;
+}
+
+@keyframes navUnderlineIn {
+    from { transform: scaleX(0); opacity: 0; }
+    to   { transform: scaleX(1); opacity: 1; }
 }
 
 .blog-header__auth {
@@ -450,15 +505,27 @@ button.blog-header__user-menu-item{
 
 /* --- Responsive Media Queries --- */
 
+/* Tablet breakpoint: 769-1023px — kompakt spacing */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .blog-header__nav-list--desktop .blog-header__nav-item a {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+    .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams {
+        padding: 8px 14px;
+    }
+    .blog-header__user-name { display: none; }
+}
+
 @media (max-width: 768px) {
     .blog-header__toggle {
-        display: flex; /* Mobil də burgeri göstər */
+        display: flex; /* Mobil-də burgeri göstər */
     }
     .blog-header__nav-list--desktop {
-        display: none; /* Mobil də desktop naviqasiyasını gizlət */
+        display: none;
     }
     .blog-header__guest-actions {
-        display: none; /* Mobil menyuda ayrıca göstəririk */
+        display: none;
     }
     .blog-header__auth > .language-switcher {
         display: none;
@@ -468,21 +535,32 @@ button.blog-header__user-menu-item{
 
 @media (min-width: 769px) {
     .blog-header__toggle {
-        display: none; /* Desktop-da burgeri gizlət */
+        display: none;
     }
     .blog-header__nav-list--desktop {
-        display: flex; /* Desktop-da normal naviqasiyanı göstər */
+        display: flex;
     }
 
     .blog-header__auth {
-        gap: 8px;
+        gap: 12px;
     }
-
-   
 
     /* Desktop-da mobil menyu elementlərini tamamilə gizlət */
     .mobile-nav-overlay,
     .mobile-nav-panel {
         display: none;
+    }
+}
+
+/* prefers-reduced-motion: tranzisiyaları söndür */
+@media (prefers-reduced-motion: reduce) {
+    .blog-header,
+    .blog-header__nav-list--desktop .blog-header__nav-item a,
+    .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams,
+    .mobile-nav-panel,
+    .mobile-nav-overlay,
+    .blog-header__nav-link--active::after {
+        transition: none !important;
+        animation: none !important;
     }
 }

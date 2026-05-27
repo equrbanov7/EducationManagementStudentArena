@@ -1,0 +1,145 @@
+/* ===========================================================================
+   blogFilterBar.css — compact, mobile-first horizontal chip rail that
+   surfaces categories + popular tags ABOVE the post grid. Replaces the
+   long, stacked sidebar that was getting pushed below posts on small
+   viewports.
+
+   Visible only at <=992px (home.css hides it on desktop and the sticky
+   sidebar at <=992px). Two distinct groups inside, separated by spacing.
+   ===========================================================================*/
+
+.blog-filter-rail {
+    margin: 0 0 24px;
+    padding: 16px 14px 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1px solid rgba(207, 219, 236, 0.8);
+    border-radius: 18px;
+    box-shadow: 0 8px 20px -14px rgba(15, 23, 42, 0.15);
+}
+
+.blog-filter-rail__group + .blog-filter-rail__group {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.blog-filter-rail__heading {
+    margin: 0 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4a5d78;
+}
+
+.blog-filter-rail__heading i {
+    color: #2563eb;
+    font-size: 0.85rem;
+}
+
+.blog-filter-rail__group--tags .blog-filter-rail__heading i {
+    color: #db2777;
+}
+
+/* Horizontally scrollable chip row. We avoid wrapping so the rail
+   stays one visual line on small screens — keeps the page short. */
+.blog-filter-rail__chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin: 0 -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    scroll-snap-type: x proximity;
+    /* hide scrollbar but keep it usable */
+    scrollbar-width: thin;
+}
+.blog-filter-rail__chips::-webkit-scrollbar { height: 4px; }
+.blog-filter-rail__chips::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.25);
+    border-radius: 999px;
+}
+
+.blog-filter-chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f3f7ff;
+    border: 1px solid #dbe7ff;
+    color: #31507a;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.blog-filter-chip:hover,
+.blog-filter-chip:focus-visible {
+    border-color: rgba(37, 99, 235, 0.4);
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+    outline: none;
+}
+
+.blog-filter-chip.is-active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 6px 16px -8px rgba(37, 99, 235, 0.5);
+}
+
+.blog-filter-chip__count {
+    font-size: 0.75rem;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.12);
+    color: #1d4ed8;
+}
+
+.blog-filter-chip.is-active .blog-filter-chip__count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* "tag" variant — rose accent */
+.blog-filter-chip--tag {
+    background: #fdf2f8;
+    border-color: #fbcfe8;
+    color: #9d174d;
+}
+.blog-filter-chip--tag:hover,
+.blog-filter-chip--tag:focus-visible {
+    background: rgba(219, 39, 119, 0.1);
+    border-color: rgba(219, 39, 119, 0.4);
+    color: #be185d;
+}
+.blog-filter-chip--tag.is-active {
+    background: #db2777;
+    border-color: #db2777;
+    color: #ffffff;
+    box-shadow: 0 6px 16px -8px rgba(219, 39, 119, 0.5);
+}
+
+@media (max-width: 480px) {
+    .blog-filter-rail { padding: 14px 12px; }
+    .blog-filter-chip {
+        min-height: 36px;
+        padding: 7px 12px;
+        font-size: 0.85rem;
+    }
+}
