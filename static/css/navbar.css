@@ -28,6 +28,23 @@
     color: var(--primary-color, #2563eb);
     z-index: 1001; /* Logo həmişə ən üstdə olsun */
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.blog-header__logo-img {
+    height: 40px;
+    width: auto;
+    max-width: 180px;
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .blog-header__logo-img {
+        height: 34px;
+        max-width: 140px;
+    }
 }
 
 /* --- Burger Button Stilləri --- */
