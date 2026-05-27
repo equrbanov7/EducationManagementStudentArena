@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'vendor/codemirror/theme/eclipse.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/display/fullscreen.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/codemirror/addon/hint/show-hint.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}?v=20260527-3">
+    <link rel="stylesheet" href="{% static 'exams/css/coding_exam.css' %}?v=20260527-5">
     <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}?v=20260519-1">
 {% endblock %}
 
@@ -235,7 +235,19 @@
                                  data-empty="{% trans 'Run the code to see errors here.' context 'exams.template.coding_exam' %}"></pre>
                         </section>
                         <section class="coding-panel" data-coding-panel="preview">
-                            <iframe id="codingPreviewFrame" class="coding-preview-frame" sandbox="allow-scripts"></iframe>
+                            {% comment %}
+                            Sandbox notes:
+                               - allow-scripts: students need to run their JS.
+                               - allow-modals: alert()/confirm()/prompt() — common browser-JS lesson primitives.
+                               - allow-forms: <form> submissions used in tutorials.
+                               - allow-popups: window.open() for tutorials demonstrating popups.
+                               Deliberately NOT included:
+                               - allow-same-origin: would let the student script touch our cookies / DOM (security boundary).
+                               - allow-top-navigation: would let the iframe redirect the parent page.
+                            {% endcomment %}
+                            <iframe id="codingPreviewFrame"
+                                    class="coding-preview-frame"
+                                    sandbox="allow-scripts allow-modals allow-forms allow-popups"></iframe>
                             <pre id="codingPreviewConsole" class="coding-output coding-preview-console"></pre>
                         </section>
                     </div>
@@ -406,7 +418,7 @@ window.CODING_EXAM_CONFIG = {
     <script src="{% static 'vendor/codemirror/addon/selection/active-line.js' %}"></script>
     <script src="{% static 'vendor/codemirror/addon/search/searchcursor.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
-    <script src="{% static 'exams/js/coding_exam.js' %}?v=20260527-3"></script>
+    <script src="{% static 'exams/js/coding_exam.js' %}?v=20260527-5"></script>
     {% if supervision.supervised %}
         {{ supervision.config|json_script:"supervision-config-data" }}
         <script nonce="{{ request.csp_nonce }}">

@@ -319,7 +319,12 @@ SECURE_REFERRER_POLICY = os.getenv("REFERRER_POLICY", "strict-origin-when-cross-
 
 # Additional response headers that tighten browser-side defaults without
 # requiring per-view duplication.
-SECURITY_RESPONSE_HEADERS = {
+#
+# An env var set to an empty string ("") removes the header — useful in HTTP
+# dev where browsers ignore the COOP header anyway and only emit a noisy
+# console warning ("origin was untrustworthy"). Production must always send
+# the header, so we keep "same-origin" as the default.
+SECURITY_RESPONSE_HEADERS = {k: v for k, v in {
     "Referrer-Policy": SECURE_REFERRER_POLICY,
     "Permissions-Policy": os.getenv(
         "PERMISSIONS_POLICY",
@@ -327,7 +332,7 @@ SECURITY_RESPONSE_HEADERS = {
     ),
     "Cross-Origin-Resource-Policy": os.getenv("CROSS_ORIGIN_RESOURCE_POLICY", "same-origin"),
     "Cross-Origin-Opener-Policy": os.getenv("CROSS_ORIGIN_OPENER_POLICY", "same-origin"),
-}
+}.items() if v}
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
