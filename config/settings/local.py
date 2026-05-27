@@ -163,6 +163,12 @@ if not SECRET_KEY:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DEBUG", True)
+
+# Browsers silently ignore Cross-Origin-Opener-Policy when the page is served
+# over plain HTTP (the "untrustworthy origin" warning in DevTools), so we
+# drop the header in local dev to keep the console clean. Production still
+# sets it via base.py defaults.
+SECURITY_RESPONSE_HEADERS = {k: v for k, v in SECURITY_RESPONSE_HEADERS.items() if k != "Cross-Origin-Opener-Policy"}
 USE_REDIS = _env_bool("USE_REDIS", False)
 
 # ALLOWED_HOSTS - read from .env or use default
