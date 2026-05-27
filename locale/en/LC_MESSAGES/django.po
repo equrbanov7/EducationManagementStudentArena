@@ -20192,3 +20192,231 @@ msgstr "Select course center"
 msgctxt "accounts.register"
 msgid "no_organization_affiliation"
 msgstr "I am not currently affiliated with any organization"
+
+#: contact/about/footer/navbar
+msgid "contact"
+msgstr "Contact"
+
+#: contact/about/footer/navbar
+msgid "EMSArena ilə tanış olun"
+msgstr "Meet EMSArena"
+
+#: contact/about/footer/navbar
+msgid "təhsilin yeni nəsil arenası"
+msgstr "the new arena for education"
+
+#: contact/about/footer/navbar
+msgid "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi."
+msgstr "A modern education management, LMS and online exam platform for universities, schools, training centres and teachers. Courses, exams, assessment, audit and AI assistant in one place."
+
+#: contact/about/footer/navbar
+msgid "Pulsuz başla"
+msgstr "Start free"
+
+#: contact/about/footer/navbar
+msgid "Bizimlə əlaqə"
+msgstr "Contact us"
+
+#: contact/about/footer/navbar
+msgid "Dəstəklənən dil"
+msgstr "Supported languages"
+
+#: contact/about/footer/navbar
+msgid "İmtahan növü"
+msgstr "Exam types"
+
+#: contact/about/footer/navbar
+msgid "Platform əlçatanlığı"
+msgstr "Platform availability"
+
+#: contact/about/footer/navbar
+msgid "Tenant izolyasiyası"
+msgstr "Tenant isolation"
+
+#: contact/about/footer/navbar
+msgid "Missiyamız"
+msgstr "Our mission"
+
+#: contact/about/footer/navbar
+msgid "Vizyonumuz"
+msgstr "Our vision"
+
+#: contact/about/footer/navbar
+msgid "Platformanın imkanları"
+msgstr "Platform capabilities"
+
+#: contact/about/footer/navbar
+msgid "Kurs və qruplar"
+msgstr "Courses and groups"
+
+#: contact/about/footer/navbar
+msgid "Multi-tenant memarlıq"
+msgstr "Multi-tenant architecture"
+
+#: contact/about/footer/navbar
+msgid "Rol-əsaslı icazələr"
+msgstr "Role-based permissions"
+
+#: contact/about/footer/navbar
+msgid "İmtahanlar və qiymətləndirmə"
+msgstr "Exams and assessment"
+
+#: contact/about/footer/navbar
+msgid "Audit və təhlükəsizlik"
+msgstr "Audit and security"
+
+#: contact/about/footer/navbar
+msgid "AI köməkçi"
+msgstr "AI assistant"
+
+#: contact/about/footer/navbar
+msgid "Komanda"
+msgstr "Team"
+
+#: contact/about/footer/navbar
+msgid "Pulsuz qeydiyyat"
+msgstr "Sign up free"
+
+#: contact/about/footer/navbar
+msgid "Demo tələb et"
+msgstr "Request a demo"
+
+#: contact/about/footer/navbar
+msgid "Əlaqə"
+msgstr "Contact"
+
+#: contact/about/footer/navbar
+msgid "Bizimlə əlaqə saxlayın"
+msgstr "Get in touch with us"
+
+#: contact/about/footer/navbar
+msgid "Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində cavab veririk."
+msgstr "Use the form below or any of the direct channels for questions, suggestions and partnership requests. We respond within 24 hours."
+
+#: contact/about/footer/navbar
+msgid "Email"
+msgstr "Email"
+
+#: contact/about/footer/navbar
+msgid "info – ümumi, support – texniki dəstək"
+msgstr "info – general, support – technical"
+
+#: contact/about/footer/navbar
+msgid "Tez cavab üçün ən sürətli kanal"
+msgstr "Fastest channel for quick replies"
+
+#: contact/about/footer/navbar
+msgid "Xəbərlər və yeniliklər"
+msgstr "News and updates"
+
+#: contact/about/footer/navbar
+msgid "Bizi izləyin"
+msgstr "Follow us"
+
+#: contact/about/footer/navbar
+msgid "Mesajınız göndərildi!"
+msgstr "Your message has been sent!"
+
+#: contact/about/footer/navbar
+msgid "Diqqətiniz üçün təşəkkür edirik. Tezliklə sizinlə əlaqə saxlayacağıq."
+msgstr "Thank you for reaching out. We will get back to you shortly."
+
+#: contact/about/footer/navbar
+msgid "Yeni mesaj göndər"
+msgstr "Send another message"
+
+#: contact/about/footer/navbar
+msgid "Bizə yazın"
+msgstr "Send us a message"
+
+#: contact/about/footer/navbar
+msgid "Formadakı bütün məlumatlar konfidensial saxlanılır."
+msgstr "All form data is kept confidential."
+
+#: contact/about/footer/navbar
+msgid "Ad Soyad"
+msgstr "Full name"
+
+#: contact/about/footer/navbar
+msgid "Telefon"
+msgstr "Phone"
+
+#: contact/about/footer/navbar
+msgid "Mövzu"
+msgstr "Subject"
+
+#: contact/about/footer/navbar
+msgid "Mesaj"
+msgstr "Message"
+
+#: contact/about/footer/navbar
+msgid "Ən azı 10, ən çoxu 5000 simvol"
+msgstr "Between 10 and 5000 characters"
+
+#: contact/about/footer/navbar
+msgid "Mesajı göndər"
+msgstr "Send message"
+
+#: contact/about/footer/navbar
+msgid "Tez-tez verilən suallar"
+msgstr "Frequently asked questions"
+
+#: contact/about/footer/navbar
+msgid "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli."
+msgstr "Education management and online exam platform. A modern LMS for universities, schools and training centres."
+
+#: contact/about/footer/navbar
+msgid "Sosial şəbəkələr"
+msgstr "Social networks"
+
+#: contact/about/footer/navbar
+msgid "Platforma"
+msgstr "Platform"
+
+#: contact/about/footer/navbar
+msgid "Ana səhifə"
+msgstr "Home"
+
+#: contact/about/footer/navbar
+msgid "Haqqımızda"
+msgstr "About"
+
+#: contact/about/footer/navbar
+msgid "İmtahanlar"
+msgstr "Exams"
+
+#: contact/about/footer/navbar
+msgid "Resurslar"
+msgstr "Resources"
+
+#: contact/about/footer/navbar
+msgid "Profilim"
+msgstr "My profile"
+
+#: contact/about/footer/navbar
+msgid "Daxil ol"
+msgstr "Sign in"
+
+#: contact/about/footer/navbar
+msgid "Qeydiyyat"
+msgstr "Sign up"
+
+#: contact/about/footer/navbar
+msgid "Texnologiya"
+msgstr "Technology"
+
+#: contact/about/footer/navbar
+msgid "Təhsil"
+msgstr "Education"
+
+#: contact/about/footer/navbar
+msgid "Sayt xəritəsi"
+msgstr "Sitemap"
+
+#: contact/about/footer/navbar
+msgid "Bütün hüquqlar qorunur."
+msgstr "All rights reserved."
+
+#: contact/about/footer/navbar
+msgid "Hazırladı"
+msgstr "Built by"

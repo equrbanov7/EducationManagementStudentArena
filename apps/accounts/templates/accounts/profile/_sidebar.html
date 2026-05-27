@@ -70,7 +70,24 @@
             </a>
         </li>
         {% endif %}
- 
+
+        {% if 'superadmin-contact-messages' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
+               data-section="superadmin-contact-messages"
+               data-title="{% trans 'Contact Messages' %}"
+               data-force-navigation="true"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-contact-messages' %}active{% endif %}">
+                <i class="fas fa-inbox sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Contact Messages" %}</span>
+                {% if contact_unhandled_count and contact_unhandled_count > 0 %}
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ contact_unhandled_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
+
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_education" context "profile.sidebar" %}</span></li>
         {% if 'statistics' in allowed_sections %}
         <li class="sidebar-menu-item">

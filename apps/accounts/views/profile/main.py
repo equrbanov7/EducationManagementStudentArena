@@ -77,6 +77,10 @@ from .constants import (
     PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK,
     PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT,
 )
+from .contact_inbox import (
+    build_contact_inbox_context,
+    handle_contact_reply_post,
+)
 from .post_handler import _load_managed_category, handle_profile_post
 from .search import _normalize_public_profile_query_value
 
@@ -232,6 +236,16 @@ def user_profile(request):
     category_management_edit_item = None
 
     if request.method == "POST":
+        # Inline reply from the contact-messages section. Short-circuits
+        # the generic profile POST handler because the action is owned
+        # entirely by the contact inbox module.
+        contact_reply_response = handle_contact_reply_post(
+            request,
+            capabilities=capabilities,
+        )
+        if contact_reply_response is not None:
+            return contact_reply_response
+
         post_result = handle_profile_post(
             request,
             profile=profile,
@@ -1837,5 +1851,16 @@ def user_profile(request):
         }
     )
     context.update(student_org_management_section)
+
+    # Contact inbox (public contact form) — only populated for superadmins.
+    # Returns the unread badge count on every render plus the full list
+    # when the section is actually being viewed.
+    context.update(
+        build_contact_inbox_context(
+            request,
+            capabilities=capabilities,
+            active_section=active_section,
+        )
+    )
 
     return render(request, "accounts/profile.html", context)

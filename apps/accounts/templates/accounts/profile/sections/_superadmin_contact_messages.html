@@ -1,0 +1,198 @@
+{% load i18n static %}
+{% comment %}
+Public contact-form inbox embedded in the user's profile sidebar.
+Only rendered when 'superadmin-contact-messages' is in allowed_sections.
+{% endcomment %}
+{% if 'superadmin-contact-messages' in allowed_sections %}
+<section class="profile-section-panel profile-section--contact-messages {% if active_section == 'superadmin-contact-messages' %}is-active{% endif %}"
+         data-profile-section-panel="superadmin-contact-messages"
+         data-source-url="{{ profile_base_url }}">
+    <header class="contact-msg-hero">
+        <span class="contact-msg-hero__icon" aria-hidden="true">
+            <i class="fas fa-inbox" aria-hidden="true"></i>
+        </span>
+        <div>
+            <p class="contact-msg-eyebrow">{% trans "Superadmin inbox" %}</p>
+            <h2>{% trans "Customer contact inbox" %}</h2>
+            <p>{% trans "Review public contact form messages and reply from the official EMSArena mailboxes." %}</p>
+        </div>
+    </header>
+
+    {# ---------- Detail + Reply view ---------- #}
+    {% if contact_selected_message %}
+        <div class="contact-msg-detail">
+            <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
+               class="contact-back-link">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                {% trans "Back to inbox" %}
+            </a>
+
+            <div class="contact-msg-card">
+                <div class="contact-msg-header">
+                    <h3>
+                        {{ contact_selected_message.name }}
+                        {% if contact_selected_message.reply_delivery_status == "sent" %}
+                            <span class="contact-pill contact-pill--ok">✓ {% trans "Sent" %}</span>
+                        {% elif contact_selected_message.reply_delivery_status == "pending" %}
+                            <span class="contact-pill contact-pill--pending">{% trans "Sending" %}</span>
+                        {% elif contact_selected_message.reply_delivery_status == "failed" %}
+                            <span class="contact-pill contact-pill--failed">{% trans "Failed" %}</span>
+                        {% elif contact_selected_message.reply_delivery_status == "recorded" %}
+                            <span class="contact-pill contact-pill--recorded">{% trans "Saved" %}</span>
+                        {% else %}
+                            <span class="contact-pill contact-pill--new">{% trans "New" %}</span>
+                        {% endif %}
+                    </h3>
+                    <p class="contact-msg-meta">
+                        <a href="mailto:{{ contact_selected_message.email }}">{{ contact_selected_message.email }}</a>
+                        {% if contact_selected_message.phone %} · {{ contact_selected_message.phone }}{% endif %}
+                        · {{ contact_selected_message.get_subject_display }}
+                        · {{ contact_selected_message.created_at|date:"d.m.Y H:i" }}
+                    </p>
+                </div>
+                <p class="contact-msg-card__label">{% trans "Customer message" %}</p>
+                <div class="contact-msg-body">{{ contact_selected_message.message }}</div>
+            </div>
+
+            {% if contact_selected_message.reply_delivery_status == "failed" %}
+            <div class="contact-delivery-alert contact-delivery-alert--failed">
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Email was not delivered." %}</strong>
+                    {% if contact_selected_message.reply_delivery_error %}
+                    <span>{{ contact_selected_message.reply_delivery_error }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif contact_selected_message.reply_delivery_status == "pending" %}
+            <div class="contact-delivery-alert contact-delivery-alert--pending">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Email delivery is still pending." %}</strong>
+                    <span>{% trans "Refresh shortly to see the final status." %}</span>
+                </div>
+            </div>
+            {% elif contact_selected_message.reply_delivery_status == "recorded" %}
+            <div class="contact-delivery-alert contact-delivery-alert--recorded">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Reply is saved, but delivery was not confirmed." %}</strong>
+                    <span>{% trans "Send it again to get a fresh delivery status." %}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post"
+                  action="{{ profile_base_url }}?section=superadmin-contact-messages&message_id={{ contact_selected_message.pk }}"
+                  class="contact-reply-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="contact_reply">
+                <input type="hidden" name="message_id" value="{{ contact_selected_message.pk }}">
+
+                <div class="contact-form-row">
+                    <label for="id_reply_from">{% trans "Send from" %}</label>
+                    <select name="reply_from" id="id_reply_from" required>
+                        <option value="info" {% if contact_selected_message.subject != 'support' %}selected{% endif %}>info@emsarena.com</option>
+                        <option value="support" {% if contact_selected_message.subject == 'support' %}selected{% endif %}>support@emsarena.com</option>
+                    </select>
+                </div>
+
+                <div class="contact-form-row">
+                    <label for="id_reply_body">{% trans "Reply" %}</label>
+                    <textarea name="reply_body" id="id_reply_body"
+                              rows="8" minlength="10" maxlength="10000" required
+                              placeholder="{% trans 'Write your reply...' %}">{{ contact_selected_message.reply_body }}</textarea>
+                    <small>{% trans "Plain text. Min 10, max 10000 characters." %}</small>
+                </div>
+
+                <div class="contact-form-actions">
+                    <button type="submit" class="contact-btn contact-btn--primary">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        {% trans "Send Reply" %}
+                    </button>
+                    <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
+                       class="contact-btn contact-btn--ghost">{% trans "Cancel" %}</a>
+                </div>
+            </form>
+
+            {% if contact_selected_message.reply_body %}
+            <div class="contact-msg-card contact-msg-card--previous-reply">
+                <h4>{% trans "Last reply attempt" %}</h4>
+                <p class="contact-msg-meta">
+                    {% trans "From" %}: {{ contact_selected_message.get_reply_from_display }}
+                    · {{ contact_selected_message.reply_sent_by|default:"-" }}
+                    {% if contact_selected_message.reply_sent_at %}
+                    · {{ contact_selected_message.reply_sent_at|date:"d.m.Y H:i" }}
+                    {% endif %}
+                </p>
+                <div class="contact-msg-body">{{ contact_selected_message.reply_body }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+    {# ---------- List view ---------- #}
+    {% else %}
+        <div class="contact-msg-toolbar">
+            <div class="contact-msg-stats">
+                <span class="contact-pill contact-pill--new">{% trans "New" %}: {{ contact_unhandled_count }}</span>
+                <span class="contact-pill contact-pill--ok">{% trans "Sent" %}: {{ contact_replied_count }}</span>
+                {% if contact_pending_count and contact_pending_count > 0 %}
+                <span class="contact-pill contact-pill--pending">{% trans "Sending" %}: {{ contact_pending_count }}</span>
+                {% endif %}
+                {% if contact_recorded_count and contact_recorded_count > 0 %}
+                <span class="contact-pill contact-pill--recorded">{% trans "Saved" %}: {{ contact_recorded_count }}</span>
+                {% endif %}
+                {% if contact_failed_count and contact_failed_count > 0 %}
+                <span class="contact-pill contact-pill--failed">{% trans "Failed" %}: {{ contact_failed_count }}</span>
+                {% endif %}
+                <span class="contact-pill">{% trans "Total" %}: {{ contact_total_count }}</span>
+            </div>
+            <form method="get" class="contact-msg-search">
+                <input type="hidden" name="section" value="superadmin-contact-messages">
+                <input type="search" name="q" value="{{ contact_search_query }}"
+                       placeholder="{% trans 'Search name, email, message...' %}">
+                <button type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
+            </form>
+        </div>
+
+        {% if contact_messages_list %}
+        <ul class="contact-msg-list">
+            {% for m in contact_messages_list %}
+            <li class="contact-msg-item {% if m.reply_delivery_status == 'failed' %}contact-msg-item--failed{% elif m.reply_delivery_status == 'pending' %}contact-msg-item--pending{% elif m.reply_delivery_status == 'recorded' %}contact-msg-item--recorded{% elif not m.is_handled %}contact-msg-item--unread{% endif %}">
+                <a href="{{ profile_base_url }}?section=superadmin-contact-messages&message_id={{ m.pk }}"
+                   class="contact-msg-link">
+                    <div class="contact-msg-row-main">
+                        <span class="contact-msg-sender">
+                            <strong>{{ m.name }}</strong>
+                            <span class="contact-msg-email">{{ m.email }}</span>
+                        </span>
+                        {% if m.reply_delivery_status == "sent" %}
+                            <span class="contact-pill contact-pill--ok">✓ {% trans "Sent" %}</span>
+                        {% elif m.reply_delivery_status == "pending" %}
+                            <span class="contact-pill contact-pill--pending">{% trans "Sending" %}</span>
+                        {% elif m.reply_delivery_status == "failed" %}
+                            <span class="contact-pill contact-pill--failed">{% trans "Failed" %}</span>
+                        {% elif m.reply_delivery_status == "recorded" %}
+                            <span class="contact-pill contact-pill--recorded">{% trans "Saved" %}</span>
+                        {% else %}
+                            <span class="contact-pill contact-pill--new">{% trans "New" %}</span>
+                        {% endif %}
+                        <span class="contact-msg-date">{{ m.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    <div class="contact-msg-row-sub">
+                        <span class="contact-msg-subject">{{ m.get_subject_display }}</span>
+                        <span class="contact-msg-snippet">{{ m.message|truncatechars:90 }}</span>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="contact-msg-empty">
+            <i class="fas fa-inbox" aria-hidden="true"></i>
+            <p>{% trans "No contact messages yet." %}</p>
+        </div>
+        {% endif %}
+    {% endif %}
+</section>
+{% endif %}
