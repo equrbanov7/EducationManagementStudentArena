@@ -410,7 +410,6 @@
     font-weight: 800;
 }
 
-.contact-form-row select,
 .contact-form-row textarea {
     box-sizing: border-box;
     width: 100%;
@@ -423,12 +422,71 @@
     font-size: 14px;
 }
 
+.contact-mail-switcher {
+    width: 100%;
+    min-width: 0;
+}
+
+.contact-mail-switcher .language-switcher__trigger {
+    width: 100%;
+    min-height: 48px;
+    border: 1.5px solid var(--contact-border);
+    border-radius: 10px;
+    padding: 11px 12px;
+    background: var(--contact-soft);
+    color: var(--contact-ink);
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.contact-mail-switcher .language-switcher__trigger:hover,
+.contact-mail-switcher.show .language-switcher__trigger {
+    border-color: var(--contact-blue);
+    background: #ffffff;
+}
+
+.contact-mail-switcher .language-switcher__trigger:focus-visible {
+    border-color: var(--contact-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.contact-mail-switcher .language-switcher__label {
+    color: var(--contact-muted);
+    font-weight: 800;
+}
+
+.contact-mail-switcher .language-switcher__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.contact-mail-switcher .language-switcher__menu {
+    left: 0;
+    right: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    z-index: 1300;
+}
+
+.contact-mail-switcher .language-switcher__menu.dropdown-menu[data-bs-popper] {
+    inset: calc(100% + 0.4rem) auto auto 0 !important;
+    right: auto !important;
+    left: 0 !important;
+}
+
+.contact-mail-switcher .language-switcher__option-code {
+    width: 46px;
+}
+
 .contact-form-row textarea {
     min-height: 180px;
     resize: vertical;
 }
 
-.contact-form-row select:focus,
 .contact-form-row textarea:focus {
     outline: none;
     border-color: var(--contact-blue);

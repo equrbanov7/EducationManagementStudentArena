@@ -91,10 +91,53 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
 
                 <div class="contact-form-row">
                     <label for="id_reply_from">{% trans "Send from" %}</label>
-                    <select name="reply_from" id="id_reply_from" required>
-                        <option value="info" {% if contact_selected_message.subject != 'support' %}selected{% endif %}>info@emsarena.com</option>
-                        <option value="support" {% if contact_selected_message.subject == 'support' %}selected{% endif %}>support@emsarena.com</option>
-                    </select>
+                    <input type="hidden"
+                           name="reply_from"
+                           id="id_reply_from"
+                           value="{% if contact_selected_message.subject == 'support' %}support{% else %}info{% endif %}"
+                           required
+                           data-contact-reply-from-input>
+                    <div class="dropdown language-switcher language-switcher--reply contact-mail-switcher"
+                         data-contact-reply-from>
+                        <button type="button"
+                                class="language-switcher__trigger dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                data-bs-display="static"
+                                aria-haspopup="listbox"
+                                aria-expanded="false">
+                            <span class="language-switcher__label">{% trans "Mailbox" %}</span>
+                            <span class="language-switcher__value" data-contact-reply-from-label>
+                                {% if contact_selected_message.subject == 'support' %}support@emsarena.com{% else %}info@emsarena.com{% endif %}
+                            </span>
+                            <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
+                        </button>
+                        <div class="language-switcher__menu dropdown-menu"
+                             role="listbox"
+                             aria-label="{% trans 'Send from' %}">
+                            <button type="button"
+                                    class="language-switcher__option dropdown-item {% if contact_selected_message.subject != 'support' %}is-active{% endif %}"
+                                    role="option"
+                                    aria-selected="{% if contact_selected_message.subject != 'support' %}true{% else %}false{% endif %}"
+                                    data-contact-reply-from-option
+                                    data-value="info"
+                                    data-label="info@emsarena.com">
+                                <span class="language-switcher__option-code">INFO</span>
+                                <span class="language-switcher__option-label">info@emsarena.com</span>
+                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+                            </button>
+                            <button type="button"
+                                    class="language-switcher__option dropdown-item {% if contact_selected_message.subject == 'support' %}is-active{% endif %}"
+                                    role="option"
+                                    aria-selected="{% if contact_selected_message.subject == 'support' %}true{% else %}false{% endif %}"
+                                    data-contact-reply-from-option
+                                    data-value="support"
+                                    data-label="support@emsarena.com">
+                                <span class="language-switcher__option-code">SUP</span>
+                                <span class="language-switcher__option-label">support@emsarena.com</span>
+                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="contact-form-row">
@@ -129,6 +172,31 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
             </div>
             {% endif %}
         </div>
+
+        <script nonce="{{ request.csp_nonce }}">
+        (function () {
+            'use strict';
+            document.querySelectorAll('[data-contact-reply-from]').forEach(function (picker) {
+                var row = picker.closest('.contact-form-row');
+                var input = row ? row.querySelector('[data-contact-reply-from-input]') : null;
+                var label = picker.querySelector('[data-contact-reply-from-label]');
+                if (!input || !label) {
+                    return;
+                }
+                picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (option) {
+                    option.addEventListener('click', function () {
+                        input.value = option.getAttribute('data-value') || '';
+                        label.textContent = option.getAttribute('data-label') || option.textContent.trim();
+                        picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (item) {
+                            var isActive = item === option;
+                            item.classList.toggle('is-active', isActive);
+                            item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                        });
+                    });
+                });
+            });
+        })();
+        </script>
 
     {# ---------- List view ---------- #}
     {% else %}

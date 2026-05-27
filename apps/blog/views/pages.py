@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from ..models import Category, Post
 from ..selectors import (
@@ -118,15 +119,14 @@ def about(request):
         request,
         "blog/about.html",
         {
-            "seo_title": "Haqqımızda – EMSArena",
-            "seo_description": (
-                "EMSArena təhsil idarəetmə, LMS və onlayn imtahan "
-                "platformasıdır. Komandamız, missiyamız və platformanın "
-                "imkanları haqqında məlumat."
+            "seo_title": _("Haqqımızda – EMSArena"),
+            "seo_description": _(
+                "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. "
+                "Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
             ),
             "seo_breadcrumbs": [
-                {"name": "Ana səhifə", "url": request.build_absolute_uri("/")},
-                {"name": "Haqqımızda", "url": request.build_absolute_uri()},
+                {"name": _("Ana səhifə"), "url": request.build_absolute_uri("/")},
+                {"name": _("Haqqımızda"), "url": request.build_absolute_uri()},
             ],
         },
     )

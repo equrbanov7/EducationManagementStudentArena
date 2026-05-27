@@ -1,8 +1,8 @@
-{% load i18n %}<!DOCTYPE html>
-<html lang="az">
+{% load i18n %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
-    <title>EMSArena – Cavab</title>
+    <title>{% trans "EMSArena – Cavab" %}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color:#0f172a;">
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f8fafc; padding:32px 16px;">
@@ -12,28 +12,27 @@
                     <tr>
                         <td style="background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%); padding:28px 32px; color:#ffffff;">
                             <p style="margin:0; font-size:13px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.85;">EMSArena</p>
-                            <h1 style="margin:6px 0 0; font-size:22px; font-weight:800;">Mesajınıza cavab</h1>
+                            <h1 style="margin:6px 0 0; font-size:22px; font-weight:800;">{% trans "Mesajınıza cavab" %}</h1>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:32px;">
                             <p style="margin:0 0 18px; font-size:16px; line-height:1.7;">
-                                Salam, <strong>{{ message.name }}</strong>!
+                                {% trans "Salam" %}, <strong>{{ message.name }}</strong>!
                             </p>
                             <p style="margin:0 0 22px; color:#475569; line-height:1.65;">
-                                EMSArena saytındakı mesajınız üçün təşəkkür edirik.
-                                Aşağıda cavabımızı tapa bilərsiniz.
+                                {% trans "EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz." %}
                             </p>
 
                             <div style="background-color:#f8fafc; border-left:4px solid #0f766e; padding:18px 22px; border-radius:8px; color:#0f172a; line-height:1.7; white-space:pre-wrap; font-size:15px;">{{ reply_body }}</div>
 
                             <hr style="border:none; border-top:1px solid #e2e8f0; margin:32px 0 24px;">
 
-                            <p style="margin:0 0 6px; font-size:13px; color:#64748b; font-weight:600;">Sizin orijinal mesajınız:</p>
+                            <p style="margin:0 0 6px; font-size:13px; color:#64748b; font-weight:600;">{% trans "Sizin orijinal mesajınız:" %}</p>
                             <div style="background-color:#f1f5f9; padding:14px 18px; border-radius:8px; color:#475569; font-size:14px; line-height:1.6; white-space:pre-wrap;">{{ message.message }}</div>
 
                             <p style="margin:28px 0 0; color:#94a3b8; font-size:13px;">
-                                Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək.
+                                {% trans "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək." %}
                             </p>
                         </td>
                     </tr>
@@ -43,7 +42,7 @@
                                 <tr>
                                     <td style="vertical-align:top;">
                                         <strong style="color:#0f172a;">EMSArena</strong><br>
-                                        Təhsil idarəetmə platforması<br>
+                                        {% trans "Təhsil idarəetmə platforması" %}<br>
                                         <a href="mailto:{{ from_email }}" style="color:#1e40af; text-decoration:none;">{{ from_email }}</a>
                                     </td>
                                     <td align="right" style="vertical-align:top;">

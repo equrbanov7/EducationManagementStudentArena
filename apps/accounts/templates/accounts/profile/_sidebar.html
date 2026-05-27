@@ -133,11 +133,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=create-category"
                data-section="create-category"
-               data-title="Create category"
+               data-title="{% trans 'Create category' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-category' %}active{% endif %}">
                 <i class="fas fa-folder-plus sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Create category</span>
+                <span class="sidebar-menu-text">{% trans "Create category" %}</span>
             </a>
         </li>
         {% endif %}
@@ -146,11 +146,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=category-management"
                data-section="category-management"
-               data-title="Categories"
+               data-title="{% trans 'Categories' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'category-management' %}active{% endif %}">
                 <i class="fas fa-sitemap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Categories</span>
+                <span class="sidebar-menu-text">{% trans "Categories" %}</span>
             </a>
         </li>
         {% endif %}
