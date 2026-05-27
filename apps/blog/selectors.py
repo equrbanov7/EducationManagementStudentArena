@@ -21,10 +21,13 @@ DEFAULT_TECHNOLOGY_CATEGORY_SLUG = "technology"
 _NAVBAR_CATEGORIES_TTL = 300  # 5 min — low mutation rate
 _SIDEBAR_CATEGORIES_TTL = 120  # 2 min — invalidated on post publish
 _POPULAR_TOPICS_TTL = 300  # 5 min — low mutation rate
+_TOP_POSTS_TTL = 180  # 3 min — refreshed often enough for view/like deltas
 
 _CACHE_KEY_NAVBAR = "emsarena:blog:navbar_categories"
 _CACHE_KEY_SIDEBAR = "emsarena:blog:sidebar_categories"
 _CACHE_KEY_POPULAR_TOPICS = "emsarena:blog:popular_topics"
+_CACHE_KEY_TOP_VIEWED = "emsarena:blog:top_viewed_posts"
+_CACHE_KEY_TOP_LIKED = "emsarena:blog:top_liked_posts"
 
 
 def _safe_cache_get(key):
@@ -260,10 +263,75 @@ def invalidate_blog_listing_cache() -> None:
             f"{_CACHE_KEY_SIDEBAR}:False",
             f"{_CACHE_KEY_POPULAR_TOPICS}:5",
             f"{_CACHE_KEY_POPULAR_TOPICS}:10",
+            f"{_CACHE_KEY_TOP_VIEWED}:3",
+            f"{_CACHE_KEY_TOP_VIEWED}:5",
+            f"{_CACHE_KEY_TOP_LIKED}:3",
+            f"{_CACHE_KEY_TOP_LIKED}:5",
         ]
         cache.delete_many(keys_to_delete)
     except Exception:
         logger.warning("Redis unavailable; could not invalidate blog listing cache")
+
+
+def get_top_viewed_posts(*, limit=3):
+    """Return the most-viewed published posts (descending by view_count).
+
+    Used by the homepage "Ən çox oxunan" widget. Results are cached briefly so
+    repeated landing-page hits don't hammer the DB. Only public, approved posts
+    are eligible — drafts and pending-approval items are excluded for safety.
+    """
+    cache_key = f"{_CACHE_KEY_TOP_VIEWED}:{limit}"
+    cached = _safe_cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    queryset = (
+        Post.objects.filter(
+            is_published=True,
+            approval_status=Post.ApprovalStatus.APPROVED,
+        )
+        .select_related("category", "author")
+        .order_by("-view_count", "-created_at")[:limit]
+    )
+    result = list(queryset)
+
+    try:
+        cache.set(cache_key, result, timeout=_TOP_POSTS_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; top viewed posts cache not populated")
+    return result
+
+
+def get_top_liked_posts(*, limit=3):
+    """Return the most-engaged-with published posts (ordered by comment count).
+
+    There is no native "like" model yet, so we use comment count as an
+    engagement proxy — posts attracting the most discussion surface first.
+    When a dedicated Reaction/Like model lands, swap the annotation here and
+    the homepage widget keeps working without further changes.
+    """
+    cache_key = f"{_CACHE_KEY_TOP_LIKED}:{limit}"
+    cached = _safe_cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    queryset = (
+        Post.objects.filter(
+            is_published=True,
+            approval_status=Post.ApprovalStatus.APPROVED,
+        )
+        .annotate(engagement_count=Count("comments"))
+        .filter(engagement_count__gt=0)
+        .select_related("category", "author")
+        .order_by("-engagement_count", "-view_count", "-created_at")[:limit]
+    )
+    result = list(queryset)
+
+    try:
+        cache.set(cache_key, result, timeout=_TOP_POSTS_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; top liked posts cache not populated")
+    return result
 
 
 def get_popular_topics(*, active_category=None, limit=5):
