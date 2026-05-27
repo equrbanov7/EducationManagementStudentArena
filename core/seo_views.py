@@ -61,6 +61,9 @@ ROOT_ASSET_MAP = {
     "favicon-512x512.png": "brand/favicon-512x512.png",
     "apple-touch-icon.png": "brand/apple-touch-icon.png",
     "logo.png": "brand/logo.png",
+    "logo.svg": "brand/logo-mark.svg",
+    "logo-horizontal.svg": "brand/logo-horizontal.svg",
+    "logo-stacked.svg": "brand/logo-stacked.svg",
     "og-image.jpg": "brand/og-image.jpg",
 }
 
@@ -197,6 +200,7 @@ def robots_txt(request):
 SITEMAP_ENTRIES = [
     ("home", "1.0", "weekly"),
     ("about", "0.7", "monthly"),
+    ("contact", "0.6", "monthly"),
     ("login", "0.5", "yearly"),
     ("register", "0.5", "yearly"),
 ]
@@ -217,10 +221,17 @@ def _resolve(entry_key: str) -> str | None:
 @require_GET
 @cache_control(max_age=86400, public=True)
 def sitemap_xml(request):
-    """Dynamic sitemap.xml covering only public, indexable URLs."""
+    """Dynamic sitemap.xml covering only public, indexable URLs.
+
+    The optional XSL stylesheet renders the XML as a human-readable
+    HTML table when opened directly in a browser. Crawlers ignore it
+    and parse the underlying XML as usual.
+    """
     today = now().date().isoformat()
+    xsl_url = static("seo/sitemap.xsl")
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<?xml-stylesheet type="text/xsl" href="{xsl_url}"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
     seen: set[str] = set()

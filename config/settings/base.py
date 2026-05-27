@@ -18,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 INSTALLED_APPS = [
     "apps.courses.apps.CoursesConfig",
     "apps.blog",
+    "apps.contact.apps.ContactConfig",
     "channels",
     "apps.live_exam",
     "apps.assignments",
@@ -319,14 +320,23 @@ SECURE_REFERRER_POLICY = os.getenv("REFERRER_POLICY", "strict-origin-when-cross-
 
 # Additional response headers that tighten browser-side defaults without
 # requiring per-view duplication.
+#
+# An env var set to an empty string ("") removes the header — useful in HTTP
+# dev where browsers ignore the COOP header anyway and only emit a noisy
+# console warning ("origin was untrustworthy"). Production must always send
+# the header, so we keep "same-origin" as the default.
 SECURITY_RESPONSE_HEADERS = {
-    "Referrer-Policy": SECURE_REFERRER_POLICY,
-    "Permissions-Policy": os.getenv(
-        "PERMISSIONS_POLICY",
-        "camera=(), geolocation=(), microphone=()",
-    ),
-    "Cross-Origin-Resource-Policy": os.getenv("CROSS_ORIGIN_RESOURCE_POLICY", "same-origin"),
-    "Cross-Origin-Opener-Policy": os.getenv("CROSS_ORIGIN_OPENER_POLICY", "same-origin"),
+    k: v
+    for k, v in {
+        "Referrer-Policy": SECURE_REFERRER_POLICY,
+        "Permissions-Policy": os.getenv(
+            "PERMISSIONS_POLICY",
+            "camera=(), geolocation=(), microphone=()",
+        ),
+        "Cross-Origin-Resource-Policy": os.getenv("CROSS_ORIGIN_RESOURCE_POLICY", "same-origin"),
+        "Cross-Origin-Opener-Policy": os.getenv("CROSS_ORIGIN_OPENER_POLICY", "same-origin"),
+    }.items()
+    if v
 }
 
 # Authentication backends
@@ -381,8 +391,30 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in {"1", "true", "ye
 EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@emsarena.com"
-EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+# SMTP socket timeout. Kept low so the request thread (or even background
+# threads) cannot stall on an unresponsive SMTP host. Override via env if
+# the upstream server is known-slow.
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "8"))
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+
+# ---------------------------------------------------------------------------
+# Contact form notifications
+# ---------------------------------------------------------------------------
+# Inbound public contact form submissions are delivered to this address.
+# Brevo has the following verified senders for emsarena.com:
+#   - support@emsarena.com  (technical / dispatch inbox)
+#   - info@emsarena.com     (general info & contact form recipient)
+#   - no-reply@emsarena.com (system / transactional sender)
+# Override via ``CONTACT_NOTIFY_EMAIL`` env var in production.
+CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL", "info@emsarena.com")
+CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL", "support@emsarena.com")
+CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL", "info@emsarena.com")
+
+# Brevo (formerly Sendinblue) HTTP API key. Used as a fallback when SMTP
+# fails (e.g., ISP blocks port 587). Generated in Brevo dashboard:
+# Settings → SMTP & API → API Keys. Port 443 / HTTPS bypasses every
+# port-blocking middlebox so this is the most reliable transport.
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 
 # ---------------------------------------------------------------------------
 # AI / Gemini configuration
