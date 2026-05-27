@@ -241,3 +241,10 @@ class ProductionAdminAllowlistSettingsTest(TestCase):
             EMAIL_HOST_USER="legacy-user@example.com",
         )
         self.assertEqual(module.EMAIL_HOST_USER, "a7359d001@smtp-brevo.com")
+
+    def test_contact_notify_email_is_available_in_production(self):
+        module = self._load_production_settings(
+            ADMIN_ALLOWED_IPS="",
+            CONTACT_NOTIFY_EMAIL="contact-target@example.com",
+        )
+        self.assertEqual(module.CONTACT_NOTIFY_EMAIL, "contact-target@example.com")
