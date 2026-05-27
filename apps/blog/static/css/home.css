@@ -174,7 +174,7 @@
         font-size: 1rem;
     }
     .home-search-wrapper {
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
     .home-active-filter-bar {
         padding: 16px;
@@ -186,9 +186,11 @@
     .home-clear-filter-link {
         width: 100%;
     }
+    /* Mobile-də sidebar artıq filter-rail-ə çevrilir, ona görə tək sütun
+       qalır — sidebar `display:none` ilə aşağıda gizlədilir. */
     .home-content-layout {
         grid-template-columns: 1fr;
-        gap: 50px;
+        gap: 28px;
     }
     .home-blog-grid {
         grid-template-columns: 1fr;
@@ -197,4 +199,41 @@
     .home-no-posts-message {
         padding: 30px 15px;
     }
+}
+
+/* ---------------------------------------------------------------------------
+   Top posts row (homepage)
+   --------------------------------------------------------------------------- */
+.home-top-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin: 0 0 36px;
+}
+
+@media (max-width: 992px) {
+    .home-top-posts-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile / tablet: hide the sticky sidebar, show the chip-rail filter instead
+   --------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+    .home-content-layout .sidebar { display: none; }
+}
+@media (min-width: 993px) {
+    .blog-filter-rail { display: none; }
+}
+
+/* a11y helper used by `<label class="visually-hidden">` and similar */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0);
+    white-space: nowrap; border: 0;
 }
