@@ -105,31 +105,37 @@ class ContactMessageAdmin(admin.ModelAdmin):
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_SENT:
             return format_html(
                 '<span style="background:#dcfce7;color:#166534;padding:3px 10px;'
-                'border-radius:999px;font-weight:600;font-size:12px;">✓ Cavablandı</span>'
+                'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+                _("✓ Cavablandı"),
             )
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_PENDING:
             return format_html(
                 '<span style="background:#dbeafe;color:#1d4ed8;padding:3px 10px;'
-                'border-radius:999px;font-weight:600;font-size:12px;">Göndərilir</span>'
+                'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+                _("Göndərilir"),
             )
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_FAILED:
             return format_html(
                 '<span style="background:#fee2e2;color:#991b1b;padding:3px 10px;'
-                'border-radius:999px;font-weight:600;font-size:12px;">Göndərilmədi</span>'
+                'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+                _("Göndərilmədi"),
             )
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_RECORDED:
             return format_html(
                 '<span style="background:#e2e8f0;color:#475569;padding:3px 10px;'
-                'border-radius:999px;font-weight:600;font-size:12px;">Qeyd edildi</span>'
+                'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+                _("Qeyd edildi"),
             )
         if obj.is_handled:
             return format_html(
                 '<span style="background:#fef3c7;color:#92400e;padding:3px 10px;'
-                'border-radius:999px;font-weight:600;font-size:12px;">Cavabsız bağlandı</span>'
+                'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+                _("Cavabsız bağlandı"),
             )
         return format_html(
             '<span style="background:#fee2e2;color:#991b1b;padding:3px 10px;'
-            'border-radius:999px;font-weight:600;font-size:12px;">Yeni</span>'
+            'border-radius:999px;font-weight:600;font-size:12px;">{}</span>',
+            _("Yeni"),
         )
 
     @admin.display(description=_("Cavab"))
@@ -141,29 +147,33 @@ class ContactMessageAdmin(admin.ModelAdmin):
             return format_html(
                 '<a href="{}" class="button" style="background:#0f766e;color:#fff;'
                 'padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;">'
-                "✓ Cavablandı — yenidən göndər</a>",
+                "{}</a>",
                 url,
+                _("✓ Cavablandı — yenidən göndər"),
             )
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_FAILED:
             return format_html(
                 '<a href="{}" class="button" style="background:#b91c1c;color:#fff;'
                 'padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;">'
-                "Yenidən cəhd et</a>",
+                "{}</a>",
                 url,
+                _("Yenidən cəhd et"),
             )
         if obj.reply_delivery_status == ContactMessage.REPLY_DELIVERY_RECORDED:
             return format_html(
                 '<a href="{}" class="button" style="background:#475569;color:#fff;'
                 'padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:600;">'
-                "Göndərişi təsdiqlə</a>",
+                "{}</a>",
                 url,
+                _("Göndərişi təsdiqlə"),
             )
         return format_html(
             '<a href="{}" class="button" style="background:linear-gradient(135deg,#1e40af,#0f766e);'
             "color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:700;"
             'box-shadow:0 4px 12px rgba(15,118,110,0.3);">'
-            "✉ Müştəriyə cavablandır</a>",
+            "{}</a>",
             url,
+            _("✉ Müştəriyə cavablandır"),
         )
 
     @admin.action(description=_("Cavablandırılmış kimi işarələ"))

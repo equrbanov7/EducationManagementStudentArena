@@ -27,6 +27,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils.translation import gettext as _
 
 from .models import ContactMessage
 
@@ -190,7 +191,10 @@ def _send_email_with_fallback(
 def _send_internal_notification(message: ContactMessage) -> bool:
     """Send the new-message alert to the configured staff mailbox."""
     recipient = _resolve_notify_address()
-    subject = f"[EMSArena Contact] {message.get_subject_display()} — {message.name}"
+    subject = _("[EMSArena Contact] %(subject)s — %(name)s") % {
+        "subject": message.get_subject_display(),
+        "name": message.name,
+    }
 
     site_url = getattr(settings, "SITE_URL", "https://emsarena.com").rstrip("/")
     admin_prefix = getattr(settings, "ADMIN_URL_PREFIX", "admin/").strip("/")
@@ -240,7 +244,7 @@ def _send_reply_email(message: ContactMessage, reply_body: str, reply_from: str)
     """Render and dispatch the reply email. Caller MUST persist already."""
     from_name, from_email = _REPLY_FROM_ADDRESSES[reply_from]
 
-    subject = f"Re: [EMSArena] {message.get_subject_display()}"
+    subject = _("Re: [EMSArena] %(subject)s") % {"subject": message.get_subject_display()}
     context = {
         "message": message,
         "reply_body": reply_body,
