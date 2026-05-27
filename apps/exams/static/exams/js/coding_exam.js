@@ -1323,6 +1323,14 @@
             syncStdinToQuestion();
             browserRunHasOutput = false;
             previewRunId += 1;
+
+            // Browser-run student code may pop alert()/confirm()/prompt(),
+            // which momentarily blurs the parent window or exits fullscreen.
+            // Open a short grace window so supervision does not count those
+            // browser-native interactions as tab switches or escape attempts.
+            if (window.ExamSupervision && typeof window.ExamSupervision.startPreviewGrace === "function") {
+                window.ExamSupervision.startPreviewGrace(5000);
+            }
             if (outputNode) outputNode.innerHTML = "";
             if (errorsNode) errorsNode.textContent = "";
             if (previewConsoleNode) previewConsoleNode.textContent = "";

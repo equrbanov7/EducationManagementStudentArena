@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 520" role="img" aria-label="EMSArena">
+  <defs>
+    <linearGradient id="emsArenaSGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="55%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="emsArenaSCap" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="emsArenaSTextLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A"/>
+      <stop offset="100%" stop-color="#1E40AF"/>
+    </linearGradient>
+    <linearGradient id="emsArenaSTextRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(150, 30)">
+    <g fill="none" stroke="url(#emsArenaSGradient)" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 6">
+      <path d="M55 70 Q100 25 145 70"/>
+    </g>
+    <g fill="url(#emsArenaSGradient)">
+      <circle cx="55" cy="70" r="5"/>
+      <circle cx="78" cy="48" r="4.5"/>
+      <circle cx="100" cy="40" r="5"/>
+      <circle cx="122" cy="48" r="4.5"/>
+      <circle cx="145" cy="70" r="5"/>
+    </g>
+    <path d="M30 130 Q100 100 170 130 L160 160 Q100 135 40 160 Z"
+          fill="url(#emsArenaSGradient)" opacity="0.95"/>
+    <path d="M40 160 Q100 135 160 160 L150 180 Q100 158 50 180 Z"
+          fill="url(#emsArenaSGradient)" opacity="0.8"/>
+    <path d="M70 115 L100 105 L130 115 L130 135 L100 125 L70 135 Z"
+          fill="#ffffff" opacity="0.95"/>
+    <line x1="100" y1="105" x2="100" y2="125" stroke="#0F766E" stroke-width="1.5"/>
+    <polygon points="100,55 145,75 100,95 55,75" fill="url(#emsArenaSCap)"/>
+    <rect x="85" y="88" width="30" height="14" rx="2" fill="url(#emsArenaSCap)"/>
+    <line x1="135" y1="78" x2="135" y2="100" stroke="url(#emsArenaSCap)" stroke-width="2.5"/>
+    <circle cx="135" cy="102" r="3.5" fill="#1E3A8A"/>
+  </g>
+
+  <text x="250" y="450" text-anchor="middle"
+        font-family="'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="80" letter-spacing="-1">
+    <tspan fill="url(#emsArenaSTextLeft)" font-weight="800">EMS</tspan><tspan fill="url(#emsArenaSTextRight)" font-weight="600">Arena</tspan>
+  </text>
+</svg>

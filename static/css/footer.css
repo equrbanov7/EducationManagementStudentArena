@@ -1,17 +1,238 @@
- /* --- Footer --- */
- footer {
-    background-color: #111827;
-    color: white;
-    text-align: center;
-    padding: 40px 20px;
+/* static/css/footer.css
+   EMSArena – Modern, accessible footer.
+   Mobile-first with desktop columns. */
+
+.ems-footer {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    color: #cbd5e1;
+    padding: 64px 24px 0;
     margin-top: auto;
-
-    width: 100%;
-
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
-.footer-location {
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: #6b7280;
+.ems-footer__container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ---------- Top section ---------- */
+.ems-footer__top {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    gap: 40px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ems-footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 320px;
+}
+
+.ems-footer__logo {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.ems-footer__logo-img {
+    height: 48px;
+    width: auto;
+    max-width: 100%;
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+}
+
+.ems-footer__tagline {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* Socials */
+.ems-footer__socials {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.ems-footer__social {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ems-footer__social:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.3);
+}
+
+/* Columns */
+.ems-footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ems-footer__col-title {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.ems-footer__col-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 32px;
+    height: 2px;
+    background: linear-gradient(90deg, #1e40af, #10b981);
+    border-radius: 2px;
+}
+
+.ems-footer__list,
+.ems-footer__contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ems-footer__link {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-block;
+}
+
+.ems-footer__link:hover {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.ems-footer__link--accent {
+    color: #5eead4;
+    font-weight: 600;
+}
+
+.ems-footer__link--accent:hover {
+    color: #99f6e4;
+}
+
+/* Contact list items */
+.ems-footer__contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.ems-footer__contact-item i {
+    color: #5eead4;
+    margin-top: 4px;
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+}
+
+.ems-footer__contact-item span {
+    color: #cbd5e1;
+}
+
+/* CTA button in footer */
+.ems-footer__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    align-self: flex-start;
+}
+
+.ems-footer__cta:hover {
+    transform: translateY(-2px);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(15, 118, 110, 0.4);
+}
+
+/* ---------- Bottom section ---------- */
+.ems-footer__bottom {
+    padding: 24px 0 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.ems-footer__copy,
+.ems-footer__made-by {
+    margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+    .ems-footer__top {
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+    }
+    .ems-footer__brand {
+        grid-column: 1 / -1;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .ems-footer { padding: 48px 18px 0; }
+    .ems-footer__top {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding-bottom: 36px;
+    }
+    .ems-footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+/* ---------- Legacy compatibility ---------- */
+/* Keep old selectors functional in case any partial still references them */
+footer.ems-footer .footer-location {
+    color: #94a3b8;
+    font-size: 0.85rem;
 }

@@ -5,83 +5,174 @@
 {% block title %}{{ seo_title }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/about.css' %}">
-    {# Animasiyalar üçün əlavə kitabxana (əgər yoxdursa) - opsional #}
-    {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> #}
+    <link rel="stylesheet" href="{% static 'css/about.css' %}?v=20260527-1">
 {% endblock %}
 
 {% block content %}
 <div class="ems-container">
 
+    {# ---------- Hero ---------- #}
     <header class="ems-hero animate-fade-down">
-        <h1 class="main-title">
-            <span class="highlight">EMSArena</span>: {% trans "hero_title" context "blog.about_page" %}
-        </h1>
-        <p class="hero-description">
-            {% trans "hero_description" context "blog.about_page" %}
-        </p>
+        <div class="ems-hero__content">
+            <span class="ems-hero__eyebrow">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                {% trans "EMSArena ilə tanış olun" %}
+            </span>
+            <h1 class="main-title">
+                <span class="highlight">EMSArena</span>: {% trans "təhsilin yeni nəsil arenası" %}
+            </h1>
+            <p class="hero-description">
+                {% trans "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi." %}
+            </p>
+            <div class="ems-hero__actions">
+                <a href="{% url 'accounts:register' %}" class="ems-btn ems-btn--primary">
+                    <i class="fas fa-rocket" aria-hidden="true"></i>
+                    {% trans "Pulsuz başla" %}
+                </a>
+                <a href="{% url 'contact' %}" class="ems-btn ems-btn--ghost">
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                    {% trans "Bizimlə əlaqə" %}
+                </a>
+            </div>
+        </div>
+        <div class="ems-hero__visual">
+            <img src="{% static 'brand/logo-stacked.svg' %}"
+                 alt="{% trans 'EMSArena loqo' %}"
+                 class="ems-hero__logo"
+                 loading="eager">
+        </div>
     </header>
 
-    <section class="ems-features-section">
-        <h2 class="section-title animate-fade-in">{% trans "section_title" context "blog.about_page" %}</h2>
-        
-        <div class="features-grid">
-            
-            <div class="feature-card animate-slide-up delay-1">
-                <div class="icon-wrapper">
-                    <i class="fas fa-folder-open"></i> </div>
-                <h3 class="feature-title">{% trans "feature_1_title" context "blog.about_page" %}</h3>
-                <p class="feature-text">
-                    {% trans "feature_1_text" context "blog.about_page" %}
-                </p>
-            </div>
-
-            <div class="feature-card animate-slide-up delay-2">
-                <div class="icon-wrapper">
-                    <i class="fas fa-sitemap"></i>
-                </div>
-                <h3 class="feature-title">{% trans "feature_2_title" context "blog.about_page" %}</h3>
-                <p class="feature-text">
-                    {% trans "feature_2_text" context "blog.about_page" %}
-                </p>
-            </div>
-
-            <div class="feature-card animate-slide-up delay-3">
-                <div class="icon-wrapper">
-                    <i class="fas fa-users-cog"></i>
-                </div>
-                <h3 class="feature-title">{% trans "feature_3_title" context "blog.about_page" %}</h3>
-                <p class="feature-text">
-                    {% trans "feature_3_text" context "blog.about_page" %}
-                </p>
-            </div>
-
-            <div class="feature-card animate-slide-up delay-4">
-                <div class="icon-wrapper">
-                    <i class="fas fa-clipboard-check"></i>
-                </div>
-                <h3 class="feature-title">{% trans "feature_4_title" context "blog.about_page" %}</h3>
-                <p class="feature-text">
-                    {% trans "feature_4_text" context "blog.about_page" %}
-                </p>
-            </div>
-
-             <div class="feature-card animate-slide-up delay-5" style="grid-column: span 1 / -1; max-width: 800px; margin: 0 auto;">
-                <div class="icon-wrapper">
-                    <i class="fas fa-building"></i>
-                </div>
-                <h3 class="feature-title">{% trans "feature_5_title" context "blog.about_page" %}</h3>
-                <p class="feature-text">
-                    {% trans "feature_5_text" context "blog.about_page" %}
-                </p>
-            </div>
-
+    {# ---------- Platform highlights (realistic for early-stage product) ---------- #}
+    <section class="ems-stats animate-fade-in delay-1" aria-label="{% trans 'EMSArena platform xüsusiyyətləri' %}">
+        <div class="ems-stat">
+            <p class="ems-stat__number">4</p>
+            <p class="ems-stat__label">{% trans "Dəstəklənən dil" %}</p>
+        </div>
+        <div class="ems-stat">
+            <p class="ems-stat__number">5+</p>
+            <p class="ems-stat__label">{% trans "İmtahan növü" %}</p>
+        </div>
+        <div class="ems-stat">
+            <p class="ems-stat__number">24/7</p>
+            <p class="ems-stat__label">{% trans "Platform əlçatanlığı" %}</p>
+        </div>
+        <div class="ems-stat">
+            <p class="ems-stat__number">100%</p>
+            <p class="ems-stat__label">{% trans "Tenant izolyasiyası" %}</p>
         </div>
     </section>
 
-    <div class="cta-section animate-fade-in delay-6">
-        <p>{% trans "cta_text" context "blog.about_page" %}</p>
-        <a href="#" class="cta-button">{% trans "cta_button" context "blog.about_page" %} &rarr;</a>
+    {# ---------- Mission & Vision ---------- #}
+    <section class="ems-mission" aria-labelledby="mission-vision-title">
+        <h2 id="mission-vision-title" class="visually-hidden">{% trans "Missiya və Vizyon" %}</h2>
+        <article class="ems-mission__card animate-slide-up delay-1">
+            <span class="ems-mission__icon"><i class="fas fa-bullseye" aria-hidden="true"></i></span>
+            <h3 class="ems-mission__title">{% trans "Missiyamız" %}</h3>
+            <p class="ems-mission__text">
+                {% trans "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən platforma ilə tədrisi sadələşdirmək." %}
+            </p>
+        </article>
+        <article class="ems-mission__card animate-slide-up delay-2">
+            <span class="ems-mission__icon"><i class="fas fa-eye" aria-hidden="true"></i></span>
+            <h3 class="ems-mission__title">{% trans "Vizyonumuz" %}</h3>
+            <p class="ems-mission__text">
+                {% trans "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün uyğun." %}
+            </p>
+        </article>
+    </section>
+
+    {# ---------- Features ---------- #}
+    <section class="ems-features-section">
+        <h2 class="section-title animate-fade-in">{% trans "Platformanın imkanları" %}</h2>
+        <p class="section-subtitle animate-fade-in delay-1">
+            {% trans "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım olan hər şey." %}
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-card animate-slide-up delay-1">
+                <div class="icon-wrapper"><i class="fas fa-folder-open" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "Kurs və qruplar" %}</h3>
+                <p class="feature-text">{% trans "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün sadə, tələbə üçün aydın." %}</p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-2">
+                <div class="icon-wrapper"><i class="fas fa-sitemap" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "Multi-tenant memarlıq" %}</h3>
+                <p class="feature-text">{% trans "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə qarışmır, RBAC ciddi tətbiq olunur." %}</p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-3">
+                <div class="icon-wrapper"><i class="fas fa-users-cog" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "Rol-əsaslı icazələr" %}</h3>
+                <p class="feature-text">{% trans "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs yalnız ona icazə verilən məlumatı görür." %}</p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-4">
+                <div class="icon-wrapper"><i class="fas fa-clipboard-check" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "İmtahanlar və qiymətləndirmə" %}</h3>
+                <p class="feature-text">{% trans "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, analitika və anti-cheat parametrləri." %}</p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-5">
+                <div class="icon-wrapper"><i class="fas fa-building" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "Audit və təhlükəsizlik" %}</h3>
+                <p class="feature-text">{% trans "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və CSP siyasətləri ilə qorunan." %}</p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-6">
+                <div class="icon-wrapper"><i class="fas fa-robot" aria-hidden="true"></i></div>
+                <h3 class="feature-title">{% trans "AI köməkçi" %}</h3>
+                <p class="feature-text">{% trans "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya kömək edən ağıllı assistent." %}</p>
+            </div>
+        </div>
+    </section>
+
+    {# ---------- Team / Founder ---------- #}
+    <section class="ems-team" aria-labelledby="team-title">
+        <h2 id="team-title" class="section-title animate-fade-in">
+            {% trans "Komanda" %}
+        </h2>
+        <p class="section-subtitle animate-fade-in delay-1">
+            {% trans "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü dizayn və etibarlı texnologiya əsas prioritetlərimizdir." %}
+        </p>
+
+        <div class="team-grid">
+            <article class="team-card animate-slide-up delay-1">
+                <div class="team-card__avatar" aria-hidden="true">EQ</div>
+                <h3 class="team-card__name">Elvin Qurbanov</h3>
+                <p class="team-card__role">{% trans "Founder · Full-stack Engineer" %}</p>
+                <p class="team-card__bio">{% trans "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan sistemlər sahəsində mütəxəssis." %}</p>
+            </article>
+            <article class="team-card animate-slide-up delay-2">
+                <div class="team-card__avatar" aria-hidden="true"><i class="fas fa-code" aria-hidden="true"></i></div>
+                <h3 class="team-card__name">{% trans "Mühəndislik komandası" %}</h3>
+                <p class="team-card__role">{% trans "Backend · Frontend · DevOps" %}</p>
+                <p class="team-card__bio">{% trans "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli mühəndislər." %}</p>
+            </article>
+            <article class="team-card animate-slide-up delay-3">
+                <div class="team-card__avatar" aria-hidden="true"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i></div>
+                <h3 class="team-card__name">{% trans "Pedaqoji məsləhətçilər" %}</h3>
+                <p class="team-card__role">{% trans "Təhsil eksperti · Metodoloq" %}</p>
+                <p class="team-card__bio">{% trans "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji düzgünlüyünü təmin edirlər." %}</p>
+            </article>
+        </div>
+    </section>
+
+    {# ---------- CTA ---------- #}
+    <div class="cta-section animate-fade-in delay-3">
+        <h3>{% trans "Təhsilinizi növbəti səviyyəyə qaldıraq" %}</h3>
+        <p>{% trans "Bir abunəlikdə kurs, imtahan, audit və AI — hamısı bir yerdə." %}</p>
+        <div class="cta-actions">
+            <a href="{% url 'accounts:register' %}" class="cta-button">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                {% trans "Pulsuz qeydiyyat" %}
+            </a>
+            <a href="{% url 'contact' %}" class="cta-button cta-button--outline">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                {% trans "Demo tələb et" %}
+            </a>
+        </div>
     </div>
 
 </div>

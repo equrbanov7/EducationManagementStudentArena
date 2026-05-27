@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'contact/css/contact.css' %}?v=20260527-2">
+{% endblock %}
+
+{% block content %}
+<div class="ems-contact">
+
+    {# ---------- Hero ---------- #}
+    <section class="ems-contact__hero">
+        <div class="ems-contact__hero-inner">
+            <span class="ems-contact__eyebrow">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                {% trans "Əlaqə" %}
+            </span>
+            <h1 class="ems-contact__title">
+                {% trans "Bizimlə əlaqə saxlayın" %}
+            </h1>
+            <p class="ems-contact__lead">
+                {% trans "Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində cavab veririk." %}
+            </p>
+        </div>
+    </section>
+
+    {# ---------- Main grid ---------- #}
+    <section class="ems-contact__grid">
+
+        {# Info cards #}
+        <aside class="ems-contact__info">
+            <div class="ems-contact__info-card">
+                <span class="ems-contact__info-icon"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
+                <h3 class="ems-contact__info-title">{% trans "Email" %}</h3>
+                <a href="mailto:info@emsarena.com" class="ems-contact__info-link">info@emsarena.com</a>
+                <a href="mailto:support@emsarena.com" class="ems-contact__info-link">support@emsarena.com</a>
+                <p class="ems-contact__info-hint">{% trans "info – ümumi, support – texniki dəstək" %}</p>
+            </div>
+
+            <div class="ems-contact__info-card">
+                <span class="ems-contact__info-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></span>
+                <h3 class="ems-contact__info-title">WhatsApp</h3>
+                <a href="https://wa.me/994000000000" target="_blank" rel="noopener noreferrer" class="ems-contact__info-link">+994 (00) 000-00-00</a>
+                <p class="ems-contact__info-hint">{% trans "Tez cavab üçün ən sürətli kanal" %}</p>
+            </div>
+
+            <div class="ems-contact__info-card">
+                <span class="ems-contact__info-icon"><i class="fab fa-instagram" aria-hidden="true"></i></span>
+                <h3 class="ems-contact__info-title">Instagram</h3>
+                <a href="https://instagram.com/emsarena_edtech" target="_blank" rel="noopener noreferrer" class="ems-contact__info-link">@emsarena_edtech</a>
+                <p class="ems-contact__info-hint">{% trans "Xəbərlər və yeniliklər" %}</p>
+            </div>
+
+            <div class="ems-contact__info-card ems-contact__info-card--social">
+                <h3 class="ems-contact__info-title">{% trans "Bizi izləyin" %}</h3>
+                <div class="ems-contact__socials">
+                    <a href="https://instagram.com/emsarena_edtech"
+                       target="_blank" rel="noopener noreferrer"
+                       class="ems-contact__social"
+                       aria-label="Instagram">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://wa.me/994000000000"
+                       target="_blank" rel="noopener noreferrer"
+                       class="ems-contact__social"
+                       aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                    </a>
+                    <a href="mailto:info@emsarena.com"
+                       class="ems-contact__social"
+                       aria-label="Email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        {# Form card #}
+        <div class="ems-contact__form-wrapper">
+            <div class="ems-contact__form-card">
+                {% if submitted %}
+                    <div class="ems-contact__success" role="status" aria-live="polite">
+                        <span class="ems-contact__success-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+                        <h2>{% trans "Mesajınız göndərildi!" %}</h2>
+                        <p>{% trans "Diqqətiniz üçün təşəkkür edirik. Tezliklə sizinlə əlaqə saxlayacağıq." %}</p>
+                        <a href="{% url 'contact' %}" class="ems-contact__btn ems-contact__btn--ghost">
+                            {% trans "Yeni mesaj göndər" %}
+                        </a>
+                    </div>
+                {% else %}
+                    <h2 class="ems-contact__form-title">{% trans "Bizə yazın" %}</h2>
+                    <p class="ems-contact__form-sub">
+                        {% trans "Formadakı bütün məlumatlar konfidensial saxlanılır." %}
+                    </p>
+
+                    <form method="post" novalidate class="ems-contact__form">
+                        {% csrf_token %}
+
+                        {# Honeypot — visually & semantically hidden from real users #}
+                        <div class="ems-contact__honeypot" aria-hidden="true">
+                            <label for="id_website">Website</label>
+                            {{ form.website }}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="ems-contact__alert ems-contact__alert--error" role="alert">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="ems-contact__row">
+                            <div class="ems-contact__field">
+                                <label for="{{ form.name.id_for_label }}" class="ems-contact__label">
+                                    {% trans "Ad Soyad" %} <span class="ems-contact__required">*</span>
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}<small class="ems-contact__error">{{ form.name.errors.0 }}</small>{% endif %}
+                            </div>
+                            <div class="ems-contact__field">
+                                <label for="{{ form.email.id_for_label }}" class="ems-contact__label">
+                                    {% trans "Email" %} <span class="ems-contact__required">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<small class="ems-contact__error">{{ form.email.errors.0 }}</small>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="ems-contact__row">
+                            <div class="ems-contact__field">
+                                <label for="{{ form.phone.id_for_label }}" class="ems-contact__label">
+                                    {% trans "Telefon" %}
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}<small class="ems-contact__error">{{ form.phone.errors.0 }}</small>{% endif %}
+                            </div>
+                            <div class="ems-contact__field">
+                                <label for="{{ form.subject.id_for_label }}" class="ems-contact__label">
+                                    {% trans "Mövzu" %} <span class="ems-contact__required">*</span>
+                                </label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}<small class="ems-contact__error">{{ form.subject.errors.0 }}</small>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="ems-contact__field">
+                            <label for="{{ form.message.id_for_label }}" class="ems-contact__label">
+                                {% trans "Mesaj" %} <span class="ems-contact__required">*</span>
+                            </label>
+                            {{ form.message }}
+                            {% if form.message.errors %}<small class="ems-contact__error">{{ form.message.errors.0 }}</small>{% endif %}
+                            <small class="ems-contact__hint">{% trans "Ən azı 10, ən çoxu 5000 simvol" %}</small>
+                        </div>
+
+                        <button type="submit" class="ems-contact__btn ems-contact__btn--primary">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            {% trans "Mesajı göndər" %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {# ---------- FAQ ---------- #}
+    <section class="ems-contact__faq" aria-labelledby="contact-faq-title">
+        <h2 id="contact-faq-title" class="ems-contact__faq-title">
+            {% trans "Tez-tez verilən suallar" %}
+        </h2>
+
+        <div class="ems-contact__faq-list">
+            <details class="ems-contact__faq-item">
+                <summary>{% trans "EMSArena hansı təşkilatlar üçün uyğundur?" %}</summary>
+                <p>{% trans "Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər təşkilat öz məkanını idarə edir." %}</p>
+            </details>
+
+            <details class="ems-contact__faq-item">
+                <summary>{% trans "Demo və ya pulsuz sınaq müddəti var?" %}</summary>
+                <p>{% trans "Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. Formada 'Satış / Demo' mövzusunu seçin." %}</p>
+            </details>
+
+            <details class="ems-contact__faq-item">
+                <summary>{% trans "Texniki dəstək necə alınır?" %}</summary>
+                <p>{% trans "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər." %}</p>
+            </details>
+
+            <details class="ems-contact__faq-item">
+                <summary>{% trans "Məlumatlarım təhlükəsizdir?" %}</summary>
+                <p>{% trans "Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur." %}</p>
+            </details>
+
+            <details class="ems-contact__faq-item">
+                <summary>{% trans "AI köməkçi necə işləyir?" %}</summary>
+                <p>{% trans "AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında suallar verə bilər." %}</p>
+            </details>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -35,6 +35,9 @@ from .base import (
     CELERY_TASK_TRACK_STARTED,
     CELERY_TIMEZONE,
     CHANNEL_LAYERS,
+    CONTACT_NOTIFY_EMAIL,
+    CONTACT_PUBLIC_EMAIL,
+    CONTACT_SUPPORT_EMAIL,
     CONTENT_SECURITY_POLICY,
     CSRF_COOKIE_HTTPONLY,
     CSRF_COOKIE_SAMESITE,
@@ -140,6 +143,11 @@ def _env_bool(name: str, default: bool) -> bool:
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
+CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL") or CONTACT_NOTIFY_EMAIL
+CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL") or CONTACT_SUPPORT_EMAIL
+CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL") or CONTACT_PUBLIC_EMAIL
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+
 # ---------------------------------------------------------------------------
 # AI / Gemini configuration
 # ---------------------------------------------------------------------------
@@ -163,6 +171,12 @@ if not SECRET_KEY:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DEBUG", True)
+
+# Browsers silently ignore Cross-Origin-Opener-Policy when the page is served
+# over plain HTTP (the "untrustworthy origin" warning in DevTools), so we
+# drop the header in local dev to keep the console clean. Production still
+# sets it via base.py defaults.
+SECURITY_RESPONSE_HEADERS = {k: v for k, v in SECURITY_RESPONSE_HEADERS.items() if k != "Cross-Origin-Opener-Policy"}
 USE_REDIS = _env_bool("USE_REDIS", False)
 
 # ALLOWED_HOSTS - read from .env or use default
