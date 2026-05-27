@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from apps.accounts.models import ProfileRole
 from apps.notifications.models import (
@@ -2492,8 +2493,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "?section=create-category")
         self.assertContains(response, "?section=category-management")
-        self.assertContains(response, "Create category")
-        self.assertContains(response, "Categories")
+        self.assertContains(response, _("Create category"))
+        self.assertContains(response, _("Categories"))
         self.assertContains(response, "Technology")
         self.assertContains(response, "js-category-management-search-form")
         self.assertContains(response, "data-category-subcategory-toggle")
