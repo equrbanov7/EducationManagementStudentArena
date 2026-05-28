@@ -120,6 +120,14 @@ services:
       AUTH_OTP_MAX_SENDS_PER_HOUR: ${AUTH_OTP_MAX_SENDS_PER_HOUR:-5}
       SENTRY_DSN: ${SENTRY_DSN:-}
       MEDIA_ACCEL_REDIRECT_URL: /internal_media
+      # Practical coding exam sandbox: with self-hosted Piston we point at the
+      # internal `piston` service (no auth, accessible only on the bridge
+      # network). Override via .env only when migrating to managed Piston.
+      CODING_EXECUTION_BACKEND: ${CODING_EXECUTION_BACKEND:-auto}
+      CODING_PISTON_URL: ${CODING_PISTON_URL:-http://piston:2000/api/v2}
+      CODING_PISTON_AUTH_TOKEN: ${CODING_PISTON_AUTH_TOKEN:-}
+      CODING_RUN_RATE_LIMIT_PER_MINUTE: ${CODING_RUN_RATE_LIMIT_PER_MINUTE:-600}
+      CODING_RUN_MAX_CONCURRENT_PER_USER: ${CODING_RUN_MAX_CONCURRENT_PER_USER:-2}
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
@@ -128,6 +136,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      piston:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -182,6 +192,53 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
+  # Piston — self-hosted code execution sandbox
+  # Used to run student-submitted code for practical/coding exams. The
+  # official engineer-man/piston image bundles isolated runtimes for
+  # Python, JavaScript, C++, Java and many more languages; it runs each
+  # submission in its own cgroup-isolated nsjail with memory/CPU/PID
+  # limits enforced by the Piston supervisor.
+  #
+  # Security:
+  #   - Not exposed externally; only the Django app can reach port 2000
+  #     over the internal emsarena-network bridge.
+  #   - Privileged mode is required because Piston uses isolate/nsjail
+  #     which needs cap_sys_admin to create user namespaces. This is the
+  #     same trust boundary you would grant Docker itself.
+  #   - The /piston volume holds installed language runtimes so we don't
+  #     re-download them on every container restart.
+  #
+  # Capacity:
+  #   - Each Piston worker handles ~1 submission at a time. Scale by
+  #     increasing PISTON_MAX_CONCURRENT_JOBS (memory permitting) or by
+  #     running multiple piston replicas behind an internal load balancer.
+  # ─────────────────────────────────────────────────────────────────────────
+  piston:
+    image: ghcr.io/engineer-man/piston:latest
+    container_name: emsarena-piston
+    restart: unless-stopped
+    privileged: true
+    tmpfs:
+      - /tmp:exec,size=1g
+    volumes:
+      - piston_packages:/piston
+    environment:
+      # Tuning for ~100 concurrent students. Each in-flight submission
+      # gets its own short-lived sandbox; idle memory cost is small.
+      PISTON_MAX_CONCURRENT_JOBS: ${PISTON_MAX_CONCURRENT_JOBS:-16}
+      PISTON_COMPILE_TIMEOUT: ${PISTON_COMPILE_TIMEOUT:-10000}
+      PISTON_RUN_TIMEOUT: ${PISTON_RUN_TIMEOUT:-15000}
+      PISTON_OUTPUT_MAX_SIZE: ${PISTON_OUTPUT_MAX_SIZE:-65536}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:2000/api/v2/runtimes >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
   # Nginx — reverse proxy and static/media file server
   # The only service with external port bindings (80 and 443).
   # ─────────────────────────────────────────────────────────────────────────
@@ -215,3 +272,4 @@ volumes:
   redis_data:
   media_data:
   static_data:
+  piston_packages:
