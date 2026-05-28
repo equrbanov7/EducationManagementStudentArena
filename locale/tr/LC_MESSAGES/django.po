@@ -10812,6 +10812,10 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
 msgstr "Yazılı cevapların değerlendirilmesi"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_execution_note"
+msgstr "Çalıştırma notu (genişletmek için tıklayın)"
+
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"

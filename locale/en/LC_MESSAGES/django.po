@@ -10722,6 +10722,10 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
 msgstr "Written answer review"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_execution_note"
+msgstr "Execution note (click to expand)"
+
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"
