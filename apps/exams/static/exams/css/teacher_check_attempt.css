@@ -687,3 +687,58 @@
     max-width: 96px !important;
 }
 /* ==================================== */
+
+/*
+ * Praktiki (coding) imtahanların icra qeydi.
+ * Runner stdin/DOM olmadığı üçün "runtime_error" verə bilər, halbuki
+ * tələbənin kodu konseptual olaraq düzgündür. Bu blok müəllimi qorxudan
+ * qırmızı traceback yerinə neytral, daraldıla bilən qeyd kimi göstərilir.
+ */
+.coding-exec-note {
+    margin-top: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: hidden;
+}
+.coding-exec-note > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #64748b;
+    user-select: none;
+}
+.coding-exec-note > summary::-webkit-details-marker {
+    display: none;
+}
+.coding-exec-note > summary::before {
+    content: "\2139"; /* ℹ info simvolu — font asılılığı yoxdur */
+    color: #94a3b8;
+    font-weight: 700;
+}
+.coding-exec-note > summary::after {
+    content: "\25B8"; /* ▸ */
+    margin-left: auto;
+    color: #94a3b8;
+    transition: transform 0.15s ease;
+}
+.coding-exec-note[open] > summary::after {
+    transform: rotate(90deg);
+}
+.coding-exec-note pre {
+    margin: 0;
+    padding: 10px 12px;
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569; /* neytral boz — qırmızı deyil */
+    font-size: 0.82em;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 220px;
+    overflow: auto;
+}
