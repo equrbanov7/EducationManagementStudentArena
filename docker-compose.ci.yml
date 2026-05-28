@@ -26,10 +26,16 @@ services:
     healthcheck:
       disable: true
 
-  # Remove the piston dependency from the app service.
+  # Mark the piston dependency as not required so compose won't block
+  # the app waiting for a service that has 0 replicas.
+  # Note: In Docker Compose v2, depends_on maps are merged (not replaced),
+  # so we must override the piston entry specifically.
   app:
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      piston:
+        condition: service_started
+        required: false
