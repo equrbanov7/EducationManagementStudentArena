@@ -424,6 +424,34 @@ BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 # feature degrades gracefully (shows a "not configured" message).
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
+# ---------------------------------------------------------------------------
+# Practical coding exam — sandbox execution backend
+# ---------------------------------------------------------------------------
+# Selects which executor runs student-submitted code for practical/coding
+# exams. The Django process itself never executes the code.
+#
+#   - "docker" : run in local Docker (best isolation, requires daemon access).
+#   - "piston" : forward to a Piston HTTP server (used by Render/Heroku/etc).
+#   - "auto"   : prefer Docker when available, else fall back to Piston.
+#
+# Default is "auto" so local-with-Docker dev keeps using Docker but production
+# (where the Docker daemon is unreachable) automatically uses Piston instead
+# of returning "Docker sandbox is not available on this server".
+CODING_EXECUTION_BACKEND = os.getenv("CODING_EXECUTION_BACKEND", "auto").lower()
+
+# Piston endpoint. Defaults to the public emkc.org instance; in production
+# you should point this at a self-hosted instance to remove the public-API
+# rate limit (≈5 req/s) and to keep student code on infrastructure you control.
+CODING_PISTON_URL = os.getenv("CODING_PISTON_URL", "https://emkc.org/api/v2/piston")
+
+# Optional Authorization header for protected (self-hosted) Piston instances.
+# Leave empty for the public emkc.org instance, which does not require auth.
+CODING_PISTON_AUTH_TOKEN = os.getenv("CODING_PISTON_AUTH_TOKEN", "")
+
+# Classroom protection for the Run Code endpoint.
+CODING_RUN_RATE_LIMIT_PER_MINUTE = os.getenv("CODING_RUN_RATE_LIMIT_PER_MINUTE", "120")
+CODING_RUN_MAX_CONCURRENT_PER_USER = os.getenv("CODING_RUN_MAX_CONCURRENT_PER_USER", "2")
+
 # Message tags for toast notifications
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
