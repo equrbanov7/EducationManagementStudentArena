@@ -10,9 +10,10 @@ from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 
-import requests
 from django.conf import settings
 from django.db import transaction
+
+import requests
 
 from apps.exams.models import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase, ExamAnswer
 from apps.exams.services.coding_polyfills import NODE_PROMPT_POLYFILL, javascript_main_has_top_level_input_loop
