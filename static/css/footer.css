@@ -3,13 +3,14 @@
    Mobile-first with desktop columns. */
 
 .ems-footer {
-    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-    color: #cbd5e1;
+    background: linear-gradient(180deg, #ffffff 0%, #f4fafb 100%);
+    color: #334155;
     padding: 64px 24px 0;
     margin-top: auto;
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 0.95rem;
     line-height: 1.6;
+    border-top: 1px solid #dbeafe;
 }
 
 .ems-footer__container {
@@ -23,31 +24,31 @@
     grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
     gap: 40px;
     padding-bottom: 48px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #dbe6f2;
 }
 
 .ems-footer__brand {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    max-width: 320px;
+    gap: 16px;
+    max-width: 360px;
 }
 
 .ems-footer__logo {
     display: inline-block;
     text-decoration: none;
+    width: min(300px, 100%);
 }
 
 .ems-footer__logo-img {
-    height: 48px;
-    width: auto;
+    display: block;
+    width: 100%;
+    height: auto;
     max-width: 100%;
-    filter: brightness(0) invert(1);
-    opacity: 0.95;
 }
 
 .ems-footer__tagline {
-    color: #94a3b8;
+    color: #475569;
     font-size: 0.9rem;
     line-height: 1.65;
     margin: 0;
@@ -67,12 +68,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e2e8f0;
+    background: #ffffff;
+    color: #0f766e;
     text-decoration: none;
     font-size: 0.95rem;
     transition: all 0.25s ease;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid #dbe6f2;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
 .ems-footer__social:hover {
@@ -91,7 +93,7 @@
 }
 
 .ems-footer__col-title {
-    color: #ffffff;
+    color: #0f172a;
     font-size: 1rem;
     font-weight: 700;
     margin: 0 0 6px;
@@ -122,7 +124,7 @@
 }
 
 .ems-footer__link {
-    color: #cbd5e1;
+    color: #334155;
     text-decoration: none;
     font-size: 0.92rem;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -130,17 +132,17 @@
 }
 
 .ems-footer__link:hover {
-    color: #ffffff;
+    color: #0f766e;
     transform: translateX(3px);
 }
 
 .ems-footer__link--accent {
-    color: #5eead4;
+    color: #0f766e;
     font-weight: 600;
 }
 
 .ems-footer__link--accent:hover {
-    color: #99f6e4;
+    color: #0f4f88;
 }
 
 /* Contact list items */
@@ -148,12 +150,12 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    color: #94a3b8;
+    color: #475569;
     font-size: 0.9rem;
 }
 
 .ems-footer__contact-item i {
-    color: #5eead4;
+    color: #0d9488;
     margin-top: 4px;
     flex-shrink: 0;
     width: 16px;
@@ -161,7 +163,7 @@
 }
 
 .ems-footer__contact-item span {
-    color: #cbd5e1;
+    color: #334155;
 }
 
 /* CTA button in footer */
@@ -233,6 +235,6 @@
 /* ---------- Legacy compatibility ---------- */
 /* Keep old selectors functional in case any partial still references them */
 footer.ems-footer .footer-location {
-    color: #94a3b8;
+    color: #475569;
     font-size: 0.85rem;
 }
