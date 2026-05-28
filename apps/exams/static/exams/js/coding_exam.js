@@ -253,6 +253,9 @@
         var timerValue = document.getElementById("codingTimerValue");
         var previewFrame = document.getElementById("codingPreviewFrame");
         var previewConsoleNode = document.getElementById("codingPreviewConsole");
+        var browserReloadBtn = document.getElementById("codingBrowserReload");
+        var browserTabTitleNode = document.querySelector(".coding-browser-tab__title");
+        var browserUrlNode = document.getElementById("codingBrowserUrl");
         var currentQuestionNumNode = document.getElementById("codingCurrentQuestionNum");
         var totalQuestionCountNode = document.getElementById("codingTotalQuestionCount");
         var answeredCountNode = document.getElementById("codingAnsweredCount");
@@ -1021,10 +1024,14 @@
             return element;
         }
 
-        function consoleBridgeSource(runId) {
+        function consoleBridgeSource(runId, stdinValues) {
+            // Pre-fed values for the in-iframe prompt() override. Stringify
+            // here so we embed them as a JS literal in the bridge source.
+            var queueLiteral = JSON.stringify(Array.isArray(stdinValues) ? stdinValues : []);
             return [
                 "(function(){",
                 "var runId=" + JSON.stringify(runId) + ";",
+                "var __stdinQueue = " + queueLiteral + ".slice();",
                 "function format(value){",
                 " if(typeof value==='string') return value;",
                 " try{return JSON.stringify(value);}catch(error){return String(value);}",
@@ -1036,6 +1043,52 @@
                 " var original=console[kind];",
                 " console[kind]=function(){send(kind,arguments); if(original){original.apply(console,arguments);}};",
                 "});",
+                // ---- prompt()/alert()/confirm() virtualization ---------------
+                // Previously the iframe fell through to the browser's native
+                // dialogs, which re-asked for input the student had already
+                // typed into the stdin panel. We intercept those calls here:
+                //   - prompt() pops the next value from the pre-fed queue.
+                //     If the queue runs out, we still call the native prompt
+                //     so the student can answer interactively.
+                //   - The prompt label and value are echoed to the console so
+                //     the run transcript matches what Node-backed runs look
+                //     like ("eded daxil et: 10").
+                "var __nativePrompt = window.prompt;",
+                "var __nativeAlert = window.alert;",
+                "var __nativeConfirm = window.confirm;",
+                "window.prompt = function(message, defaultValue){",
+                " var label = (message == null ? '' : String(message));",
+                " var value;",
+                " if(__stdinQueue.length){",
+                "  value = __stdinQueue.shift();",
+                " } else if(typeof __nativePrompt === 'function'){",
+                "  try{ value = __nativePrompt.call(window, label, defaultValue); }catch(e){ value = null; }",
+                " } else {",
+                "  value = defaultValue == null ? null : String(defaultValue);",
+                " }",
+                " send('log', [label + (value == null ? '' : String(value))]);",
+                " return value;",
+                "};",
+                "window.alert = function(message){",
+                " send('log', ['[alert] ' + (message == null ? '' : String(message))]);",
+                " if(typeof __nativeAlert === 'function'){",
+                "  try{ __nativeAlert.call(window, message); }catch(e){}",
+                " }",
+                "};",
+                "window.confirm = function(message){",
+                " var label = (message == null ? '' : String(message));",
+                " var value;",
+                " if(__stdinQueue.length){",
+                "  var raw = String(__stdinQueue.shift()).trim().toLowerCase();",
+                "  value = ['1','y','yes','true','ok'].indexOf(raw) !== -1;",
+                " } else if(typeof __nativeConfirm === 'function'){",
+                "  try{ value = __nativeConfirm.call(window, label); }catch(e){ value = false; }",
+                " } else {",
+                "  value = true;",
+                " }",
+                " send('log', [label + ' -> ' + (value ? 'OK' : 'Cancel')]);",
+                " return value;",
+                "};",
                 "window.addEventListener('error',function(event){send('error',[event.message || 'Script error']);});",
                 "window.addEventListener('unhandledrejection',function(event){send('error',[event.reason || 'Unhandled promise rejection']);});",
                 "})();"
@@ -1095,8 +1148,24 @@
                 applyPreviewNonce(script);
             });
 
+            // Pre-feed any stdin lines the student typed into the inline
+            // terminal so the iframe's overridden prompt() returns them in
+            // order, instead of re-prompting the user at the top of the page.
+            var stdinValues = [];
+            var rawStdin = (currentQuestion() && currentQuestion().stdin) || "";
+            if (rawStdin) {
+                stdinValues = String(rawStdin)
+                    .replace(/\r\n/g, "\n")
+                    .replace(/\r/g, "\n")
+                    .split("\n")
+                    .filter(function (line, index, all) {
+                        // Strip the trailing empty line that .split() leaves
+                        // when the stdin textarea ends with a newline.
+                        return !(line === "" && index === all.length - 1);
+                    });
+            }
             var bridge = applyPreviewNonce(doc.createElement("script"));
-            bridge.textContent = consoleBridgeSource(runId);
+            bridge.textContent = consoleBridgeSource(runId, stdinValues);
             doc.head.insertBefore(bridge, doc.head.firstChild);
 
             if (options.executeCurrentJavaScriptOnly) {
@@ -1114,12 +1183,31 @@
             return "<!doctype html>\n" + doc.documentElement.outerHTML;
         }
 
+        function updateBrowserChromeForCurrentFile() {
+            // Keep the fake browser chrome consistent with what's actually
+            // being rendered: show the html filename as the tab title and a
+            // plausible "URL" so students can intuit which file produced the
+            // preview when they have multiple html files.
+            if (!browserTabTitleNode && !browserUrlNode) return;
+            var htmlFile = files.find(function (file) {
+                return String(file.name || "").toLowerCase().match(/\.html?$/);
+            });
+            var name = htmlFile ? htmlFile.name : "preview.html";
+            if (browserTabTitleNode) {
+                browserTabTitleNode.textContent = name;
+            }
+            if (browserUrlNode) {
+                browserUrlNode.textContent = "preview://" + name;
+            }
+        }
+
         function renderPreview(options) {
             if (!previewFrame) {
                 return;
             }
             options = options || {};
             var runId = options.runId || ++previewRunId;
+            updateBrowserChromeForCurrentFile();
             previewFrame.removeAttribute("src");
             previewFrame.removeAttribute("srcdoc");
             window.requestAnimationFrame(function () {
@@ -1275,7 +1363,19 @@
             }
             currentQuestion().latestSubmission = submission;
             updateProgress();
-            switchTab(submission.error && !submission.output ? "errors" : "output");
+            // Auto-switch to the Errors tab whenever the run failed in a way
+            // students need to see immediately:
+            //   - sandbox_unavailable: the runner couldn't even start the
+            //     program (Docker missing in prod, Piston unreachable). The
+            //     output panel would otherwise just show "no output" and the
+            //     real reason would stay hidden in the Errors panel.
+            //   - runtime/compile errors with an error message: surface it.
+            //   - timeout: same — students need to see the time-limit message.
+            var status = submission.status || "";
+            var failureStatuses = ["sandbox_unavailable", "compile_error", "runtime_error", "timeout"];
+            var isFailure = failureStatuses.indexOf(status) !== -1;
+            var hasErrorOnly = submission.error && !submission.output;
+            switchTab(isFailure || hasErrorOnly ? "errors" : "output");
         }
 
         // Heuristic: code that touches browser globals (document, window,
@@ -1516,6 +1616,28 @@
                         window.location.href = error.payload.redirect_url;
                         return;
                     }
+                    // Rate-limit / concurrency-limit response from the
+                    // throttle service. Surface a clear message + countdown
+                    // and offer a single auto-retry once the cooldown ends.
+                    // Auto-retry only fires when we got a small retry_after,
+                    // so a runaway loop on the student's side can't bypass
+                    // the limit.
+                    var payload = error.payload || {};
+                    var retryAfter = parseInt(payload.retry_after_seconds, 10);
+                    if (!isNaN(retryAfter) && retryAfter > 0 && retryAfter <= 5) {
+                        var label = error.message || "Run failed";
+                        setStatus(label + " (auto-retry in " + retryAfter + "s)");
+                        if (errorsNode) errorsNode.textContent = label;
+                        switchTab("errors");
+                        window.setTimeout(function () {
+                            // Re-enable run button BEFORE retrying so the
+                            // user can also retry manually if they prefer.
+                            isRunInFlight = false;
+                            if (runBtn) runBtn.disabled = false;
+                            performBackendRun();
+                        }, retryAfter * 1000);
+                        return;
+                    }
                     setTerminalText(outputNode, error.message || "Run failed");
                     if (errorsNode) errorsNode.textContent = error.message || "Run failed";
                     setConsoleMeta("");
@@ -1523,8 +1645,14 @@
                     setStatus(error.message || "Run failed");
                 })
                 .finally(function () {
-                    isRunInFlight = false;
-                    if (runBtn) runBtn.disabled = false;
+                    // Only release the in-flight flag here when we did NOT
+                    // schedule an auto-retry — the retry branch above clears
+                    // it ahead of time so the timeout's performBackendRun
+                    // call isn't blocked by `isRunInFlight`.
+                    if (isRunInFlight) {
+                        isRunInFlight = false;
+                        if (runBtn) runBtn.disabled = false;
+                    }
                 });
         }
 
@@ -1709,26 +1837,34 @@
             });
         });
         if (resetBtn) {
+            // "Reset code" now only clears the run-result side (output, errors,
+            // preview, stdin, status pill). It does NOT delete student files
+            // or rewind their code — that surprised students who lost their
+            // work mid-exam. The Make-Main / Delete-File buttons remain the
+            // explicit ways to manage files; this button is for resetting the
+            // *run state* between attempts.
             resetBtn.addEventListener("click", function () {
-                openConfirmModal({
-                    title: i18n.resetConfirmTitle || "Reset code?",
-                    body: i18n.resetConfirmBody || "This will restore the starter code.",
-                    confirmText: i18n.confirm || "Confirm",
-                    danger: true,
-                    onConfirm: function () {
-                        var question = currentQuestion();
-                        question.files = cloneFiles(question.starterFiles);
-                        files = question.files;
-                        currentFileIndex = 0;
-                        question.fileIndex = 0;
-                        syncLanguageToCurrentFile();
-                        renderFiles();
-                        setEditorForCurrentFile();
-                        updateLanguagePreviewVisibility();
-                        updateProgress();
-                        queueAutosave(100);
-                    }
-                });
+                if (outputNode) outputNode.innerHTML = "";
+                if (errorsNode) errorsNode.textContent = "";
+                if (previewConsoleNode) previewConsoleNode.textContent = "";
+                if (previewFrame) {
+                    previewFrame.removeAttribute("src");
+                    previewFrame.removeAttribute("srcdoc");
+                }
+                if (stdinNode) stdinNode.value = "";
+                var question = currentQuestion();
+                if (question) question.stdin = "";
+                inlineTerminalActive = false;
+                inlineTerminalPrompts = [];
+                inlineTerminalValues = [];
+                inlineTerminalIndex = 0;
+                lastInteractivePrompts = [];
+                lastInteractiveValues = [];
+                browserRunHasOutput = false;
+                setConsoleMeta("");
+                updateStdinHint();
+                setStatus(i18n.consoleCleared || "Console cleared.");
+                switchTab("output");
             });
         }
         if (createFileBtn) {
@@ -1844,6 +1980,22 @@
                 var wrapper = editor.getWrapperElement();
                 wrapper.style.fontSize = fontSizeSelect.value + "px";
                 editor.refresh();
+            });
+        }
+
+        if (browserReloadBtn) {
+            // The reload button on the fake browser chrome re-renders the
+            // preview from the current files (just like hitting refresh in a
+            // real browser would). It does NOT call autosave or the run
+            // endpoint — it's a local-only re-render so students can iterate
+            // on HTML/CSS without burning a server roundtrip.
+            browserReloadBtn.addEventListener("click", function () {
+                previewRunId += 1;
+                if (previewConsoleNode) previewConsoleNode.textContent = "";
+                renderPreview({
+                    runId: previewRunId,
+                    executeCurrentJavaScriptOnly: shouldExecuteCurrentJavaScriptOnly()
+                });
             });
         }
 
