@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — CI Override for docker-compose.prod.yml
+# ═══════════════════════════════════════════════════════════════════════════
+# Usage: docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml up -d
+#
+# Problem: The Piston container requires `privileged: true` and kernel
+# namespace features (nsjail) that are unavailable or unreliable on
+# GitHub Actions runners.  Its health check consistently fails in CI,
+# blocking the entire stack from starting.
+#
+# Solution: This override file disables the piston service in CI and
+# removes the piston dependency from the app service.  The Django app
+# gracefully degrades when Piston is unreachable (CODING_EXECUTION_BACKEND
+# is set to "auto" — Docker sandbox is preferred, Piston is optional).
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # Disable piston entirely in CI — scale to 0 replicas and remove
+  # privileged mode so compose doesn't even attempt to start it.
+  piston:
+    deploy:
+      replicas: 0
+    privileged: false
+    entrypoint: ["true"]
+    healthcheck:
+      disable: true
+
+  # Remove the piston dependency from the app service.
+  app:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
