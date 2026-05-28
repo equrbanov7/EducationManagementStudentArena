@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shlex
@@ -9,11 +10,14 @@ from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 
+import requests
 from django.conf import settings
 from django.db import transaction
 
 from apps.exams.models import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase, ExamAnswer
 from apps.exams.services.coding_polyfills import NODE_PROMPT_POLYFILL, javascript_main_has_top_level_input_loop
+
+logger = logging.getLogger(__name__)
 
 MAX_CODE_BYTES = 256_000
 MAX_CAPTURE_BYTES = 64_000
@@ -36,6 +40,27 @@ DOCKER_IMAGES = {
     "python": "python:3.12-alpine",
     "cpp": "gcc:14",
     "java": "eclipse-temurin:21",
+}
+
+
+# Piston (https://github.com/engineer-man/piston) fallback used when Docker
+# is unavailable on the host (typical for managed app platforms such as
+# Heroku/Render/Railway). The mapping below uses Piston's `language` slugs.
+# Versions are pinned to the highest stable Piston runtimes available on the
+# public emkc.org instance as of 2026-05; "*" tells Piston to pick the latest
+# installed runtime, which keeps us forward-compatible.
+PISTON_LANGUAGES = {
+    "python": ("python", "*"),
+    "javascript": ("javascript", "*"),
+    "cpp": ("c++", "*"),
+    "java": ("java", "*"),
+}
+
+PISTON_FILE_NAMES = {
+    "python": "main.py",
+    "javascript": "main.js",
+    "cpp": "main.cpp",
+    "java": "Main.java",
 }
 
 # Secure execution plan:
@@ -517,21 +542,70 @@ def _container_command(language, files):
     return []
 
 
+def _docker_available():
+    """Docker is usable only when the CLI is installed AND the daemon answers.
+
+    On managed app platforms (Render/Railway/Heroku) `docker` may be on PATH
+    but the daemon socket isn't reachable — in that case we still need to
+    fall through to the Piston fallback instead of returning sandbox_unavailable.
+    """
+
+    if shutil.which("docker") is None:
+        return False
+    try:
+        probe = subprocess.run(  # nosec B603 - argv list, no shell, fixed cmd.
+            ["docker", "info", "--format", "{{.ServerVersion}}"],
+            text=True,
+            capture_output=True,
+            timeout=3,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return probe.returncode == 0
+
+
+def _resolve_execution_backend(language):
+    """Decide which executor to use for `language`.
+
+    - `docker` (default): use Docker; if unavailable, return `none`.
+    - `piston`: always use Piston regardless of Docker presence.
+    - `auto` (recommended in production): prefer Docker, fall back to Piston
+      when Docker is missing OR when the daemon isn't reachable.
+    """
+
+    raw = (getattr(settings, "CODING_EXECUTION_BACKEND", "docker") or "docker").lower()
+    if raw == "piston":
+        return "piston"
+    if raw == "auto":
+        return "docker" if _docker_available() else "piston"
+    # raw == "docker" (or any unknown value): legacy strict behavior.
+    return "docker" if _docker_available() else "none"
+
+
 def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb):
     if language == CodingExamQuestion.LANGUAGE_HTML:
         return ExecutionResult(status=CodingSubmission.STATUS_SUCCESS, output="Preview rendered in browser.")
 
-    backend = getattr(settings, "CODING_EXECUTION_BACKEND", "docker")
-    if backend != "docker":
-        return ExecutionResult(
-            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
-            error="Code execution is configured for Docker sandboxing, but Docker execution is disabled.",
+    backend = _resolve_execution_backend(language)
+
+    if backend == "piston":
+        return _execute_via_piston(
+            language=language,
+            files=files,
+            stdin=stdin,
+            time_limit_seconds=time_limit_seconds,
+            memory_limit_mb=memory_limit_mb,
         )
 
-    if shutil.which("docker") is None:
+    if backend == "none":
         return ExecutionResult(
             status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
-            error="Docker sandbox is not available on this server.",
+            error=(
+                "Docker sandbox is not available on this server. "
+                "Set CODING_EXECUTION_BACKEND=auto (or piston) to enable the "
+                "hosted fallback executor."
+            ),
         )
 
     image = getattr(settings, "CODING_EXECUTION_DOCKER_IMAGES", {}).get(language) or DOCKER_IMAGES.get(language)
@@ -616,6 +690,212 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
     if language in {"cpp", "java"} and error:
         status = CodingSubmission.STATUS_COMPILE_ERROR
     return ExecutionResult(status=status, output=output, error=error, execution_time_ms=elapsed_ms)
+
+
+# ---------------------------------------------------------------------------
+# Piston (hosted) execution backend
+# ---------------------------------------------------------------------------
+#
+# Piston is a stateless code-execution HTTP API maintained by engineer-man.
+# We use it as a fallback so practical exams keep working on production
+# hosts that cannot run Docker (Render, Railway, Heroku, etc.).
+#
+# Security notes:
+# - Submitted code is forwarded to the Piston server; it never executes
+#   inside the Django process. This matches our Docker invariant.
+# - Stdout/stderr are returned as strings; we truncate them to the same
+#   MAX_CAPTURE_BYTES we use elsewhere so a malicious program cannot blow
+#   up memory by emitting huge output.
+# - Stdin is normalized before being forwarded; only what the student
+#   supplied is sent.
+# - We never send authentication tokens, session cookies, or organization
+#   data to Piston — only the code itself.
+
+
+def _piston_endpoint():
+    base = getattr(settings, "CODING_PISTON_URL", "") or "https://emkc.org/api/v2/piston"
+    return base.rstrip("/") + "/execute"
+
+
+def _piston_files_payload(language, files):
+    """Build Piston's `files` array from our internal files list.
+
+    Piston requires the *main* file to be first; supplementary files are
+    written next to it in the executor's temp directory. We honour the
+    student's `is_main` flag the same way Docker does.
+    """
+
+    prepared = prepare_files_for_execution(language, files)
+    main = get_main_file(prepared)
+    if main is None:
+        return []
+
+    expected_main_name = PISTON_FILE_NAMES.get(language, main["name"])
+    ordered = [main] + [item for item in prepared if item is not main]
+
+    payload = []
+    for index, item in enumerate(ordered):
+        name = item.get("name") or expected_main_name
+        # Java needs the entrypoint to be `Main.java`; rename only if we know
+        # the public class name matches.
+        if index == 0 and language == "java" and Path(name).stem != "Main":
+            name = expected_main_name
+        payload.append({"name": name, "content": item.get("content", "") or ""})
+    return payload
+
+
+def _execute_via_piston(*, language, files, stdin, time_limit_seconds, memory_limit_mb):
+    piston_lang = PISTON_LANGUAGES.get(language)
+    if not piston_lang:
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+            error=f"Hosted executor does not support language: {language}.",
+        )
+
+    body = {
+        "language": piston_lang[0],
+        "version": piston_lang[1],
+        "files": _piston_files_payload(language, files),
+        "stdin": stdin or "",
+        # Piston enforces server-side caps but accepts our preferred hints.
+        "run_timeout": max(int(time_limit_seconds or 2), 1) * 1000 + 5000,
+        "compile_timeout": 10000,
+        "run_memory_limit": max(int(memory_limit_mb or 128), 64) * 1024 * 1024,
+    }
+
+    headers = {"Content-Type": "application/json"}
+    auth_token = getattr(settings, "CODING_PISTON_AUTH_TOKEN", "") or ""
+    if auth_token:
+        headers["Authorization"] = auth_token
+
+    # Retry policy for transient failures from the hosted runner:
+    #   - 429 (rate-limited by emkc.org public API)
+    #   - 502 / 503 / 504 (Piston worker restarting / overloaded)
+    #   - Connection errors (transient TCP/DNS hiccups)
+    # We back off briefly and retry; persistent failures still surface as
+    # sandbox_unavailable to the student instead of hanging.
+    request_timeout = max(int(time_limit_seconds or 2), 1) + 15
+    max_attempts = 3
+    backoff_seconds = 0.5
+
+    response = None
+    last_exception = None
+    start = time.perf_counter()
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            response = requests.post(
+                _piston_endpoint(),
+                json=body,
+                headers=headers,
+                timeout=request_timeout,
+            )
+        except requests.Timeout:
+            return ExecutionResult(
+                status=CodingSubmission.STATUS_TIMEOUT,
+                error="Execution timed out while contacting the hosted runner.",
+                execution_time_ms=int((time.perf_counter() - start) * 1000),
+            )
+        except requests.RequestException as exc:
+            last_exception = exc
+            logger.warning("Piston request failed (attempt %s/%s): %s", attempt, max_attempts, exc)
+            if attempt < max_attempts:
+                time.sleep(backoff_seconds * attempt)
+                continue
+            return ExecutionResult(
+                status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+                error="Hosted code runner is currently unreachable. Please try again in a moment.",
+            )
+
+        # Retry on transient HTTP errors.
+        if response.status_code in (429, 502, 503, 504) and attempt < max_attempts:
+            # Respect Retry-After when the server provides it; otherwise use
+            # exponential-ish backoff (0.5s, 1s, 1.5s).
+            retry_after = response.headers.get("Retry-After")
+            try:
+                pause = float(retry_after) if retry_after else backoff_seconds * attempt
+            except (TypeError, ValueError):
+                pause = backoff_seconds * attempt
+            time.sleep(min(pause, 3.0))
+            continue
+
+        break
+
+    elapsed_ms = int((time.perf_counter() - start) * 1000)
+
+    if response is None:
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+            error=f"Hosted code runner is unreachable: {last_exception or 'unknown error'}",
+            execution_time_ms=elapsed_ms,
+        )
+
+    if response.status_code != 200:
+        body_text = truncate_capture(response.text)
+        # Translate the server's status code into something the UI can show
+        # the student. 429 keeps its dedicated message so they understand
+        # the issue is load, not their code.
+        if response.status_code == 429:
+            friendly = "The code runner is busy right now. Wait a few seconds and " "press Run again."
+        else:
+            friendly = f"Hosted runner error ({response.status_code}): {body_text}"
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+            error=friendly,
+            execution_time_ms=elapsed_ms,
+        )
+
+    try:
+        data = response.json()
+    except ValueError:
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SANDBOX_UNAVAILABLE,
+            error="Hosted runner returned an invalid response.",
+            execution_time_ms=elapsed_ms,
+        )
+
+    run = data.get("run") or {}
+    compile_stage = data.get("compile") or {}
+
+    compile_stdout = truncate_capture(compile_stage.get("stdout") or "")
+    compile_stderr = truncate_capture(compile_stage.get("stderr") or "")
+    stdout = truncate_capture(run.get("stdout") or "")
+    stderr = truncate_capture(run.get("stderr") or "")
+
+    # Compile failures: the run stage usually doesn't fire, but the compile
+    # stderr explains what went wrong (think gcc/javac).
+    if compile_stage.get("code") not in (None, 0):
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_COMPILE_ERROR,
+            output=compile_stdout,
+            error=compile_stderr or "Compilation failed.",
+            execution_time_ms=elapsed_ms,
+        )
+
+    run_code = run.get("code")
+    signal = run.get("signal")
+    if signal in {"SIGKILL", "SIGTERM"} and "time" in (stderr or "").lower():
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_TIMEOUT,
+            output=stdout,
+            error=stderr or "Execution timed out.",
+            execution_time_ms=elapsed_ms,
+        )
+
+    if run_code in (None, 0):
+        return ExecutionResult(
+            status=CodingSubmission.STATUS_SUCCESS,
+            output=stdout,
+            error=stderr,
+            execution_time_ms=elapsed_ms,
+        )
+
+    return ExecutionResult(
+        status=CodingSubmission.STATUS_RUNTIME_ERROR,
+        output=stdout,
+        error=stderr or f"Process exited with code {run_code}.",
+        execution_time_ms=elapsed_ms,
+    )
 
 
 def normalize_output(value):
