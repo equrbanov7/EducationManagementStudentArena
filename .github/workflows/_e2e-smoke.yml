@@ -72,7 +72,7 @@ jobs:
           SESSION_COOKIE_SECURE: "False"
           CSRF_COOKIE_SECURE: "False"
         run: |
-          docker compose -f docker-compose.prod.yml up -d --no-build
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml up -d --no-build
 
       - name: 🩺 Wait for stack to be ready
         run: |
@@ -169,7 +169,7 @@ jobs:
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
         run: |
-          docker compose -f docker-compose.prod.yml logs --no-color || true
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml logs --no-color || true
 
       - name: 🧹 Tear down production stack
         if: always()
@@ -185,4 +185,4 @@ jobs:
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
         run: |
-          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml down -v --remove-orphans || true
