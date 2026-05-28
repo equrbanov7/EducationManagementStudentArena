@@ -53,6 +53,7 @@ def _abs(path: str) -> str:
 # manifest storage in production and the plain path in development.
 ROOT_ASSET_MAP = {
     "favicon.ico": "brand/favicon.ico",
+    "favicon.svg": "brand/favicon.svg",
     "favicon-16x16.png": "brand/favicon-16x16.png",
     "favicon-32x32.png": "brand/favicon-32x32.png",
     "favicon-48x48.png": "brand/favicon-48x48.png",
@@ -60,10 +61,20 @@ ROOT_ASSET_MAP = {
     "favicon-192x192.png": "brand/favicon-192x192.png",
     "favicon-512x512.png": "brand/favicon-512x512.png",
     "apple-touch-icon.png": "brand/apple-touch-icon.png",
+    # Horizontal logo (mark + EMSArena wordmark).  PNG, transparent bg.
     "logo.png": "brand/logo.png",
-    "logo.svg": "brand/logo-mark.svg",
-    "logo-horizontal.svg": "brand/logo-horizontal.svg",
-    "logo-stacked.svg": "brand/logo-stacked.svg",
+    "logo-horizontal.png": "brand/logo-horizontal.png",
+    # Stacked variant (mark above wordmark) — used in hero / about visuals.
+    "logo-stacked.png": "brand/logo-stacked.png",
+    # Mark only (square icon, no wordmark) — favicons, app icons, avatars.
+    "logo-mark.png": "brand/logo-mark.png",
+    "logo-square.png": "brand/logo-square.png",
+    # Light (white-tinted) variants for dark backgrounds — footer,
+    # brand-coloured hero banners, etc.  Same artwork, alpha-preserving
+    # white pixels so the wordmark stays readable.
+    "logo-horizontal-light.png": "brand/logo-horizontal-light.png",
+    "logo-stacked-light.png": "brand/logo-stacked-light.png",
+    "logo-mark-light.png": "brand/logo-mark-light.png",
     "og-image.jpg": "brand/og-image.jpg",
 }
 
