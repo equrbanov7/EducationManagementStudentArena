@@ -27,6 +27,7 @@ from apps.exams.services.coding_runtime import (
     normalize_files,
     run_visible_code,
 )
+from apps.exams.services.coding_throttle import acquire_run_slot, release_run_slot
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
@@ -407,18 +408,42 @@ def coding_run(request, slug, attempt_id):
     if error:
         return error
 
+    # Reserve a per-user run slot before we touch the executor. This bounds
+    # how many concurrent runs a single student can have in flight and
+    # protects the executor pool when a full classroom (100+ students)
+    # presses Run at the same instant. The slot is released in a finally
+    # block so a crashed run doesn't leak the reservation.
+    decision = acquire_run_slot(user_id=request.user.id)
+    if not decision.allowed:
+        if decision.reason == "rate_limited":
+            message = pgettext(
+                "exams.view.coding.error",
+                "You are running code too quickly. Please wait a moment and try again.",
+            )
+        else:
+            message = pgettext(
+                "exams.view.coding.error",
+                "You already have a code run in progress. Wait for it to finish.",
+            )
+        response = _json_error(message, status=429, extra={"retry_after_seconds": decision.retry_after_seconds})
+        response["Retry-After"] = str(decision.retry_after_seconds or 1)
+        return response
+
     submission = create_or_update_draft_submission(
         attempt=attempt,
         coding_question=coding_question,
         selected_language=selected_language,
         files=payload["files"],
     )
-    result = run_visible_code(
-        coding_question=coding_question,
-        selected_language=selected_language,
-        files=payload["files"],
-        stdin=payload["stdin"],
-    )
+    try:
+        result = run_visible_code(
+            coding_question=coding_question,
+            selected_language=selected_language,
+            files=payload["files"],
+            stdin=payload["stdin"],
+        )
+    finally:
+        release_run_slot(decision.slot_token)
     submission.execution_status = result["status"]
     submission.output = result["output"]
     submission.error_message = result["error"]
