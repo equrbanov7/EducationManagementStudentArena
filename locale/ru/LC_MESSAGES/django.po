@@ -10834,6 +10834,10 @@ msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
 msgstr "Проверка письменных ответов"
 
+msgctxt "exams.template.teacher_check_attempt"
+msgid "label_execution_note"
+msgstr "Примечание о выполнении (нажмите, чтобы развернуть)"
+
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"
