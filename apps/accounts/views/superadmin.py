@@ -238,10 +238,18 @@ def superadmin_ai_settings(request):
         action = request.POST.get("action", "save")
 
         if action == "save":
+            valid_models = {choice[0] for choice in AIConfiguration.MODEL_CHOICES}
+
+            def _pick_model(field_name: str, current: str) -> str:
+                """Accept only a model from MODEL_CHOICES; otherwise keep current."""
+                submitted = (request.POST.get(field_name) or "").strip()
+                return submitted if submitted in valid_models else current
+
             config.enabled = request.POST.get("enabled") == "on"
             config.rate_limit = (request.POST.get("rate_limit") or "100/1h").strip()
-            config.summary_model = request.POST.get("summary_model", config.summary_model)
-            config.grading_model = request.POST.get("grading_model", config.grading_model)
+            config.summary_model = _pick_model("summary_model", config.summary_model)
+            config.grading_model = _pick_model("grading_model", config.grading_model)
+            config.assistant_model = _pick_model("assistant_model", config.assistant_model)
 
             budget_raw = request.POST.get("monthly_budget", "5.00")
             try:

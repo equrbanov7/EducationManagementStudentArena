@@ -21056,3 +21056,11 @@ msgstr "Create category"
 #: contact/about/footer/navbar
 msgid "Categories"
 msgstr "Categories"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_assistant_model"
+msgstr "AI Assistant model"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_assistant_model"
+msgstr "Flash is recommended for chat (fast and cheap)."

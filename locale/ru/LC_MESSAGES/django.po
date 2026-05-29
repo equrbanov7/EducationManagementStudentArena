@@ -21049,3 +21049,11 @@ msgstr "Создать категорию"
 #: contact/about/footer/navbar
 msgid "Categories"
 msgstr "Категории"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_assistant_model"
+msgstr "Модель AI-ассистента"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_assistant_model"
+msgstr "Для чата рекомендуется Flash (быстро и дёшево)."
