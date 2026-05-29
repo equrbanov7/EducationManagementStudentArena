@@ -21293,3 +21293,11 @@ msgstr "Kateqoriya yarat"
 #: contact/about/footer/navbar
 msgid "Categories"
 msgstr "Kateqoriyalar"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_assistant_model"
+msgstr "AI Assistant modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_assistant_model"
+msgstr "Söhbət üçün Flash tövsiyə olunur (sürətli və ucuz)."
