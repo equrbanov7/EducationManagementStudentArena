@@ -25,8 +25,9 @@ _REQUEST_TIMEOUT = 60
 _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 
-# Gemini model for the assistant — heavier model for conversational quality.
-_DEFAULT_MODEL = "gemini-2.5-pro"
+# Gemini model for the assistant. flash is faster, cheaper and far less prone
+# to 503 "high demand" errors than pro. Overridable via GEMINI_MODEL env var.
+_DEFAULT_MODEL = "gemini-2.5-flash"
 
 SYSTEM_PROMPT = (
     "You are EMSArena AI Assistant. You help users navigate and understand "
@@ -166,6 +167,7 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
     """
     api_key = _get_api_key()
     if not api_key:
+        logger.error("Gemini assistant: GEMINI_API_KEY is missing/empty in settings.")
         return {"ok": False, "error": "AI assistant is not configured."}
 
     model = _get_model()
@@ -211,6 +213,12 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
             )
 
             if resp.status_code == 429:
+                logger.warning(
+                    "Gemini assistant rate-limited (429) on model=%s attempt=%s body=%s",
+                    model,
+                    attempt,
+                    resp.text[:1000],
+                )
                 if attempt < _MAX_RETRIES:
                     time.sleep(_RETRY_BASE_DELAY * (attempt + 1))
                     continue
@@ -222,7 +230,15 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
                 except ValueError:
                     err_body = {}
                 err_msg = err_body.get("error", {}).get("message", f"HTTP {resp.status_code}")
-                logger.error("Gemini assistant error: %s", err_msg)
+                # Log the full status + raw body so the real cause (bad key,
+                # unknown model, billing, region block, etc.) is visible.
+                logger.error(
+                    "Gemini assistant error: status=%s model=%s message=%s raw=%s",
+                    resp.status_code,
+                    model,
+                    err_msg,
+                    resp.text[:1500],
+                )
                 return {"ok": False, "error": "AI service encountered an error. Please try again."}
 
             data = resp.json()
@@ -237,6 +253,14 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
 
             answer = "\n".join(answer_parts).strip()
             if not answer:
+                # finishReason often explains an empty answer (SAFETY, MAX_TOKENS, etc.)
+                finish_reasons = [c.get("finishReason") for c in data.get("candidates", [])]
+                logger.error(
+                    "Gemini assistant empty response: model=%s finishReasons=%s raw=%s",
+                    model,
+                    finish_reasons,
+                    resp.text[:1500],
+                )
                 return {"ok": False, "error": "AI returned an empty response."}
 
             # Extract token usage if available
@@ -252,12 +276,15 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
             }
 
         except requests.Timeout:
+            logger.warning("Gemini assistant timeout (%ss) model=%s attempt=%s", _REQUEST_TIMEOUT, model, attempt)
             if attempt < _MAX_RETRIES:
                 time.sleep(_RETRY_BASE_DELAY * (attempt + 1))
                 continue
             return {"ok": False, "error": "AI service timed out. Please try again."}
-        except requests.RequestException:
-            logger.exception("Gemini assistant network error")
+        except requests.RequestException as exc:
+            # Includes connection errors, SSL, DNS, proxy — the actual exception
+            # text tells whether the server can reach Google at all.
+            logger.exception("Gemini assistant network error: model=%s detail=%s", model, exc)
             return {"ok": False, "error": "Network error contacting AI service."}
 
     return {"ok": False, "error": "AI service is unavailable."}
