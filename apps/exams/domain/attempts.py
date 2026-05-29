@@ -83,6 +83,21 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         default=0,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_extra_chances"),
     )
+    # Set when a teacher/auto-resume puts the attempt back into "resumed".
+    supervision_resumed_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_resumed_at"),
+    )
+    # Set the moment the attempt becomes "locked" (violation limit reached).
+    # The teacher then has `resume_window_seconds` to resume the student;
+    # if they do not, the backend auto-finishes the attempt with whatever the
+    # student has answered so far.  Cleared when the teacher resumes.
+    supervision_locked_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_locked_at"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.attempt.meta", "singular")
@@ -135,6 +150,73 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         if self.is_finished or not self.is_time_limit_reached(at_time=at_time):
             return False
         self.mark_finished(status="expired")
+        return True
+
+    @property
+    def supervision_resume_deadline(self):
+        """
+        Deadline by which the teacher must resume a locked attempt.  Counts
+        from the moment the attempt was locked (violation limit reached).
+        While "locked" the teacher has `resume_window_seconds` to act; if the
+        window elapses the backend auto-finishes the attempt with the answers
+        the student has so far.  Returns None when no window applies.
+        """
+        if self.supervision_status != "locked" or not self.supervision_locked_at:
+            return None
+        config = getattr(self.exam, "supervision_config", None)
+        if config is None or not config.enabled:
+            return None
+        window = config.resume_window_seconds or 0
+        if window <= 0:
+            return None
+        return self.supervision_locked_at + timedelta(seconds=window)
+
+    @property
+    def is_resume_window_expired(self):
+        deadline = self.supervision_resume_deadline
+        if deadline is None:
+            return False
+        return timezone.now() >= deadline
+
+    def expire_if_resume_window_expired(self, *, at_time=None):
+        """
+        If the attempt was locked and the teacher did not resume it within the
+        configured window, auto-finish it (submit) with whatever the student
+        has answered so far.  Kept side-effect-light so it can be called lazily
+        (on monitor reads / student polling) and from the periodic Celery
+        sweep.  Returns True if it was finished here.
+        """
+        if self.is_finished:
+            return False
+        deadline = self.supervision_resume_deadline
+        if deadline is None:
+            return False
+        if (at_time or timezone.now()) < deadline:
+            return False
+
+        self.supervision_status = "removed"
+        # Submit (not "expired") so the student's current answers are kept and
+        # graded — the attempt finishes with what they had at lock time.
+        self.mark_finished(status="submitted", extra_update_fields=["supervision_status"])
+
+        # Audit trail.  Imported lazily to avoid a circular import at module load.
+        from apps.exams.models import SupervisionIncident
+
+        SupervisionIncident.objects.create(
+            organization=self.exam.organization,
+            exam=self.exam,
+            attempt=self,
+            student=self.user,
+            event_type="resume_window_expired",
+            severity="critical",
+            metadata={
+                "reason": "teacher_did_not_resume_in_time",
+                "locked_at": self.supervision_locked_at.isoformat() if self.supervision_locked_at else None,
+                "deadline": deadline.isoformat(),
+            },
+            violation_count_at_time=self.supervision_violation_count,
+            teacher_action="auto_locked_window_expired",
+        )
         return True
 
     def mark_finished(self, status="submitted", extra_update_fields=None):
