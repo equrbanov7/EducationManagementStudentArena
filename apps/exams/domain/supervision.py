@@ -71,6 +71,14 @@ class ExamSupervisionConfig(models.Model):
         verbose_name=pgettext_lazy("supervision.config.field", "grace_period_seconds"),
         help_text=pgettext_lazy("supervision.config.help", "grace_period_seconds"),
     )
+    # Time window granted to a student to actually resume the exam after a
+    # teacher/auto resume.  If the student does not return within this window,
+    # the attempt is automatically finished by the backend.  Default 10 min.
+    resume_window_seconds = models.PositiveIntegerField(
+        default=600,
+        verbose_name=pgettext_lazy("supervision.config.field", "resume_window_seconds"),
+        help_text=pgettext_lazy("supervision.config.help", "resume_window_seconds"),
+    )
     max_fullscreen_violations = models.PositiveIntegerField(
         default=3,
         verbose_name=pgettext_lazy("supervision.config.field", "max_fullscreen_violations"),
@@ -141,6 +149,7 @@ class ExamSupervisionConfig(models.Model):
             "light": {
                 "force_fullscreen": False,
                 "grace_period_seconds": 20,
+                "resume_window_seconds": 900,
                 "max_fullscreen_violations": 5,
                 "detect_tab_switch": True,
                 "block_copy_paste": False,
@@ -153,6 +162,7 @@ class ExamSupervisionConfig(models.Model):
             "medium": {
                 "force_fullscreen": True,
                 "grace_period_seconds": 15,
+                "resume_window_seconds": 600,
                 "max_fullscreen_violations": 3,
                 "detect_tab_switch": True,
                 "block_copy_paste": True,
@@ -165,6 +175,7 @@ class ExamSupervisionConfig(models.Model):
             "strict": {
                 "force_fullscreen": True,
                 "grace_period_seconds": 10,
+                "resume_window_seconds": 300,
                 "max_fullscreen_violations": 2,
                 "detect_tab_switch": True,
                 "block_copy_paste": True,
@@ -200,6 +211,10 @@ class SupervisionIncident(models.Model):
         ("grace_period_expired", pgettext_lazy("supervision.incident.choice.event", "grace_period_expired")),
         ("auto_locked", pgettext_lazy("supervision.incident.choice.event", "auto_locked")),
         ("auto_submitted", pgettext_lazy("supervision.incident.choice.event", "auto_submitted")),
+        (
+            "resume_window_expired",
+            pgettext_lazy("supervision.incident.choice.event", "resume_window_expired"),
+        ),
         ("teacher_resumed", pgettext_lazy("supervision.incident.choice.event", "teacher_resumed")),
         ("teacher_granted_chance", pgettext_lazy("supervision.incident.choice.event", "teacher_granted_chance")),
         ("exam_started_supervised", pgettext_lazy("supervision.incident.choice.event", "exam_started_supervised")),

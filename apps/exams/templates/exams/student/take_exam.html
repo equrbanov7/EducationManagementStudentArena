@@ -1467,7 +1467,9 @@ document.addEventListener('DOMContentLoaded', function() {
         thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
         resumeTitle: "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
         resumeMsg: "{% filter escapejs %}{% trans 'supervision_resume_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        resumeBtn: "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}"
+        resumeBtn: "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}",
+        resumeCountdownLabel: "{% filter escapejs %}{% trans 'Bərpa etməyə qalan vaxt' %}{% endfilter %}",
+        lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
     };
     </script>
     <script src="{% static 'exams/js/exam_supervision.js' %}"></script>

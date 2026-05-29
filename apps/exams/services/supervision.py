@@ -5,21 +5,37 @@ Handles business logic for exam supervision: logging incidents,
 enforcing violation limits, and managing recovery flows.
 """
 
+from django.utils import timezone
+
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 
-# Event types that count as violations for limit enforcement
+# Event types that count as violations for limit enforcement.
+#
+# Clipboard / right-click / text-selection attempts are intentionally NOT
+# counted: they are blocked outright on the client (the action never
+# succeeds), but we still log them for the teacher's audit trail without
+# burning a violation point.  Only events that indicate the student left the
+# exam surface or tried to open developer tools / view source still count.
 VIOLATION_EVENT_TYPES = frozenset(
     {
         "fullscreen_exited",
         "tab_switched",
         "window_blurred",
+        "keyboard_shortcut",
+        "grace_period_expired",
+    }
+)
+
+# Events that are blocked on the client and logged for audit, but must never
+# increment the violation count.  Kept explicit so the intent is documented
+# and so the API can flag them to the frontend.
+NON_COUNTING_EVENT_TYPES = frozenset(
+    {
         "copy_attempt",
         "paste_attempt",
         "cut_attempt",
         "right_click_attempt",
-        "keyboard_shortcut",
         "text_select_attempt",
-        "grace_period_expired",
     }
 )
 
@@ -40,6 +56,7 @@ EVENT_SEVERITY_MAP = {
     "grace_period_expired": "critical",
     "auto_locked": "critical",
     "auto_submitted": "critical",
+    "resume_window_expired": "critical",
     "teacher_resumed": "info",
     "teacher_granted_chance": "info",
     "exam_started_supervised": "info",
@@ -132,7 +149,9 @@ def _apply_violation_action(attempt, config, violation_count):
 
     elif action == "lock_exam":
         attempt.supervision_status = "locked"
-        attempt.save(update_fields=["supervision_status"])
+        # Start the teacher resume window from this moment.
+        attempt.supervision_locked_at = timezone.now()
+        attempt.save(update_fields=["supervision_status", "supervision_locked_at"])
         _log_system_incident(
             attempt,
             "auto_locked",
@@ -214,6 +233,10 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
 
     old_status = attempt.supervision_status
     attempt.supervision_status = "resumed"
+    attempt.supervision_resumed_at = timezone.now()
+    # Teacher acted in time → stop the lock countdown so the sweep can no
+    # longer auto-finish this attempt.
+    attempt.supervision_locked_at = None
 
     if grant_extra_chance:
         attempt.supervision_extra_chances += 1
@@ -224,6 +247,8 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     attempt.save(
         update_fields=[
             "supervision_status",
+            "supervision_resumed_at",
+            "supervision_locked_at",
             "supervision_extra_chances",
             "supervision_violation_count",
             "status",
@@ -284,11 +309,66 @@ def teacher_stop_attempt(attempt, teacher):
     return True
 
 
+def mark_student_returned(attempt):
+    """
+    Called when a student actually re-enters a supervised attempt after a
+    teacher resume.  Clears the transient "resumed" state back to "active".
+
+    No-op if the attempt is finished or not in the "resumed" state.
+    """
+    if attempt.is_finished or attempt.supervision_status != "resumed":
+        return False
+
+    attempt.supervision_status = "active"
+    attempt.supervision_resumed_at = None
+    attempt.save(update_fields=["supervision_status", "supervision_resumed_at"])
+    return True
+
+
+def sweep_expired_resume_windows(queryset=None):
+    """
+    Finish any LOCKED attempts whose teacher-resume window has elapsed without
+    the teacher resuming.  The attempt is submitted with the student's current
+    answers.  Safe to call from the periodic Celery task and from lazy monitor
+    reads.  Returns the number of attempts auto-finished.
+
+    Tenant isolation: callers pass an org-scoped queryset; the unscoped
+    default is only intended for the global periodic sweep, and each finished
+    attempt records an incident under its own ``exam.organization``.
+    """
+    if queryset is None:
+        queryset = ExamAttempt.objects.all()
+
+    candidates = (
+        queryset.filter(
+            supervision_status="locked",
+            supervision_locked_at__isnull=False,
+        )
+        .exclude(
+            status__in=["submitted", "expired"],
+        )
+        .select_related("exam", "exam__organization", "exam__supervision_config", "user")
+    )
+
+    expired = 0
+    for attempt in candidates.iterator():
+        if attempt.expire_if_resume_window_expired():
+            expired += 1
+    return expired
+
+
 def get_attempt_supervision_status(attempt):
     """Get current supervision status and details for an attempt."""
     config = get_supervision_config(attempt.exam)
     if config is None:
         return {"supervised": False}
+
+    # Resume window countdown: how long the student still has to actually
+    # return after a resume before the backend auto-finishes the attempt.
+    resume_deadline = attempt.supervision_resume_deadline
+    resume_seconds_remaining = None
+    if resume_deadline is not None:
+        resume_seconds_remaining = max(0, int((resume_deadline - timezone.now()).total_seconds()))
 
     return {
         "supervised": True,
@@ -296,6 +376,9 @@ def get_attempt_supervision_status(attempt):
         "violation_count": attempt.supervision_violation_count,
         "max_violations": config.get_max_total_violations(),
         "extra_chances_used": attempt.supervision_extra_chances,
+        "resume_window_seconds": config.resume_window_seconds,
+        "resume_seconds_remaining": resume_seconds_remaining,
+        "resume_deadline": resume_deadline.isoformat() if resume_deadline else None,
         "config": {
             "force_fullscreen": config.force_fullscreen,
             "grace_period_seconds": config.grace_period_seconds,
@@ -342,6 +425,16 @@ def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None)
     Get supervision monitor data for the teacher dashboard.
     Returns flagged students across all supervised exams.
     """
+    # Lazily finish any stale "resumed" attempts (student never returned within
+    # the resume window) before building the view, scoped to this org so the
+    # monitor never shows phantom open rows for exams that ended long ago.
+    sweep_qs = ExamAttempt.objects.filter(exam__organization=organization)
+    if exam_queryset is not None:
+        sweep_qs = sweep_qs.filter(exam__in=exam_queryset)
+    if exam_id:
+        sweep_qs = sweep_qs.filter(exam_id=exam_id)
+    sweep_expired_resume_windows(sweep_qs)
+
     incidents_qs = SupervisionIncident.objects.filter(
         organization=organization,
     ).select_related("exam", "student", "attempt")
@@ -351,13 +444,15 @@ def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None)
     if exam_id:
         incidents_qs = incidents_qs.filter(exam_id=exam_id)
 
-    # Get unique flagged attempts
+    # Get unique flagged attempts.  ``exam__supervision_config`` is selected so
+    # the per-row ``supervision_resume_deadline`` countdown does not trigger an
+    # extra query for every resumed attempt.
     flagged_attempts = (
         ExamAttempt.objects.filter(
             exam__organization=organization,
             supervision_violation_count__gt=0,
         )
-        .select_related("user", "exam", "exam__course")
+        .select_related("user", "exam", "exam__course", "exam__supervision_config")
         .order_by("-supervision_violation_count")
     )
     if exam_queryset is not None:
@@ -440,6 +535,19 @@ def save_supervision_config_from_form(exam, form_data):
 
         config.violation_action = form_data.get("supervision_violation_action", "lock_exam")
         config.recovery_policy = form_data.get("supervision_recovery_policy", "teacher_controlled")
+
+    # Resume window is teacher-configurable regardless of template: minutes in
+    # the form, stored as seconds.  Clamp to 1–30 min (0 disables auto-finish).
+    resume_raw = form_data.get("supervision_resume_window_minutes")
+    if resume_raw not in (None, ""):
+        try:
+            resume_minutes = int(resume_raw)
+        except (ValueError, TypeError):
+            resume_minutes = 10
+        if resume_minutes <= 0:
+            config.resume_window_seconds = 0  # disables the auto-finish window
+        else:
+            config.resume_window_seconds = max(60, min(1800, resume_minutes * 60))
 
     config.save()
     return config
