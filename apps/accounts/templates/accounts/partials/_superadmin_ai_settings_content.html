@@ -66,6 +66,19 @@
                 <p class="hint">{% trans "hint_grading_model" context "superadmin.ai_settings" %}</p>
             </div>
         </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="assistant_model">{% trans "label_assistant_model" context "superadmin.ai_settings" %}</label>
+                <div class="bootstrap-single-select">
+                    <select id="assistant_model" name="assistant_model" class="bootstrap-single-select__native" data-bootstrap-select>
+                        {% for value, display in model_choices %}
+                            <option value="{{ value }}" {% if config.assistant_model == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <p class="hint">{% trans "hint_assistant_model" context "superadmin.ai_settings" %}</p>
+            </div>
+        </div>
     </div>
 
     <div class="settings-card">

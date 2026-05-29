@@ -56,7 +56,27 @@ SYSTEM_PROMPT = (
 
 
 def _get_model() -> str:
-    return os.getenv("GEMINI_MODEL", _DEFAULT_MODEL)
+    """Resolve the model for the assistant.
+
+    Priority:
+      1. GEMINI_MODEL env var (explicit operator override).
+      2. AIConfiguration.assistant_model (SuperAdmin panel setting).
+      3. _DEFAULT_MODEL (gemini-2.5-flash).
+    """
+    env_model = os.getenv("GEMINI_MODEL")
+    if env_model:
+        return env_model.strip()
+
+    try:
+        from apps.exams.domain.ai_config import get_ai_config
+
+        configured = (get_ai_config().assistant_model or "").strip()
+        if configured:
+            return configured
+    except Exception:  # pragma: no cover - DB/config unavailable, fall back
+        logger.debug("Could not read assistant_model from AIConfiguration; using default.")
+
+    return _DEFAULT_MODEL
 
 
 def _get_max_output_tokens() -> int:
