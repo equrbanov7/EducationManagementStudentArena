@@ -19,6 +19,20 @@
             İmtahanı yaradan müəllim:
             <strong>{{ exam_creator_display }}</strong>
         </p>
+        {% if attempt.supervision_status == "removed" %}
+        <div class="proctor-flag" role="alert" style="margin-top:0.75rem;display:flex;align-items:flex-start;gap:0.6rem;background:#fceaea;border:1px solid #e24b4a;border-left:4px solid #a32d2d;border-radius:8px;padding:0.7rem 0.9rem;color:#791f1f;max-width:720px;">
+            <i class="fas fa-shield-alt" style="margin-top:2px;color:#a32d2d;"></i>
+            <div>
+                <strong style="display:block;color:#a32d2d;">Nəzarətçi tərəfindən dayandırılıb</strong>
+                <span style="font-size:0.9rem;">
+                    Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb.
+                    Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan
+                    avtomatik tamamlanıb. Qeyd olunan {{ attempt.supervision_violation_count }} pozuntu
+                    aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir.
+                </span>
+            </div>
+        </div>
+        {% endif %}
         <div class="exam-timing-summary">
             <article class="exam-timing-card">
                 <span class="exam-timing-card__label">Başlayıb</span>
