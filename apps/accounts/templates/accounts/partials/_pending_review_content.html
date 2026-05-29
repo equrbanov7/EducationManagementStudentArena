@@ -88,6 +88,13 @@
                     <h4 class="pr-item-title">
                         {{ item.title }}
                         <span class="pr-badge pr-badge-type">{{ item.type_label }}</span>
+                        {% if item.supervision_removed %}
+                            <span class="pr-badge pr-badge-proctor"
+                                  title="Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
+                                  style="background:#fceaea;color:#a32d2d;border:1px solid #e24b4a;">
+                                <i class="fas fa-shield-alt me-1"></i>Nəzarətçi atıb
+                            </span>
+                        {% endif %}
                         {% if item.is_recheck and item.review_window_seconds_left > 0 %}
                             <span class="pr-badge pr-badge-recheck"><i class="fas fa-redo me-1"></i>Yenidən yoxla</span>
                         {% elif not item.can_view_student_identity and item.review_window_seconds_left > 0 %}

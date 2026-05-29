@@ -13,9 +13,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: apps/accounts/forms.py:22
 msgctxt "accounts.form.register.label"
@@ -752,7 +750,8 @@ msgstr "Ищу учителя..."
 msgctxt "profile.groups"
 msgid "help_assigned_teachers"
 msgstr ""
-"Дополнительные преподаватели, которые могут видеть эту группу и управлять ею."
+"Дополнительные преподаватели, которые могут видеть эту группу и управлять "
+"ею."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:5
 msgctxt "profile.groups"
@@ -1415,7 +1414,8 @@ msgstr "OTP-код отправлен!"
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
 msgstr ""
-"Если этот email есть в нашей системе, мы отправили OTP-код для сброса пароля."
+"Если этот email есть в нашей системе, мы отправили OTP-код для сброса "
+"пароля."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:21
 msgctxt "accounts.password_reset_done_page"
@@ -1428,8 +1428,12 @@ msgid "back_to_login"
 msgstr "Вернуться на страницу входа"
 
 msgctxt "accounts.password_reset_page"
-msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
-msgstr "Мы отправим 6-значный OTP-код на ваш email. Введите его на следующем экране, чтобы задать новый пароль. Код действует %(minutes)s минут."
+msgid ""
+"We will send a 6-digit OTP code to your email. Enter it on the next screen "
+"to set a new password. The code is valid for %(minutes)s minutes."
+msgstr ""
+"Мы отправим 6-значный OTP-код на ваш email. Введите его на следующем экране,"
+" чтобы задать новый пароль. Код действует %(minutes)s минут."
 
 msgctxt "accounts.password_reset_done_page"
 msgid "OTP code is valid for %(minutes)s minutes."
@@ -5367,8 +5371,8 @@ msgstr "Многоформатная оценка"
 msgctxt "blog.about_page"
 msgid "feature_4_text"
 msgstr ""
-"Проведение тестовых, письменных, практических и экзаменов в реальном времени "
-"(live). Возможность создавать обширный банк вопросов и пробные экзамены "
+"Проведение тестовых, письменных, практических и экзаменов в реальном времени"
+" (live). Возможность создавать обширный банк вопросов и пробные экзамены "
 "(mock exams)."
 
 #: apps/blog/templates/blog/about.html:72
@@ -5605,8 +5609,8 @@ msgstr "Недействительная ссылка"
 msgctxt "blog.password_reset_confirm_page"
 msgid "subheading_invalid"
 msgstr ""
-"Эта ссылка уже использована или истек срок ее действия. В целях безопасности "
-"ссылки одноразовые."
+"Эта ссылка уже использована или истек срок ее действия. В целях безопасности"
+" ссылки одноразовые."
 
 #: apps/blog/templates/blog/password_reset_confirm.html:62
 msgctxt "blog.password_reset_confirm_page"
@@ -6095,8 +6099,8 @@ msgstr "Здравствуйте"
 msgctxt "blog.email.welcome_email"
 msgid "body"
 msgstr ""
-"Мы рады видеть вас среди наших подписчиков! Теперь вы будете получать свежие "
-"статьи, новости и эксклюзивный контент о технологиях, программировании и "
+"Мы рады видеть вас среди наших подписчиков! Теперь вы будете получать свежие"
+" статьи, новости и эксклюзивный контент о технологиях, программировании и "
 "цифровом мире прямо на вашу почту."
 
 #: apps/blog/templates/email_templates/welcome_email.html:24
@@ -6245,8 +6249,8 @@ msgstr ""
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
 msgstr ""
-"На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте "
-"почту."
+"На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте"
+" почту."
 
 #: apps/blog/views.py:197
 msgctxt "blog.subscribe.message"
@@ -6759,8 +6763,8 @@ msgstr ""
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Важность статуса: вы можете легко работать над курсом, сохранив его в режиме "
-"«Черновик». Не забудьте «Опубликовать», когда будете готовы."
+"Важность статуса: вы можете легко работать над курсом, сохранив его в режиме"
+" «Черновик». Не забудьте «Опубликовать», когда будете готовы."
 
 #: apps/courses/templates/courses/edit_course.html:406
 msgctxt "courses.edit_page"
@@ -7298,8 +7302,7 @@ msgstr "Добавьте свою первую тему"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:351
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
-msgstr ""
-"Вы хотели удалить эту тему?\\n\\nВсе ресурсы по теме также будут удалены!"
+msgstr "Вы хотели удалить эту тему?\\n\\nВсе ресурсы по теме также будут удалены!"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:370
 msgctxt "courses.partial.topic_accordion"
@@ -9502,7 +9505,9 @@ msgstr "Медиафайл (необязательно)"
 
 msgctxt "exams.template.add_exam_question"
 msgid "media_help_text"
-msgstr "Поле слева предназначено для изображения, а поле справа — для видео. Если они не нужны, оставьте оба поля пустыми."
+msgstr ""
+"Поле слева предназначено для изображения, а поле справа — для видео. Если "
+"они не нужны, оставьте оба поля пустыми."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
@@ -9569,7 +9574,8 @@ msgstr "Включить графический ответ"
 
 msgctxt "exams.template.add_exam_question"
 msgid "help_enable_paint_answer"
-msgstr "В этом вопросе студент сможет ответить не только текстом, но и рисунком."
+msgstr ""
+"В этом вопросе студент сможет ответить не только текстом, но и рисунком."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:123
 msgctxt "exams.template.add_exam_question"
@@ -9638,7 +9644,9 @@ msgstr "Вопрос будет добавлен в выбранный вами 
 
 msgctxt "exams.template.add_exam_question"
 msgid "help_time_limit_seconds"
-msgstr "Например: 60 секунд. Если оставить пустым, будет использовано время экзамена по умолчанию."
+msgstr ""
+"Например: 60 секунд. Если оставить пустым, будет использовано время экзамена"
+" по умолчанию."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
@@ -10040,7 +10048,8 @@ msgstr "Максимальное количество нарушений"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
 msgid "supervision_max_violations_help"
-msgstr "После такого количества нарушений будет применено выбранное наказание."
+msgstr ""
+"После такого количества нарушений будет применено выбранное наказание."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html
 msgctxt "exams.template.create_edit_exam"
@@ -10136,8 +10145,8 @@ msgstr "0 = показать все вопросы"
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
 msgstr ""
-"Укажите, сколько активных вопросов увидит студент. Введите 0, чтобы показать "
-"все вопросы."
+"Укажите, сколько активных вопросов увидит студент. Введите 0, чтобы показать"
+" все вопросы."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:289
 #: apps/exams/templates/exams/teacher/create_question_bank.html:334
@@ -10269,8 +10278,8 @@ msgstr ""
 msgctxt "exams.template.create_question_bank"
 msgid "help_question_formats"
 msgstr ""
-"Начинайте каждый вопрос с новой строки. Поддерживаемые форматы нумерации: 1. "
-"Текст вопроса или 1) Текст вопроса."
+"Начинайте каждый вопрос с новой строки. Поддерживаемые форматы нумерации: 1."
+" Текст вопроса или 1) Текст вопроса."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:360
 msgctxt "exams.template.create_question_bank"
@@ -10552,8 +10561,8 @@ msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
 "Если экзамен открыт для всех, ограничения по группам и отдельным "
-"пользователям ниже не применяются. Для закрытого экзамена выберите группы и/"
-"или студентов."
+"пользователям ниже не применяются. Для закрытого экзамена выберите группы "
+"и/или студентов."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -11738,7 +11747,8 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "В ZIP обнаружен запрещенный файл: {filename}"
 
-#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22
+#: apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -11754,7 +11764,8 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Вы не можете начать этот экзамен."
 
-#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60
+#: apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -12030,7 +12041,8 @@ msgstr "Вы уже отправили эту лабораторную рабо�
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Попытка: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -13678,7 +13690,8 @@ msgstr "Ошибка соединения"
 msgctxt "live_exam.wait_room"
 msgid "hero_copy"
 msgstr ""
-"Посмотрите на главный экран и убедитесь, что ваш ник виден до начала отсчёта."
+"Посмотрите на главный экран и убедитесь, что ваш ник виден до начала "
+"отсчёта."
 
 #: apps/live_exam/templates/liveExam/wait_room.html
 msgctxt "live_exam.wait_room"
@@ -15027,7 +15040,8 @@ msgstr "Членства"
 msgctxt "organizations.model.membership.error"
 msgid "scope_unit_must_match_org"
 msgstr ""
-"Подразделение области должно принадлежать той же организации, что и членство."
+"Подразделение области должно принадлежать той же организации, что и "
+"членство."
 
 #: apps/organizations/unit_types.py:11
 msgctxt "organizations.unit_type"
@@ -16203,8 +16217,8 @@ msgstr "Открыть политику конфиденциальности"
 msgctxt "accounts.register"
 msgid "privacy_accept_hint"
 msgstr ""
-"Откройте полный текст в модальном окне, ознакомьтесь с ним и затем завершите "
-"регистрацию."
+"Откройте полный текст в модальном окне, ознакомьтесь с ним и затем завершите"
+" регистрацию."
 
 msgctxt "accounts.register"
 msgid "privacy_modal_eyebrow"
@@ -16240,9 +16254,9 @@ msgstr "Какие данные мы собираем"
 msgctxt "accounts.register"
 msgid "privacy_section_data_body"
 msgstr ""
-"Во время регистрации мы собираем ваше имя пользователя, имя, фамилию, email, "
-"страну, выбранный тип аккаунта и сведения об организации. При использовании "
-"платформы также могут формироваться рабочие записи, связанные с курсами, "
+"Во время регистрации мы собираем ваше имя пользователя, имя, фамилию, email,"
+" страну, выбранный тип аккаунта и сведения об организации. При использовании"
+" платформы также могут формироваться рабочие записи, связанные с курсами, "
 "экзаменами, лабораторными, заданиями, результатами и членством."
 
 msgctxt "accounts.register"
@@ -16253,8 +16267,8 @@ msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
 "Эти данные используются для создания аккаунта, отправки email OTP-"
-"подтверждения, управления доступом к workspace и организации, работы учебных "
-"сценариев, показа результатов, а также для аудита и контроля безопасности."
+"подтверждения, управления доступом к workspace и организации, работы учебных"
+" сценариев, показа результатов, а также для аудита и контроля безопасности."
 
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
@@ -16287,8 +16301,8 @@ msgstr "Хранение и безопасность"
 msgctxt "accounts.register"
 msgid "privacy_section_retention_body"
 msgstr ""
-"Информация хранится столько, сколько необходимо для работы сервиса, аудита и "
-"разбора спорных ситуаций. Чувствительные процессы, такие как OTP-"
+"Информация хранится столько, сколько необходимо для работы сервиса, аудита и"
+" разбора спорных ситуаций. Чувствительные процессы, такие как OTP-"
 "подтверждение, имеют короткий срок жизни, а в системе применяются "
 "технические и организационные меры безопасности."
 
@@ -16465,13 +16479,13 @@ msgid ""
 "Search current organizations, choose one, and send a short message to join "
 "as %(role_label)s."
 msgstr ""
-"Найдите доступные организации, выберите одну и отправьте короткое сообщение, "
-"чтобы присоединиться как %(role_label)s."
+"Найдите доступные организации, выберите одну и отправьте короткое сообщение,"
+" чтобы присоединиться как %(role_label)s."
 
 msgctxt "profile.join_org"
 msgid ""
-"You are currently connected to <strong>%(organization_name)s</strong>. After "
-"leaving, you can submit a new request from this section or accept any "
+"You are currently connected to <strong>%(organization_name)s</strong>. After"
+" leaving, you can submit a new request from this section or accept any "
 "pending invites."
 msgstr ""
 "Сейчас вы связаны с организацией <strong>%(organization_name)s</strong>. "
@@ -16480,8 +16494,8 @@ msgstr ""
 
 msgctxt "profile.join_org"
 msgid ""
-"You currently have <strong>%(count)s</strong> organization requests awaiting "
-"approval."
+"You currently have <strong>%(count)s</strong> organization requests awaiting"
+" approval."
 msgstr ""
 "Сейчас у вас <strong>%(count)s</strong> заявок в организации, ожидающих "
 "подтверждения."
@@ -17082,7 +17096,8 @@ msgstr "Причина удаления..."
 
 msgctxt "staff.management"
 msgid ""
-"Please confirm that you want to add the selected user(s) to the organization."
+"Please confirm that you want to add the selected user(s) to the "
+"organization."
 msgstr ""
 "Подтвердите, что хотите добавить выбранных пользователей в организацию."
 
@@ -17164,7 +17179,8 @@ msgstr "Преподаватели без организации"
 
 msgctxt "staff.management"
 msgid "Teachers who can be invited appear here."
-msgstr "Здесь отображаются преподаватели, которым можно отправить приглашение."
+msgstr ""
+"Здесь отображаются преподаватели, которым можно отправить приглашение."
 
 msgctxt "staff.management"
 msgid "Invite selected teachers"
@@ -17409,7 +17425,8 @@ msgstr "Неверный пароль. Пожалуйста, введите пр
 #: apps/accounts/views/account_management.py
 msgid "delete_account_last_admin"
 msgstr ""
-"Вы единственный администратор организации. Вы не можете удалить свой аккаунт."
+"Вы единственный администратор организации. Вы не можете удалить свой "
+"аккаунт."
 
 #: apps/accounts/views/account_management.py
 msgid "delete_account_error"
@@ -18979,7 +18996,8 @@ msgstr "Вы хотите возобновить экзамен этого ст�
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_grant_chance"
 msgstr ""
-"Вы хотите дать этому студенту дополнительный шанс и позволить ему продолжить?"
+"Вы хотите дать этому студенту дополнительный шанс и позволить ему "
+"продолжить?"
 
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_stop"
@@ -19223,7 +19241,9 @@ msgstr "Требуется полноэкранный режим"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_fullscreen_unavailable"
-msgstr "Полноэкранный режим не поддерживается браузером этого устройства; доступные средства надзора останутся активными."
+msgstr ""
+"Полноэкранный режим не поддерживается браузером этого устройства; доступные "
+"средства надзора останутся активными."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
@@ -19295,7 +19315,9 @@ msgstr "⚠️ Внимание!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
-msgstr "Вы достигли 75% лимита нарушений! Осталось только {remaining} нарушение(й). Будьте внимательнее!"
+msgstr ""
+"Вы достигли 75% лимита нарушений! Осталось только {remaining} нарушение(й). "
+"Будьте внимательнее!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_resume_title"
@@ -19366,10 +19388,8 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "loading"
 msgstr "Загрузка..."
 
-#
 # ── Statistics profile section (profile.statistics) ────────────
-#
-
+# 
 msgctxt "profile.section"
 msgid "statistics"
 msgstr "Статистика"
@@ -19669,29 +19689,41 @@ msgstr "Произошла ошибка при запросе ИИ."
 msgctxt "profile.statistics"
 msgid "ai_remaining"
 msgstr "Оставшихся запросов"
+
 msgctxt "exams.template.ai_question_bank"
 msgid "AI ilə test sualı yarat"
 msgstr "Создать тестовые вопросы с ИИ"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək."
-msgstr "Загрузите файл лекции или напишите тему как prompt. ИИ преобразует результат в тестовый формат этой страницы."
+msgid ""
+"Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu "
+"səhifənin test formatına çevirəcək."
+msgstr ""
+"Загрузите файл лекции или напишите тему как prompt. ИИ преобразует результат"
+" в тестовый формат этой страницы."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "AI ilə bu blok üçün sual yarat"
 msgstr "Создать вопросы для этого блока с ИИ"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq."
-msgstr "Вопросы будут подготовлены на основе файла лекции или prompt и добавлены в текстовое поле этого блока."
+msgid ""
+"Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn "
+"sahəsinə əlavə olunacaq."
+msgstr ""
+"Вопросы будут подготовлены на основе файла лекции или prompt и добавлены в "
+"текстовое поле этого блока."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "Prompt / mövzu"
 msgstr "Промпт / тема"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat"
-msgstr "Например: создать тестовые вопросы прикладного уровня по функциям Python"
+msgid ""
+"Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları "
+"yarat"
+msgstr ""
+"Например: создать тестовые вопросы прикладного уровня по функциям Python"
 
 msgctxt "exams.template.ai_question_bank"
 msgid "Mühazirə faylı"
@@ -20059,8 +20091,11 @@ msgid "Program input"
 msgstr "Ввод программы"
 
 msgctxt "exams.template.coding_exam"
-msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
-msgstr "Введите данные здесь. Каждая строка будет отправлена в input(), Scanner, cin или stdin."
+msgid ""
+"Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr ""
+"Введите данные здесь. Каждая строка будет отправлена в input(), Scanner, cin"
+" или stdin."
 
 msgctxt "accounts.pending_answers"
 msgid "page_title"
@@ -20139,8 +20174,12 @@ msgid "yüklənir..."
 msgstr "загрузка..."
 
 msgctxt "ai_assistant.greeting"
-msgid "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
-msgstr "Здравствуйте! Я EMSArena AI. Готов ответить на ваши вопросы. Чем могу помочь?"
+msgid ""
+"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
+" bilərəm?"
+msgstr ""
+"Здравствуйте! Я EMSArena AI. Готов ответить на ваши вопросы. Чем могу "
+"помочь?"
 
 msgctxt "ai_assistant.error"
 msgid "AI sorğu limiti hazırda aktiv deyil."
@@ -20175,8 +20214,12 @@ msgid "AI Assistent"
 msgstr "AI Ассистент"
 
 msgctxt "ai_assistant.limit_exceeded"
-msgid "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin."
-msgstr "Вы достигли почасового лимита AI-запросов. Пожалуйста, попробуйте немного позже."
+msgid ""
+"Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd "
+"edin."
+msgstr ""
+"Вы достигли почасового лимита AI-запросов. Пожалуйста, попробуйте немного "
+"позже."
 
 msgctxt "ai_assistant.input"
 msgid "Mesajınızı yazın..."
@@ -20255,8 +20298,14 @@ msgid "təhsilin yeni nəsil arenası"
 msgstr "новая арена для образования"
 
 #: contact/about/footer/navbar
-msgid "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi."
-msgstr "Современная платформа управления образованием, LMS и онлайн-экзаменов для университетов, школ, учебных центров и преподавателей. Курсы, экзамены, оценивание, аудит и ИИ-помощник в одном месте."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil "
+"idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, "
+"imtahanlar, qiymətləndirmə, audit və AI köməkçi."
+msgstr ""
+"Современная платформа управления образованием, LMS и онлайн-экзаменов для "
+"университетов, школ, учебных центров и преподавателей. Курсы, экзамены, "
+"оценивание, аудит и ИИ-помощник в одном месте."
 
 #: contact/about/footer/navbar
 msgid "Pulsuz başla"
@@ -20339,8 +20388,13 @@ msgid "Bizimlə əlaqə saxlayın"
 msgstr "Свяжитесь с нами"
 
 #: contact/about/footer/navbar
-msgid "Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində cavab veririk."
-msgstr "Используйте форму ниже или прямые каналы связи для вопросов, предложений и заявок на сотрудничество. Отвечаем в течение 24 часов."
+msgid ""
+"Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı "
+"formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində "
+"cavab veririk."
+msgstr ""
+"Используйте форму ниже или прямые каналы связи для вопросов, предложений и "
+"заявок на сотрудничество. Отвечаем в течение 24 часов."
 
 #: contact/about/footer/navbar
 msgid "info – ümumi, support – texniki dəstək"
@@ -20407,8 +20461,12 @@ msgid "Tez-tez verilən suallar"
 msgstr "Часто задаваемые вопросы"
 
 #: contact/about/footer/navbar
-msgid "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli."
-msgstr "Платформа управления образованием и онлайн-экзаменов. Современная LMS для университетов, школ и учебных центров."
+msgid ""
+"Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və"
+" kurs mərkəzləri üçün modern LMS həlli."
+msgstr ""
+"Платформа управления образованием и онлайн-экзаменов. Современная LMS для "
+"университетов, школ и учебных центров."
 
 #: contact/about/footer/navbar
 msgid "Sosial şəbəkələr"
@@ -20483,52 +20541,100 @@ msgid "Missiya və Vizyon"
 msgstr "Миссия и видение"
 
 #: contact/about/footer/navbar
-msgid "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən platforma ilə tədrisi sadələşdirmək."
-msgstr "Освободить образовательные организации от бюрократии и помочь им сосредоточиться на взаимодействии преподавателей и студентов. Упростить обучение с помощью единой надежной и масштабируемой платформы."
+msgid ""
+"Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı "
+"əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən "
+"platforma ilə tədrisi sadələşdirmək."
+msgstr ""
+"Освободить образовательные организации от бюрократии и помочь им "
+"сосредоточиться на взаимодействии преподавателей и студентов. Упростить "
+"обучение с помощью единой надежной и масштабируемой платформы."
 
 #: contact/about/footer/navbar
-msgid "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün uyğun."
-msgstr "Стать самой востребованной образовательной технологической платформой в Азербайджане и регионе: с поддержкой ИИ, multi-tenant архитектурой, безопасной и подходящей для организаций любого размера."
+msgid ""
+"Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması "
+"olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün "
+"uyğun."
+msgstr ""
+"Стать самой востребованной образовательной технологической платформой в "
+"Азербайджане и регионе: с поддержкой ИИ, multi-tenant архитектурой, "
+"безопасной и подходящей для организаций любого размера."
 
 #: contact/about/footer/navbar
-msgid "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım olan hər şey."
-msgstr "Все необходимое от курсов и экзаменов до оценивания и аналитики в одной подписке."
+msgid ""
+"Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım "
+"olan hər şey."
+msgstr ""
+"Все необходимое от курсов и экзаменов до оценивания и аналитики в одной "
+"подписке."
 
 #: contact/about/footer/navbar
-msgid "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün sadə, tələbə üçün aydın."
-msgstr "Темы, уроки, материалы и управление группами в одном месте. Просто для преподавателя и понятно для студента."
+msgid ""
+"Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün "
+"sadə, tələbə üçün aydın."
+msgstr ""
+"Темы, уроки, материалы и управление группами в одном месте. Просто для "
+"преподавателя и понятно для студента."
 
 #: contact/about/footer/navbar
-msgid "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə qarışmır, RBAC ciddi tətbiq olunur."
-msgstr "Каждая организация получает полностью изолированное пространство. Данные не смешиваются, а RBAC применяется строго."
+msgid ""
+"Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə "
+"qarışmır, RBAC ciddi tətbiq olunur."
+msgstr ""
+"Каждая организация получает полностью изолированное пространство. Данные не "
+"смешиваются, а RBAC применяется строго."
 
 #: contact/about/footer/navbar
-msgid "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs yalnız ona icazə verilən məlumatı görür."
-msgstr "Роли суперадмина, владельца организации, преподавателя, студента и сотрудника: каждый видит только разрешенные ему данные."
+msgid ""
+"Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs "
+"yalnız ona icazə verilən məlumatı görür."
+msgstr ""
+"Роли суперадмина, владельца организации, преподавателя, студента и "
+"сотрудника: каждый видит только разрешенные ему данные."
 
 #: contact/about/footer/navbar
-msgid "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, analitika və anti-cheat parametrləri."
-msgstr "Тестовые, письменные, практические и live-экзамены с автоматическим оцениванием, аналитикой и античит-настройками."
+msgid ""
+"Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, "
+"analitika və anti-cheat parametrləri."
+msgstr ""
+"Тестовые, письменные, практические и live-экзамены с автоматическим "
+"оцениванием, аналитикой и античит-настройками."
 
 #: contact/about/footer/navbar
-msgid "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və CSP siyasətləri ilə qorunan."
-msgstr "Каждое критическое действие записывается в audit log и защищается внутренними проверками безопасности и CSP-политиками."
+msgid ""
+"Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və "
+"CSP siyasətləri ilə qorunan."
+msgstr ""
+"Каждое критическое действие записывается в audit log и защищается "
+"внутренними проверками безопасности и CSP-политиками."
 
 #: contact/about/footer/navbar
-msgid "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya kömək edən ağıllı assistent."
-msgstr "Умный ассистент, который отвечает на вопросы и помогает с навигацией в рамках прав пользователя."
+msgid ""
+"İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya "
+"kömək edən ağıllı assistent."
+msgstr ""
+"Умный ассистент, который отвечает на вопросы и помогает с навигацией в "
+"рамках прав пользователя."
 
 #: contact/about/footer/navbar
-msgid "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
-msgstr "EMSArena создана опытными инженерами и педагогами. Пользовательский дизайн и надежные технологии — наши главные приоритеты."
+msgid ""
+"EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü "
+"dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
+msgstr ""
+"EMSArena создана опытными инженерами и педагогами. Пользовательский дизайн и"
+" надежные технологии — наши главные приоритеты."
 
 #: contact/about/footer/navbar
 msgid "Founder · Full-stack Engineer"
 msgstr "Основатель · Full-stack инженер"
 
 #: contact/about/footer/navbar
-msgid "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan sistemlər sahəsində mütəxəssis."
-msgstr "Главный архитектор и ведущий инженер EMSArena, специалист по Django, React и распределенным системам."
+msgid ""
+"EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan "
+"sistemlər sahəsində mütəxəssis."
+msgstr ""
+"Главный архитектор и ведущий инженер EMSArena, специалист по Django, React и"
+" распределенным системам."
 
 #: contact/about/footer/navbar
 msgid "Mühəndislik komandası"
@@ -20539,8 +20645,12 @@ msgid "Backend · Frontend · DevOps"
 msgstr "Backend · Frontend · DevOps"
 
 #: contact/about/footer/navbar
-msgid "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli mühəndislər."
-msgstr "Опытные инженеры, отвечающие за производительность, надежность и безопасность."
+msgid ""
+"Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli "
+"mühəndislər."
+msgstr ""
+"Опытные инженеры, отвечающие за производительность, надежность и "
+"безопасность."
 
 #: contact/about/footer/navbar
 msgid "Pedaqoji məsləhətçilər"
@@ -20551,8 +20661,12 @@ msgid "Təhsil eksperti · Metodoloq"
 msgstr "Эксперт по образованию · Методолог"
 
 #: contact/about/footer/navbar
-msgid "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji düzgünlüyünü təmin edirlər."
-msgstr "Специалисты с преподавательским и университетским опытом обеспечивают педагогическую корректность платформы."
+msgid ""
+"Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji"
+" düzgünlüyünü təmin edirlər."
+msgstr ""
+"Специалисты с преподавательским и университетским опытом обеспечивают "
+"педагогическую корректность платформы."
 
 #: contact/about/footer/navbar
 msgid "Təhsilinizi növbəti səviyyəyə qaldıraq"
@@ -20567,8 +20681,12 @@ msgid "Haqqımızda – EMSArena"
 msgstr "О нас – EMSArena"
 
 #: contact/about/footer/navbar
-msgid "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
-msgstr "EMSArena — платформа управления образованием, LMS и онлайн-экзаменов. Узнайте о нашей команде, миссии и возможностях платформы."
+msgid ""
+"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız,"
+" missiyamız və platformanın imkanları haqqında məlumat."
+msgstr ""
+"EMSArena — платформа управления образованием, LMS и онлайн-экзаменов. "
+"Узнайте о нашей команде, миссии и возможностях платформы."
 
 #: contact/about/footer/navbar
 msgid "Adınız və soyadınız"
@@ -20587,7 +20705,8 @@ msgid "Ad daxilində link ola bilməz."
 msgstr "Имя не может содержать ссылку."
 
 #: contact/about/footer/navbar
-msgid "Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
+msgid ""
+"Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
 msgstr "Номер телефона может содержать только цифры и символы +, -, (, )."
 
 #: contact/about/footer/navbar
@@ -20699,16 +20818,23 @@ msgid "Əlaqə – EMSArena"
 msgstr "Контакты – EMSArena"
 
 #: contact/about/footer/navbar
-msgid "EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
-msgstr "Свяжитесь с EMSArena. Пишите нам с вопросами, предложениями и заявками на сотрудничество."
+msgid ""
+"EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq "
+"istəkləriniz üçün bizə yazın."
+msgstr ""
+"Свяжитесь с EMSArena. Пишите нам с вопросами, предложениями и заявками на "
+"сотрудничество."
 
 #: contact/about/footer/navbar
 msgid "Çox sayda mesaj göndərilib. Zəhmət olmasa bir az gözləyin."
 msgstr "Отправлено слишком много сообщений. Пожалуйста, немного подождите."
 
 #: contact/about/footer/navbar
-msgid "Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
-msgstr "С этого email-адреса отправлено слишком много сообщений. Попробуйте снова завтра."
+msgid ""
+"Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
+msgstr ""
+"С этого email-адреса отправлено слишком много сообщений. Попробуйте снова "
+"завтра."
 
 #: contact/about/footer/navbar
 msgid "Mesajınızı qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
@@ -20723,40 +20849,64 @@ msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
 msgstr "Для каких организаций подходит EMSArena?"
 
 #: contact/about/footer/navbar
-msgid "Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər təşkilat öz məkanını idarə edir."
-msgstr "Подходит для университетов, школ, учебных центров, корпоративных отделов обучения и индивидуальных преподавателей. Благодаря multi-tenant структуре каждая организация управляет своим пространством."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və "
+"fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər "
+"təşkilat öz məkanını idarə edir."
+msgstr ""
+"Подходит для университетов, школ, учебных центров, корпоративных отделов "
+"обучения и индивидуальных преподавателей. Благодаря multi-tenant структуре "
+"каждая организация управляет своим пространством."
 
 #: contact/about/footer/navbar
 msgid "Demo və ya pulsuz sınaq müddəti var?"
 msgstr "Есть ли демо или бесплатный пробный период?"
 
 #: contact/about/footer/navbar
-msgid "Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. Formada 'Satış / Demo' mövzusunu seçin."
-msgstr "Да. Свяжитесь с нашей командой продаж, чтобы организовать бесплатную демо-версию. В форме выберите тему «Продажи / Демо»."
+msgid ""
+"Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz."
+" Formada 'Satış / Demo' mövzusunu seçin."
+msgstr ""
+"Да. Свяжитесь с нашей командой продаж, чтобы организовать бесплатную демо-"
+"версию. В форме выберите тему «Продажи / Демо»."
 
 #: contact/about/footer/navbar
 msgid "Texniki dəstək necə alınır?"
 msgstr "Как получить техническую поддержку?"
 
 #: contact/about/footer/navbar
-msgid "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
-msgstr "Действующие клиенты могут открыть тикет из своего аккаунта. Новые посетители могут написать через форму, выбрав тему «Техническая поддержка»."
+msgid ""
+"Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma "
+"vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
+msgstr ""
+"Действующие клиенты могут открыть тикет из своего аккаунта. Новые посетители"
+" могут написать через форму, выбрав тему «Техническая поддержка»."
 
 #: contact/about/footer/navbar
 msgid "Məlumatlarım təhlükəsizdir?"
 msgstr "Мои данные в безопасности?"
 
 #: contact/about/footer/navbar
-msgid "Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
-msgstr "Да. Данные надежно защищены благодаря multi-tenant изоляции, ролевой системе доступа (RBAC), зашифрованному хранению и audit log."
+msgid ""
+"Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli "
+"saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
+msgstr ""
+"Да. Данные надежно защищены благодаря multi-tenant изоляции, ролевой системе"
+" доступа (RBAC), зашифрованному хранению и audit log."
 
 #: contact/about/footer/navbar
 msgid "AI köməkçi necə işləyir?"
 msgstr "Как работает ИИ-помощник?"
 
 #: contact/about/footer/navbar
-msgid "AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında suallar verə bilər."
-msgstr "ИИ-помощник видит только данные, к которым у вас есть доступ. Студент может спрашивать о своих курсах, преподаватель — о своих группах, администратор — о своей организации."
+msgid ""
+"AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz "
+"kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında "
+"suallar verə bilər."
+msgstr ""
+"ИИ-помощник видит только данные, к которым у вас есть доступ. Студент может "
+"спрашивать о своих курсах, преподаватель — о своих группах, администратор — "
+"о своей организации."
 
 #: contact/about/footer/navbar
 msgid "EMSArena – Cavab"
@@ -20771,8 +20921,11 @@ msgid "Salam"
 msgstr "Здравствуйте"
 
 #: contact/about/footer/navbar
-msgid "EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
-msgstr "Спасибо за ваше сообщение на сайте EMSArena. Ниже вы найдете наш ответ."
+msgid ""
+"EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa "
+"bilərsiniz."
+msgstr ""
+"Спасибо за ваше сообщение на сайте EMSArena. Ниже вы найдете наш ответ."
 
 #: contact/about/footer/navbar
 msgid "Sizin orijinal mesajınız:"
@@ -20780,7 +20933,9 @@ msgstr "Ваше исходное сообщение:"
 
 #: contact/about/footer/navbar
 msgid "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək."
-msgstr "Вы можете ответить прямо на это сообщение, и оно снова попадет нашей команде."
+msgstr ""
+"Вы можете ответить прямо на это сообщение, и оно снова попадет нашей "
+"команде."
 
 #: contact/about/footer/navbar
 msgid "Təhsil idarəetmə platforması"
@@ -20795,8 +20950,12 @@ msgid "Yeni əlaqə mesajı"
 msgstr "Новое сообщение контакта"
 
 #: contact/about/footer/navbar
-msgid "EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
-msgstr "Из контактной формы EMSArena отправлено новое сообщение. Сообщение сохранено и доступно в админ-панели."
+msgid ""
+"EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj "
+"saxlanılıb və admin panelindən baxa bilərsiniz."
+msgstr ""
+"Из контактной формы EMSArena отправлено новое сообщение. Сообщение сохранено"
+" и доступно в админ-панели."
 
 #: contact/about/footer/navbar
 msgid "Tarix"
@@ -20811,8 +20970,13 @@ msgid "Mesaj detalları"
 msgstr "Детали сообщения"
 
 #: contact/about/footer/navbar
-msgid "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək."
-msgstr "Ответ клиенту будет отправлен с <strong>info@</strong> или <strong>support@emsarena.com</strong>; ваш личный Gmail не будет виден."
+msgid ""
+"Cavab müştəriyə <strong>info@</strong> və ya "
+"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
+"görünməyəcək."
+msgstr ""
+"Ответ клиенту будет отправлен с <strong>info@</strong> или "
+"<strong>support@emsarena.com</strong>; ваш личный Gmail не будет виден."
 
 #: contact/about/footer/navbar
 msgid "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin."
@@ -20879,8 +21043,12 @@ msgid "Hansı maildən cavab göndərilsin"
 msgstr "С какого email отправить ответ"
 
 #: contact/about/footer/navbar
-msgid "Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq görünəcək."
-msgstr "Ответ, который будет отправлен клиенту. Markdown не поддерживается; текст будет показан как обычный."
+msgid ""
+"Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq "
+"görünəcək."
+msgstr ""
+"Ответ, который будет отправлен клиенту. Markdown не поддерживается; текст "
+"будет показан как обычный."
 
 #: contact/about/footer/navbar
 msgid "Cavab qeyd edildi və %(email)s ünvanına göndərilməyə çalışılır."
@@ -20915,8 +21083,12 @@ msgid "Cavab yaz və göndər"
 msgstr "Написать и отправить ответ"
 
 #: contact/about/footer/navbar
-msgid "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa qayıdacaq."
-msgstr "Клиент увидит, что ответ пришел с этого адреса. Его ответ также вернется в этот inbox."
+msgid ""
+"Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa "
+"qayıdacaq."
+msgstr ""
+"Клиент увидит, что ответ пришел с этого адреса. Его ответ также вернется в "
+"этот inbox."
 
 #: contact/about/footer/navbar
 msgid "Cavabı göndər"
@@ -20939,8 +21111,12 @@ msgid "Customer contact inbox"
 msgstr "Входящие сообщений клиентов"
 
 #: contact/about/footer/navbar
-msgid "Review public contact form messages and reply from the official EMSArena mailboxes."
-msgstr "Просматривайте сообщения из публичной контактной формы и отвечайте с официальных почтовых ящиков EMSArena."
+msgid ""
+"Review public contact form messages and reply from the official EMSArena "
+"mailboxes."
+msgstr ""
+"Просматривайте сообщения из публичной контактной формы и отвечайте с "
+"официальных почтовых ящиков EMSArena."
 
 #: contact/about/footer/navbar
 msgid "Back to inbox"
@@ -21057,3 +21233,47 @@ msgstr "Модель AI-ассистента"
 msgctxt "superadmin.ai_settings"
 msgid "hint_assistant_model"
 msgstr "Для чата рекомендуется Flash (быстро и дёшево)."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_add_question"
+msgstr "Добавьте новый вопрос в экзамен."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_bulk_add_blocks"
+msgstr "Добавьте несколько вопросов или блоков массово."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_questions_bank"
+msgstr "Добавьте из одобренных вопросов через банк."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_results"
+msgstr "Просмотрите ответы и результаты участников."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_statistics"
+msgstr "Просмотрите общую статистику и анализ экзамена."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_live_results"
+msgstr "Отслеживайте результаты в реальном времени во время живой сессии."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "label_results_visibility"
+msgstr "Видимость результатов"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "status_results_hidden"
+msgstr "Скрыто от студентов"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "status_results_visible"
+msgstr "Видно студентам"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_show_results"
+msgstr "Показать результаты студентам"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_hide_results"
+msgstr "Скрыть результаты от студентов"
