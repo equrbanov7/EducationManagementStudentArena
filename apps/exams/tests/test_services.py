@@ -33,7 +33,12 @@ from apps.exams.services.ai_question_generation import generate_question_bank_te
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.difficulty import ensure_ai_question_difficulties, schedule_ai_question_difficulty_warmup
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
-from apps.exams.services.supervision import log_supervision_incident, teacher_resume_attempt, teacher_stop_attempt
+from apps.exams.services.supervision import (
+    log_supervision_incident,
+    sweep_expired_resume_windows,
+    teacher_resume_attempt,
+    teacher_stop_attempt,
+)
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -674,6 +679,173 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertEqual(attempt.status, "expired")
         self.assertEqual(attempt.supervision_status, "locked")
         self.assertIsNotNone(attempt.finished_at)
+
+    def _supervised_resumable_exam(self, resume_window_seconds=600):
+        self.exam.total_duration_minutes = 600  # long enough to not auto-expire
+        self.exam.save(update_fields=["total_duration_minutes"])
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            recovery_policy="teacher_controlled",
+            resume_window_seconds=resume_window_seconds,
+        )
+
+    def _locked_attempt(self, locked_minutes_ago, number=1):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=number,
+            status="in_progress",
+            supervision_status="locked",
+        )
+        attempt.supervision_locked_at = timezone.now() - timedelta(minutes=locked_minutes_ago)
+        attempt.save(update_fields=["supervision_locked_at"])
+        return attempt
+
+    def test_lock_action_stamps_locked_at(self):
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            violation_action="lock_exam",
+            max_fullscreen_violations=1,
+            resume_window_seconds=600,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        result = log_supervision_incident(attempt, "fullscreen_exited", {"source": "test"})
+
+        self.assertEqual(result["action_taken"], "locked")
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_status, "locked")
+        self.assertIsNotNone(attempt.supervision_locked_at)
+        # Countdown is exposed on the locked attempt.
+        self.assertIsNotNone(attempt.supervision_resume_deadline)
+
+    def test_lock_window_auto_finishes_when_teacher_does_not_resume(self):
+        self._supervised_resumable_exam(resume_window_seconds=600)
+        # Locked 11 minutes ago, window is 10 minutes → should auto-finish.
+        attempt = self._locked_attempt(locked_minutes_ago=11)
+
+        finished = attempt.expire_if_resume_window_expired()
+
+        self.assertTrue(finished)
+        attempt.refresh_from_db()
+        # Submitted (not expired) so the student's current answers are kept.
+        self.assertEqual(attempt.status, "submitted")
+        self.assertEqual(attempt.supervision_status, "removed")
+        self.assertTrue(attempt.is_finished)
+        self.assertTrue(attempt.supervision_incidents.filter(event_type="resume_window_expired").exists())
+
+    def test_lock_window_not_expired_when_within_window(self):
+        self._supervised_resumable_exam(resume_window_seconds=600)
+        attempt = self._locked_attempt(locked_minutes_ago=3)
+
+        finished = attempt.expire_if_resume_window_expired()
+
+        self.assertFalse(finished)
+        attempt.refresh_from_db()
+        self.assertFalse(attempt.is_finished)
+        self.assertEqual(attempt.supervision_status, "locked")
+
+    def test_teacher_resume_stops_lock_countdown(self):
+        self._supervised_resumable_exam(resume_window_seconds=600)
+        attempt = self._locked_attempt(locked_minutes_ago=1)
+
+        teacher_resume_attempt(attempt, self.teacher)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_status, "resumed")
+        self.assertIsNone(attempt.supervision_locked_at)
+        # Sweep must not touch a resumed attempt.
+        self.assertEqual(sweep_expired_resume_windows(), 0)
+
+    def test_sweep_finishes_only_stale_locked_attempts(self):
+        self._supervised_resumable_exam(resume_window_seconds=600)
+        stale = self._locked_attempt(locked_minutes_ago=20, number=1)
+        fresh = self._locked_attempt(locked_minutes_ago=2, number=2)
+
+        expired = sweep_expired_resume_windows()
+
+        self.assertEqual(expired, 1)
+        stale.refresh_from_db()
+        fresh.refresh_from_db()
+        self.assertTrue(stale.is_finished)
+        self.assertFalse(fresh.is_finished)
+
+    def test_copy_paste_rightclick_are_logged_but_do_not_count_as_violations(self):
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            violation_action="lock_exam",
+            max_fullscreen_violations=2,
+            block_copy_paste=True,
+            disable_right_click=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        for event in ("copy_attempt", "paste_attempt", "cut_attempt", "right_click_attempt"):
+            result = log_supervision_incident(attempt, event, {"source": "test"})
+            self.assertEqual(result["violation_count"], 0, event)
+            self.assertFalse(result["limit_exceeded"], event)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_violation_count, 0)
+        self.assertEqual(attempt.supervision_status, "active")
+        self.assertFalse(attempt.is_finished)
+        # The attempts are still recorded for the teacher's audit trail.
+        self.assertEqual(attempt.supervision_incidents.count(), 4)
+
+    def test_fullscreen_exit_still_counts_as_violation(self):
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            violation_action="lock_exam",
+            max_fullscreen_violations=3,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        result = log_supervision_incident(attempt, "fullscreen_exited", {"source": "test"})
+
+        self.assertEqual(result["violation_count"], 1)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_violation_count, 1)
+
+    def test_status_includes_resume_countdown(self):
+        from apps.exams.services.supervision import get_attempt_supervision_status
+
+        self._supervised_resumable_exam(resume_window_seconds=600)
+        attempt = self._locked_attempt(locked_minutes_ago=2)
+
+        status = get_attempt_supervision_status(attempt)
+
+        self.assertEqual(status["resume_window_seconds"], 600)
+        self.assertIsNotNone(status["resume_seconds_remaining"])
+        # ~8 minutes left out of 10; allow a small margin.
+        self.assertGreater(status["resume_seconds_remaining"], 400)
+        self.assertLessEqual(status["resume_seconds_remaining"], 480)
+
+    def test_lock_window_disabled_when_zero(self):
+        self._supervised_resumable_exam(resume_window_seconds=0)
+        attempt = self._locked_attempt(locked_minutes_ago=300)
+
+        self.assertFalse(attempt.expire_if_resume_window_expired())
+        attempt.refresh_from_db()
+        self.assertFalse(attempt.is_finished)
 
 
 class ExamStatisticsAiSummaryServiceTest(SimpleTestCase):

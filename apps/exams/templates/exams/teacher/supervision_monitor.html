@@ -263,6 +263,14 @@
                             </button>
                             {% endif %}
                         {% endif %}
+                        {% if attempt.supervision_status == "locked" and not attempt.is_finished and attempt.supervision_resume_deadline %}
+                            <span class="resume-countdown" data-resume-deadline="{{ attempt.supervision_resume_deadline|date:'c' }}"
+                                  title="{% trans 'Bərpa etməyə qalan vaxt' %}"
+                                  style="display:inline-flex;align-items:center;gap:0.35rem;background:#fff3cd;color:#856404;padding:0.25rem 0.6rem;border-radius:14px;font-size:0.82rem;font-weight:600;font-variant-numeric:tabular-nums;margin-left:0.25rem;">
+                                <i class="fas fa-hourglass-half"></i>
+                                <span class="resume-countdown-value">--:--</span>
+                            </span>
+                        {% endif %}
                         {% if not attempt.is_finished %}
                         <button class="btn-action btn-stop" data-stop-attempt-id="{{ attempt.id }}" title="{% trans 'action_stop' context 'exams.template.supervision_monitor' %}" style="margin-left:0.25rem;">
                             <i class="fas fa-stop"></i> {% trans "action_stop" context "exams.template.supervision_monitor" %}
@@ -541,6 +549,46 @@ document.addEventListener("DOMContentLoaded", function() {
             );
         }
     });
+
+    // --- Resume-window countdowns ---
+    // Each resumed-but-not-returned row shows how long the student still has
+    // to come back before the backend auto-finishes them. Ticks every second.
+    function fmtRemaining(totalSeconds) {
+        totalSeconds = Math.max(0, totalSeconds);
+        var m = Math.floor(totalSeconds / 60);
+        var s = totalSeconds % 60;
+        return m + ":" + (s < 10 ? "0" + s : s);
+    }
+    var resumeCountdownReloaded = false;
+    function tickResumeCountdowns() {
+        var now = Date.now();
+        var anyExpired = false;
+        document.querySelectorAll(".resume-countdown").forEach(function (el) {
+            var deadline = Date.parse(el.getAttribute("data-resume-deadline"));
+            if (isNaN(deadline)) return;
+            var remaining = Math.round((deadline - now) / 1000);
+            var valueEl = el.querySelector(".resume-countdown-value");
+            if (remaining <= 0) {
+                if (valueEl) valueEl.textContent = "0:00";
+                el.style.background = "#f8d7da";
+                el.style.color = "#721c24";
+                anyExpired = true;
+            } else {
+                if (valueEl) valueEl.textContent = fmtRemaining(remaining);
+                if (remaining <= 60) { el.style.background = "#f8d7da"; el.style.color = "#721c24"; }
+            }
+        });
+        // A window just elapsed → the backend will auto-finish it; refresh once
+        // so the row flips to "Terminated".
+        if (anyExpired && !resumeCountdownReloaded) {
+            resumeCountdownReloaded = true;
+            setTimeout(function () { location.reload(); }, 2000);
+        }
+    }
+    if (document.querySelector(".resume-countdown")) {
+        tickResumeCountdowns();
+        setInterval(tickResumeCountdowns, 1000);
+    }
 
     // --- Loading overlay on navigation ---
     var loadingOverlay = document.getElementById("loadingOverlay");

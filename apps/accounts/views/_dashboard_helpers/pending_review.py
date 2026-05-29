@@ -119,6 +119,10 @@ def _collect_pending_review_items(
                     "status": attempt.status,
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
+                    # True when the attempt was terminated by exam supervision
+                    # (proctoring) — shown as a red flag in the review list.
+                    "supervision_removed": attempt.supervision_status == "removed",
+                    "supervision_violation_count": attempt.supervision_violation_count,
                     "type_label": _pending_review_type_label("exam", exam_type=attempt.exam.exam_type),
                     "is_recheck": is_recheck,
                     "review_window_seconds_left": review_window_seconds_left,

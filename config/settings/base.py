@@ -136,6 +136,17 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
 CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
+# Periodic tasks (require running `celery -A config beat`).
+CELERY_BEAT_SCHEDULE = {
+    # Auto-finish supervised attempts whose resume window elapsed without the
+    # student returning.  Runs every minute so the supervision monitor never
+    # shows stale open rows long after an exam has ended.
+    "exams-expire-stale-resumed-attempts": {
+        "task": "exams.expire_stale_resumed_attempts",
+        "schedule": 60.0,  # seconds
+    },
+}
+
 # ---------------------------------------------------------------------------
 # Admin security settings
 # ---------------------------------------------------------------------------

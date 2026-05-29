@@ -908,7 +908,8 @@ msgstr "Emin misiniz?"
 
 msgctxt "profile.groups"
 msgid "remove_student_confirm_body"
-msgstr "{student} adlı öğrenciyi bu gruptan çıkarmak istediğinizden emin misiniz?"
+msgstr ""
+"{student} adlı öğrenciyi bu gruptan çıkarmak istediğinizden emin misiniz?"
 
 msgctxt "profile.groups"
 msgid "remove_student_confirm_button"
@@ -1411,8 +1412,7 @@ msgstr "OTP kodu gönderildi!"
 #: apps/accounts/templates/accounts/password_reset_done.html:20
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
-msgstr ""
-"Bu e-posta sistemimizde varsa, şifre sıfırlama OTP kodu gönderildi."
+msgstr "Bu e-posta sistemimizde varsa, şifre sıfırlama OTP kodu gönderildi."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:21
 msgctxt "accounts.password_reset_done_page"
@@ -1425,8 +1425,12 @@ msgid "back_to_login"
 msgstr "Giriş sayfasına dön"
 
 msgctxt "accounts.password_reset_page"
-msgid "We will send a 6-digit OTP code to your email. Enter it on the next screen to set a new password. The code is valid for %(minutes)s minutes."
-msgstr "E-postanıza 6 haneli OTP kodu gönderilecek. Sonraki ekranda kodu girerek yeni şifrenizi belirleyin. Kod %(minutes)s dakika geçerlidir."
+msgid ""
+"We will send a 6-digit OTP code to your email. Enter it on the next screen "
+"to set a new password. The code is valid for %(minutes)s minutes."
+msgstr ""
+"E-postanıza 6 haneli OTP kodu gönderilecek. Sonraki ekranda kodu girerek "
+"yeni şifrenizi belirleyin. Kod %(minutes)s dakika geçerlidir."
 
 msgctxt "accounts.password_reset_done_page"
 msgid "OTP code is valid for %(minutes)s minutes."
@@ -3431,7 +3435,8 @@ msgstr "Kullanıcı zaten başka bir kuruluşa bağlı."
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
 msgstr ""
-"Bu kullanıcı kayıt sırasında kaydolmamıştır ve kuruluşunuza katılamamaktadır."
+"Bu kullanıcı kayıt sırasında kaydolmamıştır ve kuruluşunuza "
+"katılamamaktadır."
 
 #: apps/accounts/views.py:2236
 msgctxt "accounts.role_assignment.message"
@@ -5342,8 +5347,8 @@ msgstr "Kişisel Portallar ve Paneller"
 msgctxt "blog.about_page"
 msgid "feature_3_text"
 msgstr ""
-"Öğretmenler, öğrenciler ve yöneticiler için özel yönetim panelleri. E-"
-"jurnal, değerlendirme, devam takibi ve sonuçların analitik izlenmesini "
+"Öğretmenler, öğrenciler ve yöneticiler için özel yönetim panelleri. "
+"E-jurnal, değerlendirme, devam takibi ve sonuçların analitik izlenmesini "
 "içerir."
 
 #: apps/blog/templates/blog/about.html:62
@@ -5367,8 +5372,8 @@ msgstr "Çok kurumsal (multi-tenant) yapı"
 msgctxt "blog.about_page"
 msgid "feature_5_text"
 msgstr ""
-"Aynı platformda birden fazla kuruluşun faaliyet göstermesi. Her kuruluş için "
-"ayrı rol ve yönetim kuralları ile tamamen izole veri güvenliği."
+"Aynı platformda birden fazla kuruluşun faaliyet göstermesi. Her kuruluş için"
+" ayrı rol ve yönetim kuralları ile tamamen izole veri güvenliği."
 
 #: apps/blog/templates/blog/about.html:82
 msgctxt "blog.about_page"
@@ -5728,8 +5733,8 @@ msgstr "Yeniliklerden ilk siz haberdar olun!"
 msgctxt "blog.subscribe_page"
 msgid "lead"
 msgstr ""
-"Haftalık teknoloji özetleri, programlama dersleri ve özel içerikler doğrudan "
-"e-posta kutunuzda."
+"Haftalık teknoloji özetleri, programlama dersleri ve özel içerikler doğrudan"
+" e-posta kutunuzda."
 
 #: apps/blog/templates/blog/subscribe.html:22
 msgctxt "blog.subscribe_page"
@@ -5770,8 +5775,8 @@ msgstr "Teknoloji Dünyası"
 msgctxt "blog.technology_page"
 msgid "subtitle"
 msgstr ""
-"Yapay zeka, programlama, yeni gadget'lar ve dijital dünya hakkında en güncel "
-"analizler."
+"Yapay zeka, programlama, yeni gadget'lar ve dijital dünya hakkında en güncel"
+" analizler."
 
 #: apps/blog/templates/blog/technology.html:64
 msgctxt "blog.technology_page"
@@ -7709,8 +7714,8 @@ msgstr "Öğrenciye gösterilecek soru sayısı"
 msgctxt "exams.form.exam.help"
 msgid "random_question_count"
 msgstr ""
-"Yalnızca test sınavları için. Varsayılan 10'dur. Tüm aktif soruları rastgele "
-"göstermek için 0 girin."
+"Yalnızca test sınavları için. Varsayılan 10'dur. Tüm aktif soruları rastgele"
+" göstermek için 0 girin."
 
 #: apps/exams/forms.py:164
 msgctxt "exams.form.exam.error"
@@ -9485,7 +9490,9 @@ msgstr "Medya eki (isteğe bağlı)"
 
 msgctxt "exams.template.add_exam_question"
 msgid "media_help_text"
-msgstr "Soldaki alan resim, sağdaki alan video içindir. Gerekli değilse ikisini de boş bırakabilirsiniz."
+msgstr ""
+"Soldaki alan resim, sağdaki alan video içindir. Gerekli değilse ikisini de "
+"boş bırakabilirsiniz."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
@@ -9621,7 +9628,8 @@ msgstr "Soru seçtiğiniz bölüme eklenecek."
 
 msgctxt "exams.template.add_exam_question"
 msgid "help_time_limit_seconds"
-msgstr "Örneğin: 60 saniye. Boş bırakılırsa sınavın varsayılan süresi kullanılacak."
+msgstr ""
+"Örneğin: 60 saniye. Boş bırakılırsa sınavın varsayılan süresi kullanılacak."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
@@ -10116,8 +10124,8 @@ msgstr "0 = tüm soruları göster"
 msgctxt "exams.template.create_question_bank"
 msgid "help_total_question_count"
 msgstr ""
-"Öğrencinin göreceği aktif soru sayısını girin. Tüm soruları göstermek için 0 "
-"yazın."
+"Öğrencinin göreceği aktif soru sayısını girin. Tüm soruları göstermek için 0"
+" yazın."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:289
 #: apps/exams/templates/exams/teacher/create_question_bank.html:334
@@ -10214,7 +10222,8 @@ msgstr "Silmeyi onayla"
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
 msgstr ""
-"Bu bölüm ve içindeki sorular bankadan silinecek. Devam etmek istiyor musunuz?"
+"Bu bölüm ve içindeki sorular bankadan silinecek. Devam etmek istiyor "
+"musunuz?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:345
 msgctxt "exams.template.create_question_bank"
@@ -11718,7 +11727,8 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "ZIP içinde engellenen dosya tespit edildi: {filename}"
 
-#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22
+#: apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -11734,7 +11744,8 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Bu sınava başlayamazsınız."
 
-#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60
+#: apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -12010,7 +12021,8 @@ msgstr "Bu laboratuvarı zaten gönderdiniz!"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Deneme: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -15878,7 +15890,8 @@ msgstr ""
 # Added for updated register searchable select and org-role copy
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
-msgstr "Bu kuruluş tipi için rol otomatik olarak kuruluş yöneticisi olacaktır."
+msgstr ""
+"Bu kuruluş tipi için rol otomatik olarak kuruluş yöneticisi olacaktır."
 
 msgctxt "accounts.register.js"
 msgid "no_results"
@@ -16210,8 +16223,8 @@ msgctxt "accounts.register"
 msgid "privacy_section_data_body"
 msgstr ""
 "Kayit sirasinda kullanici adinizi, adinizi, soyadinizi, e-posta adresinizi, "
-"ulkenizi, sectiginiz hesap turunu ve kurum bilgilerinizi toplariz. Platformu "
-"kullandikca kurslar, sinavlar, laboratuvarlar, odevler, sonuclar ve uyelik "
+"ulkenizi, sectiginiz hesap turunu ve kurum bilgilerinizi toplariz. Platformu"
+" kullandikca kurslar, sinavlar, laboratuvarlar, odevler, sonuclar ve uyelik "
 "hareketleriyle ilgili operasyonel kayitlar da olusabilir."
 
 msgctxt "accounts.register"
@@ -16222,8 +16235,8 @@ msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
 "Bu veriler hesabinizi olusturmak, e-posta OTP dogrulamasi gondermek, "
-"workspace ve kurum erisimini yonetmek, ders ve sinav akislarini calistirmak, "
-"sonuclari gostermek ve denetim ile guvenlik kontrollerini desteklemek icin "
+"workspace ve kurum erisimini yonetmek, ders ve sinav akislarini calistirmak,"
+" sonuclari gostermek ve denetim ile guvenlik kontrollerini desteklemek icin "
 "kullanilir."
 
 msgctxt "accounts.register"
@@ -16268,8 +16281,8 @@ msgstr "Haklariniz"
 msgctxt "accounts.register"
 msgid "privacy_section_rights_body"
 msgstr ""
-"Profil bilgilerinizi guncelleyebilir, kurum tercihlerinizi degistirebilir ve "
-"hesap verilerinizle ilgili aciklama veya silme talebinde bulunabilirsiniz. "
+"Profil bilgilerinizi guncelleyebilir, kurum tercihlerinizi degistirebilir ve"
+" hesap verilerinizle ilgili aciklama veya silme talebinde bulunabilirsiniz. "
 "Bu haklari kullanmak icin platform yoneticisiyle iletisime gecebilirsiniz."
 
 msgctxt "accounts.register"
@@ -16417,8 +16430,8 @@ msgid ""
 "Your %(role_label)s request has been sent to %(organization_name)s and is "
 "currently awaiting a response."
 msgstr ""
-"%(organization_name)s kuruluşuna %(role_label)s olarak başvurunuz gönderildi "
-"ve şu anda yanıt bekliyor."
+"%(organization_name)s kuruluşuna %(role_label)s olarak başvurunuz gönderildi"
+" ve şu anda yanıt bekliyor."
 
 msgctxt "profile.notifications"
 msgid "%(organization_name)s has invited you as %(role_label)s."
@@ -16438,8 +16451,8 @@ msgstr ""
 
 msgctxt "profile.join_org"
 msgid ""
-"You are currently connected to <strong>%(organization_name)s</strong>. After "
-"leaving, you can submit a new request from this section or accept any "
+"You are currently connected to <strong>%(organization_name)s</strong>. After"
+" leaving, you can submit a new request from this section or accept any "
 "pending invites."
 msgstr ""
 "Şu anda <strong>%(organization_name)s</strong> kuruluşuna bağlısınız. "
@@ -16448,8 +16461,8 @@ msgstr ""
 
 msgctxt "profile.join_org"
 msgid ""
-"You currently have <strong>%(count)s</strong> organization requests awaiting "
-"approval."
+"You currently have <strong>%(count)s</strong> organization requests awaiting"
+" approval."
 msgstr ""
 "Şu anda onay bekleyen <strong>%(count)s</strong> kuruluş başvurunuz var."
 
@@ -17045,7 +17058,8 @@ msgstr "Çıkarma nedeni..."
 
 msgctxt "staff.management"
 msgid ""
-"Please confirm that you want to add the selected user(s) to the organization."
+"Please confirm that you want to add the selected user(s) to the "
+"organization."
 msgstr "Seçilen kullanıcı(lar)ı kuruluşa eklemek istediğinizi onaylayın."
 
 msgctxt "staff.management"
@@ -18735,7 +18749,8 @@ msgstr "Sıkı Denetim Modu"
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_strict_desc"
-msgstr "En yüksek seviye denetim. Tüm koruma önlemleri aktif, ikinci şans yok."
+msgstr ""
+"En yüksek seviye denetim. Tüm koruma önlemleri aktif, ikinci şans yok."
 
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_strict_f1"
@@ -18829,7 +18844,8 @@ msgstr "Sıkı Denetim Modu"
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_desc"
-msgstr "En yüksek seviye denetim. Tüm koruma önlemleri aktif, ikinci şans yok."
+msgstr ""
+"En yüksek seviye denetim. Tüm koruma önlemleri aktif, ikinci şans yok."
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "tpl_info_strict_f1"
@@ -19181,7 +19197,9 @@ msgstr "Tam ekran modu gereklidir"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_fullscreen_unavailable"
-msgstr "Tam ekran bu cihazın tarayıcısı tarafından desteklenmiyor; mümkün gözetim kontrolleri aktif kalacak."
+msgstr ""
+"Tam ekran bu cihazın tarayıcısı tarafından desteklenmiyor; mümkün gözetim "
+"kontrolleri aktif kalacak."
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_ack_rule_tab"
@@ -19253,7 +19271,9 @@ msgstr "⚠️ Dikkat!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_threshold_msg"
-msgstr "İhlal limitinin %75'ine ulaştınız! Sadece {remaining} ihlal hakkınız kaldı. Daha dikkatli olun!"
+msgstr ""
+"İhlal limitinin %75'ine ulaştınız! Sadece {remaining} ihlal hakkınız kaldı. "
+"Daha dikkatli olun!"
 
 msgctxt "exams.template.take_exam"
 msgid "supervision_resume_title"
@@ -19324,10 +19344,8 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "loading"
 msgstr "Yükleniyor..."
 
-#
 # ── Statistics profile section (profile.statistics) ────────────
-#
-
+# 
 msgctxt "profile.section"
 msgid "statistics"
 msgstr "İstatistikler"
@@ -19627,29 +19645,42 @@ msgstr "AI isteği sırasında hata oluştu."
 msgctxt "profile.statistics"
 msgid "ai_remaining"
 msgstr "Kalan istek"
+
 msgctxt "exams.template.ai_question_bank"
 msgid "AI ilə test sualı yarat"
 msgstr "AI ile test soruları oluştur"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək."
-msgstr "Ders dosyası yükleyin veya konuyu prompt olarak yazın. AI sonucu bu sayfanın test formatına çevirecek."
+msgid ""
+"Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu "
+"səhifənin test formatına çevirəcək."
+msgstr ""
+"Ders dosyası yükleyin veya konuyu prompt olarak yazın. AI sonucu bu sayfanın"
+" test formatına çevirecek."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "AI ilə bu blok üçün sual yarat"
 msgstr "AI ile bu blok için soru oluştur"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq."
-msgstr "Ders dosyası veya prompt temelinde sorular hazırlanacak ve bu bloğun metin alanına eklenecek."
+msgid ""
+"Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn "
+"sahəsinə əlavə olunacaq."
+msgstr ""
+"Ders dosyası veya prompt temelinde sorular hazırlanacak ve bu bloğun metin "
+"alanına eklenecek."
 
 msgctxt "exams.template.ai_question_bank"
 msgid "Prompt / mövzu"
 msgstr "Prompt / konu"
 
 msgctxt "exams.template.ai_question_bank"
-msgid "Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat"
-msgstr "Örneğin: Python fonksiyonları konusunda uygulama düzeyinde test soruları oluştur"
+msgid ""
+"Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları "
+"yarat"
+msgstr ""
+"Örneğin: Python fonksiyonları konusunda uygulama düzeyinde test soruları "
+"oluştur"
 
 msgctxt "exams.template.ai_question_bank"
 msgid "Mühazirə faylı"
@@ -20017,8 +20048,11 @@ msgid "Program input"
 msgstr "Program girdisi"
 
 msgctxt "exams.template.coding_exam"
-msgid "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
-msgstr "Giriş verisini buraya yazın. Her satır input(), Scanner, cin veya stdin'e gönderilecek."
+msgid ""
+"Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
+msgstr ""
+"Giriş verisini buraya yazın. Her satır input(), Scanner, cin veya stdin'e "
+"gönderilecek."
 
 msgctxt "accounts.pending_answers"
 msgid "page_title"
@@ -20097,8 +20131,12 @@ msgid "yüklənir..."
 msgstr "yükleniyor..."
 
 msgctxt "ai_assistant.greeting"
-msgid "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
-msgstr "Merhaba! Ben EMSArena AI. Sorularınızı cevaplamaya hazırım. Size nasıl yardımcı olabilirim?"
+msgid ""
+"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
+" bilərəm?"
+msgstr ""
+"Merhaba! Ben EMSArena AI. Sorularınızı cevaplamaya hazırım. Size nasıl "
+"yardımcı olabilirim?"
 
 msgctxt "ai_assistant.error"
 msgid "AI sorğu limiti hazırda aktiv deyil."
@@ -20133,8 +20171,11 @@ msgid "AI Assistent"
 msgstr "AI Asistan"
 
 msgctxt "ai_assistant.limit_exceeded"
-msgid "Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd edin."
-msgstr "Saatlik AI sorgu limitine ulaştınız. Lütfen biraz sonra tekrar deneyin."
+msgid ""
+"Saatlıq AI sorğu limitinə çatdınız. Zəhmət olmasa bir az sonra yenidən cəhd "
+"edin."
+msgstr ""
+"Saatlik AI sorgu limitine ulaştınız. Lütfen biraz sonra tekrar deneyin."
 
 msgctxt "ai_assistant.input"
 msgid "Mesajınızı yazın..."
@@ -20213,8 +20254,14 @@ msgid "təhsilin yeni nəsil arenası"
 msgstr "eğitimin yeni nesil arenası"
 
 #: contact/about/footer/navbar
-msgid "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi."
-msgstr "Üniversiteler, okullar, kurs merkezleri ve öğretmenler için modern eğitim yönetimi, LMS ve çevrimiçi sınav platformu. Kurslar, sınavlar, değerlendirme, denetim ve yapay zekâ asistanı tek yerde."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil "
+"idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, "
+"imtahanlar, qiymətləndirmə, audit və AI köməkçi."
+msgstr ""
+"Üniversiteler, okullar, kurs merkezleri ve öğretmenler için modern eğitim "
+"yönetimi, LMS ve çevrimiçi sınav platformu. Kurslar, sınavlar, "
+"değerlendirme, denetim ve yapay zekâ asistanı tek yerde."
 
 #: contact/about/footer/navbar
 msgid "Pulsuz başla"
@@ -20297,8 +20344,13 @@ msgid "Bizimlə əlaqə saxlayın"
 msgstr "Bizimle iletişime geçin"
 
 #: contact/about/footer/navbar
-msgid "Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində cavab veririk."
-msgstr "Soru, öneri ve iş birliği talepleri için aşağıdaki formu veya doğrudan iletişim kanallarını kullanın. 24 saat içinde yanıtlıyoruz."
+msgid ""
+"Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün aşağıdakı "
+"formadan və ya birbaşa əlaqə vasitələrindən istifadə edin. 24 saat ərzində "
+"cavab veririk."
+msgstr ""
+"Soru, öneri ve iş birliği talepleri için aşağıdaki formu veya doğrudan "
+"iletişim kanallarını kullanın. 24 saat içinde yanıtlıyoruz."
 
 #: contact/about/footer/navbar
 msgid "info – ümumi, support – texniki dəstək"
@@ -20365,8 +20417,12 @@ msgid "Tez-tez verilən suallar"
 msgstr "Sıkça sorulan sorular"
 
 #: contact/about/footer/navbar
-msgid "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli."
-msgstr "Eğitim yönetimi ve çevrimiçi sınav platformu. Üniversiteler, okullar ve kurs merkezleri için modern LMS çözümü."
+msgid ""
+"Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və"
+" kurs mərkəzləri üçün modern LMS həlli."
+msgstr ""
+"Eğitim yönetimi ve çevrimiçi sınav platformu. Üniversiteler, okullar ve kurs"
+" merkezleri için modern LMS çözümü."
 
 #: contact/about/footer/navbar
 msgid "Sosial şəbəkələr"
@@ -20441,52 +20497,100 @@ msgid "Missiya və Vizyon"
 msgstr "Misyon ve vizyon"
 
 #: contact/about/footer/navbar
-msgid "Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən platforma ilə tədrisi sadələşdirmək."
-msgstr "Eğitim kurumlarını bürokrasiden kurtarıp öğretmen-öğrenci etkileşimine odaklanmalarını sağlamak. Tek, güvenilir ve ölçeklenebilir bir platformla öğretimi sadeleştirmek."
+msgid ""
+"Təhsil müəssisələrini bürokratiyadan azad edib müəllim-tələbə qarşılıqlı "
+"əlaqəsinə diqqət yetirməyə imkan vermək. Tək, etibarlı və ölçəklənən "
+"platforma ilə tədrisi sadələşdirmək."
+msgstr ""
+"Eğitim kurumlarını bürokrasiden kurtarıp öğretmen-öğrenci etkileşimine "
+"odaklanmalarını sağlamak. Tek, güvenilir ve ölçeklenebilir bir platformla "
+"öğretimi sadeleştirmek."
 
 #: contact/about/footer/navbar
-msgid "Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün uyğun."
-msgstr "Azerbaycan ve bölgede en çok tercih edilen eğitim teknolojileri platformu olmak: yapay zekâ destekli, çok kiracılı, güvenli ve her ölçekte kuruma uygun."
+msgid ""
+"Azərbaycan və regionun ən çox seçilən təhsil texnologiyaları platforması "
+"olmaq — AI dəstəkli, multi-tenant, təhlükəsiz və hər ölçüdə təşkilat üçün "
+"uyğun."
+msgstr ""
+"Azerbaycan ve bölgede en çok tercih edilen eğitim teknolojileri platformu "
+"olmak: yapay zekâ destekli, çok kiracılı, güvenli ve her ölçekte kuruma "
+"uygun."
 
 #: contact/about/footer/navbar
-msgid "Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım olan hər şey."
-msgstr "Kurslardan sınavlara, değerlendirmeden analitiğe kadar ihtiyacınız olan her şey tek abonelikte."
+msgid ""
+"Bir abunəlikdə kursdan imtahana, qiymətləndirmədən analitikaya qədər lazım "
+"olan hər şey."
+msgstr ""
+"Kurslardan sınavlara, değerlendirmeden analitiğe kadar ihtiyacınız olan her "
+"şey tek abonelikte."
 
 #: contact/about/footer/navbar
-msgid "Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün sadə, tələbə üçün aydın."
-msgstr "Konular, dersler, materyaller ve grup yönetimi tek yerde. Öğretmen için sade, öğrenci için anlaşılır."
+msgid ""
+"Mövzular, dərslər, materiallar və qrup idarəçiliyi tək yerdə. Müəllim üçün "
+"sadə, tələbə üçün aydın."
+msgstr ""
+"Konular, dersler, materyaller ve grup yönetimi tek yerde. Öğretmen için "
+"sade, öğrenci için anlaşılır."
 
 #: contact/about/footer/navbar
-msgid "Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə qarışmır, RBAC ciddi tətbiq olunur."
-msgstr "Her kurum tamamen izole edilmiş bir alana sahiptir. Veriler birbirine karışmaz, RBAC sıkı şekilde uygulanır."
+msgid ""
+"Hər təşkilat tam izolyasiya olunmuş məkana sahibdir. Məlumatlar bir-birinə "
+"qarışmır, RBAC ciddi tətbiq olunur."
+msgstr ""
+"Her kurum tamamen izole edilmiş bir alana sahiptir. Veriler birbirine "
+"karışmaz, RBAC sıkı şekilde uygulanır."
 
 #: contact/about/footer/navbar
-msgid "Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs yalnız ona icazə verilən məlumatı görür."
-msgstr "Superadmin, kurum sahibi, öğretmen, öğrenci ve personel rolleri: herkes yalnızca izin verilen verileri görür."
+msgid ""
+"Superadmin, təşkilat sahibi, müəllim, tələbə və işçi rolları — hər kəs "
+"yalnız ona icazə verilən məlumatı görür."
+msgstr ""
+"Superadmin, kurum sahibi, öğretmen, öğrenci ve personel rolleri: herkes "
+"yalnızca izin verilen verileri görür."
 
 #: contact/about/footer/navbar
-msgid "Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, analitika və anti-cheat parametrləri."
-msgstr "Test, yazılı, uygulamalı ve canlı sınavlar; otomatik değerlendirme, analitik ve anti-cheat ayarları."
+msgid ""
+"Test, yazılı, praktik və canlı imtahanlar. Avtomatik qiymətləndirmə, "
+"analitika və anti-cheat parametrləri."
+msgstr ""
+"Test, yazılı, uygulamalı ve canlı sınavlar; otomatik değerlendirme, analitik"
+" ve anti-cheat ayarları."
 
 #: contact/about/footer/navbar
-msgid "Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və CSP siyasətləri ilə qorunan."
-msgstr "Her kritik işlem audit log'a yazılır; dahili güvenlik testleri ve CSP politikalarıyla korunur."
+msgid ""
+"Hər kritik əməliyyat audit log-a yazılır. Daxili təhlükəsizlik testləri və "
+"CSP siyasətləri ilə qorunan."
+msgstr ""
+"Her kritik işlem audit log'a yazılır; dahili güvenlik testleri ve CSP "
+"politikalarıyla korunur."
 
 #: contact/about/footer/navbar
-msgid "İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya kömək edən ağıllı assistent."
-msgstr "Kullanıcının izinleri kapsamında soruları yanıtlayan ve gezinmeye yardımcı olan akıllı asistan."
+msgid ""
+"İstifadəçinin icazəsi çərçivəsində suallarını cavablandıran, naviqasiyaya "
+"kömək edən ağıllı assistent."
+msgstr ""
+"Kullanıcının izinleri kapsamında soruları yanıtlayan ve gezinmeye yardımcı "
+"olan akıllı asistan."
 
 #: contact/about/footer/navbar
-msgid "EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
-msgstr "EMSArena deneyimli mühendisler ve eğitimciler tarafından geliştirilmiştir. Kullanıcı odaklı tasarım ve güvenilir teknoloji temel önceliklerimizdir."
+msgid ""
+"EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü "
+"dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
+msgstr ""
+"EMSArena deneyimli mühendisler ve eğitimciler tarafından geliştirilmiştir. "
+"Kullanıcı odaklı tasarım ve güvenilir teknoloji temel önceliklerimizdir."
 
 #: contact/about/footer/navbar
 msgid "Founder · Full-stack Engineer"
 msgstr "Kurucu · Full-stack mühendis"
 
 #: contact/about/footer/navbar
-msgid "EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan sistemlər sahəsində mütəxəssis."
-msgstr "EMSArena'nın baş mimarı ve ana mühendisi; Django, React ve paylaşımlı sistemler konusunda uzmandır."
+msgid ""
+"EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan "
+"sistemlər sahəsində mütəxəssis."
+msgstr ""
+"EMSArena'nın baş mimarı ve ana mühendisi; Django, React ve paylaşımlı "
+"sistemler konusunda uzmandır."
 
 #: contact/about/footer/navbar
 msgid "Mühəndislik komandası"
@@ -20497,7 +20601,9 @@ msgid "Backend · Frontend · DevOps"
 msgstr "Backend · Frontend · DevOps"
 
 #: contact/about/footer/navbar
-msgid "Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli mühəndislər."
+msgid ""
+"Performans, etibarlılıq və təhlükəsizliyi öz üzərinə götürən təcrübəli "
+"mühəndislər."
 msgstr "Performans, güvenilirlik ve güvenliği üstlenen deneyimli mühendisler."
 
 #: contact/about/footer/navbar
@@ -20509,8 +20615,12 @@ msgid "Təhsil eksperti · Metodoloq"
 msgstr "Eğitim uzmanı · Metodolog"
 
 #: contact/about/footer/navbar
-msgid "Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji düzgünlüyünü təmin edirlər."
-msgstr "Öğretmenlik ve üniversite deneyimine sahip uzmanlar platformanın pedagojik doğruluğunu sağlar."
+msgid ""
+"Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji"
+" düzgünlüyünü təmin edirlər."
+msgstr ""
+"Öğretmenlik ve üniversite deneyimine sahip uzmanlar platformanın pedagojik "
+"doğruluğunu sağlar."
 
 #: contact/about/footer/navbar
 msgid "Təhsilinizi növbəti səviyyəyə qaldıraq"
@@ -20525,8 +20635,12 @@ msgid "Haqqımızda – EMSArena"
 msgstr "Hakkımızda – EMSArena"
 
 #: contact/about/footer/navbar
-msgid "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, missiyamız və platformanın imkanları haqqında məlumat."
-msgstr "EMSArena bir eğitim yönetimi, LMS ve çevrimiçi sınav platformudur. Ekibimiz, misyonumuz ve platform özelliklerimiz hakkında bilgi alın."
+msgid ""
+"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız,"
+" missiyamız və platformanın imkanları haqqında məlumat."
+msgstr ""
+"EMSArena bir eğitim yönetimi, LMS ve çevrimiçi sınav platformudur. Ekibimiz,"
+" misyonumuz ve platform özelliklerimiz hakkında bilgi alın."
 
 #: contact/about/footer/navbar
 msgid "Adınız və soyadınız"
@@ -20545,8 +20659,10 @@ msgid "Ad daxilində link ola bilməz."
 msgstr "Ad içinde bağlantı olamaz."
 
 #: contact/about/footer/navbar
-msgid "Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
-msgstr "Telefon numarası yalnızca rakam ve +, -, (, ) karakterlerinden oluşabilir."
+msgid ""
+"Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər."
+msgstr ""
+"Telefon numarası yalnızca rakam ve +, -, (, ) karakterlerinden oluşabilir."
 
 #: contact/about/footer/navbar
 msgid "Mesaj ən azı 10 simvol olmalıdır."
@@ -20657,16 +20773,22 @@ msgid "Əlaqə – EMSArena"
 msgstr "İletişim – EMSArena"
 
 #: contact/about/footer/navbar
-msgid "EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
-msgstr "EMSArena ile iletişime geçin. Sorularınız, önerileriniz ve iş birliği talepleriniz için bize yazın."
+msgid ""
+"EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq "
+"istəkləriniz üçün bizə yazın."
+msgstr ""
+"EMSArena ile iletişime geçin. Sorularınız, önerileriniz ve iş birliği "
+"talepleriniz için bize yazın."
 
 #: contact/about/footer/navbar
 msgid "Çox sayda mesaj göndərilib. Zəhmət olmasa bir az gözləyin."
 msgstr "Çok sayıda mesaj gönderildi. Lütfen biraz bekleyin."
 
 #: contact/about/footer/navbar
-msgid "Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
-msgstr "Bu e-posta adresinden çok sayıda mesaj gönderildi. Yarın tekrar deneyin."
+msgid ""
+"Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
+msgstr ""
+"Bu e-posta adresinden çok sayıda mesaj gönderildi. Yarın tekrar deneyin."
 
 #: contact/about/footer/navbar
 msgid "Mesajınızı qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
@@ -20674,47 +20796,72 @@ msgstr "Mesajınızı alamadık. Lütfen daha sonra tekrar deneyin."
 
 #: contact/about/footer/navbar
 msgid "Mesajınız uğurla qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq."
-msgstr "Mesajınız başarıyla alındı. Kısa süre içinde sizinle iletişime geçeceğiz."
+msgstr ""
+"Mesajınız başarıyla alındı. Kısa süre içinde sizinle iletişime geçeceğiz."
 
 #: contact/about/footer/navbar
 msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
 msgstr "EMSArena hangi kurumlar için uygundur?"
 
 #: contact/about/footer/navbar
-msgid "Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər təşkilat öz məkanını idarə edir."
-msgstr "Üniversiteler, okullar, kurs merkezleri, kurumsal eğitim birimleri ve bireysel öğretmenler için uygundur. Çok kiracılı yapı sayesinde her kurum kendi alanını yönetir."
+msgid ""
+"Universitetlər, məktəblər, kurs mərkəzləri, korporativ təlim şöbələri və "
+"fərdi müəllimlər üçün uyğundur. Multi-tenant strukturu sayəsində hər "
+"təşkilat öz məkanını idarə edir."
+msgstr ""
+"Üniversiteler, okullar, kurs merkezleri, kurumsal eğitim birimleri ve "
+"bireysel öğretmenler için uygundur. Çok kiracılı yapı sayesinde her kurum "
+"kendi alanını yönetir."
 
 #: contact/about/footer/navbar
 msgid "Demo və ya pulsuz sınaq müddəti var?"
 msgstr "Demo veya ücretsiz deneme var mı?"
 
 #: contact/about/footer/navbar
-msgid "Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. Formada 'Satış / Demo' mövzusunu seçin."
-msgstr "Evet. Satış ekibimizle iletişime geçerek ücretsiz demo düzenleyebilirsiniz. Formda 'Satış / Demo' konusunu seçin."
+msgid ""
+"Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz."
+" Formada 'Satış / Demo' mövzusunu seçin."
+msgstr ""
+"Evet. Satış ekibimizle iletişime geçerek ücretsiz demo düzenleyebilirsiniz. "
+"Formda 'Satış / Demo' konusunu seçin."
 
 #: contact/about/footer/navbar
 msgid "Texniki dəstək necə alınır?"
 msgstr "Teknik destek nasıl alınır?"
 
 #: contact/about/footer/navbar
-msgid "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
-msgstr "Mevcut müşterilerimiz hesap içinden talep oluşturabilir. Yeni gelenler formda 'Teknik destek' konusunu seçerek yazabilir."
+msgid ""
+"Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma "
+"vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
+msgstr ""
+"Mevcut müşterilerimiz hesap içinden talep oluşturabilir. Yeni gelenler "
+"formda 'Teknik destek' konusunu seçerek yazabilir."
 
 #: contact/about/footer/navbar
 msgid "Məlumatlarım təhlükəsizdir?"
 msgstr "Verilerim güvende mi?"
 
 #: contact/about/footer/navbar
-msgid "Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
-msgstr "Evet. Çok kiracılı izolasyon, rol tabanlı izin sistemi (RBAC), şifreli saklama ve audit log sayesinde veriler güçlü şekilde korunur."
+msgid ""
+"Bəli. Multi-tenant izolyasiya, rol-əsaslı icazə sistemi (RBAC), şifrəli "
+"saxlama və audit log sayəsində məlumatlar maksimum səviyyədə qorunur."
+msgstr ""
+"Evet. Çok kiracılı izolasyon, rol tabanlı izin sistemi (RBAC), şifreli "
+"saklama ve audit log sayesinde veriler güçlü şekilde korunur."
 
 #: contact/about/footer/navbar
 msgid "AI köməkçi necə işləyir?"
 msgstr "Yapay zekâ asistanı nasıl çalışır?"
 
 #: contact/about/footer/navbar
-msgid "AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında suallar verə bilər."
-msgstr "Yapay zekâ asistanı yalnızca izinli olduğunuz verileri görür. Öğrenci kendi kursları, öğretmen kendi grupları, admin ise kendi kurumu hakkında soru sorabilir."
+msgid ""
+"AI köməkçi yalnız sizin icazəniz olan məlumatları görür. Tələbə yalnız öz "
+"kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında "
+"suallar verə bilər."
+msgstr ""
+"Yapay zekâ asistanı yalnızca izinli olduğunuz verileri görür. Öğrenci kendi "
+"kursları, öğretmen kendi grupları, admin ise kendi kurumu hakkında soru "
+"sorabilir."
 
 #: contact/about/footer/navbar
 msgid "EMSArena – Cavab"
@@ -20729,8 +20876,12 @@ msgid "Salam"
 msgstr "Merhaba"
 
 #: contact/about/footer/navbar
-msgid "EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz."
-msgstr "EMSArena sitesindeki mesajınız için teşekkür ederiz. Yanıtımızı aşağıda bulabilirsiniz."
+msgid ""
+"EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa "
+"bilərsiniz."
+msgstr ""
+"EMSArena sitesindeki mesajınız için teşekkür ederiz. Yanıtımızı aşağıda "
+"bulabilirsiniz."
 
 #: contact/about/footer/navbar
 msgid "Sizin orijinal mesajınız:"
@@ -20738,7 +20889,9 @@ msgstr "Orijinal mesajınız:"
 
 #: contact/about/footer/navbar
 msgid "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək."
-msgstr "Bu mesaja doğrudan yanıt verebilirsiniz; yanıtınız ekibimize geri gelecektir."
+msgstr ""
+"Bu mesaja doğrudan yanıt verebilirsiniz; yanıtınız ekibimize geri "
+"gelecektir."
 
 #: contact/about/footer/navbar
 msgid "Təhsil idarəetmə platforması"
@@ -20753,8 +20906,12 @@ msgid "Yeni əlaqə mesajı"
 msgstr "Yeni iletişim mesajı"
 
 #: contact/about/footer/navbar
-msgid "EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz."
-msgstr "EMSArena iletişim formundan yeni bir mesaj gönderildi. Mesaj kaydedildi ve admin panelinden görüntülenebilir."
+msgid ""
+"EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj "
+"saxlanılıb və admin panelindən baxa bilərsiniz."
+msgstr ""
+"EMSArena iletişim formundan yeni bir mesaj gönderildi. Mesaj kaydedildi ve "
+"admin panelinden görüntülenebilir."
 
 #: contact/about/footer/navbar
 msgid "Tarix"
@@ -20769,8 +20926,14 @@ msgid "Mesaj detalları"
 msgstr "Mesaj detayları"
 
 #: contact/about/footer/navbar
-msgid "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək."
-msgstr "Yanıt müşteriye <strong>info@</strong> veya <strong>support@emsarena.com</strong> üzerinden gidecek; kişisel Gmail adresiniz görünmeyecek."
+msgid ""
+"Cavab müştəriyə <strong>info@</strong> və ya "
+"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
+"görünməyəcək."
+msgstr ""
+"Yanıt müşteriye <strong>info@</strong> veya "
+"<strong>support@emsarena.com</strong> üzerinden gidecek; kişisel Gmail "
+"adresiniz görünmeyecek."
 
 #: contact/about/footer/navbar
 msgid "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin."
@@ -20837,8 +21000,12 @@ msgid "Hansı maildən cavab göndərilsin"
 msgstr "Yanıt hangi e-postadan gönderilsin"
 
 #: contact/about/footer/navbar
-msgid "Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq görünəcək."
-msgstr "Müşteriye gönderilecek yanıt. Markdown desteklenmez; düz metin olarak görünür."
+msgid ""
+"Müştəriyə göndəriləcək cavab. Markdown dəstəklənmir; sadə mətn olaraq "
+"görünəcək."
+msgstr ""
+"Müşteriye gönderilecek yanıt. Markdown desteklenmez; düz metin olarak "
+"görünür."
 
 #: contact/about/footer/navbar
 msgid "Cavab qeyd edildi və %(email)s ünvanına göndərilməyə çalışılır."
@@ -20873,8 +21040,12 @@ msgid "Cavab yaz və göndər"
 msgstr "Yanıt yaz ve gönder"
 
 #: contact/about/footer/navbar
-msgid "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa qayıdacaq."
-msgstr "Müşteri yanıtın bu adresten geldiğini görecek. Onun yanıtı da bu gelen kutusuna dönecek."
+msgid ""
+"Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa "
+"qayıdacaq."
+msgstr ""
+"Müşteri yanıtın bu adresten geldiğini görecek. Onun yanıtı da bu gelen "
+"kutusuna dönecek."
 
 #: contact/about/footer/navbar
 msgid "Cavabı göndər"
@@ -20897,8 +21068,12 @@ msgid "Customer contact inbox"
 msgstr "Müşteri iletişim gelen kutusu"
 
 #: contact/about/footer/navbar
-msgid "Review public contact form messages and reply from the official EMSArena mailboxes."
-msgstr "Herkese açık iletişim formu mesajlarını inceleyin ve resmi EMSArena posta kutularından yanıtlayın."
+msgid ""
+"Review public contact form messages and reply from the official EMSArena "
+"mailboxes."
+msgstr ""
+"Herkese açık iletişim formu mesajlarını inceleyin ve resmi EMSArena posta "
+"kutularından yanıtlayın."
 
 #: contact/about/footer/navbar
 msgid "Back to inbox"
@@ -21015,3 +21190,47 @@ msgstr "AI Asistan modeli"
 msgctxt "superadmin.ai_settings"
 msgid "hint_assistant_model"
 msgstr "Sohbet için Flash önerilir (hızlı ve ucuz)."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_add_question"
+msgstr "Sınava yeni bir soru ekleyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_bulk_add_blocks"
+msgstr "Birkaç soruyu veya bloğu toplu olarak ekleyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_questions_bank"
+msgstr "Onaylanmış sorulardan banka aracılığıyla ekleyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_results"
+msgstr "Katılımcıların cevap ve sonuçlarını görüntüleyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_statistics"
+msgstr "Sınavın genel istatistik ve analizlerine bakın."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "desc_view_live_results"
+msgstr "Canlı oturum sırasında sonuçları gerçek zamanlı izleyin."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "label_results_visibility"
+msgstr "Sonuç görünürlüğü"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "status_results_hidden"
+msgstr "Öğrencilerden gizli"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "status_results_visible"
+msgstr "Öğrencilere görünür"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_show_results"
+msgstr "Sonuçları öğrencilere göster"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_hide_results"
+msgstr "Sonuçları öğrencilerden gizle"

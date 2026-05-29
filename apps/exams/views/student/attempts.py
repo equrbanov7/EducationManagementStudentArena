@@ -93,8 +93,17 @@ def take_exam(request, slug, attempt_id):
     history_url = build_exam_history_url(exam, return_to=return_to)
 
     attempt.expire_if_time_limit_reached()
+    # If the resume window already lapsed before the student got here, finish now.
+    attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
         return redirect(build_exam_result_url(attempt, return_to=return_to))
+
+    # Student is actually back in the exam → clear the pending "resumed" state
+    # so the periodic sweep does not auto-finish an active student.
+    if attempt.supervision_status == "resumed":
+        from apps.exams.services.supervision import mark_student_returned
+
+        mark_student_returned(attempt)
 
     # Sualları Attempt-ə bağlanmış cavablardan götürürük
     answers_qs = (

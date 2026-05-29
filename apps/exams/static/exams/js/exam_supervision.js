@@ -513,24 +513,24 @@
             this._previewGraceUntil = Date.now() + ms;
         },
 
+        // Clipboard / right-click are blocked outright (preventDefault) but do
+        // NOT cost the student a violation point. We still log the attempt so
+        // the teacher sees it in the audit trail.
         _onCopy: function (e) {
             if (this._isEditableField(e.target)) return;
             e.preventDefault();
             this._logEvent("copy_attempt");
-            this._incrementViolation();
         },
 
         _onPaste: function (e) {
             e.preventDefault();
             this._logEvent("paste_attempt");
-            this._incrementViolation();
         },
 
         _onCut: function (e) {
             if (this._isEditableField(e.target)) return;
             e.preventDefault();
             this._logEvent("cut_attempt");
-            this._incrementViolation();
         },
 
         _onContextMenu: function (e) {
@@ -585,7 +585,10 @@
                 if (ctrl && (key === "c" || key === "v" || key === "x")) {
                     e.preventDefault();
                     e.stopPropagation();
-                    this._logEvent("keyboard_shortcut", { key: e.key, ctrl: e.ctrlKey, shift: e.shiftKey, meta: e.metaKey });
+                    // Blocked, but logged as a non-counting clipboard event so it
+                    // does not burn a violation point (matches mouse copy/paste).
+                    var clipEvent = key === "c" ? "copy_attempt" : (key === "v" ? "paste_attempt" : "cut_attempt");
+                    this._logEvent(clipEvent, { via: "keyboard", key: e.key });
                     return false;
                 }
             }
@@ -811,6 +814,8 @@
             var lockedWait = i18n.lockedWait || "\u0130mtahan\u0131n\u0131z dayand\u0131r\u0131l\u0131b. M\u00fc\u0259llim q\u0259rar q\u0259bul ed\u0259n\u0259 q\u0259d\u0259r g\u00f6zl\u0259yin.";
             var lockedWaiting = i18n.lockedWaiting || "M\u00fc\u0259llim cavab\u0131n\u0131 g\u00f6zl\u0259yirik...";
 
+            var countdownLabel = i18n.lockedCountdownLabel || "Müəllim bərpa etməsə, imtahan avtomatik bitəcək";
+
             var overlay = document.createElement("div");
             overlay.id = "supervision-locked-overlay";
             overlay.style.cssText =
@@ -822,13 +827,46 @@
                 '<h2 style="color:#dc3545;">' + lockedTitle + "</h2>" +
                 '<p style="color:#555;margin:1rem 0;">' + lockedMsg + "</p>" +
                 '<p style="color:#555;">' + lockedWait + "</p>" +
-                '<div style="margin-top:1.5rem;"><div class="spinner-border text-secondary" role="status"></div></div>' +
+                '<div id="supervision-locked-countdown-wrap" style="margin:1.5rem 0;display:none;">' +
+                '<div style="font-size:0.8rem;color:#888;text-transform:uppercase;letter-spacing:0.02em;">' + countdownLabel + '</div>' +
+                '<div id="supervision-locked-countdown" style="font-size:2.5rem;font-weight:700;color:#dc3545;font-variant-numeric:tabular-nums;">--:--</div>' +
+                '</div>' +
                 '<p style="color:#999;font-size:0.85rem;margin-top:1rem;">' + lockedWaiting + "</p>" +
                 "</div>";
             document.body.appendChild(overlay);
 
-            // Poll for status changes
+            // Fetch the authoritative remaining time, then tick locally.
+            this._startLockCountdown();
+            // Poll for status changes (teacher resume / auto-finish).
             this._startStatusPolling();
+        },
+
+        // Drives the "teacher must resume within N" countdown shown on the
+        // locked overlay. Seeds from the status API, then ticks every second.
+        _startLockCountdown: function () {
+            var self = this;
+            this._checkSupervisionStatus(function (data) {
+                var remaining = data && data.resume_seconds_remaining;
+                if (remaining === null || remaining === undefined) return;
+                var wrap = document.getElementById("supervision-locked-countdown-wrap");
+                var cdEl = document.getElementById("supervision-locked-countdown");
+                if (!wrap || !cdEl) return;
+                wrap.style.display = "block";
+                remaining = Math.max(0, parseInt(remaining, 10) || 0);
+                cdEl.textContent = self._formatRemaining(remaining);
+                if (self._lockCountdownTimer) clearInterval(self._lockCountdownTimer);
+                self._lockCountdownTimer = setInterval(function () {
+                    remaining--;
+                    cdEl.textContent = self._formatRemaining(remaining);
+                    if (remaining <= 0) {
+                        clearInterval(self._lockCountdownTimer);
+                        self._lockCountdownTimer = null;
+                        // Window elapsed — backend has (or is about to) submit
+                        // the attempt; reload to land on the result page.
+                        window.location.reload();
+                    }
+                }, 1000);
+            });
         },
 
         _startStatusPolling: function () {
@@ -836,30 +874,56 @@
                 ExamSupervision._checkSupervisionStatus(function (data) {
                     if (data.supervision_status === "resumed" || data.supervision_status === "active") {
                         clearInterval(poll);
+                        if (ExamSupervision._lockCountdownTimer) {
+                            clearInterval(ExamSupervision._lockCountdownTimer);
+                            ExamSupervision._lockCountdownTimer = null;
+                        }
                         var overlay = document.getElementById("supervision-locked-overlay");
                         if (overlay) overlay.remove();
                         ExamSupervision.isActive = true;
                         ExamSupervision.violationCount = data.violation_count || 0;
                         ExamSupervision.maxViolations = data.max_violations || ExamSupervision.maxViolations;
                         ExamSupervision._updateBadge();
-                        if (ExamSupervision.config.force_fullscreen) {
-                            ExamSupervision._showResumeFullscreenOverlay();
-                        }
+                        // Teacher resumed in time → just bring the student back
+                        // (fullscreen prompt if required). No further countdown.
+                        ExamSupervision._showResumeFullscreenOverlay(null);
                     } else if (data.is_finished) {
                         clearInterval(poll);
+                        if (ExamSupervision._lockCountdownTimer) {
+                            clearInterval(ExamSupervision._lockCountdownTimer);
+                            ExamSupervision._lockCountdownTimer = null;
+                        }
                         window.location.reload();
                     }
                 });
             }, 5000);
         },
 
-        _showResumeFullscreenOverlay: function () {
+        // Format seconds as M:SS for the resume countdown.
+        _formatRemaining: function (totalSeconds) {
+            totalSeconds = Math.max(0, parseInt(totalSeconds, 10) || 0);
+            var m = Math.floor(totalSeconds / 60);
+            var s = totalSeconds % 60;
+            return m + ":" + (s < 10 ? "0" + s : s);
+        },
+
+        _showResumeFullscreenOverlay: function (resumeSecondsRemaining) {
             if (document.getElementById("supervision-resume-overlay")) return;
 
+            var self = this;
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
             var resumeTitle = i18n.resumeTitle || "\u0130mtahan b\u0259rpa edildi!";
-            var resumeMsg = i18n.resumeMsg || "Davam etm\u0259k \u00fc\u00e7\u00fcn tam ekrana qay\u0131d\u0131n.";
-            var resumeBtn = i18n.resumeBtn || "Tam ekrana ke\u00e7 v\u0259 davam et";
+            var needsFullscreen = !!this.config.force_fullscreen;
+            var resumeMsg = needsFullscreen
+                ? (i18n.resumeMsg || "Davam etm\u0259k \u00fc\u00e7\u00fcn tam ekrana qay\u0131d\u0131n.")
+                : (i18n.resumeMsgNoFs || "Davam etm\u0259k \u00fc\u00e7\u00fcn d\u00fcym\u0259ni bas\u0131n.");
+            var resumeBtn = needsFullscreen
+                ? (i18n.resumeBtn || "Tam ekrana ke\u00e7 v\u0259 davam et")
+                : (i18n.resumeBtnNoFs || "Davam et");
+            var countdownLabel = i18n.resumeCountdownLabel || "B\u0259rpa etm\u0259y\u0259 qalan vaxt";
+
+            // Whether a resume window applies (null = disabled / no deadline).
+            var hasCountdown = resumeSecondsRemaining !== null && resumeSecondsRemaining !== undefined;
 
             var overlay = document.createElement("div");
             overlay.id = "supervision-resume-overlay";
@@ -871,13 +935,52 @@
                 '<div style="font-size:3rem;color:#28a745;margin-bottom:1rem;"><i class="fas fa-check-circle"></i></div>' +
                 '<h2 style="color:#333;">' + resumeTitle + '</h2>' +
                 '<p style="color:#555;margin:1rem 0;">' + resumeMsg + '</p>' +
-                '<button id="supervision-resume-fs-btn" style="margin-top:1rem;padding:0.75rem 2rem;background:#007bff;color:#fff;' +
+                (hasCountdown
+                    ? '<div style="margin:1.25rem 0;">' +
+                      '<div style="font-size:0.85rem;color:#888;letter-spacing:0.02em;text-transform:uppercase;">' + countdownLabel + '</div>' +
+                      '<div id="supervision-resume-countdown" style="font-size:2.5rem;font-weight:700;color:#dc3545;font-variant-numeric:tabular-nums;">' +
+                      self._formatRemaining(resumeSecondsRemaining) + '</div>' +
+                      '</div>'
+                    : '') +
+                '<button id="supervision-resume-fs-btn" style="margin-top:0.5rem;padding:0.75rem 2rem;background:#007bff;color:#fff;' +
                 'border:none;border-radius:8px;font-size:1.1rem;cursor:pointer;">' +
-                '<i class="fas fa-expand"></i> ' + resumeBtn + '</button>' +
+                (needsFullscreen ? '<i class="fas fa-expand"></i> ' : '') + resumeBtn + '</button>' +
                 '</div>';
             document.body.appendChild(overlay);
 
+            // Live countdown to the resume deadline. When it hits zero the
+            // backend has (or is about to) auto-finish the attempt, so reload
+            // to land on the result page.
+            if (hasCountdown) {
+                var remaining = Math.max(0, parseInt(resumeSecondsRemaining, 10) || 0);
+                var cdEl = document.getElementById("supervision-resume-countdown");
+                this._resumeCountdownTimer = setInterval(function () {
+                    remaining--;
+                    if (cdEl) {
+                        cdEl.textContent = self._formatRemaining(remaining);
+                        if (remaining <= 30) cdEl.style.color = "#dc3545";
+                    }
+                    if (remaining <= 0) {
+                        clearInterval(self._resumeCountdownTimer);
+                        self._resumeCountdownTimer = null;
+                        window.location.reload();
+                    }
+                }, 1000);
+            }
+
+            var finishResume = function () {
+                if (self._resumeCountdownTimer) {
+                    clearInterval(self._resumeCountdownTimer);
+                    self._resumeCountdownTimer = null;
+                }
+                overlay.remove();
+            };
+
             document.getElementById("supervision-resume-fs-btn").addEventListener("click", function () {
+                if (!needsFullscreen) {
+                    finishResume();
+                    return;
+                }
                 try {
                     var el = document.documentElement;
                     var fsPromise;
@@ -887,15 +990,11 @@
                         fsPromise = el.webkitRequestFullscreen();
                     }
                     if (fsPromise && typeof fsPromise.then === "function") {
-                        fsPromise.then(function () {
-                            overlay.remove();
-                        }).catch(function () {
-                            overlay.remove();
-                        });
+                        fsPromise.then(finishResume).catch(finishResume);
                         return;
                     }
                 } catch (e) {}
-                overlay.remove();
+                finishResume();
             });
         },
 
@@ -949,6 +1048,14 @@
         destroy: function () {
             this.isActive = false;
             this._clearGraceTimer();
+            if (this._resumeCountdownTimer) {
+                clearInterval(this._resumeCountdownTimer);
+                this._resumeCountdownTimer = null;
+            }
+            if (this._lockCountdownTimer) {
+                clearInterval(this._lockCountdownTimer);
+                this._lockCountdownTimer = null;
+            }
         },
     };
 
