@@ -52,9 +52,16 @@ class AIConfiguration(models.Model):
 
     grading_model = models.CharField(
         max_length=50,
-        default="gemini-2.5-flash-lite",
+        default="gemini-2.5-flash",
         choices=MODEL_CHOICES,
         help_text="Yazılı cavab qiymətləndirmə üçün istifadə olunan model.",
+    )
+
+    assistant_model = models.CharField(
+        max_length=50,
+        default="gemini-2.5-flash",
+        choices=MODEL_CHOICES,
+        help_text="AI Assistant (söhbət) üçün istifadə olunan model.",
     )
 
     # ── Budget ─────────────────────────────────────────────────────
