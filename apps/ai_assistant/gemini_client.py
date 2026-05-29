@@ -25,8 +25,9 @@ _REQUEST_TIMEOUT = 60
 _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 
-# Gemini model for the assistant — heavier model for conversational quality.
-_DEFAULT_MODEL = "gemini-2.5-pro"
+# Gemini model for the assistant. flash is faster, cheaper and far less prone
+# to 503 "high demand" errors than pro. Overridable via GEMINI_MODEL env var.
+_DEFAULT_MODEL = "gemini-2.5-flash"
 
 SYSTEM_PROMPT = (
     "You are EMSArena AI Assistant. You help users navigate and understand "
