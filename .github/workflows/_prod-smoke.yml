@@ -60,7 +60,27 @@ jobs:
           SESSION_COOKIE_SECURE: "False"
           CSRF_COOKIE_SECURE: "False"
         run: |
-          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml up -d --no-build
+          # Docker Hub anonim pull-lar paylaşılan CI IP-sində rate-limit-ə (toomanyrequests)
+          # və ya keçici "unknown" manifest xətasına düşə bilir. Stack-i 3 dəfəyə qədər
+          # geriçəkilmə (backoff) ilə qaldırmağa çalışırıq ki, keçici nasazlıq CI-ni sındırmasın.
+          set -e
+          ATTEMPTS=3
+          for i in $(seq 1 $ATTEMPTS); do
+            echo "▶ Start production stack — cəhd $i/$ATTEMPTS"
+            if docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml up -d --no-build; then
+              echo "✅ Stack qalxdı (cəhd $i)."
+              exit 0
+            fi
+            echo "⚠️ Cəhd $i uğursuz oldu (yəqin Docker Hub rate-limit/nasazlıq)."
+            docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml down -v --remove-orphans || true
+            if [ "$i" -lt "$ATTEMPTS" ]; then
+              SLEEP=$((i * 15))
+              echo "⏳ ${SLEEP}s gözləyib yenidən cəhd edirik..."
+              sleep "$SLEEP"
+            fi
+          done
+          echo "::error::❌ Production stack $ATTEMPTS cəhddən sonra qalxmadı."
+          exit 1
 
       # Poll /health/ and /ping/ with retries (up to 120 s)
       - name: 🩺 Poll health and ping endpoints
