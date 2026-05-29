@@ -21007,3 +21007,11 @@ msgstr "Kategori oluştur"
 #: contact/about/footer/navbar
 msgid "Categories"
 msgstr "Kategoriler"
+
+msgctxt "superadmin.ai_settings"
+msgid "label_assistant_model"
+msgstr "AI Asistan modeli"
+
+msgctxt "superadmin.ai_settings"
+msgid "hint_assistant_model"
+msgstr "Sohbet için Flash önerilir (hızlı ve ucuz)."
