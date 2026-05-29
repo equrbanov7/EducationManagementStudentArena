@@ -114,6 +114,7 @@ def supervision_status_api(request, attempt_id):
     )
 
     attempt.expire_if_time_limit_reached()
+    attempt.expire_if_resume_window_expired()
     status = get_attempt_supervision_status(attempt)
     status["is_finished"] = attempt.is_finished
     status["attempt_status"] = attempt.status

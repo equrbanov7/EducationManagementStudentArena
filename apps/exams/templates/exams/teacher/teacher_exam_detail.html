@@ -25,11 +25,11 @@
         <div class="card-body">
             {# --- İmtahan Məlumatları Hissəsi --- #}
             <section class="exam-info-section">
-                <div class="info-item">
+                <div class="info-card">
                     <span class="info-label"><i class="fas fa-file-alt"></i> {% trans "label_type" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.get_exam_type_display }}</span>
                 </div>
-                <div class="info-item">
+                <div class="info-card">
                     <span class="info-label"><i class="fas fa-info-circle"></i> {% trans "label_status" context "exams.template.teacher_exam_detail" %}:</span>
                     {% if exam.is_active %}
                         <span class="status-badge active">{% trans "status_active" context "exams.template.teacher_exam_detail" %}</span>
@@ -37,114 +37,160 @@
                         <span class="status-badge passive">{% trans "status_passive" context "exams.template.teacher_exam_detail" %}</span>
                     {% endif %}
                 </div>
-                <div class="info-item">
-                    <span class="info-label"><i class="fas fa-eye"></i> Nəticə görünüşü:</span>
+                <div class="info-card">
+                    <span class="info-label"><i class="fas fa-eye"></i> {% trans "label_results_visibility" context "exams.template.teacher_exam_detail" %}:</span>
                     {% if exam.results_hidden_from_students %}
-                        <span class="status-badge passive">Tələbələrdən gizlidir</span>
+                        <span class="status-badge passive">{% trans "status_results_hidden" context "exams.template.teacher_exam_detail" %}</span>
                     {% else %}
-                        <span class="status-badge active">Tələbələrə görünür</span>
+                        <span class="status-badge active">{% trans "status_results_visible" context "exams.template.teacher_exam_detail" %}</span>
                     {% endif %}
                 </div>
                 {% if exam.total_duration_minutes %}
-                <div class="info-item">
+                <div class="info-card">
                     <span class="info-label"><i class="far fa-clock"></i> {% trans "label_total_duration" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.total_duration_minutes }} {% trans "unit_minutes" context "exams.template.teacher_exam_detail" %}</span>
                 </div>
                 {% endif %}
                 {% if exam.default_question_time_seconds %}
-                <div class="info-item">
+                <div class="info-card">
                     <span class="info-label"><i class="fas fa-stopwatch"></i> {% trans "label_question_time" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.default_question_time_seconds }} {% trans "unit_seconds" context "exams.template.teacher_exam_detail" %}</span>
                 </div>
                 {% endif %}
                 {% if exam.max_attempts_per_user %}
-                <div class="info-item">
+                <div class="info-card">
                     <span class="info-label"><i class="fas fa-redo-alt"></i> {% trans "label_attempts" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.max_attempts_per_user }}</span>
                 </div>
                 {% endif %}
-
-                {# Live başlat - YALNIZ TEST İMTAHANLARI ÜÇÜN #}
-                {% if exam.exam_type == "test" %}
-                    {% if exam.is_active %}
-                        <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
-                           class="btn btn-success live-start-btn"
-                           target="_blank"
-                           rel="noopener noreferrer">
-                            🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
-                        </a>
-                    {% else %}
-                        <span class="live-start-tooltip"
-                              tabindex="0"
-                              title="{% trans 'hint_activate_exam_before_live' context 'exams.template.teacher_exam_detail' %}">
-                            <span class="btn btn-success live-start-btn live-start-btn-disabled" aria-disabled="true">
-                                🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
-                            </span>
-                        </span>
-                    {% endif %}
-                {% endif %}
-
             </section>
 
-            {# --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- #}
+            {# Live başlat - YALNIZ TEST İMTAHANLARI ÜÇÜN (tam enli sətir) #}
+            {% if exam.exam_type == "test" %}
+            <section class="live-start-section">
+                {% if exam.is_active %}
+                    <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
+                       class="live-start-btn"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
+                    </a>
+                {% else %}
+                    <span class="live-start-tooltip"
+                          tabindex="0"
+                          title="{% trans 'hint_activate_exam_before_live' context 'exams.template.teacher_exam_detail' %}">
+                        <span class="live-start-btn live-start-btn-disabled" aria-disabled="true">
+                            🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
+                        </span>
+                    </span>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            {# --- İmtahan Hərəkətləri: İkon-Kart Şəbəkəsi --- #}
             <section class="exam-actions-section">
-                <div class="action-group">
+                <div class="action-card-grid">
+                    {# Sual əlavə et #}
                     <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
-                       class="action-btn primary-btn js-open-question-form-modal"
+                       class="action-card action-card--blue js-open-question-form-modal"
                        data-question-modal-mode="create"
                        data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
-                        <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_exam_detail" %}
+                        <span class="action-card__icon"><i class="fas fa-plus"></i></span>
+                        <span class="action-card__body">
+                            <span class="action-card__title">{% trans "action_add_question" context "exams.template.teacher_exam_detail" %}</span>
+                            <span class="action-card__desc">{% trans "desc_add_question" context "exams.template.teacher_exam_detail" %}</span>
+                        </span>
+                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    {# Sual Bankı Düyməsi #}
+                    {# Bloklarla toplu əlavə #}
                     {% if exam.exam_type == "test" %}
                         <a href="{% url 'exams:test_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
-                           class="action-btn bank-btn">
-                            <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
+                           class="action-card action-card--blue">
+                            <span class="action-card__icon"><i class="fas fa-layer-group"></i></span>
+                            <span class="action-card__body">
+                                <span class="action-card__title">{% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                                <span class="action-card__desc">{% trans "desc_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                            </span>
+                            <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                         </a>
                     {% elif exam.exam_type == "written" or exam.exam_type == "coding" %}
                         <a href="{% url 'exams:create_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
-                           class="action-btn bank-btn">
-                            <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
+                           class="action-card action-card--blue">
+                            <span class="action-card__icon"><i class="fas fa-layer-group"></i></span>
+                            <span class="action-card__body">
+                                <span class="action-card__title">{% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                                <span class="action-card__desc">{% trans "desc_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                            </span>
+                            <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                         </a>
                     {% endif %}
 
-                    <a href="{% url 'exams:teacher_questions_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn library-btn">
-                        <i class="fas fa-database"></i> {% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}
+                    {# Sual bankı #}
+                    <a href="{% url 'exams:teacher_questions_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+                       class="action-card action-card--green">
+                        <span class="action-card__icon"><i class="fas fa-database"></i></span>
+                        <span class="action-card__body">
+                            <span class="action-card__title">{% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}</span>
+                            <span class="action-card__desc">{% trans "desc_questions_bank" context "exams.template.teacher_exam_detail" %}</span>
+                        </span>
+                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
-                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
-                        <i class="fas fa-poll"></i> {% trans "action_view_results" context "exams.template.teacher_exam_detail" %}
+                    {# Nəticələrə bax #}
+                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}"
+                       class="action-card action-card--green">
+                        <span class="action-card__icon"><i class="fas fa-poll"></i></span>
+                        <span class="action-card__body">
+                            <span class="action-card__title">{% trans "action_view_results" context "exams.template.teacher_exam_detail" %}</span>
+                            <span class="action-card__desc">{% trans "desc_view_results" context "exams.template.teacher_exam_detail" %}</span>
+                        </span>
+                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
 
+                    {# Statistikaya bax #}
+                    <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}"
+                       class="action-card action-card--slate">
+                        <span class="action-card__icon"><i class="fas fa-chart-line"></i></span>
+                        <span class="action-card__body">
+                            <span class="action-card__title">{% trans "action_view_statistics" context "exams.template.teacher_exam_detail" %}</span>
+                            <span class="action-card__desc">{% trans "desc_view_statistics" context "exams.template.teacher_exam_detail" %}</span>
+                        </span>
+                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
+                    </a>
+
+                    {# Canlı nəticələri izlə #}
+                    {% if exam.exam_type == "test" %}
+                    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+                       class="action-card action-card--slate">
+                        <span class="action-card__icon"><i class="fas fa-broadcast-tower"></i></span>
+                        <span class="action-card__body">
+                            <span class="action-card__title">{% trans "action_view_live_results" context "exams.template.teacher_exam_detail" %}</span>
+                            <span class="action-card__desc">{% trans "desc_view_live_results" context "exams.template.teacher_exam_detail" %}</span>
+                        </span>
+                        <span class="action-card__arrow"><i class="fas fa-chevron-right"></i></span>
+                    </a>
+                    {% endif %}
+                </div>
+
+                {# --- İdarəetmə düymələri sətri --- #}
+                <div class="exam-control-row">
                     <form method="post"
                           action="{% url 'exams:toggle_exam_results_visibility' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                           class="inline-action-form">
                         {% csrf_token %}
                         {% if exam.results_hidden_from_students %}
                             <button type="submit" class="action-btn visibility-show-btn">
-                                <i class="fas fa-eye"></i> Nəticələri tələbələrə göstər
+                                <i class="fas fa-eye"></i> {% trans "action_show_results" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% else %}
                             <button type="submit" class="action-btn visibility-hide-btn">
-                                <i class="fas fa-eye-slash"></i> Nəticəni tələbələrdən gizlət
+                                <i class="fas fa-eye-slash"></i> {% trans "action_hide_results" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% endif %}
                     </form>
 
-                    <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
-                        <i class="fas fa-chart-line"></i> {% trans "action_view_statistics" context "exams.template.teacher_exam_detail" %}
-                    </a>
-
-                    {% if exam.exam_type == "test" %}
-                    <a href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn secondary-btn">
-                        <i class="fas fa-broadcast-tower"></i> {% trans "action_view_live_results" context "exams.template.teacher_exam_detail" %}
-                    </a>
-                    {% endif %}
-                </div>
-
-                <div class="action-group">
-                    <form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}">
+                    <form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}" class="inline-action-form">
                         {% csrf_token %}
                         {% if exam.is_active %}
                             <button type="submit" class="action-btn warning-btn">
