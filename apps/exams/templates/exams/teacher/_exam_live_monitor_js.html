@@ -282,6 +282,7 @@
     /* ---------- Modal ---------- */
     var modal = $("snapshotModal");
     var currentAttempt = null;
+    var currentSnapshot = null;
     function openModal(attemptId) {
         currentAttempt = attemptId;
         modal.classList.add("show");
@@ -294,7 +295,132 @@
                 $("modalBody").innerHTML = '<div class="modal-loading">Məlumat yüklənmədi.</div>';
             });
     }
+    /* ---------- Answer rendering (test / written / practical) ---------- */
+    var KIND_BADGE = {
+        test: { label: t("kind_test", "Test"), cls: "type-test" },
+        written: { label: t("kind_written", "Yazılı"), cls: "type-written" },
+        paint: { label: t("kind_paint", "Çəkim"), cls: "type-paint" },
+        coding: { label: t("kind_coding", "Praktiki"), cls: "type-coding" }
+    };
+
+    function fileIcon(name) {
+        var ext = (name || "").split(".").pop().toLowerCase();
+        if (ext === "html" || ext === "htm") return "fa-html5";
+        if (ext === "css") return "fa-css3-alt";
+        if (ext === "js") return "fa-js";
+        if (ext === "py") return "fa-python";
+        if (ext === "java") return "fa-java";
+        return "fa-file-code";
+    }
+
+    // Render the saved code files of one practical question as collapsible
+    // blocks (first file expanded). Each file keeps its full content in a
+    // monospace block with the original filename.
+    function renderCodeFiles(files, qIdx) {
+        if (!files || !files.length) {
+            return '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+        }
+        return '<div class="code-files">' + files.map(function (f, i) {
+            var empty = !(f.content || "").trim();
+            var open = i === 0 && !empty;
+            var lines = (f.content || "").split("\n").length;
+            return '<div class="code-file' + (open ? " open" : "") + '" data-codefile>' +
+                '<button type="button" class="code-file-head" data-codetoggle>' +
+                '<i class="fab ' + fileIcon(f.name) + '"></i> <span class="cf-name">' + esc(f.name) + '</span>' +
+                '<span class="cf-meta">' + (empty ? esc(t("file_empty", "boş")) : (lines + " " + t("lines", "sətir"))) + '</span>' +
+                '<i class="fas fa-chevron-down cf-caret"></i></button>' +
+                '<pre class="code-file-body"><code>' + esc(f.content || "") + '</code></pre>' +
+                '</div>';
+        }).join("") + '</div>';
+    }
+
+    // Question media (image / video) attached to the question itself.
+    function renderQuestionMedia(a) {
+        var html = "";
+        if (a.image_url) {
+            html += '<div class="ans-media"><img src="' + esc(a.image_url) + '" alt="" loading="lazy" /></div>';
+        }
+        if (a.video_url) {
+            html += '<div class="ans-media"><video controls preload="metadata" playsinline src="' + esc(a.video_url) + '"></video></div>';
+        }
+        return html;
+    }
+
+    function renderOneAnswer(a, idx) {
+        var badgeDef = KIND_BADGE[a.kind] || KIND_BADGE.written;
+        var badge = '<span class="ans-type-badge ' + badgeDef.cls + '">' + esc(badgeDef.label) + '</span>';
+
+        // Answered / unanswered status chip.
+        var statusChip = a.is_answered
+            ? '<span class="ans-status answered"><i class="fas fa-circle-check"></i> ' + esc(t("answered_chip", "Cavablanıb")) + '</span>'
+            : '<span class="ans-status pending"><i class="fas fa-circle"></i> ' + esc(t("unanswered_chip", "Boş")) + '</span>';
+
+        var body = "";
+        if (a.kind === "coding") {
+            body = renderCodeFiles(a.files, idx);
+            if (a.execution_status) {
+                body += '<div class="ans-run-meta"><i class="fas fa-terminal"></i> ' +
+                    esc(t("last_run", "Son icra")) + ': ' + esc(a.execution_status) + '</div>';
+            }
+        } else if (a.kind === "test") {
+            if (a.selected_options && a.selected_options.length) {
+                body = '<div class="ans-options">' + a.selected_options.map(function (o) {
+                    var ok = o.is_correct;
+                    var icon = ok ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>'
+                                  : '<i class="fas fa-circle-dot" style="color:#2563eb"></i>';
+                    var lbl = o.label ? '<b>' + esc(o.label) + ')</b> ' : '';
+                    return '<div class="ans-option-item ' + (ok ? "opt-correct" : "opt-chosen") + '">' + icon + ' ' + lbl + esc(o.text) + '</div>';
+                }).join("") + '</div>';
+                // Show the correct answer when the student picked wrong (teacher-only view).
+                var pickedWrong = a.selected_options.some(function (o) { return !o.is_correct; });
+                if (pickedWrong && a.correct_options && a.correct_options.length) {
+                    body += '<div class="ans-correct-hint"><i class="fas fa-key"></i> ' + esc(t("correct_answer", "Düzgün cavab")) + ': ' +
+                        a.correct_options.map(function (o) { return (o.label ? esc(o.label) + ") " : "") + esc(o.text); }).join(", ") + '</div>';
+                }
+            } else {
+                body = '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+            }
+        } else if (a.kind === "paint") {
+            if (a.paint_image_url) {
+                body = '<div class="ans-media"><a href="' + esc(a.paint_image_url) + '" target="_blank" rel="noopener"><img src="' + esc(a.paint_image_url) + '" alt="" loading="lazy" /></a></div>';
+            } else if (a.has_paint) {
+                body = '<span class="pill"><i class="fas fa-paint-brush"></i> ' + esc(t("paint_answer", "Çəkim cavabı verilib")) + '</span>';
+            } else if (a.text_answer) {
+                body = '<div class="ans-text-block">' + esc(a.text_answer) + '</div>';
+            } else {
+                body = '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+            }
+        } else {
+            // written
+            if (a.text_answer) {
+                body = '<div class="ans-text-block">' + esc(a.text_answer) + '</div>';
+            } else if (a.files && a.files.length) {
+                body = '<div class="ans-files">' + a.files.map(function (fn) {
+                    return '<span class="pill"><i class="fas fa-paperclip"></i> ' + esc(fn) + '</span>';
+                }).join(" ") + '</div>';
+            } else {
+                body = '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+            }
+        }
+
+        return '<div class="ans-item ' + (a.is_answered ? "is-answered" : "is-pending") + '">' +
+            '<div class="ans-q"><span class="ans-num">' + (idx + 1) + '.</span> ' +
+            '<span class="ans-q-text">' + esc(a.question_text || t("question", "Sual")) + '</span>' +
+            badge + statusChip + '</div>' +
+            renderQuestionMedia(a) +
+            '<div class="ans-a">' + body + '</div></div>';
+    }
+
+    function renderAnswers(d) {
+        var answers = d.answers || [];
+        if (!answers.length) {
+            return '<div class="side-empty">' + esc(t("no_answers_yet", "Hələ heç bir suala cavab verilməyib.")) + '</div>';
+        }
+        return answers.map(renderOneAnswer).join("");
+    }
+
     function renderModal(d) {
+        currentSnapshot = d;
         $("modalStudentName").textContent = d.student_name;
         var metaBits = ["@" + d.student_username, (STATUS_LABELS[d.supervision_status] || d.supervision_status)];
         if (d.exam_title) metaBits.push(d.exam_title);
@@ -314,27 +440,7 @@
             scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + esc(sLabel) + '</div></div>';
         }
 
-        var answersHtml = (d.answers && d.answers.length) ? d.answers.map(function (a, idx) {
-            var ansBody = "";
-            var typeLabel = "";
-            if (a.question_type === "multiple_choice" || a.question_type === "single_choice") {
-                typeLabel = '<span class="ans-type-badge type-test">Test</span>';
-            } else if (a.question_type === "open_ended" || a.question_type === "short_answer") {
-                typeLabel = '<span class="ans-type-badge type-written">Yazılı</span>';
-            } else if (a.question_type === "paint" || a.has_paint) {
-                typeLabel = '<span class="ans-type-badge type-paint">Çəkim</span>';
-            }
-            if (a.selected_options && a.selected_options.length) {
-                ansBody = '<div class="ans-options">' + a.selected_options.map(function (o) { return '<div class="ans-option-item"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;"></i> ' + esc(o) + '</div>'; }).join("") + '</div>';
-            } else if (a.text_answer) {
-                ansBody = '<div class="ans-text-block">' + esc(a.text_answer) + '</div>';
-            } else if (a.has_paint) {
-                ansBody = '<span class="pill"><i class="fas fa-paint-brush"></i> Çəkim cavabı</span>';
-            } else {
-                ansBody = '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
-            }
-            return '<div class="ans-item"><div class="ans-q"><span class="ans-num">' + (idx + 1) + '.</span> ' + esc(a.question_text || "Sual") + typeLabel + '</div><div class="ans-a">' + ansBody + '</div></div>';
-        }).join("") : '<div class="side-empty">' + esc(t("no_answers_yet", "Hələ heç bir suala cavab verilməyib.")) + '</div>';
+        var answersHtml = renderAnswers(d);
 
         var incHtml = (d.incidents && d.incidents.length) ? d.incidents.map(function (e) {
             return '<div class="inc-item"><i class="fas fa-circle" style="font-size:0.5rem;color:#dc3545"></i> ' +
@@ -364,13 +470,20 @@
         $("modalStopBtn").style.display = !finished ? "inline-flex" : "none";
         $("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " " + t("questions_answered", "sual cavablanıb");
     }
-    function closeModal() { modal.classList.remove("show"); currentAttempt = null; }
+    function closeModal() { modal.classList.remove("show"); currentAttempt = null; currentSnapshot = null; }
 
     $("studentMap").addEventListener("click", function (e) {
         var cell = e.target.closest(".smap-cell");
         if (cell) openModal(cell.getAttribute("data-attempt"));
     });
     $("modalClose").addEventListener("click", closeModal);
+    // Collapse / expand code files (event-delegated since modal body re-renders).
+    $("modalBody").addEventListener("click", function (e) {
+        var toggle = e.target.closest("[data-codetoggle]");
+        if (!toggle) return;
+        var file = toggle.closest("[data-codefile]");
+        if (file) file.classList.toggle("open");
+    });
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
@@ -438,12 +551,18 @@
     });
     $("modalResumeBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
+        // A manual teacher pause is undone with no penalty change; an auto-lock
+        // resume grants the student their extra chance.
+        var isManual = currentSnapshot && currentSnapshot.manual_lock;
+        var msg = isManual
+            ? t("confirm_resume_manual_msg", "Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək.")
+            : t("confirm_resume_msg", "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək.");
         showConfirm(
             t("confirm_resume_title", "Bərpa et"),
-            t("confirm_resume_msg", "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək."),
+            msg,
             '<i class="fas fa-play"></i> ' + t("confirm_resume_btn", "Bəli, bərpa et"),
             "btn-resume2",
-            function () { postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: true }, t("toast_student_resumed", "Tələbə bərpa edildi")); }
+            function () { postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: !isManual }, t("toast_student_resumed", "Tələbə bərpa edildi")); }
         );
     });
 

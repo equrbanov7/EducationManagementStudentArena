@@ -7,8 +7,8 @@ enforcing violation limits, and managing recovery flows.
 
 from django.utils import timezone
 
-from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 
@@ -29,6 +29,7 @@ def _notify_student_via_ws(attempt_id: int, event_data: dict) -> None:
         )
     except Exception:
         pass
+
 
 # Event types that count as violations for limit enforcement.
 #
@@ -235,31 +236,44 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     if attempt.supervision_status not in ("locked", "removed", "warned"):
         raise ValueError("Attempt is not in a locked/removed/warned state.")
 
-    if attempt.expire_if_time_limit_reached():
-        raise ValueError("Attempt time limit has expired and cannot be resumed.")
-
     if attempt.is_finished:
         raise ValueError("Attempt is already finished and cannot be resumed.")
 
+    # A manual teacher pause ("Müvəqqəti blokla") is the teacher's own decision,
+    # not a student violation, so it is ALWAYS resumable — independent of the
+    # exam clock, the recovery_policy, or even whether a supervision config is
+    # still attached.  The teacher froze the screen, the teacher unfreezes it.
+    is_manual_lock = bool(attempt.supervision_manual_lock)
     config = get_supervision_config(attempt.exam)
-    if config is None:
-        raise ValueError("No active supervision config for this exam.")
 
-    # Check recovery policy
-    if config.recovery_policy == "no_second_chance":
-        raise ValueError("Recovery policy does not allow resumption.")
+    if not is_manual_lock:
+        # Auto-lock path: the exam clock still governs, and the recovery policy
+        # decides whether a violation-locked attempt may be resumed at all.
+        if attempt.expire_if_time_limit_reached():
+            raise ValueError("Attempt time limit has expired and cannot be resumed.")
 
-    if config.recovery_policy == "one_extra_chance" and attempt.supervision_extra_chances >= 1:
-        raise ValueError("Student has already used their extra chance.")
+        if config is None:
+            raise ValueError("No active supervision config for this exam.")
+
+        if config.recovery_policy == "no_second_chance":
+            raise ValueError("Recovery policy does not allow resumption.")
+
+        if config.recovery_policy == "one_extra_chance" and attempt.supervision_extra_chances >= 1:
+            raise ValueError("Student has already used their extra chance.")
 
     old_status = attempt.supervision_status
     attempt.supervision_status = "resumed"
     attempt.supervision_resumed_at = timezone.now()
-    # Teacher acted in time → stop the lock countdown so the sweep can no
-    # longer auto-finish this attempt.
+    # Teacher acted → stop any lock countdown and clear the manual-pause flag so
+    # the sweep can no longer auto-finish this attempt and a later auto-lock is
+    # handled on its own terms.
     attempt.supervision_locked_at = None
+    attempt.supervision_manual_lock = False
 
-    if grant_extra_chance:
+    # Granting an extra chance only makes sense for an auto-lock (a real
+    # violation).  For a manual pause we keep the violation count untouched —
+    # the teacher simply lets the student carry on.
+    if grant_extra_chance and not is_manual_lock:
         attempt.supervision_extra_chances += 1
         # Reset violation count to give student a fresh start
         attempt.supervision_violation_count = max(0, attempt.supervision_violation_count - 1)
@@ -270,6 +284,7 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
             "supervision_status",
             "supervision_resumed_at",
             "supervision_locked_at",
+            "supervision_manual_lock",
             "supervision_extra_chances",
             "supervision_violation_count",
             "status",
@@ -294,12 +309,15 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
         teacher_action=action_type,
     )
 
-    _notify_student_via_ws(attempt.id, {
-        "action": "resumed",
-        "supervision_status": "resumed",
-        "violation_count": attempt.supervision_violation_count,
-        "max_violations": config.max_violations if config else 3,
-    })
+    _notify_student_via_ws(
+        attempt.id,
+        {
+            "action": "resumed",
+            "supervision_status": "resumed",
+            "violation_count": attempt.supervision_violation_count,
+            "max_violations": config.get_max_total_violations() if config else 3,
+        },
+    )
 
     return True
 
@@ -321,8 +339,12 @@ def teacher_lock_attempt(attempt, teacher):
 
     old_status = attempt.supervision_status
     attempt.supervision_status = "locked"
-    attempt.supervision_locked_at = timezone.now()
-    attempt.save(update_fields=["supervision_status", "supervision_locked_at"])
+    # Mark this as a *manual* teacher pause. Unlike an auto-lock we deliberately
+    # do NOT set ``supervision_locked_at`` so the resume-window sweep can never
+    # auto-finish a teacher-paused attempt — the teacher controls when it ends.
+    attempt.supervision_manual_lock = True
+    attempt.supervision_locked_at = None
+    attempt.save(update_fields=["supervision_status", "supervision_manual_lock", "supervision_locked_at"])
 
     SupervisionIncident.objects.create(
         organization=attempt.exam.organization,
@@ -341,11 +363,15 @@ def teacher_lock_attempt(attempt, teacher):
         teacher_action="teacher_temporary_lock",
     )
 
-    _notify_student_via_ws(attempt.id, {
-        "action": "locked",
-        "supervision_status": "locked",
-        "reason": "teacher_temporary_lock",
-    })
+    _notify_student_via_ws(
+        attempt.id,
+        {
+            "action": "locked",
+            "supervision_status": "locked",
+            "reason": "teacher_temporary_lock",
+            "manual": True,
+        },
+    )
 
     return True
 
@@ -380,12 +406,15 @@ def teacher_stop_attempt(attempt, teacher):
         teacher_action="teacher_force_stopped",
     )
 
-    _notify_student_via_ws(attempt.id, {
-        "action": "stopped",
-        "supervision_status": "removed",
-        "is_finished": True,
-        "reason": "teacher_force_stopped",
-    })
+    _notify_student_via_ws(
+        attempt.id,
+        {
+            "action": "stopped",
+            "supervision_status": "removed",
+            "is_finished": True,
+            "reason": "teacher_force_stopped",
+        },
+    )
 
     return True
 
@@ -454,6 +483,7 @@ def get_attempt_supervision_status(attempt):
     return {
         "supervised": True,
         "supervision_status": attempt.supervision_status,
+        "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
         "violation_count": attempt.supervision_violation_count,
         "max_violations": config.get_max_total_violations(),
         "extra_chances_used": attempt.supervision_extra_chances,
@@ -748,6 +778,196 @@ def get_exam_session_dates(exam):
     )
 
 
+def _media_url(file_field):
+    """Safely return a media file's URL, or None when absent/unset."""
+    try:
+        if file_field and getattr(file_field, "name", ""):
+            return file_field.url
+    except Exception:
+        pass
+    return None
+
+
+def _question_kind(question, exam_type):
+    """
+    Coarse per-question kind for the monitor modal badge.
+
+    ``ExamQuestion`` has no ``question_type`` column, so we infer the kind from
+    the exam type and the question's own paint/option configuration:
+      - "test"    → has selectable options (single/multiple choice)
+      - "written" → free-text / open answer
+      - "paint"   → drawing-enabled question
+      - "coding"  → practical coding question
+    """
+    if exam_type == "coding":
+        return "coding"
+    if getattr(question, "paint_enabled_effective", False):
+        return "paint"
+    if exam_type == "test":
+        return "test"
+    # For written/mixed exams, a question with options behaves like a test item;
+    # otherwise it is a free-text written answer.
+    has_options = False
+    try:
+        has_options = question.options.exists()
+    except Exception:
+        has_options = False
+    return "test" if has_options else "written"
+
+
+def _written_test_snapshot_answers(attempt, exam_type):
+    """
+    Build per-question answer rows for test / written exams.
+
+    Walks every question on the exam in order (so unanswered questions are
+    visible too), pulling the student's autosaved ExamAnswer where present.
+    Correct/selected-option flags are included because this view is teacher-only
+    (read-only monitoring); they are never sent to a student surface.
+
+    Returns ``(rows, answered_count)``.
+    """
+    # Map of question_id → answer for O(1) lookup, with options prefetched.
+    answers_by_q = {
+        a.question_id: a
+        for a in attempt.answers.select_related("question").prefetch_related("selected_options", "files").all()
+    }
+
+    questions = attempt.exam.questions.filter(is_active=True).prefetch_related("options").order_by("order", "id")
+
+    rows = []
+    answered_count = 0
+    for q in questions:
+        ans = answers_by_q.get(q.id)
+        kind = _question_kind(q, exam_type)
+
+        selected = []
+        text_answer = ""
+        has_paint = False
+        is_answered = False
+        files = []
+        if ans is not None:
+            selected = [
+                {"text": opt.text, "label": opt.label, "is_correct": opt.is_correct}
+                for opt in ans.selected_options.all()
+            ]
+            text_answer = (ans.text_answer or "")[:4000]
+            has_paint = bool(getattr(ans, "has_paint", False))
+            files = [f.filename() for f in ans.files.all()]
+            is_answered = bool(selected or text_answer.strip() or has_paint or files)
+        if is_answered:
+            answered_count += 1
+
+        # The set of correct option texts lets the teacher see at a glance what
+        # the right answer was for a test item.
+        correct_options = [{"text": opt.text, "label": opt.label} for opt in q.options.all() if opt.is_correct]
+
+        rows.append(
+            {
+                "kind": kind,
+                "question_text": (q.text or "")[:600],
+                "image_url": _media_url(getattr(q, "image", None)),
+                "video_url": _media_url(getattr(q, "video", None)),
+                "selected_options": selected,
+                "correct_options": correct_options,
+                "text_answer": text_answer,
+                "has_paint": has_paint,
+                "paint_image_url": _media_url(getattr(ans, "paint_image", None)) if ans is not None else None,
+                "files": files,
+                "is_correct": bool(ans.is_correct) if ans is not None else None,
+                "is_answered": is_answered,
+                "updated_at": ans.updated_at.isoformat() if (ans and ans.updated_at) else None,
+            }
+        )
+
+    return rows, answered_count
+
+
+def _coding_snapshot_answers(attempt):
+    """
+    Build per-question answer rows for a practical / coding exam.
+
+    Reads the latest saved CodingSubmission for each coding question on the
+    exam (draft autosaves while in progress, or the final submission once the
+    student submits) and surfaces every file with its full content so the
+    teacher can read exactly what the student is typing, file by file.
+
+    Returns ``(rows, answered_count)``.
+    """
+    from apps.exams.models import CodingExamQuestion, CodingSubmission
+
+    coding_questions = (
+        CodingExamQuestion.objects.filter(question__exam=attempt.exam, question__is_active=True)
+        .select_related("question")
+        .order_by("question__order", "id")
+    )
+
+    # Latest submission per coding question for this attempt. ``-is_final`` then
+    # ``-submitted_at`` keeps the final submission ahead of older drafts, and the
+    # newest draft otherwise. code_files prefetched to avoid an N+1.
+    submissions = (
+        CodingSubmission.objects.filter(attempt=attempt)
+        .select_related("question")
+        .prefetch_related("code_files")
+        .order_by("-is_final", "-submitted_at")
+    )
+    latest_by_question = {}
+    for sub in submissions:
+        latest_by_question.setdefault(sub.question_id, sub)
+
+    rows = []
+    answered_count = 0
+    for cq in coding_questions:
+        sub = latest_by_question.get(cq.id)
+        files = []
+        if sub is not None:
+            files = [
+                {"name": item["name"], "content": (item["content"] or "")[:20000]}
+                for item in _submission_file_items_safe(sub)
+            ]
+        # Drop files that are entirely empty so an untouched starter file does
+        # not read as "answered".
+        non_empty = [f for f in files if (f["content"] or "").strip()]
+        is_answered = bool(non_empty)
+        if is_answered:
+            answered_count += 1
+
+        rows.append(
+            {
+                "kind": "coding",
+                "question_text": (cq.title or cq.problem_statement or "")[:600],
+                "image_url": _media_url(getattr(cq.question, "image", None)),
+                "video_url": _media_url(getattr(cq.question, "video", None)),
+                "language": cq.language,
+                "files": files,
+                "execution_status": getattr(sub, "execution_status", "") if sub else "",
+                "output": (getattr(sub, "output", "") or "")[:4000] if sub else "",
+                "is_answered": is_answered,
+                "updated_at": sub.updated_at.isoformat() if (sub and sub.updated_at) else None,
+            }
+        )
+
+    return rows, answered_count
+
+
+def _submission_file_items_safe(submission):
+    """
+    Files for a coding submission as ``[{name, content}, ...]``.
+
+    Prefers the structured CodingFile rows; falls back to the JSON ``files``
+    list stored on the submission (the shape coding_autosave writes). Mirrors
+    the student-side ``_submission_file_items`` helper so monitor and student
+    views never disagree about what was saved.
+    """
+    code_files = list(submission.code_files.all())
+    if code_files:
+        return [{"name": cf.name, "content": cf.content or ""} for cf in code_files]
+    return [
+        {"name": item.get("name") or "file.txt", "content": item.get("content") or ""}
+        for item in (submission.files or [])
+        if isinstance(item, dict)
+    ]
+
+
 def get_attempt_live_snapshot(attempt):
     """
     Detailed live snapshot of a single student's in-progress (or finished)
@@ -757,25 +977,19 @@ def get_attempt_live_snapshot(attempt):
     "look over the shoulder" without blocking the student. Scope MUST be enforced
     by the caller (exam already tenant/permission scoped).
     """
-    answers = attempt.answers.select_related("question").prefetch_related("selected_options").order_by("question_id")
-
+    exam_type = getattr(attempt.exam, "exam_type", "") or ""
     total_questions = get_exam_question_total(attempt.exam)
-    answer_rows = []
-    for ans in answers:
-        selected = [opt.text for opt in ans.selected_options.all()] if hasattr(ans, "selected_options") else []
-        question_type = ""
-        if ans.question:
-            question_type = getattr(ans.question, "question_type", "") or ""
-        answer_rows.append(
-            {
-                "question_text": (ans.question.text or "")[:300] if ans.question else "",
-                "question_type": question_type,
-                "selected_options": selected,
-                "text_answer": (ans.text_answer or "")[:1000],
-                "has_paint": bool(getattr(ans, "has_paint", False)),
-                "updated_at": ans.updated_at.isoformat() if ans.updated_at else None,
-            }
-        )
+
+    if exam_type == "coding":
+        # Practical / coding exams store the student's work in CodingSubmission
+        # (one per coding question), NOT in attempt.answers.  We surface the
+        # latest saved files per question so the teacher sees exactly what the
+        # student has typed live, file by file.
+        answer_rows, answered_count = _coding_snapshot_answers(attempt)
+    else:
+        # Test / written exams keep their live answers in attempt.answers,
+        # autosaved per question while the student works.
+        answer_rows, answered_count = _written_test_snapshot_answers(attempt, exam_type)
 
     incidents = SupervisionIncident.objects.filter(attempt=attempt).order_by("-timestamp")[:50]
     incident_rows = [
@@ -804,8 +1018,9 @@ def get_attempt_live_snapshot(attempt):
         "student_name": attempt.user.get_full_name() or attempt.user.username,
         "student_username": attempt.user.username,
         "supervision_status": attempt.supervision_status,
+        "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
         "violation_count": attempt.supervision_violation_count,
-        "answered": len(answer_rows),
+        "answered": answered_count,
         "total_questions": total_questions,
         "correct_count": attempt.correct_count,
         "wrong_count": attempt.wrong_count,
