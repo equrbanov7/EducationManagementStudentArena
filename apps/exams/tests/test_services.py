@@ -35,6 +35,7 @@ from apps.exams.services.difficulty import ensure_ai_question_difficulties, sche
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import (
     get_attempt_live_snapshot,
+    get_attempt_supervision_status,
     log_supervision_incident,
     sweep_expired_resume_windows,
     teacher_lock_attempt,
@@ -902,8 +903,8 @@ class ExamSupervisionServicesTest(TestCase):
         )
         q = ExamQuestion.objects.create(exam=test_exam, text="2+2?", order=1)
         opt_a = ExamQuestionOption.objects.create(question=q, label="A", text="4", is_correct=True)
-        ExamQuestionOption.objects.create(question=q, label="B", text="5", is_correct=False)
-        ExamQuestion.objects.create(exam=test_exam, text="Unanswered?", order=2)
+        opt_b = ExamQuestionOption.objects.create(question=q, label="B", text="5", is_correct=False)
+        q2 = ExamQuestion.objects.create(exam=test_exam, text="Unanswered?", order=2)
 
         attempt = ExamAttempt.objects.create(
             user=self.student,
@@ -913,6 +914,7 @@ class ExamSupervisionServicesTest(TestCase):
         )
         ans = ExamAnswer.objects.create(attempt=attempt, question=q)
         ans.selected_options.add(opt_a)
+        ExamAnswer.objects.create(attempt=attempt, question=q2)
 
         snap = get_attempt_live_snapshot(attempt)
 
@@ -922,9 +924,41 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertTrue(first["is_answered"])
         self.assertEqual(first["selected_options"][0]["text"], "4")
         self.assertTrue(first["selected_options"][0]["is_correct"])
+        option_flags = {opt["text"]: opt for opt in first["options"]}
+        self.assertEqual(set(option_flags), {"4", "5"})
+        self.assertTrue(option_flags[opt_a.text]["is_correct"])
+        self.assertTrue(option_flags[opt_a.text]["is_selected"])
+        self.assertFalse(option_flags[opt_b.text]["is_correct"])
+        self.assertFalse(option_flags[opt_b.text]["is_selected"])
         # Second question is shown but flagged unanswered.
         self.assertFalse(snap["answers"][1]["is_answered"])
         self.assertEqual(snap["answered"], 1)
+
+    def test_snapshot_uses_attempt_answer_order_and_omits_unassigned_questions(self):
+        test_exam = Exam.objects.create(
+            title="Randomized Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+        )
+        q1 = ExamQuestion.objects.create(exam=test_exam, text="Bank first", order=1)
+        ExamQuestion.objects.create(exam=test_exam, text="Not assigned", order=2)
+        q3 = ExamQuestion.objects.create(exam=test_exam, text="Student first", order=3)
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=test_exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+        ExamAnswer.objects.create(attempt=attempt, question=q3)
+        ExamAnswer.objects.create(attempt=attempt, question=q1)
+
+        snap = get_attempt_live_snapshot(attempt)
+
+        self.assertEqual([row["question_text"] for row in snap["answers"]], ["Student first", "Bank first"])
+        self.assertEqual(snap["total_questions"], 2)
 
     def test_sweep_finishes_only_stale_locked_attempts(self):
         self._supervised_resumable_exam(resume_window_seconds=600)
@@ -1008,6 +1042,23 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertFalse(attempt.expire_if_resume_window_expired())
         attempt.refresh_from_db()
         self.assertFalse(attempt.is_finished)
+
+    def test_status_reports_manual_lock_even_when_exam_is_not_supervised(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+            supervision_status="locked",
+            supervision_manual_lock=True,
+        )
+
+        status = get_attempt_supervision_status(attempt)
+
+        self.assertFalse(status["supervised"])
+        self.assertTrue(status["manual_lock"])
+        self.assertEqual(status["supervision_status"], "locked")
+        self.assertEqual(status["config"], {})
 
 
 class ExamStatisticsAiSummaryServiceTest(SimpleTestCase):
