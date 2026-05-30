@@ -139,6 +139,12 @@
     .feed-icon.sev-low, .feed-icon.sev-info { background: rgba(14,165,233,0.12); color: var(--lv-info); }
     .panel-count-badge { background: #fee2e2; color: #b91c1c; font-size: 0.74rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; }
     .side-empty { padding: 2rem 1.3rem; text-align: center; color: var(--lv-faint); font-size: 0.86rem; }
+    .blocked-actions { display: flex; gap: 0.35rem; margin-left: auto; flex-shrink: 0; }
+    .blocked-actions .btn-sm-action { padding: 0.3rem 0.6rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.13s; }
+    .blocked-actions .btn-sm-resume { background: rgba(22,163,74,0.12); color: var(--lv-success); }
+    .blocked-actions .btn-sm-resume:hover { background: rgba(22,163,74,0.22); }
+    .blocked-actions .btn-sm-stop { background: rgba(220,53,69,0.10); color: var(--lv-danger); }
+    .blocked-actions .btn-sm-stop:hover { background: rgba(220,53,69,0.18); }
 
     /* Badges */
     .badge-status { padding: 0.24rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
@@ -170,13 +176,22 @@
     .mon-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--lv-muted); margin: 1.2rem 0 0.7rem; }
     .ans-item { border: 1px solid var(--lv-border); border-radius: var(--lv-radius-sm); padding: 0.75rem 0.9rem; margin-bottom: 0.6rem; }
     .ans-item .ans-q { font-size: 0.86rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .ans-item .ans-q .ans-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--lv-primary); color: #fff; font-size: 0.7rem; font-weight: 700; margin-right: 0.4rem; flex-shrink: 0; }
     .ans-item .ans-a { font-size: 0.84rem; color: var(--lv-text); }
     .ans-item .ans-a .pill { display: inline-block; background: #eef2f7; border-radius: 6px; padding: 0.1rem 0.5rem; margin: 0.1rem 0.2rem 0.1rem 0; font-size: 0.8rem; }
     .ans-item .ans-empty { font-size: 0.82rem; color: var(--lv-faint); font-style: italic; }
+    .ans-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .ans-option-item { display: flex; align-items: center; gap: 0.4rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
+    .ans-text-block { background: #f8fafc; border: 1px solid var(--lv-border); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.84rem; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow-y: auto; }
+    .ans-type-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.12rem 0.45rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
+    .ans-type-badge.type-test { background: #dbeafe; color: #1d4ed8; }
+    .ans-type-badge.type-written { background: #fef3c7; color: #92400e; }
+    .ans-type-badge.type-paint { background: #ede9fe; color: #6d28d9; }
     .inc-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--lv-border); font-size: 0.84rem; }
     .inc-item:last-child { border-bottom: none; }
     .inc-time { margin-left: auto; font-size: 0.76rem; color: var(--lv-faint); }
-    .lv-modal-foot { flex-shrink: 0; display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap; padding: 1.1rem 1.4rem; border-top: 1px solid var(--lv-border); background: #fafbfc; }
+    .lv-modal-foot { flex-shrink: 0; display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap; padding: 1.1rem 1.4rem; border-top: 1px solid var(--lv-border); background: #fafbfc; position: sticky; bottom: 0; z-index: 2; align-items: center; }
+    .modal-answer-count { font-size: 0.78rem; color: var(--lv-muted); margin-right: auto; font-weight: 600; }
     .btn-act { padding: 0.55rem 1.1rem; border-radius: var(--lv-radius-sm); border: 1px solid transparent; cursor: pointer; font-size: 0.86rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.13s; }
     .btn-act:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-pause { background: rgba(245,158,11,0.12); color: #b45309; }
@@ -209,6 +224,7 @@
      data-poll-url="{{ poll_url }}"
      data-snapshot-base="/exams/supervision/api/snapshot/"
      data-resume-base="/exams/supervision/api/resume/"
+     data-lock-base="/exams/supervision/api/lock/"
      data-stop-base="/exams/supervision/api/stop/">
 
     {# Header #}
@@ -299,6 +315,14 @@
         <div class="side-col">
             <div class="panel">
                 <div class="panel-head">
+                    <h2><i class="fas fa-lock"></i> Bloklanmış tələbələr</h2>
+                    <span class="panel-count-badge" id="blockedBadge">0</span>
+                </div>
+                <div class="side-list" id="blockedList"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
                     <h2><i class="fas fa-user-clock"></i> Daxil olmayanlar</h2>
                     <span class="panel-count-badge" id="notEnteredBadge">0</span>
                 </div>
@@ -329,9 +353,29 @@
             <div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>Yüklənir…</p></div>
         </div>
         <div class="lv-modal-foot">
+            <span class="modal-answer-count" id="modalAnswerCount"></span>
             <button type="button" class="btn-act btn-resume2" id="modalResumeBtn" style="display:none;"><i class="fas fa-play"></i> Bərpa et</button>
             <button type="button" class="btn-act btn-pause" id="modalPauseBtn" style="display:none;"><i class="fas fa-pause"></i> Müvəqqəti blokla</button>
-            <button type="button" class="btn-act btn-stop2" id="modalStopBtn" style="display:none;"><i class="fas fa-stop"></i> İmtahanı dayandır</button>
+            <button type="button" class="btn-act btn-stop2" id="modalStopBtn" style="display:none;"><i class="fas fa-stop"></i> İmtahandan uzaqlaşdır</button>
+        </div>
+    </div>
+</div>
+
+{# Confirmation modal #}
+<div class="lv-overlay" id="confirmOverlay">
+    <div class="lv-modal" style="max-width:450px;">
+        <div class="lv-modal-head">
+            <div>
+                <div class="mh-title" id="confirmTitle">Təsdiq</div>
+            </div>
+            <button type="button" class="lv-close" id="confirmClose">&times;</button>
+        </div>
+        <div class="lv-modal-body" style="text-align:center;padding:1.5rem;">
+            <p id="confirmMessage" style="font-size:0.95rem;color:#333;margin:0;"></p>
+        </div>
+        <div class="lv-modal-foot" style="justify-content:center;">
+            <button type="button" class="btn-act" id="confirmCancel" style="background:#f0f0f0;color:#333;"><i class="fas fa-times"></i> Ləğv et</button>
+            <button type="button" class="btn-act" id="confirmOk"></button>
         </div>
     </div>
 </div>
