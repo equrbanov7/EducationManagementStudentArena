@@ -95,6 +95,18 @@
             <section class="coding-question-card">
                 <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
                 <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
+                {% if coding_question.question.image %}
+                    <div class="question-media" id="codingQuestionImage" style="margin-top:0.75rem;">
+                        <img src="{{ coding_question.question.image.url }}" alt="" style="max-width:100%;max-height:320px;border-radius:8px;">
+                    </div>
+                {% endif %}
+                {% if coding_question.question.video %}
+                    <div class="question-media" id="codingQuestionVideo" style="margin-top:0.75rem;">
+                        <video controls preload="metadata" playsinline style="max-width:100%;max-height:320px;border-radius:8px;">
+                            <source src="{{ coding_question.question.video.url }}">
+                        </video>
+                    </div>
+                {% endif %}
             </section>
 
             <main class="coding-workspace" id="codingWorkspace">
@@ -472,6 +484,9 @@ window.CODING_EXAM_CONFIG = {
             lockedMsg: "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
             lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
             lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
+            teacherLockTitle: "{% filter escapejs %}{% trans 'İmtahan müəllim tərəfindən dayandırıldı' %}{% endfilter %}",
+            teacherLockMsg: "{% filter escapejs %}{% trans 'Müəlliminiz imtahanınızı müvəqqəti olaraq dayandırdı. Ekranınız kilidlənib.' %}{% endfilter %}",
+            teacherLockWaiting: "{% filter escapejs %}{% trans 'Müəllim imtahanı bərpa edənə qədər gözləyin.' %}{% endfilter %}",
             thresholdTitle: "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
             thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
             resumeTitle: "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
@@ -481,8 +496,9 @@ window.CODING_EXAM_CONFIG = {
             lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
         };
         </script>
-        <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260527-6"></script>
+        <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260530-realtime"></script>
         <script nonce="{{ request.csp_nonce }}">
+        window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";
         document.addEventListener("DOMContentLoaded", function() {
             if (window.ExamSupervision) {
                 var supervisionConfig = JSON.parse(document.getElementById("supervision-config-data").textContent);

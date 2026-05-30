@@ -245,12 +245,33 @@ def _check_question_media_access(user, path: str) -> bool:
         return False
 
     try:
-        from apps.exams.models import Exam
+        from apps.exams.models import Exam, ExamAttempt
 
         exam = Exam.objects.select_related("organization").get(pk=int(exam_id_str))
         if exam.organization is None:
             return False
-        return _user_has_org_membership(user, exam.organization, min_level=0)
+
+        # Active org members (teachers, admins, enrolled students) may view.
+        if _user_has_org_membership(user, exam.organization, min_level=0):
+            return True
+
+        # The exam's author always has access to its own question media.
+        if getattr(exam, "author_id", None) == user.id:
+            return True
+
+        # A student legitimately tied to THIS exam — even without a formal
+        # Membership row — must be able to see the question's image/video:
+        #   * they have (or had) an attempt on the exam, or
+        #   * they are individually allowed, or in an allowed group.
+        # Scope stays strict: access is bound to this one exam, not the org.
+        if ExamAttempt.objects.filter(exam=exam, user=user).exists():
+            return True
+        if exam.allowed_users.filter(pk=user.id).exists():
+            return True
+        if exam.allowed_groups.filter(students=user).exists():
+            return True
+
+        return False
     except (Exam.DoesNotExist, ValueError):
         return False
 
