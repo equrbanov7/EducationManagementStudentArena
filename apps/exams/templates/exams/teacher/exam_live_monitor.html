@@ -1,222 +1,10 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ exam.title }} — Canlı Nəzarət{% endblock %}
+{% block title %}{{ exam.title }} — {% trans "page_title" context "exams.template.exam_live_monitor" %}{% endblock %}
 
 {% block extraCss %}
-<style nonce="{{ request.csp_nonce }}">
-    .live-wrap {
-        --lv-bg: #f5f7fa;
-        --lv-surface: #ffffff;
-        --lv-border: #e8ecf1;
-        --lv-border-strong: #dce2ea;
-        --lv-text: #1f2733;
-        --lv-muted: #6b7686;
-        --lv-faint: #99a2af;
-        --lv-primary: #2563eb;
-        --lv-primary-dark: #1d4ed8;
-        --lv-danger: #dc3545;
-        --lv-warning: #f59e0b;
-        --lv-success: #16a34a;
-        --lv-info: #0ea5e9;
-        --lv-radius: 16px;
-        --lv-radius-sm: 10px;
-        --lv-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 4px 16px rgba(16,24,40,0.06);
-        --lv-shadow-hover: 0 4px 8px rgba(16,24,40,0.06), 0 12px 28px rgba(16,24,40,0.10);
-        max-width: 1280px;
-        margin: 1.75rem auto 4rem;
-        padding: 0 1.25rem;
-        color: var(--lv-text);
-    }
-
-    /* Header */
-    .live-head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; }
-    .live-head .breadcrumb { font-size: 0.82rem; color: var(--lv-faint); margin-bottom: 0.35rem; }
-    .live-head .breadcrumb a { color: var(--lv-primary); text-decoration: none; }
-    .live-head h1 { font-size: 1.5rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.55rem; letter-spacing: -0.01em; }
-    .live-head h1 .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--lv-success); box-shadow: 0 0 0 4px rgba(22,163,74,0.18); animation: livePulse 2s infinite; }
-    @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .live-head .sub { font-size: 0.9rem; color: var(--lv-muted); margin: 0.3rem 0 0; }
-    .head-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .btn-ghost { padding: 0.55rem 1rem; border-radius: var(--lv-radius-sm); border: 1px solid var(--lv-border-strong); background: var(--lv-surface); color: var(--lv-text); text-decoration: none; font-size: 0.88rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; transition: all 0.15s; }
-    .btn-ghost:hover { background: #f3f5f8; }
-    .poll-status { font-size: 0.8rem; color: var(--lv-muted); display: inline-flex; align-items: center; gap: 0.4rem; }
-    .poll-status .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--lv-success); }
-    .poll-status.is-paused .pip { background: var(--lv-faint); }
-
-    /* Filter row */
-    .live-filter { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; background: var(--lv-surface); border: 1px solid var(--lv-border); border-radius: var(--lv-radius); padding: 0.85rem 1.1rem; box-shadow: var(--lv-shadow); margin-bottom: 1.5rem; }
-    .live-filter label { font-size: 0.74rem; font-weight: 600; color: var(--lv-muted); text-transform: uppercase; letter-spacing: 0.03em; }
-    .live-filter input[type="date"], .live-filter select { padding: 0.5rem 0.7rem; border: 1px solid var(--lv-border-strong); border-radius: var(--lv-radius-sm); font-size: 0.88rem; height: 40px; background: var(--lv-surface); color: var(--lv-text); }
-    .live-filter input:focus, .live-filter select:focus { outline: none; border-color: var(--lv-primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
-    .chip-btn { padding: 0.5rem 0.95rem; border-radius: 999px; border: 1px solid var(--lv-border-strong); background: var(--lv-surface); color: var(--lv-muted); font-size: 0.84rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.13s; }
-    .chip-btn:hover { border-color: var(--lv-primary); color: var(--lv-primary); }
-    .chip-btn.is-active { background: var(--lv-primary); border-color: var(--lv-primary); color: #fff; }
-    .filter-spacer { flex: 1; }
-
-    /* Stat cards */
-    .live-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .lstat { position: relative; background: var(--lv-surface); border: 1px solid var(--lv-border); border-radius: var(--lv-radius); padding: 1.2rem 1.3rem; box-shadow: var(--lv-shadow); }
-    .lstat.accent-primary { border-top: 3px solid var(--lv-primary); }
-    .lstat.accent-success { border-top: 3px solid var(--lv-success); }
-    .lstat.accent-info { border-top: 3px solid var(--lv-info); }
-    .lstat.accent-danger { border-top: 3px solid var(--lv-danger); }
-    .lstat .lstat-label { font-size: 0.74rem; font-weight: 600; color: var(--lv-muted); text-transform: uppercase; letter-spacing: 0.03em; }
-    .lstat .lstat-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 0.25rem; line-height: 1; }
-    .lstat .lstat-value small { font-size: 1rem; font-weight: 500; color: var(--lv-faint); }
-    .lstat.accent-primary .lstat-value { color: var(--lv-primary); }
-    .lstat.accent-success .lstat-value { color: var(--lv-success); }
-    .lstat.accent-info .lstat-value { color: var(--lv-info); }
-    .lstat.accent-danger .lstat-value { color: var(--lv-danger); }
-    .lstat .lstat-meta { font-size: 0.78rem; color: var(--lv-muted); margin-top: 0.6rem; }
-    .lstat .lstat-bar { height: 6px; border-radius: 999px; background: var(--lv-border); margin-top: 0.6rem; overflow: hidden; }
-    .lstat .lstat-bar > span { display: block; height: 100%; border-radius: 999px; }
-    .lstat.accent-primary .lstat-bar > span { background: var(--lv-primary); }
-    .lstat.accent-success .lstat-bar > span { background: var(--lv-success); }
-    .lstat.accent-info .lstat-bar > span { background: var(--lv-info); }
-    .lstat.accent-danger .lstat-bar > span { background: var(--lv-danger); }
-
-    /* Charts */
-    .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.35rem; margin-bottom: 1.5rem; }
-    .chart-panel .panel-body { display: flex; align-items: center; justify-content: center; min-height: 200px; }
-    .chart-panel canvas { max-height: 220px; }
-
-    /* Main grid: map + side */
-    .live-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.35rem; align-items: start; }
-    .panel { background: var(--lv-surface); border: 1px solid var(--lv-border); border-radius: var(--lv-radius); box-shadow: var(--lv-shadow); }
-    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--lv-border); }
-    .panel-head h2 { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
-    .panel-head .legend { display: flex; gap: 0.85rem; flex-wrap: wrap; font-size: 0.76rem; color: var(--lv-muted); }
-    .panel-head .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
-    .legend .sw { width: 11px; height: 11px; border-radius: 3px; }
-    .sw.s-finished { background: var(--lv-success); }
-    .sw.s-progress { background: var(--lv-info); }
-    .sw.s-flagged { background: var(--lv-danger); }
-    .sw.s-none { background: #e2e6eb; }
-    .panel-body { padding: 1.3rem; }
-
-    /* Student map */
-    .student-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
-    .smap-cell { aspect-ratio: 1; border-radius: var(--lv-radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 0.95rem; font-weight: 700; color: #fff; border: none; position: relative; transition: transform 0.12s ease, box-shadow 0.12s ease; }
-    .smap-cell:hover { transform: translateY(-2px); box-shadow: var(--lv-shadow-hover); z-index: 5; }
-    /* Base state colours */
-    .smap-cell.state-finished { background: var(--lv-success); }
-    .smap-cell.state-in_progress { background: var(--lv-info); }
-    .smap-cell.state-not_entered { background: #eef1f5; color: var(--lv-faint); border: 1px solid var(--lv-border-strong); }
-    /* Violation-severity tint overrides base state colour so the most at-risk
-       students stand out at a glance. removed = darkest red. */
-    .smap-cell.vio-low { background: #f59e0b; }
-    .smap-cell.vio-high { background: #ea580c; }
-    .smap-cell.vio-critical { background: #dc2626; }
-    .smap-cell.vio-removed { background: #7f1d1d; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35); }
-    .smap-cell.vio-removed::after { content: "\f05e"; font-family: "Font Awesome 6 Free", "Font Awesome 5 Free"; font-weight: 900; position: absolute; bottom: 3px; left: 5px; font-size: 0.6rem; opacity: 0.85; }
-    .smap-cell .cell-vio { position: absolute; top: 4px; right: 5px; font-size: 0.62rem; background: rgba(0,0,0,0.3); border-radius: 999px; padding: 0 5px; line-height: 1.5; }
-    .smap-cell .cell-prog { font-size: 0.6rem; font-weight: 600; opacity: 0.92; margin-top: 2px; }
-
-    /* Tooltip */
-    .smap-tip { position: fixed; z-index: 9999; pointer-events: none; background: #1f2733; color: #fff; border-radius: 10px; padding: 0.7rem 0.85rem; font-size: 0.8rem; box-shadow: 0 12px 32px rgba(0,0,0,0.3); max-width: 240px; opacity: 0; transition: opacity 0.12s; }
-    .smap-tip.show { opacity: 1; }
-    .smap-tip .tip-name { font-weight: 700; margin-bottom: 0.3rem; }
-    .smap-tip .tip-row { display: flex; justify-content: space-between; gap: 1rem; color: #c7cdd6; margin-top: 0.15rem; }
-    .smap-tip .tip-row b { color: #fff; font-weight: 600; }
-
-    .map-empty { text-align: center; padding: 2.5rem 1rem; color: var(--lv-muted); }
-    .map-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; padding: 0.9rem 1.3rem; border-top: 1px solid var(--lv-border); font-size: 0.78rem; color: var(--lv-muted); }
-
-    /* Side panels */
-    .side-col { display: flex; flex-direction: column; gap: 1.35rem; }
-    .side-list { max-height: 340px; overflow-y: auto; }
-    .side-item { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1.3rem; border-bottom: 1px solid var(--lv-border); }
-    .side-item:last-child { border-bottom: none; }
-    .avatar { width: 34px; height: 34px; border-radius: 50%; background: #eef1f5; color: var(--lv-muted); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
-    .side-item .si-body { flex: 1; min-width: 0; }
-    .side-item .si-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .side-item .si-meta { font-size: 0.76rem; color: var(--lv-muted); }
-    .si-count { font-size: 0.78rem; font-weight: 700; }
-    .feed-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.82rem; }
-    .feed-icon.sev-high, .feed-icon.sev-critical { background: rgba(220,53,69,0.12); color: var(--lv-danger); }
-    .feed-icon.sev-medium { background: rgba(245,158,11,0.14); color: #b45309; }
-    .feed-icon.sev-low, .feed-icon.sev-info { background: rgba(14,165,233,0.12); color: var(--lv-info); }
-    .panel-count-badge { background: #fee2e2; color: #b91c1c; font-size: 0.74rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 999px; }
-    .side-empty { padding: 2rem 1.3rem; text-align: center; color: var(--lv-faint); font-size: 0.86rem; }
-    .blocked-actions { display: flex; gap: 0.35rem; margin-left: auto; flex-shrink: 0; }
-    .blocked-actions .btn-sm-action { padding: 0.3rem 0.6rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.13s; }
-    .blocked-actions .btn-sm-resume { background: rgba(22,163,74,0.12); color: var(--lv-success); }
-    .blocked-actions .btn-sm-resume:hover { background: rgba(22,163,74,0.22); }
-    .blocked-actions .btn-sm-stop { background: rgba(220,53,69,0.10); color: var(--lv-danger); }
-    .blocked-actions .btn-sm-stop:hover { background: rgba(220,53,69,0.18); }
-
-    /* Badges */
-    .badge-status { padding: 0.24rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
-    .badge-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-    .badge-active { background: #dcfce7; color: #15803d; }
-    .badge-warned { background: #fef3c7; color: #b45309; }
-    .badge-locked { background: #fee2e2; color: #b91c1c; }
-    .badge-removed { background: #7f1d1d; color: #fff; }
-    .badge-resumed { background: #dbeafe; color: #1d4ed8; }
-
-    /* Modal */
-    .lv-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9998; justify-content: center; align-items: center; padding: 1.5rem 1rem; backdrop-filter: blur(2px); }
-    .lv-overlay.show { display: flex; }
-    .lv-modal { background: #fff; border-radius: var(--lv-radius); width: 100%; max-width: 720px; max-height: calc(100vh - 3rem); box-shadow: 0 24px 64px rgba(15,23,42,0.3); overflow: hidden; display: flex; flex-direction: column; }
-    .lv-modal-head { flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.4rem; border-bottom: 1px solid var(--lv-border); }
-    .lv-modal-head .mh-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.55rem; }
-    .lv-modal-head .mh-sub { font-size: 0.82rem; color: var(--lv-muted); margin-top: 0.2rem; }
-    .lv-close { background: none; border: none; cursor: pointer; color: var(--lv-faint); font-size: 1.3rem; line-height: 1; padding: 0.2rem; }
-    .lv-close:hover { color: var(--lv-text); }
-    .lv-modal-body { flex: 1 1 auto; min-height: 0; padding: 1.4rem; overflow-y: auto; }
-    .mon-note { display: flex; align-items: center; gap: 0.5rem; background: rgba(14,165,233,0.08); color: #0c5e80; border-radius: var(--lv-radius-sm); padding: 0.6rem 0.85rem; font-size: 0.82rem; margin-bottom: 1.2rem; }
-    .mon-meta-row { font-size: 0.84rem; color: var(--lv-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
-    .mon-meta-row b { color: var(--lv-text); font-weight: 600; }
-    .mon-meta-row i { color: var(--lv-faint); }
-    .mon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.7rem; margin-bottom: 1.4rem; }
-    .mon-metric { background: #f7f9fc; border: 1px solid var(--lv-border); border-radius: var(--lv-radius-sm); padding: 0.7rem; text-align: center; }
-    .mon-metric .mm-v { font-size: 1.3rem; font-weight: 700; }
-    .mon-metric .mm-l { font-size: 0.7rem; color: var(--lv-muted); text-transform: uppercase; letter-spacing: 0.02em; margin-top: 0.25rem; }
-    .mon-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--lv-muted); margin: 1.2rem 0 0.7rem; }
-    .ans-item { border: 1px solid var(--lv-border); border-radius: var(--lv-radius-sm); padding: 0.75rem 0.9rem; margin-bottom: 0.6rem; }
-    .ans-item .ans-q { font-size: 0.86rem; font-weight: 600; margin-bottom: 0.35rem; }
-    .ans-item .ans-q .ans-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--lv-primary); color: #fff; font-size: 0.7rem; font-weight: 700; margin-right: 0.4rem; flex-shrink: 0; }
-    .ans-item .ans-a { font-size: 0.84rem; color: var(--lv-text); }
-    .ans-item .ans-a .pill { display: inline-block; background: #eef2f7; border-radius: 6px; padding: 0.1rem 0.5rem; margin: 0.1rem 0.2rem 0.1rem 0; font-size: 0.8rem; }
-    .ans-item .ans-empty { font-size: 0.82rem; color: var(--lv-faint); font-style: italic; }
-    .ans-options { display: flex; flex-direction: column; gap: 0.3rem; }
-    .ans-option-item { display: flex; align-items: center; gap: 0.4rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
-    .ans-text-block { background: #f8fafc; border: 1px solid var(--lv-border); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.84rem; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow-y: auto; }
-    .ans-type-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.12rem 0.45rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
-    .ans-type-badge.type-test { background: #dbeafe; color: #1d4ed8; }
-    .ans-type-badge.type-written { background: #fef3c7; color: #92400e; }
-    .ans-type-badge.type-paint { background: #ede9fe; color: #6d28d9; }
-    .inc-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--lv-border); font-size: 0.84rem; }
-    .inc-item:last-child { border-bottom: none; }
-    .inc-time { margin-left: auto; font-size: 0.76rem; color: var(--lv-faint); }
-    .lv-modal-foot { flex-shrink: 0; display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap; padding: 1.1rem 1.4rem; border-top: 1px solid var(--lv-border); background: #fafbfc; position: sticky; bottom: 0; z-index: 2; align-items: center; }
-    .modal-answer-count { font-size: 0.78rem; color: var(--lv-muted); margin-right: auto; font-weight: 600; }
-    .btn-act { padding: 0.55rem 1.1rem; border-radius: var(--lv-radius-sm); border: 1px solid transparent; cursor: pointer; font-size: 0.86rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.13s; }
-    .btn-act:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-pause { background: rgba(245,158,11,0.12); color: #b45309; }
-    .btn-pause:hover:not(:disabled) { background: rgba(245,158,11,0.2); }
-    .btn-resume2 { background: rgba(22,163,74,0.10); color: var(--lv-success); }
-    .btn-resume2:hover:not(:disabled) { background: rgba(22,163,74,0.18); }
-    .btn-stop2 { background: var(--lv-danger); color: #fff; }
-    .btn-stop2:hover:not(:disabled) { background: #c02a3a; }
-    .modal-loading { text-align: center; padding: 2.5rem; color: var(--lv-muted); }
-    .modal-loading i { font-size: 1.8rem; }
-
-    /* Toast */
-    .lv-toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px); background: #1f2733; color: #fff; padding: 0.75rem 1.2rem; border-radius: var(--lv-radius-sm); font-size: 0.88rem; box-shadow: 0 12px 32px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 10000; }
-    .lv-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .lv-toast.is-error { background: #b91c1c; }
-    .lv-toast.is-success { background: #15803d; }
-
-    @media (max-width: 980px) {
-        .live-grid { grid-template-columns: 1fr; }
-        .chart-row { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 600px) {
-        .student-map { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'exams/css/exam_live_monitor.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -231,35 +19,35 @@
     <div class="live-head">
         <div>
             <div class="breadcrumb">
-                <a href="{% url 'exams:supervision_monitor' %}"><i class="fas fa-arrow-left"></i> Nəzarət Monitoru</a>
-                <span> / Canlı izləmə</span>
+                <a href="{% url 'exams:supervision_monitor' %}"><i class="fas fa-arrow-left"></i> {% trans "breadcrumb_monitor" context "exams.template.exam_live_monitor" %}</a>
+                <span> / {% trans "breadcrumb_live" context "exams.template.exam_live_monitor" %}</span>
             </div>
             <h1><span class="live-dot"></span> {{ exam.title }}</h1>
-            <p class="sub">İmtahan prosesinin canlı monitorinqi — yalnız izləmə, müdaxiləsiz.</p>
+            <p class="sub">{% trans "header_subtitle" context "exams.template.exam_live_monitor" %}</p>
         </div>
         <div class="head-actions">
-            <span class="poll-status" id="pollStatus"><span class="pip"></span> <span id="pollStatusText">Avtomatik yenilənir</span></span>
-            <button type="button" class="btn-ghost" id="togglePollBtn"><i class="fas fa-pause"></i> Dayandır</button>
-            <button type="button" class="btn-ghost" id="refreshNowBtn"><i class="fas fa-rotate"></i> Yenilə</button>
+            <span class="poll-status" id="pollStatus"><span class="pip"></span> <span id="pollStatusText">{% trans "poll_auto_refresh" context "exams.template.exam_live_monitor" %}</span></span>
+            <button type="button" class="btn-ghost" id="togglePollBtn"><i class="fas fa-pause"></i> {% trans "btn_pause_poll" context "exams.template.exam_live_monitor" %}</button>
+            <button type="button" class="btn-ghost" id="refreshNowBtn"><i class="fas fa-rotate"></i> {% trans "btn_refresh" context "exams.template.exam_live_monitor" %}</button>
         </div>
     </div>
 
     {# Date filter #}
     <form method="get" class="live-filter" id="liveFilterForm">
         <a href="?today=1" class="chip-btn {% if selected_date == today_value %}is-active{% endif %}" data-nav>
-            <i class="fas fa-calendar-day"></i> Bugünkü imtahan
+            <i class="fas fa-calendar-day"></i> {% trans "filter_today" context "exams.template.exam_live_monitor" %}
         </a>
         <a href="{% url 'exams:exam_live_monitor' exam.id %}" class="chip-btn {% if not selected_date %}is-active{% endif %}" data-nav>
-            <i class="fas fa-layer-group"></i> Bütün sessiyalar
+            <i class="fas fa-layer-group"></i> {% trans "filter_all_sessions" context "exams.template.exam_live_monitor" %}
         </a>
         <div class="filter-spacer"></div>
-        <label for="dateInput">Tarix</label>
+        <label for="dateInput">{% trans "label_date" context "exams.template.exam_live_monitor" %}</label>
         <input type="date" name="date" id="dateInput" value="{{ selected_date }}"
                {% if session_dates %}max="{{ today_value }}"{% endif %}>
         {% if session_dates %}
-        <label for="dateSelect">Sessiyalar</label>
+        <label for="dateSelect">{% trans "label_sessions" context "exams.template.exam_live_monitor" %}</label>
         <select id="dateSelect">
-            <option value="">Tarix seç…</option>
+            <option value="">{% trans "select_date_placeholder" context "exams.template.exam_live_monitor" %}</option>
             {% for d in session_dates %}
             <option value="{{ d|date:'Y-m-d' }}" {% if selected_date == d|date:'Y-m-d' %}selected{% endif %}>{{ d|date:'d.m.Y' }}</option>
             {% endfor %}
@@ -273,11 +61,11 @@
     {# Charts #}
     <div class="chart-row">
         <div class="panel chart-panel">
-            <div class="panel-head"><h2><i class="fas fa-chart-pie"></i> Status paylanması</h2></div>
+            <div class="panel-head"><h2><i class="fas fa-chart-pie"></i> {% trans "chart_status_dist" context "exams.template.exam_live_monitor" %}</h2></div>
             <div class="panel-body"><canvas id="statusChart" height="180"></canvas></div>
         </div>
         <div class="panel chart-panel">
-            <div class="panel-head"><h2><i class="fas fa-chart-column"></i> Tələbə tərəqqisi</h2></div>
+            <div class="panel-head"><h2><i class="fas fa-chart-column"></i> {% trans "chart_student_progress" context "exams.template.exam_live_monitor" %}</h2></div>
             <div class="panel-body"><canvas id="progressChart" height="180"></canvas></div>
         </div>
     </div>
@@ -287,26 +75,26 @@
         {# Student map #}
         <div class="panel">
             <div class="panel-head">
-                <h2><i class="fas fa-table-cells"></i> Tələbə xəritəsi</h2>
+                <h2><i class="fas fa-table-cells"></i> {% trans "panel_student_map" context "exams.template.exam_live_monitor" %}</h2>
                 <div class="legend">
-                    <span><i class="sw s-finished"></i> Bitib</span>
-                    <span><i class="sw s-progress"></i> Davam edir</span>
-                    <span><i class="sw" style="background:#f59e0b"></i> 1-2 pozuntu</span>
-                    <span><i class="sw" style="background:#ea580c"></i> 3-5 pozuntu</span>
-                    <span><i class="sw" style="background:#dc2626"></i> 6+ pozuntu</span>
-                    <span><i class="sw" style="background:#7f1d1d"></i> Çıxarılıb</span>
-                    <span><i class="sw s-none"></i> Girməyib</span>
+                    <span><i class="sw s-finished"></i> {% trans "legend_finished" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw s-progress"></i> {% trans "legend_in_progress" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw" style="background:#f59e0b"></i> {% trans "legend_vio_low" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw" style="background:#ea580c"></i> {% trans "legend_vio_mid" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw" style="background:#dc2626"></i> {% trans "legend_vio_high" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw" style="background:#7f1d1d"></i> {% trans "legend_removed" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw s-none"></i> {% trans "legend_not_entered" context "exams.template.exam_live_monitor" %}</span>
                 </div>
             </div>
             <div class="panel-body">
                 <div class="student-map" id="studentMap"></div>
                 <div class="map-empty" id="mapEmpty" style="display:none;">
                     <i class="fas fa-users-slash" style="font-size:2rem;opacity:0.4;"></i>
-                    <p style="margin-top:0.75rem;">Bu sessiya üçün tələbə tapılmadı.</p>
+                    <p style="margin-top:0.75rem;">{% trans "map_empty" context "exams.template.exam_live_monitor" %}</p>
                 </div>
             </div>
             <div class="map-foot">
-                <span><i class="fas fa-hand-pointer"></i> Hər kvadrat bir tələbədir. Detal üçün klikləyin.</span>
+                <span><i class="fas fa-hand-pointer"></i> {% trans "map_hint" context "exams.template.exam_live_monitor" %}</span>
                 <span id="mapFootMeta"></span>
             </div>
         </div>
@@ -315,7 +103,7 @@
         <div class="side-col">
             <div class="panel">
                 <div class="panel-head">
-                    <h2><i class="fas fa-lock"></i> Bloklanmış tələbələr</h2>
+                    <h2><i class="fas fa-lock"></i> {% trans "panel_blocked" context "exams.template.exam_live_monitor" %}</h2>
                     <span class="panel-count-badge" id="blockedBadge">0</span>
                 </div>
                 <div class="side-list" id="blockedList"></div>
@@ -323,7 +111,7 @@
 
             <div class="panel">
                 <div class="panel-head">
-                    <h2><i class="fas fa-user-clock"></i> Daxil olmayanlar</h2>
+                    <h2><i class="fas fa-user-clock"></i> {% trans "panel_not_entered" context "exams.template.exam_live_monitor" %}</h2>
                     <span class="panel-count-badge" id="notEnteredBadge">0</span>
                 </div>
                 <div class="side-list" id="notEnteredList"></div>
@@ -331,7 +119,7 @@
 
             <div class="panel">
                 <div class="panel-head">
-                    <h2><i class="fas fa-flag"></i> Şübhəli hadisələr</h2>
+                    <h2><i class="fas fa-flag"></i> {% trans "panel_incidents" context "exams.template.exam_live_monitor" %}</h2>
                 </div>
                 <div class="side-list" id="incidentFeed"></div>
             </div>
@@ -344,19 +132,19 @@
     <div class="lv-modal">
         <div class="lv-modal-head">
             <div>
-                <div class="mh-title"><i class="fas fa-desktop"></i> <span id="modalStudentName">Tələbə</span></div>
+                <div class="mh-title"><i class="fas fa-desktop"></i> <span id="modalStudentName">{% trans "modal_student" context "exams.template.exam_live_monitor" %}</span></div>
                 <div class="mh-sub" id="modalStudentMeta"></div>
             </div>
             <button type="button" class="lv-close" id="modalClose">&times;</button>
         </div>
         <div class="lv-modal-body" id="modalBody">
-            <div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>Yüklənir…</p></div>
+            <div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>{% trans "loading" context "exams.template.exam_live_monitor" %}</p></div>
         </div>
         <div class="lv-modal-foot">
             <span class="modal-answer-count" id="modalAnswerCount"></span>
-            <button type="button" class="btn-act btn-resume2" id="modalResumeBtn" style="display:none;"><i class="fas fa-play"></i> Bərpa et</button>
-            <button type="button" class="btn-act btn-pause" id="modalPauseBtn" style="display:none;"><i class="fas fa-pause"></i> Müvəqqəti blokla</button>
-            <button type="button" class="btn-act btn-stop2" id="modalStopBtn" style="display:none;"><i class="fas fa-stop"></i> İmtahandan uzaqlaşdır</button>
+            <button type="button" class="btn-act btn-resume2" id="modalResumeBtn" style="display:none;"><i class="fas fa-play"></i> {% trans "btn_resume" context "exams.template.exam_live_monitor" %}</button>
+            <button type="button" class="btn-act btn-pause" id="modalPauseBtn" style="display:none;"><i class="fas fa-pause"></i> {% trans "btn_temp_block" context "exams.template.exam_live_monitor" %}</button>
+            <button type="button" class="btn-act btn-stop2" id="modalStopBtn" style="display:none;"><i class="fas fa-stop"></i> {% trans "btn_remove_student" context "exams.template.exam_live_monitor" %}</button>
         </div>
     </div>
 </div>
@@ -366,7 +154,7 @@
     <div class="lv-modal" style="max-width:450px;">
         <div class="lv-modal-head">
             <div>
-                <div class="mh-title" id="confirmTitle">Təsdiq</div>
+                <div class="mh-title" id="confirmTitle">{% trans "confirm_title" context "exams.template.exam_live_monitor" %}</div>
             </div>
             <button type="button" class="lv-close" id="confirmClose">&times;</button>
         </div>
@@ -374,7 +162,7 @@
             <p id="confirmMessage" style="font-size:0.95rem;color:#333;margin:0;"></p>
         </div>
         <div class="lv-modal-foot" style="justify-content:center;">
-            <button type="button" class="btn-act" id="confirmCancel" style="background:#f0f0f0;color:#333;"><i class="fas fa-times"></i> Ləğv et</button>
+            <button type="button" class="btn-act" id="confirmCancel" style="background:#f0f0f0;color:#333;"><i class="fas fa-times"></i> {% trans "btn_cancel" context "exams.template.exam_live_monitor" %}</button>
             <button type="button" class="btn-act" id="confirmOk"></button>
         </div>
     </div>
@@ -383,6 +171,69 @@
 <div class="lv-toast" id="lvToast"></div>
 
 {{ monitor_data|json_script:"monitor-bootstrap" }}
+
+<script id="monitor-i18n" type="application/json">
+{
+    "poll_auto_refresh": "{% filter escapejs %}{% trans "poll_auto_refresh" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "poll_paused": "{% filter escapejs %}{% trans "poll_paused" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "btn_pause_poll": "{% filter escapejs %}{% trans "btn_pause_poll" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "btn_continue_poll": "{% filter escapejs %}{% trans "btn_continue_poll" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_entered": "{% filter escapejs %}{% trans "stat_entered" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_in_progress": "{% filter escapejs %}{% trans "stat_in_progress" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_finished": "{% filter escapejs %}{% trans "stat_finished" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_flagged": "{% filter escapejs %}{% trans "stat_flagged" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_students": "{% filter escapejs %}{% trans "stat_students" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_avg_progress": "{% filter escapejs %}{% trans "stat_avg_progress" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_completed": "{% filter escapejs %}{% trans "stat_completed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "stat_violations": "{% filter escapejs %}{% trans "stat_violations" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "status_active": "{% filter escapejs %}{% trans "status_active" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "status_warned": "{% filter escapejs %}{% trans "status_warned" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "status_locked": "{% filter escapejs %}{% trans "status_locked" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "status_removed": "{% filter escapejs %}{% trans "status_removed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "status_resumed": "{% filter escapejs %}{% trans "status_resumed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_fullscreen_exited": "{% filter escapejs %}{% trans "event_fullscreen_exited" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_tab_switched": "{% filter escapejs %}{% trans "event_tab_switched" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_window_blurred": "{% filter escapejs %}{% trans "event_window_blurred" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_copy_attempt": "{% filter escapejs %}{% trans "event_copy_attempt" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_paste_attempt": "{% filter escapejs %}{% trans "event_paste_attempt" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_right_click": "{% filter escapejs %}{% trans "event_right_click" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_keyboard_shortcut": "{% filter escapejs %}{% trans "event_keyboard_shortcut" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "event_auto_locked": "{% filter escapejs %}{% trans "event_auto_locked" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "blocked_temp": "{% filter escapejs %}{% trans "blocked_temp" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "blocked_removed": "{% filter escapejs %}{% trans "blocked_removed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "no_blocked": "{% filter escapejs %}{% trans "no_blocked" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "all_entered": "{% filter escapejs %}{% trans "all_entered" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "not_entered_yet": "{% filter escapejs %}{% trans "not_entered_yet" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "no_incidents": "{% filter escapejs %}{% trans "no_incidents" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "monitor_note": "{% filter escapejs %}{% trans "monitor_note" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "answered_label": "{% filter escapejs %}{% trans "answered_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "remaining_label": "{% filter escapejs %}{% trans "remaining_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "violations_label": "{% filter escapejs %}{% trans "violations_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "current_answers": "{% filter escapejs %}{% trans "current_answers" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "violation_log": "{% filter escapejs %}{% trans "violation_log" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "no_answers_yet": "{% filter escapejs %}{% trans "no_answers_yet" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "no_violations": "{% filter escapejs %}{% trans "no_violations" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_stop_title": "{% filter escapejs %}{% trans "confirm_stop_title" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_stop_msg": "{% filter escapejs %}{% trans "confirm_stop_msg" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_stop_btn": "{% filter escapejs %}{% trans "confirm_stop_btn" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_pause_title": "{% filter escapejs %}{% trans "confirm_pause_title" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_pause_msg": "{% filter escapejs %}{% trans "confirm_pause_msg" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_pause_btn": "{% filter escapejs %}{% trans "confirm_pause_btn" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_resume_title": "{% filter escapejs %}{% trans "confirm_resume_title" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_resume_msg": "{% filter escapejs %}{% trans "confirm_resume_msg" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "confirm_resume_btn": "{% filter escapejs %}{% trans "confirm_resume_btn" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "toast_student_blocked": "{% filter escapejs %}{% trans "toast_student_blocked" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "toast_student_removed": "{% filter escapejs %}{% trans "toast_student_removed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "toast_student_resumed": "{% filter escapejs %}{% trans "toast_student_resumed" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "toast_error": "{% filter escapejs %}{% trans "toast_error" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "toast_connection_error": "{% filter escapejs %}{% trans "toast_connection_error" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "teacher_score_label": "{% filter escapejs %}{% trans "teacher_score_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "auto_score_label": "{% filter escapejs %}{% trans "auto_score_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "exam_date_label": "{% filter escapejs %}{% trans "exam_date_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "finished_at_label": "{% filter escapejs %}{% trans "finished_at_label" context "exams.template.exam_live_monitor" %}{% endfilter %}",
+    "questions_answered": "{% filter escapejs %}{% trans "questions_answered" context "exams.template.exam_live_monitor" %}{% endfilter %}"
+}
+</script>
 
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script nonce="{{ request.csp_nonce }}">

@@ -11,29 +11,37 @@
     var STOP_BASE = wrap.getAttribute("data-stop-base");
     var POLL_INTERVAL = 8000;
 
+    // Load i18n strings from template-generated JSON
+    var I18N = {};
+    try { I18N = JSON.parse(document.getElementById("monitor-i18n").textContent); } catch (e) { I18N = {}; }
+    function t(key, fallback) { return I18N[key] || fallback || key; }
+
     var EVENT_LABELS = {
-        fullscreen_exited: "Tam ekrandan çıxış",
+        fullscreen_exited: t("event_fullscreen_exited", "Tam ekrandan çıxış"),
         fullscreen_restored: "Tam ekran bərpa edildi",
-        tab_switched: "Tab dəyişdirildi",
-        window_blurred: "Pəncərə fokusu itdi",
+        tab_switched: t("event_tab_switched", "Tab dəyişdirildi"),
+        window_blurred: t("event_window_blurred", "Pəncərə fokusu itdi"),
         window_focused: "Pəncərə fokusa qayıtdı",
-        copy_attempt: "Kopyalama cəhdi",
-        paste_attempt: "Yapışdırma cəhdi",
+        copy_attempt: t("event_copy_attempt", "Kopyalama cəhdi"),
+        paste_attempt: t("event_paste_attempt", "Yapışdırma cəhdi"),
         cut_attempt: "Kəsmə cəhdi",
-        right_click_attempt: "Sağ klik cəhdi",
-        keyboard_shortcut: "Klaviatura qısayolu",
+        right_click_attempt: t("event_right_click", "Sağ klik cəhdi"),
+        keyboard_shortcut: t("event_keyboard_shortcut", "Klaviatura qısayolu"),
         text_select_attempt: "Mətn seçmə cəhdi",
         suspicious_repeated: "Şübhəli təkrar",
         grace_period_expired: "Möhlət bitdi",
-        auto_locked: "Avtomatik kilidləndi",
+        auto_locked: t("event_auto_locked", "Avtomatik kilidləndi"),
         auto_submitted: "Avtomatik təslim",
         resume_window_expired: "Bərpa müddəti bitdi",
         teacher_resumed: "Müəllim bərpa etdi",
         teacher_granted_chance: "Əlavə şans verildi"
     };
     var STATUS_LABELS = {
-        active: "aktiv", warned: "xəbərdarlıq", locked: "kilidli",
-        removed: "çıxarılıb", resumed: "bərpa olunub"
+        active: t("status_active", "aktiv"),
+        warned: t("status_warned", "xəbərdarlıq"),
+        locked: t("status_locked", "kilidli"),
+        removed: t("status_removed", "çıxarılıb"),
+        resumed: t("status_resumed", "bərpa olunub")
     };
 
     function getCSRF() {
@@ -77,10 +85,10 @@
     function renderStats(d) {
         var c = d.counts || {};
         var stats = [
-            { cls: "accent-primary", label: "Daxil olub", value: c.entered || 0, sub: (d.students ? d.students.length : 0) + " tələbə" },
-            { cls: "accent-info", label: "Davam edir", value: c.in_progress || 0, sub: "Ortalama " + (d.avg_progress || 0) + "% tərəqqi", bar: d.avg_progress || 0 },
-            { cls: "accent-success", label: "Təslim edib", value: c.finished || 0, sub: "Tamamlanmış sessiya" },
-            { cls: "accent-danger", label: "Problemli", value: c.flagged || 0, sub: (d.total_violations || 0) + " pozuntu" }
+            { cls: "accent-primary", label: t("stat_entered", "Daxil olub"), value: c.entered || 0, sub: (d.students ? d.students.length : 0) + " " + t("stat_students", "tələbə") },
+            { cls: "accent-info", label: t("stat_in_progress", "Davam edir"), value: c.in_progress || 0, sub: t("stat_avg_progress", "Ortalama") + " " + (d.avg_progress || 0) + "%", bar: d.avg_progress || 0 },
+            { cls: "accent-success", label: t("stat_finished", "Təslim edib"), value: c.finished || 0, sub: t("stat_completed", "Tamamlanmış sessiya") },
+            { cls: "accent-danger", label: t("stat_flagged", "Problemli"), value: c.flagged || 0, sub: (d.total_violations || 0) + " " + t("stat_violations", "pozuntu") }
         ];
         $("liveStats").innerHTML = stats.map(function (s) {
             return '<div class="lstat ' + s.cls + '">' +
@@ -121,14 +129,14 @@
         $("notEnteredBadge").textContent = list.length;
         var el = $("notEnteredList");
         if (!list.length) {
-            el.innerHTML = '<div class="side-empty"><i class="fas fa-check-circle" style="color:#16a34a"></i> Bütün tələbələr daxil olub.</div>';
+            el.innerHTML = '<div class="side-empty"><i class="fas fa-check-circle" style="color:#16a34a"></i> ' + esc(t("all_entered", "Bütün tələbələr daxil olub.")) + '</div>';
             return;
         }
         el.innerHTML = list.map(function (s) {
             return '<div class="side-item">' +
                 '<div class="avatar">' + esc(initials(s.name)).toUpperCase() + '</div>' +
                 '<div class="si-body"><div class="si-name">' + esc(s.name) + '</div>' +
-                '<div class="si-meta">Hələ giriş etməyib</div></div></div>';
+                '<div class="si-meta">' + esc(t("not_entered_yet", "Hələ giriş etməyib")) + '</div></div></div>';
         }).join("");
     }
 
@@ -140,18 +148,18 @@
         $("blockedBadge").textContent = list.length;
         var el = $("blockedList");
         if (!list.length) {
-            el.innerHTML = '<div class="side-empty"><i class="fas fa-shield-alt" style="color:#16a34a"></i> Bloklanmış tələbə yoxdur.</div>';
+            el.innerHTML = '<div class="side-empty"><i class="fas fa-shield-alt" style="color:#16a34a"></i> ' + esc(t("no_blocked", "Bloklanmış tələbə yoxdur.")) + '</div>';
             return;
         }
         el.innerHTML = list.map(function (s) {
-            var statusLabel = s.supervision_status === "locked" ? "Müvəqqəti bloklu" : "Çıxarılıb";
+            var statusLabel = s.supervision_status === "locked" ? t("blocked_temp", "Müvəqqəti bloklu") : t("blocked_removed", "Çıxarılıb");
             return '<div class="side-item">' +
                 '<div class="avatar" style="background:#fee2e2;color:#b91c1c;">' + esc(initials(s.name)).toUpperCase() + '</div>' +
                 '<div class="si-body"><div class="si-name">' + esc(s.name) + '</div>' +
-                '<div class="si-meta">' + statusLabel + ' · ' + s.violation_count + ' pozuntu</div></div>' +
+                '<div class="si-meta">' + statusLabel + ' · ' + s.violation_count + ' ' + t("stat_violations", "pozuntu") + '</div></div>' +
                 '<div class="blocked-actions">' +
-                '<button type="button" class="btn-sm-action btn-sm-resume" data-blocked-resume="' + s.attempt_id + '" title="Bərpa et"><i class="fas fa-play"></i></button>' +
-                '<button type="button" class="btn-sm-action btn-sm-stop" data-blocked-stop="' + s.attempt_id + '" title="İmtahandan uzaqlaşdır"><i class="fas fa-ban"></i></button>' +
+                '<button type="button" class="btn-sm-action btn-sm-resume" data-blocked-resume="' + s.attempt_id + '" title="' + esc(t("btn_resume", "Bərpa et")) + '"><i class="fas fa-play"></i></button>' +
+                '<button type="button" class="btn-sm-action btn-sm-stop" data-blocked-stop="' + s.attempt_id + '" title="' + esc(t("btn_remove_student", "İmtahandan uzaqlaşdır")) + '"><i class="fas fa-ban"></i></button>' +
                 '</div></div>';
         }).join("");
     }
@@ -161,7 +169,7 @@
         var inc = d.recent_incidents || [];
         var el = $("incidentFeed");
         if (!inc.length) {
-            el.innerHTML = '<div class="side-empty"><i class="fas fa-shield-alt" style="color:#16a34a"></i> Şübhəli hadisə yoxdur.</div>';
+            el.innerHTML = '<div class="side-empty"><i class="fas fa-shield-alt" style="color:#16a34a"></i> ' + esc(t("no_incidents", "Şübhəli hadisə yoxdur.")) + '</div>';
             return;
         }
         el.innerHTML = inc.map(function (e) {
@@ -404,38 +412,38 @@
                   closeModal();
                   fetchData();
               } else {
-                  toast((res.data && res.data.error) || "Əməliyyat alınmadı", "error");
+                  toast((res.data && res.data.error) || t("toast_error", "Əməliyyat alınmadı"), "error");
               }
-          }).catch(function () { toast("Bağlantı xətası", "error"); });
+          }).catch(function () { toast(t("toast_connection_error", "Bağlantı xətası"), "error"); });
     }
     $("modalStopBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
         showConfirm(
-            "İmtahandan uzaqlaşdır",
-            "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək.",
-            '<i class="fas fa-ban"></i> Bəli, uzaqlaşdır',
+            t("confirm_stop_title", "İmtahandan uzaqlaşdır"),
+            t("confirm_stop_msg", "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək."),
+            '<i class="fas fa-ban"></i> ' + t("confirm_stop_btn", "Bəli, uzaqlaşdır"),
             "btn-stop2",
-            function () { postAction(STOP_BASE, currentAttempt, {}, "Tələbə imtahandan uzaqlaşdırıldı"); }
+            function () { postAction(STOP_BASE, currentAttempt, {}, t("toast_student_removed", "Tələbə imtahandan uzaqlaşdırıldı")); }
         );
     });
     $("modalPauseBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
         showConfirm(
-            "Müvəqqəti blokla",
-            "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz.",
-            '<i class="fas fa-lock"></i> Bəli, blokla',
+            t("confirm_pause_title", "Müvəqqəti blokla"),
+            t("confirm_pause_msg", "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz."),
+            '<i class="fas fa-lock"></i> ' + t("confirm_pause_btn", "Bəli, blokla"),
             "btn-pause",
-            function () { postAction(LOCK_BASE, currentAttempt, {}, "Tələbə müvəqqəti bloklandı"); }
+            function () { postAction(LOCK_BASE, currentAttempt, {}, t("toast_student_blocked", "Tələbə müvəqqəti bloklandı")); }
         );
     });
     $("modalResumeBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
         showConfirm(
-            "Bərpa et",
-            "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək.",
-            '<i class="fas fa-play"></i> Bəli, bərpa et',
+            t("confirm_resume_title", "Bərpa et"),
+            t("confirm_resume_msg", "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək."),
+            '<i class="fas fa-play"></i> ' + t("confirm_resume_btn", "Bəli, bərpa et"),
             "btn-resume2",
-            function () { postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: true }, "Tələbə bərpa edildi"); }
+            function () { postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: true }, t("toast_student_resumed", "Tələbə bərpa edildi")); }
         );
     });
 
@@ -445,11 +453,11 @@
         if (resumeBtn) {
             var aid = resumeBtn.getAttribute("data-blocked-resume");
             showConfirm(
-                "Bərpa et",
-                "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?",
-                '<i class="fas fa-play"></i> Bəli, bərpa et',
+                t("confirm_resume_title", "Bərpa et"),
+                t("confirm_resume_msg", "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?"),
+                '<i class="fas fa-play"></i> ' + t("confirm_resume_btn", "Bəli, bərpa et"),
                 "btn-resume2",
-                function () { postAction(RESUME_BASE, aid, { grant_extra_chance: true }, "Tələbə bərpa edildi"); }
+                function () { postAction(RESUME_BASE, aid, { grant_extra_chance: true }, t("toast_student_resumed", "Tələbə bərpa edildi")); }
             );
             return;
         }
@@ -457,11 +465,11 @@
         if (stopBtn) {
             var aid2 = stopBtn.getAttribute("data-blocked-stop");
             showConfirm(
-                "İmtahandan uzaqlaşdır",
-                "Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri alına bilməz.",
-                '<i class="fas fa-ban"></i> Bəli, uzaqlaşdır',
+                t("confirm_stop_title", "İmtahandan uzaqlaşdır"),
+                t("confirm_stop_msg", "Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri alına bilməz."),
+                '<i class="fas fa-ban"></i> ' + t("confirm_stop_btn", "Bəli, uzaqlaşdır"),
                 "btn-stop2",
-                function () { postAction(STOP_BASE, aid2, {}, "Tələbə imtahandan uzaqlaşdırıldı"); }
+                function () { postAction(STOP_BASE, aid2, {}, t("toast_student_removed", "Tələbə imtahandan uzaqlaşdırıldı")); }
             );
         }
     });
@@ -488,16 +496,16 @@
     function startPolling() {
         polling = true;
         $("pollStatus").classList.remove("is-paused");
-        $("pollStatusText").textContent = "Avtomatik yenilənir";
-        $("togglePollBtn").innerHTML = '<i class="fas fa-pause"></i> Dayandır';
+        $("pollStatusText").textContent = t("poll_auto_refresh", "Avtomatik yenilənir");
+        $("togglePollBtn").innerHTML = '<i class="fas fa-pause"></i> ' + t("btn_pause_poll", "Dayandır");
         clearInterval(pollTimer);
         pollTimer = setInterval(fetchData, POLL_INTERVAL);
     }
     function stopPolling() {
         polling = false;
         $("pollStatus").classList.add("is-paused");
-        $("pollStatusText").textContent = "Dayandırılıb";
-        $("togglePollBtn").innerHTML = '<i class="fas fa-play"></i> Davam et';
+        $("pollStatusText").textContent = t("poll_paused", "Dayandırılıb");
+        $("togglePollBtn").innerHTML = '<i class="fas fa-play"></i> ' + t("btn_continue_poll", "Davam et");
         clearInterval(pollTimer);
     }
     $("togglePollBtn").addEventListener("click", function () { polling ? stopPolling() : startPolling(); });
