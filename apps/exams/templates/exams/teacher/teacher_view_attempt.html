@@ -166,7 +166,21 @@
                     </h5>
                 </div>
                 <div class="card-body question-body">
-                    
+
+                    {# ================== SUALIN MEDİASI (şəkil / video) ================== #}
+                    {% if item.question.image %}
+                        <div class="question-media mb-3">
+                            <img src="{{ item.question.image.url }}" alt="{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}" class="img-fluid rounded" style="max-height:360px;">
+                        </div>
+                    {% endif %}
+                    {% if item.question.video %}
+                        <div class="question-media mb-3">
+                            <video controls preload="metadata" playsinline class="img-fluid rounded" style="max-height:360px;">
+                                <source src="{{ item.question.video.url }}">
+                            </video>
+                        </div>
+                    {% endif %}
+
                     {# ================== TEST İMTAHANI CAVABLARI ================== #}
                     {% if exam.exam_type == 'test' %}
                         <div class="options-list">

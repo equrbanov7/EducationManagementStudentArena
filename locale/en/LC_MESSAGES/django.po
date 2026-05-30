@@ -21279,3 +21279,363 @@ msgstr "Show results to students"
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_hide_results"
 msgstr "Hide results from students"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "page_title"
+msgstr "Live Monitoring"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_monitor"
+msgstr "Supervision Monitor"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_live"
+msgstr "Live tracking"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "header_subtitle"
+msgstr "Live monitoring of the exam process — observation only, no intervention."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_auto_refresh"
+msgstr "Auto-refreshing"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_pause_poll"
+msgstr "Pause"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_refresh"
+msgstr "Refresh"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_today"
+msgstr "Today's exam"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_all_sessions"
+msgstr "All sessions"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_date"
+msgstr "Date"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_sessions"
+msgstr "Sessions"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "select_date_placeholder"
+msgstr "Select date…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_status_dist"
+msgstr "Status distribution"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_student_progress"
+msgstr "Student progress"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_student_map"
+msgstr "Student map"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_finished"
+msgstr "Finished"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_in_progress"
+msgstr "In progress"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_low"
+msgstr "1-2 violations"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_mid"
+msgstr "3-5 violations"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_high"
+msgstr "6+ violations"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_removed"
+msgstr "Removed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_not_entered"
+msgstr "Not entered"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_empty"
+msgstr "No students found for this session."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_hint"
+msgstr "Each square represents a student. Click for details."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_blocked"
+msgstr "Blocked students"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_not_entered"
+msgstr "Not entered"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_incidents"
+msgstr "Suspicious incidents"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "modal_student"
+msgstr "Student"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "loading"
+msgstr "Loading…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_resume"
+msgstr "Resume"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_temp_block"
+msgstr "Temporarily block"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_remove_student"
+msgstr "Remove from exam"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_title"
+msgstr "Confirmation"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_cancel"
+msgstr "Cancel"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_paused"
+msgstr "Paused"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_continue_poll"
+msgstr "Continue"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_entered"
+msgstr "Entered"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_in_progress"
+msgstr "In progress"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_finished"
+msgstr "Submitted"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_flagged"
+msgstr "Flagged"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_students"
+msgstr "students"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_avg_progress"
+msgstr "Average"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_completed"
+msgstr "Completed session"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_violations"
+msgstr "violations"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_active"
+msgstr "active"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_warned"
+msgstr "warned"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_locked"
+msgstr "locked"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_removed"
+msgstr "removed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_resumed"
+msgstr "resumed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_fullscreen_exited"
+msgstr "Exited fullscreen"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_tab_switched"
+msgstr "Tab switched"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_window_blurred"
+msgstr "Window lost focus"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_copy_attempt"
+msgstr "Copy attempt"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_paste_attempt"
+msgstr "Paste attempt"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_right_click"
+msgstr "Right-click attempt"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_keyboard_shortcut"
+msgstr "Keyboard shortcut"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_auto_locked"
+msgstr "Auto-locked"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_temp"
+msgstr "Temporarily blocked"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_removed"
+msgstr "Removed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_blocked"
+msgstr "No blocked students."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "all_entered"
+msgstr "All students have entered."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "not_entered_yet"
+msgstr "Not entered yet"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_incidents"
+msgstr "No suspicious incidents."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "monitor_note"
+msgstr "This is observation mode only — the student is not blocked."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_label"
+msgstr "Answered"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "remaining_label"
+msgstr "Remaining"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violations_label"
+msgstr "Violations"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "current_answers"
+msgstr "Current answers"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violation_log"
+msgstr "Violation log"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_answers_yet"
+msgstr "No questions have been answered yet."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_violations"
+msgstr "No violations recorded."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_title"
+msgstr "Remove from exam"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_msg"
+msgstr "Do you want to permanently stop this student's exam? It will be submitted immediately and cannot be reversed."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_btn"
+msgstr "Yes, remove"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_title"
+msgstr "Temporarily block"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_msg"
+msgstr "The student's screen will be locked. The exam will not be submitted — you can resume later."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_btn"
+msgstr "Yes, block"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_title"
+msgstr "Resume"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_msg"
+msgstr "Do you want to allow the student to continue their exam? An extra chance will be granted."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_btn"
+msgstr "Yes, resume"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_blocked"
+msgstr "Student temporarily blocked"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_removed"
+msgstr "Student removed from exam"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_resumed"
+msgstr "Student resumed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_error"
+msgstr "Operation failed"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_connection_error"
+msgstr "Connection error"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "teacher_score_label"
+msgstr "Teacher score"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "auto_score_label"
+msgstr "Auto score"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "exam_date_label"
+msgstr "Exam date"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "finished_at_label"
+msgstr "Finished"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "questions_answered"
+msgstr "questions answered"

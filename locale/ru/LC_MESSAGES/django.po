@@ -21277,3 +21277,363 @@ msgstr "Показать результаты студентам"
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_hide_results"
 msgstr "Скрыть результаты от студентов"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "page_title"
+msgstr "Мониторинг в реальном времени"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_monitor"
+msgstr "Монитор наблюдения"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_live"
+msgstr "Онлайн-отслеживание"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "header_subtitle"
+msgstr "Мониторинг экзамена в реальном времени — только наблюдение, без вмешательства."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_auto_refresh"
+msgstr "Автообновление"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_pause_poll"
+msgstr "Остановить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_refresh"
+msgstr "Обновить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_today"
+msgstr "Сегодняшний экзамен"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_all_sessions"
+msgstr "Все сессии"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_date"
+msgstr "Дата"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_sessions"
+msgstr "Сессии"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "select_date_placeholder"
+msgstr "Выберите дату…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_status_dist"
+msgstr "Распределение статусов"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_student_progress"
+msgstr "Прогресс студентов"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_student_map"
+msgstr "Карта студентов"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_finished"
+msgstr "Завершено"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_in_progress"
+msgstr "В процессе"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_low"
+msgstr "1-2 нарушения"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_mid"
+msgstr "3-5 нарушений"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_high"
+msgstr "6+ нарушений"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_removed"
+msgstr "Удалён"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_not_entered"
+msgstr "Не вошёл"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_empty"
+msgstr "Студенты для этой сессии не найдены."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_hint"
+msgstr "Каждый квадрат — студент. Нажмите для подробностей."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_blocked"
+msgstr "Заблокированные студенты"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_not_entered"
+msgstr "Не вошли"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_incidents"
+msgstr "Подозрительные инциденты"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "modal_student"
+msgstr "Студент"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "loading"
+msgstr "Загрузка…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_resume"
+msgstr "Восстановить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_temp_block"
+msgstr "Временно заблокировать"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_remove_student"
+msgstr "Удалить с экзамена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_title"
+msgstr "Подтверждение"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_cancel"
+msgstr "Отмена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_paused"
+msgstr "Остановлено"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_continue_poll"
+msgstr "Продолжить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_entered"
+msgstr "Вошли"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_in_progress"
+msgstr "В процессе"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_finished"
+msgstr "Сдали"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_flagged"
+msgstr "Проблемные"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_students"
+msgstr "студентов"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_avg_progress"
+msgstr "Среднее"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_completed"
+msgstr "Завершённая сессия"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_violations"
+msgstr "нарушений"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_active"
+msgstr "активен"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_warned"
+msgstr "предупреждён"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_locked"
+msgstr "заблокирован"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_removed"
+msgstr "удалён"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_resumed"
+msgstr "восстановлен"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_fullscreen_exited"
+msgstr "Выход из полноэкранного режима"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_tab_switched"
+msgstr "Переключение вкладки"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_window_blurred"
+msgstr "Потеря фокуса окна"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_copy_attempt"
+msgstr "Попытка копирования"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_paste_attempt"
+msgstr "Попытка вставки"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_right_click"
+msgstr "Правый клик"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_keyboard_shortcut"
+msgstr "Горячая клавиша"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_auto_locked"
+msgstr "Автоблокировка"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_temp"
+msgstr "Временно заблокирован"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_removed"
+msgstr "Удалён"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_blocked"
+msgstr "Нет заблокированных студентов."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "all_entered"
+msgstr "Все студенты вошли."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "not_entered_yet"
+msgstr "Ещё не вошёл"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_incidents"
+msgstr "Нет подозрительных инцидентов."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "monitor_note"
+msgstr "Это режим наблюдения — студент не блокируется."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_label"
+msgstr "Отвечено"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "remaining_label"
+msgstr "Осталось"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violations_label"
+msgstr "Нарушения"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "current_answers"
+msgstr "Текущие ответы"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violation_log"
+msgstr "Журнал нарушений"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_answers_yet"
+msgstr "Пока нет ответов на вопросы."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_violations"
+msgstr "Нарушений не зафиксировано."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_title"
+msgstr "Удалить с экзамена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_msg"
+msgstr "Вы хотите окончательно остановить экзамен этого студента? Он будет сдан немедленно и не может быть отменён."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_btn"
+msgstr "Да, удалить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_title"
+msgstr "Временно заблокировать"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_msg"
+msgstr "Экран студента будет заблокирован. Экзамен не будет сдан — вы можете восстановить позже."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_btn"
+msgstr "Да, заблокировать"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_title"
+msgstr "Восстановить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_msg"
+msgstr "Вы хотите позволить студенту продолжить экзамен? Будет предоставлен дополнительный шанс."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_btn"
+msgstr "Да, восстановить"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_blocked"
+msgstr "Студент временно заблокирован"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_removed"
+msgstr "Студент удалён с экзамена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_resumed"
+msgstr "Студент восстановлен"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_error"
+msgstr "Операция не выполнена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_connection_error"
+msgstr "Ошибка подключения"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "teacher_score_label"
+msgstr "Балл преподавателя"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "auto_score_label"
+msgstr "Автоматическая оценка"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "exam_date_label"
+msgstr "Дата экзамена"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "finished_at_label"
+msgstr "Завершение"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "questions_answered"
+msgstr "вопросов отвечено"
