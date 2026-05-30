@@ -158,6 +158,21 @@ urlpatterns = [
         name="supervision_detail",
     ),
     path(
+        "supervision/live/<int:exam_id>/",
+        views.exam_live_monitor,
+        name="exam_live_monitor",
+    ),
+    path(
+        "supervision/live/<int:exam_id>/poll/",
+        views.exam_live_monitor_poll_api,
+        name="exam_live_monitor_poll",
+    ),
+    path(
+        "supervision/api/snapshot/<int:attempt_id>/",
+        views.attempt_live_snapshot_api,
+        name="attempt_live_snapshot",
+    ),
+    path(
         "supervision/api/log/<int:attempt_id>/",
         views.log_incident_api,
         name="supervision_log_incident",
