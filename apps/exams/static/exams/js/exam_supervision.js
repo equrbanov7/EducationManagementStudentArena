@@ -32,6 +32,7 @@
         _initialized: false,
         _initialStatus: "active",
         _thresholdWarned: false,
+        _navigatingToResult: false,
 
         /**
          * Initialize the supervision module.
@@ -399,6 +400,13 @@
         // present; falls back to a plain reload, which the server then redirects
         // to the result page for a finished attempt.
         _leaveToResult: function () {
+            if (this._navigatingToResult || window.EXAM_SUPERVISION_NAVIGATING === true) {
+                return;
+            }
+            this._navigatingToResult = true;
+            window.EXAM_SUPERVISION_NAVIGATING = true;
+            this.destroy();
+
             var url = (window.SUPERVISION_RESULT_URL || "").trim();
             if (url) {
                 window.location.href = url;

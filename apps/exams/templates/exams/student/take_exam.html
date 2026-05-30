@@ -1004,9 +1004,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 stopQuestionTimer();
                 timerValueElement.textContent = "00:00";
 
-                // Prevent beforeunload warning during auto-submit
-                isFinishingExam = true;
-                hasUnsavedChanges = false;
+                // Prevent beforeunload warning and duplicate supervision redirects during auto-submit.
+                prepareExamFinishNavigation();
 
                 // Show time-up notification
                 var timeUpMsg = (I18N_TAKE_EXAM.timeUpMessage || "").trim();
@@ -1211,6 +1210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.removeItem(storageKey);
                 localStorage.removeItem(markedStorageKey);
                 clearLocalDraft();
+                prepareExamFinishNavigation();
                 window.location.href = data.redirect_url;
                 return;
             }
@@ -1298,6 +1298,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem(storageKey);
                     localStorage.removeItem(markedStorageKey);
                     clearLocalDraft();
+                    prepareExamFinishNavigation();
                     window.location.href = data.redirect_url;
                     return;
                 }
@@ -1329,6 +1330,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }, serverAutoSaveIntervalMs);
 
     let isFinishingExam = false;
+
+    function prepareExamFinishNavigation() {
+        isFinishingExam = true;
+        hasUnsavedChanges = false;
+        window.EXAM_SUPERVISION_NAVIGATING = true;
+        if (window.ExamSupervision && typeof window.ExamSupervision.destroy === "function") {
+            window.ExamSupervision.destroy();
+        }
+    }
 
     // Səhifədən çıxanda xəbərdarlıq
     window.addEventListener("beforeunload", function (e) {
@@ -1378,8 +1388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmFinishBtn.addEventListener('click', () => {
-        isFinishingExam = true;
-        hasUnsavedChanges = false;
+        prepareExamFinishNavigation();
         confirmFinishBtn.disabled = true;
 
         const hiddenInput = document.createElement('input');
@@ -1474,7 +1483,7 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
     };
     </script>
-    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260531-manual-control"></script>
+    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260531-result-nav-guard"></script>
     <script nonce="{{ request.csp_nonce }}">
     // Where to send the student when a teacher stops / auto-finishes the attempt.
     window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";
