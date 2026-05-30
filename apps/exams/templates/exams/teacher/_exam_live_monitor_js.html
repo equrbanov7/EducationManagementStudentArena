@@ -354,7 +354,7 @@
         $("modalResumeBtn").style.display = canResume ? "inline-flex" : "none";
         $("modalPauseBtn").style.display = !finished && d.supervision_status !== "locked" && d.supervision_status !== "removed" ? "inline-flex" : "none";
         $("modalStopBtn").style.display = !finished ? "inline-flex" : "none";
-        $("modalAnswerCount").textContent = d.answered + "/" + d.total_questions + " sual cavablanıb";
+        $("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " sual cavablanıb";
     }
     function closeModal() { modal.classList.remove("show"); currentAttempt = null; }
 
