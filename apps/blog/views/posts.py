@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -148,15 +148,20 @@ def post_edit_ajax(request, pk):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
-    can_publish, blocked_reason = can_user_publish_post(request.user)
-    if not can_publish:
-        return JsonResponse(
-            {"success": False, "message": blocked_reason},
-            status=403,
-        )
+    post = get_object_or_404(Post.objects.select_related("author"), pk=pk)
+    is_author_edit = post.author_id == request.user.id
+    is_moderator_edit = not is_author_edit and can_user_moderate_post(request.user, post)
 
-    # Yalnız öz postunu düzəldə bilsin
-    post = get_object_or_404(Post, pk=pk, author=request.user)
+    if not is_author_edit and not is_moderator_edit:
+        raise Http404
+
+    if is_author_edit:
+        can_publish, blocked_reason = can_user_publish_post(request.user)
+        if not can_publish:
+            return JsonResponse(
+                {"success": False, "message": blocked_reason},
+                status=403,
+            )
 
     title = request.POST.get("title", "").strip()
     content = request.POST.get("content", "").strip()
@@ -236,18 +241,18 @@ def post_edit_ajax(request, pk):
     # Şəkil URL
     post.image_url = image_url or None
 
-    if post.requires_approval or author_requires_post_approval(post.author):
-        post.requires_approval = True
-        post.approval_status = Post.ApprovalStatus.PENDING
-        post.approval_requested_at = timezone.now()
-        post.is_published = False
-    else:
-        post.requires_approval = False
-        post.approval_status = Post.ApprovalStatus.APPROVED
-        post.approval_requested_at = None
-        post.is_published = is_published
+    if not is_moderator_edit:
+        if post.requires_approval or author_requires_post_approval(post.author):
+            post.requires_approval = True
+            post.approval_status = Post.ApprovalStatus.PENDING
+            post.approval_requested_at = timezone.now()
+            post.is_published = False
+        else:
+            post.requires_approval = False
+            post.approval_status = Post.ApprovalStatus.APPROVED
+            post.approval_requested_at = None
+            post.is_published = is_published
 
-    # Save
     post.save()
 
     return JsonResponse(

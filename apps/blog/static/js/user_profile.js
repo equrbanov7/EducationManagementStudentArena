@@ -10,6 +10,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const createModal = document.getElementById("createModal");
   const createFormContainer = document.querySelector("[data-create-post-form-container]");
 
+  [editModal, warningModal].forEach(function (modal) {
+    if (modal && modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+  });
+
   // Edit modal elementləri
   const editForm = document.getElementById("editForm");
   const editTitle = document.getElementById("editTitle");
@@ -270,11 +276,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const fileImage = this.dataset.fileImage || "";
       const isPublished = this.dataset.isPublished === "true";
       const requiresApproval = this.dataset.requiresApproval === "true";
+      const isModeratorEdit = this.dataset.moderatorEdit === "true";
       const approvalStatus = this.dataset.approvalStatus || "";
       const slug = this.dataset.slug || "";
       const createdAt = this.dataset.createdAt || "";
       const updatedAt = this.dataset.updatedAt || "";
-      currentPostRequiresApproval = requiresApproval;
+      currentPostRequiresApproval = requiresApproval && !isModeratorEdit;
 
       // Form sahələrini doldur
       editTitle.value = title;
@@ -282,7 +289,10 @@ document.addEventListener("DOMContentLoaded", function () {
       editExcerpt.value = excerpt;
       editImageUrl.value = imageUrl;
       if (editIsPublished) {
-        if (requiresApproval) {
+        if (isModeratorEdit) {
+          editIsPublished.checked = isPublished;
+          editIsPublished.disabled = true;
+        } else if (requiresApproval) {
           editIsPublished.checked = false;
           editIsPublished.disabled = true;
         } else {
@@ -292,7 +302,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (editApprovalNotice) {
-        editApprovalNotice.hidden = !requiresApproval;
+        editApprovalNotice.textContent = "Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.";
+        editApprovalNotice.hidden = !requiresApproval || isModeratorEdit;
       }
 
       // Meta məlumatları doldur
