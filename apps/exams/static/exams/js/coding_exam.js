@@ -11,6 +11,15 @@
         }
     }
 
+    function navigateAway(url) {
+        if (!url) return;
+        window.EXAM_SUPERVISION_NAVIGATING = true;
+        if (window.ExamSupervision && typeof window.ExamSupervision.destroy === "function") {
+            window.ExamSupervision.destroy();
+        }
+        window.location.href = url;
+    }
+
     function formatTime(totalSeconds) {
         var value = Math.max(0, parseInt(totalSeconds, 10) || 0);
         var minutes = Math.floor(value / 60);
@@ -913,7 +922,7 @@
                 .then(function (body) {
                     hasUnsavedChanges = false;
                     if (body.finished && body.redirect_url) {
-                        window.location.href = body.redirect_url;
+                        navigateAway(body.redirect_url);
                         return;
                     }
                     currentQuestion().latestSubmission = body.submission || currentQuestion().latestSubmission;
@@ -921,7 +930,7 @@
                 })
                 .catch(function (error) {
                     if (error.payload && error.payload.redirect_url) {
-                        window.location.href = error.payload.redirect_url;
+                        navigateAway(error.payload.redirect_url);
                         return;
                     }
                     setStatus(error.message || "Save failed");
@@ -1605,7 +1614,7 @@
                 .then(function (body) {
                     hasUnsavedChanges = false;
                     if (body.finished && body.redirect_url) {
-                        window.location.href = body.redirect_url;
+                        navigateAway(body.redirect_url);
                         return;
                     }
                     applyRunResult(body.submission || {});
@@ -1613,7 +1622,7 @@
                 })
                 .catch(function (error) {
                     if (error.payload && error.payload.redirect_url) {
-                        window.location.href = error.payload.redirect_url;
+                        navigateAway(error.payload.redirect_url);
                         return;
                     }
                     // Rate-limit / concurrency-limit response from the
@@ -1705,12 +1714,12 @@
                     hasUnsavedChanges = false;
                     setStatus(i18n.submitSuccess || "Submission successful");
                     if (body.redirect_url) {
-                        window.location.href = body.redirect_url;
+                        navigateAway(body.redirect_url);
                     }
                 })
                 .catch(function (error) {
                     if (error.payload && error.payload.redirect_url) {
-                        window.location.href = error.payload.redirect_url;
+                        navigateAway(error.payload.redirect_url);
                         return;
                     }
                     isSubmitting = false;
