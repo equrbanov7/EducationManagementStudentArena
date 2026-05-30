@@ -18,7 +18,10 @@ from django.views.decorators.http import require_GET, require_POST
 from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
+    get_attempt_live_snapshot,
     get_attempt_supervision_status,
+    get_exam_live_monitor_data,
+    get_exam_session_dates,
     get_supervision_monitor_data,
     log_supervision_incident,
     teacher_resume_attempt,
@@ -409,3 +412,100 @@ def teacher_stop_api(request, attempt_id):
             "supervision_status": attempt.supervision_status,
         }
     )
+
+
+# ─────────────────────────────────────────────
+# Live exam monitoring (per-exam dashboard)
+# ─────────────────────────────────────────────
+
+
+def _get_scoped_exam_or_404(request, org, exam_id):
+    """
+    Resolve an exam by id, strictly scoped to the org and the teacher's
+    permission (author-only unless they hold ``exam.manage`` / are superadmin).
+    Centralises the scope check so live-monitor views can never leak another
+    organisation's or another teacher's exam.
+    """
+    return get_object_or_404(
+        _supervision_exam_queryset(request, org).select_related("supervision_config"),
+        id=exam_id,
+    )
+
+
+def _parse_date_param(request):
+    """Parse ?date=YYYY-MM-DD (or ?today=1) into a date, or None for all sessions."""
+    if request.GET.get("today") == "1":
+        from django.utils import timezone
+
+        return timezone.localdate()
+    raw = (request.GET.get("date") or "").strip()
+    if not raw:
+        return None
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+@login_required
+def exam_live_monitor(request, exam_id):
+    """
+    Live monitoring dashboard for a single exam: every student's progress and
+    supervision state, a student map, and a suspicious-events feed. Read-only
+    observation — a teacher can watch without interfering; stop/lock remain
+    explicit actions via the existing APIs.
+    """
+    org = _ensure_organization_context(request)
+    _ensure_teacher(request.user)
+
+    exam = _get_scoped_exam_or_404(request, org, exam_id)
+    date_value = _parse_date_param(request)
+
+    data = get_exam_live_monitor_data(exam, date_value=date_value)
+    session_dates = get_exam_session_dates(exam)
+
+    from django.utils import timezone
+
+    context = {
+        "exam": exam,
+        "monitor_data": data,
+        "session_dates": session_dates,
+        "selected_date": date_value.isoformat() if date_value else "",
+        "today_value": timezone.localdate().isoformat(),
+        "poll_url": f"/exams/supervision/live/{exam.id}/poll/",
+    }
+    return render(request, "exams/teacher/exam_live_monitor.html", context)
+
+
+@login_required
+@require_GET
+def exam_live_monitor_poll_api(request, exam_id):
+    """JSON polling endpoint that backs the live dashboard's auto-refresh."""
+    org = _ensure_organization_context(request)
+    _ensure_teacher(request.user)
+
+    exam = _get_scoped_exam_or_404(request, org, exam_id)
+    date_value = _parse_date_param(request)
+
+    data = get_exam_live_monitor_data(exam, date_value=date_value)
+    return JsonResponse(data)
+
+
+@login_required
+@require_GET
+def attempt_live_snapshot_api(request, attempt_id):
+    """
+    JSON snapshot of one student's current answers + supervision events, for the
+    "look over the shoulder" modal. Read-only; scope enforced via the exam.
+    """
+    org = _ensure_organization_context(request)
+    _ensure_teacher(request.user)
+
+    attempt = get_object_or_404(
+        ExamAttempt.objects.select_related("user", "exam"),
+        id=attempt_id,
+        exam__organization=org,
+        exam__in=_supervision_exam_queryset(request, org),
+    )
+
+    return JsonResponse(get_attempt_live_snapshot(attempt))
