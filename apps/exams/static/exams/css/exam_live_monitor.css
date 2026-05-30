@@ -199,6 +199,13 @@
 .ans-option-item { display: flex; align-items: center; gap: 0.4rem; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
 .ans-option-item.opt-correct { background: #f0fdf4; border: 1px solid #bbf7d0; }
 .ans-option-item.opt-chosen { background: #eff6ff; border: 1px solid #bfdbfe; }
+.ans-option-item.opt-wrong { background: #fef2f2; border: 1px solid #fecaca; }
+.ans-option-item.opt-neutral { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
+.ans-option-item .opt-text { flex: 1; min-width: 0; }
+.ans-option-item .opt-tags { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: auto; }
+.ans-option-item .opt-tag { border-radius: 999px; padding: 0.08rem 0.4rem; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; }
+.ans-option-item .opt-picked { background: #dbeafe; color: #1d4ed8; }
+.ans-option-item .opt-key { background: #dcfce7; color: #166534; }
 .ans-correct-hint { margin-top: 0.4rem; font-size: 0.78rem; color: var(--lv-success); display: flex; align-items: center; gap: 0.35rem; }
 .ans-files { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .ans-media { margin: 0.5rem 0; }

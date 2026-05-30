@@ -66,7 +66,9 @@ def log_incident_api(request, attempt_id):
         user=request.user,
     )
 
-    attempt.expire_if_time_limit_reached()
+    is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
+    if not is_manual_lock:
+        attempt.expire_if_time_limit_reached()
     if attempt.is_finished:
         return JsonResponse({"error": "Attempt is already finished."}, status=400)
 
@@ -100,6 +102,7 @@ def log_incident_api(request, attempt_id):
             "limit_exceeded": result["limit_exceeded"],
             "action_taken": result["action_taken"],
             "supervision_status": result["supervision_status"],
+            "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
         }
     )
 
@@ -117,7 +120,9 @@ def supervision_status_api(request, attempt_id):
         user=request.user,
     )
 
-    attempt.expire_if_time_limit_reached()
+    is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
+    if not is_manual_lock:
+        attempt.expire_if_time_limit_reached()
     attempt.expire_if_resume_window_expired()
     status = get_attempt_supervision_status(attempt)
     status["is_finished"] = attempt.is_finished
