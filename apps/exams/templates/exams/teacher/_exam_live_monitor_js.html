@@ -346,6 +346,25 @@
         return html;
     }
 
+    function renderTestOptions(options) {
+        return '<div class="ans-options">' + (options || []).map(function (o) {
+            var cls = o.is_correct ? "opt-correct" : (o.is_selected ? "opt-wrong" : "opt-neutral");
+            var icon = o.is_correct
+                ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>'
+                : (o.is_selected
+                    ? '<i class="fas fa-times-circle" style="color:#dc2626"></i>'
+                    : '<i class="far fa-circle" style="color:#94a3b8"></i>');
+            var lbl = o.label ? '<b>' + esc(o.label) + ')</b> ' : '';
+            var tags = [];
+            if (o.is_selected) tags.push('<span class="opt-tag opt-picked">' + esc(t("picked_option", "Seçilib")) + '</span>');
+            if (o.is_correct) tags.push('<span class="opt-tag opt-key">' + esc(t("correct_option", "Düz")) + '</span>');
+            return '<div class="ans-option-item ' + cls + '">' + icon +
+                '<span class="opt-text">' + lbl + esc(o.text) + '</span>' +
+                (tags.length ? '<span class="opt-tags">' + tags.join("") + '</span>' : '') +
+                '</div>';
+        }).join("") + '</div>';
+    }
+
     function renderOneAnswer(a, idx) {
         var badgeDef = KIND_BADGE[a.kind] || KIND_BADGE.written;
         var badge = '<span class="ans-type-badge ' + badgeDef.cls + '">' + esc(badgeDef.label) + '</span>';
@@ -363,7 +382,9 @@
                     esc(t("last_run", "Son icra")) + ': ' + esc(a.execution_status) + '</div>';
             }
         } else if (a.kind === "test") {
-            if (a.selected_options && a.selected_options.length) {
+            if (a.options && a.options.length) {
+                body = renderTestOptions(a.options);
+            } else if (a.selected_options && a.selected_options.length) {
                 body = '<div class="ans-options">' + a.selected_options.map(function (o) {
                     var ok = o.is_correct;
                     var icon = ok ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>'
