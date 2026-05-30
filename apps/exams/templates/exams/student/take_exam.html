@@ -1439,7 +1439,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="{% static 'js/review_countdown.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
-    {% if supervision.supervised %}
     {{ supervision.config|json_script:"supervision-config-data" }}
     <script nonce="{{ request.csp_nonce }}">
     window.SUPERVISION_ACK_I18N = {
@@ -1463,8 +1462,8 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedMsg: "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
         lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
         lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
-        teacherLockTitle: "{% filter escapejs %}{% trans 'İmtahan müəllim tərəfindən dayandırıldı' %}{% endfilter %}",
-        teacherLockMsg: "{% filter escapejs %}{% trans 'Müəlliminiz imtahanınızı müvəqqəti olaraq dayandırdı. Ekranınız kilidlənib.' %}{% endfilter %}",
+        teacherLockTitle: "{% filter escapejs %}{% trans 'Müəllim tərəfindən müvəqqəti bloklandınız' %}{% endfilter %}",
+        teacherLockMsg: "{% filter escapejs %}{% trans 'Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.' %}{% endfilter %}",
         teacherLockWaiting: "{% filter escapejs %}{% trans 'Müəllim imtahanı bərpa edənə qədər gözləyin.' %}{% endfilter %}",
         thresholdTitle: "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
         thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
@@ -1475,7 +1474,7 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
     };
     </script>
-    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260530-realtime"></script>
+    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260531-manual-control"></script>
     <script nonce="{{ request.csp_nonce }}">
     // Where to send the student when a teacher stops / auto-finishes the attempt.
     window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";
@@ -1486,6 +1485,7 @@ document.addEventListener('DOMContentLoaded', function() {
             );
             ExamSupervision.init({
                 config: supervisionConfig,
+                supervised: {{ supervision.supervised|yesno:"true,false" }},
                 attemptId: {{ attempt.id }},
                 csrfToken: "{{ csrf_token }}",
                 logEndpoint: "{% url 'exams:supervision_log_incident' attempt.id %}",
@@ -1497,7 +1497,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     </script>
-    {% endif %}
 {% endblock %}
 
 {% endblock %}
