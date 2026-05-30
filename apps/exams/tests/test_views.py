@@ -3819,6 +3819,53 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertEqual(self.attempt.supervision_status, "locked")
         self.assertIsNotNone(self.attempt.finished_at)
 
+    def test_student_status_api_keeps_manual_lock_visible_after_exam_duration(self):
+        self.attempt.supervision_manual_lock = True
+        self.attempt.started_at = timezone.now() - timedelta(minutes=61)
+        self.attempt.save(update_fields=["supervision_manual_lock", "started_at"])
+        self.client.force_login(self.student)
+
+        response = self.client.get(reverse("exams:supervision_status_api", args=[self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["manual_lock"])
+        self.assertFalse(payload["is_finished"])
+        self.assertEqual(payload["supervision_status"], "locked")
+        self.attempt.refresh_from_db()
+        self.assertEqual(self.attempt.status, "in_progress")
+
+    def test_student_status_api_reports_manual_lock_without_supervision_config(self):
+        self.exam.supervision_config.delete()
+        self.attempt.supervision_manual_lock = True
+        self.attempt.save(update_fields=["supervision_manual_lock"])
+        self.client.force_login(self.student)
+
+        response = self.client.get(reverse("exams:supervision_status_api", args=[self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload["supervised"])
+        self.assertTrue(payload["manual_lock"])
+        self.assertEqual(payload["supervision_status"], "locked")
+
+    def test_unsupervised_student_exam_loads_manual_lock_listener(self):
+        self.exam.supervision_config.delete()
+        self.attempt.supervision_status = "active"
+        self.attempt.supervision_manual_lock = False
+        self.attempt.save(update_fields=["supervision_status", "supervision_manual_lock"])
+        question = ExamQuestion.objects.create(exam=self.exam, text="Manual lock listener?", order=1)
+        ExamQuestionOption.objects.create(question=question, text="Yes", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="No", is_correct=False)
+        ExamAnswer.objects.create(attempt=self.attempt, question=question)
+        _login_with_org(self.client, self.student, self.org)
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.exam.slug, self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "exam_supervision.js")
+        self.assertContains(response, "supervised: false")
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # Tenant Isolation: Null Organization Edge-Case Tests
