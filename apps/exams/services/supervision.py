@@ -276,6 +276,46 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     return True
 
 
+def teacher_lock_attempt(attempt, teacher):
+    """
+    Teacher temporarily locks a supervised attempt.
+
+    The student's screen is locked (frozen) but the exam is NOT submitted.
+    The teacher can later resume or permanently remove the student.
+
+    Returns True on success, raises ValueError on invalid state.
+    """
+    if attempt.is_finished:
+        raise ValueError("Attempt is already finished.")
+
+    if attempt.supervision_status == "locked":
+        raise ValueError("Attempt is already locked.")
+
+    old_status = attempt.supervision_status
+    attempt.supervision_status = "locked"
+    attempt.supervision_locked_at = timezone.now()
+    attempt.save(update_fields=["supervision_status", "supervision_locked_at"])
+
+    SupervisionIncident.objects.create(
+        organization=attempt.exam.organization,
+        exam=attempt.exam,
+        attempt=attempt,
+        student=attempt.user,
+        event_type="auto_locked",
+        severity="high",
+        metadata={
+            "teacher_id": teacher.id,
+            "teacher_username": teacher.username,
+            "previous_status": old_status,
+            "reason": "teacher_temporary_lock",
+        },
+        violation_count_at_time=attempt.supervision_violation_count,
+        teacher_action="teacher_temporary_lock",
+    )
+
+    return True
+
+
 def teacher_stop_attempt(attempt, teacher):
     """
     Teacher force-stops a supervised attempt, submitting it immediately.
@@ -682,9 +722,13 @@ def get_attempt_live_snapshot(attempt):
     answer_rows = []
     for ans in answers:
         selected = [opt.text for opt in ans.selected_options.all()] if hasattr(ans, "selected_options") else []
+        question_type = ""
+        if ans.question:
+            question_type = getattr(ans.question, "question_type", "") or ""
         answer_rows.append(
             {
                 "question_text": (ans.question.text or "")[:300] if ans.question else "",
+                "question_type": question_type,
                 "selected_options": selected,
                 "text_answer": (ans.text_answer or "")[:1000],
                 "has_paint": bool(getattr(ans, "has_paint", False)),
@@ -730,6 +774,7 @@ def get_attempt_live_snapshot(attempt):
         "is_finished": attempt.is_finished,
         "status": attempt.status,
         "exam_title": attempt.exam.title,
+        "exam_type": getattr(attempt.exam, "exam_type", "") or "",
         "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
         "finished_at": attempt.finished_at.isoformat() if attempt.finished_at else None,
         "answers": answer_rows,

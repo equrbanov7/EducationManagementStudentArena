@@ -188,6 +188,11 @@ urlpatterns = [
         name="supervision_resume",
     ),
     path(
+        "supervision/api/lock/<int:attempt_id>/",
+        views.teacher_lock_api,
+        name="supervision_lock",
+    ),
+    path(
         "supervision/api/stop/<int:attempt_id>/",
         views.teacher_stop_api,
         name="supervision_stop",

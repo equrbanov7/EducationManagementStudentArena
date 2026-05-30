@@ -7,6 +7,7 @@
     var POLL_URL = wrap.getAttribute("data-poll-url");
     var SNAPSHOT_BASE = wrap.getAttribute("data-snapshot-base");
     var RESUME_BASE = wrap.getAttribute("data-resume-base");
+    var LOCK_BASE = wrap.getAttribute("data-lock-base");
     var STOP_BASE = wrap.getAttribute("data-stop-base");
     var POLL_INTERVAL = 8000;
 
@@ -131,6 +132,30 @@
         }).join("");
     }
 
+    /* ---------- Blocked students list ---------- */
+    function renderBlocked(d) {
+        var list = (d.students || []).filter(function (s) {
+            return s.supervision_status === "locked" || s.supervision_status === "removed";
+        }).filter(function (s) { return !s.is_finished; });
+        $("blockedBadge").textContent = list.length;
+        var el = $("blockedList");
+        if (!list.length) {
+            el.innerHTML = '<div class="side-empty"><i class="fas fa-shield-alt" style="color:#16a34a"></i> Bloklanmış tələbə yoxdur.</div>';
+            return;
+        }
+        el.innerHTML = list.map(function (s) {
+            var statusLabel = s.supervision_status === "locked" ? "Müvəqqəti bloklu" : "Çıxarılıb";
+            return '<div class="side-item">' +
+                '<div class="avatar" style="background:#fee2e2;color:#b91c1c;">' + esc(initials(s.name)).toUpperCase() + '</div>' +
+                '<div class="si-body"><div class="si-name">' + esc(s.name) + '</div>' +
+                '<div class="si-meta">' + statusLabel + ' · ' + s.violation_count + ' pozuntu</div></div>' +
+                '<div class="blocked-actions">' +
+                '<button type="button" class="btn-sm-action btn-sm-resume" data-blocked-resume="' + s.attempt_id + '" title="Bərpa et"><i class="fas fa-play"></i></button>' +
+                '<button type="button" class="btn-sm-action btn-sm-stop" data-blocked-stop="' + s.attempt_id + '" title="İmtahandan uzaqlaşdır"><i class="fas fa-ban"></i></button>' +
+                '</div></div>';
+        }).join("");
+    }
+
     /* ---------- Incident feed ---------- */
     function renderFeed(d) {
         var inc = d.recent_incidents || [];
@@ -209,6 +234,7 @@
         state = d;
         renderStats(d);
         renderMap(d);
+        renderBlocked(d);
         renderNotEntered(d);
         renderFeed(d);
         renderStatusChart(d);
@@ -280,18 +306,26 @@
             scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + sLabel + '</div></div>';
         }
 
-        var answersHtml = (d.answers && d.answers.length) ? d.answers.map(function (a) {
+        var answersHtml = (d.answers && d.answers.length) ? d.answers.map(function (a, idx) {
             var ansBody = "";
+            var typeLabel = "";
+            if (a.question_type === "multiple_choice" || a.question_type === "single_choice") {
+                typeLabel = '<span class="ans-type-badge type-test">Test</span>';
+            } else if (a.question_type === "open_ended" || a.question_type === "short_answer") {
+                typeLabel = '<span class="ans-type-badge type-written">Yazılı</span>';
+            } else if (a.question_type === "paint" || a.has_paint) {
+                typeLabel = '<span class="ans-type-badge type-paint">Çəkim</span>';
+            }
             if (a.selected_options && a.selected_options.length) {
-                ansBody = a.selected_options.map(function (o) { return '<span class="pill">' + esc(o) + '</span>'; }).join("");
+                ansBody = '<div class="ans-options">' + a.selected_options.map(function (o) { return '<div class="ans-option-item"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;"></i> ' + esc(o) + '</div>'; }).join("") + '</div>';
             } else if (a.text_answer) {
-                ansBody = esc(a.text_answer);
+                ansBody = '<div class="ans-text-block">' + esc(a.text_answer) + '</div>';
             } else if (a.has_paint) {
                 ansBody = '<span class="pill"><i class="fas fa-paint-brush"></i> Çəkim cavabı</span>';
             } else {
                 ansBody = '<span class="ans-empty">Hələ cavab yoxdur</span>';
             }
-            return '<div class="ans-item"><div class="ans-q">' + esc(a.question_text || "Sual") + '</div><div class="ans-a">' + ansBody + '</div></div>';
+            return '<div class="ans-item"><div class="ans-q"><span class="ans-num">' + (idx + 1) + '.</span> ' + esc(a.question_text || "Sual") + typeLabel + '</div><div class="ans-a">' + ansBody + '</div></div>';
         }).join("") : '<div class="side-empty">Hələ heç bir suala cavab verilməyib.</div>';
 
         var incHtml = (d.incidents && d.incidents.length) ? d.incidents.map(function (e) {
@@ -318,8 +352,9 @@
         var finished = d.is_finished;
         var canResume = (d.supervision_status === "locked" || d.supervision_status === "removed") && !finished;
         $("modalResumeBtn").style.display = canResume ? "inline-flex" : "none";
-        $("modalPauseBtn").style.display = !finished && d.supervision_status !== "locked" ? "inline-flex" : "none";
+        $("modalPauseBtn").style.display = !finished && d.supervision_status !== "locked" && d.supervision_status !== "removed" ? "inline-flex" : "none";
         $("modalStopBtn").style.display = !finished ? "inline-flex" : "none";
+        $("modalAnswerCount").textContent = d.answered + "/" + d.total_questions + " sual cavablanıb";
     }
     function closeModal() { modal.classList.remove("show"); currentAttempt = null; }
 
@@ -330,6 +365,31 @@
     $("modalClose").addEventListener("click", closeModal);
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+    /* ---------- Confirmation modal ---------- */
+    var confirmOverlay = $("confirmOverlay");
+    var pendingConfirmAction = null;
+
+    function showConfirm(title, message, btnText, btnClass, onConfirm) {
+        $("confirmTitle").textContent = title;
+        $("confirmMessage").textContent = message;
+        var okBtn = $("confirmOk");
+        okBtn.innerHTML = btnText;
+        okBtn.className = "btn-act " + btnClass;
+        pendingConfirmAction = onConfirm;
+        confirmOverlay.classList.add("show");
+    }
+    function hideConfirm() {
+        confirmOverlay.classList.remove("show");
+        pendingConfirmAction = null;
+    }
+    $("confirmClose").addEventListener("click", hideConfirm);
+    $("confirmCancel").addEventListener("click", hideConfirm);
+    confirmOverlay.addEventListener("click", function (e) { if (e.target === confirmOverlay) hideConfirm(); });
+    $("confirmOk").addEventListener("click", function () {
+        if (pendingConfirmAction) pendingConfirmAction();
+        hideConfirm();
+    });
 
     /* ---------- Teacher actions (stop / pause / resume) ---------- */
     function postAction(base, attemptId, body, okMsg) {
@@ -350,18 +410,60 @@
     }
     $("modalStopBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
-        if (!confirm("Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək.")) return;
-        postAction(STOP_BASE, currentAttempt, {}, "İmtahan dayandırıldı");
+        showConfirm(
+            "İmtahandan uzaqlaşdır",
+            "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək.",
+            '<i class="fas fa-ban"></i> Bəli, uzaqlaşdır',
+            "btn-stop2",
+            function () { postAction(STOP_BASE, currentAttempt, {}, "Tələbə imtahandan uzaqlaşdırıldı"); }
+        );
     });
     $("modalPauseBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
-        if (!confirm("Tələbəni müvəqqəti bloklamaq istəyirsiniz? Tələbə geri qayıdana qədər imtahan dayanacaq.")) return;
-        // Temporary block = force-stop the active session (existing supported action).
-        postAction(STOP_BASE, currentAttempt, {}, "Tələbə müvəqqəti bloklandı");
+        showConfirm(
+            "Müvəqqəti blokla",
+            "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz.",
+            '<i class="fas fa-lock"></i> Bəli, blokla',
+            "btn-pause",
+            function () { postAction(LOCK_BASE, currentAttempt, {}, "Tələbə müvəqqəti bloklandı"); }
+        );
     });
     $("modalResumeBtn").addEventListener("click", function () {
         if (!currentAttempt) return;
-        postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: true }, "Tələbə bərpa edildi");
+        showConfirm(
+            "Bərpa et",
+            "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək.",
+            '<i class="fas fa-play"></i> Bəli, bərpa et',
+            "btn-resume2",
+            function () { postAction(RESUME_BASE, currentAttempt, { grant_extra_chance: true }, "Tələbə bərpa edildi"); }
+        );
+    });
+
+    /* ---------- Blocked panel actions ---------- */
+    document.addEventListener("click", function (e) {
+        var resumeBtn = e.target.closest("[data-blocked-resume]");
+        if (resumeBtn) {
+            var aid = resumeBtn.getAttribute("data-blocked-resume");
+            showConfirm(
+                "Bərpa et",
+                "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?",
+                '<i class="fas fa-play"></i> Bəli, bərpa et',
+                "btn-resume2",
+                function () { postAction(RESUME_BASE, aid, { grant_extra_chance: true }, "Tələbə bərpa edildi"); }
+            );
+            return;
+        }
+        var stopBtn = e.target.closest("[data-blocked-stop]");
+        if (stopBtn) {
+            var aid2 = stopBtn.getAttribute("data-blocked-stop");
+            showConfirm(
+                "İmtahandan uzaqlaşdır",
+                "Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri alına bilməz.",
+                '<i class="fas fa-ban"></i> Bəli, uzaqlaşdır',
+                "btn-stop2",
+                function () { postAction(STOP_BASE, aid2, {}, "Tələbə imtahandan uzaqlaşdırıldı"); }
+            );
+        }
     });
 
     /* ---------- Toast ---------- */
