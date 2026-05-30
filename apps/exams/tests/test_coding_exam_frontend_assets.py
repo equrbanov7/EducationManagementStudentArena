@@ -13,6 +13,7 @@ from django.conf import settings
 from django.test import SimpleTestCase
 
 JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "coding_exam.js"
+SUPERVISION_JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "exam_supervision.js"
 
 
 class CodingExamJavaScriptAssetTests(SimpleTestCase):
@@ -72,3 +73,21 @@ class CodingExamJavaScriptAssetTests(SimpleTestCase):
         # any other way and silently regressing them would hurt UX badly.
         for binding in ('"Ctrl-Enter"', '"Cmd-Enter"', '"Ctrl-Space"', '"Ctrl-/"'):
             self.assertIn(binding, self.source, f"Missing shortcut binding: {binding}")
+
+    def test_redirects_stop_supervision_before_navigation(self):
+        self.assertIn("function navigateAway", self.source)
+        self.assertIn("window.EXAM_SUPERVISION_NAVIGATING = true", self.source)
+        self.assertIn("window.ExamSupervision.destroy", self.source)
+
+
+class ExamSupervisionJavaScriptAssetTests(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.source = SUPERVISION_JS_ASSET.read_text(encoding="utf-8")
+
+    def test_result_navigation_is_idempotent(self):
+        self.assertIn("_navigatingToResult", self.source)
+        self.assertIn("window.EXAM_SUPERVISION_NAVIGATING === true", self.source)
+        self.assertIn("window.EXAM_SUPERVISION_NAVIGATING = true", self.source)
+        self.assertIn("this.destroy();", self.source)
