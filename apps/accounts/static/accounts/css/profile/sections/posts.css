@@ -226,7 +226,8 @@
     font-size: 0.9rem;
 }
 
-.profile-posts-card .modal-overlay .form-group {
+.profile-posts-card .modal-overlay .form-group,
+.profile-post-edit-modal .form-group {
     margin-bottom: 1rem;
 }
 
@@ -234,7 +235,8 @@
     margin-bottom: 1rem;
 }
 
-.profile-posts-card .modal-overlay .form-group label {
+.profile-posts-card .modal-overlay .form-group label,
+.profile-post-edit-modal .form-group label {
     display: block;
     font-weight: 600;
     color: #334155;
@@ -250,7 +252,8 @@
     font-size: 0.92rem;
 }
 
-.profile-posts-card .modal-overlay .form-control {
+.profile-posts-card .modal-overlay .form-control,
+.profile-post-edit-modal .form-control {
     width: 100%;
     padding: 0.625rem 0.8rem;
     border: 1px solid #cbd5e1;
@@ -272,7 +275,8 @@
     background-color: #ffffff;
 }
 
-.profile-posts-card .modal-overlay .form-control:focus {
+.profile-posts-card .modal-overlay .form-control:focus,
+.profile-post-edit-modal .form-control:focus {
     border-color: #2563eb;
     outline: none;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
@@ -344,7 +348,8 @@
     line-height: 1.45;
 }
 
-.profile-posts-card .modal-overlay textarea.form-control {
+.profile-posts-card .modal-overlay textarea.form-control,
+.profile-post-edit-modal textarea.form-control {
     resize: vertical;
 }
 

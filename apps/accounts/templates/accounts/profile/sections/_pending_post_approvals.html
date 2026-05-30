@@ -207,6 +207,7 @@
                                               aria-required="true"
                                               required></textarea>
                                     <div class="pending-post-buttons">
+                                        {% include "accounts/profile/sections/_pending_post_edit_button.html" with post=item.post %}
                                         <button type="button"
                                                 class="btn btn-outline-danger btn-sm js-post-action-btn"
                                                 data-action="delete"
@@ -242,6 +243,7 @@
                                               aria-required="true"
                                               required></textarea>
                                     <div class="pending-post-buttons">
+                                        {% include "accounts/profile/sections/_pending_post_edit_button.html" with post=item.post %}
                                         <button type="button"
                                                 class="btn btn-outline-warning btn-sm js-post-action-btn"
                                                 data-action="deactivate"
@@ -275,6 +277,7 @@
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     <input type="hidden" name="action" value="reactivate">
                                     <div class="pending-post-buttons">
+                                        {% include "accounts/profile/sections/_pending_post_edit_button.html" with post=item.post %}
                                         <button type="button"
                                                 class="btn btn-outline-success btn-sm js-post-action-btn"
                                                 data-action="reactivate"
