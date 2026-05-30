@@ -98,6 +98,15 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         null=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_locked_at"),
     )
+    # True when the *teacher* manually paused the attempt ("Müvəqqəti blokla"),
+    # as opposed to an automatic lock triggered by exceeding the violation
+    # limit.  A manual lock is the teacher's own decision — it must always be
+    # resumable regardless of the exam's recovery_policy, and (unlike an
+    # auto-lock) it does NOT start the auto-finish countdown.
+    supervision_manual_lock = models.BooleanField(
+        default=False,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_manual_lock"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.attempt.meta", "singular")
@@ -162,6 +171,10 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         the student has so far.  Returns None when no window applies.
         """
         if self.supervision_status != "locked" or not self.supervision_locked_at:
+            return None
+        # A teacher's manual pause is open-ended: the teacher decides when to
+        # resume, so it must never auto-finish the attempt.
+        if self.supervision_manual_lock:
             return None
         config = getattr(self.exam, "supervision_config", None)
         if config is None or not config.enabled:
