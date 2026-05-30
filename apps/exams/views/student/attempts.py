@@ -92,7 +92,9 @@ def take_exam(request, slug, attempt_id):
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
 
-    attempt.expire_if_time_limit_reached()
+    is_manual_supervision_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
+    if not is_manual_supervision_lock:
+        attempt.expire_if_time_limit_reached()
     # If the resume window already lapsed before the student got here, finish now.
     attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
