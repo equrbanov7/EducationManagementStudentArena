@@ -49,6 +49,9 @@ from .teacher.results import (
 )
 from .teacher.statistics import teacher_exam_statistics
 from .teacher.supervision import (
+    attempt_live_snapshot_api,
+    exam_live_monitor,
+    exam_live_monitor_poll_api,
     log_incident_api,
     supervision_detail,
     supervision_monitor,
@@ -99,6 +102,9 @@ __all__ = [
     # Teacher - Supervision
     "supervision_monitor",
     "supervision_detail",
+    "exam_live_monitor",
+    "exam_live_monitor_poll_api",
+    "attempt_live_snapshot_api",
     "teacher_resume_api",
     "teacher_stop_api",
     "log_incident_api",
