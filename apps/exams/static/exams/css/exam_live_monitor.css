@@ -151,7 +151,27 @@
 .badge-resumed { background: #dbeafe; color: #1d4ed8; }
 
 /* Modal */
-.lv-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9998; justify-content: center; align-items: center; padding: 1.5rem 1rem; backdrop-filter: blur(2px); }
+/* The overlays are rendered OUTSIDE .live-wrap (siblings in the DOM), so the
+   palette CSS variables defined on .live-wrap don't cascade into them. Redeclare
+   them here so buttons like .btn-stop2 (background: var(--lv-danger)) resolve
+   correctly instead of falling back to a transparent background with white text. */
+.lv-overlay {
+    --lv-surface: #ffffff;
+    --lv-border: #e8ecf1;
+    --lv-border-strong: #dce2ea;
+    --lv-text: #1f2733;
+    --lv-muted: #6b7686;
+    --lv-faint: #99a2af;
+    --lv-primary: #2563eb;
+    --lv-primary-dark: #1d4ed8;
+    --lv-danger: #dc3545;
+    --lv-warning: #f59e0b;
+    --lv-success: #16a34a;
+    --lv-info: #0ea5e9;
+    --lv-radius: 16px;
+    --lv-radius-sm: 10px;
+    display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55); z-index: 9998; justify-content: center; align-items: center; padding: 1.5rem 1rem; backdrop-filter: blur(2px);
+}
 .lv-overlay.show { display: flex; }
 .lv-modal { background: #fff; border-radius: var(--lv-radius); width: 100%; max-width: 720px; max-height: calc(100vh - 3rem); box-shadow: 0 24px 64px rgba(15,23,42,0.3); overflow: hidden; display: flex; flex-direction: column; }
 .lv-modal-head { flex-shrink: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.4rem; border-bottom: 1px solid var(--lv-border); }
@@ -176,12 +196,41 @@
 .ans-item .ans-a .pill { display: inline-block; background: #eef2f7; border-radius: 6px; padding: 0.1rem 0.5rem; margin: 0.1rem 0.2rem 0.1rem 0; font-size: 0.8rem; }
 .ans-item .ans-empty { font-size: 0.82rem; color: var(--lv-faint); font-style: italic; }
 .ans-options { display: flex; flex-direction: column; gap: 0.3rem; }
-.ans-option-item { display: flex; align-items: center; gap: 0.4rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
-.ans-text-block { background: #f8fafc; border: 1px solid var(--lv-border); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.84rem; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow-y: auto; }
+.ans-option-item { display: flex; align-items: center; gap: 0.4rem; border-radius: 6px; padding: 0.35rem 0.6rem; font-size: 0.82rem; }
+.ans-option-item.opt-correct { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.ans-option-item.opt-chosen { background: #eff6ff; border: 1px solid #bfdbfe; }
+.ans-correct-hint { margin-top: 0.4rem; font-size: 0.78rem; color: var(--lv-success); display: flex; align-items: center; gap: 0.35rem; }
+.ans-files { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.ans-media { margin: 0.5rem 0; }
+.ans-media img, .ans-media video { max-width: 100%; max-height: 320px; border-radius: 8px; border: 1px solid var(--lv-border); display: block; }
+.ans-run-meta { margin-top: 0.45rem; font-size: 0.76rem; color: var(--lv-muted); display: flex; align-items: center; gap: 0.35rem; }
+.ans-text-block { background: #f8fafc; border: 1px solid var(--lv-border); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.84rem; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow-y: auto; }
 .ans-type-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.12rem 0.45rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
 .ans-type-badge.type-test { background: #dbeafe; color: #1d4ed8; }
 .ans-type-badge.type-written { background: #fef3c7; color: #92400e; }
 .ans-type-badge.type-paint { background: #ede9fe; color: #6d28d9; }
+.ans-type-badge.type-coding { background: #e0f2fe; color: #0369a1; }
+
+/* Answered / pending state */
+.ans-item.is-pending { opacity: 0.92; border-style: dashed; }
+.ans-item .ans-q { display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem; }
+.ans-item .ans-q .ans-q-text { flex: 1 1 auto; min-width: 0; }
+.ans-status { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 0.12rem 0.45rem; border-radius: 999px; }
+.ans-status.answered { background: #dcfce7; color: #15803d; }
+.ans-status.pending { background: #f1f5f9; color: #94a3b8; }
+.ans-status.pending .fa-circle { font-size: 0.5rem; }
+
+/* Practical code files */
+.code-files { display: flex; flex-direction: column; gap: 0.45rem; }
+.code-file { border: 1px solid var(--lv-border-strong); border-radius: 8px; overflow: hidden; background: #0f172a; }
+.code-file-head { width: 100%; display: flex; align-items: center; gap: 0.5rem; background: #1e293b; color: #e2e8f0; border: none; padding: 0.5rem 0.7rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: left; }
+.code-file-head .cf-name { flex: 1 1 auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.code-file-head .cf-meta { font-size: 0.68rem; color: #94a3b8; font-weight: 500; }
+.code-file-head .cf-caret { transition: transform 0.18s ease; font-size: 0.7rem; color: #94a3b8; }
+.code-file.open .code-file-head .cf-caret { transform: rotate(180deg); }
+.code-file-body { display: none; margin: 0; padding: 0.75rem 0.9rem; background: #0f172a; color: #e2e8f0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; line-height: 1.5; max-height: 340px; overflow: auto; white-space: pre; }
+.code-file.open .code-file-body { display: block; }
+.code-file-body code { white-space: pre; }
 .inc-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--lv-border); font-size: 0.84rem; }
 .inc-item:last-child { border-bottom: none; }
 .inc-time { margin-left: auto; font-size: 0.76rem; color: var(--lv-faint); }
