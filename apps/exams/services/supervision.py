@@ -11,6 +11,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
+from apps.exams.services.randomizer import build_shuffled_options
 
 
 def _notify_student_via_ws(attempt_id: int, event_data: dict) -> None:
@@ -324,7 +325,7 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
 
 def teacher_lock_attempt(attempt, teacher):
     """
-    Teacher temporarily locks a supervised attempt.
+    Teacher temporarily locks an attempt.
 
     The student's screen is locked (frozen) but the exam is NOT submitted.
     The teacher can later resume or permanently remove the student.
@@ -470,9 +471,6 @@ def sweep_expired_resume_windows(queryset=None):
 def get_attempt_supervision_status(attempt):
     """Get current supervision status and details for an attempt."""
     config = get_supervision_config(attempt.exam)
-    if config is None:
-        return {"supervised": False}
-
     # Resume window countdown: how long the student still has to actually
     # return after a resume before the backend auto-finishes the attempt.
     resume_deadline = attempt.supervision_resume_deadline
@@ -480,17 +478,13 @@ def get_attempt_supervision_status(attempt):
     if resume_deadline is not None:
         resume_seconds_remaining = max(0, int((resume_deadline - timezone.now()).total_seconds()))
 
-    return {
-        "supervised": True,
-        "supervision_status": attempt.supervision_status,
-        "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
-        "violation_count": attempt.supervision_violation_count,
-        "max_violations": config.get_max_total_violations(),
-        "extra_chances_used": attempt.supervision_extra_chances,
-        "resume_window_seconds": config.resume_window_seconds,
-        "resume_seconds_remaining": resume_seconds_remaining,
-        "resume_deadline": resume_deadline.isoformat() if resume_deadline else None,
-        "config": {
+    config_payload = {}
+    max_violations = 3
+    resume_window_seconds = 0
+    if config is not None:
+        max_violations = config.get_max_total_violations()
+        resume_window_seconds = config.resume_window_seconds
+        config_payload = {
             "force_fullscreen": config.force_fullscreen,
             "grace_period_seconds": config.grace_period_seconds,
             "detect_tab_switch": config.detect_tab_switch,
@@ -500,7 +494,19 @@ def get_attempt_supervision_status(attempt):
             "restrict_keyboard_shortcuts": config.restrict_keyboard_shortcuts,
             "violation_action": config.violation_action,
             "recovery_policy": config.recovery_policy,
-        },
+        }
+
+    return {
+        "supervised": config is not None,
+        "supervision_status": attempt.supervision_status,
+        "manual_lock": bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked"),
+        "violation_count": attempt.supervision_violation_count,
+        "max_violations": max_violations,
+        "extra_chances_used": attempt.supervision_extra_chances,
+        "resume_window_seconds": resume_window_seconds,
+        "resume_seconds_remaining": resume_seconds_remaining,
+        "resume_deadline": resume_deadline.isoformat() if resume_deadline else None,
+        "config": config_payload,
     }
 
 
@@ -819,47 +825,75 @@ def _written_test_snapshot_answers(attempt, exam_type):
     """
     Build per-question answer rows for test / written exams.
 
-    Walks every question on the exam in order (so unanswered questions are
-    visible too), pulling the student's autosaved ExamAnswer where present.
-    Correct/selected-option flags are included because this view is teacher-only
-    (read-only monitoring); they are never sent to a student surface.
+    Walks the answers that were created for this attempt, in creation order.
+    That creation order is the student's assigned question sequence; it may be
+    different from the exam bank order when random question distribution is on.
+    Correct/selected-option flags are included because this view is teacher-only.
 
     Returns ``(rows, answered_count)``.
     """
-    # Map of question_id → answer for O(1) lookup, with options prefetched.
-    answers_by_q = {
-        a.question_id: a
-        for a in attempt.answers.select_related("question").prefetch_related("selected_options", "files").all()
-    }
-
-    questions = attempt.exam.questions.filter(is_active=True).prefetch_related("options").order_by("order", "id")
+    answers = list(
+        attempt.answers.select_related("question", "question__exam", "question__block")
+        .prefetch_related("question__options", "selected_options", "files")
+        .order_by("id")
+    )
 
     rows = []
     answered_count = 0
-    for q in questions:
-        ans = answers_by_q.get(q.id)
+    for ans in answers:
+        q = ans.question
         kind = _question_kind(q, exam_type)
 
         selected = []
+        all_options = []
         text_answer = ""
         has_paint = False
-        is_answered = False
         files = []
-        if ans is not None:
+
+        selected_options = list(ans.selected_options.all())
+        selected_option_ids = {opt.id for opt in selected_options}
+        if kind == "test":
+            option_by_id = {opt.id: opt for opt in q.options.all()}
+            option_rows = build_shuffled_options(attempt.id, q)
+            for option_row in option_rows:
+                opt = option_by_id.get(option_row["id"])
+                if opt is None:
+                    continue
+                packed = {
+                    "id": opt.id,
+                    "text": option_row["text"],
+                    "label": option_row["label"],
+                    "is_correct": opt.is_correct,
+                    "is_selected": opt.id in selected_option_ids,
+                }
+                all_options.append(packed)
+                if packed["is_selected"]:
+                    selected.append(
+                        {
+                            "id": packed["id"],
+                            "text": packed["text"],
+                            "label": packed["label"],
+                            "is_correct": packed["is_correct"],
+                        }
+                    )
+        else:
             selected = [
-                {"text": opt.text, "label": opt.label, "is_correct": opt.is_correct}
-                for opt in ans.selected_options.all()
+                {"id": opt.id, "text": opt.text, "label": opt.label, "is_correct": opt.is_correct}
+                for opt in selected_options
             ]
-            text_answer = (ans.text_answer or "")[:4000]
-            has_paint = bool(getattr(ans, "has_paint", False))
-            files = [f.filename() for f in ans.files.all()]
-            is_answered = bool(selected or text_answer.strip() or has_paint or files)
+
+        text_answer = (ans.text_answer or "")[:4000]
+        has_paint = bool(getattr(ans, "has_paint", False))
+        files = [f.filename() for f in ans.files.all()]
+        is_answered = bool(selected or text_answer.strip() or has_paint or files)
         if is_answered:
             answered_count += 1
 
         # The set of correct option texts lets the teacher see at a glance what
         # the right answer was for a test item.
-        correct_options = [{"text": opt.text, "label": opt.label} for opt in q.options.all() if opt.is_correct]
+        correct_options = [
+            {"id": opt["id"], "text": opt["text"], "label": opt["label"]} for opt in all_options if opt["is_correct"]
+        ]
 
         rows.append(
             {
@@ -867,15 +901,16 @@ def _written_test_snapshot_answers(attempt, exam_type):
                 "question_text": (q.text or "")[:600],
                 "image_url": _media_url(getattr(q, "image", None)),
                 "video_url": _media_url(getattr(q, "video", None)),
+                "options": all_options,
                 "selected_options": selected,
                 "correct_options": correct_options,
                 "text_answer": text_answer,
                 "has_paint": has_paint,
-                "paint_image_url": _media_url(getattr(ans, "paint_image", None)) if ans is not None else None,
+                "paint_image_url": _media_url(getattr(ans, "paint_image", None)),
                 "files": files,
-                "is_correct": bool(ans.is_correct) if ans is not None else None,
+                "is_correct": bool(ans.is_correct),
                 "is_answered": is_answered,
-                "updated_at": ans.updated_at.isoformat() if (ans and ans.updated_at) else None,
+                "updated_at": ans.updated_at.isoformat() if ans.updated_at else None,
             }
         )
 
@@ -978,18 +1013,18 @@ def get_attempt_live_snapshot(attempt):
     by the caller (exam already tenant/permission scoped).
     """
     exam_type = getattr(attempt.exam, "exam_type", "") or ""
-    total_questions = get_exam_question_total(attempt.exam)
-
     if exam_type == "coding":
         # Practical / coding exams store the student's work in CodingSubmission
         # (one per coding question), NOT in attempt.answers.  We surface the
         # latest saved files per question so the teacher sees exactly what the
         # student has typed live, file by file.
         answer_rows, answered_count = _coding_snapshot_answers(attempt)
+        total_questions = len(answer_rows) or get_exam_question_total(attempt.exam)
     else:
         # Test / written exams keep their live answers in attempt.answers,
         # autosaved per question while the student works.
         answer_rows, answered_count = _written_test_snapshot_answers(attempt, exam_type)
+        total_questions = len(answer_rows) or get_exam_question_total(attempt.exam)
 
     incidents = SupervisionIncident.objects.filter(attempt=attempt).order_by("-timestamp")[:50]
     incident_rows = [

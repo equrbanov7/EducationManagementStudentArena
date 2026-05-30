@@ -26,6 +26,7 @@
         isFullscreen: false,
         capabilities: null,
         requestedConfig: null,
+        isSupervised: true,
         _fullscreenDisabledByCapability: false,
         _acknowledged: false,
         _initialized: false,
@@ -50,6 +51,7 @@
             this.violationCount = opts.violationCount || 0;
             this.maxViolations = opts.maxViolations || 3;
             this.gracePeriodSeconds = this.config.grace_period_seconds || 15;
+            this.isSupervised = opts.supervised !== false;
             this._initialStatus = opts.supervisionStatus || "active";
             this.isActive = true;
             this._acknowledged = false;
@@ -57,11 +59,17 @@
             this.capabilities = this._detectCapabilities();
             this._applyCapabilityFallbacks();
 
-            this._createWarningModal();
-            this._createSupervisionBadge();
+            if (this.isSupervised) {
+                this._createWarningModal();
+                this._createSupervisionBadge();
+            }
 
             // Connect WebSocket for real-time teacher action notifications
             this._connectWebSocket();
+            // Start the resilient status poll immediately as well. If the
+            // teacher pauses the student while the acknowledgment modal is
+            // still open, the manual-lock modal should still appear.
+            this._startBackgroundStatusWatch();
 
             // If attempt is already locked/removed, show the right overlay
             // immediately. We ask the status API whether this was a manual
@@ -86,6 +94,10 @@
                         self._onLimitExceeded();
                     }
                 }, 1500);
+                return;
+            }
+
+            if (!this.isSupervised) {
                 return;
             }
 
@@ -351,9 +363,9 @@
         // available, but in dev (InMemoryChannelLayer) or behind a proxy that
         // drops WS the socket may never connect — so this poll guarantees the
         // student's screen still locks / submits without a manual refresh.
-        // 3s feels effectively synchronous to a watching teacher while staying
-        // cheap enough for a full classroom.
-        _bgStatusInterval: 3000,
+        // WebSocket delivers teacher actions instantly. Keep the fallback poll
+        // at 1s so the lock still feels immediate when WS is unavailable.
+        _bgStatusInterval: 1000,
         _startBackgroundStatusWatch: function () {
             if (this._bgStatusWatch) return;
             var self = this;
@@ -364,7 +376,7 @@
                     return;
                 }
                 self._checkSupervisionStatus(function (data) {
-                    if (!data || !data.supervised) return;
+                    if (!data) return;
                     if (data.is_finished) {
                         // Teacher removed / auto-finished the attempt → leave the
                         // exam immediately (result page) instead of waiting.
@@ -897,9 +909,9 @@
             }
 
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var title = i18n.teacherLockTitle || "İmtahan müəllim tərəfindən dayandırıldı";
+            var title = i18n.teacherLockTitle || "Müəllim tərəfindən müvəqqəti bloklandınız";
             var msg = i18n.teacherLockMsg ||
-                "Müəlliminiz imtahanınızı müvəqqəti olaraq dayandırdı. Ekranınız kilidlənib.";
+                "Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.";
             var waiting = i18n.teacherLockWaiting ||
                 "Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni bağlamayın.";
 
@@ -951,7 +963,7 @@
                         ExamSupervision._leaveToResult();
                     }
                 });
-            }, 3000);
+            }, 1000);
         },
 
         _onLimitExceeded: function () {
@@ -1049,7 +1061,7 @@
                         ExamSupervision._leaveToResult();
                     }
                 });
-            }, 3000);
+            }, 1000);
         },
 
         // Format seconds as M:SS for the resume countdown.
@@ -1186,7 +1198,11 @@
                 .then(
                     function (data) {
                         if (data.supervision_status === "locked" || data.supervision_status === "removed") {
-                            ExamSupervision._onLimitExceeded();
+                            if (data.manual_lock) {
+                                ExamSupervision._showTeacherLockOverlay();
+                            } else {
+                                ExamSupervision._onLimitExceeded();
+                            }
                         }
                         if (data.violation_count !== undefined) {
                             ExamSupervision.violationCount = data.violation_count;
