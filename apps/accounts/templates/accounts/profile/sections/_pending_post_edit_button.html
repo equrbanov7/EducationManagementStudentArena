@@ -1,0 +1,22 @@
+<button type="button"
+        class="btn btn-outline-primary btn-sm js-edit-post pending-post-edit-btn"
+        data-post-id="{{ post.pk }}"
+        data-edit-url="{% url 'post_edit_ajax' post.pk %}"
+        data-title="{{ post.title|escape }}"
+        data-content="{{ post.content|escape }}"
+        data-category-root="{{ post.root_category.id|default_if_none:'' }}"
+        data-subcategory="{{ post.selected_subcategory.id|default_if_none:'' }}"
+        data-excerpt="{{ post.excerpt|default_if_none:''|escape }}"
+        data-image-url="{{ post.image_url|default_if_none:''|escape }}"
+        data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
+        data-is-published="{{ post.is_published|yesno:'true,false' }}"
+        data-requires-approval="{{ post.requires_approval|yesno:'true,false' }}"
+        data-approval-status="{{ post.approval_status }}"
+        data-approval-feedback="{{ post.approval_feedback|default_if_none:''|escape }}"
+        data-slug="{{ post.slug|escape }}"
+        data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
+        data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
+        data-moderator-edit="true"
+        title="Postu redaktə et">
+    <i class="fas fa-edit"></i> Redaktə et
+</button>
