@@ -24,9 +24,12 @@ from channels.security.websocket import AllowedHostsOriginValidator
 django_asgi_app = get_asgi_application()
 
 # Import routing only after Django app registry is ready.
-from apps.live_exam.routing import websocket_urlpatterns
+from apps.exams.routing import websocket_urlpatterns as exams_ws_urlpatterns
+from apps.live_exam.routing import websocket_urlpatterns as live_exam_ws_urlpatterns
 
-websocket_application = AllowedHostsOriginValidator(AuthMiddlewareStack(URLRouter(websocket_urlpatterns)))
+all_websocket_urlpatterns = live_exam_ws_urlpatterns + exams_ws_urlpatterns
+
+websocket_application = AllowedHostsOriginValidator(AuthMiddlewareStack(URLRouter(all_websocket_urlpatterns)))
 
 application = ProtocolTypeRouter(
     {

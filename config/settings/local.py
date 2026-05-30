@@ -123,6 +123,19 @@ MIDDLEWARE = list(MIDDLEWARE)
 CHANNEL_LAYERS = deepcopy(CHANNEL_LAYERS)
 CACHES = deepcopy(CACHES)
 
+# Dev-only: the base CSP whitelists the supervision WebSocket only for
+# ws://{127.0.0.1,localhost,0.0.0.0}:8000. When the dev server runs on a
+# different port (or the page is opened via another local host) the browser
+# blocks the WebSocket handshake, silently killing real-time teacher → student
+# lock/stop delivery. Broaden connect-src for ws/wss in local development only;
+# production keeps the strict base policy.
+CONTENT_SECURITY_POLICY = deepcopy(CONTENT_SECURITY_POLICY)
+_csp_connect = list(CONTENT_SECURITY_POLICY["DIRECTIVES"].get("connect-src", []))
+for _scheme in ("ws:", "wss:"):
+    if _scheme not in _csp_connect:
+        _csp_connect.append(_scheme)
+CONTENT_SECURITY_POLICY["DIRECTIVES"]["connect-src"] = _csp_connect
+
 
 def _split_csv_env(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]

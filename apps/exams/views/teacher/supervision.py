@@ -24,6 +24,7 @@ from apps.exams.services.supervision import (
     get_exam_session_dates,
     get_supervision_monitor_data,
     log_supervision_incident,
+    teacher_lock_attempt,
     teacher_resume_attempt,
     teacher_stop_attempt,
 )
@@ -314,14 +315,20 @@ def teacher_resume_api(request, attempt_id):
         exam__in=_supervision_exam_queryset(request, org),
     )
 
-    attempt.expire_if_time_limit_reached()
+    # A manual teacher pause must stay resumable regardless of the exam clock —
+    # do NOT auto-expire it here.  Only auto-lock (violation) attempts are
+    # subject to the time-limit / terminated checks before resuming.
+    is_manual_lock = bool(getattr(attempt, "supervision_manual_lock", False))
 
-    # Explicitly block resume for terminated/finished attempts
-    if attempt.is_finished:
-        return JsonResponse(
-            {"error": pgettext("supervision.view.api", "attempt_already_terminated")},
-            status=403,
-        )
+    if not is_manual_lock:
+        attempt.expire_if_time_limit_reached()
+
+        # Explicitly block resume for terminated/finished attempts
+        if attempt.is_finished:
+            return JsonResponse(
+                {"error": pgettext("supervision.view.api", "attempt_already_terminated")},
+                status=403,
+            )
 
     try:
         body = json.loads(request.body)
@@ -332,9 +339,9 @@ def teacher_resume_api(request, attempt_id):
 
     try:
         teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
-    except ValueError:
+    except ValueError as exc:
         return JsonResponse(
-            {"error": pgettext("supervision.view.api", "operation_not_allowed")},
+            {"error": str(exc) or pgettext("supervision.view.api", "operation_not_allowed")},
             status=400,
         )
 
@@ -403,6 +410,56 @@ def teacher_stop_api(request, attempt_id):
             "status": attempt.status,
         },
         reason="teacher_force_stopped_supervision",
+        request=request,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "supervision_status": attempt.supervision_status,
+        }
+    )
+
+
+@login_required
+@require_POST
+def teacher_lock_api(request, attempt_id):
+    """
+    Teacher action to temporarily lock a supervised student attempt.
+    Locks the student's screen without submitting the exam.
+    The teacher can later resume or permanently remove the student.
+    """
+    org = _ensure_organization_context(request)
+    _ensure_teacher(request.user)
+
+    attempt = get_object_or_404(
+        ExamAttempt.objects.select_related("exam"),
+        id=attempt_id,
+        exam__organization=org,
+        exam__in=_supervision_exam_queryset(request, org),
+    )
+
+    try:
+        teacher_lock_attempt(attempt, request.user)
+    except ValueError:
+        return JsonResponse(
+            {"error": pgettext("supervision.view.api", "operation_not_allowed")},
+            status=400,
+        )
+
+    # Audit log
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=org,
+        obj=attempt,
+        new_values={
+            "supervision_status": attempt.supervision_status,
+        },
+        reason="teacher_temporary_lock_supervision",
         request=request,
     )
 

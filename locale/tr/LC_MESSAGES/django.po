@@ -21234,3 +21234,363 @@ msgstr "Sonuçları öğrencilere göster"
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_hide_results"
 msgstr "Sonuçları öğrencilerden gizle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "page_title"
+msgstr "Canlı İzleme"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_monitor"
+msgstr "Gözetim Monitörü"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_live"
+msgstr "Canlı izleme"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "header_subtitle"
+msgstr "Sınav sürecinin canlı izlemesi — yalnızca gözlem, müdahale yok."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_auto_refresh"
+msgstr "Otomatik yenileniyor"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_pause_poll"
+msgstr "Durdur"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_refresh"
+msgstr "Yenile"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_today"
+msgstr "Bugünkü sınav"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_all_sessions"
+msgstr "Tüm oturumlar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_date"
+msgstr "Tarih"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_sessions"
+msgstr "Oturumlar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "select_date_placeholder"
+msgstr "Tarih seç…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_status_dist"
+msgstr "Durum dağılımı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_student_progress"
+msgstr "Öğrenci ilerlemesi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_student_map"
+msgstr "Öğrenci haritası"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_finished"
+msgstr "Bitti"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_in_progress"
+msgstr "Devam ediyor"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_low"
+msgstr "1-2 ihlal"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_mid"
+msgstr "3-5 ihlal"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_high"
+msgstr "6+ ihlal"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_removed"
+msgstr "Çıkarıldı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_not_entered"
+msgstr "Girmedi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_empty"
+msgstr "Bu oturum için öğrenci bulunamadı."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_hint"
+msgstr "Her kare bir öğrencidir. Ayrıntı için tıklayın."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_blocked"
+msgstr "Engellenen öğrenciler"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_not_entered"
+msgstr "Girmeyenler"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_incidents"
+msgstr "Şüpheli olaylar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "modal_student"
+msgstr "Öğrenci"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "loading"
+msgstr "Yükleniyor…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_resume"
+msgstr "Geri yükle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_temp_block"
+msgstr "Geçici olarak engelle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_remove_student"
+msgstr "Sınavdan uzaklaştır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_title"
+msgstr "Onay"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_cancel"
+msgstr "İptal"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_paused"
+msgstr "Duraklatıldı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_continue_poll"
+msgstr "Devam et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_entered"
+msgstr "Giriş yaptı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_in_progress"
+msgstr "Devam ediyor"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_finished"
+msgstr "Teslim etti"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_flagged"
+msgstr "Sorunlu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_students"
+msgstr "öğrenci"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_avg_progress"
+msgstr "Ortalama"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_completed"
+msgstr "Tamamlanmış oturum"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_violations"
+msgstr "ihlal"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_active"
+msgstr "aktif"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_warned"
+msgstr "uyarılmış"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_locked"
+msgstr "kilitli"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_removed"
+msgstr "çıkarılmış"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_resumed"
+msgstr "geri yüklenmiş"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_fullscreen_exited"
+msgstr "Tam ekrandan çıkış"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_tab_switched"
+msgstr "Sekme değiştirildi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_window_blurred"
+msgstr "Pencere odağını kaybetti"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_copy_attempt"
+msgstr "Kopyalama girişimi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_paste_attempt"
+msgstr "Yapıştırma girişimi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_right_click"
+msgstr "Sağ tık girişimi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_keyboard_shortcut"
+msgstr "Klavye kısayolu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_auto_locked"
+msgstr "Otomatik kilitlendi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_temp"
+msgstr "Geçici olarak engelli"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_removed"
+msgstr "Çıkarıldı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_blocked"
+msgstr "Engellenen öğrenci yok."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "all_entered"
+msgstr "Tüm öğrenciler giriş yaptı."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "not_entered_yet"
+msgstr "Henüz giriş yapmadı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_incidents"
+msgstr "Şüpheli olay yok."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "monitor_note"
+msgstr "Bu sadece gözlem modudur — öğrenci engellenmez."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_label"
+msgstr "Cevaplanan"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "remaining_label"
+msgstr "Kalan"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violations_label"
+msgstr "İhlaller"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "current_answers"
+msgstr "Mevcut cevaplar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violation_log"
+msgstr "İhlal günlüğü"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_answers_yet"
+msgstr "Henüz hiçbir soruya cevap verilmedi."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_violations"
+msgstr "İhlal kaydedilmedi."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_title"
+msgstr "Sınavdan uzaklaştır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_msg"
+msgstr "Bu öğrencinin sınavını kalıcı olarak durdurmak istiyor musunuz? Sınav hemen teslim edilecek ve geri alınamaz."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_btn"
+msgstr "Evet, uzaklaştır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_title"
+msgstr "Geçici olarak engelle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_msg"
+msgstr "Öğrencinin ekranı kilitlenecek. Sınav teslim edilmeyecek — sonra geri yükleyebilirsiniz."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_btn"
+msgstr "Evet, engelle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_title"
+msgstr "Geri yükle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_msg"
+msgstr "Öğrencinin sınava devam etmesine izin vermek istiyor musunuz? Ek şans verilecek."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_btn"
+msgstr "Evet, geri yükle"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_blocked"
+msgstr "Öğrenci geçici olarak engellendi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_removed"
+msgstr "Öğrenci sınavdan uzaklaştırıldı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_resumed"
+msgstr "Öğrenci geri yüklendi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_error"
+msgstr "İşlem başarısız"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_connection_error"
+msgstr "Bağlantı hatası"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "teacher_score_label"
+msgstr "Öğretmen puanı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "auto_score_label"
+msgstr "Otomatik puan"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "exam_date_label"
+msgstr "Sınav tarihi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "finished_at_label"
+msgstr "Bitiş"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "questions_answered"
+msgstr "soru cevaplandı"
