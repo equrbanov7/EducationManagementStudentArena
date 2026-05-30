@@ -315,14 +315,20 @@ def teacher_resume_api(request, attempt_id):
         exam__in=_supervision_exam_queryset(request, org),
     )
 
-    attempt.expire_if_time_limit_reached()
+    # A manual teacher pause must stay resumable regardless of the exam clock —
+    # do NOT auto-expire it here.  Only auto-lock (violation) attempts are
+    # subject to the time-limit / terminated checks before resuming.
+    is_manual_lock = bool(getattr(attempt, "supervision_manual_lock", False))
 
-    # Explicitly block resume for terminated/finished attempts
-    if attempt.is_finished:
-        return JsonResponse(
-            {"error": pgettext("supervision.view.api", "attempt_already_terminated")},
-            status=403,
-        )
+    if not is_manual_lock:
+        attempt.expire_if_time_limit_reached()
+
+        # Explicitly block resume for terminated/finished attempts
+        if attempt.is_finished:
+            return JsonResponse(
+                {"error": pgettext("supervision.view.api", "attempt_already_terminated")},
+                status=403,
+            )
 
     try:
         body = json.loads(request.body)
@@ -333,9 +339,9 @@ def teacher_resume_api(request, attempt_id):
 
     try:
         teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
-    except ValueError:
+    except ValueError as exc:
         return JsonResponse(
-            {"error": pgettext("supervision.view.api", "operation_not_allowed")},
+            {"error": str(exc) or pgettext("supervision.view.api", "operation_not_allowed")},
             status=400,
         )
 

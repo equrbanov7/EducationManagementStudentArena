@@ -63,11 +63,29 @@
             // Connect WebSocket for real-time teacher action notifications
             this._connectWebSocket();
 
-            // If attempt is already locked/removed, show locked overlay immediately
+            // If attempt is already locked/removed, show the right overlay
+            // immediately. We ask the status API whether this was a manual
+            // teacher pause (distinct overlay, no auto-finish countdown) or an
+            // auto-lock from the violation limit.
             if (this._initialStatus === "locked" || this._initialStatus === "removed") {
                 this._acknowledged = true;
                 this._bindEvents();
-                this._onLimitExceeded();
+                var self = this;
+                this._checkSupervisionStatus(function (data) {
+                    if (data && data.manual_lock) {
+                        self._showTeacherLockOverlay();
+                    } else {
+                        self._onLimitExceeded();
+                    }
+                });
+                // Fallback: if the status call fails the callback never fires,
+                // so show the limit overlay after a short delay to be safe.
+                window.setTimeout(function () {
+                    if (!document.getElementById("supervision-teacher-lock-overlay") &&
+                        !document.getElementById("supervision-locked-overlay")) {
+                        self._onLimitExceeded();
+                    }
+                }, 1500);
                 return;
             }
 
@@ -319,6 +337,61 @@
                     this._showWarning();
                     this._startGraceTimer();
                 }
+            }
+
+            // Always-on safety net: poll the status API so a teacher lock/stop
+            // is honoured even if the WebSocket is unavailable (no Redis / proxy
+            // dropped the socket). The WS still delivers it instantly when up.
+            this._startBackgroundStatusWatch();
+        },
+
+        // Primary, infra-independent delivery path: a fast status poll that
+        // reacts to a teacher action (lock / stop) while the student is taking
+        // the exam. The WebSocket delivers the same events instantly when it is
+        // available, but in dev (InMemoryChannelLayer) or behind a proxy that
+        // drops WS the socket may never connect — so this poll guarantees the
+        // student's screen still locks / submits without a manual refresh.
+        // 3s feels effectively synchronous to a watching teacher while staying
+        // cheap enough for a full classroom.
+        _bgStatusInterval: 3000,
+        _startBackgroundStatusWatch: function () {
+            if (this._bgStatusWatch) return;
+            var self = this;
+            this._bgStatusWatch = setInterval(function () {
+                if (!self.isActive) return;
+                if (document.getElementById("supervision-teacher-lock-overlay") ||
+                    document.getElementById("supervision-locked-overlay")) {
+                    return;
+                }
+                self._checkSupervisionStatus(function (data) {
+                    if (!data || !data.supervised) return;
+                    if (data.is_finished) {
+                        // Teacher removed / auto-finished the attempt → leave the
+                        // exam immediately (result page) instead of waiting.
+                        self._leaveToResult();
+                        return;
+                    }
+                    if (data.supervision_status === "locked") {
+                        if (data.manual_lock) {
+                            self._showTeacherLockOverlay();
+                        } else {
+                            self._onLimitExceeded();
+                        }
+                    }
+                });
+            }, this._bgStatusInterval);
+        },
+
+        // Navigate the student away once the attempt is finished by a teacher
+        // (or auto-finish). Uses the result URL exposed by the exam page when
+        // present; falls back to a plain reload, which the server then redirects
+        // to the result page for a finished attempt.
+        _leaveToResult: function () {
+            var url = (window.SUPERVISION_RESULT_URL || "").trim();
+            if (url) {
+                window.location.href = url;
+            } else {
+                window.location.reload();
             }
         },
 
@@ -804,6 +877,83 @@
             }, 10000);
         },
 
+        // Dedicated overlay for a *manual* teacher pause ("Müvəqqəti blokla").
+        // Visually matches the violation-lock overlay so the student gets the
+        // same clear "screen is frozen" treatment, but the wording makes it
+        // explicit that the teacher paused them and there is NO auto-finish
+        // countdown — the student simply waits for the teacher to resume.
+        _showTeacherLockOverlay: function () {
+            this.isActive = false;
+            this._hideWarning();
+            this._clearGraceTimer();
+
+            // If the violation-lock overlay is already up, drop it — the teacher
+            // pause supersedes it with the correct messaging.
+            var existingLimit = document.getElementById("supervision-locked-overlay");
+            if (existingLimit) existingLimit.remove();
+            if (document.getElementById("supervision-teacher-lock-overlay")) {
+                this._startTeacherLockPolling();
+                return;
+            }
+
+            var i18n = (window.SUPERVISION_ACK_I18N) || {};
+            var title = i18n.teacherLockTitle || "İmtahan müəllim tərəfindən dayandırıldı";
+            var msg = i18n.teacherLockMsg ||
+                "Müəlliminiz imtahanınızı müvəqqəti olaraq dayandırdı. Ekranınız kilidlənib.";
+            var waiting = i18n.teacherLockWaiting ||
+                "Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni bağlamayın.";
+
+            var overlay = document.createElement("div");
+            overlay.id = "supervision-teacher-lock-overlay";
+            overlay.style.cssText =
+                "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);" +
+                "z-index:100001;display:flex;justify-content:center;align-items:center;";
+            overlay.innerHTML =
+                '<div style="background:#fff;border-radius:12px;padding:2.5rem;max-width:520px;width:90%;text-align:center;">' +
+                '<div style="font-size:4rem;color:#ea580c;margin-bottom:1rem;"><i class="fas fa-hand-paper"></i></div>' +
+                '<h2 style="color:#ea580c;">' + title + '</h2>' +
+                '<p style="color:#555;margin:1rem 0;">' + msg + '</p>' +
+                '<div style="margin:1.25rem 0;display:flex;justify-content:center;">' +
+                '<div style="display:inline-flex;align-items:center;gap:0.6rem;background:#fff7ed;color:#9a3412;' +
+                'padding:0.6rem 1.1rem;border-radius:999px;font-weight:600;">' +
+                '<i class="fas fa-spinner fa-spin"></i> ' + waiting + '</div>' +
+                '</div>' +
+                '</div>';
+            document.body.appendChild(overlay);
+
+            // Poll for the teacher's resume / a force-stop. The WebSocket usually
+            // delivers this instantly, but polling is the resilient fallback.
+            this._startTeacherLockPolling();
+        },
+
+        _startTeacherLockPolling: function () {
+            if (this._teacherLockPoll) return;
+            this._teacherLockPoll = setInterval(function () {
+                ExamSupervision._checkSupervisionStatus(function (data) {
+                    if (!data) return;
+                    if (data.supervision_status === "resumed" || data.supervision_status === "active") {
+                        clearInterval(ExamSupervision._teacherLockPoll);
+                        ExamSupervision._teacherLockPoll = null;
+                        var ov = document.getElementById("supervision-teacher-lock-overlay");
+                        if (ov) ov.remove();
+                        ExamSupervision.isActive = true;
+                        if (data.violation_count !== undefined) {
+                            ExamSupervision.violationCount = data.violation_count;
+                        }
+                        if (data.max_violations !== undefined) {
+                            ExamSupervision.maxViolations = data.max_violations;
+                        }
+                        ExamSupervision._updateBadge();
+                        ExamSupervision._showResumeFullscreenOverlay(null);
+                    } else if (data.is_finished) {
+                        clearInterval(ExamSupervision._teacherLockPoll);
+                        ExamSupervision._teacherLockPoll = null;
+                        ExamSupervision._leaveToResult();
+                    }
+                });
+            }, 3000);
+        },
+
         _onLimitExceeded: function () {
             this.isActive = false;
             this._hideWarning();
@@ -896,10 +1046,10 @@
                             clearInterval(ExamSupervision._lockCountdownTimer);
                             ExamSupervision._lockCountdownTimer = null;
                         }
-                        window.location.reload();
+                        ExamSupervision._leaveToResult();
                     }
                 });
-            }, 5000);
+            }, 3000);
         },
 
         // Format seconds as M:SS for the resume countdown.
@@ -1059,6 +1209,14 @@
                 clearInterval(this._lockCountdownTimer);
                 this._lockCountdownTimer = null;
             }
+            if (this._teacherLockPoll) {
+                clearInterval(this._teacherLockPoll);
+                this._teacherLockPoll = null;
+            }
+            if (this._bgStatusWatch) {
+                clearInterval(this._bgStatusWatch);
+                this._bgStatusWatch = null;
+            }
             this._closeWebSocket();
         },
 
@@ -1118,11 +1276,18 @@
             if (!data || !data.action) return;
 
             if (data.action === "locked") {
-                // Teacher temporarily blocked the student's screen
-                this._onLimitExceeded();
+                // Teacher temporarily blocked the student's screen. A manual
+                // teacher pause shows a distinct "your teacher paused you"
+                // overlay (no auto-finish countdown); an auto-lock keeps the
+                // violation-limit flow.
+                if (data.manual) {
+                    this._showTeacherLockOverlay();
+                } else {
+                    this._onLimitExceeded();
+                }
             } else if (data.action === "stopped") {
-                // Teacher force-stopped the exam — reload to result page
-                window.location.reload();
+                // Teacher force-stopped the exam — leave to the result page.
+                this._leaveToResult();
             } else if (data.action === "resumed") {
                 // Teacher resumed the student
                 if (this._lockCountdownTimer) {
@@ -1131,6 +1296,8 @@
                 }
                 var overlay = document.getElementById("supervision-locked-overlay");
                 if (overlay) overlay.remove();
+                var teacherLockOverlay = document.getElementById("supervision-teacher-lock-overlay");
+                if (teacherLockOverlay) teacherLockOverlay.remove();
                 this.isActive = true;
                 if (data.violation_count !== undefined) {
                     this.violationCount = data.violation_count;
