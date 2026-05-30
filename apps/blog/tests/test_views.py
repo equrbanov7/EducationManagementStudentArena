@@ -535,6 +535,87 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, "data-pending-post-toggle")
         self.assertContains(response, "data-pending-post-full")
 
+    def test_pending_post_approvals_section_exposes_moderator_edit_button(self):
+        pending_post = Post.objects.create(
+            author=self.student,
+            title="Editable Approval Content",
+            content="Student content",
+            category=self.tech_category,
+            requires_approval=True,
+            approval_status=Post.ApprovalStatus.PENDING,
+            is_published=False,
+        )
+
+        self._activate_org(self.teacher)
+        response = self.client.get(reverse("accounts:profile") + "?section=pending-post-approvals")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Redaktə et")
+        self.assertContains(response, 'data-moderator-edit="true"')
+        self.assertContains(response, reverse("post_edit_ajax", args=[pending_post.id]))
+
+    def test_teacher_can_edit_reviewable_student_post_without_changing_review_state(self):
+        pending_post = Post.objects.create(
+            author=self.student,
+            title="Student Pending Post",
+            content="Original student content",
+            category=self.tech_category,
+            requires_approval=True,
+            approval_status=Post.ApprovalStatus.PENDING,
+            is_published=False,
+        )
+
+        self._activate_org(self.teacher)
+        response = self.client.post(
+            reverse("post_edit_ajax", args=[pending_post.id]),
+            {
+                "title": "Teacher Edited Pending Post",
+                "content": "Teacher polished the content.",
+                "excerpt": "Teacher excerpt",
+                "category": str(self.tech_category.id),
+                "subcategory": "",
+                "image_url": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        pending_post.refresh_from_db()
+        self.assertEqual(pending_post.title, "Teacher Edited Pending Post")
+        self.assertEqual(pending_post.excerpt, "Teacher excerpt")
+        self.assertEqual(pending_post.approval_status, Post.ApprovalStatus.PENDING)
+        self.assertFalse(pending_post.is_published)
+
+    def test_org_admin_can_edit_published_org_post_without_unpublishing_it(self):
+        org_admin = User.objects.create_user(
+            username="blog_post_edit_org_admin",
+            email="blog_post_edit_org_admin@example.com",
+            password="StrongPass123!",
+        )
+        _assign_user_to_org(org_admin, self.organization, ProfileRole.ORG_ADMIN, membership_role_name="manager")
+
+        self._activate_org(org_admin)
+        response = self.client.post(
+            reverse("post_edit_ajax", args=[self.teacher_post.id]),
+            {
+                "title": "Org Admin Edited Post",
+                "content": "Updated by org admin.",
+                "excerpt": "",
+                "category": str(self.tech_category.id),
+                "subcategory": str(self.ai_category.id),
+                "image_url": "",
+                "is_published": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.teacher_post.refresh_from_db()
+        self.assertEqual(self.teacher_post.title, "Org Admin Edited Post")
+        self.assertEqual(self.teacher_post.approval_status, Post.ApprovalStatus.APPROVED)
+        self.assertTrue(self.teacher_post.is_published)
+        self.assertEqual(self.teacher_post.category_id, self.ai_category.id)
+
     def test_superadmin_can_deactivate_published_post_without_approval_flag(self):
         superadmin = User.objects.create_superuser(
             username="blog_post_superadmin",
