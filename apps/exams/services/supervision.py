@@ -298,9 +298,7 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
         "action": "resumed",
         "supervision_status": "resumed",
         "violation_count": attempt.supervision_violation_count,
-        "max_violations": attempt.exam.supervision_configs.filter(is_active=True).values_list(
-            "max_violations", flat=True
-        ).first() or 3,
+        "max_violations": config.max_violations if config else 3,
     })
 
     return True

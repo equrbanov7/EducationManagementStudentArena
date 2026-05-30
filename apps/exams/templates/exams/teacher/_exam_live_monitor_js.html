@@ -306,12 +306,12 @@
         if (d.is_finished) {
             var sVal, sLabel;
             if (d.teacher_score != null && d.checked_by_teacher) {
-                sVal = d.teacher_score; sLabel = "Müəllim balı";
+                sVal = d.teacher_score; sLabel = t("teacher_score_label", "Müəllim balı");
             } else {
                 sVal = (d.score_percent != null ? d.score_percent + "%" : "—");
-                sLabel = d.checked_by_teacher ? "Qiymət" : "Avtomatik nəticə";
+                sLabel = d.checked_by_teacher ? t("teacher_score_label", "Qiymət") : t("auto_score_label", "Avtomatik nəticə");
             }
-            scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + sLabel + '</div></div>';
+            scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + esc(sLabel) + '</div></div>';
         }
 
         var answersHtml = (d.answers && d.answers.length) ? d.answers.map(function (a, idx) {
@@ -331,38 +331,38 @@
             } else if (a.has_paint) {
                 ansBody = '<span class="pill"><i class="fas fa-paint-brush"></i> Çəkim cavabı</span>';
             } else {
-                ansBody = '<span class="ans-empty">Hələ cavab yoxdur</span>';
+                ansBody = '<span class="ans-empty">' + esc(t("no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
             }
             return '<div class="ans-item"><div class="ans-q"><span class="ans-num">' + (idx + 1) + '.</span> ' + esc(a.question_text || "Sual") + typeLabel + '</div><div class="ans-a">' + ansBody + '</div></div>';
-        }).join("") : '<div class="side-empty">Hələ heç bir suala cavab verilməyib.</div>';
+        }).join("") : '<div class="side-empty">' + esc(t("no_answers_yet", "Hələ heç bir suala cavab verilməyib.")) + '</div>';
 
         var incHtml = (d.incidents && d.incidents.length) ? d.incidents.map(function (e) {
             return '<div class="inc-item"><i class="fas fa-circle" style="font-size:0.5rem;color:#dc3545"></i> ' +
                 esc(e.event_display || EVENT_LABELS[e.event_type] || e.event_type) +
                 '<span class="inc-time">' + timeAgo(e.timestamp) + '</span></div>';
-        }).join("") : '<div class="side-empty">Pozuntu qeydə alınmayıb.</div>';
+        }).join("") : '<div class="side-empty">' + esc(t("no_violations", "Pozuntu qeydə alınmayıb.")) + '</div>';
 
-        var startedRow = '<div class="mon-meta-row"><i class="fas fa-calendar-day"></i> İmtahan tarixi: <b>' + esc(fmtDateTime(d.started_at)) + '</b>' +
-            (d.finished_at ? ' &nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> Bitmə: <b>' + esc(fmtDateTime(d.finished_at)) + '</b>' : '') + '</div>';
+        var startedRow = '<div class="mon-meta-row"><i class="fas fa-calendar-day"></i> ' + esc(t("exam_date_label", "İmtahan tarixi")) + ': <b>' + esc(fmtDateTime(d.started_at)) + '</b>' +
+            (d.finished_at ? ' &nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> ' + esc(t("finished_at_label", "Bitmə")) + ': <b>' + esc(fmtDateTime(d.finished_at)) + '</b>' : '') + '</div>';
 
         $("modalBody").innerHTML =
-            '<div class="mon-note"><i class="fas fa-eye"></i> Bu, yalnız izləmə rejimidir — tələbə bloklanmır.</div>' +
+            '<div class="mon-note"><i class="fas fa-eye"></i> ' + esc(t("monitor_note", "Bu, yalnız izləmə rejimidir — tələbə bloklanmır.")) + '</div>' +
             startedRow +
             '<div class="mon-grid">' +
-            '<div class="mon-metric"><div class="mm-v">' + d.answered + '/' + d.total_questions + '</div><div class="mm-l">Cavablanıb</div></div>' +
-            '<div class="mon-metric"><div class="mm-v">' + Math.max(0, d.total_questions - d.answered) + '</div><div class="mm-l">Qalıb</div></div>' +
-            '<div class="mon-metric"><div class="mm-v" style="color:#dc3545">' + d.violation_count + '</div><div class="mm-l">Pozuntu</div></div>' +
+            '<div class="mon-metric"><div class="mm-v">' + d.answered + '/' + d.total_questions + '</div><div class="mm-l">' + esc(t("answered_label", "Cavablanıb")) + '</div></div>' +
+            '<div class="mon-metric"><div class="mm-v">' + Math.max(0, d.total_questions - d.answered) + '</div><div class="mm-l">' + esc(t("remaining_label", "Qalıb")) + '</div></div>' +
+            '<div class="mon-metric"><div class="mm-v" style="color:#dc3545">' + d.violation_count + '</div><div class="mm-l">' + esc(t("violations_label", "Pozuntu")) + '</div></div>' +
             scoreBlock +
             '</div>' +
-            '<div class="mon-section-title">Cari cavablar</div>' + answersHtml +
-            '<div class="mon-section-title">Pozuntu jurnalı</div>' + incHtml;
+            '<div class="mon-section-title">' + esc(t("current_answers", "Cari cavablar")) + '</div>' + answersHtml +
+            '<div class="mon-section-title">' + esc(t("violation_log", "Pozuntu jurnalı")) + '</div>' + incHtml;
 
         var finished = d.is_finished;
         var canResume = (d.supervision_status === "locked" || d.supervision_status === "removed") && !finished;
         $("modalResumeBtn").style.display = canResume ? "inline-flex" : "none";
         $("modalPauseBtn").style.display = !finished && d.supervision_status !== "locked" && d.supervision_status !== "removed" ? "inline-flex" : "none";
         $("modalStopBtn").style.display = !finished ? "inline-flex" : "none";
-        $("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " sual cavablanıb";
+        $("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " " + t("questions_answered", "sual cavablanıb");
     }
     function closeModal() { modal.classList.remove("show"); currentAttempt = null; }
 
