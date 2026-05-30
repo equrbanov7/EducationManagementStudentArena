@@ -34,8 +34,10 @@ from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.services.difficulty import ensure_ai_question_difficulties, schedule_ai_question_difficulty_warmup
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.supervision import (
+    get_attempt_live_snapshot,
     log_supervision_incident,
     sweep_expired_resume_windows,
+    teacher_lock_attempt,
     teacher_resume_attempt,
     teacher_stop_attempt,
 )
@@ -763,6 +765,166 @@ class ExamSupervisionServicesTest(TestCase):
         self.assertIsNone(attempt.supervision_locked_at)
         # Sweep must not touch a resumed attempt.
         self.assertEqual(sweep_expired_resume_windows(), 0)
+
+    def test_manual_teacher_lock_does_not_start_auto_finish_window(self):
+        # A manual teacher pause must never auto-finish, even under a tight
+        # resume window — the teacher controls when it ends.
+        self._supervised_resumable_exam(resume_window_seconds=300)
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        teacher_lock_attempt(attempt, self.teacher)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_status, "locked")
+        self.assertTrue(attempt.supervision_manual_lock)
+        # No countdown stamped → no auto-finish deadline.
+        self.assertIsNone(attempt.supervision_locked_at)
+        self.assertIsNone(attempt.supervision_resume_deadline)
+        self.assertFalse(attempt.expire_if_resume_window_expired())
+        self.assertEqual(sweep_expired_resume_windows(), 0)
+
+    def test_manual_lock_is_resumable_even_with_no_second_chance(self):
+        # The recovery policy governs the auto-lock (violation) flow; it must
+        # not block a teacher from undoing their own manual pause.
+        self.exam.total_duration_minutes = 600
+        self.exam.save(update_fields=["total_duration_minutes"])
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            recovery_policy="no_second_chance",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+            supervision_violation_count=2,
+        )
+
+        teacher_lock_attempt(attempt, self.teacher)
+        # Should NOT raise despite no_second_chance.
+        teacher_resume_attempt(attempt, self.teacher, grant_extra_chance=True)
+
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_status, "resumed")
+        self.assertEqual(attempt.status, "in_progress")
+        self.assertFalse(attempt.supervision_manual_lock)
+        # Manual-lock resume preserves the violation count (no extra chance).
+        self.assertEqual(attempt.supervision_violation_count, 2)
+        self.assertEqual(attempt.supervision_extra_chances, 0)
+
+    def test_auto_lock_resume_still_honours_no_second_chance(self):
+        # Regression guard: a genuine auto-lock under no_second_chance must
+        # still refuse resumption.
+        self.exam.total_duration_minutes = 600
+        self.exam.save(update_fields=["total_duration_minutes"])
+        ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            recovery_policy="no_second_chance",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+            supervision_status="locked",
+        )
+        attempt.supervision_locked_at = timezone.now()
+        attempt.save(update_fields=["supervision_locked_at"])
+
+        with self.assertRaises(ValueError):
+            teacher_resume_attempt(attempt, self.teacher)
+
+    def test_snapshot_surfaces_coding_draft_files(self):
+        # Practical exams keep live work in CodingSubmission, not ExamAnswer.
+        # The monitor snapshot must read those draft files so the teacher sees
+        # what the student is typing.
+        from apps.exams.models import CodingExamQuestion, CodingSubmission
+
+        coding_exam = Exam.objects.create(
+            title="Coding Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+            exam_type="coding",
+        )
+        question = ExamQuestion.objects.create(exam=coding_exam, text="Build a page", order=1)
+        coding_q = CodingExamQuestion.objects.create(
+            question=question,
+            language=CodingExamQuestion.LANGUAGE_HTML,
+            title="HTML task",
+            problem_statement="Make index.html",
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=coding_exam,
+            attempt_number=1,
+            status="draft",
+        )
+        CodingSubmission.objects.create(
+            student=self.student,
+            exam=coding_exam,
+            attempt=attempt,
+            question=coding_q,
+            selected_language=CodingExamQuestion.LANGUAGE_HTML,
+            files=[
+                {"name": "index.html", "content": "<h1>Hi</h1>"},
+                {"name": "style.css", "content": "h1{color:red}"},
+            ],
+            is_final=False,
+        )
+
+        snap = get_attempt_live_snapshot(attempt)
+
+        self.assertEqual(snap["exam_type"], "coding")
+        self.assertEqual(len(snap["answers"]), 1)
+        row = snap["answers"][0]
+        self.assertEqual(row["kind"], "coding")
+        names = [f["name"] for f in row["files"]]
+        self.assertIn("index.html", names)
+        self.assertIn("style.css", names)
+        self.assertTrue(row["is_answered"])
+        self.assertEqual(snap["answered"], 1)
+
+    def test_snapshot_lists_test_questions_with_selected_options(self):
+        test_exam = Exam.objects.create(
+            title="Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+        )
+        q = ExamQuestion.objects.create(exam=test_exam, text="2+2?", order=1)
+        opt_a = ExamQuestionOption.objects.create(question=q, label="A", text="4", is_correct=True)
+        ExamQuestionOption.objects.create(question=q, label="B", text="5", is_correct=False)
+        ExamQuestion.objects.create(exam=test_exam, text="Unanswered?", order=2)
+
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=test_exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+        ans = ExamAnswer.objects.create(attempt=attempt, question=q)
+        ans.selected_options.add(opt_a)
+
+        snap = get_attempt_live_snapshot(attempt)
+
+        self.assertEqual(len(snap["answers"]), 2)
+        first = snap["answers"][0]
+        self.assertEqual(first["kind"], "test")
+        self.assertTrue(first["is_answered"])
+        self.assertEqual(first["selected_options"][0]["text"], "4")
+        self.assertTrue(first["selected_options"][0]["is_correct"])
+        # Second question is shown but flagged unanswered.
+        self.assertFalse(snap["answers"][1]["is_answered"])
+        self.assertEqual(snap["answered"], 1)
 
     def test_sweep_finishes_only_stale_locked_attempts(self):
         self._supervised_resumable_exam(resume_window_seconds=600)

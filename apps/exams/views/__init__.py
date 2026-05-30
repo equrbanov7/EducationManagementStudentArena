@@ -56,6 +56,7 @@ from .teacher.supervision import (
     supervision_detail,
     supervision_monitor,
     supervision_status_api,
+    teacher_lock_api,
     teacher_resume_api,
     teacher_stop_api,
 )
@@ -105,6 +106,7 @@ __all__ = [
     "exam_live_monitor",
     "exam_live_monitor_poll_api",
     "attempt_live_snapshot_api",
+    "teacher_lock_api",
     "teacher_resume_api",
     "teacher_stop_api",
     "log_incident_api",
