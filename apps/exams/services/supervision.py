@@ -7,7 +7,28 @@ enforcing violation limits, and managing recovery flows.
 
 from django.utils import timezone
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
+
+
+def _notify_student_via_ws(attempt_id: int, event_data: dict) -> None:
+    """
+    Send a real-time supervision event to the student via WebSocket.
+    Silently fails if channel layer is unavailable.
+    """
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            return
+        group_name = f"exam_supervision_{attempt_id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {"type": "supervision_event", "data": event_data},
+        )
+    except Exception:
+        pass
 
 # Event types that count as violations for limit enforcement.
 #
@@ -273,6 +294,15 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
         teacher_action=action_type,
     )
 
+    _notify_student_via_ws(attempt.id, {
+        "action": "resumed",
+        "supervision_status": "resumed",
+        "violation_count": attempt.supervision_violation_count,
+        "max_violations": attempt.exam.supervision_configs.filter(is_active=True).values_list(
+            "max_violations", flat=True
+        ).first() or 3,
+    })
+
     return True
 
 
@@ -313,6 +343,12 @@ def teacher_lock_attempt(attempt, teacher):
         teacher_action="teacher_temporary_lock",
     )
 
+    _notify_student_via_ws(attempt.id, {
+        "action": "locked",
+        "supervision_status": "locked",
+        "reason": "teacher_temporary_lock",
+    })
+
     return True
 
 
@@ -345,6 +381,13 @@ def teacher_stop_attempt(attempt, teacher):
         violation_count_at_time=attempt.supervision_violation_count,
         teacher_action="teacher_force_stopped",
     )
+
+    _notify_student_via_ws(attempt.id, {
+        "action": "stopped",
+        "supervision_status": "removed",
+        "is_finished": True,
+        "reason": "teacher_force_stopped",
+    })
 
     return True
 

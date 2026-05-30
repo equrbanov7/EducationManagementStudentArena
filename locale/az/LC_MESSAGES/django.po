@@ -21526,3 +21526,363 @@ msgstr "Nəticələri tələbələrə göstər"
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_hide_results"
 msgstr "Nəticəni tələbələrdən gizlət"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "page_title"
+msgstr "Canlı Nəzarət"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_monitor"
+msgstr "Nəzarət Monitoru"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "breadcrumb_live"
+msgstr "Canlı izləmə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "header_subtitle"
+msgstr "İmtahan prosesinin canlı monitorinqi — yalnız izləmə, müdaxiləsiz."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_auto_refresh"
+msgstr "Avtomatik yenilənir"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_pause_poll"
+msgstr "Dayandır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_refresh"
+msgstr "Yenilə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_today"
+msgstr "Bugünkü imtahan"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "filter_all_sessions"
+msgstr "Bütün sessiyalar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_date"
+msgstr "Tarix"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "label_sessions"
+msgstr "Sessiyalar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "select_date_placeholder"
+msgstr "Tarix seç…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_status_dist"
+msgstr "Status paylanması"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "chart_student_progress"
+msgstr "Tələbə tərəqqisi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_student_map"
+msgstr "Tələbə xəritəsi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_finished"
+msgstr "Bitib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_in_progress"
+msgstr "Davam edir"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_low"
+msgstr "1-2 pozuntu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_mid"
+msgstr "3-5 pozuntu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_vio_high"
+msgstr "6+ pozuntu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_removed"
+msgstr "Çıxarılıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "legend_not_entered"
+msgstr "Girməyib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_empty"
+msgstr "Bu sessiya üçün tələbə tapılmadı."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "map_hint"
+msgstr "Hər kvadrat bir tələbədir. Detal üçün klikləyin."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_blocked"
+msgstr "Bloklanmış tələbələr"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_not_entered"
+msgstr "Daxil olmayanlar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "panel_incidents"
+msgstr "Şübhəli hadisələr"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "modal_student"
+msgstr "Tələbə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "loading"
+msgstr "Yüklənir…"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_resume"
+msgstr "Bərpa et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_temp_block"
+msgstr "Müvəqqəti blokla"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_remove_student"
+msgstr "İmtahandan uzaqlaşdır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_title"
+msgstr "Təsdiq"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "poll_paused"
+msgstr "Dayandırılıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "btn_continue_poll"
+msgstr "Davam et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_entered"
+msgstr "Daxil olub"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_in_progress"
+msgstr "Davam edir"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_finished"
+msgstr "Təslim edib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_flagged"
+msgstr "Problemli"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_students"
+msgstr "tələbə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_avg_progress"
+msgstr "Ortalama"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_completed"
+msgstr "Tamamlanmış sessiya"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "stat_violations"
+msgstr "pozuntu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_active"
+msgstr "aktiv"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_warned"
+msgstr "xəbərdarlıq"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_locked"
+msgstr "kilidli"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_removed"
+msgstr "çıxarılıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "status_resumed"
+msgstr "bərpa olunub"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_fullscreen_exited"
+msgstr "Tam ekrandan çıxış"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_tab_switched"
+msgstr "Tab dəyişdirildi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_window_blurred"
+msgstr "Pəncərə fokusu itdi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_copy_attempt"
+msgstr "Kopyalama cəhdi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_paste_attempt"
+msgstr "Yapışdırma cəhdi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_right_click"
+msgstr "Sağ klik cəhdi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_keyboard_shortcut"
+msgstr "Klaviatura qısayolu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "event_auto_locked"
+msgstr "Avtomatik kilidləndi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_temp"
+msgstr "Müvəqqəti bloklu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "blocked_removed"
+msgstr "Çıxarılıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_blocked"
+msgstr "Bloklanmış tələbə yoxdur."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "all_entered"
+msgstr "Bütün tələbələr daxil olub."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "not_entered_yet"
+msgstr "Hələ giriş etməyib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_incidents"
+msgstr "Şübhəli hadisə yoxdur."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "monitor_note"
+msgstr "Bu, yalnız izləmə rejimidir — tələbə bloklanmır."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_label"
+msgstr "Cavablanıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "remaining_label"
+msgstr "Qalıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violations_label"
+msgstr "Pozuntu"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "current_answers"
+msgstr "Cari cavablar"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "violation_log"
+msgstr "Pozuntu jurnalı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_answers_yet"
+msgstr "Hələ heç bir suala cavab verilməyib."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "no_violations"
+msgstr "Pozuntu qeydə alınmayıb."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_title"
+msgstr "İmtahandan uzaqlaşdır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_msg"
+msgstr "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_stop_btn"
+msgstr "Bəli, uzaqlaşdır"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_title"
+msgstr "Müvəqqəti blokla"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_msg"
+msgstr "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_pause_btn"
+msgstr "Bəli, blokla"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_title"
+msgstr "Bərpa et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_msg"
+msgstr "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək."
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_btn"
+msgstr "Bəli, bərpa et"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_blocked"
+msgstr "Tələbə müvəqqəti bloklandı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_removed"
+msgstr "Tələbə imtahandan uzaqlaşdırıldı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_student_resumed"
+msgstr "Tələbə bərpa edildi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_error"
+msgstr "Əməliyyat alınmadı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "toast_connection_error"
+msgstr "Bağlantı xətası"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "teacher_score_label"
+msgstr "Müəllim balı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "auto_score_label"
+msgstr "Avtomatik nəticə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "exam_date_label"
+msgstr "İmtahan tarixi"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "finished_at_label"
+msgstr "Bitmə"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "questions_answered"
+msgstr "sual cavablanıb"
