@@ -47,6 +47,13 @@
         if (!anchor || !anchor.href) return false;
         if (anchor.target && anchor.target !== "_self") return false;
         if (anchor.hasAttribute("download")) return false;
+        if (anchor.matches(
+            ".js-open-create-exam, .js-open-exam-form-modal, .js-open-question-form-modal, " +
+            ".js-open-delete-confirm-modal, .js-open-assigned-exam-modal, [data-open-exam-start-modal], " +
+            "[data-no-route-loading]"
+        )) {
+            return false;
+        }
 
         const url = new URL(anchor.href, window.location.href);
         if (url.origin !== window.location.origin) return false;
