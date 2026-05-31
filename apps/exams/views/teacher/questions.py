@@ -9,7 +9,7 @@ from django.db.models.functions import Lower
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
@@ -19,6 +19,8 @@ from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+
+QUESTION_BANK_SEARCH_MAX_LENGTH = 240
 
 
 def _is_question_modal_request(request):
@@ -47,6 +49,29 @@ def _safe_same_origin_redirect_path(request, candidate_url):
     return f"{path}{query}{fragment}"
 
 
+def _is_internal_exam_management_path(candidate_path):
+    raw_path = (candidate_path or "").strip()
+    if not raw_path:
+        return False
+
+    try:
+        match = resolve(urlsplit(raw_path).path)
+    except Resolver404:
+        return False
+
+    return match.namespace == "exams" and match.url_name in {
+        "teacher_questions_bank",
+        "test_question_bank",
+        "create_question_bank",
+        "add_exam_question",
+        "edit_exam_question",
+        "delete_exam_question",
+        "teacher_exam_results",
+        "teacher_view_attempt",
+        "teacher_check_attempt",
+    }
+
+
 def _resolve_question_bank_navigation(request):
     requested_profile_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
     valid_profile_sections = {
@@ -66,6 +91,8 @@ def _resolve_question_bank_navigation(request):
         request,
         request.GET.get("return_to") or request.POST.get("return_to"),
     )
+    if _is_internal_exam_management_path(return_to):
+        return_to = ""
 
     nav_params = {}
     if requested_profile_section:
@@ -139,7 +166,7 @@ def _render_question_form_html(request, *, exam, form, editing=False, question=N
 def teacher_questions_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
-    _, _, navigation_query = _resolve_question_bank_navigation(request)
+    navigation_return_to, navigation_from_section, navigation_query = _resolve_question_bank_navigation(request)
 
     allowed_statuses = {"all", "active", "inactive"}
     allowed_sorts = {"newest", "oldest", "az", "za"}
@@ -176,7 +203,7 @@ def teacher_questions_bank(request, slug):
             messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
 
         redirect_params = {}
-        redirect_q = (request.POST.get("q") or "").strip()
+        redirect_q = (request.POST.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
         redirect_status = (request.POST.get("status") or "all").strip().lower()
         redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
         redirect_page = (request.POST.get("page") or "").strip()
@@ -189,18 +216,17 @@ def teacher_questions_bank(request, slug):
             redirect_params["sort"] = redirect_sort
         if redirect_page.isdigit():
             redirect_params["page"] = redirect_page
-        if request.POST.get("from_section"):
-            redirect_params["from_section"] = request.POST.get("from_section")
-        safe_return_to = _safe_same_origin_redirect_path(request, request.POST.get("return_to"))
-        if safe_return_to:
-            redirect_params["return_to"] = safe_return_to
+        if navigation_from_section:
+            redirect_params["from_section"] = navigation_from_section
+        if navigation_return_to:
+            redirect_params["return_to"] = navigation_return_to
 
         redirect_url = reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug})
         if redirect_params:
             redirect_url = f"{redirect_url}?{urlencode(redirect_params)}"
         return redirect(redirect_url)
 
-    search_query = (request.GET.get("q") or "").strip()
+    search_query = (request.GET.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
     status_filter = (request.GET.get("status") or "all").strip().lower()
     sort_filter = (request.GET.get("sort") or "newest").strip().lower()
     if status_filter not in allowed_statuses:
@@ -250,11 +276,10 @@ def teacher_questions_bank(request, slug):
         base_query_params["status"] = status_filter
     if sort_filter != "newest":
         base_query_params["sort"] = sort_filter
-    if request.GET.get("from_section"):
-        base_query_params["from_section"] = request.GET.get("from_section")
-    safe_return_to = _safe_same_origin_redirect_path(request, request.GET.get("return_to"))
-    if safe_return_to:
-        base_query_params["return_to"] = safe_return_to
+    if navigation_from_section:
+        base_query_params["from_section"] = navigation_from_section
+    if navigation_return_to:
+        base_query_params["return_to"] = navigation_return_to
 
     return render(
         request,
@@ -270,6 +295,9 @@ def teacher_questions_bank(request, slug):
             "inactive_questions": inactive_questions,
             "pagination_query": urlencode(base_query_params),
             "question_bank_navigation_query": navigation_query,
+            "navigation_from_section": navigation_from_section,
+            "navigation_return_to": navigation_return_to,
+            "question_bank_search_max_length": QUESTION_BANK_SEARCH_MAX_LENGTH,
         },
     )
 
