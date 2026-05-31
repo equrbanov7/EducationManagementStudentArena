@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "title_question_bank" context "exams.template.create_question_bank" %} - {{ exam.title }}{% endblock %}
+{% block title %}{{ question_bank_page_title }} - {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
 <style nonce="{{ request.csp_nonce }}">
@@ -625,7 +625,7 @@
     {% endif %}
 
     <div class="bank-header" style="text-align: center; margin-bottom: 30px;">
-        <h2>{{ exam.title }} <span style="color:#6c5ce7">{% trans "heading_question_bank" context "exams.template.create_question_bank" %}</span></h2>
+        <h2>{{ exam.title }} <span style="color:#6c5ce7">{{ question_bank_heading }}</span></h2>
     </div>
 
     <form method="post" action="{% url 'exams:process_question_bank' exam.slug %}" id="bankForm">
