@@ -1,47 +1,305 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ exam.title }} - {% trans "title" context "accounts.pending_review_detail" %}{% endblock %}
+{% block title %}{{ item_title }} - {% trans "title" context "accounts.pending_review_detail" %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'accounts/css/pending_review_detail.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="mb-1">{{ exam.title }}</h1>
-      <p class="text-muted mb-0">{% trans "subtitle" context "accounts.pending_review_detail" %}</p>
-    </div>
-    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary btn-sm">← {% trans "back" context "accounts.pending_review_detail" %}</a>
-  </div>
+<div class="pending-detail-page">
+  <div class="pending-detail-shell">
+    <header class="pending-detail-header">
+      <div class="pending-detail-kicker">{{ item_type_label }}</div>
+      <h1>{{ item_title }}</h1>
+      <p>{{ course_title }}</p>
+      <a href="{{ back_url }}" class="pending-detail-back">
+        <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.pending_review_detail" %}
+      </a>
+    </header>
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title mb-3">{% trans "student_answer" context "accounts.pending_review_detail" %}</h5>
-      <div class="mb-2"><strong>{% trans "student" context "accounts.pending_review_detail" %}:</strong> {{ submission.student.get_full_name|default:submission.student.username }}</div>
-      <div class="mb-2"><strong>{% trans "exam" context "accounts.pending_review_detail" %}:</strong> {{ exam.title }}</div>
-      <div class="mb-2"><strong>{% trans "date" context "accounts.pending_review_detail" %}:</strong> {{ submission.submitted_at }}</div>
-    </div>
-  </div>
+    <section class="pending-detail-meta">
+      <article class="meta-card">
+        <span class="meta-label">{% trans "student" context "accounts.pending_review_detail" %}</span>
+        <span class="meta-value">{{ student_display }}</span>
+      </article>
+      <article class="meta-card">
+        <span class="meta-label">Status</span>
+        <span class="meta-value">{{ status_display }}</span>
+      </article>
+      <article class="meta-card">
+        <span class="meta-label">{% trans "date" context "accounts.pending_review_detail" %}</span>
+        <span class="meta-value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
+      </article>
+      <article class="meta-card meta-card-score">
+        <span class="meta-label">Bal</span>
+        <span class="meta-value">
+          {% if current_score or current_score == 0 %}
+            {{ current_score }} / {{ max_score }}
+          {% else %}
+            - / {{ max_score }}
+          {% endif %}
+        </span>
+      </article>
+    </section>
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title mb-3">{% trans "grading" context "accounts.pending_review_detail" %}</h5>
-        {% for question in questions %}
-          <div class="mb-4 pb-3 border-bottom">
-            <div class="mb-2"><strong>{{ forloop.counter }}. {{ question.text }}</strong></div>
-            <div class="mb-2 text-muted">{% trans "student_answer" context "accounts.pending_review_detail" %}: {{ question.student_answer|default:"—" }}</div>
-            <label class="form-label">{% trans "score_per_question" context "accounts.pending_review_detail" %}</label>
-            <input type="number" name="score_{{ question.id }}" class="form-control" min="0" step="0.5">
-          </div>
+    {% if is_recheck_window %}
+    <div class="review-window-banner">
+      <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+      <span>
+        Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+        <span data-review-countdown="{{ review_window_seconds_left }}">--:--:--</span>
+      </span>
+    </div>
+    {% elif is_pregrade_anonymous_window %}
+    <div class="review-window-banner">
+      <strong>Anonim yoxlama pəncərəsi aktivdir.</strong>
+      <span>
+        Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+        <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
+      </span>
+    </div>
+    {% elif is_locked %}
+    <div class="review-window-banner review-window-banner--locked">
+      <strong>Yoxlama bağlanıb.</strong>
+      <span>Bu cavab artıq yalnız baxış üçündür. Bal və rəy dəyişdirilə bilməz.</span>
+    </div>
+    {% endif %}
+
+    {% if content_text %}
+    <section class="pending-detail-block">
+      <h2>Cavab mətni</h2>
+      <div class="pending-detail-content">{{ content_text|linebreaks }}</div>
+    </section>
+    {% endif %}
+
+    {% if attachments %}
+    <section class="pending-detail-block">
+      <h2>Əlavələr</h2>
+      <ul class="pending-file-list">
+        {% for file_item in attachments %}
+        <li>
+          <a href="{{ file_item.url }}" target="_blank" rel="noopener">
+            <i class="fas fa-paperclip"></i>
+            <span>{{ file_item.name }}</span>
+          </a>
+        </li>
         {% endfor %}
-        <div class="mb-3">
-          <label for="id_feedback" class="form-label">{% trans "feedback" context "accounts.pending_review_detail" %}</label>
-          <textarea id="id_feedback" name="feedback" class="form-control" rows="4" placeholder="{% trans 'feedback_ph' context 'accounts.pending_review_detail' %}"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">{% trans "save_grade" context "accounts.pending_review_detail" %}</button>
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if lab_answers %}
+    <section class="pending-detail-block">
+      <h2>Lab sual cavabları</h2>
+      <div class="lab-answer-list">
+        {% for answer in lab_answers %}
+        <article class="lab-answer-card" id="grade-answer-{{ answer.id }}">
+          <h3>
+            <span>{{ forloop.counter }}. {{ answer.question.question_text }}</span>
+            <button type="button" class="answer-accordion-btn" data-grade-toggle="{{ answer.id }}" aria-label="Toggle answer">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+          </h3>
+          <div class="lab-answer-preview">
+            {% if answer.answer %}
+              {{ answer.answer|striptags|truncatechars:90 }}
+            {% elif answer.answer_file %}
+              Fayl əlavə edilib...
+            {% else %}
+              Bu sual üçün cavab yoxdur.
+            {% endif %}
+          </div>
+          <div class="lab-answer-content">
+            <div class="lab-answer-section">
+              <div class="lab-answer-section-title">
+                <i class="fas fa-align-left"></i> Cavab
+              </div>
+              {% if answer.answer %}
+              <div class="lab-answer-text">{{ answer.answer|linebreaks }}</div>
+              {% elif answer.answer_file %}
+              <p class="pending-empty">Mətn cavabı yoxdur.</p>
+              {% else %}
+              <p class="pending-empty">Bu sual üçün cavab yoxdur.</p>
+              {% endif %}
+              {% if answer.answer_file %}
+              <a class="lab-answer-file" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
+                <i class="fas fa-download"></i> Faylı aç
+              </a>
+              {% endif %}
+            </div>
+            <div class="lab-answer-section">
+              <div class="lab-answer-section-title">
+                <i class="fas fa-star"></i> Bu suala bal
+              </div>
+              <input
+                type="number"
+                name="answer_score_{{ answer.id }}"
+                class="question-score-input"
+                min="0"
+                {% if answer.question.points > 0 %}max="{{ answer.question.points }}"{% endif %}
+                step="1"
+                value="{{ answer.score_input_value }}"
+                data-question-max="{% if answer.question.points > 0 %}{{ answer.question.points }}{% else %}0{% endif %}"
+                form="pendingReviewForm"
+                {% if is_locked %}disabled{% endif %}
+              >
+            </div>
+          </div>
+        </article>
+        {% endfor %}
       </div>
-    </div>
-  </form>
+    </section>
+    {% endif %}
+
+    <section class="pending-detail-block pending-grade-block">
+      <h2>{% trans "grading" context "accounts.pending_review_detail" %}</h2>
+      <form method="post" id="pendingReviewForm" class="pending-grade-form">
+        {% csrf_token %}
+        <div class="grade-row">
+          <label for="id_score">Yekun bal</label>
+          <input
+            type="number"
+            id="id_score"
+            name="score"
+            min="0"
+            max="{{ max_score }}"
+            step="1"
+            required
+            inputmode="numeric"
+            value="{{ current_score_input_value }}"
+            data-auto-total="{{ auto_total_score_input_value|default:'0' }}"
+            data-manual-total-initial="{% if use_manual_total_initial %}1{% else %}0{% endif %}"
+            {% if is_locked %}disabled{% endif %}
+          >
+        </div>
+        <div class="grade-row">
+          <label for="id_feedback">{% trans "feedback" context "accounts.pending_review_detail" %}</label>
+          <textarea
+            id="id_feedback"
+            name="feedback"
+            rows="5"
+            placeholder="{% trans 'feedback_ph' context 'accounts.pending_review_detail' %}"
+            {% if is_locked %}disabled{% endif %}
+          >{{ feedback|default:"" }}</textarea>
+        </div>
+        <div class="grade-actions">
+          {% if not is_locked %}
+          <button type="submit" class="btn-save">
+            <i class="fas fa-check"></i> {% trans "save_grade" context "accounts.pending_review_detail" %}
+          </button>
+          {% endif %}
+          <a href="{{ back_url }}" class="btn-cancel">
+            {% if is_locked %}Bağla{% else %}Ləğv et{% endif %}
+          </a>
+        </div>
+      </form>
+    </section>
+  </div>
 </div>
+{% include "courses/partials/_action_confirm_modal.html" %}
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+  "use strict";
+
+  var form = document.getElementById("pendingReviewForm");
+  var totalInput = document.getElementById("id_score");
+  var scoreInputs = Array.prototype.slice.call(document.querySelectorAll(".question-score-input"));
+  var manualTotalActive = totalInput && totalInput.getAttribute("data-manual-total-initial") === "1";
+  var submitConfirmed = false;
+
+  function parseIntegerValue(rawValue) {
+    var normalized = (rawValue || "").trim().replace(",", ".");
+    var match = normalized.match(/^-?\d+/);
+    if (!match) return null;
+    var parsed = parseInt(match[0], 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  function normalizeInput(input) {
+    var parsed = parseIntegerValue(input.value);
+    if (parsed === null) {
+      input.value = "";
+      return 0;
+    }
+    var nextValue = Math.max(0, parsed);
+    var max = parseInt(input.getAttribute("max") || input.getAttribute("data-question-max") || "0", 10);
+    if (!Number.isNaN(max) && max > 0 && nextValue > max) nextValue = max;
+    input.value = String(nextValue);
+    return nextValue;
+  }
+
+  function recalcTotal() {
+    if (!totalInput || manualTotalActive || !scoreInputs.length) return;
+    var total = scoreInputs.reduce(function (sum, input) {
+      return sum + normalizeInput(input);
+    }, 0);
+    totalInput.value = String(total);
+  }
+
+  scoreInputs.forEach(function (input) {
+    input.addEventListener("input", recalcTotal);
+    input.addEventListener("blur", function () {
+      normalizeInput(input);
+      recalcTotal();
+    });
+  });
+
+  if (totalInput && !totalInput.disabled) {
+    totalInput.addEventListener("input", function () {
+      manualTotalActive = Boolean((totalInput.value || "").trim());
+      if (!manualTotalActive) recalcTotal();
+    });
+    totalInput.addEventListener("blur", function () {
+      if ((totalInput.value || "").trim()) normalizeInput(totalInput);
+    });
+  }
+
+  if (!manualTotalActive) recalcTotal();
+
+  if (form) {
+    form.addEventListener("submit", function (event) {
+      var submitButton = form.querySelector("button[type='submit']");
+      if (submitConfirmed || !submitButton || submitButton.disabled) {
+        submitConfirmed = false;
+        return;
+      }
+      event.preventDefault();
+      if (typeof window.openActionConfirmModal !== "function") {
+        submitConfirmed = true;
+        form.requestSubmit ? form.requestSubmit() : form.submit();
+        return;
+      }
+      window.openActionConfirmModal({
+        title: "Qiymətləndirməni təsdiqləyin",
+        message: "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?",
+        confirmLabel: submitButton.textContent.trim(),
+        confirmButtonClass: "btn btn-success",
+        onConfirm: function () {
+          submitConfirmed = true;
+          form.requestSubmit ? form.requestSubmit() : form.submit();
+        },
+      });
+    });
+  }
+
+  document.querySelectorAll(".answer-accordion-btn").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var card = document.getElementById("grade-answer-" + button.getAttribute("data-grade-toggle"));
+      if (!card) return;
+      var collapsed = card.classList.toggle("is-collapsed");
+      var icon = button.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-chevron-down", collapsed);
+        icon.classList.toggle("fa-chevron-up", !collapsed);
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}
