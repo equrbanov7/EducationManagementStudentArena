@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var organizationSearchInput = document.getElementById("organizationSearchInput");
     var organizationSearchLabel = document.getElementById("organizationSearchLabel");
     var organizationSearchList = document.getElementById("organizationSearchList");
+    var organizationSearchField = organizationSearchInput ? organizationSearchInput.closest(".register-form-field") : null;
     var studentJoinHint = document.getElementById("studentJoinHint");
     var organizationSelect = document.getElementById("id_join_organization");
     var organizationSearchDebounceTimer = null;
@@ -555,6 +556,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 card.classList.add("is-selected");
                 showPersonaStep(orgType);
+                updateSelectionSummary();
+                saveSignupDraft();
             });
         });
     }
@@ -575,6 +578,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (shouldShowInstitutionStep()) {
                     wizardNext(3);
                 }
+                saveSignupDraft();
             });
         });
     }
@@ -589,11 +593,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 registrationTypeSelect.value = "";
                 registrationTypeSelect.dispatchEvent(new Event("change", { bubbles: true }));
             }
+            saveSignupDraft();
         });
     }
 
     function hideOrganizationSearchList() {
         if (organizationSearchList) organizationSearchList.hidden = true;
+    }
+
+    function keepOrganizationSearchFocus(button) {
+        if (!button) return;
+        button.addEventListener("mousedown", function (event) {
+            event.preventDefault();
+        });
     }
 
     function organizationOptionLabel(organization) {
@@ -645,7 +657,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isNoOrganizationSelected()) {
             noOrganizationButton.classList.add("is-selected");
         }
-        noOrganizationButton.addEventListener("click", selectNoOrganization);
+        keepOrganizationSearchFocus(noOrganizationButton);
+        noOrganizationButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            selectNoOrganization();
+        });
         organizationSearchList.appendChild(noOrganizationButton);
 
         if (!options.length) {
@@ -667,7 +683,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 optionButton.classList.add("is-selected");
             }
 
-            optionButton.addEventListener("click", function () {
+            keepOrganizationSearchFocus(optionButton);
+            optionButton.addEventListener("click", function (event) {
+                event.preventDefault();
                 if (organizationSelect) {
                     organizationSelect.value = String(organization.id);
                     organizationSelect.dispatchEvent(new Event("change", { bubbles: true }));
@@ -912,6 +930,8 @@ document.addEventListener("DOMContentLoaded", function () {
             values.organizationSearchNoOrganization = organizationSearchInput.dataset.noOrganizationSelected === "1";
         }
 
+        values.selectedOrgType = _selectedOrgType || getRegistrationMeta().orgType || "";
+
         return {
             step: currentWizardStep(),
             values: values,
@@ -940,10 +960,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function restoreSignupDraft() {
         var draftStorage = getDraftStorage();
-        if (!draftStorage) return;
+        if (!draftStorage) return null;
 
         var rawDraft = draftStorage.getItem(signupDraftStorageKey);
-        if (!rawDraft) return;
+        if (!rawDraft) return null;
 
         try {
             var parsedDraft = JSON.parse(rawDraft);
@@ -951,7 +971,13 @@ document.addEventListener("DOMContentLoaded", function () {
             var restoredSelectFields = [];
 
             Object.keys(values).forEach(function (name) {
-                if (name === "organizationSearchInput" || name === "organizationSearchNoOrganization") return;
+                if (
+                    name === "organizationSearchInput" ||
+                    name === "organizationSearchNoOrganization" ||
+                    name === "selectedOrgType"
+                ) {
+                    return;
+                }
 
                 var field = registerForm ? registerForm.elements.namedItem(name) : null;
                 if (!field || field.type === "password") return;
@@ -981,6 +1007,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     : "";
             }
 
+            if (values.selectedOrgType && (!registrationTypeSelect || !registrationTypeSelect.value)) {
+                showPersonaStep(values.selectedOrgType);
+            }
+
             clearUnsupportedIndividualSelection();
             updateStep2State();
             syncStep2CardSelection();
@@ -1005,9 +1035,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             updateSelectionSummary();
+            return parsedDraft;
         } catch (error) {
             clearSignupDraft();
-            return;
+            return null;
         }
     }
 
@@ -1172,6 +1203,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (organizationSearchInput) {
+        function openOrganizationSearchList() {
+            if (!isJoinMode(currentSelection().mode)) return;
+            if (organizationSearchDebounceTimer) {
+                clearTimeout(organizationSearchDebounceTimer);
+                organizationSearchDebounceTimer = null;
+            }
+            populateJoinOrganizationOptions(organizationSearchInput.value);
+            renderOrganizationSearchList(organizationSearchInput.value);
+        }
+
         organizationSearchInput.addEventListener("input", function () {
             if (!isJoinMode(currentSelection().mode)) return;
 
@@ -1197,18 +1238,12 @@ document.addEventListener("DOMContentLoaded", function () {
             organizationSearchDebounceTimer = window.setTimeout(function () {
                 populateJoinOrganizationOptions(organizationSearchInput.value);
                 renderOrganizationSearchList(organizationSearchInput.value);
-            }, 1000);
+                saveSignupDraft();
+            }, 150);
         });
 
-        organizationSearchInput.addEventListener("focus", function () {
-            if (!isJoinMode(currentSelection().mode)) return;
-            if (organizationSearchDebounceTimer) {
-                clearTimeout(organizationSearchDebounceTimer);
-                organizationSearchDebounceTimer = null;
-            }
-            populateJoinOrganizationOptions(organizationSearchInput.value);
-            renderOrganizationSearchList(organizationSearchInput.value);
-        });
+        organizationSearchInput.addEventListener("focus", openOrganizationSearchList);
+        organizationSearchInput.addEventListener("click", openOrganizationSearchList);
     }
 
     if (organizationSelect) {
@@ -1225,9 +1260,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!organizationSearchInput || !organizationSearchList) return;
         if (!isJoinMode(currentSelection().mode)) return;
 
-        var clickInsideInput = organizationSearchInput.contains(event.target);
-        var clickInsideList = organizationSearchList.contains(event.target);
-        if (!clickInsideInput && !clickInsideList) {
+        var clickInsideSearchField = organizationSearchField && organizationSearchField.contains(event.target);
+        if (!clickInsideSearchField) {
             hideOrganizationSearchList();
         }
     });
@@ -1345,12 +1379,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     var requestedStep = getRequestedWizardStep();
-    if (shouldRestoreSignupDraft() || requestedStep > 1) {
-        restoreSignupDraft();
-    }
-    syncLanguageSwitcherTargets(requestedStep);
+    var restoredDraft = restoreSignupDraft();
+    var restoredStep = restoredDraft && restoredDraft.step ? normalizeWizardStep(restoredDraft.step) : 1;
+    syncLanguageSwitcherTargets(requestedStep > 1 ? requestedStep : restoredStep);
     if (requestedStep > 1) {
         wizardNext(requestedStep);
+    } else if (restoredStep > 1) {
+        wizardNext(restoredStep);
     } else if (shouldRestoreSignupDraft()) {
         persistWizardStep(1);
     }
