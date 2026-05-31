@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Audit Log{% endblock %}
+{% block title %}{% trans "title" context "audit.list" %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="mb-1">Audit Log</h1>
+      <h1 class="mb-1">{% trans "heading" context "audit.list" %}</h1>
       <p class="text-muted mb-0">
         {% if current_organization %}
-          {{ current_organization.name }} üçün son fəaliyyət qeydləri
+          {{ current_organization.name }} — {% trans "subtitle_recent" context "audit.list" %}
         {% elif is_superadmin %}
-          Bütün təşkilatlar üzrə son fəaliyyət qeydləri
+          {% trans "subtitle_all_orgs" context "audit.list" %}
         {% else %}
-          Son fəaliyyət qeydləri
+          {% trans "subtitle_recent" context "audit.list" %}
         {% endif %}
       </p>
     </div>
@@ -25,18 +25,18 @@
       <table class="table table-striped align-middle">
         <thead>
           <tr>
-            <th scope="col">Time</th>
-            <th scope="col">User</th>
-            <th scope="col">Action</th>
-            <th scope="col">Resource</th>
-            <th scope="col">Organization</th>
+            <th scope="col">{% trans "col_time" context "audit.list" %}</th>
+            <th scope="col">{% trans "col_user" context "audit.list" %}</th>
+            <th scope="col">{% trans "col_action" context "audit.list" %}</th>
+            <th scope="col">{% trans "col_resource" context "audit.list" %}</th>
+            <th scope="col">{% trans "col_organization" context "audit.list" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for log in audit_logs %}
             <tr>
               <td>{{ log.created_at }}</td>
-              <td>{% if log.user %}{{ log.user.username }}{% else %}Anonymous{% endif %}</td>
+              <td>{% if log.user %}{{ log.user.username }}{% else %}{% trans "anonymous" context "audit.list" %}{% endif %}</td>
               <td>{{ log.get_action_display|default:log.action }}</td>
               <td>{{ log.get_resource_display }}</td>
               <td>{% if log.organization %}{{ log.organization.name }}{% else %}-{% endif %}</td>
@@ -47,7 +47,7 @@
     </div>
   {% else %}
     <div class="alert alert-light border">
-      Hələ audit qeydi yoxdur.
+      {% trans "empty" context "audit.list" %}
     </div>
   {% endif %}
 </div>
