@@ -3310,7 +3310,7 @@ msgstr "Этот адрес электронной почты уже испол�
 #: apps/accounts/views.py:1244
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr ""
+msgstr "Для студента требуется указать университет или школу."
 "Для роли Студента требуется название университета или идентификатор школы."
 
 #: apps/accounts/views.py:1250
@@ -3321,7 +3321,7 @@ msgstr "Профиль успешно обновлен!"
 #: apps/accounts/views.py:1711
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr ""
+msgstr "Создайте новую публикацию и выберите, кто её увидит."
 "Используйте кнопку ниже, чтобы создать новую публикацию в редакторе по "
 "умолчанию."
 
@@ -3363,7 +3363,7 @@ msgstr "Вы можете управлять пользователями тол
 #: apps/accounts/views.py:1830
 msgctxt "accounts.manage_roles.message"
 msgid "insufficient_level_for_target_user"
-msgstr ""
+msgstr "Вашего уровня недостаточно для этого пользователя."
 "Ваш уровень недостаточно высок, чтобы управлять ролью этого пользователя."
 
 #: apps/accounts/views.py:1845
@@ -3440,7 +3440,7 @@ msgstr "Пользователь уже подключен к другой ор�
 #: apps/accounts/views.py:2218
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr ""
+msgstr "Пользователь не выбрал эту организацию при регистрации."
 "Этот пользователь не дал согласия при регистрации и не может присоединиться "
 "к вашей организации."
 
@@ -3452,7 +3452,7 @@ msgstr "У вас нет разрешения на изменение роли �
 #: apps/accounts/views.py:2274
 msgctxt "accounts.role_assignment.message"
 msgid "user_added_to_org_with_role"
-msgstr ""
+msgstr "Пользователь добавлен в организацию с ролью."
 "%(username)s добавлен в организацию и ему присвоена роль `%(role_display)s`."
 
 #: apps/accounts/views.py:2289
@@ -3488,7 +3488,7 @@ msgstr "Неверный выбор разрешения."
 #: apps/accounts/views.py:2460
 msgctxt "accounts.permission_editor.message"
 msgid "grant_only_owned_or_grantable_permissions"
-msgstr ""
+msgstr "Вы можете предоставлять только те разрешения, которыми владеете или вправе выдавать."
 "Вы можете предоставлять только разрешения, которыми владеете или можете "
 "предоставить."
 
@@ -3534,20 +3534,20 @@ msgstr "Настройки ИИ успешно сохранены."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr ""
+msgstr "Регистрация завершена, ваша заявка зарегистрирована."
 "Регистрация завершена, заявка в организацию сохранена. Подтвердите код из "
 "email, чтобы продолжить."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr ""
+msgstr "Регистрация завершена, теперь вы можете войти."
 "Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
 msgid "verification_email_not_found_register_again"
-msgstr ""
+msgstr "Письмо для подтверждения не найдено, зарегистрируйтесь снова."
 "Электронная почта для подтверждения не найдена. Зарегистрируйтесь еще раз."
 
 #: apps/accounts/views.py:2747 apps/accounts/views.py:2791
@@ -3587,7 +3587,7 @@ msgstr "Вы успешно выступили."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr ""
+msgstr "Не удалось отправить письмо с OTP-кодом."
 "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/assignments/admin.py:23
@@ -6248,7 +6248,7 @@ msgstr ""
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
-msgstr ""
+msgstr "Письмо с подтверждением отправлено."
 "На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте"
 " почту."
 
@@ -6339,7 +6339,7 @@ msgstr "Новый код отправлен."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr ""
+msgstr "Не удалось отправить письмо с OTP-кодом."
 "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/blog/views.py:633
@@ -20526,7 +20526,7 @@ msgstr "Создал"
 
 #: contact/about/footer/navbar
 msgid "Email"
-msgstr "Email"
+msgstr "Эл. почта"
 
 #: contact/about/footer/navbar
 msgid "EMSArena loqo"
@@ -21637,3 +21637,712 @@ msgstr "Завершение"
 msgctxt "exams.template.exam_live_monitor"
 msgid "questions_answered"
 msgstr "вопросов отвечено"
+
+msgctxt "audit.list"
+msgid "title"
+msgstr "Журнал аудита"
+
+msgctxt "audit.list"
+msgid "heading"
+msgstr "Журнал аудита"
+
+msgctxt "audit.list"
+msgid "subtitle_all_orgs"
+msgstr "Последние записи активности по всем организациям"
+
+msgctxt "audit.list"
+msgid "subtitle_recent"
+msgstr "Последние записи активности"
+
+msgctxt "audit.list"
+msgid "col_time"
+msgstr "Время"
+
+msgctxt "audit.list"
+msgid "col_user"
+msgstr "Пользователь"
+
+msgctxt "audit.list"
+msgid "col_action"
+msgstr "Действие"
+
+msgctxt "audit.list"
+msgid "col_resource"
+msgstr "Ресурс"
+
+msgctxt "audit.list"
+msgid "col_organization"
+msgstr "Организация"
+
+msgctxt "audit.list"
+msgid "anonymous"
+msgstr "Аноним"
+
+msgctxt "audit.list"
+msgid "empty"
+msgstr "Записей аудита пока нет."
+
+msgctxt "common"
+msgid "search"
+msgstr "Поиск"
+
+msgctxt "common"
+msgid "search_clear"
+msgstr "Очистить поиск"
+
+msgctxt "common"
+msgid "save"
+msgstr "Сохранить"
+
+msgctxt "common"
+msgid "delete"
+msgstr "Удалить"
+
+msgctxt "common"
+msgid "confirm"
+msgstr "Подтвердить"
+
+msgctxt "common"
+msgid "cancel"
+msgstr "Отмена"
+
+msgctxt "common"
+msgid "close"
+msgstr "Закрыть"
+
+msgctxt "common"
+msgid "select_all"
+msgstr "Выбрать всё"
+
+msgctxt "common"
+msgid "reject"
+msgstr "Отклонить"
+
+msgctxt "common"
+msgid "resend_code"
+msgstr "Отправить код повторно"
+
+msgctxt "accounts.student_org"
+msgid "students_title"
+msgstr "Студенты организации"
+
+msgctxt "accounts.student_org"
+msgid "col_user"
+msgstr "Пользователь"
+
+msgctxt "accounts.student_org"
+msgid "col_username"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.student_org"
+msgid "col_email"
+msgstr "Эл. почта"
+
+msgctxt "accounts.student_org"
+msgid "col_action"
+msgstr "Действие"
+
+msgctxt "accounts.student_org"
+msgid "col_selected_org"
+msgstr "Выбранная организация"
+
+msgctxt "accounts.student_org"
+msgid "col_message"
+msgstr "Сообщение"
+
+msgctxt "accounts.student_org"
+msgid "col_status_note"
+msgstr "Статус/Примечание"
+
+msgctxt "accounts.student_org"
+msgid "col_role_type"
+msgstr "Тип роли"
+
+msgctxt "accounts.student_org"
+msgid "col_sender"
+msgstr "Отправитель"
+
+msgctxt "accounts.student_org"
+msgid "col_request_date"
+msgstr "Дата заявки"
+
+msgctxt "accounts.student_org"
+msgid "remove_from_org"
+msgstr "Удалить из организации"
+
+msgctxt "accounts.student_org"
+msgid "no_students"
+msgstr "Студенты не найдены."
+
+msgctxt "accounts.student_org"
+msgid "pending_title"
+msgstr "Студенты, ожидающие подтверждения"
+
+msgctxt "accounts.student_org"
+msgid "pending_desc"
+msgstr "Здесь вы можете добавить студентов, выбравших эту организацию при регистрации, по одному или всех сразу. Заявки тех, кто уже принят в другую организацию, отобразятся как «Закрыто»."
+
+msgctxt "accounts.student_org"
+msgid "pending_search_ph"
+msgstr "Поиск студентов, ожидающих подтверждения..."
+
+msgctxt "accounts.student_org"
+msgid "add_selected"
+msgstr "Добавить выбранных в организацию"
+
+msgctxt "accounts.student_org"
+msgid "add_selected_count"
+msgstr "Добавить выбранных в организацию (выбрано: {count})"
+
+msgctxt "accounts.student_org"
+msgid "min_one_student"
+msgstr "Выберите хотя бы 1 студента"
+
+msgctxt "accounts.student_org"
+msgid "min_one"
+msgstr "Выберите хотя бы 1"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected"
+msgstr "Удалить выбранных"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected_count"
+msgstr "Удалить выбранных (выбрано: {count})"
+
+msgctxt "accounts.student_org"
+msgid "add_to_org"
+msgstr "Добавить в организацию"
+
+msgctxt "accounts.student_org"
+msgid "no_pending"
+msgstr "Нет студентов, ожидающих подтверждения."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_title"
+msgstr "Студенты без организации"
+
+msgctxt "accounts.student_org"
+msgid "unassigned_desc"
+msgstr "Отправьте приглашения студентам, которые зарегистрировались без выбора организации. Они присоединятся после принятия приглашения в личном кабинете."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_search_ph"
+msgstr "Поиск студентов без организации..."
+
+msgctxt "accounts.student_org"
+msgid "invite_selected"
+msgstr "Пригласить выбранных"
+
+msgctxt "accounts.student_org"
+msgid "invite_selected_count"
+msgstr "Пригласить выбранных (выбрано: {count})"
+
+msgctxt "accounts.student_org"
+msgid "invite"
+msgstr "Пригласить"
+
+msgctxt "accounts.student_org"
+msgid "no_invite_targets"
+msgstr "Не найдено студентов для приглашения."
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_title"
+msgstr "Отправленные приглашения"
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_desc"
+msgstr "Вы можете отозвать ещё не принятые приглашения по одному или массово."
+
+msgctxt "accounts.student_org"
+msgid "sent_invite_search_ph"
+msgstr "Поиск отправленных приглашений..."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected"
+msgstr "Отозвать выбранные"
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_count"
+msgstr "Отозвать выбранные (выбрано: {count})"
+
+msgctxt "accounts.student_org"
+msgid "revoke"
+msgstr "Отозвать"
+
+msgctxt "accounts.student_org"
+msgid "no_active_invite"
+msgstr "Нет активных приглашений для отзыва."
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_title"
+msgstr "Заявки преподавателей / сотрудников"
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_desc"
+msgstr "В этом разделе вы можете просматривать, подтверждать или отклонять заявки пользователей, которые зарегистрировались как преподаватель или сотрудник и выбрали эту организацию."
+
+msgctxt "accounts.student_org"
+msgid "ts_search_ph"
+msgstr "Поиск преподавателя / сотрудника..."
+
+msgctxt "accounts.student_org"
+msgid "role_teacher"
+msgstr "Преподаватель"
+
+msgctxt "accounts.student_org"
+msgid "role_staff"
+msgstr "Сотрудник"
+
+msgctxt "accounts.student_org"
+msgid "role_student"
+msgstr "Студент"
+
+msgctxt "accounts.student_org"
+msgid "approve"
+msgstr "Подтвердить"
+
+msgctxt "accounts.student_org"
+msgid "no_ts_requests"
+msgstr "Нет заявок преподавателей / сотрудников, ожидающих подтверждения."
+
+msgctxt "accounts.student_org"
+msgid "revoke_invite"
+msgstr "Отозвать приглашение"
+
+msgctxt "accounts.student_org"
+msgid "revoke_confirm"
+msgstr "Подтвердите, что хотите отозвать выбранные приглашения."
+
+msgctxt "accounts.student_org"
+msgid "remove_lead"
+msgstr "Подтвердите, что хотите удалить указанного пользователя из организации."
+
+msgctxt "accounts.student_org"
+msgid "field_name"
+msgstr "Имя"
+
+msgctxt "accounts.student_org"
+msgid "field_org"
+msgstr "Организация"
+
+msgctxt "accounts.student_org"
+msgid "field_role_change"
+msgstr "Изменяемая роль"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_label"
+msgstr "Причина удаления (обязательно)"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_ph"
+msgstr "Причина удаления..."
+
+msgctxt "accounts.student_org"
+msgid "add_lead"
+msgstr "Подтвердите добавление выбранного(ых) пользователя(ей) в организацию."
+
+msgctxt "accounts.student_org"
+msgid "invite_lead"
+msgstr "Подтвердите отправку приглашения выбранному(ым) пользователю(ям)."
+
+msgctxt "accounts.student_org"
+msgid "no_active_org"
+msgstr "Активная организация не найдена."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_org"
+msgstr "Организация"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_type"
+msgstr "Тип"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_owner"
+msgstr "Владелец"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_features"
+msgstr "Возможности"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "no_org"
+msgstr "Организации не найдены."
+
+msgctxt "blog.create_question"
+msgid "title"
+msgstr "Создать вопрос"
+
+msgctxt "blog.create_question"
+msgid "subtitle"
+msgstr "Создайте новый вопрос и выберите, кто его увидит."
+
+msgctxt "blog.create_question"
+msgid "save"
+msgstr "Сохранить вопрос"
+
+msgctxt "blog.create_question"
+msgid "my_questions"
+msgstr "Мои вопросы"
+
+msgctxt "admin.verify_otp"
+msgid "description"
+msgstr "Доступ к панели администратора открывается только после подтверждения OTP. Введите 6-значный код, отправленный на ваш адрес эл. почты."
+
+msgctxt "admin.verify_otp"
+msgid "expiry"
+msgstr "Код действителен {minutes} минут."
+
+msgctxt "admin.verify_otp"
+msgid "messages_label"
+msgstr "Уведомления"
+
+msgctxt "admin.verify_otp"
+msgid "errors_label"
+msgstr "Сообщения об ошибках"
+
+msgctxt "admin.verify_otp"
+msgid "otp_errors_label"
+msgstr "Ошибки OTP"
+
+msgctxt "admin.verify_otp"
+msgid "retry_note"
+msgstr "Подождите {seconds} секунд перед повторной попыткой."
+
+msgctxt "admin.verify_otp"
+msgid "submit"
+msgstr "Подтвердить"
+
+msgctxt "admin.verify_otp"
+msgid "resend"
+msgstr "Отправить код повторно"
+
+msgctxt "accounts.student_org"
+msgid "student_search_ph"
+msgstr "Поиск студентов..."
+
+msgctxt "accounts.student_org"
+msgid "this_user"
+msgstr "Этот пользователь"
+
+msgctxt "accounts.student_org"
+msgid "revoke_single_suffix"
+msgstr "— подтвердите, что хотите отозвать отправленное приглашение."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_confirm"
+msgstr "Подтвердите, что хотите отозвать выбранные приглашения."
+
+msgctxt "accounts.student_org"
+msgid "selected_invite_count"
+msgstr "Выбрано приглашений"
+
+msgctxt "accounts.student_org"
+msgid "select_one_invite_first"
+msgstr "Сначала выберите хотя бы одно приглашение."
+
+msgctxt "accounts.student_org"
+msgid "confirm_disabled_hint"
+msgstr "В этом случае кнопка подтверждения отключена."
+
+msgctxt "accounts.student_org"
+msgid "add_lead_single"
+msgstr "Подтвердите добавление пользователя в организацию."
+
+msgctxt "accounts.student_org"
+msgid "selected_user_count"
+msgstr "Выбрано пользователей"
+
+msgctxt "accounts.student_org"
+msgid "invite_lead_single"
+msgstr "Подтвердите отправку приглашения пользователю."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "title"
+msgstr "Возможности организации"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "intro"
+msgstr "Здесь вы можете включать или отключать функции видимости проверки для каждой организации. Когда функция включена, преподаватель видит имя студента ещё до окончания анонимного окна, при этом окно редактирования оценки остаётся прежним."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "flags_title"
+msgstr "Флаги видимости проверки"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "code"
+msgstr "Код"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "active_name_visible"
+msgstr "Активно, имя видно"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "default_anonymity"
+msgstr "Действует анонимность по умолчанию"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "restore_anonymous"
+msgstr "Вернуть анонимную проверку"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "activate"
+msgstr "Активировать"
+
+msgctxt "accounts.pending_review_detail"
+msgid "title"
+msgstr "Проверка"
+
+msgctxt "accounts.pending_review_detail"
+msgid "subtitle"
+msgstr "Детали проверки"
+
+msgctxt "accounts.pending_review_detail"
+msgid "back"
+msgstr "Назад"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student_answer"
+msgstr "Ответ студента"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student"
+msgstr "Студент"
+
+msgctxt "accounts.pending_review_detail"
+msgid "exam"
+msgstr "Экзамен"
+
+msgctxt "accounts.pending_review_detail"
+msgid "date"
+msgstr "Дата"
+
+msgctxt "accounts.pending_review_detail"
+msgid "grading"
+msgstr "Оценивание"
+
+msgctxt "accounts.pending_review_detail"
+msgid "score_per_question"
+msgstr "Балл за вопрос"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback"
+msgstr "Отзыв"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback_ph"
+msgstr "Напишите краткий и понятный отзыв для студента"
+
+msgctxt "accounts.pending_review_detail"
+msgid "save_grade"
+msgstr "Сохранить оценку"
+
+msgctxt "profile.category_management"
+msgid "search_ph"
+msgstr "Поиск категорий..."
+
+msgctxt "profile.category_management"
+msgid "search"
+msgstr "Поиск"
+
+msgctxt "profile.category_management"
+msgid "search_clear"
+msgstr "Очистить поиск"
+
+msgctxt "profile.category_management"
+msgid "edit"
+msgstr "Редактировать"
+
+msgctxt "profile.category_management"
+msgid "delete"
+msgstr "Удалить"
+
+msgctxt "profile.category_management"
+msgid "empty"
+msgstr "Категорий пока нет."
+
+msgctxt "profile.category_management"
+msgid "save"
+msgstr "Сохранить"
+
+msgctxt "profile.category_management"
+msgid "cancel"
+msgstr "Отмена"
+
+msgctxt "profile.category_management"
+msgid "delete_confirm"
+msgstr "Подтвердить удаление"
+
+msgid "Mövcud şifrə"
+msgstr "Текущий пароль"
+
+msgid "Yeni şifrə"
+msgstr "Новый пароль"
+
+msgid "Yeni şifrəni təkrarla"
+msgstr "Повторите новый пароль"
+
+msgctxt "profile.category_management"
+msgid "eyebrow"
+msgstr "Управление"
+
+msgctxt "profile.category_management"
+msgid "title"
+msgstr "Управление категориями"
+
+msgctxt "profile.category_management"
+msgid "subtitle"
+msgstr "Здесь отображаются категории по умолчанию, новые и подкатегории."
+
+msgctxt "profile.category_management"
+msgid "root_categories"
+msgstr "основных категорий"
+
+msgctxt "profile.category_management"
+msgid "create_new"
+msgstr "Создать новую категорию"
+
+msgctxt "profile.category_management"
+msgid "search_ph_names"
+msgstr "Поиск по названиям AZ, EN, RU, TR"
+
+msgctxt "profile.category_management"
+msgid "reset"
+msgstr "Сбросить"
+
+msgctxt "profile.category_management"
+msgid "root_category"
+msgstr "Основная категория"
+
+msgctxt "profile.category_management"
+msgid "default"
+msgstr "По умолчанию"
+
+msgctxt "profile.category_management"
+msgid "type_category"
+msgstr "категорию"
+
+msgctxt "profile.category_management"
+msgid "type_subcategory"
+msgstr "подкатегорию"
+
+msgctxt "profile.category_management"
+msgid "direct_posts"
+msgstr "прямых публикаций"
+
+msgctxt "profile.category_management"
+msgid "show_subcategories"
+msgstr "Показать подкатегории"
+
+msgctxt "profile.category_management"
+msgid "hide_subcategories"
+msgstr "Скрыть подкатегории"
+
+msgctxt "profile.category_management"
+msgid "subcategories_count"
+msgstr "подкатегорий"
+
+msgctxt "profile.category_management"
+msgid "showing_filtered"
+msgstr "Показаны отфильтрованные"
+
+msgctxt "profile.category_management"
+msgid "clear_before_delete"
+msgstr "Чтобы удалить, сначала очистите связанные публикации или подкатегории."
+
+msgctxt "profile.category_management"
+msgid "zero_subcategories"
+msgstr "0 подкатегорий"
+
+msgctxt "profile.category_management"
+msgid "subcategory"
+msgstr "Подкатегория"
+
+msgctxt "profile.category_management"
+msgid "parent"
+msgstr "Родитель"
+
+msgctxt "profile.category_management"
+msgid "subcategory_has_posts"
+msgstr "К этой подкатегории привязаны публикации."
+
+msgctxt "profile.category_management"
+msgid "no_search_match"
+msgstr "Категории по запросу не найдены."
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title_named"
+msgstr "Редактировать категорию:"
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title"
+msgstr "Редактировать категорию"
+
+msgctxt "profile.category_management"
+msgid "close"
+msgstr "Закрыть"
+
+msgctxt "profile.category_management"
+msgid "delete_modal_title"
+msgstr "Удалить категорию"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_chip"
+msgstr "Отвечено"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "unanswered_chip"
+msgstr "Пусто"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "picked_option"
+msgstr "Выбрано"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_option"
+msgstr "Верно"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_answer"
+msgstr "Правильный ответ"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "paint_answer"
+msgstr "Ответ-рисунок отправлен"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "question"
+msgstr "Вопрос"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "last_run"
+msgstr "Последний запуск"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "file_empty"
+msgstr "пусто"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "lines"
+msgstr "строк"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_test"
+msgstr "Тест"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_written"
+msgstr "Письменный"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_paint"
+msgstr "Рисунок"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_coding"
+msgstr "Практический"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_manual_msg"
+msgstr "Разрешить студенту продолжить экзамен? Количество нарушений не изменится."
