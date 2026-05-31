@@ -3106,6 +3106,32 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertContains(response, "js-bulk-action-btn")
         self.assertContains(response, "disabled")
 
+    def test_questions_bank_truncates_overlong_search_query(self):
+        long_query = "A" * 320
+
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"q": long_query},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["search_query"], "A" * 240)
+        self.assertContains(response, 'maxlength="240"', html=False)
+
+    def test_questions_bank_drops_nested_exam_return_to_from_filter_forms(self):
+        nested_return_to = (
+            f"{reverse('exams:teacher_questions_bank', args=[self.exam.slug])}?return_to=/accounts/profile/"
+        )
+
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"from_section": "my-exams", "return_to": nested_return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["navigation_return_to"], "")
+        self.assertNotContains(response, 'name="return_to"', html=False)
+
     def test_questions_bank_bulk_deactivate_selected(self):
         selected = [str(self.questions[0].id), str(self.questions[1].id)]
         response = self.client.post(
@@ -3512,6 +3538,8 @@ class TeacherQuestionsBankViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Tələbəyə düşəcək sual sayı")
+        self.assertContains(response, "Praktiki sual bankı")
+        self.assertNotContains(response, "Yazılı sual bankı")
         self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="3"')
 
     def test_process_question_bank_success_redirect_preserves_return_navigation(self):
@@ -3865,6 +3893,21 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "exam_supervision.js")
         self.assertContains(response, "supervised: false")
+
+    def test_supervision_monitor_shows_exam_without_config_or_violations(self):
+        fresh_exam = Exam.objects.create(
+            author=self.teacher,
+            organization=self.org,
+            title="Fresh Monitor Exam",
+            exam_type="test",
+            is_active=True,
+        )
+
+        response = self.client.get(reverse("exams:supervision_monitor"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, fresh_exam.title)
+        self.assertContains(response, "Bu imtahana hələ heç kim qoşulmayıb.")
 
 
 # ════════════════════════════════════════════════════════════════════════════
