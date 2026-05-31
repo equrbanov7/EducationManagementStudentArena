@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}Create Question{% endblock %}
+{% block title %}{% trans "title" context "blog.create_question" %}{% endblock %}
 
 {% block content %}
 <div class="container py-4" style="max-width: 840px;">
   <div class="mb-4">
-    <h1 class="mb-2">Create Question</h1>
-    <p class="text-muted mb-0">Yeni sual yaradın və kimlərin görə biləcəyini seçin.</p>
+    <h1 class="mb-2">{% trans "title" context "blog.create_question" %}</h1>
+    <p class="text-muted mb-0">{% trans "subtitle" context "blog.create_question" %}</p>
   </div>
 
   <div class="card shadow-sm">
@@ -16,8 +16,8 @@
         {% csrf_token %}
         {{ form.as_p }}
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">Save Question</button>
-          <a href="{% url 'my_questions' %}" class="btn btn-outline-secondary">My Questions</a>
+          <button type="submit" class="btn btn-primary">{% trans "save" context "blog.create_question" %}</button>
+          <a href="{% url 'my_questions' %}" class="btn btn-outline-secondary">{% trans "my_questions" context "blog.create_question" %}</a>
         </div>
       </form>
     </div>

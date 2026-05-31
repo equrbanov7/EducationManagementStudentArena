@@ -18,14 +18,14 @@
             <input type="text"
                    name="student_org_search"
                    value="{{ student_search_query }}"
-                   placeholder="Tələbə axtar..."
+                   placeholder="{% trans "student_search_ph" context "accounts.student_org" %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'search_clear' context 'common' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -33,7 +33,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
         </button>
     </form>
 </div>
@@ -46,16 +46,16 @@
 {% else %}
 <div class="section-card">
     <div class="section-title">
-        <i class="fas fa-users"></i> Təşkilat tələbələri
+        <i class="fas fa-users"></i> {% trans "students_title" context "accounts.student_org" %}
     </div>
     <div class="table-responsive profile-section-table-scroll">
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_action" context "accounts.student_org" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -75,15 +75,15 @@
                             data-student-username="@{{ student.user.username }}"
                             data-student-email="{{ student.user.email }}"
                             data-student-org="{{ organization.name }}"
-                            data-student-role="Tələbə"
+                            data-student-role="{% trans 'role_student' context 'accounts.student_org' %}"
                             {% if not can_manage_students %}disabled{% endif %}>
-                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                            <i class="fas fa-user-minus"></i> {% trans "remove_from_org" context "accounts.student_org" %}
                         </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Tələbə tapılmadı.</td>
+                    <td colspan="4" class="text-center">{% trans "no_students" context "accounts.student_org" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -94,11 +94,10 @@
 
 <div class="section-card mt-4">
     <div class="section-title">
-        <i class="fas fa-user-clock"></i> Təsdiq gözləyən tələbələr
+        <i class="fas fa-user-clock"></i> {% trans "pending_title" context "accounts.student_org" %}
     </div>
     <p class="text-muted mb-3">
-        Qeydiyyat zamanı bu təşkilatı seçən tələbələri buradan tək-tək və ya hamısını seçib əlavə edə bilərsiniz.
-        Artıq başqa təşkilata qəbul olanların müraciəti "Bağlanıb" kimi görünəcək.
+        {% trans "pending_desc" context "accounts.student_org" %}
     </p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
@@ -115,14 +114,14 @@
             <input type="text"
                    name="student_org_pending_search"
                    value="{{ pending_search_query }}"
-                   placeholder="Təsdiq gözləyən tələbə axtar..."
+                   placeholder="{% trans "pending_search_ph" context "accounts.student_org" %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'search_clear' context 'common' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -130,7 +129,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
         </button>
     </form>
 
@@ -144,31 +143,31 @@
                        id="selectAllPendingStudents"
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "select_all" context "common" %}</span>
             </label>
             <div class="d-flex gap-2">
                 <button type="button"
                         class="btn btn-success btn-sm js-pending-add-confirm-bulk"
-                        data-default-label="Seçilənləri təşkilata əlavə et"
-                        data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"
-                        data-disabled-tooltip="Ən az 1 tələbə seçin"
+                        data-default-label="{% trans 'add_selected' context 'accounts.student_org' %}"
+                        data-selected-label="{% trans 'add_selected_count' context 'accounts.student_org' %}"
+                        data-disabled-tooltip="{% trans 'min_one_student' context 'accounts.student_org' %}"
                         data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                        title="Ən az 1 tələbə seçin"
+                        title="{% trans 'min_one_student' context 'accounts.student_org' %}"
                         {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
                     <i class="fas fa-check-double"></i>
-                    <span class="js-pending-add-bulk-label">Seçilənləri təşkilata əlavə et</span>
+                    <span class="js-pending-add-bulk-label">{% trans "add_selected" context "accounts.student_org" %}</span>
                 </button>
                 <button type="submit"
                         name="bulk_reject"
                         value="1"
                         class="btn btn-outline-danger btn-sm js-pending-remove-bulk"
-                        data-default-label="Seçilənləri sil"
-                        data-selected-label="Seçilənləri sil ({count} seçildi)"
-                        data-disabled-tooltip="Ən az 1 seçin"
+                        data-default-label="{% trans 'delete_selected' context 'accounts.student_org' %}"
+                        data-selected-label="{% trans 'delete_selected_count' context 'accounts.student_org' %}"
+                        data-disabled-tooltip="{% trans 'min_one' context 'accounts.student_org' %}"
                         data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                        title="Ən az 1 seçin"
+                        title="{% trans 'min_one' context 'accounts.student_org' %}"
                         {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
-                    <i class="fas fa-trash"></i> Seçilənləri sil
+                    <i class="fas fa-trash"></i> {% trans "delete_selected" context "accounts.student_org" %}
                 </button>
             </div>
         </div>
@@ -178,13 +177,13 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Seçilmiş təşkilat</th>
-                        <th>Mesaj</th>
-                        <th>Status/Qeyd</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_selected_org" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_message" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_status_note" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_action" context "accounts.student_org" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -198,7 +197,7 @@
                                    data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
                                    data-user-username="@{{ pending_request.user.username }}"
                                    data-user-email="{{ pending_request.user.email }}"
-                                   data-target-role="Tələbə"
+                                   data-target-role="{% trans 'role_student' context 'accounts.student_org' %}"
                                    {% if not pending_request.request_is_actionable %}disabled{% endif %}>
                         </td>
                         <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>
@@ -229,9 +228,9 @@
                                         data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
                                         data-user-username="@{{ pending_request.user.username }}"
                                         data-user-email="{{ pending_request.user.email }}"
-                                        data-target-role="Tələbə"
+                                        data-target-role="{% trans 'role_student' context 'accounts.student_org' %}"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Təşkilata əlavə et
+                                    <i class="fas fa-user-check"></i> {% trans "add_to_org" context "accounts.student_org" %}
                                 </button>
                                 {% endif %}
                                 <button type="submit"
@@ -239,7 +238,7 @@
                                         value="{{ pending_request.user.id }}"
                                         class="btn btn-outline-danger btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-trash"></i> Sil
+                                    <i class="fas fa-trash"></i> {% trans "delete" context "common" %}
                                 </button>
                             </div>
                         </td>
@@ -249,7 +248,7 @@
             </table>
         </div>
         {% if not pending_requested_students.paginator.count %}
-        <p class="text-center text-muted mt-2 mb-0">Təsdiq gözləyən tələbə yoxdur.</p>
+        <p class="text-center text-muted mt-2 mb-0">{% trans "no_pending" context "accounts.student_org" %}</p>
         {% endif %}
     </form>
     {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
@@ -257,10 +256,10 @@
 
 <div class="section-card mt-4">
     <div class="section-title">
-        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan tələbələr
+        <i class="fas fa-user-plus"></i> {% trans "unassigned_title" context "accounts.student_org" %}
     </div>
     <p class="text-muted mb-3">
-        Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə kabinetində qəbul etdikdən sonra təşkilata qoşulacaq.
+        {% trans "unassigned_desc" context "accounts.student_org" %}
     </p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
@@ -277,14 +276,14 @@
             <input type="text"
                    name="student_org_unassigned_search"
                    value="{{ unassigned_search_query }}"
-                   placeholder="Təşkilatsız tələbə axtar..."
+                   placeholder="{% trans "unassigned_search_ph" context "accounts.student_org" %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'search_clear' context 'common' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -292,7 +291,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
         </button>
     </form>
 
@@ -306,17 +305,17 @@
                        id="selectAllUnassignedStudents"
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "select_all" context "common" %}</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
-                    data-default-label="Seçilənlərə dəvət et"
-                    data-selected-label="Seçilənlərə dəvət et ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'invite_selected' context 'accounts.student_org' %}"
+                    data-selected-label="{% trans 'invite_selected_count' context 'accounts.student_org' %}"
+                    data-disabled-tooltip="{% trans 'min_one' context 'accounts.student_org' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'min_one' context 'accounts.student_org' %}"
                     {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
+                <i class="fas fa-paper-plane"></i> {% trans "invite_selected" context "accounts.student_org" %}
             </button>
         </div>
 
@@ -325,10 +324,10 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_action" context "accounts.student_org" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -342,7 +341,7 @@
                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
-                                   data-target-role="Tələbə"
+                                   data-target-role="{% trans 'role_student' context 'accounts.student_org' %}"
                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
@@ -355,15 +354,15 @@
                                     data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                     data-user-username="@{{ profile.user.username }}"
                                     data-user-email="{{ profile.user.email }}"
-                                    data-target-role="Tələbə"
+                                    data-target-role="{% trans 'role_student' context 'accounts.student_org' %}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-paper-plane"></i> Dəvət et
+                                <i class="fas fa-paper-plane"></i> {% trans "invite" context "accounts.student_org" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">Dəvət göndəriləcək tələbə tapılmadı.</td>
+                        <td colspan="5" class="text-center">{% trans "no_invite_targets" context "accounts.student_org" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -375,10 +374,10 @@
 
 <div class="section-card mt-4">
     <div class="section-title">
-        <i class="fas fa-paper-plane"></i> Göndərilmiş dəvətlər
+        <i class="fas fa-paper-plane"></i> {% trans "sent_invites_title" context "accounts.student_org" %}
     </div>
     <p class="text-muted mb-3">
-        Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə bilərsiniz.
+        {% trans "sent_invites_desc" context "accounts.student_org" %}
     </p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
@@ -395,14 +394,14 @@
             <input type="text"
                    name="student_org_sent_invite_search"
                    value="{{ sent_invite_search_query }}"
-                   placeholder="Göndərilən dəvət axtar..."
+                   placeholder="{% trans "sent_invite_search_ph" context "accounts.student_org" %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'search_clear' context 'common' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -410,7 +409,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
         </button>
     </form>
 
@@ -424,20 +423,20 @@
                        id="selectAllSentInvites"
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
-                <span class="form-check-label">Hamısını seç</span>
+                <span class="form-check-label">{% trans "select_all" context "common" %}</span>
             </label>
             <button type="button"
                     class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
                     data-bs-toggle="modal"
                     data-bs-target="#revokeSentInvitesConfirmModal"
                     data-revoke-mode="bulk"
-                    data-default-label="Seçilənləri geri çək"
-                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
-                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-default-label="{% trans 'revoke_selected' context 'accounts.student_org' %}"
+                    data-selected-label="{% trans 'revoke_selected_count' context 'accounts.student_org' %}"
+                    data-disabled-tooltip="{% trans 'min_one' context 'accounts.student_org' %}"
                     data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
-                    title="Ən az 1 seçin"
+                    title="{% trans 'min_one' context 'accounts.student_org' %}"
                     {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
-                <i class="fas fa-trash"></i> Seçilənləri geri çək
+                <i class="fas fa-trash"></i> {% trans "revoke_selected" context "accounts.student_org" %}
             </button>
         </div>
 
@@ -446,11 +445,11 @@
                 <thead>
                     <tr>
                         <th style="width: 44px;"></th>
-                        <th>İstifadəçi</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Göndərən</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_sender" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_action" context "accounts.student_org" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -476,13 +475,13 @@
                                     data-single-revoke-user-id="{{ invite.user.id }}"
                                     data-single-revoke-username="@{{ invite.user.username }}"
                                     {% if not can_manage_students %}disabled{% endif %}>
-                                <i class="fas fa-trash"></i> Geri çək
+                                <i class="fas fa-trash"></i> {% trans "revoke" context "accounts.student_org" %}
                             </button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Geri çəkiləcək aktiv dəvət yoxdur.</td>
+                        <td colspan="6" class="text-center">{% trans "no_active_invite" context "accounts.student_org" %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -494,13 +493,13 @@
 
 <div class="section-card mt-4">
     <div class="section-title">
-        <i class="fas fa-chalkboard-teacher"></i> Müəllim / İşçi müraciətləri
+        <i class="fas fa-chalkboard-teacher"></i> {% trans "ts_requests_title" context "accounts.student_org" %}
         {% if pending_teacher_staff_requests.paginator.count %}
         <span class="sidebar-menu-badge sidebar-menu-badge--warning ms-2">{{ pending_teacher_staff_requests.paginator.count }}</span>
         {% endif %}
     </div>
     <p class="text-muted mb-3">
-        Bu bölmədə müəllim və ya işçi olaraq qeydiyyatdan keçib bu təşkilatı seçən istifadəçilərin müraciətlərini görə, təsdiqləyə və ya rədd edə bilərsiniz.
+        {% trans "ts_requests_desc" context "accounts.student_org" %}
     </p>
     <form method="get"
           class="search-form mb-3 role-assignment-search-form"
@@ -518,14 +517,14 @@
             <input type="text"
                    name="student_org_ts_search"
                    value="{{ teacher_staff_search_query }}"
-                   placeholder="Müəllim / işçi axtar..."
+                   placeholder="{% trans "ts_search_ph" context "accounts.student_org" %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
                    data-standard-search-input>
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'search_clear' context 'common' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -533,7 +532,7 @@
         <button type="submit"
                 class="btn btn-primary role-assignment-search-submit"
                 data-standard-search-submit>
-            <i class="fas fa-search"></i> Axtar
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
         </button>
     </form>
 
@@ -541,13 +540,13 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Rol növü</th>
-                    <th>Mesaj</th>
-                    <th>Müraciət tarixi</th>
-                    <th>Əməliyyat</th>
+                    <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_role_type" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_message" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_request_date" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_action" context "accounts.student_org" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -558,9 +557,9 @@
                     <td>{{ ts_request.user.email }}</td>
                     <td>
                         {% if ts_request.role_type == "teacher" %}
-                            <span class="role-badge">Müəllim</span>
+                            <span class="role-badge">{% trans "role_teacher" context "accounts.student_org" %}</span>
                         {% elif ts_request.role_type == "staff" %}
-                            <span class="role-badge role-warning">İşçi</span>
+                            <span class="role-badge role-warning">{% trans "role_staff" context "accounts.student_org" %}</span>
                         {% else %}
                             <span class="role-badge">{{ ts_request.role_type }}</span>
                         {% endif %}
@@ -585,7 +584,7 @@
                                 <button type="submit"
                                         class="btn btn-success btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Təsdiqlə
+                                    <i class="fas fa-user-check"></i> {% trans "approve" context "accounts.student_org" %}
                                 </button>
                             </form>
                             <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -596,7 +595,7 @@
                                 <button type="submit"
                                         class="btn btn-outline-danger btn-sm"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-times"></i> Rədd et
+                                    <i class="fas fa-times"></i> {% trans "reject" context "common" %}
                                 </button>
                             </form>
                         </div>
@@ -607,7 +606,7 @@
         </table>
     </div>
     {% if not pending_teacher_staff_requests.paginator.count %}
-    <p class="text-center text-muted mt-2 mb-0">Təsdiq gözləyən müəllim / işçi müraciəti yoxdur.</p>
+    <p class="text-center text-muted mt-2 mb-0">{% trans "no_ts_requests" context "accounts.student_org" %}</p>
     {% endif %}
     {% include "partials/_pagination.html" with page_obj=pending_teacher_staff_requests extra_query=teacher_staff_pagination_query page_param=teacher_staff_page_param %}
 </div>
@@ -622,19 +621,19 @@
                 <input type="hidden" name="single_revoke_user_id" id="revokeSentInvitesSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="revokeSentInvitesSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Dəvəti geri çək</h5>
+                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>{% trans "revoke_invite" context "accounts.student_org" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p class="mb-0" id="revokeSentInvitesModalText">
-                        Seçilən dəvətləri geri çəkmək istədiyinizi təsdiqləyin.
+                        {% trans "revoke_confirm" context "accounts.student_org" %}
                     </p>
                     <small class="text-muted d-block mt-2" id="revokeSentInvitesModalHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
                     <button type="submit" class="btn btn-danger" id="revokeSentInvitesConfirmBtn">
-                        <i class="fas fa-trash"></i> Təsdiqlə
+                        <i class="fas fa-trash"></i> {% trans "confirm" context "common" %}
                     </button>
                 </div>
             </form>
@@ -650,19 +649,19 @@
                 <input type="hidden" name="action" value="remove_student">
                 <input type="hidden" name="user_id" id="removeStudentModalUserId">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>Təşkilatdan uzaqlaşdır</h5>
+                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>{% trans "remove_from_org" context "accounts.student_org" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3">Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin.</p>
+                    <p class="mb-3">{% trans "remove_lead" context "accounts.student_org" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="removeStudentModalFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="removeStudentModalUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="removeStudentModalEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="removeStudentModalOrg">-</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="removeStudentModalRole">-</span></li>
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="removeStudentModalFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="removeStudentModalUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="removeStudentModalEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="removeStudentModalOrg">-</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="removeStudentModalRole">-</span></li>
                     </ul>
-                    <label for="removeStudentReasonInput" class="form-label mt-3">Uzaqlaşdırma səbəbi (məcburi) <span class="text-danger">*</span></label>
+                    <label for="removeStudentReasonInput" class="form-label mt-3">{% trans "remove_reason_label" context "accounts.student_org" %} <span class="text-danger">*</span></label>
                     <textarea
                         id="removeStudentReasonInput"
                         name="remove_reason"
@@ -670,12 +669,12 @@
                         rows="3"
                         maxlength="280"
                         required
-                        placeholder="Uzaqlaşdırma səbəbi..."></textarea>
+                        placeholder="{% trans "remove_reason_ph" context "accounts.student_org" %}"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                        <i class="fas fa-user-minus"></i> {% trans "remove_from_org" context "accounts.student_org" %}
                     </button>
                 </div>
             </form>
@@ -693,24 +692,24 @@
                 <input type="hidden" name="single_user_id" id="pendingAddSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="pendingAddSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Təşkilata əlavə et</h5>
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>{% trans "add_to_org" context "accounts.student_org" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3" id="pendingAddLeadText">Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin.</p>
+                    <p class="mb-3" id="pendingAddLeadText">{% trans "add_lead" context "accounts.student_org" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="pendingAddModalFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="pendingAddModalUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="pendingAddModalEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="pendingAddModalRole">Tələbə</span></li>
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="pendingAddModalFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="pendingAddModalUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="pendingAddModalEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="pendingAddModalRole">Tələbə</span></li>
                     </ul>
                     <small class="text-muted d-block mt-2" id="pendingAddModalHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
                     <button type="submit" class="btn btn-success" id="pendingAddConfirmBtn">
-                        <i class="fas fa-user-check"></i> Təşkilata əlavə et
+                        <i class="fas fa-user-check"></i> {% trans "add_to_org" context "accounts.student_org" %}
                     </button>
                 </div>
             </form>
@@ -728,24 +727,24 @@
                 <input type="hidden" name="single_invite_user_id" id="inviteConfirmSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="inviteConfirmSelectedUserIds">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Dəvət et</h5>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>{% trans "invite" context "accounts.student_org" %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3" id="inviteConfirmLeadText">Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin.</p>
+                    <p class="mb-3" id="inviteConfirmLeadText">{% trans "invite_lead" context "accounts.student_org" %}</p>
                     <ul class="list-unstyled mb-0">
-                        <li><strong>Ad:</strong> <span id="inviteConfirmFullName">-</span></li>
-                        <li><strong>Username:</strong> <span id="inviteConfirmUsername">-</span></li>
-                        <li><strong>Email:</strong> <span id="inviteConfirmEmail">-</span></li>
-                        <li><strong>Təşkilat:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
-                        <li><strong>Dəyişəcək rol:</strong> <span id="inviteConfirmRole">Tələbə</span></li>
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="inviteConfirmFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="inviteConfirmUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="inviteConfirmEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="inviteConfirmRole">Tələbə</span></li>
                     </ul>
                     <small class="text-muted d-block mt-2" id="inviteConfirmHint"></small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
                     <button type="submit" class="btn btn-success" id="inviteConfirmBtn">
-                        <i class="fas fa-paper-plane"></i> Dəvət et
+                        <i class="fas fa-paper-plane"></i> {% trans "invite" context "accounts.student_org" %}
                     </button>
                 </div>
             </form>
@@ -763,14 +762,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var pendingRemoveBulkBtn = document.querySelector(".js-pending-remove-bulk");
     var pendingAddBulkLabel = document.querySelector(".js-pending-add-bulk-label");
     var pendingAddDefaultLabel = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "Seçilənləri təşkilata əlavə et")
-        : "Seçilənləri təşkilata əlavə et";
+        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "{% trans 'add_selected' context 'accounts.student_org' %}")
+        : "{% trans 'add_selected' context 'accounts.student_org' %}";
     var pendingAddSelectedLabelTemplate = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "Seçilənləri təşkilata əlavə et ({count} seçildi)")
-        : "Seçilənləri təşkilata əlavə et ({count} seçildi)";
+        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "{% trans 'add_selected_count' context 'accounts.student_org' %}")
+        : "{% trans 'add_selected_count' context 'accounts.student_org' %}";
     var pendingAddDisabledTooltip = pendingAddBulkBtn
-        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 tələbə seçin")
-        : "Ən az 1 tələbə seçin";
+        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'min_one_student' context 'accounts.student_org' %}")
+        : "{% trans 'min_one_student' context 'accounts.student_org' %}";
     var pendingAddPermissionDisabled = pendingAddBulkBtn
         ? pendingAddBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
@@ -778,8 +777,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? pendingRemoveBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
     var pendingRemoveDisabledTooltip = pendingRemoveBulkBtn
-        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
+        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'min_one' context 'accounts.student_org' %}")
+        : "{% trans 'min_one' context 'accounts.student_org' %}";
 
     var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
     var unassignedCheckboxes = Array.from(document.querySelectorAll(".unassigned-student-checkbox"));
@@ -791,8 +790,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? inviteBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
     var unassignedDisabledTooltip = inviteBulkBtn
-        ? (inviteBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
+        ? (inviteBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'min_one' context 'accounts.student_org' %}")
+        : "{% trans 'min_one' context 'accounts.student_org' %}";
 
     var selectAllSentInvites = document.getElementById("selectAllSentInvites");
     var sentInviteCheckboxes = Array.from(document.querySelectorAll(".sent-invite-checkbox"));
@@ -804,8 +803,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ? sentInviteRevokeBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
     var sentInviteDisabledTooltip = sentInviteRevokeBulkBtn
-        ? (sentInviteRevokeBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
+        ? (sentInviteRevokeBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'min_one' context 'accounts.student_org' %}")
+        : "{% trans 'min_one' context 'accounts.student_org' %}";
 
     function syncBulkButtonState(button, selectedCount, hasRows, isPermissionDisabled, tooltipText) {
         if (!button) {
@@ -991,7 +990,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fullName: checkbox.getAttribute("data-user-full-name") || "-",
                     username: checkbox.getAttribute("data-user-username") || "-",
                     email: checkbox.getAttribute("data-user-email") || "-",
-                    role: checkbox.getAttribute("data-target-role") || "Tələbə",
+                    role: checkbox.getAttribute("data-target-role") || "{% trans 'role_student' context 'accounts.student_org' %}",
                 };
             })
             .filter(function (entry) {
@@ -1039,12 +1038,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (mode === "single") {
                 var singleUserId = trigger ? (trigger.getAttribute("data-single-revoke-user-id") || "") : "";
-                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "Bu istifadəçi") : "Bu istifadəçi";
+                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "{% trans 'this_user' context 'accounts.student_org' %}") : "{% trans 'this_user' context 'accounts.student_org' %}";
                 if (revokeSingleInput) {
                     revokeSingleInput.value = singleUserId;
                 }
                 if (revokeTextNode) {
-                    revokeTextNode.textContent = singleUsername + " üçün göndərilmiş dəvəti geri çəkmək istədiyinizi təsdiqləyin.";
+                    revokeTextNode.textContent = singleUsername + " " + "{% trans 'revoke_single_suffix' context 'accounts.student_org' %}";
                 }
                 return;
             }
@@ -1056,17 +1055,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (selectedUserIds.length) {
                 if (revokeTextNode) {
-                    revokeTextNode.textContent = "Seçilmiş dəvətləri geri çəkmək istədiyinizi təsdiqləyin.";
+                    revokeTextNode.textContent = "{% trans 'revoke_selected_confirm' context 'accounts.student_org' %}";
                 }
                 if (revokeHintNode) {
-                    revokeHintNode.textContent = "Seçilən dəvət sayı: " + String(selectedUserIds.length);
+                    revokeHintNode.textContent = "{% trans 'selected_invite_count' context 'accounts.student_org' %}: " + String(selectedUserIds.length);
                 }
             } else {
                 if (revokeTextNode) {
-                    revokeTextNode.textContent = "Əvvəlcə ən azı bir dəvət seçin.";
+                    revokeTextNode.textContent = "{% trans 'select_one_invite_first' context 'accounts.student_org' %}";
                 }
                 if (revokeHintNode) {
-                    revokeHintNode.textContent = "Bu halda təsdiqlə düyməsi deaktiv edilir.";
+                    revokeHintNode.textContent = "{% trans 'confirm_disabled_hint' context 'accounts.student_org' %}";
                 }
                 if (revokeConfirmBtn) {
                     revokeConfirmBtn.disabled = true;
@@ -1094,7 +1093,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 fullNameNode.textContent = trigger.getAttribute("data-student-full-name") || "-";
             }
             if (usernameNode) {
-                usernameNode.textContent = trigger.getAttribute("data-student-username") || "Bu istifadəçi";
+                usernameNode.textContent = trigger.getAttribute("data-student-username") || "{% trans 'this_user' context 'accounts.student_org' %}";
             }
             if (emailNode) {
                 emailNode.textContent = trigger.getAttribute("data-student-email") || "-";
@@ -1103,7 +1102,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 orgNode.textContent = trigger.getAttribute("data-student-org") || "-";
             }
             if (roleNode) {
-                roleNode.textContent = trigger.getAttribute("data-student-role") || "Tələbə";
+                roleNode.textContent = trigger.getAttribute("data-student-role") || "{% trans 'role_student' context 'accounts.student_org' %}";
             }
             if (reasonInput) {
                 reasonInput.value = "";
@@ -1144,16 +1143,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 pendingAddEmail.textContent = firstUser ? firstUser.email : "-";
             }
             if (pendingAddRole) {
-                pendingAddRole.textContent = firstUser ? firstUser.role : "Tələbə";
+                pendingAddRole.textContent = firstUser ? firstUser.role : "{% trans 'role_student' context 'accounts.student_org' %}";
             }
             if (pendingAddLeadText) {
                 pendingAddLeadText.textContent = mode === "bulk"
-                    ? "Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin."
-                    : "İstifadəçini təşkilata əlavə etməyi təsdiqləyin.";
+                    ? "{% trans 'add_lead' context 'accounts.student_org' %}"
+                    : "{% trans 'add_lead_single' context 'accounts.student_org' %}";
             }
             if (pendingAddHint) {
                 pendingAddHint.textContent = users.length > 1
-                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    ? "{% trans 'selected_user_count' context 'accounts.student_org' %}: " + String(users.length)
                     : "";
             }
             if (pendingAddConfirmBtn) {
@@ -1169,7 +1168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         fullName: button.getAttribute("data-user-full-name") || "-",
                         username: button.getAttribute("data-user-username") || "-",
                         email: button.getAttribute("data-user-email") || "-",
-                        role: button.getAttribute("data-target-role") || "Tələbə",
+                        role: button.getAttribute("data-target-role") || "{% trans 'role_student' context 'accounts.student_org' %}",
                     }],
                     "single"
                 );
@@ -1218,16 +1217,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 inviteEmail.textContent = firstUser ? firstUser.email : "-";
             }
             if (inviteRole) {
-                inviteRole.textContent = firstUser ? firstUser.role : "Tələbə";
+                inviteRole.textContent = firstUser ? firstUser.role : "{% trans 'role_student' context 'accounts.student_org' %}";
             }
             if (inviteLeadText) {
                 inviteLeadText.textContent = mode === "bulk"
-                    ? "Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin."
-                    : "İstifadəçiyə dəvət göndərməyi təsdiqləyin.";
+                    ? "{% trans 'invite_lead' context 'accounts.student_org' %}"
+                    : "{% trans 'invite_lead_single' context 'accounts.student_org' %}";
             }
             if (inviteHint) {
                 inviteHint.textContent = users.length > 1
-                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    ? "{% trans 'selected_user_count' context 'accounts.student_org' %}: " + String(users.length)
                     : "";
             }
             if (inviteConfirmBtn) {
@@ -1243,7 +1242,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         fullName: button.getAttribute("data-user-full-name") || "-",
                         username: button.getAttribute("data-user-username") || "-",
                         email: button.getAttribute("data-user-email") || "-",
-                        role: button.getAttribute("data-target-role") || "Tələbə",
+                        role: button.getAttribute("data-target-role") || "{% trans 'role_student' context 'accounts.student_org' %}",
                     }],
                     "single"
                 );
@@ -1264,6 +1263,6 @@ document.addEventListener("DOMContentLoaded", function () {
 {% else %}
 <div class="empty-state">
     <i class="fas fa-building"></i>
-    <p>Aktiv təşkilat tapılmadı.</p>
+    <p>{% trans "no_active_org" context "accounts.student_org" %}</p>
 </div>
 {% endif %}
