@@ -572,7 +572,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260520-four-step"></script>
+<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260601-search-draft"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script nonce="{{ request.csp_nonce }}">
