@@ -108,6 +108,7 @@
     .student-table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--sm-border); font-size: 0.88rem; vertical-align: middle; }
     .student-table tbody tr:last-child td { border-bottom: none; }
     .student-table tbody tr:hover { background: #fafbfc; }
+    .student-table .student-empty-row td { color: var(--sm-text-muted); text-align: center; padding: 1.1rem; }
     .student-cell strong { font-weight: 600; color: var(--sm-text); }
     .student-cell small { color: var(--sm-text-faint); font-size: 0.78rem; }
     .vio-count { font-weight: 700; font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; padding: 0 6px; border-radius: 7px; font-size: 0.85rem; background: #eef1f5; color: var(--sm-text-muted); }
@@ -234,7 +235,7 @@
         <div class="stat-card warning">
             <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
             <div class="stat-body">
-                <div class="stat-value">{{ page_obj.paginator.count }}</div>
+                <div class="stat-value">{{ monitored_attempts_count }}</div>
                 <div class="stat-label">{% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}</div>
             </div>
         </div>
@@ -288,7 +289,7 @@
     </form>
 
     {# Sort toolbar — sorts rows inside every card (server-side, preserves filters) #}
-    {% if page_obj.object_list %}
+    {% if exam_cards %}
     <div class="section-title sort-toolbar">
         <span class="sort-toolbar-label"><i class="fas fa-layer-group"></i> {% trans "col_exam" context "exams.template.supervision_monitor" %}</span>
         <span class="sort-toolbar-actions">
@@ -311,22 +312,20 @@
         </span>
     </div>
 
-    {# Exam cards grouped by exam; dictsort keeps same-exam rows contiguous so regroup never splits a card #}
     <div class="exam-cards">
-        {% regroup page_obj|dictsort:"exam.id" by exam as exam_groups %}
-        {% for group in exam_groups %}
-        {% with attempts=group.list %}
-        <div class="exam-card collapsed" data-exam-card data-exam-id="{{ group.grouper.id }}">
+        {% for card in exam_cards %}
+        {% with exam=card.exam attempts=card.attempts %}
+        <div class="exam-card collapsed {% if card.violation_total >= 3 %}risk-high{% elif card.violation_total > 0 %}risk-medium{% else %}risk-low{% endif %}" data-exam-card data-exam-id="{{ exam.id }}">
             <div class="exam-card-head" data-card-toggle role="button" tabindex="0" aria-expanded="false">
                 <div class="exam-card-icon"><i class="fas fa-file-shield"></i></div>
                 <div class="exam-card-titles">
-                    <p class="exam-card-title" title="{{ group.grouper.title }}">{{ group.grouper.title }}</p>
+                    <p class="exam-card-title" title="{{ exam.title }}">{{ exam.title }}</p>
                     <span class="exam-card-sub">
                         <i class="fas fa-users" style="font-size:0.72rem;"></i>
-                        {{ attempts|length }} {% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}
+                        {{ card.attempt_count }} {% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}
                     </span>
                 </div>
-                <a href="{% url 'exams:exam_live_monitor' group.grouper.id %}" class="btn-live-monitor" data-nav="1" title="Canlı izlə">
+                <a href="{% url 'exams:exam_live_monitor' exam.id %}" class="btn-live-monitor" data-nav="1" title="Canlı izlə">
                     <i class="fas fa-tower-broadcast"></i> Canlı izlə
                 </a>
                 <i class="fas fa-chevron-down exam-card-toggle"></i>
@@ -335,15 +334,15 @@
             {# per-exam mini metrics — computed in JS from rows, placeholders here #}
             <div class="exam-card-metrics" data-card-metrics>
                 <div class="exam-metric">
-                    <div class="m-value" data-metric="students">{{ attempts|length }}</div>
+                    <div class="m-value" data-metric="students">{{ card.attempt_count }}</div>
                     <div class="m-label">{% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}</div>
                 </div>
                 <div class="exam-metric is-danger">
-                    <div class="m-value" data-metric="violations">0</div>
+                    <div class="m-value" data-metric="violations">{{ card.violation_total }}</div>
                     <div class="m-label">{% trans "stat_total_incidents" context "exams.template.supervision_monitor" %}</div>
                 </div>
                 <div class="exam-metric is-warning">
-                    <div class="m-value" data-metric="active">0</div>
+                    <div class="m-value" data-metric="active">{{ card.active_count }}</div>
                     <div class="m-label">{% trans "status_active" context "exams.template.supervision_monitor" %}</div>
                 </div>
             </div>
@@ -361,6 +360,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% if attempts %}
                         {% for attempt in attempts %}
                         <tr data-student-row data-violations="{{ attempt.supervision_violation_count }}" data-status="{{ attempt.supervision_status }}">
                             <td class="student-cell">
@@ -411,6 +411,11 @@
                             </td>
                         </tr>
                         {% endfor %}
+                        {% else %}
+                        <tr class="student-empty-row">
+                            <td colspan="6">{% trans "Bu imtahana hələ heç kim qoşulmayıb." context "exams.template.supervision_monitor" %}</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -422,7 +427,7 @@
     <div class="exam-cards">
         <div class="empty-state">
             <i class="fas fa-circle-check"></i>
-            <p>{% trans "empty_no_violations" context "exams.template.supervision_monitor" %}</p>
+            <p>{% trans "Monitor üçün imtahan tapılmadı." context "exams.template.supervision_monitor" %}</p>
         </div>
     </div>
     {% endif %}

@@ -57,11 +57,11 @@
 
         <section class="qb-filters">
             <form id="questionSearchForm" method="get" class="qb-filter-form">
-                {% if request.GET.from_section %}
-                    <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+                {% if navigation_from_section %}
+                    <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
                 {% endif %}
-                {% if request.GET.return_to %}
-                    <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+                {% if navigation_return_to %}
+                    <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
                 {% endif %}
                 <div class="qb-input-wrap">
                     <i class="fas fa-search"></i>
@@ -71,6 +71,8 @@
                         value="{{ search_query }}"
                         type="text"
                         autocomplete="off"
+                        maxlength="{{ question_bank_search_max_length }}"
+                        data-max-length="{{ question_bank_search_max_length }}"
                         placeholder="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}"
                     >
                 </div>
@@ -114,11 +116,11 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
-            {% if request.GET.from_section %}
-                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% if navigation_from_section %}
+                <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
             {% endif %}
-            {% if request.GET.return_to %}
-                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% if navigation_return_to %}
+                <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
             {% endif %}
 
             <section class="qb-bulk-toolbar">
@@ -262,11 +264,11 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
-            {% if request.GET.from_section %}
-                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% if navigation_from_section %}
+                <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
             {% endif %}
-            {% if request.GET.return_to %}
-                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% if navigation_return_to %}
+                <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
             {% endif %}
         </form>
 
@@ -278,11 +280,11 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
-            {% if request.GET.from_section %}
-                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% if navigation_from_section %}
+                <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
             {% endif %}
-            {% if request.GET.return_to %}
-                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% if navigation_return_to %}
+                <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
             {% endif %}
         </form>
     </div>

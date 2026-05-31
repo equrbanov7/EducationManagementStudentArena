@@ -3,13 +3,14 @@ Supervision views for both teacher monitoring and student event logging.
 """
 
 import json
+from collections import defaultdict
 from datetime import datetime
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import pgettext
@@ -154,21 +155,24 @@ def supervision_monitor(request):
     accessible_exams = _supervision_exam_queryset(request, org)
     data = get_supervision_monitor_data(org, exam_id=exam_id, exam_queryset=accessible_exams)
 
-    flagged = data["flagged_attempts"]
+    attempts = data["monitor_attempts"]
+    monitor_exams = data["monitor_exams"]
 
     # Apply search filter
     if search_query:
-        flagged = (
-            flagged.filter(user__username__icontains=search_query)
-            | flagged.filter(user__first_name__icontains=search_query)
-            | flagged.filter(user__last_name__icontains=search_query)
-            | flagged.filter(exam__title__icontains=search_query)
-        )
-        flagged = flagged.distinct()
+        attempts = attempts.filter(
+            Q(user__username__icontains=search_query)
+            | Q(user__first_name__icontains=search_query)
+            | Q(user__last_name__icontains=search_query)
+            | Q(exam__title__icontains=search_query)
+        ).distinct()
+        matching_exam_ids = attempts.values_list("exam_id", flat=True).distinct()
+        monitor_exams = monitor_exams.filter(Q(title__icontains=search_query) | Q(id__in=matching_exam_ids)).distinct()
 
     # Apply status filter
     if status_filter:
-        flagged = flagged.filter(supervision_status=status_filter)
+        attempts = attempts.filter(supervision_status=status_filter)
+        monitor_exams = monitor_exams.filter(id__in=attempts.values_list("exam_id", flat=True).distinct())
 
     # Apply date range filters
     date_from_value = date_from_str
@@ -176,13 +180,15 @@ def supervision_monitor(request):
     if date_from_str:
         try:
             dt_from = datetime.strptime(date_from_str, "%Y-%m-%d")
-            flagged = flagged.filter(started_at__date__gte=dt_from.date())
+            attempts = attempts.filter(started_at__date__gte=dt_from.date())
+            monitor_exams = monitor_exams.filter(id__in=attempts.values_list("exam_id", flat=True).distinct())
         except ValueError:
             date_from_value = ""
     if date_to_str:
         try:
             dt_to = datetime.strptime(date_to_str, "%Y-%m-%d")
-            flagged = flagged.filter(started_at__date__lte=dt_to.date())
+            attempts = attempts.filter(started_at__date__lte=dt_to.date())
+            monitor_exams = monitor_exams.filter(id__in=attempts.values_list("exam_id", flat=True).distinct())
         except ValueError:
             date_to_value = ""
 
@@ -200,10 +206,11 @@ def supervision_monitor(request):
         order_field = ALLOWED_SORT_FIELDS[sort_by]
         if sort_dir == "desc":
             order_field = f"-{order_field}"
-        flagged = flagged.order_by(order_field)
+        attempts = attempts.order_by(order_field, "-started_at")
     else:
         sort_by = ""
         sort_dir = ""
+        attempts = attempts.order_by("-supervision_violation_count", "-started_at")
 
     # Build sort_base_query for pagination/sort links
     sort_base_params = {}
@@ -227,10 +234,32 @@ def supervision_monitor(request):
         pagination_params["sort_dir"] = sort_dir
     pagination_query = urlencode(pagination_params)
 
-    # Pagination
+    monitored_attempts_count = attempts.count()
+
+    # Pagination is exam-based so newly created exams appear even before any
+    # student joins or any violation is logged.
     page_number = request.GET.get("page", 1)
-    paginator = Paginator(flagged, 10)
+    paginator = Paginator(monitor_exams, 10)
     page_obj = paginator.get_page(page_number)
+    page_exam_ids = [exam.id for exam in page_obj.object_list]
+
+    attempts_by_exam = defaultdict(list)
+    if page_exam_ids:
+        for attempt in attempts.filter(exam_id__in=page_exam_ids):
+            attempts_by_exam[attempt.exam_id].append(attempt)
+
+    exam_cards = []
+    for exam in page_obj.object_list:
+        exam_attempts = attempts_by_exam.get(exam.id, [])
+        exam_cards.append(
+            {
+                "exam": exam,
+                "attempts": exam_attempts,
+                "attempt_count": len(exam_attempts),
+                "violation_total": sum(item.supervision_violation_count for item in exam_attempts),
+                "active_count": sum(1 for item in exam_attempts if not item.is_finished),
+            }
+        )
 
     # Severity distribution for charts (single aggregation query)
     severity_agg = dict(
@@ -245,8 +274,10 @@ def supervision_monitor(request):
 
     context = {
         "page_obj": page_obj,
+        "exam_cards": exam_cards,
         "supervised_exams": data["supervised_exams"],
         "total_incidents": data["total_incidents"],
+        "monitored_attempts_count": monitored_attempts_count,
         "severity_counts": severity_counts,
         "violation_type_counts": violation_type_counts,
         "search_query": search_query,

@@ -11,6 +11,7 @@
         var modalHeader = modalElement ? modalElement.querySelector(".modal-header") : null;
         var bsModal = null;
         var submitInFlight = false;
+        var modalLoadToken = 0;
         var i18n = window.EXAM_CREATE_EDIT_MODAL_I18N || {};
 
         if (!modalElement || !modalBody || typeof bootstrap === "undefined") {
@@ -55,6 +56,10 @@
         }
 
         function resetModalBody() {
+            modalLoadToken += 1;
+            if (modalElement) {
+                modalElement.dataset.examModalLoading = "0";
+            }
             modalBody.innerHTML = getLoadingMarkup();
         }
 
@@ -562,6 +567,7 @@
                 }
 
                 submitInFlight = true;
+                var submitToken = modalLoadToken;
 
                 var submitBtn = form.querySelector('button[type="submit"]');
                 if (submitBtn) {
@@ -588,6 +594,10 @@
                         }
                     }
 
+                    if (submitToken !== modalLoadToken) {
+                        return;
+                    }
+
                     if (contentType.indexOf("application/json") !== -1) {
                         var jsonPayload = await response.json();
                         if (jsonPayload.html) {
@@ -598,9 +608,15 @@
                     }
 
                     var html = await response.text();
+                    if (submitToken !== modalLoadToken) {
+                        return;
+                    }
                     modalBody.innerHTML = html || getErrorMarkup();
                     bindModalForm();
                 } catch (error) {
+                    if (submitToken !== modalLoadToken) {
+                        return;
+                    }
                     modalBody.innerHTML = getErrorMarkup();
                 } finally {
                     submitInFlight = false;
@@ -618,6 +634,9 @@
 
             applyModalMode(mode);
             modalBody.innerHTML = getLoadingMarkup();
+            modalLoadToken += 1;
+            var loadToken = modalLoadToken;
+            modalElement.dataset.examModalLoading = "1";
             bsModal.show();
 
             var modalUrl = buildModalUrl(rawUrl);
@@ -634,10 +653,20 @@
                 }
 
                 var html = await response.text();
+                if (loadToken !== modalLoadToken) {
+                    return;
+                }
                 modalBody.innerHTML = html;
                 bindModalForm();
             } catch (error) {
+                if (loadToken !== modalLoadToken) {
+                    return;
+                }
                 modalBody.innerHTML = getErrorMarkup();
+            } finally {
+                if (loadToken === modalLoadToken) {
+                    modalElement.dataset.examModalLoading = "0";
+                }
             }
         }
 
