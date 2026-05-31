@@ -29,6 +29,30 @@ document.addEventListener("DOMContentLoaded", function () {
   var checkboxes = Array.prototype.slice.call(document.querySelectorAll(".question-checkbox"));
   var debounceTimer = null;
 
+  function normalizeSearchInput() {
+    if (!searchInput) {
+      return;
+    }
+    var maxLength = parseInt(searchInput.getAttribute("data-max-length") || searchInput.getAttribute("maxlength"), 10);
+    var value = (searchInput.value || "").trim();
+    if (Number.isFinite(maxLength) && maxLength > 0 && value.length > maxLength) {
+      value = value.slice(0, maxLength);
+    }
+    searchInput.value = value;
+  }
+
+  function submitSearchForm() {
+    if (!searchForm) {
+      return;
+    }
+    normalizeSearchInput();
+    if (typeof searchForm.requestSubmit === "function") {
+      searchForm.requestSubmit();
+      return;
+    }
+    searchForm.submit();
+  }
+
   if (questionModalElement && typeof bootstrap !== "undefined") {
     questionModal = bootstrap.Modal.getOrCreateInstance(questionModalElement);
   }
@@ -103,16 +127,18 @@ document.addEventListener("DOMContentLoaded", function () {
         clearTimeout(debounceTimer);
       }
       debounceTimer = setTimeout(function () {
-        searchForm.submit();
+        submitSearchForm();
       }, 420);
     });
   }
 
   if (searchForm) {
+    searchForm.addEventListener("submit", normalizeSearchInput);
+
     var formSelects = searchForm.querySelectorAll("select");
     formSelects.forEach(function (item) {
       item.addEventListener("change", function () {
-        searchForm.submit();
+        submitSearchForm();
       });
     });
   }

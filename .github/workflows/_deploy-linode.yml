@@ -20,17 +20,17 @@ on:
         type: string
         default: "/opt/emsarena/app"
       venv-dir:
-        description: "Absolute path to the Python virtualenv on the server"
+        description: "Absolute path to the Python virtualenv on legacy systemd deployments"
         type: string
         default: "/opt/emsarena/venv"
       service-name:
-        description: "systemd service restarted after deployment"
+        description: "systemd service restarted by legacy deployments"
         type: string
         default: "emsarena.service"
       app-base-url:
         description: "Internal upstream URL used for ping and health checks"
         type: string
-        default: "http://127.0.0.1:8001"
+        default: "http://127.0.0.1"
       healthcheck-host:
         description: "Host header sent to the upstream health checks"
         type: string
@@ -38,7 +38,7 @@ on:
       deploy-timeout-seconds:
         description: "How long to wait for the app to become healthy"
         type: string
-        default: "180"
+        default: "300"
     secrets:
       SSH_PRIVATE_KEY:
         required: false
@@ -113,22 +113,37 @@ jobs:
             exit 1
           fi
 
+          USE_PASSWORD_AUTH=false
           if [ -n "$SSH_PRIVATE_KEY" ]; then
             printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/emsarena_deploy_key
             chmod 600 ~/.ssh/emsarena_deploy_key
-            SSH_CMD=(ssh -i ~/.ssh/emsarena_deploy_key -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST")
+            SSH_CMD=(ssh -i ~/.ssh/emsarena_deploy_key -o BatchMode=yes -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST")
+            if ! "${SSH_CMD[@]}" true; then
+              if [ -z "$SSHPASS" ]; then
+                echo "SSH_PRIVATE_KEY did not authenticate, and SSH_PASSWORD is not configured." >&2
+                exit 1
+              fi
+              echo "SSH_PRIVATE_KEY did not authenticate; falling back to SSH_PASSWORD."
+              USE_PASSWORD_AUTH=true
+            fi
           elif [ -n "$SSHPASS" ]; then
-            sudo apt-get update
-            sudo apt-get install -y sshpass
-            SSH_CMD=(sshpass -e ssh -p "$SSH_PORT" -o PreferredAuthentications=password -o PubkeyAuthentication=no "$SSH_USERNAME@$SSH_HOST")
+            USE_PASSWORD_AUTH=true
           else
             echo "Either SSH_PRIVATE_KEY or SSH_PASSWORD must be configured." >&2
             exit 1
           fi
 
+          if [ "$USE_PASSWORD_AUTH" = "true" ]; then
+            sudo apt-get update
+            sudo apt-get install -y sshpass
+            SSH_CMD=(sshpass -e ssh -p "$SSH_PORT" -o PreferredAuthentications=password -o PubkeyAuthentication=no "$SSH_USERNAME@$SSH_HOST")
+          fi
+
+          ENV_OVERRIDES_B64="$(printf '%s' "${ENV_OVERRIDES}" | base64 -w0)"
+
           "${SSH_CMD[@]}" "mkdir -p '${APP_DIR}'"
           RSYNC_SSH="ssh -p ${SSH_PORT}"
-          if [ -n "$SSH_PRIVATE_KEY" ]; then
+          if [ "$USE_PASSWORD_AUTH" = "false" ]; then
             RSYNC_SSH="${RSYNC_SSH} -i ~/.ssh/emsarena_deploy_key"
             RSYNC_CMD=(rsync -az --delete --exclude-from scripts/deploy/rsync-excludes.txt -e "$RSYNC_SSH")
           else
@@ -146,12 +161,25 @@ jobs:
           export APP_BASE_URL="${APP_BASE_URL}"
           export HEALTHCHECK_HOST="${HEALTHCHECK_HOST}"
           export DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS}"
-          export ENV_OVERRIDES="${ENV_OVERRIDES}"
+          export ENV_OVERRIDES_B64="${ENV_OVERRIDES_B64}"
+          export ENV_OVERRIDES="\$(printf '%s' "\$ENV_OVERRIDES_B64" | base64 -d)"
+          unset ENV_OVERRIDES_B64
 
           cd "${APP_DIR}"
 
           # Sync GitHub Secrets → server .env (upsert, no-op when empty)
           bash scripts/deploy/sync-env-overrides.sh "${APP_DIR}/.env"
+
+          # Enforce non-secret production host settings after secret sync so a
+          # stale ENV_OVERRIDES secret cannot point the app back at an old host.
+          ENV_OVERRIDES='SITE_URL=https://emsarena.com
+          ALLOWED_HOSTS=emsarena.com,www.emsarena.com,172.104.154.170,localhost,127.0.0.1
+          CSRF_TRUSTED_ORIGINS=https://emsarena.com,https://www.emsarena.com
+          LAN_HOST=emsarena.com
+          LIVE_EXAM_PUBLIC_HOST=emsarena.com
+          SECURE_SSL_REDIRECT=True
+          SESSION_COOKIE_SECURE=True
+          CSRF_COOKIE_SECURE=True' bash scripts/deploy/sync-env-overrides.sh "${APP_DIR}/.env"
 
           bash scripts/deploy/remote_deploy.sh
           EOF

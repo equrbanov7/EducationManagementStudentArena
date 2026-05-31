@@ -18,4 +18,5 @@ tmp/
 output/
 .env
 .env.*
+docker/nginx/certs/
 db.sqlite3

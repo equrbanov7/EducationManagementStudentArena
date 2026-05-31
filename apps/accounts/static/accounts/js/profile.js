@@ -896,6 +896,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!createExamUrl || !createExamModal || !createExamModalBody) {
             return;
         }
+        if (
+            createExamModal.dataset.createExamLoading === "1" &&
+            createExamModal.classList.contains("active")
+        ) {
+            return;
+        }
 
         ensureModalRoot(createExamModal);
         createExamModal.classList.add("active");
@@ -904,6 +910,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var modalUrl = buildCreateExamModalUrl(createExamUrl);
         createExamModal.dataset.createExamUrl = modalUrl;
+        var loadToken = String((Number(createExamModal.dataset.createExamToken) || 0) + 1);
+        createExamModal.dataset.createExamToken = loadToken;
+        createExamModal.dataset.createExamLoading = "1";
 
         try {
             var response = await fetch(modalUrl, {
@@ -915,10 +924,26 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) {
                 throw new Error("create exam modal load failed");
             }
+            if (
+                createExamModal.dataset.createExamToken !== loadToken ||
+                !createExamModal.classList.contains("active")
+            ) {
+                return;
+            }
             createExamModalBody.innerHTML = html;
             bindCreateExamModalForm();
         } catch (error) {
+            if (
+                createExamModal.dataset.createExamToken !== loadToken ||
+                !createExamModal.classList.contains("active")
+            ) {
+                return;
+            }
             createExamModalBody.innerHTML = '<div class="create-exam-modal-error">Form yüklənmədi. Yenidən cəhd edin.</div>';
+        } finally {
+            if (createExamModal.dataset.createExamToken === loadToken) {
+                createExamModal.dataset.createExamLoading = "0";
+            }
         }
     }
 
@@ -928,6 +953,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         createExamModal.classList.remove("active");
         document.body.style.overflow = "";
+        // Invalidate any in-flight load so a late fetch cannot repaint the
+        // body after the modal has been closed, and clear the loading guard
+        // so the next open starts fresh.
+        createExamModal.dataset.createExamToken =
+            String((Number(createExamModal.dataset.createExamToken) || 0) + 1);
+        createExamModal.dataset.createExamLoading = "0";
         if (resetContent && createExamModalBody) {
             createExamModalBody.innerHTML = createExamModalLoadingMarkup();
         }

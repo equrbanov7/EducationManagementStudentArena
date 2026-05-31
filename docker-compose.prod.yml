@@ -7,21 +7,18 @@
 #   SECRET_KEY, DATABASE_URL (or POSTGRES_* vars), REDIS_PASSWORD,
 #   ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SITE_URL
 #
-# TLS / SSL Architecture — Option B (External Load Balancer termination):
-#   SSL/TLS is terminated at the upstream Load Balancer (e.g. AWS ALB,
-#   Cloudflare, or HAProxy).  The LB decrypts HTTPS traffic and forwards
-#   plain HTTP to nginx on port 80, setting the X-Forwarded-Proto: https
-#   header so that Django and nginx know the original connection was secure.
-#   Nginx therefore only listens on port 80 inside the container; the LB
-#   handles all certificate management and HTTPS redirection externally.
-#   Do NOT add a 443 binding here — certificates live on the LB, not nginx.
+# TLS / SSL Architecture:
+#   Cloudflare can connect to the origin over plain HTTP (Flexible) or HTTPS
+#   (Full).  This stack exposes both port 80 and 443 so Cloudflare Full mode
+#   does not fail when the zone is configured to use encrypted origin pulls.
+#   Certificates for origin HTTPS are mounted from docker/nginx/certs.
 #
 # Security notes:
 #   - Redis is NOT exposed externally; it is reachable only inside the
 #     emsarena-network bridge network.
 #   - Redis is password-protected via REDIS_PASSWORD.
 #   - PostgreSQL is NOT exposed externally.
-#   - Only nginx (port 80) is accessible from outside; the LB provides HTTPS.
+#   - Only nginx (ports 80/443) is accessible from outside.
 # ═══════════════════════════════════════════════════════════════════════════
 
 services:
@@ -114,6 +111,11 @@ services:
       BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
       BREVO_API_KEY: ${BREVO_API_KEY:-}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
+      AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
+      AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
       AUTH_OTP_EXPIRY_SECONDS: ${AUTH_OTP_EXPIRY_SECONDS:-300}
       AUTH_OTP_RESEND_COOLDOWN_SECONDS: ${AUTH_OTP_RESEND_COOLDOWN_SECONDS:-60}
       AUTH_OTP_MAX_ATTEMPTS: ${AUTH_OTP_MAX_ATTEMPTS:-5}
@@ -178,6 +180,11 @@ services:
       BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
       BREVO_API_KEY: ${BREVO_API_KEY:-}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
+      AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
+      AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
       SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:
@@ -230,7 +237,10 @@ services:
       PISTON_RUN_TIMEOUT: ${PISTON_RUN_TIMEOUT:-15000}
       PISTON_OUTPUT_MAX_SIZE: ${PISTON_OUTPUT_MAX_SIZE:-65536}
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:2000/api/v2/runtimes >/dev/null 2>&1 || exit 1"]
+      test:
+        - "CMD-SHELL"
+        - >-
+          node -e 'require("http").get("http://localhost:2000/api/v2/runtimes", r => process.exit(r.statusCode === 200 ? 0 : 1)).on("error", () => process.exit(1))'
       interval: 15s
       timeout: 5s
       retries: 10
@@ -247,8 +257,10 @@ services:
     container_name: emsarena-nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
       - static_data:/var/www/staticfiles:ro
       - media_data:/var/www/media:ro
     depends_on:

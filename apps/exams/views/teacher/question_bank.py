@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
@@ -48,6 +48,29 @@ def _safe_same_origin_redirect_path(request, candidate_url):
     return f"{path}{query}{fragment}"
 
 
+def _is_internal_exam_management_path(candidate_path):
+    raw_path = (candidate_path or "").strip()
+    if not raw_path:
+        return False
+
+    try:
+        match = resolve(urlsplit(raw_path).path)
+    except Resolver404:
+        return False
+
+    return match.namespace == "exams" and match.url_name in {
+        "teacher_questions_bank",
+        "test_question_bank",
+        "create_question_bank",
+        "add_exam_question",
+        "edit_exam_question",
+        "delete_exam_question",
+        "teacher_exam_results",
+        "teacher_view_attempt",
+        "teacher_check_attempt",
+    }
+
+
 def _resolve_question_bank_navigation(request):
     requested_profile_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
     valid_profile_sections = {
@@ -67,6 +90,8 @@ def _resolve_question_bank_navigation(request):
         request,
         request.GET.get("return_to") or request.POST.get("return_to"),
     )
+    if _is_internal_exam_management_path(return_to):
+        return_to = ""
 
     nav_params = {}
     if requested_profile_section:
@@ -102,6 +127,19 @@ def _parse_written_questions(content_text):
             questions.append(question_text)
 
     return questions
+
+
+def _question_bank_title_context(exam):
+    if exam.exam_type == "coding":
+        return {
+            "question_bank_page_title": pgettext("exams.template.create_question_bank", "Praktiki sual bankı"),
+            "question_bank_heading": pgettext("exams.template.create_question_bank", "praktiki sual bankı"),
+        }
+
+    return {
+        "question_bank_page_title": pgettext("exams.template.create_question_bank", "Yazılı sual bankı"),
+        "question_bank_heading": pgettext("exams.template.create_question_bank", "yazılı sual bankı"),
+    }
 
 
 def _optional_non_negative_int(value):
@@ -293,6 +331,7 @@ def create_question_bank(request, slug):
             "question_bank_navigation_query": navigation_query,
             "navigation_from_section": navigation_from_section,
             "navigation_return_to": navigation_return_to,
+            **_question_bank_title_context(exam),
         },
     )
 

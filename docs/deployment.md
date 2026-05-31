@@ -252,10 +252,9 @@ The repository now includes a reusable deployment workflow at
 `.github/workflows/_deploy-linode.yml`, wired into `.github/workflows/ci.yml`.
 When a push to `main` passes the full CI pipeline, GitHub Actions will SSH
 into the Linode host, sync the checked-out repository snapshot into
-`/opt/emsarena/app` over SSH, install production Python dependencies into
-`/opt/emsarena/venv`, run migrations, collect static files, restart
-`emsarena.service`, and verify `/ping/` plus `/health/` through the local
-Daphne upstream.
+`/opt/emsarena/app` over SSH, preserve server-only runtime data, run
+`docker compose -f docker-compose.prod.yml up -d --build`, and verify
+`/ping/` plus `/health/` through the local nginx origin.
 
 ### Required GitHub secrets
 
@@ -263,23 +262,23 @@ Add these repository secrets before enabling automatic deploys:
 
 | Secret | Required | Notes |
 |--------|----------|-------|
-| `SSH_HOST` | Yes | Example: `170.187.154.194` |
-| `SSH_USERNAME` | Yes | Example: `root` |
 | `SSH_PASSWORD` | Yes, unless using key auth | Password-based fallback supported for first setup |
-| `SSH_PRIVATE_KEY` | Optional | Preferred over `SSH_PASSWORD` once a deploy key exists |
+| `SSH_PRIVATE_KEY` | Optional | Tried first; deploy falls back to `SSH_PASSWORD` when configured |
+| `ENV_OVERRIDES` | Optional | Newline-separated secret env values to upsert into `/opt/emsarena/app/.env` |
 
-If both `SSH_PRIVATE_KEY` and `SSH_PASSWORD` are present, the workflow uses
-the private key.
+The production workflow currently deploys to `172.104.154.170` as `root`.
+Non-secret host settings such as `SITE_URL`, `ALLOWED_HOSTS`, and
+`CSRF_TRUSTED_ORIGINS` are enforced during deploy so stale secret overrides
+cannot point the application back at an old server.
 
 ### First-time server setup
 
 Automatic deploys expect these items to exist once on the server:
 
-- `/opt/emsarena/app` — the repository checkout
-- `/opt/emsarena/venv` — the Python virtualenv used by the live app
+- `/opt/emsarena/app` — the Docker Compose application directory
 - `/opt/emsarena/app/.env` — persistent runtime environment variables
-- `emsarena.service` — the Daphne `systemd` service used in production
-- Nginx configured to proxy to `127.0.0.1:8001`
+- Docker Engine with the Docker Compose plugin
+- Nginx is managed by `docker-compose.prod.yml` and publishes ports `80` and `443`
 
 The workflow never overwrites the application `.env`, so you only need to
 set it up once. The live app environment file should remain at:
@@ -288,23 +287,18 @@ set it up once. The live app environment file should remain at:
 /opt/emsarena/app/.env
 ```
 
-If this Linode was created from the Django One-Click app, make sure the old
-duplicate `daphne.service` is disabled and only `emsarena.service` remains
-responsible for port `8001`. The deploy script will also try to disable the
-legacy `daphne.service` automatically as a safeguard.
-
 The SSH sync step excludes runtime data such as `.env`, `media/`, and
-`staticfiles/`, so user uploads and server-side secrets are preserved across
-deployments without requiring Git access from the Linode host.
+`docker/nginx/certs/`, so user uploads, Cloudflare origin certificates, and
+server-side secrets are preserved across deployments without requiring Git
+access from the Linode host.
 
 ### Zero-downtime update checklist
 
 1. Sync the latest application code into `/opt/emsarena/app`
-2. `/opt/emsarena/venv/bin/pip install -r requirements/production.txt`
-3. `DJANGO_SETTINGS_MODULE=config.settings.production /opt/emsarena/venv/bin/python manage.py migrate --noinput`
-4. `DJANGO_SETTINGS_MODULE=config.settings.production /opt/emsarena/venv/bin/python manage.py collectstatic --noinput`
-5. `systemctl restart emsarena.service`
-6. Verify `/ping/` and `/health/` before considering the rollout complete.
+2. Preserve `.env`, `media/`, Docker volumes, and `docker/nginx/certs/`
+3. `docker compose -f docker-compose.prod.yml up -d --build`
+4. Wait for `emsarena-app` to become healthy
+5. Verify `/ping/` and `/health/` before considering the rollout complete.
 
 ---
 
