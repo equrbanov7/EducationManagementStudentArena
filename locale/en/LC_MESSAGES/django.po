@@ -3518,14 +3518,14 @@ msgstr "AI settings saved successfully."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr ""
+msgstr "Registration completed, your request has been recorded."
 "Registration completed and your organization request is recorded. Verify the"
 " email code to continue."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr ""
+msgstr "Registration completed, you can log in now."
 "Registration completed. Verify the email code to activate your account."
 
 #: apps/accounts/views.py:2739
@@ -3565,7 +3565,7 @@ msgstr "A new verification code has been sent."
 
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
-msgstr ""
+msgstr "Failed to send the registration email."
 "Registration failed: we could not send the verification email. Please check "
 "your email address and try again."
 
@@ -21639,3 +21639,712 @@ msgstr "Finished"
 msgctxt "exams.template.exam_live_monitor"
 msgid "questions_answered"
 msgstr "questions answered"
+
+msgctxt "audit.list"
+msgid "title"
+msgstr "Audit Log"
+
+msgctxt "audit.list"
+msgid "heading"
+msgstr "Audit Log"
+
+msgctxt "audit.list"
+msgid "subtitle_all_orgs"
+msgstr "Recent activity logs across all organizations"
+
+msgctxt "audit.list"
+msgid "subtitle_recent"
+msgstr "Recent activity logs"
+
+msgctxt "audit.list"
+msgid "col_time"
+msgstr "Time"
+
+msgctxt "audit.list"
+msgid "col_user"
+msgstr "User"
+
+msgctxt "audit.list"
+msgid "col_action"
+msgstr "Action"
+
+msgctxt "audit.list"
+msgid "col_resource"
+msgstr "Resource"
+
+msgctxt "audit.list"
+msgid "col_organization"
+msgstr "Organization"
+
+msgctxt "audit.list"
+msgid "anonymous"
+msgstr "Anonymous"
+
+msgctxt "audit.list"
+msgid "empty"
+msgstr "No audit records yet."
+
+msgctxt "common"
+msgid "search"
+msgstr "Search"
+
+msgctxt "common"
+msgid "search_clear"
+msgstr "Clear search"
+
+msgctxt "common"
+msgid "save"
+msgstr "Save"
+
+msgctxt "common"
+msgid "delete"
+msgstr "Delete"
+
+msgctxt "common"
+msgid "confirm"
+msgstr "Confirm"
+
+msgctxt "common"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "common"
+msgid "close"
+msgstr "Close"
+
+msgctxt "common"
+msgid "select_all"
+msgstr "Select all"
+
+msgctxt "common"
+msgid "reject"
+msgstr "Reject"
+
+msgctxt "common"
+msgid "resend_code"
+msgstr "Resend code"
+
+msgctxt "accounts.student_org"
+msgid "students_title"
+msgstr "Organization students"
+
+msgctxt "accounts.student_org"
+msgid "col_user"
+msgstr "User"
+
+msgctxt "accounts.student_org"
+msgid "col_username"
+msgstr "Username"
+
+msgctxt "accounts.student_org"
+msgid "col_email"
+msgstr "Email"
+
+msgctxt "accounts.student_org"
+msgid "col_action"
+msgstr "Action"
+
+msgctxt "accounts.student_org"
+msgid "col_selected_org"
+msgstr "Selected organization"
+
+msgctxt "accounts.student_org"
+msgid "col_message"
+msgstr "Message"
+
+msgctxt "accounts.student_org"
+msgid "col_status_note"
+msgstr "Status/Note"
+
+msgctxt "accounts.student_org"
+msgid "col_role_type"
+msgstr "Role type"
+
+msgctxt "accounts.student_org"
+msgid "col_sender"
+msgstr "Sender"
+
+msgctxt "accounts.student_org"
+msgid "col_request_date"
+msgstr "Request date"
+
+msgctxt "accounts.student_org"
+msgid "remove_from_org"
+msgstr "Remove from organization"
+
+msgctxt "accounts.student_org"
+msgid "no_students"
+msgstr "No students found."
+
+msgctxt "accounts.student_org"
+msgid "pending_title"
+msgstr "Students pending approval"
+
+msgctxt "accounts.student_org"
+msgid "pending_desc"
+msgstr "Here you can add students who selected this organization at sign-up, individually or all at once. Requests of those already accepted by another organization will appear as \"Closed\"."
+
+msgctxt "accounts.student_org"
+msgid "pending_search_ph"
+msgstr "Search students pending approval..."
+
+msgctxt "accounts.student_org"
+msgid "add_selected"
+msgstr "Add selected to organization"
+
+msgctxt "accounts.student_org"
+msgid "add_selected_count"
+msgstr "Add selected to organization ({count} selected)"
+
+msgctxt "accounts.student_org"
+msgid "min_one_student"
+msgstr "Select at least 1 student"
+
+msgctxt "accounts.student_org"
+msgid "min_one"
+msgstr "Select at least 1"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected"
+msgstr "Delete selected"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected_count"
+msgstr "Delete selected ({count} selected)"
+
+msgctxt "accounts.student_org"
+msgid "add_to_org"
+msgstr "Add to organization"
+
+msgctxt "accounts.student_org"
+msgid "no_pending"
+msgstr "No students pending approval."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_title"
+msgstr "Students not linked to an organization"
+
+msgctxt "accounts.student_org"
+msgid "unassigned_desc"
+msgstr "Send invitations to students who signed up without selecting an organization. They join the organization after accepting the invitation in their account."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_search_ph"
+msgstr "Search students without an organization..."
+
+msgctxt "accounts.student_org"
+msgid "invite_selected"
+msgstr "Invite selected"
+
+msgctxt "accounts.student_org"
+msgid "invite_selected_count"
+msgstr "Invite selected ({count} selected)"
+
+msgctxt "accounts.student_org"
+msgid "invite"
+msgstr "Invite"
+
+msgctxt "accounts.student_org"
+msgid "no_invite_targets"
+msgstr "No students found to invite."
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_title"
+msgstr "Sent invitations"
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_desc"
+msgstr "You can revoke invitations that have not been accepted yet, individually or in bulk."
+
+msgctxt "accounts.student_org"
+msgid "sent_invite_search_ph"
+msgstr "Search sent invitations..."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected"
+msgstr "Revoke selected"
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_count"
+msgstr "Revoke selected ({count} selected)"
+
+msgctxt "accounts.student_org"
+msgid "revoke"
+msgstr "Revoke"
+
+msgctxt "accounts.student_org"
+msgid "no_active_invite"
+msgstr "No active invitations to revoke."
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_title"
+msgstr "Teacher / Staff requests"
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_desc"
+msgstr "In this section you can view, approve or reject requests from users who signed up as a teacher or staff member and selected this organization."
+
+msgctxt "accounts.student_org"
+msgid "ts_search_ph"
+msgstr "Search teacher / staff..."
+
+msgctxt "accounts.student_org"
+msgid "role_teacher"
+msgstr "Teacher"
+
+msgctxt "accounts.student_org"
+msgid "role_staff"
+msgstr "Staff"
+
+msgctxt "accounts.student_org"
+msgid "role_student"
+msgstr "Student"
+
+msgctxt "accounts.student_org"
+msgid "approve"
+msgstr "Approve"
+
+msgctxt "accounts.student_org"
+msgid "no_ts_requests"
+msgstr "No teacher / staff requests pending approval."
+
+msgctxt "accounts.student_org"
+msgid "revoke_invite"
+msgstr "Revoke invitation"
+
+msgctxt "accounts.student_org"
+msgid "revoke_confirm"
+msgstr "Confirm that you want to revoke the selected invitations."
+
+msgctxt "accounts.student_org"
+msgid "remove_lead"
+msgstr "Confirm that you want to remove the following user from the organization."
+
+msgctxt "accounts.student_org"
+msgid "field_name"
+msgstr "Name"
+
+msgctxt "accounts.student_org"
+msgid "field_org"
+msgstr "Organization"
+
+msgctxt "accounts.student_org"
+msgid "field_role_change"
+msgstr "Role to change"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_label"
+msgstr "Removal reason (required)"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_ph"
+msgstr "Removal reason..."
+
+msgctxt "accounts.student_org"
+msgid "add_lead"
+msgstr "Confirm adding the selected user(s) to the organization."
+
+msgctxt "accounts.student_org"
+msgid "invite_lead"
+msgstr "Confirm sending an invitation to the selected user(s)."
+
+msgctxt "accounts.student_org"
+msgid "no_active_org"
+msgstr "No active organization found."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_org"
+msgstr "Organization"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_type"
+msgstr "Type"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_owner"
+msgstr "Owner"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_features"
+msgstr "Features"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "no_org"
+msgstr "No organizations found."
+
+msgctxt "blog.create_question"
+msgid "title"
+msgstr "Create Question"
+
+msgctxt "blog.create_question"
+msgid "subtitle"
+msgstr "Create a new question and choose who can see it."
+
+msgctxt "blog.create_question"
+msgid "save"
+msgstr "Save question"
+
+msgctxt "blog.create_question"
+msgid "my_questions"
+msgstr "My Questions"
+
+msgctxt "admin.verify_otp"
+msgid "description"
+msgstr "Access to the admin panel is granted only after OTP verification. Enter the 6-digit code sent to your email address."
+
+msgctxt "admin.verify_otp"
+msgid "expiry"
+msgstr "The code is valid for {minutes} minutes."
+
+msgctxt "admin.verify_otp"
+msgid "messages_label"
+msgstr "Notifications"
+
+msgctxt "admin.verify_otp"
+msgid "errors_label"
+msgstr "Error messages"
+
+msgctxt "admin.verify_otp"
+msgid "otp_errors_label"
+msgstr "OTP errors"
+
+msgctxt "admin.verify_otp"
+msgid "retry_note"
+msgstr "Please wait {seconds} seconds before trying again."
+
+msgctxt "admin.verify_otp"
+msgid "submit"
+msgstr "Confirm"
+
+msgctxt "admin.verify_otp"
+msgid "resend"
+msgstr "Resend code"
+
+msgctxt "accounts.student_org"
+msgid "student_search_ph"
+msgstr "Search students..."
+
+msgctxt "accounts.student_org"
+msgid "this_user"
+msgstr "This user"
+
+msgctxt "accounts.student_org"
+msgid "revoke_single_suffix"
+msgstr "— confirm that you want to revoke the invitation sent."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_confirm"
+msgstr "Confirm that you want to revoke the selected invitations."
+
+msgctxt "accounts.student_org"
+msgid "selected_invite_count"
+msgstr "Selected invitations"
+
+msgctxt "accounts.student_org"
+msgid "select_one_invite_first"
+msgstr "Select at least one invitation first."
+
+msgctxt "accounts.student_org"
+msgid "confirm_disabled_hint"
+msgstr "In this case the confirm button is disabled."
+
+msgctxt "accounts.student_org"
+msgid "add_lead_single"
+msgstr "Confirm adding the user to the organization."
+
+msgctxt "accounts.student_org"
+msgid "selected_user_count"
+msgstr "Selected users"
+
+msgctxt "accounts.student_org"
+msgid "invite_lead_single"
+msgstr "Confirm sending an invitation to the user."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "title"
+msgstr "Organization features"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "intro"
+msgstr "Here you can enable or disable review-visibility features for each organization. When enabled, the teacher can see the student's name even before the anonymous window ends, while the grade-editing window stays the same."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "flags_title"
+msgstr "Review visibility flags"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "code"
+msgstr "Code"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "active_name_visible"
+msgstr "Active, name visible"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "default_anonymity"
+msgstr "Default anonymity is active"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "restore_anonymous"
+msgstr "Restore anonymous review"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "activate"
+msgstr "Activate"
+
+msgctxt "accounts.pending_review_detail"
+msgid "title"
+msgstr "Review"
+
+msgctxt "accounts.pending_review_detail"
+msgid "subtitle"
+msgstr "Review details"
+
+msgctxt "accounts.pending_review_detail"
+msgid "back"
+msgstr "Back"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student_answer"
+msgstr "Student answer"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student"
+msgstr "Student"
+
+msgctxt "accounts.pending_review_detail"
+msgid "exam"
+msgstr "Exam"
+
+msgctxt "accounts.pending_review_detail"
+msgid "date"
+msgstr "Date"
+
+msgctxt "accounts.pending_review_detail"
+msgid "grading"
+msgstr "Grading"
+
+msgctxt "accounts.pending_review_detail"
+msgid "score_per_question"
+msgstr "Score per question"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback"
+msgstr "Feedback"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback_ph"
+msgstr "Write short, clear feedback for the student"
+
+msgctxt "accounts.pending_review_detail"
+msgid "save_grade"
+msgstr "Save grade"
+
+msgctxt "profile.category_management"
+msgid "search_ph"
+msgstr "Search categories..."
+
+msgctxt "profile.category_management"
+msgid "search"
+msgstr "Search"
+
+msgctxt "profile.category_management"
+msgid "search_clear"
+msgstr "Clear search"
+
+msgctxt "profile.category_management"
+msgid "edit"
+msgstr "Edit"
+
+msgctxt "profile.category_management"
+msgid "delete"
+msgstr "Delete"
+
+msgctxt "profile.category_management"
+msgid "empty"
+msgstr "No categories yet."
+
+msgctxt "profile.category_management"
+msgid "save"
+msgstr "Save"
+
+msgctxt "profile.category_management"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "profile.category_management"
+msgid "delete_confirm"
+msgstr "Confirm deletion"
+
+msgid "Mövcud şifrə"
+msgstr "Current password"
+
+msgid "Yeni şifrə"
+msgstr "New password"
+
+msgid "Yeni şifrəni təkrarla"
+msgstr "Confirm new password"
+
+msgctxt "profile.category_management"
+msgid "eyebrow"
+msgstr "Manage"
+
+msgctxt "profile.category_management"
+msgid "title"
+msgstr "Manage categories"
+
+msgctxt "profile.category_management"
+msgid "subtitle"
+msgstr "Default categories, newly created ones and subcategories appear here."
+
+msgctxt "profile.category_management"
+msgid "root_categories"
+msgstr "root categories"
+
+msgctxt "profile.category_management"
+msgid "create_new"
+msgstr "Create new category"
+
+msgctxt "profile.category_management"
+msgid "search_ph_names"
+msgstr "Search by AZ, EN, RU, TR names"
+
+msgctxt "profile.category_management"
+msgid "reset"
+msgstr "Reset"
+
+msgctxt "profile.category_management"
+msgid "root_category"
+msgstr "Root category"
+
+msgctxt "profile.category_management"
+msgid "default"
+msgstr "Default"
+
+msgctxt "profile.category_management"
+msgid "type_category"
+msgstr "the category"
+
+msgctxt "profile.category_management"
+msgid "type_subcategory"
+msgstr "the subcategory"
+
+msgctxt "profile.category_management"
+msgid "direct_posts"
+msgstr "direct posts"
+
+msgctxt "profile.category_management"
+msgid "show_subcategories"
+msgstr "Show subcategories"
+
+msgctxt "profile.category_management"
+msgid "hide_subcategories"
+msgstr "Hide subcategories"
+
+msgctxt "profile.category_management"
+msgid "subcategories_count"
+msgstr "subcategories"
+
+msgctxt "profile.category_management"
+msgid "showing_filtered"
+msgstr "Showing filtered results"
+
+msgctxt "profile.category_management"
+msgid "clear_before_delete"
+msgstr "To delete, first clear linked posts or subcategories."
+
+msgctxt "profile.category_management"
+msgid "zero_subcategories"
+msgstr "0 subcategories"
+
+msgctxt "profile.category_management"
+msgid "subcategory"
+msgstr "Subcategory"
+
+msgctxt "profile.category_management"
+msgid "parent"
+msgstr "Parent"
+
+msgctxt "profile.category_management"
+msgid "subcategory_has_posts"
+msgstr "This subcategory has linked posts."
+
+msgctxt "profile.category_management"
+msgid "no_search_match"
+msgstr "No categories match your search."
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title_named"
+msgstr "Edit category:"
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title"
+msgstr "Edit category"
+
+msgctxt "profile.category_management"
+msgid "close"
+msgstr "Close"
+
+msgctxt "profile.category_management"
+msgid "delete_modal_title"
+msgstr "Delete category"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_chip"
+msgstr "Answered"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "unanswered_chip"
+msgstr "Empty"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "picked_option"
+msgstr "Selected"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_option"
+msgstr "Correct"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_answer"
+msgstr "Correct answer"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "paint_answer"
+msgstr "Drawing answer submitted"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "question"
+msgstr "Question"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "last_run"
+msgstr "Last run"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "file_empty"
+msgstr "empty"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "lines"
+msgstr "lines"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_test"
+msgstr "Test"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_written"
+msgstr "Written"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_paint"
+msgstr "Drawing"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_coding"
+msgstr "Practical"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_manual_msg"
+msgstr "Allow the student to continue the exam? The violation count will not change."

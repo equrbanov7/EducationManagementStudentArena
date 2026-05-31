@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -13,14 +13,14 @@
       <p class="admin-otp-brand">{{ site_header }}</p>
       <h1 id="admin-otp-title" class="admin-otp-title">{{ title }}</h1>
       <p class="admin-otp-description">
-        Admin panelə keçid yalnız OTP təsdiqindən sonra açılır. Email ünvanınıza göndərilən 6 rəqəmli kodu daxil edin.
+        {% trans "description" context "admin.verify_otp" %}
       </p>
       <p class="admin-otp-description admin-otp-description--muted">
-        Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+        {% blocktrans context "admin.verify_otp" with minutes=otp_expiry_minutes %}The code is valid for {{ minutes }} minutes.{% endblocktrans %}
       </p>
 
       {% if messages %}
-        <ul class="admin-otp-messages" aria-label="Bildirişlər">
+        <ul class="admin-otp-messages" aria-label="{% trans "messages_label" context "admin.verify_otp" %}">
           {% for message in messages %}
             <li class="admin-otp-message admin-otp-message--{{ message.tags|default:'info' }}">{{ message }}</li>
           {% endfor %}
@@ -28,7 +28,7 @@
       {% endif %}
 
       {% if form.non_field_errors %}
-        <ul class="admin-otp-errors" aria-label="Xəta mesajları">
+        <ul class="admin-otp-errors" aria-label="{% trans "errors_label" context "admin.verify_otp" %}">
           {% for error in form.non_field_errors %}
             <li>{{ error }}</li>
           {% endfor %}
@@ -40,7 +40,7 @@
         <label class="admin-otp-label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
         {{ form.code }}
         {% if form.code.errors %}
-          <ul class="admin-otp-errors admin-otp-errors--field" aria-label="OTP xətaları">
+          <ul class="admin-otp-errors admin-otp-errors--field" aria-label="{% trans "otp_errors_label" context "admin.verify_otp" %}">
             {% for error in form.code.errors %}
               <li>{{ error }}</li>
             {% endfor %}
@@ -49,16 +49,16 @@
 
         {% if retry_after %}
           <p class="admin-otp-retry-note">
-            Təkrar cəhd etməzdən əvvəl {{ retry_after }} saniyə gözləyin.
+            {% blocktrans context "admin.verify_otp" with seconds=retry_after %}Please wait {{ seconds }} seconds before trying again.{% endblocktrans %}
           </p>
         {% endif %}
 
-        <button type="submit" class="admin-otp-button">Təsdiqlə</button>
+        <button type="submit" class="admin-otp-button">{% trans "submit" context "admin.verify_otp" %}</button>
       </form>
 
       <form method="post" action="{{ resend_url }}" class="admin-otp-resend-form">
         {% csrf_token %}
-        <button type="submit" class="admin-otp-button admin-otp-button--secondary">Kodu yenidən göndər</button>
+        <button type="submit" class="admin-otp-button admin-otp-button--secondary">{% trans "resend" context "admin.verify_otp" %}</button>
       </form>
     </section>
   </main>
