@@ -137,7 +137,7 @@ TEMPLATE_EDITS = {
 
 def apply_template_edits():
     report = []
-    for rel, (ctx, edits) in TEMPLATE_EDITS.items():
+    for rel, (_ctx, edits) in TEMPLATE_EDITS.items():
         p = os.path.join(BASE, rel)
         with open(p, encoding="utf-8") as f:
             content = f.read()
