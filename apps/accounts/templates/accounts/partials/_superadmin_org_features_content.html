@@ -1,24 +1,25 @@
+{% load i18n %}
 <div class="section-card">
     <div class="section-title">
-        <i class="fas fa-sliders-h"></i> Təşkilat özəllikləri
+        <i class="fas fa-sliders-h"></i> {% trans "title" context "accounts.superadmin_org_features" %}
     </div>
     <p class="text-muted mb-0">
-        Buradan təşkilatlara aid review visibility feature-lərini ayrıca açıb bağlaya bilərsən. Toggle aktiv olanda müəllim tələbə adını anonim pəncərə bitmədən də görür, amma bal redaktə vaxtı olduğu kimi qalır.
+        {% trans "intro" context "accounts.superadmin_org_features" %}
     </p>
 </div>
 
 <div class="section-card">
     <div class="section-title">
-        <i class="fas fa-user-shield"></i> Review visibility feature flag-ları
+        <i class="fas fa-user-shield"></i> {% trans "flags_title" context "accounts.superadmin_org_features" %}
     </div>
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Təşkilat</th>
-                    <th>Tip</th>
-                    <th>Sahib</th>
-                    <th>Özəlliklər</th>
+                    <th>{% trans "col_org" context "accounts.superadmin_org_features" %}</th>
+                    <th>{% trans "col_type" context "accounts.superadmin_org_features" %}</th>
+                    <th>{% trans "col_owner" context "accounts.superadmin_org_features" %}</th>
+                    <th>{% trans "col_features" context "accounts.superadmin_org_features" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,7 +27,7 @@
                 <tr>
                     <td>
                         <div><strong>{{ organization.name }}</strong></div>
-                        <div class="text-muted small">Kod: {{ organization.organization_identifier|default:"-" }}</div>
+                        <div class="text-muted small">{% trans "code" context "accounts.superadmin_org_features" %}: {{ organization.organization_identifier|default:"-" }}</div>
                     </td>
                     <td>{{ organization.get_org_type_display }}</td>
                     <td>{{ organization.owner.username }}</td>
@@ -41,9 +42,9 @@
                                     </div>
                                     <div>
                                         {% if feature.enabled %}
-                                            <span class="role-badge role-warning">Aktivdir, ad görünür</span>
+                                            <span class="role-badge role-warning">{% trans "active_name_visible" context "accounts.superadmin_org_features" %}</span>
                                         {% else %}
-                                            <span class="role-badge role-success">Standart anonimlik aktivdir</span>
+                                            <span class="role-badge role-success">{% trans "default_anonymity" context "accounts.superadmin_org_features" %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -62,9 +63,9 @@
                                             value="set_review_identity_reveal"
                                             class="btn btn-outline-primary btn-sm">
                                         {% if feature.enabled %}
-                                            Anonim yoxlamanı qaytar
+                                            {% trans "restore_anonymous" context "accounts.superadmin_org_features" %}
                                         {% else %}
-                                            Aktiv et
+                                            {% trans "activate" context "accounts.superadmin_org_features" %}
                                         {% endif %}
                                     </button>
                                 </form>
@@ -75,7 +76,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Təşkilat tapılmadı.</td>
+                    <td colspan="4" class="text-center">{% trans "no_org" context "accounts.superadmin_org_features" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -3307,7 +3307,7 @@ msgstr "Bu email artıq istifadə olunur."
 #: apps/accounts/views.py:1244
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr ""
+msgstr "Tələbə üçün universitet və ya məktəb tələb olunur."
 "Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir."
 
 #: apps/accounts/views.py:1250
@@ -3318,7 +3318,7 @@ msgstr "Profil uğurla yeniləndi!"
 #: apps/accounts/views.py:1711
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr ""
+msgstr "Yeni paylaşım yaradın və kimlərin görə biləcəyini seçin."
 "Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə "
 "edin."
 
@@ -3436,7 +3436,7 @@ msgstr "İstifadəçi artıq başqa təşkilata bağlıdır."
 #: apps/accounts/views.py:2218
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr ""
+msgstr "İstifadəçi qeydiyyat zamanı bu təşkilatı seçməyib."
 "Bu istifadəçi signup zamanı seçməyib və sizin təşkilatınıza qoşula bilməz."
 
 #: apps/accounts/views.py:2236
@@ -3447,13 +3447,13 @@ msgstr "Bu istifadəçinin rolunu dəyişməyə icazəniz yoxdur."
 #: apps/accounts/views.py:2274
 msgctxt "accounts.role_assignment.message"
 msgid "user_added_to_org_with_role"
-msgstr ""
+msgstr "İstifadəçi təşkilata rol ilə əlavə edildi."
 "%(username)s təşkilata əlavə edildi və `%(role_display)s` rolu verildi."
 
 #: apps/accounts/views.py:2289
 msgctxt "accounts.role_assignment.message"
 msgid "change_lower_level_users_only"
-msgstr ""
+msgstr "Yalnız özünüzdən aşağı səviyyəli istifadəçiləri dəyişə bilərsiniz."
 "Yalnız sizdən aşağı səviyyəli istifadəçilərin rolunu dəyişə bilərsiniz."
 
 #: apps/accounts/views.py:2328
@@ -3474,7 +3474,7 @@ msgstr "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olu
 #: apps/accounts/views.py:2441
 msgctxt "accounts.permission_editor.message"
 msgid "manage_lower_role_permissions_only"
-msgstr ""
+msgstr "Yalnız özünüzdən aşağı rolların icazələrini idarə edə bilərsiniz."
 "Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə "
 "bilərsiniz."
 
@@ -3486,7 +3486,7 @@ msgstr "Yanlış permission seçimi."
 #: apps/accounts/views.py:2460
 msgctxt "accounts.permission_editor.message"
 msgid "grant_only_owned_or_grantable_permissions"
-msgstr ""
+msgstr "Yalnız sahib olduğunuz və ya vermə icazəniz olan icazələri verə bilərsiniz."
 "Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə bilərsiniz"
 
 #: apps/accounts/views.py:2465
@@ -3531,14 +3531,14 @@ msgstr "AI tənzimləmələri uğurla yeniləndi."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr ""
+msgstr "Qeydiyyat tamamlandı, müraciətiniz qeydə alındı."
 "Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email "
 "kodunu təsdiqləyin."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr ""
+msgstr "Qeydiyyat tamamlandı, indi daxil ola bilərsiniz."
 "Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu "
 "təsdiqləyin."
 
@@ -3579,7 +3579,7 @@ msgstr "Yeni təsdiq kodu göndərildi."
 
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
-msgstr ""
+msgstr "Qeydiyyat e-poçtu göndərilə bilmədi."
 "Qeydiyyat uğursuz oldu: doğrulama emaili göndərilə bilmədi. Zəhmət olmasa "
 "email ünvanınızı yoxlayın və yenidən cəhd edin."
 
@@ -3590,7 +3590,7 @@ msgstr "Uğurla çıxış etdiniz."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr ""
+msgstr "OTP kodu e-poçtu göndərilə bilmədi."
 "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
 
 #: apps/assignments/admin.py:23
@@ -5157,7 +5157,7 @@ msgstr "Bu tapşırığa giriş icazəniz yoxdur"
 #: apps/assignments/views.py:313
 msgctxt "assignment.message"
 msgid "submission_not_allowed_attempts_or_deadline"
-msgstr ""
+msgstr "Təhvil mümkün deyil: cəhd limiti bitib və ya son tarix keçib."
 "Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib."
 
 #: apps/assignments/views.py:330
@@ -6256,7 +6256,7 @@ msgstr ""
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
-msgstr ""
+msgstr "Təsdiq e-poçtu göndərildi."
 "'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu "
 "yoxlayın."
 
@@ -6349,7 +6349,7 @@ msgstr "Yeni kod göndərildi."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr ""
+msgstr "OTP kodu e-poçtu göndərilə bilmədi."
 "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
 
 #: apps/blog/views.py:633
@@ -21886,3 +21886,712 @@ msgstr "Bitmə"
 msgctxt "exams.template.exam_live_monitor"
 msgid "questions_answered"
 msgstr "sual cavablanıb"
+
+msgctxt "audit.list"
+msgid "title"
+msgstr "Audit jurnalı"
+
+msgctxt "audit.list"
+msgid "heading"
+msgstr "Audit jurnalı"
+
+msgctxt "audit.list"
+msgid "subtitle_all_orgs"
+msgstr "Bütün təşkilatlar üzrə son fəaliyyət qeydləri"
+
+msgctxt "audit.list"
+msgid "subtitle_recent"
+msgstr "Son fəaliyyət qeydləri"
+
+msgctxt "audit.list"
+msgid "col_time"
+msgstr "Vaxt"
+
+msgctxt "audit.list"
+msgid "col_user"
+msgstr "İstifadəçi"
+
+msgctxt "audit.list"
+msgid "col_action"
+msgstr "Əməliyyat"
+
+msgctxt "audit.list"
+msgid "col_resource"
+msgstr "Resurs"
+
+msgctxt "audit.list"
+msgid "col_organization"
+msgstr "Təşkilat"
+
+msgctxt "audit.list"
+msgid "anonymous"
+msgstr "Anonim"
+
+msgctxt "audit.list"
+msgid "empty"
+msgstr "Hələ audit qeydi yoxdur."
+
+msgctxt "common"
+msgid "search"
+msgstr "Axtar"
+
+msgctxt "common"
+msgid "search_clear"
+msgstr "Axtarışı təmizlə"
+
+msgctxt "common"
+msgid "save"
+msgstr "Yadda saxla"
+
+msgctxt "common"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "common"
+msgid "confirm"
+msgstr "Təsdiqlə"
+
+msgctxt "common"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "common"
+msgid "close"
+msgstr "Bağla"
+
+msgctxt "common"
+msgid "select_all"
+msgstr "Hamısını seç"
+
+msgctxt "common"
+msgid "reject"
+msgstr "Rədd et"
+
+msgctxt "common"
+msgid "resend_code"
+msgstr "Kodu yenidən göndər"
+
+msgctxt "accounts.student_org"
+msgid "students_title"
+msgstr "Təşkilat tələbələri"
+
+msgctxt "accounts.student_org"
+msgid "col_user"
+msgstr "İstifadəçi"
+
+msgctxt "accounts.student_org"
+msgid "col_username"
+msgstr "İstifadəçi adı"
+
+msgctxt "accounts.student_org"
+msgid "col_email"
+msgstr "E-poçt"
+
+msgctxt "accounts.student_org"
+msgid "col_action"
+msgstr "Əməliyyat"
+
+msgctxt "accounts.student_org"
+msgid "col_selected_org"
+msgstr "Seçilmiş təşkilat"
+
+msgctxt "accounts.student_org"
+msgid "col_message"
+msgstr "Mesaj"
+
+msgctxt "accounts.student_org"
+msgid "col_status_note"
+msgstr "Status/Qeyd"
+
+msgctxt "accounts.student_org"
+msgid "col_role_type"
+msgstr "Rol növü"
+
+msgctxt "accounts.student_org"
+msgid "col_sender"
+msgstr "Göndərən"
+
+msgctxt "accounts.student_org"
+msgid "col_request_date"
+msgstr "Müraciət tarixi"
+
+msgctxt "accounts.student_org"
+msgid "remove_from_org"
+msgstr "Təşkilatdan uzaqlaşdır"
+
+msgctxt "accounts.student_org"
+msgid "no_students"
+msgstr "Tələbə tapılmadı."
+
+msgctxt "accounts.student_org"
+msgid "pending_title"
+msgstr "Təsdiq gözləyən tələbələr"
+
+msgctxt "accounts.student_org"
+msgid "pending_desc"
+msgstr "Qeydiyyat zamanı bu təşkilatı seçən tələbələri buradan tək-tək və ya hamısını seçib əlavə edə bilərsiniz. Artıq başqa təşkilata qəbul olanların müraciəti \"Bağlanıb\" kimi görünəcək."
+
+msgctxt "accounts.student_org"
+msgid "pending_search_ph"
+msgstr "Təsdiq gözləyən tələbə axtar..."
+
+msgctxt "accounts.student_org"
+msgid "add_selected"
+msgstr "Seçilənləri təşkilata əlavə et"
+
+msgctxt "accounts.student_org"
+msgid "add_selected_count"
+msgstr "Seçilənləri təşkilata əlavə et ({count} seçildi)"
+
+msgctxt "accounts.student_org"
+msgid "min_one_student"
+msgstr "Ən az 1 tələbə seçin"
+
+msgctxt "accounts.student_org"
+msgid "min_one"
+msgstr "Ən az 1 seçin"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "accounts.student_org"
+msgid "delete_selected_count"
+msgstr "Seçilənləri sil ({count} seçildi)"
+
+msgctxt "accounts.student_org"
+msgid "add_to_org"
+msgstr "Təşkilata əlavə et"
+
+msgctxt "accounts.student_org"
+msgid "no_pending"
+msgstr "Təsdiq gözləyən tələbə yoxdur."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_title"
+msgstr "Təşkilata bağlı olmayan tələbələr"
+
+msgctxt "accounts.student_org"
+msgid "unassigned_desc"
+msgstr "Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə kabinetində qəbul etdikdən sonra təşkilata qoşulacaq."
+
+msgctxt "accounts.student_org"
+msgid "unassigned_search_ph"
+msgstr "Təşkilatsız tələbə axtar..."
+
+msgctxt "accounts.student_org"
+msgid "invite_selected"
+msgstr "Seçilənlərə dəvət et"
+
+msgctxt "accounts.student_org"
+msgid "invite_selected_count"
+msgstr "Seçilənlərə dəvət et ({count} seçildi)"
+
+msgctxt "accounts.student_org"
+msgid "invite"
+msgstr "Dəvət et"
+
+msgctxt "accounts.student_org"
+msgid "no_invite_targets"
+msgstr "Dəvət göndəriləcək tələbə tapılmadı."
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_title"
+msgstr "Göndərilmiş dəvətlər"
+
+msgctxt "accounts.student_org"
+msgid "sent_invites_desc"
+msgstr "Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə bilərsiniz."
+
+msgctxt "accounts.student_org"
+msgid "sent_invite_search_ph"
+msgstr "Göndərilən dəvət axtar..."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected"
+msgstr "Seçilənləri geri çək"
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_count"
+msgstr "Seçilənləri geri çək ({count} seçildi)"
+
+msgctxt "accounts.student_org"
+msgid "revoke"
+msgstr "Geri çək"
+
+msgctxt "accounts.student_org"
+msgid "no_active_invite"
+msgstr "Geri çəkiləcək aktiv dəvət yoxdur."
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_title"
+msgstr "Müəllim / İşçi müraciətləri"
+
+msgctxt "accounts.student_org"
+msgid "ts_requests_desc"
+msgstr "Bu bölmədə müəllim və ya işçi olaraq qeydiyyatdan keçib bu təşkilatı seçən istifadəçilərin müraciətlərini görə, təsdiqləyə və ya rədd edə bilərsiniz."
+
+msgctxt "accounts.student_org"
+msgid "ts_search_ph"
+msgstr "Müəllim / işçi axtar..."
+
+msgctxt "accounts.student_org"
+msgid "role_teacher"
+msgstr "Müəllim"
+
+msgctxt "accounts.student_org"
+msgid "role_staff"
+msgstr "İşçi"
+
+msgctxt "accounts.student_org"
+msgid "role_student"
+msgstr "Tələbə"
+
+msgctxt "accounts.student_org"
+msgid "approve"
+msgstr "Təsdiqlə"
+
+msgctxt "accounts.student_org"
+msgid "no_ts_requests"
+msgstr "Təsdiq gözləyən müəllim / işçi müraciəti yoxdur."
+
+msgctxt "accounts.student_org"
+msgid "revoke_invite"
+msgstr "Dəvəti geri çək"
+
+msgctxt "accounts.student_org"
+msgid "revoke_confirm"
+msgstr "Seçilən dəvətləri geri çəkmək istədiyinizi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "remove_lead"
+msgstr "Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "field_name"
+msgstr "Ad"
+
+msgctxt "accounts.student_org"
+msgid "field_org"
+msgstr "Təşkilat"
+
+msgctxt "accounts.student_org"
+msgid "field_role_change"
+msgstr "Dəyişəcək rol"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_label"
+msgstr "Uzaqlaşdırma səbəbi (məcburi)"
+
+msgctxt "accounts.student_org"
+msgid "remove_reason_ph"
+msgstr "Uzaqlaşdırma səbəbi..."
+
+msgctxt "accounts.student_org"
+msgid "add_lead"
+msgstr "Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "invite_lead"
+msgstr "Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "no_active_org"
+msgstr "Aktiv təşkilat tapılmadı."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_org"
+msgstr "Təşkilat"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_type"
+msgstr "Növ"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_owner"
+msgstr "Sahib"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "col_features"
+msgstr "Xüsusiyyətlər"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "no_org"
+msgstr "Təşkilat tapılmadı."
+
+msgctxt "blog.create_question"
+msgid "title"
+msgstr "Sual yarat"
+
+msgctxt "blog.create_question"
+msgid "subtitle"
+msgstr "Yeni sual yaradın və kimlərin görə biləcəyini seçin."
+
+msgctxt "blog.create_question"
+msgid "save"
+msgstr "Sualı yadda saxla"
+
+msgctxt "blog.create_question"
+msgid "my_questions"
+msgstr "Suallarım"
+
+msgctxt "admin.verify_otp"
+msgid "description"
+msgstr "Admin panelə keçid yalnız OTP təsdiqindən sonra açılır. E-poçt ünvanınıza göndərilən 6 rəqəmli kodu daxil edin."
+
+msgctxt "admin.verify_otp"
+msgid "expiry"
+msgstr "Kod {minutes} dəqiqə etibarlıdır."
+
+msgctxt "admin.verify_otp"
+msgid "messages_label"
+msgstr "Bildirişlər"
+
+msgctxt "admin.verify_otp"
+msgid "errors_label"
+msgstr "Xəta mesajları"
+
+msgctxt "admin.verify_otp"
+msgid "otp_errors_label"
+msgstr "OTP xətaları"
+
+msgctxt "admin.verify_otp"
+msgid "retry_note"
+msgstr "Təkrar cəhd etməzdən əvvəl {seconds} saniyə gözləyin."
+
+msgctxt "admin.verify_otp"
+msgid "submit"
+msgstr "Təsdiqlə"
+
+msgctxt "admin.verify_otp"
+msgid "resend"
+msgstr "Kodu yenidən göndər"
+
+msgctxt "accounts.student_org"
+msgid "student_search_ph"
+msgstr "Tələbə axtar..."
+
+msgctxt "accounts.student_org"
+msgid "this_user"
+msgstr "Bu istifadəçi"
+
+msgctxt "accounts.student_org"
+msgid "revoke_single_suffix"
+msgstr "üçün göndərilmiş dəvəti geri çəkmək istədiyinizi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "revoke_selected_confirm"
+msgstr "Seçilmiş dəvətləri geri çəkmək istədiyinizi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "selected_invite_count"
+msgstr "Seçilən dəvət sayı"
+
+msgctxt "accounts.student_org"
+msgid "select_one_invite_first"
+msgstr "Əvvəlcə ən azı bir dəvət seçin."
+
+msgctxt "accounts.student_org"
+msgid "confirm_disabled_hint"
+msgstr "Bu halda təsdiqlə düyməsi deaktiv edilir."
+
+msgctxt "accounts.student_org"
+msgid "add_lead_single"
+msgstr "İstifadəçini təşkilata əlavə etməyi təsdiqləyin."
+
+msgctxt "accounts.student_org"
+msgid "selected_user_count"
+msgstr "Seçilən istifadəçi sayı"
+
+msgctxt "accounts.student_org"
+msgid "invite_lead_single"
+msgstr "İstifadəçiyə dəvət göndərməyi təsdiqləyin."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "title"
+msgstr "Təşkilat xüsusiyyətləri"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "intro"
+msgstr "Buradan təşkilatlara aid yoxlama görünürlüyü xüsusiyyətlərini ayrıca açıb-bağlaya bilərsiniz. Xüsusiyyət aktiv olanda müəllim tələbə adını anonim pəncərə bitmədən də görür, lakin bal redaktəsi vaxtı olduğu kimi qalır."
+
+msgctxt "accounts.superadmin_org_features"
+msgid "flags_title"
+msgstr "Yoxlama görünürlüyü bayraqları"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "code"
+msgstr "Kod"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "active_name_visible"
+msgstr "Aktivdir, ad görünür"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "default_anonymity"
+msgstr "Standart anonimlik aktivdir"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "restore_anonymous"
+msgstr "Anonim yoxlamanı qaytar"
+
+msgctxt "accounts.superadmin_org_features"
+msgid "activate"
+msgstr "Aktiv et"
+
+msgctxt "accounts.pending_review_detail"
+msgid "title"
+msgstr "Yoxlama"
+
+msgctxt "accounts.pending_review_detail"
+msgid "subtitle"
+msgstr "Yoxlama detalları"
+
+msgctxt "accounts.pending_review_detail"
+msgid "back"
+msgstr "Geri"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student_answer"
+msgstr "Tələbə cavabı"
+
+msgctxt "accounts.pending_review_detail"
+msgid "student"
+msgstr "Tələbə"
+
+msgctxt "accounts.pending_review_detail"
+msgid "exam"
+msgstr "İmtahan"
+
+msgctxt "accounts.pending_review_detail"
+msgid "date"
+msgstr "Tarix"
+
+msgctxt "accounts.pending_review_detail"
+msgid "grading"
+msgstr "Qiymətləndirmə"
+
+msgctxt "accounts.pending_review_detail"
+msgid "score_per_question"
+msgstr "Sual üzrə bal"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback"
+msgstr "Rəy"
+
+msgctxt "accounts.pending_review_detail"
+msgid "feedback_ph"
+msgstr "Tələbə üçün qısa və aydın rəy yazın"
+
+msgctxt "accounts.pending_review_detail"
+msgid "save_grade"
+msgstr "Qiyməti yadda saxla"
+
+msgctxt "profile.category_management"
+msgid "search_ph"
+msgstr "Kateqoriya axtar..."
+
+msgctxt "profile.category_management"
+msgid "search"
+msgstr "Axtar"
+
+msgctxt "profile.category_management"
+msgid "search_clear"
+msgstr "Axtarışı təmizlə"
+
+msgctxt "profile.category_management"
+msgid "edit"
+msgstr "Düzəliş et"
+
+msgctxt "profile.category_management"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "profile.category_management"
+msgid "empty"
+msgstr "Hələ kateqoriya yoxdur."
+
+msgctxt "profile.category_management"
+msgid "save"
+msgstr "Yadda saxla"
+
+msgctxt "profile.category_management"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "profile.category_management"
+msgid "delete_confirm"
+msgstr "Silməni təsdiqlə"
+
+msgid "Mövcud şifrə"
+msgstr "Mövcud şifrə"
+
+msgid "Yeni şifrə"
+msgstr "Yeni şifrə"
+
+msgid "Yeni şifrəni təkrarla"
+msgstr "Yeni şifrəni təkrarla"
+
+msgctxt "profile.category_management"
+msgid "eyebrow"
+msgstr "İdarəetmə"
+
+msgctxt "profile.category_management"
+msgid "title"
+msgstr "Kateqoriyaları idarə et"
+
+msgctxt "profile.category_management"
+msgid "subtitle"
+msgstr "Standart kateqoriyalar, yeni yaradılanlar və alt kateqoriyalar burada görünür."
+
+msgctxt "profile.category_management"
+msgid "root_categories"
+msgstr "əsas kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "create_new"
+msgstr "Yeni kateqoriya yarat"
+
+msgctxt "profile.category_management"
+msgid "search_ph_names"
+msgstr "AZ, EN, RU, TR adlarına görə axtar"
+
+msgctxt "profile.category_management"
+msgid "reset"
+msgstr "Sıfırla"
+
+msgctxt "profile.category_management"
+msgid "root_category"
+msgstr "Əsas kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "default"
+msgstr "Standart"
+
+msgctxt "profile.category_management"
+msgid "type_category"
+msgstr "kateqoriyanı"
+
+msgctxt "profile.category_management"
+msgid "type_subcategory"
+msgstr "alt kateqoriyanı"
+
+msgctxt "profile.category_management"
+msgid "direct_posts"
+msgstr "birbaşa paylaşım"
+
+msgctxt "profile.category_management"
+msgid "show_subcategories"
+msgstr "Alt kateqoriyaları göstər"
+
+msgctxt "profile.category_management"
+msgid "hide_subcategories"
+msgstr "Alt kateqoriyaları gizlət"
+
+msgctxt "profile.category_management"
+msgid "subcategories_count"
+msgstr "alt kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "showing_filtered"
+msgstr "Filtrlənənləri göstərir"
+
+msgctxt "profile.category_management"
+msgid "clear_before_delete"
+msgstr "Silmək üçün əvvəlcə bağlı paylaşımları və ya alt kateqoriyaları təmizləyin."
+
+msgctxt "profile.category_management"
+msgid "zero_subcategories"
+msgstr "0 alt kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "subcategory"
+msgstr "Alt kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "parent"
+msgstr "Üst kateqoriya"
+
+msgctxt "profile.category_management"
+msgid "subcategory_has_posts"
+msgstr "Bu alt kateqoriyaya bağlı paylaşımlar var."
+
+msgctxt "profile.category_management"
+msgid "no_search_match"
+msgstr "Axtarışa uyğun kateqoriya tapılmadı."
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title_named"
+msgstr "Kateqoriyanı redaktə et:"
+
+msgctxt "profile.category_management"
+msgid "edit_modal_title"
+msgstr "Kateqoriyanı redaktə et"
+
+msgctxt "profile.category_management"
+msgid "close"
+msgstr "Bağla"
+
+msgctxt "profile.category_management"
+msgid "delete_modal_title"
+msgstr "Kateqoriyanı sil"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "answered_chip"
+msgstr "Cavablanıb"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "unanswered_chip"
+msgstr "Boş"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "picked_option"
+msgstr "Seçilib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_option"
+msgstr "Düz"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "correct_answer"
+msgstr "Düzgün cavab"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "paint_answer"
+msgstr "Çəkim cavabı verilib"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "question"
+msgstr "Sual"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "last_run"
+msgstr "Son icra"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "file_empty"
+msgstr "boş"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "lines"
+msgstr "sətir"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_test"
+msgstr "Test"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_written"
+msgstr "Yazılı"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_paint"
+msgstr "Çəkim"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "kind_coding"
+msgstr "Praktiki"
+
+msgctxt "exams.template.exam_live_monitor"
+msgid "confirm_resume_manual_msg"
+msgstr "Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."
