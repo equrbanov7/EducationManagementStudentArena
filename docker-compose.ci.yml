@@ -3,15 +3,19 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # Usage: docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml up -d
 #
-# Problem: The Piston container requires `privileged: true` and kernel
-# namespace features (nsjail) that are unavailable or unreliable on
-# GitHub Actions runners.  Its health check consistently fails in CI,
-# blocking the entire stack from starting.
+# Problems:
+#   1. The Piston container requires `privileged: true` and kernel namespace
+#      features (nsjail) that are unavailable or unreliable on GitHub Actions
+#      runners. Its health check consistently fails in CI, blocking the app.
+#   2. The production nginx config requires private origin TLS certificate
+#      files for port 443. Those certs are not committed to the repo, so nginx
+#      exits in CI before http://localhost/ping/ can respond.
 #
-# Solution: This override file disables the piston service in CI and
-# removes the piston dependency from the app service.  The Django app
-# gracefully degrades when Piston is unreachable (CODING_EXECUTION_BACKEND
-# is set to "auto" — Docker sandbox is preferred, Piston is optional).
+# Solution: This override file disables the piston service in CI, removes the
+# hard piston dependency from the app service, and swaps nginx to an HTTP-only
+# config for localhost smoke tests. The Django app gracefully degrades when
+# Piston is unreachable (CODING_EXECUTION_BACKEND is set to "auto" — Docker
+# sandbox is preferred, Piston is optional).
 # ═══════════════════════════════════════════════════════════════════════════
 
 services:
@@ -39,3 +43,10 @@ services:
       piston:
         condition: service_started
         required: false
+
+  # CI runs only over http://localhost. The production nginx config also
+  # requires private origin TLS certificate files for port 443, which are not
+  # committed to the repo and would make nginx exit before /ping/ is reachable.
+  nginx:
+    volumes:
+      - ./docker/nginx/nginx.ci.conf:/etc/nginx/conf.d/default.conf:ro
