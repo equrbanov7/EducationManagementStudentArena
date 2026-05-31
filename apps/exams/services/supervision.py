@@ -10,7 +10,7 @@ from django.utils import timezone
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from apps.exams.models import ExamAttempt, ExamSupervisionConfig, SupervisionIncident
+from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.randomizer import build_shuffled_options
 
 
@@ -540,55 +540,42 @@ def get_flagged_students_for_exam(exam, organization):
 def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None):
     """
     Get supervision monitor data for the teacher dashboard.
-    Returns flagged students across all supervised exams.
+    Returns all monitorable exams and their attempts, even when an exam has no
+    explicit supervision config or has no violations yet.
     """
+    exam_choices_qs = exam_queryset if exam_queryset is not None else Exam.objects.filter(organization=organization)
+    exam_choices_qs = exam_choices_qs.filter(organization=organization)
+
+    monitor_exams = exam_choices_qs
+    if exam_id:
+        monitor_exams = monitor_exams.filter(id=exam_id)
+
     # Lazily finish any stale "resumed" attempts (student never returned within
     # the resume window) before building the view, scoped to this org so the
     # monitor never shows phantom open rows for exams that ended long ago.
-    sweep_qs = ExamAttempt.objects.filter(exam__organization=organization)
-    if exam_queryset is not None:
-        sweep_qs = sweep_qs.filter(exam__in=exam_queryset)
-    if exam_id:
-        sweep_qs = sweep_qs.filter(exam_id=exam_id)
+    sweep_qs = ExamAttempt.objects.filter(exam__organization=organization, exam__in=monitor_exams)
     sweep_expired_resume_windows(sweep_qs)
 
     incidents_qs = SupervisionIncident.objects.filter(
         organization=organization,
     ).select_related("exam", "student", "attempt")
-    if exam_queryset is not None:
-        incidents_qs = incidents_qs.filter(exam__in=exam_queryset)
-
+    incidents_qs = incidents_qs.filter(exam__in=monitor_exams)
     if exam_id:
         incidents_qs = incidents_qs.filter(exam_id=exam_id)
 
-    # Get unique flagged attempts.  ``exam__supervision_config`` is selected so
+    # Get all joined attempts.  ``exam__supervision_config`` is selected so
     # the per-row ``supervision_resume_deadline`` countdown does not trigger an
     # extra query for every resumed attempt.
-    flagged_attempts = (
+    monitor_attempts = (
         ExamAttempt.objects.filter(
             exam__organization=organization,
-            supervision_violation_count__gt=0,
+            exam__in=monitor_exams,
         )
         .select_related("user", "exam", "exam__course", "exam__supervision_config")
         .order_by("-supervision_violation_count")
     )
-    if exam_queryset is not None:
-        flagged_attempts = flagged_attempts.filter(exam__in=exam_queryset)
 
-    if exam_id:
-        flagged_attempts = flagged_attempts.filter(exam_id=exam_id)
-
-    # Get supervised exams list
-    supervised_exams = (
-        ExamSupervisionConfig.objects.filter(
-            exam__organization=organization,
-            enabled=True,
-        )
-        .select_related("exam")
-        .values_list("exam__id", "exam__title")
-    )
-    if exam_queryset is not None:
-        supervised_exams = supervised_exams.filter(exam__in=exam_queryset)
+    exam_choices = exam_choices_qs.order_by("title", "id").values_list("id", "title")
 
     # Summary stats
     total_incidents = incidents_qs.filter(
@@ -596,8 +583,9 @@ def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None)
     ).count()
 
     return {
-        "flagged_attempts": flagged_attempts,
-        "supervised_exams": list(supervised_exams),
+        "monitor_attempts": monitor_attempts,
+        "monitor_exams": monitor_exams.select_related("course", "author").order_by("-created_at", "-id"),
+        "supervised_exams": list(exam_choices),
         "total_incidents": total_incidents,
         "incidents_qs": incidents_qs,
     }
