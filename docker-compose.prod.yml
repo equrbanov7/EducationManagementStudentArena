@@ -122,10 +122,12 @@ services:
       AUTH_OTP_MAX_SENDS_PER_HOUR: ${AUTH_OTP_MAX_SENDS_PER_HOUR:-5}
       SENTRY_DSN: ${SENTRY_DSN:-}
       MEDIA_ACCEL_REDIRECT_URL: /internal_media
-      # Practical coding exam sandbox: with self-hosted Piston we point at the
-      # internal `piston` service (no auth, accessible only on the bridge
-      # network). Override via .env only when migrating to managed Piston.
-      CODING_EXECUTION_BACKEND: ${CODING_EXECUTION_BACKEND:-auto}
+      PRACTICAL_EXAMS_ENABLED: "false"
+      EXAM_SUPERVISION_ENABLED: "false"
+      # Practical/coding exams are disabled in production. Keep the settings
+      # here for future controlled re-enable, but do not start Piston by
+      # default or make app health depend on it.
+      CODING_EXECUTION_BACKEND: "disabled"
       CODING_PISTON_URL: ${CODING_PISTON_URL:-http://piston:2000/api/v2}
       CODING_PISTON_AUTH_TOKEN: ${CODING_PISTON_AUTH_TOKEN:-}
       CODING_RUN_RATE_LIMIT_PER_MINUTE: ${CODING_RUN_RATE_LIMIT_PER_MINUTE:-600}
@@ -138,8 +140,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      piston:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -187,6 +187,9 @@ services:
       AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      PRACTICAL_EXAMS_ENABLED: "false"
+      EXAM_SUPERVISION_ENABLED: "false"
+      CODING_EXECUTION_BACKEND: "disabled"
     volumes:
       - media_data:/app/media
     depends_on:
@@ -200,6 +203,8 @@ services:
 
   # ─────────────────────────────────────────────────────────────────────────
   # Piston — self-hosted code execution sandbox
+  # Optional profile for practical/coding exams. Disabled in normal
+  # production deploys so the code-execution sandbox does not consume RAM/CPU.
   # Used to run student-submitted code for practical/coding exams. The
   # official engineer-man/piston image bundles isolated runtimes for
   # Python, JavaScript, C++, Java and many more languages; it runs each
@@ -221,6 +226,8 @@ services:
   #     running multiple piston replicas behind an internal load balancer.
   # ─────────────────────────────────────────────────────────────────────────
   piston:
+    profiles:
+      - coding
     image: ghcr.io/engineer-man/piston:latest
     container_name: emsarena-piston
     restart: unless-stopped

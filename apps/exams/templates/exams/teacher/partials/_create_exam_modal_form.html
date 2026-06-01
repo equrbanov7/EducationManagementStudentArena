@@ -203,6 +203,7 @@
                 </div>
             </div>
         </div>
+        {% if form.exam_supervision_enabled %}
         <div class="form-group form-group-full">
             <div class="create-exam-modal-section-title">
                 <h4><i class="fas fa-shield-alt" style="color:#dc3545;"></i> {% trans "supervision_section_title" context "exams.template.create_exam_modal_form" %}</h4>
@@ -331,6 +332,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <div class="modal-buttons create-exam-modal-actions">

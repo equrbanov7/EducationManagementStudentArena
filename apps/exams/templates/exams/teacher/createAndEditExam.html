@@ -315,6 +315,7 @@
 
                 </div>
 
+                {% if form.exam_supervision_enabled %}
                 {# ================= İMTAHAN NƏZARƏTİ BLOKU ================= #}
                 <div class="form-grid">
                     <div class="form-section-title span-full">
@@ -499,6 +500,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
 
                 <div class="form-actions">
                     {% if is_editing %}

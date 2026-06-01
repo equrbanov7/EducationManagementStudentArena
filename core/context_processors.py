@@ -155,3 +155,11 @@ def seo_context(request):
         "seo": seo,
         "SEO_ABS_ORIGIN": SITE_ORIGIN,
     }
+
+
+def feature_flags(request):
+    """Expose lightweight feature flags to templates."""
+    return {
+        "exam_supervision_enabled": bool(getattr(settings, "EXAM_SUPERVISION_ENABLED", True)),
+        "practical_exams_enabled": bool(getattr(settings, "PRACTICAL_EXAMS_ENABLED", True)),
+    }

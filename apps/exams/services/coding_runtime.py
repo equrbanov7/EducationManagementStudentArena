@@ -569,6 +569,7 @@ def _docker_available():
 def _resolve_execution_backend(language):
     """Decide which executor to use for `language`.
 
+    - `disabled` / `none`: do not execute code.
     - `docker` (default): use Docker; if unavailable, return `none`.
     - `piston`: always use Piston regardless of Docker presence.
     - `auto` (recommended in production): prefer Docker, fall back to Piston
@@ -576,6 +577,8 @@ def _resolve_execution_backend(language):
     """
 
     raw = (getattr(settings, "CODING_EXECUTION_BACKEND", "docker") or "docker").lower()
+    if raw in {"disabled", "none"}:
+        return "none"
     if raw == "piston":
         return "piston"
     if raw == "auto":

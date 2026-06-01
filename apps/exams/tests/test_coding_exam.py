@@ -5,7 +5,7 @@ from io import BytesIO
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import pgettext
 
@@ -123,6 +123,21 @@ class CodingExamFormTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["exam_type"], "coding")
         self.assertEqual(form.cleaned_data["random_question_count"], 10)
+
+    @override_settings(PRACTICAL_EXAMS_ENABLED=False)
+    def test_coding_exam_form_rejects_practical_exam_when_disabled(self):
+        form = ExamForm(
+            data={
+                "title": "Algorithms practical",
+                "description": "",
+                "exam_type": "coding",
+                "is_active": "on",
+                "random_question_count": "10",
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("exam_type", form.errors)
 
     def test_truncate_capture_accepts_timeout_bytes(self):
         self.assertEqual(truncate_capture(b"Execution timed out."), "Execution timed out.")
