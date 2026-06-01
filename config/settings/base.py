@@ -235,6 +235,19 @@ def _env_float_setting(name: str, default: float, *, minimum: float | None = Non
 # still written to browser localStorage immediately, while DB writes are batched.
 EXAM_AUTOSAVE_INTERVAL_MS = _env_int_setting("EXAM_AUTOSAVE_INTERVAL_MS", 300_000, minimum=60_000)
 EXAM_AUTOSAVE_JITTER_MS = _env_int_setting("EXAM_AUTOSAVE_JITTER_MS", 60_000, minimum=0)
+EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED = _env_bool_setting("EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED", False)
+
+# Written-answer uploads are accepted on explicit save/submit, but kept tight
+# so a single student cannot push large multipart or canvas payloads repeatedly.
+EXAM_ANSWER_FILE_MAX_SIZE_MB = _env_int_setting("EXAM_ANSWER_FILE_MAX_SIZE_MB", 5, minimum=1)
+EXAM_ANSWER_MAX_FILES_PER_QUESTION = _env_int_setting("EXAM_ANSWER_MAX_FILES_PER_QUESTION", 3, minimum=1)
+EXAM_PAINT_MAX_BASE64_CHARS = _env_int_setting("EXAM_PAINT_MAX_BASE64_CHARS", 1_500_000, minimum=100_000)
+EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 12, minimum=0)
+EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 6, minimum=0)
+EXAM_START_WAIT_TIMEOUT_SECONDS = _env_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
+EXAM_START_POLL_INTERVAL_SECONDS = _env_float_setting("EXAM_START_POLL_INTERVAL_SECONDS", 0.05, minimum=0.01)
+EXAM_START_LOCK_LEASE_SECONDS = _env_int_setting("EXAM_START_LOCK_LEASE_SECONDS", 120, minimum=1)
+EXAM_RANDOMIZER_USAGE_CACHE_SECONDS = _env_int_setting("EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30, minimum=0)
 
 
 # Request queueing for mutating HTTP calls. This protects every app view from
@@ -268,6 +281,7 @@ REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
     ).split(",")
     if prefix.strip()
 )
+HEALTH_CHECK_CACHE_SECONDS = _env_float_setting("HEALTH_CHECK_CACHE_SECONDS", 2.0, minimum=0.0)
 AUTH_OTP_EXPIRY_SECONDS = int(os.getenv("AUTH_OTP_EXPIRY_SECONDS", "300"))
 AUTH_OTP_RESEND_COOLDOWN_SECONDS = int(os.getenv("AUTH_OTP_RESEND_COOLDOWN_SECONDS", "60"))
 AUTH_OTP_MAX_ATTEMPTS = int(os.getenv("AUTH_OTP_MAX_ATTEMPTS", "5"))

@@ -100,7 +100,7 @@ def _save_test_answer_if_changed(answer, question, selected_option_ids, current_
         answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
 
 
-def _save_written_answer_if_changed(request, answer, question):
+def _save_written_answer_if_changed(request, answer, question, *, allow_binary_uploads=True):
     update_fields = []
     text = request.POST.get(f"q_{question.id}", "").strip()
     if answer.text_answer != text:
@@ -110,17 +110,29 @@ def _save_written_answer_if_changed(request, answer, question):
         answer.is_correct = False
         update_fields.append("is_correct")
 
-    files = request.FILES.getlist(f"file_{question.id}[]")
-    if files:
-        answer.files.all().delete()
-        for uploaded_file in files:
-            validate_uploaded_file(
-                uploaded_file,
-                allowed_extensions=EXAM_ALLOWED_EXTENSIONS,
-                max_size_mb=10,
+    if allow_binary_uploads:
+        files = request.FILES.getlist(f"file_{question.id}[]")
+        if len(files) > settings.EXAM_ANSWER_MAX_FILES_PER_QUESTION:
+            raise ValidationError(
+                pgettext("exams.view.validation", "Bir sual üçün maksimum {count} fayl yükləyə bilərsiniz.").format(
+                    count=settings.EXAM_ANSWER_MAX_FILES_PER_QUESTION
+                )
             )
-            randomize_uploaded_filename(uploaded_file)
-            ExamAnswerFile.objects.create(answer=answer, file=uploaded_file)
+        if files:
+            answer.files.all().delete()
+            for uploaded_file in files:
+                validate_uploaded_file(
+                    uploaded_file,
+                    allowed_extensions=EXAM_ALLOWED_EXTENSIONS,
+                    max_size_mb=settings.EXAM_ANSWER_FILE_MAX_SIZE_MB,
+                )
+                randomize_uploaded_filename(uploaded_file)
+                ExamAnswerFile.objects.create(answer=answer, file=uploaded_file)
+
+    if not allow_binary_uploads:
+        if update_fields:
+            answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
+        return
 
     paint_enabled = request.POST.get(f"paint_enabled_{question.id}") == "1"
     paint_clear = request.POST.get(f"paint_clear_{question.id}") == "1"
@@ -336,7 +348,12 @@ def take_exam(request, slug, attempt_id):
 
             else:  # Yazılı sual
                 try:
-                    _save_written_answer_if_changed(request, ans, q)
+                    _save_written_answer_if_changed(
+                        request,
+                        ans,
+                        q,
+                        allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
+                    )
                 except ValidationError as exc:
                     if is_ajax:
                         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
@@ -410,5 +427,6 @@ def take_exam(request, slug, attempt_id):
         "supervision": supervision_data,
         "exam_autosave_interval_ms": settings.EXAM_AUTOSAVE_INTERVAL_MS,
         "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
+        "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
     }
     return render(request, "exams/student/take_exam.html", context)

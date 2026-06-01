@@ -12,6 +12,12 @@ DISABLE_LEGACY_DAPHNE_SERVICE="${DISABLE_LEGACY_DAPHNE_SERVICE:-true}"
 DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
 DEPLOY_MODE="${DEPLOY_MODE:-docker}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+APP_REPLICAS="${APP_REPLICAS:-1}"
+
+if ! [[ "$APP_REPLICAS" =~ ^[0-9]+$ ]] || [ "$APP_REPLICAS" -lt 1 ]; then
+  echo "APP_REPLICAS must be a positive integer." >&2
+  exit 1
+fi
 
 if [ "$(id -u)" -eq 0 ]; then
   SUDO=""
@@ -135,6 +141,30 @@ ensure_origin_cert() {
   chmod 644 "$cert_file"
 }
 
+app_replicas_ready() {
+  local ids=()
+  local id
+  local status
+  local total=0
+  local ready=0
+  local summary=""
+
+  mapfile -t ids < <(docker compose -f "$COMPOSE_FILE" ps -q app)
+
+  for id in "${ids[@]}"; do
+    [ -n "$id" ] || continue
+    status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$id" 2>/dev/null || true)"
+    total=$((total + 1))
+    summary="${summary}${id:0:12}:${status:-unknown} "
+    if [ "$status" = "healthy" ] || [ "$status" = "running" ]; then
+      ready=$((ready + 1))
+    fi
+  done
+
+  APP_HEALTH_SUMMARY="${ready}/${total} app replica(s) ready (${summary:-none})"
+  [ "$total" -ge "$APP_REPLICAS" ] && [ "$ready" -eq "$total" ]
+}
+
 docker_deploy() {
   if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Missing ${APP_DIR}/${COMPOSE_FILE}." >&2
@@ -150,7 +180,10 @@ docker_deploy() {
   ensure_origin_cert
 
   docker compose -f "$COMPOSE_FILE" config >/tmp/emsarena-compose-config.yml
-  docker compose -f "$COMPOSE_FILE" up -d --build
+  docker compose -f "$COMPOSE_FILE" build
+  docker compose -f "$COMPOSE_FILE" up -d postgres redis
+  docker compose -f "$COMPOSE_FILE" run --rm -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
+  RUN_RELEASE_ON_START=false docker compose -f "$COMPOSE_FILE" up -d --remove-orphans --scale app="$APP_REPLICAS"
 
   local max_attempts=$((DEPLOY_TIMEOUT_SECONDS / 5))
   local attempt=1
@@ -161,19 +194,19 @@ docker_deploy() {
   fi
 
   while true; do
-    health_status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' emsarena-app 2>/dev/null || true)"
-    if [ "$health_status" = "healthy" ] || [ "$health_status" = "running" ]; then
+    if app_replicas_ready; then
       break
     fi
+    health_status="$APP_HEALTH_SUMMARY"
 
     if [ "$attempt" -ge "$max_attempts" ]; then
-      echo "emsarena-app did not become healthy within ${DEPLOY_TIMEOUT_SECONDS}s. Last status: ${health_status}" >&2
+      echo "App replicas did not become healthy within ${DEPLOY_TIMEOUT_SECONDS}s. Last status: ${health_status}" >&2
       docker compose -f "$COMPOSE_FILE" ps >&2 || true
       docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx >&2 || true
       exit 1
     fi
 
-    echo "Waiting for emsarena-app health (${attempt}/${max_attempts})... ${health_status:-unknown}"
+    echo "Waiting for app replica health (${attempt}/${max_attempts})... ${health_status:-unknown}"
     sleep 5
     attempt=$((attempt + 1))
   done
