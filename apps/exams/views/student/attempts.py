@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
@@ -91,18 +92,26 @@ def take_exam(request, slug, attempt_id):
     exam = attempt.exam
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
+    supervision_feature_enabled = exam_supervision_enabled()
 
-    is_manual_supervision_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
+    if exam.exam_type == "coding" and not practical_exams_enabled():
+        messages.error(request, practical_exam_disabled_message())
+        return redirect(_resolve_exam_failure_redirect(request))
+
+    is_manual_supervision_lock = bool(
+        supervision_feature_enabled and attempt.supervision_manual_lock and attempt.supervision_status == "locked"
+    )
     if not is_manual_supervision_lock:
         attempt.expire_if_time_limit_reached()
     # If the resume window already lapsed before the student got here, finish now.
-    attempt.expire_if_resume_window_expired()
+    if supervision_feature_enabled:
+        attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
         return redirect(build_exam_result_url(attempt, return_to=return_to))
 
     # Student is actually back in the exam → clear the pending "resumed" state
     # so the periodic sweep does not auto-finish an active student.
-    if attempt.supervision_status == "resumed":
+    if supervision_feature_enabled and attempt.supervision_status == "resumed":
         from apps.exams.services.supervision import mark_student_returned
 
         mark_student_returned(attempt)

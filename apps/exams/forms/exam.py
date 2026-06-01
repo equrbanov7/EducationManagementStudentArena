@@ -10,6 +10,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.exams.features import (
     PRACTICAL_EXAM_TYPE,
+    exam_supervision_enabled,
     practical_exam_disabled_message,
     practical_exams_enabled,
     selectable_exam_type_choices,
@@ -304,6 +305,7 @@ class ExamForm(forms.ModelForm):
         organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
         self.practical_exams_enabled = practical_exams_enabled()
+        self.exam_supervision_enabled = exam_supervision_enabled()
 
         submitted_exam_type = (self.data.get("exam_type") or "").strip() if self.is_bound else ""
         if not self.practical_exams_enabled and submitted_exam_type != PRACTICAL_EXAM_TYPE:

@@ -16,6 +16,11 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from apps.exams.features import (
+    disabled_supervision_status,
+    exam_supervision_enabled,
+    supervision_disabled_message,
+)
 from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.supervision import (
@@ -49,6 +54,22 @@ def _supervision_exam_queryset(request, organization):
     return exams.filter(author=request.user)
 
 
+def _ensure_supervision_feature_enabled():
+    if not exam_supervision_enabled():
+        raise PermissionDenied(supervision_disabled_message())
+
+
+def _supervision_disabled_json(*, status=403):
+    return JsonResponse(
+        {
+            "success": False,
+            "supervised": False,
+            "error": supervision_disabled_message(),
+        },
+        status=status,
+    )
+
+
 # ─────────────────────────────────────────────
 # Student-facing API endpoints
 # ─────────────────────────────────────────────
@@ -66,6 +87,8 @@ def log_incident_api(request, attempt_id):
         id=attempt_id,
         user=request.user,
     )
+    if not exam_supervision_enabled():
+        return JsonResponse({"supervised": False})
 
     is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
     if not is_manual_lock:
@@ -120,6 +143,8 @@ def supervision_status_api(request, attempt_id):
         id=attempt_id,
         user=request.user,
     )
+    if not exam_supervision_enabled():
+        return JsonResponse(disabled_supervision_status(attempt))
 
     is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
     if not is_manual_lock:
@@ -144,6 +169,7 @@ def supervision_monitor(request):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    _ensure_supervision_feature_enabled()
 
     exam_id = request.GET.get("exam")
     search_query = request.GET.get("q", "").strip()
@@ -302,6 +328,7 @@ def supervision_detail(request, attempt_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    _ensure_supervision_feature_enabled()
 
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("user", "exam"),
@@ -343,6 +370,8 @@ def teacher_resume_api(request, attempt_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    if not exam_supervision_enabled():
+        return _supervision_disabled_json()
 
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("exam"),
@@ -416,6 +445,8 @@ def teacher_stop_api(request, attempt_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    if not exam_supervision_enabled():
+        return _supervision_disabled_json()
 
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("exam"),
@@ -467,6 +498,8 @@ def teacher_lock_api(request, attempt_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    if not exam_supervision_enabled():
+        return _supervision_disabled_json()
 
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("exam"),
@@ -550,6 +583,7 @@ def exam_live_monitor(request, exam_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    _ensure_supervision_feature_enabled()
 
     exam = _get_scoped_exam_or_404(request, org, exam_id)
     date_value = _parse_date_param(request)
@@ -576,6 +610,8 @@ def exam_live_monitor_poll_api(request, exam_id):
     """JSON polling endpoint that backs the live dashboard's auto-refresh."""
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    if not exam_supervision_enabled():
+        return _supervision_disabled_json()
 
     exam = _get_scoped_exam_or_404(request, org, exam_id)
     date_value = _parse_date_param(request)
@@ -593,6 +629,8 @@ def attempt_live_snapshot_api(request, attempt_id):
     """
     org = _ensure_organization_context(request)
     _ensure_teacher(request.user)
+    if not exam_supervision_enabled():
+        return _supervision_disabled_json()
 
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("user", "exam"),

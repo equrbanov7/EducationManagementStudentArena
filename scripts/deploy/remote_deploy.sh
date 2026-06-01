@@ -62,6 +62,19 @@ wait_for_http() {
   done
 }
 
+refresh_nginx_upstream() {
+  # Docker Compose can recreate the app container without recreating nginx.
+  # nginx resolves upstream names at config load time, so a deploy can leave it
+  # proxying to the old app container IP until the proxy is reloaded.
+  echo "Refreshing nginx upstream DNS for the current app container..."
+  if docker compose -f "$COMPOSE_FILE" exec -T nginx nginx -s reload; then
+    return 0
+  fi
+
+  echo "nginx reload failed; recreating nginx without touching dependencies." >&2
+  docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate nginx
+}
+
 legacy_deploy() {
   if [ ! -x "${VENV_DIR}/bin/python" ]; then
     echo "Missing virtualenv at ${VENV_DIR}." >&2
@@ -164,6 +177,8 @@ docker_deploy() {
     sleep 5
     attempt=$((attempt + 1))
   done
+
+  refresh_nginx_upstream
 
   wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "/tmp/emsarena-ping.json" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true

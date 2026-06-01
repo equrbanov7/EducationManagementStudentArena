@@ -11,6 +11,8 @@ import logging
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
+from apps.exams.features import exam_supervision_enabled
+
 logger = logging.getLogger("exams.supervision.ws")
 
 
@@ -23,6 +25,10 @@ class ExamSupervisionConsumer(AsyncJsonWebsocketConsumer):
     """
 
     async def connect(self):
+        if not exam_supervision_enabled():
+            await self.close(code=4403)
+            return
+
         self.attempt_id = self.scope["url_route"]["kwargs"]["attempt_id"]
         self.group_name = f"exam_supervision_{self.attempt_id}"
 
