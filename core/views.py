@@ -1,5 +1,7 @@
 import logging
+import threading
 import time
+from copy import deepcopy
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -14,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 # Application start time – used to report uptime in the health endpoint.
 _APP_START_TIME: float = time.monotonic()
+_HEALTH_CACHE_LOCK = threading.Lock()
+_HEALTH_CACHE: dict = {"expires_at": 0.0, "payload": None, "status_code": 503}
 
 
 def health_check(request):
@@ -22,6 +26,52 @@ def health_check(request):
     Checks: Database connectivity, Redis connectivity.
     Returns a structured JSON response with individual component statuses.
     """
+    cached = _cached_health_payload()
+    if cached is not None:
+        payload, status_code = cached
+        return JsonResponse(payload, status=status_code)
+
+    with _HEALTH_CACHE_LOCK:
+        cached = _cached_health_payload()
+        if cached is not None:
+            payload, status_code = cached
+            return JsonResponse(payload, status=status_code)
+
+        payload, status_code = _build_health_payload()
+        _store_health_payload(payload, status_code)
+        return JsonResponse(payload, status=status_code)
+
+
+def _health_cache_seconds() -> float:
+    try:
+        return max(0.0, float(getattr(settings, "HEALTH_CHECK_CACHE_SECONDS", 2.0)))
+    except (TypeError, ValueError):
+        return 2.0
+
+
+def _cached_health_payload():
+    ttl = _health_cache_seconds()
+    if ttl <= 0:
+        return None
+
+    payload = _HEALTH_CACHE.get("payload")
+    if payload is None or time.monotonic() >= float(_HEALTH_CACHE.get("expires_at", 0.0)):
+        return None
+
+    return deepcopy(payload), int(_HEALTH_CACHE.get("status_code", 503))
+
+
+def _store_health_payload(payload: dict, status_code: int) -> None:
+    ttl = _health_cache_seconds()
+    if ttl <= 0:
+        return
+
+    _HEALTH_CACHE["payload"] = deepcopy(payload)
+    _HEALTH_CACHE["status_code"] = int(status_code)
+    _HEALTH_CACHE["expires_at"] = time.monotonic() + ttl
+
+
+def _build_health_payload():
     import os
 
     health_status: dict = {
@@ -60,7 +110,7 @@ def health_check(request):
     # Response: 200 for healthy, 207 for degraded, 503 for unhealthy
     status_map = {"healthy": 200, "degraded": 207, "unhealthy": 503}
     status_code = status_map.get(health_status["status"], 503)
-    return JsonResponse(health_status, status=status_code)
+    return health_status, status_code
 
 
 def ping(request):

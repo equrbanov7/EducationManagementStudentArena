@@ -2456,6 +2456,95 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(first_answer.text_answer, "New first answer")
         self.assertEqual(second_answer.text_answer, "Keep second answer")
 
+    @override_settings(EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED=False)
+    def test_take_exam_autosave_ignores_file_and_paint_payloads(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Autosave Binary Guard Written Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+            enable_paint=True,
+        )
+        written_exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Upload-heavy written question",
+            order=1,
+            points=1,
+            enable_paint=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        answer = ExamAnswer.objects.create(attempt=attempt, question=question)
+        paint_data_url = "data:image/png;base64," + base64.b64encode(_TINY_PNG_BYTES).decode("ascii")
+        uploaded_file = SimpleUploadedFile("answer.pdf", b"%PDF-1.4\n", content_type="application/pdf")
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[written_exam.slug, attempt.id]),
+            {
+                "submit_action": "autosave",
+                "changed_questions[]": [str(question.id)],
+                f"q_{question.id}": "Text should autosave",
+                f"paint_enabled_{question.id}": "1",
+                f"paint_data_{question.id}": paint_data_url,
+                f"file_{question.id}[]": uploaded_file,
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        answer.refresh_from_db()
+        self.assertEqual(answer.text_answer, "Text should autosave")
+        self.assertFalse(answer.files.exists())
+        self.assertFalse(answer.has_paint)
+        self.assertFalse(bool(answer.paint_data_url))
+
+    @override_settings(EXAM_ANSWER_MAX_FILES_PER_QUESTION=1, EXAM_ANSWER_FILE_MAX_SIZE_MB=1)
+    def test_take_exam_rejects_too_many_files_for_one_written_answer(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written File Limit Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="written",
+        )
+        written_exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=written_exam,
+            text="Upload limited question",
+            order=1,
+            points=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        answer = ExamAnswer.objects.create(attempt=attempt, question=question)
+        first_file = SimpleUploadedFile("first.pdf", b"%PDF-1.4\n", content_type="application/pdf")
+        second_file = SimpleUploadedFile("second.pdf", b"%PDF-1.4\n", content_type="application/pdf")
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[written_exam.slug, attempt.id]),
+            {
+                "submit_action": "save_draft",
+                f"q_{question.id}": "Draft with too many files",
+                f"file_{question.id}[]": [first_file, second_file],
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("maksimum 1", response.json()["error"])
+        answer.refresh_from_db()
+        self.assertFalse(answer.files.exists())
+
     def test_take_exam_test_autosave_skips_full_score_recalculation(self):
         test_exam = Exam.objects.create(
             author=self.teacher,

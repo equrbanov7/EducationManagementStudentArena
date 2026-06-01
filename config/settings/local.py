@@ -51,9 +51,20 @@ from .base import (
     EMAIL_PORT,
     EMAIL_USE_SSL,
     EMAIL_USE_TLS,
+    EXAM_ANSWER_FILE_MAX_SIZE_MB,
+    EXAM_ANSWER_MAX_FILES_PER_QUESTION,
+    EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
     EXAM_AUTOSAVE_INTERVAL_MS,
     EXAM_AUTOSAVE_JITTER_MS,
+    EXAM_PAINT_MAX_BASE64_CHARS,
+    EXAM_RANDOMIZER_USAGE_CACHE_SECONDS,
+    EXAM_START_GLOBAL_CONCURRENCY,
+    EXAM_START_LOCK_LEASE_SECONDS,
+    EXAM_START_PER_EXAM_CONCURRENCY,
+    EXAM_START_POLL_INTERVAL_SECONDS,
+    EXAM_START_WAIT_TIMEOUT_SECONDS,
     FILE_UPLOAD_SECURITY_MAX_SIZE_MB,
+    HEALTH_CHECK_CACHE_SECONDS,
     INSTALLED_APPS,
     LANGUAGE_CODE,
     LANGUAGE_COOKIE_HTTPONLY,
@@ -156,6 +167,16 @@ def _env_bool(name: str, default: bool) -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
+def _env_int(name: str, default: int, *, minimum: int | None = None) -> int:
+    try:
+        value = int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
@@ -202,11 +223,13 @@ if ENABLE_NGROK:
     ALLOWED_HOSTS.extend([".ngrok-free.dev", ".ngrok-free.app", ".ngrok.io", ".ngrok.app"])
 ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
-# Database - PostgreSQL with SQLite fallback for development
+# Database - PostgreSQL with SQLite fallback for development. Keep persistent
+# connections disabled by default so local ASGI/load tests do not fill Postgres.
+DATABASE_CONN_MAX_AGE = _env_int("DATABASE_CONN_MAX_AGE", 0, minimum=0)
 DATABASES = {
     "default": dj_database_url.config(
         default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-        conn_max_age=600,
+        conn_max_age=DATABASE_CONN_MAX_AGE,
         conn_health_checks=True,
     )
 }

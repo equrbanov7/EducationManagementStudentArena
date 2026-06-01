@@ -2,16 +2,20 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # EMS Arena — Production container entrypoint
 # ═══════════════════════════════════════════════════════════════════════════
-# 1. Run database migrations and collect static files (idempotent; safe on
-#    rolling restarts and required when Docker named volumes persist older
-#    static assets across image rebuilds).
+# 1. Optionally run database migrations and collect static files. The deploy
+#    script runs this once before scaling app replicas; direct compose users
+#    keep the old safe default by leaving RUN_RELEASE_ON_START=true.
 # 2. Exec Daphne as PID 1 so Docker signals (SIGTERM/SIGINT) are forwarded
 #    directly to the ASGI server for graceful shutdown.
 # ═══════════════════════════════════════════════════════════════════════════
 set -e
 
-echo "Running database migrations…"
-/app/docker/release.sh
+if [ "${RUN_RELEASE_ON_START:-true}" = "true" ]; then
+  echo "Running database migrations and collectstatic…"
+  /app/docker/release.sh
+else
+  echo "Skipping release tasks in this app replica."
+fi
 
 echo "Starting Daphne ASGI server…"
 exec daphne -b 0.0.0.0 -p 8000 config.asgi:application

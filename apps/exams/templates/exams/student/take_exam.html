@@ -91,6 +91,7 @@
           data-exam-type="{{ exam.exam_type }}"
           data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
           data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
+          data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"
           class="modern-exam-form">
         {% csrf_token %}
 
@@ -411,9 +412,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let questionTransitionTimer = null;
     let questionTransitionHideTimer = null;
     const dirtyQuestionIds = new Set();
+    const binaryDirtyQuestionIds = new Set();
 
     // Exam type
     const examType = examForm.dataset.examType;
+    const autoSaveBinaryUploadsEnabled = examForm.dataset.autosaveBinaryUploadsEnabled === "1";
 
     // localStorage üçün key
     const examId = examForm.dataset.examId;
@@ -822,9 +825,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return match ? match[1] : null;
     }
 
-    function markQuestionDirty(questionId) {
+    function markQuestionDirty(questionId, containsBinary = false) {
         if (questionId !== null && questionId !== undefined && questionId !== '') {
-            dirtyQuestionIds.add(String(questionId));
+            const normalizedQuestionId = String(questionId);
+            dirtyQuestionIds.add(normalizedQuestionId);
+            if (containsBinary) {
+                binaryDirtyQuestionIds.add(normalizedQuestionId);
+            }
         }
     }
 
@@ -968,10 +975,10 @@ document.addEventListener('DOMContentLoaded', function() {
         sendDraft("autosave", { silent: true }).catch(() => {});
     }
 
-    function markAnswerChanged(delayMs = null, questionId = null) {
+    function markAnswerChanged(delayMs = null, questionId = null, options = {}) {
         hasUnsavedChanges = true;
         answerRevision += 1;
-        markQuestionDirty(questionId);
+        markQuestionDirty(questionId, Boolean(options.containsBinary));
         persistLocalDraft();
         updateProgress();
         queueAutoSave(delayMs);
@@ -1134,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid] = fileState[qid].concat(selected);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000, qid);
+        markAnswerChanged(1000, qid, { containsBinary: true });
     };
 
     window.handleDrop = function(event, qid) {
@@ -1146,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid] = fileState[qid].concat(selected);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000, qid);
+        markAnswerChanged(1000, qid, { containsBinary: true });
     };
 
     window.triggerFileInput = function(qid) {
@@ -1161,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileState[qid].splice(index, 1);
         syncInputFiles(qid);
         renderPreview(qid);
-        markAnswerChanged(1000, qid);
+        markAnswerChanged(1000, qid, { containsBinary: true });
     };
 
     function appendFieldToFormData(formData, field) {
@@ -1209,10 +1216,12 @@ document.addEventListener('DOMContentLoaded', function() {
         dirtyQuestionIds.forEach(questionId => {
             formData.append("changed_questions[]", questionId);
             appendFieldsByName(formData, `q_${questionId}`);
-            appendFieldsByName(formData, `file_${questionId}[]`);
-            appendFieldsByName(formData, `paint_enabled_${questionId}`);
-            appendFieldsByName(formData, `paint_clear_${questionId}`);
-            appendFieldsByName(formData, `paint_data_${questionId}`);
+            if (autoSaveBinaryUploadsEnabled) {
+                appendFieldsByName(formData, `file_${questionId}[]`);
+                appendFieldsByName(formData, `paint_enabled_${questionId}`);
+                appendFieldsByName(formData, `paint_clear_${questionId}`);
+                appendFieldsByName(formData, `paint_data_${questionId}`);
+            }
         });
 
         return formData;
@@ -1230,6 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const sentRevision = answerRevision;
+        const sentDirtyQuestionIds = action === "autosave" ? new Set(dirtyQuestionIds) : new Set();
         const formData = buildDraftFormData(action);
 
         if (action === "autosave") {
@@ -1256,9 +1266,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (sentRevision === answerRevision) {
-                hasUnsavedChanges = false;
-                dirtyQuestionIds.clear();
-                clearLocalDraft();
+                if (action === "autosave" && !autoSaveBinaryUploadsEnabled) {
+                    sentDirtyQuestionIds.forEach(questionId => {
+                        const normalizedQuestionId = String(questionId);
+                        if (!binaryDirtyQuestionIds.has(normalizedQuestionId)) {
+                            dirtyQuestionIds.delete(normalizedQuestionId);
+                        }
+                    });
+                    hasUnsavedChanges = dirtyQuestionIds.size > 0 || binaryDirtyQuestionIds.size > 0;
+                    if (hasUnsavedChanges) {
+                        persistLocalDraft();
+                    } else {
+                        clearLocalDraft();
+                    }
+                } else {
+                    hasUnsavedChanges = false;
+                    dirtyQuestionIds.clear();
+                    binaryDirtyQuestionIds.clear();
+                    clearLocalDraft();
+                }
             } else {
                 hasUnsavedChanges = true;
                 persistLocalDraft();
@@ -1353,6 +1379,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (sentRevision === answerRevision) {
                     hasUnsavedChanges = false;
                     dirtyQuestionIds.clear();
+                    binaryDirtyQuestionIds.clear();
                     clearLocalDraft();
                 } else {
                     hasUnsavedChanges = true;

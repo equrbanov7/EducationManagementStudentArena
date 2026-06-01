@@ -1,15 +1,44 @@
 import random
 from collections import Counter
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 
 from apps.exams.constants import LABELS
-from apps.exams.models import Exam, ExamAnswer
+from apps.exams.models import ExamAnswer
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
 
 _DIFFICULTY_ORDER = ("easy", "medium", "hard")
 _QUESTION_SOFT_USAGE_CAP = 4
+
+
+def _usage_cache_seconds() -> int:
+    try:
+        return max(0, int(getattr(settings, "EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30)))
+    except (TypeError, ValueError):
+        return 30
+
+
+def _cached_usage_counts(cache_key: str, builder):
+    ttl = _usage_cache_seconds()
+    if ttl <= 0:
+        return builder()
+
+    try:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+    except Exception:
+        return builder()
+
+    value = builder()
+    try:
+        cache.set(cache_key, value, ttl)
+    except Exception:
+        pass
+    return value
 
 
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
@@ -72,23 +101,29 @@ def _build_fair_block_pick_plan(blocks, total_needed, block_usage_counts):
 
 
 def _historical_question_usage(exam, attempt):
-    rows = (
-        ExamAnswer.objects.filter(attempt__exam=exam)
-        .exclude(attempt=attempt)
-        .values("question_id")
-        .annotate(total=Count("attempt__user_id", distinct=True))
-    )
-    return {row["question_id"]: row["total"] for row in rows}
+    def build_counts():
+        rows = (
+            ExamAnswer.objects.filter(attempt__exam=exam)
+            .exclude(attempt=attempt)
+            .values("question_id")
+            .annotate(total=Count("attempt__user_id", distinct=True))
+        )
+        return {row["question_id"]: row["total"] for row in rows}
+
+    return _cached_usage_counts(f"emsarena:exam-randomizer:question-usage:{exam.id}", build_counts)
 
 
 def _historical_block_usage(exam, attempt):
-    rows = (
-        ExamAnswer.objects.filter(attempt__exam=exam, question__block_id__isnull=False)
-        .exclude(attempt=attempt)
-        .values("question__block_id")
-        .annotate(total=Count("attempt__user_id", distinct=True))
-    )
-    return {row["question__block_id"]: row["total"] for row in rows}
+    def build_counts():
+        rows = (
+            ExamAnswer.objects.filter(attempt__exam=exam, question__block_id__isnull=False)
+            .exclude(attempt=attempt)
+            .values("question__block_id")
+            .annotate(total=Count("attempt__user_id", distinct=True))
+        )
+        return {row["question__block_id"]: row["total"] for row in rows}
+
+    return _cached_usage_counts(f"emsarena:exam-randomizer:block-usage:{exam.id}", build_counts)
 
 
 def _normalise_difficulty(value):
@@ -210,10 +245,8 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
     exam = attempt.exam
 
     with transaction.atomic():
-        locked_exam = Exam.objects.select_for_update().get(pk=exam.pk)
         attempt = attempt.__class__.objects.select_for_update().select_related("exam").get(pk=attempt.pk)
-        attempt.exam = locked_exam
-        exam = locked_exam
+        exam = attempt.exam
 
         # Əgər artıq suallar yaradılıbsa:
         if attempt.answers.exists():
