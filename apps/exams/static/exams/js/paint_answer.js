@@ -4,7 +4,7 @@
 
     function notifyExamChange(delayMs, questionId) {
       if (typeof window.markExamAnswerChanged === "function") {
-        window.markExamAnswerChanged(delayMs, questionId);
+        window.markExamAnswerChanged(delayMs, questionId, { containsBinary: true });
         return;
       }
 

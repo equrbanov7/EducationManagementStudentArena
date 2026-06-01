@@ -1,6 +1,12 @@
+import logging
+import time
+import uuid
+from contextlib import contextmanager
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib import messages
+from django.core.cache import caches
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -10,6 +16,173 @@ from django.utils.translation import pgettext
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+
+logger = logging.getLogger(__name__)
+
+
+class ExamStartBusy(Exception):
+    """Raised when too many students are trying to build attempts at once."""
+
+
+def _safe_int_setting(name: str, default: int, *, minimum: int | None = None) -> int:
+    try:
+        value = int(getattr(settings, name, default))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
+def _safe_float_setting(name: str, default: float, *, minimum: float | None = None) -> float:
+    try:
+        value = float(getattr(settings, name, default))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    return value
+
+
+def _exam_start_cache():
+    return caches[getattr(settings, "REQUEST_QUEUE_CACHE_ALIAS", "default")]
+
+
+def _exam_start_wait_timeout() -> float:
+    return _safe_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
+
+
+def _exam_start_poll_interval() -> float:
+    return _safe_float_setting("EXAM_START_POLL_INTERVAL_SECONDS", 0.05, minimum=0.01)
+
+
+def _exam_start_lock_lease_seconds() -> int:
+    return _safe_int_setting("EXAM_START_LOCK_LEASE_SECONDS", 120, minimum=1)
+
+
+def _release_capacity_counter(cache, key: str) -> None:
+    try:
+        value = cache.decr(key)
+        if value <= 0:
+            cache.delete(key)
+    except ValueError:
+        cache.delete(key)
+    except Exception:
+        logger.warning("Exam start capacity counter release failed.", exc_info=True)
+
+
+def _try_acquire_capacity_counter(cache, key: str, limit: int, lease_seconds: int) -> str:
+    if limit <= 0:
+        return "disabled"
+
+    try:
+        cache.add(key, 0, timeout=lease_seconds)
+        value = cache.incr(key)
+        try:
+            cache.touch(key, lease_seconds)
+        except Exception:
+            pass
+
+        if value <= limit:
+            return "acquired"
+
+        _release_capacity_counter(cache, key)
+        return "busy"
+    except Exception:
+        logger.warning("Exam start capacity counter failed; bypassing the gate.", exc_info=True)
+        return "bypass"
+
+
+@contextmanager
+def _exam_start_actor_lock(exam_id: int, user_id: int):
+    cache_key = f"emsarena:exam-start:actor:{exam_id}:{user_id}"
+    token = uuid.uuid4().hex
+    lease_seconds = _exam_start_lock_lease_seconds()
+    timeout = _exam_start_wait_timeout()
+    deadline = time.monotonic() + timeout
+    acquired = False
+    cache = None
+
+    try:
+        cache = _exam_start_cache()
+        while True:
+            if cache.add(cache_key, token, timeout=lease_seconds):
+                acquired = True
+                break
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ExamStartBusy
+            time.sleep(min(_exam_start_poll_interval(), remaining))
+    except ExamStartBusy:
+        raise
+    except Exception:
+        logger.warning("Exam start actor lock failed; continuing without the per-user lock.", exc_info=True)
+        yield
+        return
+
+    try:
+        yield
+    finally:
+        try:
+            if acquired and cache is not None and cache.get(cache_key) == token:
+                cache.delete(cache_key)
+        except Exception:
+            logger.warning("Exam start actor lock release failed.", exc_info=True)
+
+
+@contextmanager
+def _exam_start_capacity_gate(exam_id: int):
+    limits = (
+        ("global", _safe_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 12, minimum=0)),
+        (f"exam:{exam_id}", _safe_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 6, minimum=0)),
+    )
+    if all(limit <= 0 for _, limit in limits):
+        yield
+        return
+
+    try:
+        cache = _exam_start_cache()
+    except Exception:
+        logger.warning("Exam start capacity cache unavailable; continuing without the capacity gate.", exc_info=True)
+        yield
+        return
+
+    lease_seconds = _exam_start_lock_lease_seconds()
+    timeout = _exam_start_wait_timeout()
+    deadline = time.monotonic() + timeout
+    acquired_keys: list[str] = []
+
+    try:
+        while True:
+            acquired_keys = []
+            blocked = False
+
+            for suffix, limit in limits:
+                key = f"emsarena:exam-start:capacity:{suffix}"
+                result = _try_acquire_capacity_counter(cache, key, limit, lease_seconds)
+                if result == "busy":
+                    blocked = True
+                    break
+                if result == "acquired":
+                    acquired_keys.append(key)
+
+            if not blocked:
+                break
+
+            for key in acquired_keys:
+                _release_capacity_counter(cache, key)
+            acquired_keys = []
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ExamStartBusy
+            time.sleep(min(_exam_start_poll_interval(), remaining))
+
+        yield
+    finally:
+        for key in acquired_keys:
+            _release_capacity_counter(cache, key)
 
 
 def get_active_attempt_for_user(exam, user):
@@ -126,40 +299,52 @@ def _start_or_resume_attempt(request, exam: Exam):
         or request.POST.get("next"),
     )
 
-    current = get_active_attempt_for_user(exam, user)
-    if current:
-        desired = _effective_needed_count(exam)
-        current_count = current.answers.count()
+    try:
+        with _exam_start_actor_lock(exam.id, user.id), _exam_start_capacity_gate(exam.id):
+            current = get_active_attempt_for_user(exam, user)
+            if current:
+                desired = _effective_needed_count(exam)
+                current_count = current.answers.count()
 
-        if current_count != desired and not _attempt_has_any_answer(current):
-            generate_random_questions_for_attempt(current, force_rebuild=True)
+                if current_count != desired and not _attempt_has_any_answer(current):
+                    generate_random_questions_for_attempt(current, force_rebuild=True)
 
-        return redirect(
-            _append_return_to(
-                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": current.id}), return_to
+                return redirect(
+                    _append_return_to(
+                        reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": current.id}),
+                        return_to,
+                    )
+                )
+
+            max_attempts = exam.max_attempts_per_user
+            attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, user)
+            if attempt_limit_result_url:
+                messages.info(
+                    request,
+                    pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
+                )
+                return redirect(attempt_limit_result_url)
+
+            last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
+            next_attempt_number = last_attempt.attempt_number + 1 if last_attempt else 1
+
+            attempt = ExamAttempt.objects.create(
+                user=user,
+                exam=exam,
+                attempt_number=next_attempt_number,
+                status="in_progress",
             )
-        )
 
-    max_attempts = exam.max_attempts_per_user
-    attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, user)
-    if attempt_limit_result_url:
-        messages.info(
+            generate_random_questions_for_attempt(attempt)
+    except ExamStartBusy:
+        messages.warning(
             request,
-            pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
+            pgettext(
+                "exams.service.attempt.message",
+                "Server hazırda çox imtahan start sorğusu emal edir. Bir neçə saniyə sonra yenidən yoxlayın.",
+            ),
         )
-        return redirect(attempt_limit_result_url)
-
-    last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
-    next_attempt_number = last_attempt.attempt_number + 1 if last_attempt else 1
-
-    attempt = ExamAttempt.objects.create(
-        user=user,
-        exam=exam,
-        attempt_number=next_attempt_number,
-        status="in_progress",
-    )
-
-    generate_random_questions_for_attempt(attempt)
+        return redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
 
     messages.success(
         request,

@@ -1,5 +1,6 @@
 import base64
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.utils import timezone
@@ -55,12 +56,12 @@ def _save_paint_png_to_answer(ans, data_url: str):
 
     b64_data = m.group(1)
 
-    # çox böyük payload-ları blokla (təhlükəsizlik)
-    if len(b64_data) > 3_500_000:  # ~2.6MB binary civarı
+    max_base64_chars = int(getattr(settings, "EXAM_PAINT_MAX_BASE64_CHARS", 1_500_000))
+    if len(b64_data) > max_base64_chars:
         return False
 
     try:
-        binary = base64.b64decode(b64_data)
+        binary = base64.b64decode(b64_data, validate=True)
     except Exception:
         return False
 
