@@ -89,7 +89,8 @@
           data-exam-id="{{ exam.id }}"
           data-attempt-id="{{ attempt.id }}"
           data-exam-type="{{ exam.exam_type }}"
-          data-autosave-interval-ms="15000"
+          data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
+          data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
           class="modern-exam-form">
         {% csrf_token %}
 
@@ -427,10 +428,28 @@ document.addEventListener('DOMContentLoaded', function() {
         thresholdSeconds: 300,
         autoCloseMs: 5000
     }) : null;
+    const defaultAutoSaveIntervalMs = 300000;
     const serverAutoSaveIntervalMs = Math.max(
-        5000,
-        parseInt(examForm.dataset.autosaveIntervalMs || "15000", 10) || 15000
+        60000,
+        parseInt(examForm.dataset.autosaveIntervalMs || String(defaultAutoSaveIntervalMs), 10) || defaultAutoSaveIntervalMs
     );
+    const autoSaveJitterMaxMs = Math.max(
+        0,
+        parseInt(examForm.dataset.autosaveJitterMs || "0", 10) || 0
+    );
+    const autoSaveSpreadMs = (() => {
+        if (!autoSaveJitterMaxMs) {
+            return 0;
+        }
+        const seed = `${examId || ""}:${attemptId || ""}`;
+        let hash = 0;
+        for (let index = 0; index < seed.length; index += 1) {
+            hash = ((hash << 5) - hash) + seed.charCodeAt(index);
+            hash |= 0;
+        }
+        return Math.abs(hash) % (autoSaveJitterMaxMs + 1);
+    })();
+    const autoSaveDelayMs = serverAutoSaveIntervalMs + autoSaveSpreadMs;
 
     // Fayl state
     const fileState = {};
@@ -924,12 +943,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function queueAutoSave(delayMs = serverAutoSaveIntervalMs) {
+    function queueAutoSave(delayMs = autoSaveDelayMs) {
         if (autoSaveTimer) {
             return;
         }
 
-        const effectiveDelayMs = Math.max(serverAutoSaveIntervalMs, Number(delayMs) || 0);
+        const effectiveDelayMs = Math.max(autoSaveDelayMs, Number(delayMs) || 0);
         autoSaveTimer = setTimeout(() => {
             autoSaveTimer = null;
             flushAutoSave();
@@ -1145,6 +1164,60 @@ document.addEventListener('DOMContentLoaded', function() {
         markAnswerChanged(1000, qid);
     };
 
+    function appendFieldToFormData(formData, field) {
+        if (!field || !field.name || field.disabled) {
+            return;
+        }
+
+        if (field.type === "file") {
+            Array.from(field.files || []).forEach(file => {
+                formData.append(field.name, file);
+            });
+            return;
+        }
+
+        if ((field.type === "checkbox" || field.type === "radio") && !field.checked) {
+            return;
+        }
+
+        formData.append(field.name, field.value);
+    }
+
+    function appendFieldsByName(formData, fieldName) {
+        Array.from(examForm.elements).forEach(field => {
+            if (field.name === fieldName) {
+                appendFieldToFormData(formData, field);
+            }
+        });
+    }
+
+    function buildDraftFormData(action) {
+        if (action !== "autosave") {
+            const formData = new FormData(examForm);
+            formData.append("submit_action", action);
+            return formData;
+        }
+
+        const formData = new FormData();
+        appendFieldsByName(formData, "csrfmiddlewaretoken");
+        appendFieldsByName(formData, "return_to");
+        appendFieldsByName(formData, "next");
+        appendFieldsByName(formData, "from_section");
+        appendFieldsByName(formData, "assigned_type");
+        formData.append("submit_action", action);
+
+        dirtyQuestionIds.forEach(questionId => {
+            formData.append("changed_questions[]", questionId);
+            appendFieldsByName(formData, `q_${questionId}`);
+            appendFieldsByName(formData, `file_${questionId}[]`);
+            appendFieldsByName(formData, `paint_enabled_${questionId}`);
+            appendFieldsByName(formData, `paint_clear_${questionId}`);
+            appendFieldsByName(formData, `paint_data_${questionId}`);
+        });
+
+        return formData;
+    }
+
     // Draft / autosave – AJAX
     function sendDraft(action = "autosave", options = {}) {
         if (action === "autosave" && !hasUnsavedChanges) {
@@ -1157,14 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const sentRevision = answerRevision;
-        const formData = new FormData(examForm);
-        formData.append("submit_action", action);
-
-        if (action === "autosave" && dirtyQuestionIds.size > 0) {
-            dirtyQuestionIds.forEach(questionId => {
-                formData.append("changed_questions[]", questionId);
-            });
-        }
+        const formData = buildDraftFormData(action);
 
         if (action === "autosave") {
             autoSaveRequestInFlight = true;
@@ -1327,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hasUnsavedChanges && !autoSaveTimer) {
             flushAutoSave();
         }
-    }, serverAutoSaveIntervalMs);
+    }, autoSaveDelayMs);
 
     let isFinishingExam = false;
 

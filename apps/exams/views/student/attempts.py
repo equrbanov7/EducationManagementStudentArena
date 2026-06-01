@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -10,7 +11,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
-from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
+from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     generate_random_questions_for_attempt,
@@ -31,6 +32,138 @@ from ._helpers import (
     ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
 )
+
+
+def _attempt_answers_queryset(attempt):
+    return (
+        attempt.answers.select_related("question", "question__exam", "question__block")
+        .prefetch_related("question__options", "selected_options", "files")
+        .order_by("id")
+    )
+
+
+def _selected_option_ids_from_request(request, question):
+    if question.answer_mode == "single":
+        raw_option_id = request.POST.get(f"q_{question.id}")
+        if not raw_option_id:
+            return set()
+        try:
+            return {int(raw_option_id)}
+        except (TypeError, ValueError):
+            return set()
+
+    selected_option_ids = set()
+    for raw_option_id in request.POST.getlist(f"q_{question.id}"):
+        try:
+            selected_option_ids.add(int(raw_option_id))
+        except (TypeError, ValueError):
+            continue
+    return selected_option_ids
+
+
+def _valid_question_option_ids(question):
+    return {option.id for option in question.options.all()}
+
+
+def _correct_question_option_ids(question):
+    return {option.id for option in question.options.all() if option.is_correct}
+
+
+def _save_test_answer_if_changed(answer, question, selected_option_ids, current_selected_option_ids):
+    valid_option_ids = _valid_question_option_ids(question)
+    selected_option_ids = selected_option_ids & valid_option_ids
+
+    if current_selected_option_ids != selected_option_ids:
+        answer.selected_options.set(selected_option_ids)
+
+    correct_option_ids = _correct_question_option_ids(question)
+    next_is_correct = bool(correct_option_ids and selected_option_ids == correct_option_ids)
+    update_fields = []
+
+    if answer.text_answer:
+        answer.text_answer = ""
+        update_fields.append("text_answer")
+
+    if answer.is_correct != next_is_correct:
+        answer.is_correct = next_is_correct
+        update_fields.append("is_correct")
+
+    if (
+        getattr(answer, "has_paint", False)
+        or getattr(answer, "paint_image", None)
+        or getattr(answer, "paint_data_url", None)
+    ):
+        _clear_paint_from_answer(answer)
+        update_fields.extend(["has_paint", "paint_image", "paint_data_url", "paint_updated_at"])
+
+    if update_fields:
+        answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
+
+
+def _save_written_answer_if_changed(request, answer, question):
+    update_fields = []
+    text = request.POST.get(f"q_{question.id}", "").strip()
+    if answer.text_answer != text:
+        answer.text_answer = text
+        update_fields.append("text_answer")
+    if answer.is_correct:
+        answer.is_correct = False
+        update_fields.append("is_correct")
+
+    files = request.FILES.getlist(f"file_{question.id}[]")
+    if files:
+        answer.files.all().delete()
+        for uploaded_file in files:
+            validate_uploaded_file(
+                uploaded_file,
+                allowed_extensions=EXAM_ALLOWED_EXTENSIONS,
+                max_size_mb=10,
+            )
+            randomize_uploaded_filename(uploaded_file)
+            ExamAnswerFile.objects.create(answer=answer, file=uploaded_file)
+
+    paint_enabled = request.POST.get(f"paint_enabled_{question.id}") == "1"
+    paint_clear = request.POST.get(f"paint_clear_{question.id}") == "1"
+    paint_data_url = (request.POST.get(f"paint_data_{question.id}") or "").strip()
+
+    if not question.paint_enabled_effective:
+        if (
+            getattr(answer, "has_paint", False)
+            or getattr(answer, "paint_image", None)
+            or getattr(answer, "paint_data_url", None)
+        ):
+            _clear_paint_from_answer(answer)
+            update_fields.extend(["has_paint", "paint_image", "paint_data_url", "paint_updated_at"])
+    elif paint_clear:
+        _clear_paint_from_answer(answer)
+        update_fields.extend(["has_paint", "paint_image", "paint_data_url", "paint_updated_at"])
+    elif paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
+        if _save_paint_png_to_answer(answer, paint_data_url):
+            update_fields.extend(["paint_image", "paint_updated_at", "has_paint", "paint_data_url"])
+    elif not paint_enabled and (getattr(answer, "has_paint", False) or getattr(answer, "paint_image", None)):
+        _clear_paint_from_answer(answer)
+        update_fields.extend(["has_paint", "paint_image", "paint_data_url", "paint_updated_at"])
+
+    if update_fields:
+        answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
+
+
+def _previous_attempts_for_context(request, exam, attempt):
+    previous_attempts = annotate_attempt_result_visibility(
+        list(
+            ExamAttempt.objects.filter(
+                exam=exam,
+                user=request.user,
+                status__in=["submitted", "graded", "expired"],
+            )
+            .exclude(id=attempt.id)
+            .order_by("-started_at")
+        )
+    )
+    current_path = request.get_full_path()
+    for previous_attempt in previous_attempts:
+        previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=current_path)
+    return previous_attempts
 
 
 def _resolve_exam_failure_redirect(request):
@@ -117,28 +250,13 @@ def take_exam(request, slug, attempt_id):
         mark_student_returned(attempt)
 
     # Sualları Attempt-ə bağlanmış cavablardan götürürük
-    answers_qs = (
-        attempt.answers.select_related("question", "question__exam", "question__block")
-        .prefetch_related("question__options", "selected_options", "files")
-        .order_by("id")
-    )
+    answers = list(_attempt_answers_queryset(attempt))
 
-    if not answers_qs.exists():
+    if not answers:
         generate_random_questions_for_attempt(attempt)
-        answers_qs = (
-            attempt.answers.select_related("question", "question__exam", "question__block")
-            .prefetch_related("question__options", "selected_options", "files")
-            .order_by("id")
-        )
+        answers = list(_attempt_answers_queryset(attempt))
 
-    if not answers_qs.exists():
-        answers_qs = (
-            attempt.answers.select_related("question", "question__exam", "question__block")
-            .prefetch_related("question__options", "selected_options", "files")
-            .order_by("id")
-        )
-
-    if not answers_qs.exists():
+    if not answers:
         message_key = (
             "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         )
@@ -159,21 +277,6 @@ def take_exam(request, slug, attempt_id):
         else:
             remaining_seconds = int(total_seconds)
 
-    previous_attempts = annotate_attempt_result_visibility(
-        list(
-            ExamAttempt.objects.filter(
-                exam=exam,
-                user=request.user,
-                status__in=["submitted", "graded", "expired"],
-            )
-            .exclude(id=attempt.id)
-            .order_by("-started_at")
-        )
-    )
-    current_path = request.get_full_path()
-    for previous_attempt in previous_attempts:
-        previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=current_path)
-
     if exam.exam_type == "coding":
         from apps.exams.services.supervision import get_attempt_supervision_status
         from apps.exams.views.student.coding import take_coding_exam
@@ -184,27 +287,19 @@ def take_exam(request, slug, attempt_id):
             attempt=attempt,
             remaining_seconds=remaining_seconds,
             history_url=history_url,
-            previous_attempts=previous_attempts,
+            previous_attempts=_previous_attempts_for_context(request, exam, attempt),
             supervision=get_attempt_supervision_status(attempt),
         )
 
-    questions = [a.question for a in answers_qs]
+    questions = [a.question for a in answers]
 
     # ✅ Hər cavab üçün seçilmiş option ID-lərini set olaraq saxla
     answers_by_qid = {}
-    for a in answers_qs:
+    for a in answers:
         answers_by_qid[a.question_id] = {
             "answer": a,
-            "selected_option_ids": set(a.selected_options.values_list("id", flat=True)),
+            "selected_option_ids": {option.id for option in a.selected_options.all()},
         }
-
-    # q_payload yaradırıq
-    q_payload = []
-    for q in questions:
-        opts = []
-        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-            opts = build_shuffled_options(attempt.id, q)
-        q_payload.append({"q": q, "opts": opts})
 
     if request.method == "POST":
         action = (request.POST.get("submit_action") or "").strip()
@@ -221,88 +316,39 @@ def take_exam(request, slug, attempt_id):
                 except (TypeError, ValueError):
                     continue
 
-        # ✅ KRİTİK: Hər sual üçün cavabı yenilə
         for q in questions:
             if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
                 continue
 
-            ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+            answer_data = answers_by_qid.get(q.id) or {}
+            ans = answer_data.get("answer")
+            if ans is None:
+                ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+                answer_data = {"answer": ans, "selected_option_ids": set()}
 
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-                # ✅ Əvvəlcə mövcud seçimləri təmizlə
-                ans.selected_options.clear()
-
-                if q.answer_mode == "single":
-                    opt_id = request.POST.get(f"q_{q.id}")
-                    if opt_id:
-                        opt = ExamQuestionOption.objects.filter(id=opt_id, question=q).first()
-                        if opt:
-                            ans.selected_options.add(opt)
-
-                else:  # multiple
-                    opt_ids = request.POST.getlist(f"q_{q.id}")
-                    if opt_ids:
-                        opts = list(ExamQuestionOption.objects.filter(question=q, id__in=opt_ids))
-                        if opts:
-                            ans.selected_options.add(*opts)
-
-                # ✅ Test cavabları üçün text_answer-ı boşalt
-                ans.text_answer = ""
-                ans.has_paint = False
-                if getattr(ans, "paint_image", None):
-                    _clear_paint_from_answer(ans)
-
-                # ✅ Auto-evaluate et
-                ans.auto_evaluate()
-                ans.save()
+                _save_test_answer_if_changed(
+                    ans,
+                    q,
+                    _selected_option_ids_from_request(request, q),
+                    answer_data.get("selected_option_ids", set()),
+                )
 
             else:  # Yazılı sual
-                text = request.POST.get(f"q_{q.id}", "").strip()
-                ans.text_answer = text
-                ans.is_correct = False
-                ans.save()
+                try:
+                    _save_written_answer_if_changed(request, ans, q)
+                except ValidationError as exc:
+                    if is_ajax:
+                        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+                    messages.error(request, exc.messages[0])
+                    return redirect(
+                        append_return_to(
+                            reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+                            return_to,
+                        )
+                    )
 
-                files = request.FILES.getlist(f"file_{q.id}[]")
-                if files:
-                    ans.files.all().delete()
-                    for f in files:
-                        try:
-                            validate_uploaded_file(
-                                f,
-                                allowed_extensions=EXAM_ALLOWED_EXTENSIONS,
-                                max_size_mb=10,
-                            )
-                        except ValidationError as exc:
-                            if is_ajax:
-                                return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-                            messages.error(request, exc.messages[0])
-                            return redirect(
-                                append_return_to(
-                                    reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
-                                    return_to,
-                                )
-                            )
-                        randomize_uploaded_filename(f)
-                        ExamAnswerFile.objects.create(answer=ans, file=f)
-
-                # Paint hissəsi
-                paint_enabled = request.POST.get(f"paint_enabled_{q.id}") == "1"
-                paint_clear = request.POST.get(f"paint_clear_{q.id}") == "1"
-                paint_data_url = (request.POST.get(f"paint_data_{q.id}") or "").strip()
-
-                if not q.paint_enabled_effective:
-                    _clear_paint_from_answer(ans)
-                elif paint_clear:
-                    _clear_paint_from_answer(ans)
-                elif paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
-                    _save_paint_png_to_answer(ans, paint_data_url)
-                elif not paint_enabled:
-                    _clear_paint_from_answer(ans)
-
-                ans.save()
-
-        # ✅ Test imtahanı üçün score-u yenilə
-        if exam.exam_type == "test":
+        if exam.exam_type == "test" and (action != "autosave" or is_time_up):
             attempt.recalculate_score()
 
         # ✅ Finish və ya time up
@@ -319,8 +365,7 @@ def take_exam(request, slug, attempt_id):
                 )
             return redirect(build_exam_result_url(attempt, return_to=return_to))
 
-        # ✅ Draft olaraq saxla (autosave və ya manual save_draft)
-        if action in ("autosave", "save_draft"):
+        if action == "save_draft" and attempt.status != "draft":
             attempt.status = "draft"
             attempt.save(update_fields=["status"])
 
@@ -344,6 +389,14 @@ def take_exam(request, slug, attempt_id):
     if attempt.supervision_status in ("locked", "removed") and not attempt.is_finished:
         pass  # Template will handle the locked overlay
 
+    previous_attempts = _previous_attempts_for_context(request, exam, attempt)
+    q_payload = []
+    for q in questions:
+        opts = []
+        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+            opts = build_shuffled_options(attempt.id, q)
+        q_payload.append({"q": q, "opts": opts})
+
     context = {
         "exam": exam,
         "attempt": attempt,
@@ -355,5 +408,7 @@ def take_exam(request, slug, attempt_id):
         "previous_attempts": previous_attempts,
         "previous_attempts_count": len(previous_attempts),
         "supervision": supervision_data,
+        "exam_autosave_interval_ms": settings.EXAM_AUTOSAVE_INTERVAL_MS,
+        "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
     }
     return render(request, "exams/student/take_exam.html", context)

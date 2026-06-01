@@ -231,6 +231,12 @@ def _env_float_setting(name: str, default: float, *, minimum: float | None = Non
     return value
 
 
+# Student exam autosave is intentionally slow on the server side. Answers are
+# still written to browser localStorage immediately, while DB writes are batched.
+EXAM_AUTOSAVE_INTERVAL_MS = _env_int_setting("EXAM_AUTOSAVE_INTERVAL_MS", 300_000, minimum=60_000)
+EXAM_AUTOSAVE_JITTER_MS = _env_int_setting("EXAM_AUTOSAVE_JITTER_MS", 60_000, minimum=0)
+
+
 # Request queueing for mutating HTTP calls. This protects every app view from
 # duplicate/bursty writes by serialising unsafe methods per user/session and by
 # limiting concurrent write requests per worker process.
