@@ -1448,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="{% static 'js/review_countdown.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
-    {% if supervision.supervised %}
+    {% if exam_supervision_enabled %}
     {{ supervision.config|json_script:"supervision-config-data" }}
     <script nonce="{{ request.csp_nonce }}">
     window.SUPERVISION_ACK_I18N = {

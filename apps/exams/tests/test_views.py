@@ -3894,6 +3894,23 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertContains(response, "exam_supervision.js")
         self.assertContains(response, "supervised: false")
 
+    @override_settings(EXAM_SUPERVISION_ENABLED=False)
+    def test_student_exam_omits_supervision_listener_when_feature_disabled(self):
+        self.attempt.supervision_status = "active"
+        self.attempt.supervision_manual_lock = False
+        self.attempt.save(update_fields=["supervision_status", "supervision_manual_lock"])
+        question = ExamQuestion.objects.create(exam=self.exam, text="Feature disabled?", order=1)
+        ExamQuestionOption.objects.create(question=question, text="Yes", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="No", is_correct=False)
+        ExamAnswer.objects.create(attempt=self.attempt, question=question)
+        _login_with_org(self.client, self.student, self.org)
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.exam.slug, self.attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "exam_supervision.js")
+        self.assertNotContains(response, "supervised: false")
+
     def test_supervision_monitor_shows_exam_without_config_or_violations(self):
         fresh_exam = Exam.objects.create(
             author=self.teacher,
