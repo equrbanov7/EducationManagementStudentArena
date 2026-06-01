@@ -10,6 +10,11 @@ from django.utils import timezone
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+from apps.exams.features import (
+    disabled_supervision_status,
+    exam_supervision_enabled,
+    supervision_disabled_message,
+)
 from apps.exams.models import Exam, ExamAttempt, ExamSupervisionConfig, SupervisionIncident
 from apps.exams.services.randomizer import build_shuffled_options
 
@@ -89,6 +94,8 @@ EVENT_SEVERITY_MAP = {
 
 def get_supervision_config(exam):
     """Get supervision config for an exam, or None if not enabled."""
+    if not exam_supervision_enabled():
+        return None
     try:
         config = exam.supervision_config
         if config.enabled:
@@ -109,6 +116,9 @@ def log_supervision_incident(attempt, event_type, metadata=None):
       - action_taken: what action was taken (if any)
       - supervision_status: current supervision status of the attempt
     """
+    if not exam_supervision_enabled():
+        return None
+
     exam = attempt.exam
     config = get_supervision_config(exam)
 
@@ -234,6 +244,9 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
 
     Returns True on success, raises ValueError on invalid state.
     """
+    if not exam_supervision_enabled():
+        raise ValueError(supervision_disabled_message())
+
     if attempt.supervision_status not in ("locked", "removed", "warned"):
         raise ValueError("Attempt is not in a locked/removed/warned state.")
 
@@ -332,6 +345,9 @@ def teacher_lock_attempt(attempt, teacher):
 
     Returns True on success, raises ValueError on invalid state.
     """
+    if not exam_supervision_enabled():
+        raise ValueError(supervision_disabled_message())
+
     if attempt.is_finished:
         raise ValueError("Attempt is already finished.")
 
@@ -383,6 +399,9 @@ def teacher_stop_attempt(attempt, teacher):
 
     Returns True on success, raises ValueError on invalid state.
     """
+    if not exam_supervision_enabled():
+        raise ValueError(supervision_disabled_message())
+
     if attempt.is_finished:
         raise ValueError("Attempt is already finished.")
 
@@ -447,6 +466,9 @@ def sweep_expired_resume_windows(queryset=None):
     default is only intended for the global periodic sweep, and each finished
     attempt records an incident under its own ``exam.organization``.
     """
+    if not exam_supervision_enabled():
+        return 0
+
     if queryset is None:
         queryset = ExamAttempt.objects.all()
 
@@ -470,6 +492,9 @@ def sweep_expired_resume_windows(queryset=None):
 
 def get_attempt_supervision_status(attempt):
     """Get current supervision status and details for an attempt."""
+    if not exam_supervision_enabled():
+        return disabled_supervision_status(attempt)
+
     config = get_supervision_config(attempt.exam)
     # Resume window countdown: how long the student still has to actually
     # return after a resume before the backend auto-finishes the attempt.
@@ -512,6 +537,9 @@ def get_attempt_supervision_status(attempt):
 
 def get_flagged_students_for_exam(exam, organization):
     """Get summary of flagged students for a specific exam."""
+    if not exam_supervision_enabled():
+        return []
+
     attempts = (
         ExamAttempt.objects.filter(
             exam=exam,
@@ -543,6 +571,16 @@ def get_supervision_monitor_data(organization, exam_id=None, exam_queryset=None)
     Returns all monitorable exams and their attempts, even when an exam has no
     explicit supervision config or has no violations yet.
     """
+    if not exam_supervision_enabled():
+        empty_qs = Exam.objects.none()
+        return {
+            "monitor_attempts": ExamAttempt.objects.none(),
+            "monitor_exams": empty_qs,
+            "supervised_exams": [],
+            "total_incidents": 0,
+            "incidents_qs": SupervisionIncident.objects.none(),
+        }
+
     exam_choices_qs = exam_queryset if exam_queryset is not None else Exam.objects.filter(organization=organization)
     exam_choices_qs = exam_choices_qs.filter(organization=organization)
 
@@ -636,6 +674,20 @@ def get_exam_live_monitor_data(exam, date_value=None):
     Returns a JSON-serialisable dict consumed by both the initial page render
     and the polling endpoint, so the two never drift apart.
     """
+    if not exam_supervision_enabled():
+        return {
+            "exam_id": exam.id,
+            "exam_title": exam.title,
+            "total_questions": get_exam_question_total(exam),
+            "counts": {"entered": 0, "in_progress": 0, "finished": 0, "flagged": 0, "not_entered": 0},
+            "status_dist": {"active": 0, "warned": 0, "locked": 0, "removed": 0, "resumed": 0},
+            "violation_type_dist": {},
+            "avg_progress": 0,
+            "total_violations": 0,
+            "students": [],
+            "recent_incidents": [],
+        }
+
     from django.db.models import Count
 
     # ``answered_count`` is annotated so each student's progress is read in the
@@ -761,6 +813,9 @@ def get_exam_session_dates(exam):
     Used to populate the date filter so a teacher can isolate one sitting of an
     exam that is run on multiple days.
     """
+    if not exam_supervision_enabled():
+        return []
+
     from django.db.models.functions import TruncDate
 
     return list(
@@ -1000,6 +1055,31 @@ def get_attempt_live_snapshot(attempt):
     "look over the shoulder" without blocking the student. Scope MUST be enforced
     by the caller (exam already tenant/permission scoped).
     """
+    if not exam_supervision_enabled():
+        return {
+            "attempt_id": attempt.id,
+            "student_name": attempt.user.get_full_name() or attempt.user.username,
+            "student_username": attempt.user.username,
+            "supervision_status": "active",
+            "manual_lock": False,
+            "violation_count": 0,
+            "answered": 0,
+            "total_questions": get_exam_question_total(attempt.exam),
+            "correct_count": attempt.correct_count,
+            "wrong_count": attempt.wrong_count,
+            "score_percent": None,
+            "checked_by_teacher": attempt.checked_by_teacher,
+            "teacher_score": attempt.teacher_score,
+            "is_finished": attempt.is_finished,
+            "status": attempt.status,
+            "exam_title": attempt.exam.title,
+            "exam_type": getattr(attempt.exam, "exam_type", "") or "",
+            "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
+            "finished_at": attempt.finished_at.isoformat() if attempt.finished_at else None,
+            "answers": [],
+            "incidents": [],
+        }
+
     exam_type = getattr(attempt.exam, "exam_type", "") or ""
     if exam_type == "coding":
         # Practical / coding exams store the student's work in CodingSubmission
@@ -1066,6 +1146,13 @@ def save_supervision_config_from_form(exam, form_data):
     Create or update supervision config from form data.
     Called when teacher saves exam with supervision settings.
     """
+    if not exam_supervision_enabled():
+        ExamSupervisionConfig.objects.filter(exam=exam, enabled=True).update(
+            enabled=False,
+            updated_at=timezone.now(),
+        )
+        return ExamSupervisionConfig.objects.filter(exam=exam).first()
+
     enabled = form_data.get("supervision_enabled") == "on"
 
     config, created = ExamSupervisionConfig.objects.get_or_create(

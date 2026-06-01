@@ -78,6 +78,7 @@ TEMPLATES = [
                 "apps.blog.context_processors.blog_navigation_context",
                 "apps.organizations.context_processors.organization_context",
                 "core.context_processors.seo_context",
+                "core.context_processors.feature_flags",
             ],
         },
     },
@@ -191,6 +192,12 @@ AI_ASSISTANT_RATE_LIMIT = os.getenv("AI_ASSISTANT_RATE_LIMIT", "25/1h")
 # Practical/coding exams are still being hardened. Keep them available in
 # local/test by default, but let production disable the feature explicitly.
 PRACTICAL_EXAMS_ENABLED = os.getenv("PRACTICAL_EXAMS_ENABLED", "True").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip().lower() in {
     "1",
     "true",
     "yes",
@@ -444,6 +451,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 #   - "docker" : run in local Docker (best isolation, requires daemon access).
 #   - "piston" : forward to a Piston HTTP server (used by Render/Heroku/etc).
 #   - "auto"   : prefer Docker when available, else fall back to Piston.
+#   - "disabled" / "none": never execute submitted code.
 #
 # Default is "auto" so local-with-Docker dev keeps using Docker but production
 # (where the Docker daemon is unreachable) automatically uses Piston instead

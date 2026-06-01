@@ -26,6 +26,7 @@ from apps.exams.models import (
     ExamQuestionOption,
     ExamSupervisionConfig,
     QuestionBlock,
+    SupervisionIncident,
 )
 from apps.exams.services import parsing
 from apps.exams.services.ai_grading import _parse_ai_grade, grade_written_answer
@@ -38,6 +39,7 @@ from apps.exams.services.supervision import (
     get_attempt_supervision_status,
     get_supervision_monitor_data,
     log_supervision_incident,
+    save_supervision_config_from_form,
     sweep_expired_resume_windows,
     teacher_lock_attempt,
     teacher_resume_attempt,
@@ -653,6 +655,39 @@ class ExamSupervisionServicesTest(TestCase):
         data = get_supervision_monitor_data(self.org)
 
         self.assertTrue(data["monitor_attempts"].filter(id=attempt.id).exists())
+
+    @override_settings(EXAM_SUPERVISION_ENABLED=False)
+    def test_disabled_supervision_does_not_log_lock_or_keep_config_enabled(self):
+        config = ExamSupervisionConfig.objects.create(
+            exam=self.exam,
+            enabled=True,
+            max_fullscreen_violations=1,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=1,
+            status="in_progress",
+        )
+
+        result = log_supervision_incident(attempt, "fullscreen_exited", {"source": "test"})
+
+        self.assertIsNone(result)
+        self.assertFalse(SupervisionIncident.objects.filter(attempt=attempt).exists())
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_violation_count, 0)
+        self.assertEqual(attempt.supervision_status, "active")
+
+        status = get_attempt_supervision_status(attempt)
+        self.assertFalse(status["supervised"])
+        self.assertEqual(status["max_violations"], 0)
+
+        save_supervision_config_from_form(self.exam, {"supervision_enabled": "on"})
+        config.refresh_from_db()
+        self.assertFalse(config.enabled)
+
+        with self.assertRaises(ValueError):
+            teacher_lock_attempt(attempt, self.teacher)
 
     def test_auto_submit_persists_removed_status_and_finishes_attempt(self):
         ExamSupervisionConfig.objects.create(

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from apps.exams.features import practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.models import CodingExamQuestion, CodingSubmission, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
@@ -40,6 +41,10 @@ def _json_error(message, *, status=400, extra=None):
     return JsonResponse(payload, status=status)
 
 
+def _coding_disabled_error():
+    return _json_error(practical_exam_disabled_message(), status=403)
+
+
 def _parse_json_body(request):
     try:
         return json.loads(request.body.decode("utf-8") or "{}")
@@ -48,6 +53,8 @@ def _parse_json_body(request):
 
 
 def _get_coding_attempt(request, slug, attempt_id):
+    if not practical_exams_enabled():
+        raise Http404(practical_exam_disabled_message())
     ensure_student_exam_tenant_context(request)
     return get_object_or_404(
         ExamAttempt.objects.select_related("exam", "user"),
@@ -142,6 +149,8 @@ def _submission_file_items(submission):
 
 
 def _get_submission_download_attempt(request, slug, attempt_id):
+    if not practical_exams_enabled():
+        raise Http404(practical_exam_disabled_message())
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related("exam", "user"),
         id=attempt_id,
@@ -214,6 +223,9 @@ def _serialize_coding_question(coding_question, *, index, latest_submission):
 
 
 def take_coding_exam(request, *, exam, attempt, remaining_seconds, history_url, previous_attempts, supervision):
+    if not practical_exams_enabled():
+        raise Http404(practical_exam_disabled_message())
+
     coding_questions = _get_attempt_coding_questions(attempt)
     if not coding_questions:
         return _json_error(pgettext("exams.view.coding.error", "coding_question_not_found"), status=404)
@@ -363,6 +375,8 @@ def _build_submission_items(request, attempt):
 @login_required
 @require_POST
 def coding_autosave(request, slug, attempt_id):
+    if not practical_exams_enabled():
+        return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
     if attempt.is_finished or attempt.expire_if_time_limit_reached():
         return _json_error(
@@ -393,6 +407,8 @@ def coding_autosave(request, slug, attempt_id):
 @login_required
 @require_POST
 def coding_run(request, slug, attempt_id):
+    if not practical_exams_enabled():
+        return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
     if attempt.is_finished or attempt.expire_if_time_limit_reached():
         return _json_error(
@@ -469,6 +485,8 @@ def coding_run(request, slug, attempt_id):
 @login_required
 @require_POST
 def coding_submit(request, slug, attempt_id):
+    if not practical_exams_enabled():
+        return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
     already_finished = attempt.is_finished
     time_expired = attempt.is_time_limit_reached()
