@@ -85,6 +85,7 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   app:
     image: ${APP_IMAGE:-emsarena-prod:latest}
+    container_name: emsarena-app
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
