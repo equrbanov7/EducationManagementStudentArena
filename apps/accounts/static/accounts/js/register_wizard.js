@@ -1019,6 +1019,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (organizationSelect && values.join_organization !== undefined) {
+                // Populate options without search filter so the saved organization
+                // value can be found.  The previous populateJoinOrganizationOptions
+                // call (via updateStep2State) may have used the full label text
+                // (including country suffix) as the search term, which excludes the
+                // correct option because organization.name does not contain the
+                // country suffix.
+                populateJoinOrganizationOptions("");
                 organizationSelect.value = values.join_organization;
                 syncSearchInputWithSelectedOrganization();
                 if (organizationSearchInput && typeof values.organizationSearchInput === "string") {
