@@ -14,6 +14,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
+from apps.accounts.views.auth import AUTH_DEVICE_COOKIE_NAME
 from apps.exams.models import Exam
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
@@ -237,6 +238,42 @@ class LoginRateLimitTest(TestCase):
 
         self.assertEqual(blocked.status_code, 429)
         self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+    def test_login_page_sets_auth_device_cookie(self):
+        response = self.client.get(self.login_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(AUTH_DEVICE_COOKIE_NAME, response.cookies)
+        self.assertTrue(response.cookies[AUTH_DEVICE_COOKIE_NAME]["httponly"])
+        self.assertEqual(response.cookies[AUTH_DEVICE_COOKIE_NAME]["samesite"], "Lax")
+
+    def test_login_rate_limit_isolated_by_device_cookie_on_same_ip(self):
+        shared_ip = "198.51.100.10"
+        noisy_client = Client()
+        peer_client = Client()
+
+        for _ in range(2):
+            response = noisy_client.post(
+                self.login_url,
+                {"username": "limiteduser", "password": "wrongpassword"},
+                REMOTE_ADDR=shared_ip,
+            )
+            self.assertEqual(response.status_code, 200)
+
+        blocked = noisy_client.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "wrongpassword"},
+            REMOTE_ADDR=shared_ip,
+        )
+        self.assertEqual(blocked.status_code, 429)
+
+        peer_response = peer_client.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "StrongPass123!"},
+            REMOTE_ADDR=shared_ip,
+        )
+        self.assertEqual(peer_response.status_code, 302)
+        self.assertTrue(peer_response.wsgi_request.user.is_authenticated)
 
     def test_superadmin_correct_login_clears_limit_and_allows_access(self):
         for _ in range(2):
