@@ -2359,6 +2359,23 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "timeWarningStorageKey")
         self.assertContains(response, "exam_time_warning.js")
 
+    @override_settings(EXAM_AUTOSAVE_INTERVAL_MS=300000, EXAM_AUTOSAVE_JITTER_MS=60000)
+    def test_take_exam_uses_five_minute_server_autosave_with_jitter(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-autosave-interval-ms="300000"')
+        self.assertContains(response, 'data-autosave-jitter-ms="60000"')
+        self.assertContains(response, "const defaultAutoSaveIntervalMs = 300000;")
+        self.assertContains(response, "const autoSaveDelayMs = serverAutoSaveIntervalMs + autoSaveSpreadMs;")
+
     def test_take_exam_time_warning_modal_strings_are_translated_for_supported_languages(self):
         self.course_assigned_exam.total_duration_minutes = 30
         self.course_assigned_exam.save(update_fields=["total_duration_minutes"])
@@ -2438,6 +2455,62 @@ class StudentExamVisibilityFilteringTest(TestCase):
         second_answer.refresh_from_db()
         self.assertEqual(first_answer.text_answer, "New first answer")
         self.assertEqual(second_answer.text_answer, "Keep second answer")
+
+    def test_take_exam_test_autosave_skips_full_score_recalculation(self):
+        test_exam = Exam.objects.create(
+            author=self.teacher,
+            title="High Capacity Autosave Test Exam",
+            is_active=True,
+            is_public=False,
+            exam_type="test",
+        )
+        test_exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=test_exam,
+            text="Two plus two?",
+            order=1,
+            points=1,
+            answer_mode="single",
+        )
+        correct_option = ExamQuestionOption.objects.create(
+            question=question,
+            label="A",
+            text="4",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=question,
+            label="B",
+            text="5",
+            is_correct=False,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=test_exam,
+            status="in_progress",
+            attempt_number=1,
+        )
+        answer = ExamAnswer.objects.create(attempt=attempt, question=question)
+
+        with patch.object(ExamAttempt, "recalculate_score", autospec=True) as recalculate_score:
+            response = self.client.post(
+                reverse("exams:take_exam", args=[test_exam.slug, attempt.id]),
+                {
+                    "submit_action": "autosave",
+                    "changed_questions[]": [str(question.id)],
+                    f"q_{question.id}": str(correct_option.id),
+                },
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        recalculate_score.assert_not_called()
+        answer.refresh_from_db()
+        self.assertEqual(set(answer.selected_options.values_list("id", flat=True)), {correct_option.id})
+        self.assertTrue(answer.is_correct)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "in_progress")
+        self.assertEqual(attempt.correct_count, 0)
 
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
