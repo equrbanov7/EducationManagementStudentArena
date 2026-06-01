@@ -4,6 +4,8 @@ Authentication views: registration, verification, login, logout.
 
 import json
 import logging
+import re
+import secrets
 from urllib.parse import quote
 
 from django.conf import settings
@@ -55,7 +57,11 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 AUTH_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
-LOGIN_LIMIT_SCOPE_IP = "accounts.login.ip"
+AUTH_DEVICE_COOKIE_NAME = "ems_auth_device"
+AUTH_DEVICE_COOKIE_SALT = "accounts.auth_device"  # nosec B105 - signing salt, not a secret.
+AUTH_DEVICE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
+AUTH_DEVICE_ID_RE = re.compile(r"^[a-f0-9]{32,64}$")
+LOGIN_LIMIT_SCOPE_DEVICE = "accounts.login.device"
 LOGIN_LIMIT_SCOPE_IDENTITY = "accounts.login.identity"
 OTP_VERIFY_LIMIT_SCOPE = "accounts.otp.verify"
 OTP_RESEND_LIMIT_SCOPE = "accounts.otp.resend"
@@ -64,18 +70,67 @@ AUTH_REDIRECT_DISALLOWED_CHARS = frozenset({"'", '"', "\\", "\r", "\n", "\t"})
 PASSWORD_RESET_EMAIL_SESSION_KEY = "accounts_password_reset_email"
 
 
+def _new_auth_device_id():
+    return secrets.token_hex(24)
+
+
+def _get_auth_device_id(request):
+    cached_device_id = getattr(request, "_accounts_auth_device_id", "")
+    if cached_device_id:
+        return cached_device_id
+
+    try:
+        signed_device_id = request.get_signed_cookie(
+            AUTH_DEVICE_COOKIE_NAME,
+            default="",
+            salt=AUTH_DEVICE_COOKIE_SALT,
+            max_age=AUTH_DEVICE_COOKIE_MAX_AGE,
+        )
+    except BadSignature:
+        signed_device_id = ""
+
+    candidate = str(signed_device_id or "").strip().lower()
+    if AUTH_DEVICE_ID_RE.fullmatch(candidate):
+        device_id = candidate
+        needs_cookie = False
+    else:
+        device_id = _new_auth_device_id()
+        needs_cookie = True
+
+    request._accounts_auth_device_id = device_id
+    request._accounts_auth_device_cookie_needs_refresh = needs_cookie
+    return device_id
+
+
+def _ensure_auth_device_cookie(request, response):
+    device_id = getattr(request, "_accounts_auth_device_id", "") or _get_auth_device_id(request)
+    if not getattr(request, "_accounts_auth_device_cookie_needs_refresh", False):
+        return response
+
+    response.set_signed_cookie(
+        AUTH_DEVICE_COOKIE_NAME,
+        device_id,
+        salt=AUTH_DEVICE_COOKIE_SALT,
+        max_age=AUTH_DEVICE_COOKIE_MAX_AGE,
+        httponly=True,
+        samesite="Lax",
+        secure=request.is_secure(),
+    )
+    return response
+
+
 def _login_limit_keys(request, username):
-    client_ip = get_client_ip(request) or "unknown"
+    device_id = _get_auth_device_id(request)
     normalized_username = normalize_rate_identity(username)
     return [
-        (LOGIN_LIMIT_SCOPE_IP, client_ip),
-        (LOGIN_LIMIT_SCOPE_IDENTITY, client_ip, normalized_username),
+        (LOGIN_LIMIT_SCOPE_DEVICE, device_id),
+        (LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized_username),
     ]
 
 
 def _clear_login_rate_limits_after_password_reset(request, user):
-    client_ip = get_client_ip(request) or "unknown"
-    clear_rate_limit(LOGIN_LIMIT_SCOPE_IP, client_ip)
+    device_id = _get_auth_device_id(request)
+    clear_rate_limit(LOGIN_LIMIT_SCOPE_DEVICE, device_id)
 
     identities = {
         getattr(user, "username", ""),
@@ -83,7 +138,7 @@ def _clear_login_rate_limits_after_password_reset(request, user):
     }
     for identity in identities:
         if identity:
-            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, client_ip, normalize_rate_identity(identity))
+            clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalize_rate_identity(identity))
 
 
 def _authenticate_superadmin_for_rate_limit_reset(request, username, password):
@@ -175,6 +230,10 @@ class CustomLoginView(LoginView):
         ),
     }
 
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        return _ensure_auth_device_cookie(request, response)
+
     def get_redirect_url(self):
         redirect_to = self.request.POST.get(
             self.redirect_field_name,
@@ -200,6 +259,7 @@ class CustomLoginView(LoginView):
                         "Cleared login rate limit after successful superadmin authentication",
                         extra={
                             "username": normalize_rate_identity(username),
+                            "auth_device": _get_auth_device_id(request),
                             "client_ip": get_client_ip(request) or "unknown",
                         },
                     )
