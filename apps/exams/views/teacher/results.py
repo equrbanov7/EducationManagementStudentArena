@@ -1,16 +1,19 @@
 import json
 from datetime import datetime, timedelta
+from io import BytesIO
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.text import slugify
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
@@ -262,6 +265,132 @@ def _build_anonymous_name(*, attempt_id: int, user_id: int, exam_id: int) -> str
     )
 
 
+def _available_groups_for_exam(exam):
+    """İmtahanın iştirakçılarının üzv olduğu qruplar + allowed_groups (tenant-scoped).
+
+    - allowed_groups-i daxil et (təyin olunmuş qruplar).
+    - Plus: imtahanın cəhdləri olan tələbələrin üzv olduqları qruplar.
+    - Tenant: yalnız bu imtahanın organization-na aid qrupları göstər (əgər varsa).
+    """
+    from apps.exams.models import StudentGroup
+
+    attempt_user_ids = exam.attempts.values_list("user_id", flat=True)
+    qs = StudentGroup.objects.filter(Q(exams=exam) | Q(students__id__in=attempt_user_ids))
+    org_id = getattr(exam, "organization_id", None)
+    if org_id:
+        qs = qs.filter(organization_id=org_id)
+    return qs.distinct().order_by("name")
+
+
+def _attempt_effective_finish(attempt, *, now=None):
+    """İmtahanı bitirməyən tələbə üçün effektiv bitmə vaxtı.
+
+    - Əgər finished_at varsa, onu qaytarır.
+    - Yoxsa: started_at + exam.total_duration_minutes (əgər müddət bitibsə).
+    - Müddət hələ bitməyibsə None.
+    """
+    finished_at = getattr(attempt, "finished_at", None)
+    if finished_at:
+        return finished_at, False
+    started_at = getattr(attempt, "started_at", None)
+    duration_minutes = getattr(attempt.exam, "total_duration_minutes", None)
+    if not started_at or not duration_minutes:
+        return None, False
+    deadline = started_at + timedelta(minutes=int(duration_minutes))
+    if (now or timezone.now()) >= deadline:
+        return deadline, True
+    return None, False
+
+
+def _apply_results_filters(exam, request):
+    """Şərt: teacher_exam_results və export_exam_results_xlsx ortaq filter logic-i.
+
+    Qaytarır: (attempts_qs, filter_state_dict)
+    """
+    attempts = exam.attempts.select_related("user", "exam").prefetch_related(
+        "answers__question__options",
+        "answers__selected_options",
+    )
+
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        attempts = attempts.filter(
+            Q(user__username__icontains=search_query)
+            | Q(user__first_name__icontains=search_query)
+            | Q(user__last_name__icontains=search_query)
+        )
+
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}
+    if status_filter not in allowed_status_filters:
+        status_filter = "all"
+    if status_filter != "all":
+        attempts = attempts.filter(status=status_filter)
+
+    checked_filter = (request.GET.get("checked") or "all").strip().lower()
+    if checked_filter == "checked":
+        attempts = attempts.filter(checked_by_teacher=True)
+    elif checked_filter == "unchecked":
+        attempts = attempts.filter(checked_by_teacher=False)
+    else:
+        checked_filter = "all"
+
+    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+    if date_from:
+        attempts = attempts.filter(started_at__date__gte=date_from)
+    if date_to:
+        attempts = attempts.filter(started_at__date__lte=date_to)
+
+    # Group filter — imtahanın iştirakçılarının üzvü olduğu istənilən qrupdan
+    group_filter_raw = (request.GET.get("group") or "").strip().lower()
+    group_id = None
+    if group_filter_raw and group_filter_raw != "all":
+        try:
+            group_id = int(group_filter_raw)
+        except ValueError:
+            group_id = None
+    if group_id is not None and _available_groups_for_exam(exam).filter(id=group_id).exists():
+        attempts = attempts.filter(user__student_groups_as_student__id=group_id).distinct()
+    else:
+        group_id = None
+
+    sort_by = (request.GET.get("sort_by") or "").strip()
+    sort_dir = (request.GET.get("sort_dir") or "").strip()
+    ALLOWED_SORT_FIELDS = {
+        "user": "user__first_name",
+        "username": "user__username",
+        "email": "user__email",
+        "status": "status",
+        "correct": "correct_count",
+        "wrong": "wrong_count",
+        "score": "teacher_score",
+        "start": "started_at",
+        "end": "finished_at",
+        "duration": "duration_seconds",
+    }
+    if sort_by in ALLOWED_SORT_FIELDS and sort_dir in ("asc", "desc"):
+        order_field = ALLOWED_SORT_FIELDS[sort_by]
+        if sort_dir == "desc":
+            order_field = f"-{order_field}"
+        attempts = attempts.order_by(order_field)
+    else:
+        sort_by = ""
+        sort_dir = ""
+        attempts = attempts.order_by("-started_at")
+
+    return attempts, {
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "checked_filter": checked_filter,
+        "date_from_raw": date_from_raw,
+        "date_to_raw": date_to_raw,
+        "group_id": group_id,
+        "sort_by": sort_by,
+        "sort_dir": sort_dir,
+    }
+
+
 @login_required
 def teacher_exam_results(request, slug):
     """
@@ -276,11 +405,6 @@ def teacher_exam_results(request, slug):
     exam_detail_url = _append_query_params(
         reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
         **navigation_params,
-    )
-
-    attempts = exam.attempts.select_related("user", "exam").prefetch_related(
-        "answers__question__options",
-        "answers__selected_options",
     )
 
     selected_attempt = None
@@ -355,58 +479,15 @@ def teacher_exam_results(request, slug):
                 )
             )
 
-    search_query = (request.GET.get("q") or "").strip()
-    if search_query:
-        attempts = attempts.filter(
-            Q(user__username__icontains=search_query)
-            | Q(user__first_name__icontains=search_query)
-            | Q(user__last_name__icontains=search_query)
-        )
-
-    status_filter = (request.GET.get("status") or "all").strip().lower()
-    allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}
-    if status_filter not in allowed_status_filters:
-        status_filter = "all"
-    if status_filter != "all":
-        attempts = attempts.filter(status=status_filter)
-
-    checked_filter = (request.GET.get("checked") or "all").strip().lower()
-    if checked_filter == "checked":
-        attempts = attempts.filter(checked_by_teacher=True)
-    elif checked_filter == "unchecked":
-        attempts = attempts.filter(checked_by_teacher=False)
-    else:
-        checked_filter = "all"
-
-    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
-    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
-    if date_from:
-        attempts = attempts.filter(started_at__date__gte=date_from)
-    if date_to:
-        attempts = attempts.filter(started_at__date__lte=date_to)
-
-    # ---------- Sorting ----------
-    sort_by = (request.GET.get("sort_by") or "").strip()
-    sort_dir = (request.GET.get("sort_dir") or "").strip()
-    ALLOWED_SORT_FIELDS = {
-        "user": "user__first_name",
-        "status": "status",
-        "correct": "correct_count",
-        "wrong": "wrong_count",
-        "score": "teacher_score",
-        "start": "started_at",
-        "end": "finished_at",
-        "duration": "duration_seconds",
-    }
-    if sort_by in ALLOWED_SORT_FIELDS and sort_dir in ("asc", "desc"):
-        order_field = ALLOWED_SORT_FIELDS[sort_by]
-        if sort_dir == "desc":
-            order_field = f"-{order_field}"
-        attempts = attempts.order_by(order_field)
-    else:
-        sort_by = ""
-        sort_dir = ""
-        attempts = attempts.order_by("-started_at")
+    attempts, filter_state = _apply_results_filters(exam, request)
+    search_query = filter_state["search_query"]
+    status_filter = filter_state["status_filter"]
+    checked_filter = filter_state["checked_filter"]
+    date_from_raw = filter_state["date_from_raw"]
+    date_to_raw = filter_state["date_to_raw"]
+    group_id = filter_state["group_id"]
+    sort_by = filter_state["sort_by"]
+    sort_dir = filter_state["sort_dir"]
 
     max_score = 100 if exam.exam_type == "test" else exam.questions.aggregate(total=Sum("points")).get("total") or 0
     pending_count = 0 if exam.exam_type == "test" else attempts.filter(checked_by_teacher=False).count()
@@ -455,11 +536,21 @@ def teacher_exam_results(request, slug):
             identity_window_seconds=identity_window_seconds,
         )
         real_name = att.user.get_full_name() or att.user.username
+        effective_finish, finish_inferred = _attempt_effective_finish(att, now=now)
+        effective_duration = att.duration_seconds
+        if effective_duration is None and effective_finish and att.started_at:
+            effective_duration = max(int((effective_finish - att.started_at).total_seconds()), 0)
 
+        test_result = calculate_test_attempt_result(att) if exam.exam_type == "test" else None
+        if test_result is not None:
+            delivered_count = test_result.delivered_count
+        else:
+            delivered_count = att.correct_count + att.wrong_count
         attempts_data.append(
             {
                 "attempt": att,
-                "test_result": calculate_test_attempt_result(att) if exam.exam_type == "test" else None,
+                "test_result": test_result,
+                "delivered_count": delivered_count,
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
                 "can_view_name": can_view_name,
@@ -471,6 +562,9 @@ def teacher_exam_results(request, slug):
                 ),
                 "countdown_seconds": action_state["countdown_seconds"],
                 "countdown_mode": action_state["countdown_mode"],
+                "effective_finish": effective_finish,
+                "finish_inferred": finish_inferred,
+                "effective_duration_seconds": effective_duration,
             }
         )
 
@@ -485,6 +579,7 @@ def teacher_exam_results(request, slug):
     questions = exam.questions.all()
     hardest_questions = sorted(questions, key=lambda q: q.correct_ratio)[:5]
 
+    group_filter_value = str(group_id) if group_id else ""
     pagination_query = urlencode(
         {
             key: value
@@ -494,6 +589,7 @@ def teacher_exam_results(request, slug):
                 "checked": checked_filter,
                 "date_from": date_from_raw,
                 "date_to": date_to_raw,
+                "group": group_filter_value,
                 "sort_by": sort_by,
                 "sort_dir": sort_dir,
                 "attempt": (request.GET.get("attempt") or "").strip(),
@@ -513,6 +609,7 @@ def teacher_exam_results(request, slug):
                 "checked": checked_filter,
                 "date_from": date_from_raw,
                 "date_to": date_to_raw,
+                "group": group_filter_value,
                 "attempt": (request.GET.get("attempt") or "").strip(),
                 "from_section": (request.GET.get("from_section") or "").strip(),
                 "return_to": (request.GET.get("return_to") or "").strip(),
@@ -520,6 +617,31 @@ def teacher_exam_results(request, slug):
             if value not in ("", None)
         }
     )
+
+    # Export URL — bütün filtrlər saxlanılır, pagination çıxarılır
+    export_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "checked": checked_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
+                "group": group_filter_value,
+                "sort_by": sort_by,
+                "sort_dir": sort_dir,
+            }.items()
+            if value not in ("", None)
+        }
+    )
+    export_xlsx_url = reverse("exams:export_exam_results_xlsx", kwargs={"slug": exam.slug})
+    if export_query:
+        export_xlsx_url = f"{export_xlsx_url}?{export_query}"
+
+    available_groups = _available_groups_for_exam(exam)
+    teacher_display = exam.author.get_full_name() or exam.author.username
+    teacher_username = exam.author.username
 
     return render(
         request,
@@ -548,8 +670,157 @@ def teacher_exam_results(request, slug):
             "sort_base_query": sort_base_query,
             "pagination_query": pagination_query,
             "can_delete_attempts": request_has_permission(request, "exam.delete"),
+            "available_groups": available_groups,
+            "group_filter": group_filter_value,
+            "export_xlsx_url": export_xlsx_url,
+            "teacher_display": teacher_display,
+            "teacher_username": teacher_username,
         },
     )
+
+
+@login_required
+def export_exam_results_xlsx(request, slug):
+    """İmtahan nəticələrini xlsx olaraq export et.
+
+    - Eyni filtrlər tətbiq olunur (group, status, checked, date, q).
+    - Pagination YOX — bütün uyğun cəhdlər.
+    - Tenant isolation: get_teacher_exam_or_404 bunu təmin edir.
+    """
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+
+    # Eyni filtrləri tətbiq et
+    attempts_qs, _ = _apply_results_filters(exam, request)
+    attempts_list = list(attempts_qs)
+
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Alignment, Font, PatternFill
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        return HttpResponse(
+            "openpyxl is not installed. Add openpyxl to requirements.",
+            status=500,
+            content_type="text/plain",
+        )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = (exam.title[:28] + "…") if len(exam.title) > 30 else exam.title
+
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill("solid", fgColor="2563EB")
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+    is_test = exam.exam_type == "test"
+    is_written_or_coding = exam.exam_type in ("written", "coding")
+
+    headers = ["#", "Ad Soyad", "İstifadəçi adı", "E-poçt", "Status"]
+    if is_test:
+        headers += ["Düzgün", "Səhv", "Cavabsız", "Verilmiş sual", "Bal", "Maks. bal", "Faiz"]
+    else:
+        headers += ["Düzgün", "Səhv", "Verilmiş sual"]
+    if is_written_or_coding:
+        headers += ["Müəllim balı", "Yoxlanıb"]
+    headers += ["Başlama", "Bitmə", "Müddət (s:dq:sn)", "Qruplar"]
+
+    for col_idx, title in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=title)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+    ws.row_dimensions[1].height = 28
+
+    now = timezone.now()
+    for row_idx, att in enumerate(attempts_list, start=2):
+        effective_finish, _ = _attempt_effective_finish(att, now=now)
+        effective_duration = att.duration_seconds
+        if effective_duration is None and effective_finish and att.started_at:
+            effective_duration = max(int((effective_finish - att.started_at).total_seconds()), 0)
+
+        # Bütün allowed/iştirakçı qruplarından user-in üzv olduqları
+        available_group_ids = list(_available_groups_for_exam(exam).values_list("id", flat=True))
+        user_groups = ", ".join(
+            list(att.user.student_groups_as_student.filter(id__in=available_group_ids).values_list("name", flat=True))
+        )
+
+        row = [
+            row_idx - 1,
+            att.user.get_full_name() or att.user.username,
+            att.user.username,
+            att.user.email or "",
+            att.get_status_display(),
+        ]
+
+        if is_test:
+            test_result = calculate_test_attempt_result(att)
+            row += [
+                test_result.correct_count,
+                test_result.wrong_count,
+                test_result.unanswered_count,
+                test_result.delivered_count,
+                float(test_result.score_display) if test_result.score_display else 0,
+                float(test_result.max_score_display) if test_result.max_score_display else 0,
+                float(test_result.percentage_display) if test_result.percentage_display else 0,
+            ]
+        else:
+            delivered = att.correct_count + att.wrong_count
+            row += [att.correct_count, att.wrong_count, delivered]
+
+        if is_written_or_coding:
+            row += [
+                att.teacher_score if att.teacher_score is not None else "",
+                "Bəli" if att.checked_by_teacher else "Xeyr",
+            ]
+
+        # Müddəti hh:mm:ss formatına çevir
+        if effective_duration is not None:
+            d_total = max(int(effective_duration), 0)
+            d_h, d_m, d_s = d_total // 3600, (d_total % 3600) // 60, d_total % 60
+            duration_str = f"{d_h:02d}:{d_m:02d}:{d_s:02d}"
+        else:
+            duration_str = ""
+
+        row += [
+            att.started_at.replace(tzinfo=None) if att.started_at else "",
+            effective_finish.replace(tzinfo=None) if effective_finish else "",
+            duration_str,
+            user_groups,
+        ]
+
+        for col_idx, value in enumerate(row, start=1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell.alignment = left if col_idx in (2, 3, 4, len(headers)) else center
+            if isinstance(value, datetime):
+                cell.number_format = "DD.MM.YYYY HH:MM"
+
+    # Sütun genişlikləri
+    widths = [5, 28, 20, 26, 16]
+    if is_test:
+        widths += [10, 10, 12, 16, 8, 12, 8]
+    else:
+        widths += [10, 10, 14]
+    if is_written_or_coding:
+        widths += [14, 12]
+    widths += [20, 20, 14, 30]
+    for idx, width in enumerate(widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    ws.freeze_panes = "A2"
+
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"{slugify(exam.title) or 'exam'}-results-{timezone.now().strftime('%Y%m%d-%H%M')}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @login_required
