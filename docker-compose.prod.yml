@@ -50,6 +50,38 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
+  # PgBouncer — PostgreSQL connection pooler
+  # Keeps Daphne/Celery from opening unbounded backend connections to Postgres.
+  # Session pooling is intentional because the app uses PostgreSQL session GUCs
+  # for RLS tenant context.
+  # ─────────────────────────────────────────────────────────────────────────
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.25.1-p0
+    container_name: emsarena-pgbouncer
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      POOL_MODE: ${PGBOUNCER_POOL_MODE:-session}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE:-40}
+      MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-4}
+      RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-20}
+      RESERVE_POOL_TIMEOUT: ${PGBOUNCER_RESERVE_POOL_TIMEOUT:-3}
+      SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
+      SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
+      AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
   # Redis — channel layer (DB 0) and cache (DB 1)
   # No external port binding; accessible only within emsarena-network.
   # Password enforced via --requirepass; REDISCLI_AUTH is set so the
@@ -85,15 +117,17 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   app:
     image: ${APP_IMAGE:-emsarena-prod:latest}
-    container_name: emsarena-app
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       RUN_RELEASE_ON_START: ${RUN_RELEASE_ON_START:-true}
+      APP_ENV: ${APP_ENV:-production}
+      APP_VERSION: ${APP_VERSION:-unknown}
       ASGI_THREADS: ${ASGI_THREADS:-8}
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-multiproc
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
       DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
       REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       SECRET_KEY: ${SECRET_KEY}
@@ -137,11 +171,24 @@ services:
       EXAM_RANDOMIZER_USAGE_CACHE_SECONDS: ${EXAM_RANDOMIZER_USAGE_CACHE_SECONDS:-30}
       REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT: ${REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT:-8}
       HEALTH_CHECK_CACHE_SECONDS: ${HEALTH_CHECK_CACHE_SECONDS:-2}
+      METRICS_ALLOW_ANONYMOUS: ${METRICS_ALLOW_ANONYMOUS:-true}
+      OBJECT_STORAGE_ENABLED: ${OBJECT_STORAGE_ENABLED:-false}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
+      AWS_S3_CUSTOM_DOMAIN: ${AWS_S3_CUSTOM_DOMAIN:-}
+      AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
+      AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
+      AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
       AUTH_OTP_EXPIRY_SECONDS: ${AUTH_OTP_EXPIRY_SECONDS:-300}
       AUTH_OTP_RESEND_COOLDOWN_SECONDS: ${AUTH_OTP_RESEND_COOLDOWN_SECONDS:-60}
       AUTH_OTP_MAX_ATTEMPTS: ${AUTH_OTP_MAX_ATTEMPTS:-5}
       AUTH_OTP_MAX_SENDS_PER_HOUR: ${AUTH_OTP_MAX_SENDS_PER_HOUR:-5}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
+      SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
       MEDIA_ACCEL_REDIRECT_URL: /internal_media
       PRACTICAL_EXAMS_ENABLED: "false"
       EXAM_SUPERVISION_ENABLED: "false"
@@ -158,7 +205,7 @@ services:
       - static_data:/app/staticfiles
     command: ["/app/docker/prod-entrypoint.sh"]
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -183,11 +230,12 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
-    container_name: emsarena-celery-worker
-    command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=2"]
+    command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=${CELERY_WORKER_CONCURRENCY:-2}"]
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      APP_ENV: ${APP_ENV:-production}
+      APP_VERSION: ${APP_VERSION:-unknown}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
       DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
       REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
       SECRET_KEY: ${SECRET_KEY}
@@ -221,19 +269,118 @@ services:
       EXAM_RANDOMIZER_USAGE_CACHE_SECONDS: ${EXAM_RANDOMIZER_USAGE_CACHE_SECONDS:-30}
       REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT: ${REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT:-8}
       HEALTH_CHECK_CACHE_SECONDS: ${HEALTH_CHECK_CACHE_SECONDS:-2}
+      METRICS_ALLOW_ANONYMOUS: ${METRICS_ALLOW_ANONYMOUS:-true}
+      OBJECT_STORAGE_ENABLED: ${OBJECT_STORAGE_ENABLED:-false}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
+      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
+      AWS_S3_CUSTOM_DOMAIN: ${AWS_S3_CUSTOM_DOMAIN:-}
+      AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
+      AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
+      AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
+      SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
       PRACTICAL_EXAMS_ENABLED: "false"
       EXAM_SUPERVISION_ENABLED: "false"
       CODING_EXECUTION_BACKEND: "disabled"
     volumes:
       - media_data:/app/media
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PostgreSQL exporter — Prometheus metrics for DB pressure and slowdowns.
+  # Bound only to the internal Docker network.
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.17.1
+    container_name: emsarena-postgres-exporter
+    environment:
+      DATA_SOURCE_URI: postgres:5432/${POSTGRES_DB}?sslmode=disable
+      DATA_SOURCE_USER: ${POSTGRES_USER}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9187/metrics >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Prometheus — scrapes app replicas and database exporter.
+  # Exposed only on localhost; use SSH tunnel or a private admin network.
+  # ─────────────────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v3.8.0
+    container_name: emsarena-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME:-15d}
+      - --web.enable-lifecycle
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      app:
+        condition: service_healthy
+      postgres_exporter:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Grafana — pre-provisioned with Prometheus datasource and EMS dashboard.
+  # Exposed only on localhost; set GRAFANA_ADMIN_PASSWORD in production.
+  # ─────────────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:12.3.0
+    container_name: emsarena-grafana
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-before-production}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://127.0.0.1:3000}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     networks:
       - emsarena-network
 
@@ -327,4 +474,6 @@ volumes:
   redis_data:
   media_data:
   static_data:
+  prometheus_data:
+  grafana_data:
   piston_packages:

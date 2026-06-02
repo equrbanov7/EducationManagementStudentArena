@@ -416,6 +416,8 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 SERVE_MEDIA = False
 FILE_UPLOAD_SECURITY_MAX_SIZE_MB = int(os.getenv("FILE_UPLOAD_SECURITY_MAX_SIZE_MB", "25"))
+OBJECT_STORAGE_ENABLED = _env_bool_setting("OBJECT_STORAGE_ENABLED", False)
+METRICS_ALLOW_ANONYMOUS = _env_bool_setting("METRICS_ALLOW_ANONYMOUS", False)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

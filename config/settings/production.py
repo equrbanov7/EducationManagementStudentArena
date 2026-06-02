@@ -93,7 +93,9 @@ from .base import (
     MEDIA_ROOT,
     MEDIA_URL,
     MESSAGE_TAGS,
+    METRICS_ALLOW_ANONYMOUS,
     MIDDLEWARE,
+    OBJECT_STORAGE_ENABLED,
     OTP_RESEND_RATE_LIMIT,
     OTP_VERIFY_RATE_LIMIT,
     PASSWORD_RESET_TIMEOUT,
@@ -152,6 +154,18 @@ def _env_int(name: str, default: int, *, minimum: int | None = None) -> int:
     return value
 
 
+def _env_float(name: str, default: float, *, minimum: float | None = None, maximum: float | None = None) -> float:
+    try:
+        value = float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    if minimum is not None:
+        value = max(minimum, value)
+    if maximum is not None:
+        value = min(maximum, value)
+    return value
+
+
 def _csp_connect_sources(*values: str) -> tuple[str, ...]:
     sources = {"'self'"}
 
@@ -185,6 +199,8 @@ CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL") or CONTACT_NOTIFY_EMAIL
 CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL") or CONTACT_SUPPORT_EMAIL
 CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL") or CONTACT_PUBLIC_EMAIL
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+OBJECT_STORAGE_ENABLED = _env_bool("OBJECT_STORAGE_ENABLED", OBJECT_STORAGE_ENABLED)
+METRICS_ALLOW_ANONYMOUS = _env_bool("METRICS_ALLOW_ANONYMOUS", METRICS_ALLOW_ANONYMOUS)
 
 # SECURITY WARNING: Secret key must be set in environment
 SECRET_KEY = os.environ["SECRET_KEY"]
@@ -270,6 +286,39 @@ STORAGES = {
         "BACKEND": STATICFILES_STORAGE,
     },
 }
+
+if OBJECT_STORAGE_ENABLED:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "").strip()
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "").strip()
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "").strip()
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "").strip()
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "").strip()
+    AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN", "").strip()
+    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual").strip()
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = _env_bool("AWS_QUERYSTRING_AUTH", True)
+    AWS_QUERYSTRING_EXPIRE = _env_int("AWS_QUERYSTRING_EXPIRE", 900, minimum=60)
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": os.getenv("AWS_S3_CACHE_CONTROL", "private, max-age=900"),
+    }
+
+    _missing_object_storage = [
+        name
+        for name, value in {
+            "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+            "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+            "AWS_STORAGE_BUCKET_NAME": AWS_STORAGE_BUCKET_NAME,
+            "AWS_S3_ENDPOINT_URL": AWS_S3_ENDPOINT_URL,
+        }.items()
+        if not value
+    ]
+    if _missing_object_storage:
+        raise ImproperlyConfigured("OBJECT_STORAGE_ENABLED=true but missing: " + ", ".join(_missing_object_storage))
+
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    }
 
 # Media files must not be served directly by Django in production.
 # Configure your web server (nginx/caddy) to serve MEDIA_ROOT with appropriate
@@ -357,9 +406,22 @@ sentry_dsn = (os.getenv("SENTRY_DSN") or "").strip()
 if sentry_dsn:
     if sentry_sdk is None:
         raise ImproperlyConfigured("SENTRY_DSN is set but sentry_sdk is not installed.")
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+
     sentry_sdk.init(
         dsn=sentry_dsn,
         send_default_pii=False,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            RedisIntegration(),
+        ],
+        environment=os.getenv("APP_ENV", "production"),
+        release=os.getenv("APP_VERSION") or None,
+        traces_sample_rate=_env_float("SENTRY_TRACES_SAMPLE_RATE", 0.05, minimum=0.0, maximum=1.0),
+        profiles_sample_rate=_env_float("SENTRY_PROFILES_SAMPLE_RATE", 0.0, minimum=0.0, maximum=1.0),
     )
 
 # Content Security Policy (CSP) - Production overrides (stricter than base)
