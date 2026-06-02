@@ -13,9 +13,15 @@ DEPLOY_TIMEOUT_SECONDS="${DEPLOY_TIMEOUT_SECONDS:-300}"
 DEPLOY_MODE="${DEPLOY_MODE:-docker}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 APP_REPLICAS="${APP_REPLICAS:-1}"
+CELERY_REPLICAS="${CELERY_REPLICAS:-1}"
 
 if ! [[ "$APP_REPLICAS" =~ ^[0-9]+$ ]] || [ "$APP_REPLICAS" -lt 1 ]; then
   echo "APP_REPLICAS must be a positive integer." >&2
+  exit 1
+fi
+
+if ! [[ "$CELERY_REPLICAS" =~ ^[0-9]+$ ]] || [ "$CELERY_REPLICAS" -lt 0 ]; then
+  echo "CELERY_REPLICAS must be zero or a positive integer." >&2
   exit 1
 fi
 
@@ -181,9 +187,11 @@ docker_deploy() {
 
   docker compose -f "$COMPOSE_FILE" config >/tmp/emsarena-compose-config.yml
   docker compose -f "$COMPOSE_FILE" build
-  docker compose -f "$COMPOSE_FILE" up -d postgres redis
+  docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer
   docker compose -f "$COMPOSE_FILE" run --rm -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
-  RUN_RELEASE_ON_START=false docker compose -f "$COMPOSE_FILE" up -d --remove-orphans --scale app="$APP_REPLICAS"
+  RUN_RELEASE_ON_START=false docker compose -f "$COMPOSE_FILE" up -d --remove-orphans \
+    --scale app="$APP_REPLICAS" \
+    --scale celery_worker="$CELERY_REPLICAS"
 
   local max_attempts=$((DEPLOY_TIMEOUT_SECONDS / 5))
   local attempt=1
