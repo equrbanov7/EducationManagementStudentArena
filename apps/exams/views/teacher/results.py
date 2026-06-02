@@ -717,14 +717,23 @@ def export_exam_results_xlsx(request, slug):
     is_test = exam.exam_type == "test"
     is_written_or_coding = exam.exam_type in ("written", "coding")
 
-    headers = ["#", "Ad Soyad", "İstifadəçi adı", "E-poçt", "Status"]
+    headers = [
+        "#",
+        "Qruplar",
+        "Ad Soyad",
+        "İstifadəçi adı",
+        "E-poçt",
+        "Status",
+        "Başlama",
+        "Bitmə",
+        "Müddət (s:dq:sn)",
+    ]
+    if is_written_or_coding:
+        headers += ["Müəllim balı", "Yoxlanıb"]
     if is_test:
         headers += ["Düzgün", "Səhv", "Cavabsız", "Verilmiş sual", "Bal", "Maks. bal", "Faiz"]
     else:
         headers += ["Düzgün", "Səhv", "Verilmiş sual"]
-    if is_written_or_coding:
-        headers += ["Müəllim balı", "Yoxlanıb"]
-    headers += ["Başlama", "Bitmə", "Müddət (s:dq:sn)", "Qruplar"]
 
     for col_idx, title in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col_idx, value=title)
@@ -746,13 +755,31 @@ def export_exam_results_xlsx(request, slug):
             list(att.user.student_groups_as_student.filter(id__in=available_group_ids).values_list("name", flat=True))
         )
 
+        # Müddəti hh:mm:ss formatına çevir
+        if effective_duration is not None:
+            d_total = max(int(effective_duration), 0)
+            d_h, d_m, d_s = d_total // 3600, (d_total % 3600) // 60, d_total % 60
+            duration_str = f"{d_h:02d}:{d_m:02d}:{d_s:02d}"
+        else:
+            duration_str = ""
+
         row = [
             row_idx - 1,
+            user_groups,
             att.user.get_full_name() or att.user.username,
             att.user.username,
             att.user.email or "",
             att.get_status_display(),
+            att.started_at.replace(tzinfo=None) if att.started_at else "",
+            effective_finish.replace(tzinfo=None) if effective_finish else "",
+            duration_str,
         ]
+
+        if is_written_or_coding:
+            row += [
+                att.teacher_score if att.teacher_score is not None else "",
+                "Bəli" if att.checked_by_teacher else "Xeyr",
+            ]
 
         if is_test:
             test_result = calculate_test_attempt_result(att)
@@ -769,42 +796,23 @@ def export_exam_results_xlsx(request, slug):
             delivered = att.correct_count + att.wrong_count
             row += [att.correct_count, att.wrong_count, delivered]
 
-        if is_written_or_coding:
-            row += [
-                att.teacher_score if att.teacher_score is not None else "",
-                "Bəli" if att.checked_by_teacher else "Xeyr",
-            ]
-
-        # Müddəti hh:mm:ss formatına çevir
-        if effective_duration is not None:
-            d_total = max(int(effective_duration), 0)
-            d_h, d_m, d_s = d_total // 3600, (d_total % 3600) // 60, d_total % 60
-            duration_str = f"{d_h:02d}:{d_m:02d}:{d_s:02d}"
-        else:
-            duration_str = ""
-
-        row += [
-            att.started_at.replace(tzinfo=None) if att.started_at else "",
-            effective_finish.replace(tzinfo=None) if effective_finish else "",
-            duration_str,
-            user_groups,
-        ]
-
+        # Sola düzlənən sütunlar: Qruplar (2), Ad Soyad (3), İstifadəçi adı (4), E-poçt (5), Başlama (7), Bitmə (8)
+        left_columns = {2, 3, 4, 5, 7, 8}
         for col_idx, value in enumerate(row, start=1):
             cell = ws.cell(row=row_idx, column=col_idx, value=value)
-            cell.alignment = left if col_idx in (2, 3, 4, len(headers)) else center
+            cell.alignment = left if col_idx in left_columns else center
             if isinstance(value, datetime):
                 cell.number_format = "DD.MM.YYYY HH:MM"
 
-    # Sütun genişlikləri
-    widths = [5, 28, 20, 26, 16]
-    if is_test:
-        widths += [10, 10, 12, 16, 8, 12, 8]
-    else:
-        widths += [10, 10, 14]
+    # Sütun genişlikləri (header sırasına uyğun)
+    # #, Qruplar, Ad Soyad, İstifadəçi adı, E-poçt, Status, Başlama, Bitmə, Müddət
+    widths = [5, 26, 26, 20, 28, 16, 20, 20, 16]
     if is_written_or_coding:
-        widths += [14, 12]
-    widths += [20, 20, 14, 30]
+        widths += [14, 12]  # Müəllim balı, Yoxlanıb
+    if is_test:
+        widths += [10, 10, 12, 16, 8, 12, 8]  # Düzgün, Səhv, Cavabsız, Verilmiş, Bal, Maks, Faiz
+    else:
+        widths += [10, 10, 14]  # Düzgün, Səhv, Verilmiş sual
     for idx, width in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(idx)].width = width
 
