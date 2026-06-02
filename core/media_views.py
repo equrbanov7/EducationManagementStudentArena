@@ -41,7 +41,9 @@ import posixpath
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
+from django.core.files.storage import default_storage
 from django.http import FileResponse, Http404, HttpResponse
+from django.shortcuts import redirect
 from django.utils._os import safe_join
 from django.views.decorators.http import require_GET
 
@@ -371,11 +373,26 @@ def protected_media(request, path: str):
         if not _check_private_media_access(request, path):
             raise PermissionDenied
 
+    clean_path = posixpath.normpath(path).lstrip("/")
+    if clean_path == ".." or clean_path.startswith("../"):
+        raise Http404("Invalid media path.")
+
+    if getattr(settings, "OBJECT_STORAGE_ENABLED", False):
+        if not default_storage.exists(clean_path):
+            raise Http404("Media file not found.")
+
+        response = redirect(default_storage.url(clean_path))
+        if _is_private(path):
+            response["Cache-Control"] = "private, no-store"
+        else:
+            response["Cache-Control"] = "public, max-age=3600"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
+
     # Support X-Accel-Redirect for production nginx setups
     accel_url = (getattr(settings, "MEDIA_ACCEL_REDIRECT_URL", None) or "").rstrip("/")
     if accel_url:
         # Delegate file serving to nginx via internal redirect.
-        clean_path = posixpath.normpath(path).lstrip("/")
         response = HttpResponse()
         response["X-Accel-Redirect"] = f"{accel_url}/{clean_path}"
         response["Content-Type"] = mimetypes.guess_type(path)[0] or "application/octet-stream"

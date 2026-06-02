@@ -17,5 +17,10 @@ else
   echo "Skipping release tasks in this app replica."
 fi
 
+if [ -n "${PROMETHEUS_MULTIPROC_DIR:-}" ]; then
+  rm -rf "${PROMETHEUS_MULTIPROC_DIR:?}"/*
+  mkdir -p "$PROMETHEUS_MULTIPROC_DIR"
+fi
+
 echo "Starting Daphne ASGI server…"
 exec daphne -b 0.0.0.0 -p 8000 config.asgi:application
