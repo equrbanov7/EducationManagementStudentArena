@@ -37,6 +37,7 @@ from .teacher.question_bank import (
     create_question_bank,
     process_question_bank,
     test_question_bank,
+    test_question_bank_template_download,
 )
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (
@@ -91,6 +92,7 @@ __all__ = [
     "create_question_bank",
     "process_question_bank",
     "test_question_bank",
+    "test_question_bank_template_download",
     "ai_generate_question_bank",
     # Teacher - Results
     "teacher_exam_results",

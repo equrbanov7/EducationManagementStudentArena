@@ -8832,6 +8832,41 @@ msgctxt "exams.service.parsing.error"
 msgid "unsupported_file_type"
 msgstr "Yalnız .docx, .pdf, .txt qəbul olunur."
 
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_zip_bomb"
+msgstr "Fayl şübhəlidir: daxili məzmun çox böyükdür (ZIP-bomb riski). Faylı yenidən hazırlayın."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_has_macros"
+msgstr "Makro daxil olan fayllar (.docm/.xlsm və ya VBA daxili) qəbul edilmir. Yalnız təmiz .docx yükləyin."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_unsafe_entry"
+msgstr "Fayl içində təhlükəli yol (path traversal) aşkar edildi. Fayl rədd edildi."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_corrupt"
+msgstr "Fayl xarab və ya tanınmır."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_signature_mismatch"
+msgstr "Faylın uzantısı və faktiki məzmunu uyğun gəlmir. Düzgün .docx / .pdf yükləyin."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_pdf_active_content"
+msgstr "PDF-də JavaScript və ya aktiv kontent aşkar edildi. Bu fayl təhlükəsizlik səbəbi ilə qəbul edilmir."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "file_pdf_encrypted"
+msgstr "Şifrli PDF dəstəklənmir. Şifrəni aradan götürüb yenidən yükləyin."
+
 #: apps/exams/services/parsing.py:260
 msgctxt "exams.service.parsing.warning"
 msgid "missing_option"
@@ -8851,6 +8886,31 @@ msgstr "Təkrar variant mətni: {labels} eynidir."
 msgctxt "exams.service.parsing.warning"
 msgid "correct_missing"
 msgstr "Düz cavab kimi işarələnən {option} variantı yoxdur."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.warning"
+msgid "option_count_recommend_5"
+msgstr "Sualda {count} variant var — tövsiyə olunan say 5-dir (A–E). E variantı əlavə etmək məsləhət görülür."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.warning"
+msgid "option_count_too_low"
+msgstr "Sualda yalnız {count} variant tapıldı — minimum 4 variant (A–D) tələb olunur."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.warning"
+msgid "empty_option_text"
+msgstr "{option} variantının mətni boşdur."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.warning"
+msgid "correct_too_long"
+msgstr "Düz cavab digər variantlardan xeyli uzundur — tələbə üçün gözəgörünən ipucu yaranır."
+
+#: apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.warning"
+msgid "correct_too_short"
+msgstr "Düz cavab digər variantlardan xeyli qısadır — tələbə üçün gözəgörünən ipucu yaranır."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:9
 msgctxt "exams.partial.exam_modals"
@@ -11897,12 +11957,27 @@ msgstr "Fayl oxunmadı: {error}"
 #: apps/exams/views/teacher/question_bank.py:255
 msgctxt "exams.view.question_bank.warning"
 msgid "duplicate_in_import"
-msgstr "Təkrar sual: #{index} sualı əvvəlki #{previous_index} ilə eynidir."
+msgstr "Təkrar sual: #{index} əvvəlki #{previous_index} ilə eynidir — “{preview}”."
+
+#: apps/exams/views/teacher/question_bank.py
+msgctxt "exams.view.question_bank.warning"
+msgid "duplicate_in_import_first"
+msgstr "Bu sualın {count} dublikatı tapıldı — növbəti dublikat #{next_index}: “{preview}”."
 
 #: apps/exams/views/teacher/question_bank.py:275
 msgctxt "exams.view.question_bank.warning"
 msgid "already_in_exam"
-msgstr "Bu sual artıq imtahanda mövcuddur (import # {index})."
+msgstr "İmport #{index} artıq bu imtahanda var — DB-də #{db_index}: “{preview}”."
+
+#: apps/exams/views/teacher/question_bank.py
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_long"
+msgstr "Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli uzundur. Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu balanslaşdırın."
+
+#: apps/exams/views/teacher/question_bank.py
+msgctxt "exams.view.question_bank.warning"
+msgid "bulk_correct_too_short"
+msgstr "Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli qısadır. Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu balanslaşdırın."
 
 #: apps/exams/views/teacher/question_bank.py:375
 msgctxt "exams.view.question_bank.message"

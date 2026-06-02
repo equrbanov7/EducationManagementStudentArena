@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var rowToggleTrigger = event.target.closest('[data-toggle-row-card]');
         if (rowToggleTrigger) {
-            if (event.target.closest('button, a, textarea, select')) {
+            if (event.target.closest('button, a, textarea, select, details, summary, .warning-box')) {
                 return;
             }
             if (event.target.closest('input') && event.target.type !== 'checkbox') {

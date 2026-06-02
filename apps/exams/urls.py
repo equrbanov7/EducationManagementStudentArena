@@ -98,6 +98,11 @@ urlpatterns = [
     ),
     path("<slug:slug>/test-bank/", views.test_question_bank, name="test_question_bank"),
     path(
+        "<slug:slug>/test-bank/template-download/",
+        views.test_question_bank_template_download,
+        name="test_question_bank_template_download",
+    ),
+    path(
         "<slug:slug>/create-bank/",
         views.create_question_bank,
         name="create_question_bank",
