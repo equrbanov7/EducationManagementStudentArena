@@ -6,8 +6,8 @@
 {% block title %}{{ exam.title }} - {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <div class="ter-filter-card">
+    <div class="ter-filter-card results-filter-card">
         <form method="get" id="resultsFiltersForm" class="ter-filter-grid js-results-filters-form" novalidate>
             {% if request.GET.from_section %}
                 <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
