@@ -1306,6 +1306,56 @@ class ExamParsingServicesTest(TestCase):
         self.assertEqual(parsed[0]["options"]["D"], "Şəbəkə xidmətlərinin optimallaşdırılması")
         self.assertEqual(parsed[0]["options"]["E"], "Cihazların şəbəkəyə qoşulması")
 
+    def test_parse_bulk_mcq_end_question_keeps_title_and_prompt_together(self):
+        raw = """
+        141. google.biz
+        Bu tip feyk vebsaytin hazirlanaraq hucum teskil edilmesi hansi hucum novune aiddir:
+        CyberSquaiting
+        BitSquatting
+        Paket manipulyasiyasi
+        BitManipulating
+        Heç biri
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(
+            parsed[0]["text"],
+            "google.biz Bu tip feyk vebsaytin hazirlanaraq hucum teskil edilmesi hansi hucum novune aiddir:",
+        )
+        self.assertEqual(parsed[0]["options"]["A"], "CyberSquaiting")
+        self.assertEqual(parsed[0]["options"]["E"], "Heç biri")
+
+    def test_parse_bulk_mcq_end_question_does_not_treat_ip_as_question_number(self):
+        raw = """
+        449. Aşağıdakı IP localhostun IP-sidir.
+        127.0.0.1
+        128.0.0.1
+        127.1.0.1
+        127.1.0.0
+        Heç biri
+        END_QUESTION
+        """
+
+        parsed = parsing.parse_bulk_mcq(raw)
+
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["q_no"], "449")
+        self.assertEqual(parsed[0]["text"], "Aşağıdakı IP localhostun IP-sidir.")
+        self.assertEqual(parsed[0]["options"]["A"], "127.0.0.1")
+        self.assertEqual(parsed[0]["options"]["D"], "127.1.0.0")
+
+    def test_normalize_pdf_extracted_text_keeps_ip_option_intact(self):
+        raw = "449. Aşağıdakı IP localhostun IP-sidir. A) 127.0.0.1 B) 128.0.0.1 C) 127.1.0.1 D) 127.1.0.0 Cavab: A"
+
+        normalized = parsing.normalize_pdf_extracted_text(raw)
+
+        self.assertIn("A) 127.0.0.1", normalized)
+        self.assertNotIn("\n\n127.0.0.1", normalized)
+        self.assertIn("\nB) 128.0.0.1", normalized)
+
     def test_extract_text_from_upload_reads_pdf_with_pypdf(self):
         uploaded = SimpleUploadedFile("questions.pdf", b"%PDF-1.4 fake", content_type="application/pdf")
         fake_page = Mock()

@@ -5,6 +5,7 @@ View tests for exams app.
 import base64
 import json
 from datetime import timedelta
+from io import BytesIO
 from unittest.mock import patch
 from urllib.parse import quote, urlencode
 
@@ -3487,7 +3488,102 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertIn('id="selectedIndicesInput"', html)
         self.assertIn('id="pointsPayloadInput"', html)
         self.assertEqual(html.count('class="custom-checkbox qcheck"'), 2)
-        self.assertEqual(html.count('class="q-card is-selected"'), 2)
+        self.assertEqual(html.count("q-card is-selected"), 2)
+
+    def test_test_question_bank_downloads_problem_report_xlsx(self):
+        raw_text = """
+1. Same imported question?
+A) Correct answer
+B) Wrong answer
+C) Other answer
+D) Alternative answer
+E) Extra answer
+Cavab: A
+
+2. Same imported question?
+A) Correct answer
+B) Wrong answer
+C) Other answer
+D) Alternative answer
+E) Extra answer
+Cavab: A
+"""
+
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "download_report",
+                "raw_text": raw_text,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("problem-report", response["Content-Disposition"])
+
+        if response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            from openpyxl import load_workbook
+
+            workbook = load_workbook(BytesIO(response.content), read_only=True)
+            self.assertIn("Xülasə", workbook.sheetnames)
+            self.assertIn("Problemlər", workbook.sheetnames)
+
+            problems = workbook["Problemlər"]
+            headers = [cell.value for cell in next(problems.iter_rows(min_row=1, max_row=1))]
+            self.assertIn("Feedback", headers)
+            rows_text = "\n".join(
+                " ".join(str(cell.value or "") for cell in row)
+                for row in problems.iter_rows(min_row=2, max_row=problems.max_row)
+            )
+        else:
+            self.assertEqual(
+                response["Content-Type"],
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+            from docx import Document
+
+            document = Document(BytesIO(response.content))
+            rows_text = "\n".join(paragraph.text for paragraph in document.paragraphs)
+            self.assertIn("Feedback", rows_text)
+        self.assertIn("Dublikat", rows_text)
+        self.assertIn("Təkrarlanan suallardan birini silin", rows_text)
+
+    def test_test_question_bank_preview_keeps_filter_counts_for_warning_types(self):
+        raw_text = """
+1. google.biz
+A) Bu tip feyk vebsaytin hazirlanaraq hucum teskil edilmesi hansi hucum novune aiddir:
+B) CyberSquaiting
+C) BitSquatting
+D) Paket manipulyasiyasi
+E) BitManipulating
+Cavab: A
+
+2. google.biz
+A) Bu tip feyk vebsaytin hazirlanaraq hucum teskil edilmesi hansi hucum novune aiddir:
+B) CyberSquaiting
+C) BitSquatting
+D) Paket manipulyasiyasi
+E) BitManipulating
+Cavab: A
+"""
+
+        response = self.client.post(
+            reverse("exams:test_question_bank", args=[self.exam.slug]),
+            {
+                "action": "preview",
+                "raw_text": raw_text,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["category_counts"]["duplicates"], 2)
+        self.assertEqual(response.context["category_counts"]["balance"], 2)
+        self.assertEqual(response.context["category_counts"]["errors"], 2)
+
+        html = response.content.decode()
+        self.assertIn('data-filter="has-dup"', html)
+        self.assertIn('data-filter="has-balance"', html)
+        self.assertNotIn('filter-chip--duplicate" data-filter="has-dup" disabled', html)
+        self.assertNotIn('filter-chip--balance" data-filter="has-balance" disabled', html)
 
     @override_settings(DATA_UPLOAD_MAX_NUMBER_FIELDS=1000)
     @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
