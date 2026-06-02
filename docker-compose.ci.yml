@@ -43,6 +43,16 @@ services:
       piston:
         condition: service_started
         required: false
+    # Override healthcheck to be more aggressive in CI so nginx starts sooner
+    # and the /ping/ poll can succeed within the timeout window.
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import socket; s=socket.socket(); s.settimeout(3); s.connect(('localhost', 8000)); s.close()\""
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   # CI runs only over http://localhost. The production nginx config also
   # requires private origin TLS certificate files for port 443, which are not
