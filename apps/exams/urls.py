@@ -133,6 +133,11 @@ urlpatterns = [
         name="delete_exam_attempts",
     ),
     path(
+        "<slug:slug>/results/export.xlsx",
+        views.export_exam_results_xlsx,
+        name="export_exam_results_xlsx",
+    ),
+    path(
         "<slug:slug>/toggle-active/",
         views.toggle_exam_active,
         name="toggle_exam_active",
