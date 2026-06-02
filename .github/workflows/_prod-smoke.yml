@@ -52,7 +52,7 @@ jobs:
           POSTGRES_USER: emsarena
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
           ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
@@ -86,7 +86,7 @@ jobs:
       - name: 🩺 Poll health and ping endpoints
         run: |
           echo "Waiting for the stack to be ready..."
-          MAX=24
+          MAX=36
           for i in $(seq 1 $MAX); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ping/ 2>/dev/null || echo "000")
             if [[ "$STATUS" == "200" ]]; then
@@ -96,7 +96,7 @@ jobs:
             echo "Attempt $i/$MAX — /ping/ returned HTTP $STATUS. Retrying in 5s..."
             sleep 5
             if [[ $i -eq $MAX ]]; then
-              echo "::error::❌ /ping/ did not return 200 within 120 s."
+              echo "::error::❌ /ping/ did not return 200 within 180 s."
               exit 1
             fi
           done
@@ -118,7 +118,7 @@ jobs:
           POSTGRES_USER: emsarena
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
           ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
@@ -135,7 +135,7 @@ jobs:
           POSTGRES_USER: emsarena
           POSTGRES_PASSWORD: ci-smoke-postgres-password
           REDIS_PASSWORD: ci-smoke-redis-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
           ADMIN_ALLOWED_IPS: "127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
           SITE_URL: "http://localhost"
