@@ -1,0 +1,2 @@
+# Default pip entrypoint for Dependabot dependency graph discovery.
+-r base.txt
