@@ -4,11 +4,11 @@
 {% block title %}{{ exam.title }} - {% trans "title_question_bank" context "exams.template.test_question_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260508-ai-form-fix">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260603-report-fix">
 {% endblock %}
 
-{% block content %} 
-<div class="bulk-page-wrapper">
+{% block content %}
+<div class="bulk-page-wrapper" {% if parsed and request.method == 'POST' %}data-auto-scroll-preview="true"{% endif %}>
     
     <header class="page-header">
         <div class="title-section">
@@ -49,16 +49,24 @@
                     </div>
                 </div>
             </div>
-    
-            <div class="stat-card">
+
+            <div class="stat-card stat-card--clickable" data-filter-trigger="has-error" title="{% trans 'Yalnız xətalı sualları göstər' context 'exams.template.test_question_bank' %}">
+                <div class="stat-icon red"><i class="bi bi-x-octagon-fill"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">{% trans "Xətalar" context "exams.template.test_question_bank" %}</span>
+                    <span class="stat-value" id="totalErrors">{{ error_count|default:0 }}</span>
+                </div>
+            </div>
+
+            <div class="stat-card stat-card--clickable" data-filter-trigger="has-warning" title="{% trans 'Yalnız xəbərdarlıqlı sualları göstər' context 'exams.template.test_question_bank' %}">
                 <div class="stat-icon yellow"><i class="bi bi-exclamation-triangle"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "stat_warnings" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
                 </div>
             </div>
-            
-            <div class="stat-card">
+
+            <div class="stat-card stat-card--clickable" data-filter-trigger="has-dup" title="{% trans 'Yalnız dublikatları göstər' context 'exams.template.test_question_bank' %}">
                 <div class="stat-icon red"><i class="bi bi-layers"></i></div>
                 <div class="stat-info">
                     <span class="stat-label">{% trans "stat_duplicates" context "exams.template.test_question_bank" %}</span>
@@ -174,7 +182,29 @@
                     <span class="format-tag" data-ext="pdf">PDF</span>
                     <span class="format-tag" data-ext="txt">TXT</span>
                 </div>
-                  
+
+                {# ---- Şablon endirmə (müəllim nümunəni endirib doldurub geri yükləyə bilsin) ---- #}
+                <div class="template-download">
+                    <div class="template-download__head">
+                        <i class="fas fa-file-circle-question"></i>
+                        <span>{% trans "Necə yazmalı olduğunu bilmirsən?" context "exams.template.test_question_bank" %}</span>
+                    </div>
+                    <p class="template-download__desc">
+                        {% trans "Hazır şablonu endirib doldurub geri yüklə." context "exams.template.test_question_bank" %}
+                    </p>
+                    <div class="template-download__actions">
+                        <a class="template-download__btn template-download__btn--docx"
+                           href="{% url 'exams:test_question_bank_template_download' exam.slug %}?format=docx"
+                           download>
+                            <i class="bi bi-file-earmark-word-fill"></i> DOCX
+                        </a>
+                        <a class="template-download__btn template-download__btn--txt"
+                           href="{% url 'exams:test_question_bank_template_download' exam.slug %}?format=txt"
+                           download>
+                            <i class="bi bi-file-earmark-text-fill"></i> TXT
+                        </a>
+                    </div>
+                </div>
 
             </aside>
         
@@ -265,18 +295,102 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
 
     {% if parsed %}
     <div class="results-container animate-up">
+        {% if test_level_warnings %}
+        <div class="bulk-warning-panel" id="warningsPanel" role="alert" aria-live="polite">
+            <div class="bulk-warning-panel__head">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+                <h5>{% trans "Testdə diqqət edilməli pattern aşkarlandı" context "exams.template.test_question_bank" %}</h5>
+            </div>
+            <ul class="bulk-warning-panel__list">
+                {% for w in test_level_warnings %}
+                    <li class="bulk-warning-panel__item bulk-warning-panel__item--{{ w.severity|default:'warning' }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ w.msg }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <div class="results-header">
             <div class="results-title">
                 <h4>{% trans "heading_review_result" context "exams.template.test_question_bank" %}</h4>
                 <p>{% trans "heading_review_result_desc" context "exams.template.test_question_bank" %}</p>
             </div>
             <div class="action-btns">
+                <form method="post" class="report-download-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="download_report"/>
+                    {% if navigation_from_section %}
+                        <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
+                    {% endif %}
+                    {% if navigation_return_to %}
+                        <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
+                    {% endif %}
+                    <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+                    <button type="submit" class="btn-action download-report">
+                        <i class="fas fa-file-excel"></i> {% trans "Hesabatı yüklə" context "exams.template.test_question_bank" %}
+                    </button>
+                </form>
                 <button type="button" class="btn-action select-all" data-toggle-all="true">
                     <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}
                 </button>
                 <button type="button" class="btn-action deselect-all" data-toggle-all="false">
                     <i class="fas fa-circle-xmark"></i> {% trans "action_deselect_all" context "exams.template.test_question_bank" %}
                 </button>
+            </div>
+        </div>
+
+        {# ---- Filter chip toolbar: sualları kateqoriyaya görə süzgəcləyir ---- #}
+        <div class="filter-toolbar" id="qFilterToolbar" data-active-filter="all">
+            <div class="filter-toolbar__left">
+                <span class="filter-toolbar__label">
+                    <i class="fas fa-filter"></i> {% trans "Süzgəc" context "exams.template.test_question_bank" %}:
+                </span>
+                <div class="filter-chips">
+                    <button type="button" class="filter-chip is-active" data-filter="all">
+                        {% trans "Hamısı" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ parsed|length }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--error" data-filter="has-error" {% if not category_counts.errors %}disabled{% endif %}>
+                        <i class="fas fa-circle-xmark"></i>
+                        {% trans "Xətalı" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.errors|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--warning" data-filter="has-warning" {% if not category_counts.warnings %}disabled{% endif %}>
+                        <i class="fas fa-triangle-exclamation"></i>
+                        {% trans "Xəbərdarlıq" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.warnings|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--duplicate" data-filter="has-dup" {% if not duplicate_count %}disabled{% endif %}>
+                        <i class="fas fa-clone"></i>
+                        {% trans "Dublikat" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ duplicate_count|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--structure" data-filter="has-structure" {% if not category_counts.structure %}disabled{% endif %}>
+                        <i class="fas fa-list-ol"></i>
+                        {% trans "Variant problemi" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.structure|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--balance" data-filter="has-balance" {% if not category_counts.balance %}disabled{% endif %}>
+                        <i class="fas fa-scale-unbalanced"></i>
+                        {% trans "Uzunluq balansı" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.balance|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--clean" data-filter="is-clean" {% if not category_counts.clean %}disabled{% endif %}>
+                        <i class="fas fa-check-circle"></i>
+                        {% trans "Təmiz" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.clean|default:0 }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-toolbar__right">
+                <label class="filter-toolbar__search">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="qSearch" placeholder="{% trans 'Sual mətnində axtar...' context 'exams.template.test_question_bank' %}">
+                </label>
+                <span class="filter-toolbar__visible" id="filterVisibleCount" aria-live="polite"></span>
             </div>
         </div>
 
@@ -298,9 +412,13 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
             <input type="hidden" name="selected_indices" id="selectedIndicesInput" value="">
             <input type="hidden" name="points_payload" id="pointsPayloadInput" value="">
 
-            <div class="question-list">
+            <div class="question-list" id="questionList">
                 {% for q in parsed %}
-                <div class="q-card{% if forloop.counter in selected %} is-selected{% endif %}" data-toggle-row-card>
+                <div class="q-card{% if forloop.counter in selected %} is-selected{% endif %} q-card--sev-{{ q.meta.top_severity|default:'none' }} {{ q.meta.flags }}"
+                     id="qcard-{{ forloop.counter }}"
+                     data-q-index="{{ forloop.counter }}"
+                     data-q-flags="{{ q.meta.flags }}"
+                     data-toggle-row-card>
                     <div class="q-checkbox-wrapper">
                         <input
                             class="custom-checkbox qcheck"
@@ -321,11 +439,43 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
                             style="width:70px;"
                         >
                     </div>
-                      
+
                     <div class="q-content">
                         <div class="q-header">
                             <span class="q-num">#{{ forloop.counter }}</span>
                             <span class="q-text">{{ q.text }}</span>
+
+                            {# ---- Severity badge cluster ---- #}
+                            {% if q.meta.total_count %}
+                            <span class="q-badges">
+                                {% if q.meta.error_count %}
+                                <span class="q-badge q-badge--error" title="{% trans 'Xəta' context 'exams.template.test_question_bank' %}">
+                                    <i class="fas fa-circle-xmark"></i> {{ q.meta.error_count }}
+                                </span>
+                                {% endif %}
+                                {% if q.meta.warning_count %}
+                                <span class="q-badge q-badge--warning" title="{% trans 'Xəbərdarlıq' context 'exams.template.test_question_bank' %}">
+                                    <i class="fas fa-triangle-exclamation"></i> {{ q.meta.warning_count }}
+                                </span>
+                                {% endif %}
+                                {% if q.meta.info_count %}
+                                <span class="q-badge q-badge--info" title="{% trans 'Qeyd' context 'exams.template.test_question_bank' %}">
+                                    <i class="fas fa-circle-info"></i> {{ q.meta.info_count }}
+                                </span>
+                                {% endif %}
+                                {% if q.meta.has_duplicate %}
+                                <span class="q-badge q-badge--duplicate" title="{% trans 'Dublikat' context 'exams.template.test_question_bank' %}">
+                                    <i class="fas fa-clone"></i>
+                                </span>
+                                {% endif %}
+                            </span>
+                            {% else %}
+                            <span class="q-badges">
+                                <span class="q-badge q-badge--clean" title="{% trans 'Təmiz' context 'exams.template.test_question_bank' %}">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                            </span>
+                            {% endif %}
                         </div>
 
                         <div class="options-grid">
@@ -338,15 +488,48 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
                         </div>
 
                         {% if q.warnings %}
-                        <div class="warning-box">
-                            {% for w in q.warnings %}
-                            <div class="warning-msg"><i class="fas fa-circle-exclamation"></i> {{ w.msg }}</div>
-                            {% endfor %}
-                        </div>
+                        <details class="warning-box warning-box--{{ q.meta.top_severity|default:'warning' }}" {% if q.meta.error_count or q.meta.has_duplicate %}open{% endif %}>
+                            <summary class="warning-box__summary">
+                                <span class="warning-box__summary-label">
+                                    <i class="fas fa-list-check"></i>
+                                    {% trans "Xəbərdarlıqları göstər" context "exams.template.test_question_bank" %}
+                                </span>
+                                <span class="warning-box__tags">
+                                    {% if q.meta.has_duplicate %}<span class="warning-box__tag warning-box__tag--dup"><i class="fas fa-clone"></i> {% trans "Dublikat" context "exams.template.test_question_bank" %}</span>{% endif %}
+                                    {% if q.meta.has_structure_issue %}<span class="warning-box__tag warning-box__tag--struct"><i class="fas fa-list-ol"></i> {% trans "Variant" context "exams.template.test_question_bank" %}</span>{% endif %}
+                                    {% if q.meta.has_balance_issue %}<span class="warning-box__tag warning-box__tag--bal"><i class="fas fa-scale-unbalanced"></i> {% trans "Balans" context "exams.template.test_question_bank" %}</span>{% endif %}
+                                </span>
+                                <span class="warning-box__summary-count">{{ q.meta.total_count }}</span>
+                                <i class="fas fa-chevron-down warning-box__chevron"></i>
+                            </summary>
+                            <div class="warning-box__body">
+                                {% for w in q.warnings %}
+                                <div class="warning-msg warning-msg--{{ w.severity|default:'warning' }}" data-severity="{{ w.severity|default:'warning' }}">
+                                    <span class="warning-msg__badge">
+                                        {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                                    </span>
+                                    <span class="warning-msg__text">
+                                        {{ w.msg }}
+                                        {% if w.type == 'duplicate_in_import' and w.ref %}
+                                        <a href="#qcard-{{ w.ref }}" class="warning-msg__jump" data-jump-to="qcard-{{ w.ref }}">
+                                            <i class="fas fa-arrow-right-long"></i>
+                                            {% trans "Aç" context "exams.template.test_question_bank" %} #{{ w.ref }}
+                                        </a>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </details>
                         {% endif %}
                     </div>
                 </div>
                 {% endfor %}
+
+                <div class="filter-empty-state" id="filterEmptyState" hidden>
+                    <i class="fas fa-filter-circle-xmark"></i>
+                    <p>{% trans "Bu süzgəcə uyğun sual yoxdur." context "exams.template.test_question_bank" %}</p>
+                </div>
             </div>
 
         
@@ -389,7 +572,7 @@ window.AI_QUESTION_BANK_I18N = {
 };
 </script>
 <script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
-<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260520-compact-save"></script>
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260603-parser-click-fix"></script>
 
 <script nonce="{{ request.csp_nonce }}">
 function syncBankSettings(){

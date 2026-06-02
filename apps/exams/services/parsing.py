@@ -1,6 +1,10 @@
+import logging
 import os
 import re
+import zipfile
 from collections import defaultdict
+from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
+from apps.exams.services.utils import _norm
 
 from django.utils.translation import pgettext
 
@@ -11,8 +15,120 @@ try:
 except ImportError:
     PdfReader = None
 
-from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
-from apps.exams.services.utils import _norm
+logger = logging.getLogger(__name__)
+
+# ---- Fayl yükləmə təhlükəsizliyi -----------------------------------------------
+# Configurable via settings.EXAM_UPLOAD_MAX_BYTES; default 5MB (uyğun mövcud kodla)
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+
+# DOCX/ZIP "zip-bomb" qarşısı: hər hansı entry-nin uncompressed ölçüsü 50MB-dan çox olmamalıdır
+# və ümumi uncompressed ölçü 100MB-dan çox olmamalıdır.
+MAX_DOCX_ENTRY_UNCOMPRESSED = 50 * 1024 * 1024
+MAX_DOCX_TOTAL_UNCOMPRESSED = 100 * 1024 * 1024
+
+# Magic bytes (real signature) — uzantıya görə yox, faktiki məzmuna görə yoxlayırıq.
+FILE_SIGNATURES = {
+    "pdf": [b"%PDF-"],
+    # DOCX/XLSX/PPTX hamısı ZIP-dir, "PK\x03\x04" və ya boş zip "PK\x05\x06"
+    "docx": [b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"],
+}
+
+
+def _ensure_within_size_limit(uploaded_file, limit: int) -> None:
+    if uploaded_file.size and uploaded_file.size > limit:
+        raise ValueError(pgettext("exams.service.parsing.error", "file_too_large"))
+
+
+def _peek_magic_bytes(uploaded_file, length: int = 8) -> bytes:
+    """Faylın əvvəlindən magic bytes oxu, sonra cursor-u geri qaytar."""
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+    head = uploaded_file.read(length) or b""
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+    return head
+
+
+def _verify_magic_bytes(head: bytes, expected_key: str) -> bool:
+    signatures = FILE_SIGNATURES.get(expected_key, [])
+    return any(head.startswith(sig) for sig in signatures)
+
+
+def _docx_zip_bomb_safe(uploaded_file) -> None:
+    """
+    DOCX əslində ZIP arxividir. Pis niyyətli istifadəçi 1KB-lıq fayl yükləyə bilər
+    ki, açıldıqda 4GB olsun — bu yaddaşı tükətir. Burada hər entry-nin
+    bildirilmiş uncompressed ölçüsünü yoxlayırıq və ümumi limiti tətbiq edirik.
+    Eyni zamanda .docm (macro-enabled) və ya əmr icra edən content-i bloklayırıq.
+    """
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+
+    try:
+        with zipfile.ZipFile(uploaded_file) as zf:
+            total = 0
+            # blocked_entries = (
+            #     "vbaproject.bin",  # makro
+            #     "word/vbaproject.bin",
+            #     "macro",
+            #     ".bin",  # ümumi binary embedlər — diqqətli olmaq lazımdır
+            # )
+            for info in zf.infolist():
+                if info.file_size > MAX_DOCX_ENTRY_UNCOMPRESSED:
+                    raise ValueError(pgettext("exams.service.parsing.error", "file_zip_bomb"))
+                total += info.file_size
+                if total > MAX_DOCX_TOTAL_UNCOMPRESSED:
+                    raise ValueError(pgettext("exams.service.parsing.error", "file_zip_bomb"))
+
+                name_lower = info.filename.lower()
+                # VBA / makro mövcuddursa, rədd et
+                if "vbaproject.bin" in name_lower:
+                    raise ValueError(pgettext("exams.service.parsing.error", "file_has_macros"))
+                # Path traversal mühafizəsi
+                if name_lower.startswith("/") or ".." in name_lower.split("/"):
+                    raise ValueError(pgettext("exams.service.parsing.error", "file_unsafe_entry"))
+    except zipfile.BadZipFile:
+        raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
+    finally:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+
+
+def _pdf_safety_check(uploaded_file) -> None:
+    """
+    PDF-də OpenAction/JavaScript/embedded file kimi aktiv kontentin olub-olmadığını yoxlayırıq.
+    Tam sanitize etmirik — sadəcə şübhəli pattern olarsa rədd edirik.
+    """
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+    # PDF-in ilk hissəsindən şübhəli açar sözləri axtarırıq (tam fayla baxmaq baha olardı).
+    sample = uploaded_file.read(256 * 1024) or b""
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+
+    suspicious_markers = (
+        b"/JS",
+        b"/JavaScript",
+        b"/Launch",
+        b"/EmbeddedFile",
+        b"/OpenAction",
+        b"/AA",  # additional actions
+    )
+    if any(marker in sample for marker in suspicious_markers):
+        raise ValueError(pgettext("exams.service.parsing.error", "file_pdf_active_content"))
+
 
 END_QUESTION_RE = re.compile(r"^\s*END_QUESTION\s*$", re.IGNORECASE)
 JOINED_OPTION_BOUNDARY_RE = re.compile(r"(?<=[a-zəöüğışç])(?=[A-ZƏÖÜĞİŞÇ])")
@@ -44,7 +160,7 @@ def normalize_pdf_extracted_text(text: str) -> str:
 
     # Sual nömrələri: " 12)" və ya " 12." -> yeni blok kimi başlasın
     # (Variant daxilində 1) 2) olsa belə parser artıq IN_OPT-də bunu sual saymır, problem olmur.)
-    t = re.sub(r"(?<!\n)\s+(\d{1,4})\s*([\)\.])", r"\n\n\1\2", t)
+    t = re.sub(r"(?<!\n)\s+(\d{1,4})\s*(\)|\.(?!\d))", r"\n\n\1\2", t)
 
     # Variantlar: " A)" / " *A)" / " B." və s -> yeni sətirdən başlasın
     t = re.sub(r"(?<!\n)\s+(\*?[A-E])\s*([\)\.])", r"\n\1\2", t, flags=re.IGNORECASE)
@@ -59,19 +175,45 @@ def normalize_pdf_extracted_text(text: str) -> str:
 
 
 def extract_text_from_upload(uploaded_file) -> str:
-    name = uploaded_file.name.lower()
+    """
+    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf.
+    Çoxsaylı təhlükəsizlik yoxlamaları ilə birlikdə:
+      - Ölçü limiti (default 5MB)
+      - Faktiki magic bytes (uzantı saxtalaşdırıla bilər)
+      - DOCX: makro (.docm/.vbaproject), ZIP-bomb və path-traversal yoxlanışı
+      - PDF: aktiv kontent (JS/OpenAction/EmbeddedFile) yoxlanışı
+    """
+    name = (uploaded_file.name or "").lower()
     ext = os.path.splitext(name)[1]
 
-    # təhlükəsizlik: böyük fayl limiti (məs: 5MB)
-    if uploaded_file.size > 5 * 1024 * 1024:
-        raise ValueError(pgettext("exams.service.parsing.error", "file_too_large"))
+    # 1) Ölçü limiti
+    _ensure_within_size_limit(uploaded_file, MAX_UPLOAD_BYTES)
+
+    # 2) macro-enabled uzantıları ilkin olaraq rədd edirik
+    blocked_extensions = (".docm", ".dotm", ".xlsm", ".pptm", ".bin", ".exe", ".scr", ".js", ".html", ".htm")
+    if ext in blocked_extensions:
+        raise ValueError(pgettext("exams.service.parsing.error", "file_has_macros"))
 
     if ext == ".txt":
+        # TXT üçün magic bytes yoxdur — sadəcə oxuyuruq, lakin UTF-8 səhvini ignoryalayırıq
         return uploaded_file.read().decode("utf-8", errors="ignore")
 
     if ext == ".docx":
-        # docx.Document file-like də qəbul edir
-        doc = Document(uploaded_file)
+        head = _peek_magic_bytes(uploaded_file, 8)
+        if not _verify_magic_bytes(head, "docx"):
+            # uzantı .docx-dir amma faktiki məzmun ZIP deyil — saxta fayl
+            raise ValueError(pgettext("exams.service.parsing.error", "file_signature_mismatch"))
+
+        # ZIP-bomb + makro yoxlaması (file-pointer-i bərpa edir)
+        _docx_zip_bomb_safe(uploaded_file)
+
+        try:
+            # docx.Document file-like də qəbul edir
+            doc = Document(uploaded_file)
+        except Exception as exc:
+            logger.warning("DOCX parse failed for upload %s: %s", name, exc)
+            raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
+
         lines = []
         for p in doc.paragraphs:
             t = (p.text or "").strip()
@@ -83,18 +225,39 @@ def extract_text_from_upload(uploaded_file) -> str:
         if PdfReader is None:
             raise ValueError(pgettext("exams.service.parsing.error", "pdf_dependency_missing"))
 
-        uploaded_file.seek(0)
-        reader = PdfReader(uploaded_file)
+        head = _peek_magic_bytes(uploaded_file, 8)
+        if not _verify_magic_bytes(head, "pdf"):
+            raise ValueError(pgettext("exams.service.parsing.error", "file_signature_mismatch"))
+
+        # PDF aktiv kontent yoxlaması
+        _pdf_safety_check(uploaded_file)
+
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+
+        try:
+            reader = PdfReader(uploaded_file)
+        except Exception as exc:
+            logger.warning("PDF parse failed for upload %s: %s", name, exc)
+            raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
+
+        # Şifrli PDF-i rədd edirik — content extraction işləməz, lakin pis niyyət üçün də səbəb olar
+        if getattr(reader, "is_encrypted", False):
+            raise ValueError(pgettext("exams.service.parsing.error", "file_pdf_encrypted"))
+
         parts = []
         for page in reader.pages:
-            txt = page.extract_text() or ""
+            try:
+                txt = page.extract_text() or ""
+            except Exception:
+                continue
             txt = txt.strip()
             if txt:
                 parts.append(txt)
 
         raw = "\n\n".join(parts)
-
-        # ✅ əsas fix burada
         return normalize_pdf_extracted_text(raw)
 
     raise ValueError(pgettext("exams.service.parsing.error", "unsupported_file_type"))
@@ -185,13 +348,57 @@ def _question_line_index(lines: list[str]) -> int:
     return 0
 
 
+def _looks_like_question_prompt(line: str) -> bool:
+    text = (line or "").strip()
+    if not text:
+        return False
+
+    lower = text.lower()
+    question_markers = (
+        "?",
+        ":",
+        "hansı",
+        "hansıdır",
+        "hansidir",
+        "nədir",
+        "nedir",
+        "nəyi",
+        "neyi",
+        "kimdir",
+        "harada",
+        "necə",
+        "nece",
+        "aiddir",
+        "aid edilir",
+        "istifadə",
+        "istifade",
+        "aşağıdakı",
+        "asagidaki",
+    )
+    return any(marker in lower for marker in question_markers)
+
+
+def _split_unlabeled_question_and_options(lines: list[str], q_idx: int) -> tuple[list[str], list[str]]:
+    question_lines = [lines[q_idx]]
+    option_start = q_idx + 1
+
+    while option_start < len(lines) and len(lines) - option_start > len(LABELS):
+        candidate = lines[option_start]
+        if not _looks_like_question_prompt(candidate):
+            break
+        question_lines.append(candidate)
+        option_start += 1
+
+    return question_lines, lines[option_start:]
+
+
 def _parse_unlabeled_end_question_block(lines: list[str], fallback_no: int) -> dict | None:
     if len(lines) < 2:
         return None
 
     q_idx = _question_line_index(lines)
-    q_no, q_text = _strip_question_number(lines[q_idx], fallback_no)
-    option_lines = lines[q_idx + 1 :]
+    question_lines, option_lines = _split_unlabeled_question_and_options(lines, q_idx)
+    q_no, q_text = _strip_question_number(" ".join(question_lines), fallback_no)
 
     if len(option_lines) < 2:
         return None
@@ -280,52 +487,112 @@ def _parse_end_question_blocks(raw_text: str) -> list[dict]:
     return questions
 
 
+# Severity səviyyələri — UI-da rəngləməni və "blok edirmi?" qərarını bunlara görə veririk
+SEVERITY_ERROR = "error"  # qırmızı — saxlanışı blok etməyə bilər, amma diqqət vacibdir
+SEVERITY_WARNING = "warning"  # sarı — informativ xəbərdarlıq
+SEVERITY_INFO = "info"  # mavi — sadəcə yumşaq qeyd
+
+
+def _add_warning(q: dict, w_type: str, msg: str, severity: str = SEVERITY_WARNING, **extra) -> None:
+    payload = {"type": w_type, "msg": msg, "severity": severity}
+    payload.update(extra)
+    q["warnings"].append(payload)
+
+
 def _validate_questions(questions: list[dict]) -> None:
     for q in questions:
-        # missing A-D
+        opts = q.get("options", {}) or {}
+
+        # missing A-D — bunlar minimum tələbdir, ERROR
         for must in ["A", "B", "C", "D"]:
-            if must not in q["options"]:
-                q["warnings"].append(
-                    {
-                        "type": "missing_option",
-                        "msg": pgettext("exams.service.parsing.warning", "missing_option").format(option=must),
-                    }
+            if must not in opts:
+                _add_warning(
+                    q,
+                    "missing_option",
+                    pgettext("exams.service.parsing.warning", "missing_option").format(option=must),
+                    severity=SEVERITY_ERROR,
                 )
 
-        # E optional warning
-        if "E" not in q["options"]:
-            q["warnings"].append(
-                {
-                    "type": "missing_option_e",
-                    "msg": pgettext("exams.service.parsing.warning", "missing_option_e"),
-                }
+        # Variant sayı: standart 5 (A-E). 4 olarsa — sarı warning, 3 və daha az — minimum_option warning-i artıq qoyulub.
+        present_labels = [lab for lab in ["A", "B", "C", "D", "E"] if lab in opts]
+        option_count = len(present_labels)
+        if option_count == 4 and "E" not in opts:
+            _add_warning(
+                q,
+                "option_count_recommend_5",
+                pgettext("exams.service.parsing.warning", "option_count_recommend_5").format(count=option_count),
+                severity=SEVERITY_WARNING,
+            )
+        elif option_count < 4:
+            # missing A/B/C/D artıq error verdi — bunu info səviyyəsində əlavə eləyirik
+            _add_warning(
+                q,
+                "option_count_too_low",
+                pgettext("exams.service.parsing.warning", "option_count_too_low").format(count=option_count),
+                severity=SEVERITY_ERROR,
             )
 
         # duplicate options text warning
         norm_map = defaultdict(list)
-        for lab, txt in q["options"].items():
+        for lab, txt in opts.items():
             norm_map[_norm(txt)].append(lab)
 
         dup_groups = [labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1]
         for labs in dup_groups:
-            q["warnings"].append(
-                {
-                    "type": "duplicate_option_text",
-                    "msg": pgettext("exams.service.parsing.warning", "duplicate_option_text").format(
-                        labels=", ".join(labs)
-                    ),
-                }
+            _add_warning(
+                q,
+                "duplicate_option_text",
+                pgettext("exams.service.parsing.warning", "duplicate_option_text").format(labels=", ".join(labs)),
+                severity=SEVERITY_WARNING,
             )
 
         # correct label exists?
-        for c in q["correct"]:
-            if c not in q["options"]:
-                q["warnings"].append(
-                    {
-                        "type": "correct_missing",
-                        "msg": pgettext("exams.service.parsing.warning", "correct_missing").format(option=c),
-                    }
+        for c in q.get("correct", []):
+            if c not in opts:
+                _add_warning(
+                    q,
+                    "correct_missing",
+                    pgettext("exams.service.parsing.warning", "correct_missing").format(option=c),
+                    severity=SEVERITY_ERROR,
                 )
+
+        # boş və ya çox qısa variant mətnləri (UX faydası: spam/yanlış parse halı)
+        for lab in present_labels:
+            txt = (opts.get(lab) or "").strip()
+            if not txt:
+                _add_warning(
+                    q,
+                    "empty_option_text",
+                    pgettext("exams.service.parsing.warning", "empty_option_text").format(option=lab),
+                    severity=SEVERITY_ERROR,
+                )
+
+        # uzunluq/balans xəbərdarlığı — yalnız doğru cavabı çox uzun/qısa olduqda
+        correct_labels = [c for c in q.get("correct", []) if c in opts]
+        wrong_labels = [lab for lab in present_labels if lab not in correct_labels]
+        if correct_labels and wrong_labels:
+            correct_lengths = [len((opts.get(c) or "").strip()) for c in correct_labels]
+            wrong_lengths = [len((opts.get(w) or "").strip()) for w in wrong_labels]
+            if correct_lengths and wrong_lengths:
+                max_correct = max(correct_lengths)
+                max_wrong = max(wrong_lengths)
+                avg_wrong = sum(wrong_lengths) / max(1, len(wrong_lengths))
+                # yalnız doğru cavab çox uzundursa (≥1.8x ortalama yanlışdan və ≥15 simvol)
+                if max_correct >= 15 and avg_wrong > 0 and max_correct >= avg_wrong * 1.8:
+                    _add_warning(
+                        q,
+                        "correct_too_long",
+                        pgettext("exams.service.parsing.warning", "correct_too_long"),
+                        severity=SEVERITY_INFO,
+                    )
+                # və ya yalnız doğru cavab çox qısadır (≤0.4x və yanlışlar uzundur)
+                elif max_wrong >= 15 and max_correct > 0 and max_correct <= avg_wrong * 0.4:
+                    _add_warning(
+                        q,
+                        "correct_too_short",
+                        pgettext("exams.service.parsing.warning", "correct_too_short"),
+                        severity=SEVERITY_INFO,
+                    )
 
 
 # PDF-dən çıxan və ya digər mənbədən alınan raw mətni parser üçün strukturlaşdırılmış sual formatına çevirir

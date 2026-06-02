@@ -6,7 +6,7 @@ import re
 LABELS = ["A", "B", "C", "D", "E"]
 
 # Sualların, variantların və cavab sətrlərinin tanınması üçün regex-lər
-QUESTION_RE = re.compile(r"^\s*(\d+)\s*[\)\.]\s*(.+)\s*$")
+QUESTION_RE = re.compile(r"^\s*(\d+)\s*(?:\)\s*|\.(?!\d)\s*)(.+)\s*$")
 
 # Variant sətrləri: opsional "*", sonra A-E, sonra ")" və ya ".", sonra variant mətni
 OPTION_RE = re.compile(r"^\s*(\*)?\s*([A-E])\s*[\)\.]\s*(.+)\s*$", re.IGNORECASE)

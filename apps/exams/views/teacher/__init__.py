@@ -16,7 +16,13 @@ from .groups import (
     teacher_remove_student_from_group,
     teacher_update_group,
 )
-from .question_bank import ai_generate_question_bank, create_question_bank, process_question_bank, test_question_bank
+from .question_bank import (
+    ai_generate_question_bank,
+    create_question_bank,
+    process_question_bank,
+    test_question_bank,
+    test_question_bank_template_download,
+)
 from .questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .results import (
     delete_exam_attempts,
@@ -47,6 +53,7 @@ __all__ = [
     "create_question_bank",
     "process_question_bank",
     "test_question_bank",
+    "test_question_bank_template_download",
     "ai_generate_question_bank",
     "teacher_exam_results",
     "delete_exam_attempts",
