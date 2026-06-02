@@ -117,7 +117,8 @@ jobs:
           E2E_USERNAME: ${{ env.E2E_USERNAME }}
           E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
         run: |
-          docker exec emsarena-app python manage.py seed_ci_e2e_user \
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+            python manage.py seed_ci_e2e_user \
             --username "$E2E_USERNAME" \
             --password "$E2E_PASSWORD"
 
@@ -125,7 +126,8 @@ jobs:
         env:
           E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
         run: |
-          docker exec emsarena-app python manage.py seed_ci_e2e_scenario \
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+            python manage.py seed_ci_e2e_scenario \
             --password "$E2E_ROLE_PASSWORD"
 
       # Install Python + Playwright for the E2E test runner.
