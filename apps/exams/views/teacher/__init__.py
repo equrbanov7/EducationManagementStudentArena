@@ -20,6 +20,7 @@ from .question_bank import ai_generate_question_bank, create_question_bank, proc
 from .questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .results import (
     delete_exam_attempts,
+    export_exam_results_xlsx,
     teacher_check_attempt,
     teacher_exam_results,
     teacher_pending_attempts,
@@ -49,6 +50,7 @@ __all__ = [
     "ai_generate_question_bank",
     "teacher_exam_results",
     "delete_exam_attempts",
+    "export_exam_results_xlsx",
     "teacher_view_attempt",
     "teacher_check_attempt",
     "teacher_pending_attempts",

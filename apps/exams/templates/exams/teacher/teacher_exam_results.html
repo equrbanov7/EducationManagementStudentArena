@@ -8,24 +8,6 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
-    <style nonce="{{ request.csp_nonce }}">
-        .countdown-timer {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            color: #dc3545;
-        }
-
-        .anonymous-name {
-            font-style: italic;
-            color: #6c757d;
-        }
-
-        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:99998; justify-content:center; align-items:center; }
-        .loading-overlay.show { display:flex; }
-        .loading-spinner { text-align:center; color:#007bff; }
-        .loading-spinner i { font-size:2.5rem; }
-        .loading-spinner p { margin-top:0.75rem; font-size:0.95rem; color:#555; font-weight:600; }
-    </style>
 {% endblock %}
 
 {% block content %}
@@ -35,39 +17,89 @@
         <p>{% trans "loading" context "exams.template.teacher_exam_results" %}</p>
     </div>
 </div>
-<div class="container my-4">
-    <h1 class="h3">{{ exam.title }} - {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}</h1>
 
-    <div class="results-summary mb-4">
-        <div class="results-summary__row">
-            <span class="results-summary__label">{% trans "label_type" context "exams.template.teacher_exam_results" %}</span>
-            <strong>{{ exam.get_exam_type_display }}</strong>
+<div class="ter-page">
+    <div class="ter-header-card">
+        <div class="ter-header-top">
+            <a href="{{ profile_return_url }}" class="ter-back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>{{ source_back_label }}</span>
+            </a>
+            <div class="ter-header-meta">
+                <span class="ter-meta-pill ter-meta-pill--type">
+                    <i class="fas fa-clipboard-list"></i>
+                    {{ exam.get_exam_type_display }}
+                </span>
+                {% if exam.is_active %}
+                    <span class="ter-meta-pill ter-meta-pill--active">
+                        <i class="fas fa-circle"></i> {% trans "status_active" context "exams.template.teacher_exam_results" %}
+                    </span>
+                {% else %}
+                    <span class="ter-meta-pill ter-meta-pill--inactive">
+                        <i class="far fa-circle"></i> {% trans "status_inactive" context "exams.template.teacher_exam_results" %}
+                    </span>
+                {% endif %}
+            </div>
         </div>
-        <div class="results-summary__row">
-            <span class="results-summary__label">{% trans "label_status" context "exams.template.teacher_exam_results" %}</span>
-            {% if exam.is_active %}
-                <span class="results-summary__pill results-summary__pill--success">
-                    {% trans "status_active" context "exams.template.teacher_exam_results" %}
-                </span>
-            {% else %}
-                <span class="results-summary__pill results-summary__pill--neutral">
-                    {% trans "status_inactive" context "exams.template.teacher_exam_results" %}
-                </span>
+        <h1 class="ter-title">{{ exam.title }}</h1>
+        <p class="ter-subtitle">
+            {% trans "page_title_suffix" context "exams.template.teacher_exam_results" %}
+            {% if teacher_display %}
+                · <span class="ter-teacher-line"><i class="fas fa-chalkboard-teacher"></i> {{ teacher_display }} <span class="ter-handle">(@{{ teacher_username }})</span></span>
             {% endif %}
+        </p>
+
+        <div class="ter-stats">
+            <div class="ter-stat ter-stat--total">
+                <span class="ter-stat-icon"><i class="fas fa-users"></i></span>
+                <div>
+                    <div class="ter-stat-value">{{ review_stats.total }}</div>
+                    <div class="ter-stat-label">İştirakçı</div>
+                </div>
+            </div>
+            <div class="ter-stat ter-stat--graded">
+                <span class="ter-stat-icon"><i class="fas fa-check-circle"></i></span>
+                <div>
+                    <div class="ter-stat-value">{{ review_stats.graded }}</div>
+                    <div class="ter-stat-label">Yoxlanıb</div>
+                </div>
+            </div>
+            <div class="ter-stat ter-stat--pending">
+                <span class="ter-stat-icon"><i class="fas fa-hourglass-half"></i></span>
+                <div>
+                    <div class="ter-stat-value">{{ review_stats.pending }}</div>
+                    <div class="ter-stat-label">Gözləyir</div>
+                </div>
+            </div>
+            <div class="ter-stat ter-stat--max">
+                <span class="ter-stat-icon"><i class="fas fa-star"></i></span>
+                <div>
+                    <div class="ter-stat-value">{{ review_stats.max_score }}</div>
+                    <div class="ter-stat-label">Maks. bal</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ter-header-actions">
+            <a href="{{ export_xlsx_url }}" class="ter-action-btn ter-action-btn--export">
+                <i class="fas fa-file-excel"></i>
+                <span>Excel-ə yüklə</span>
+            </a>
         </div>
     </div>
 
-    <div class="results-filter-card">
-        <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
+    <div class="ter-filter-card">
+        <form method="get" id="resultsFiltersForm" class="ter-filter-grid js-results-filters-form" novalidate>
             {% if request.GET.from_section %}
                 <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
             {% endif %}
             {% if request.GET.return_to %}
                 <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
             {% endif %}
-            <div class="results-filter-field results-filter-field--wide">
-                <label class="results-filter-label" for="resultsFilterSearchInput">
-                    {% trans "search_placeholder" context "exams.template.teacher_exam_results" %}
+
+            <div class="ter-filter-field ter-filter-field--wide">
+                <label class="ter-filter-label" for="resultsFilterSearchInput">
+                    <i class="fas fa-search"></i> {% trans "search_placeholder" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="text"
                        id="resultsFilterSearchInput"
@@ -77,9 +109,30 @@
                        autocomplete="off"
                        placeholder="{% trans "search_placeholder" context "exams.template.teacher_exam_results" %}">
             </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterStatusSelect">
-                    {% trans "filter_status_label" context "exams.template.teacher_exam_results" %}
+
+            {% if available_groups %}
+            <div class="ter-filter-field">
+                <label class="ter-filter-label" for="resultsFilterGroupSelect">
+                    <i class="fas fa-layer-group"></i> Qrup
+                </label>
+                <div class="bootstrap-single-select">
+                    <select name="group"
+                            id="resultsFilterGroupSelect"
+                            class="form-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
+                            data-bootstrap-select
+                            data-reset-value="all">
+                        <option value="all" {% if not group_filter %}selected{% endif %}>Bütün qruplar</option>
+                        {% for grp in available_groups %}
+                            <option value="{{ grp.id }}" {% if group_filter == grp.id|stringformat:"s" %}selected{% endif %}>{{ grp.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="ter-filter-field">
+                <label class="ter-filter-label" for="resultsFilterStatusSelect">
+                    <i class="fas fa-tasks"></i> {% trans "filter_status_label" context "exams.template.teacher_exam_results" %}
                 </label>
                 <div class="bootstrap-single-select">
                 <select name="status"
@@ -105,9 +158,10 @@
                 </select>
                 </div>
             </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterCheckedSelect">
-                    {% trans "filter_checked_label" context "exams.template.teacher_exam_results" %}
+
+            <div class="ter-filter-field">
+                <label class="ter-filter-label" for="resultsFilterCheckedSelect">
+                    <i class="fas fa-check-double"></i> {% trans "filter_checked_label" context "exams.template.teacher_exam_results" %}
                 </label>
                 <div class="bootstrap-single-select">
                 <select name="checked"
@@ -127,172 +181,167 @@
                 </select>
                 </div>
             </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterDateFromInput">
-                    {% trans "filter_date_from" context "exams.template.teacher_exam_results" %}
+
+            <div class="ter-filter-field">
+                <label class="ter-filter-label" for="resultsFilterDateFromInput">
+                    <i class="fas fa-calendar-alt"></i> {% trans "filter_date_from" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateFromInput"
                        name="date_from"
                        value="{{ date_from }}"
-                       class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="{% trans "filter_date_from" context "exams.template.teacher_exam_results" %}">
+                       class="form-control js-auto-filter js-filter-resettable">
             </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterDateToInput">
-                    {% trans "filter_date_to" context "exams.template.teacher_exam_results" %}
+
+            <div class="ter-filter-field">
+                <label class="ter-filter-label" for="resultsFilterDateToInput">
+                    <i class="fas fa-calendar-check"></i> {% trans "filter_date_to" context "exams.template.teacher_exam_results" %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateToInput"
                        name="date_to"
                        value="{{ date_to }}"
-                       class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="{% trans "filter_date_to" context "exams.template.teacher_exam_results" %}">
+                       class="form-control js-auto-filter js-filter-resettable">
             </div>
-            <button type="submit" class="btn results-filter-submit">
-                <i class="fas fa-filter me-1"></i> {% trans "action_apply_filter" context "exams.template.teacher_exam_results" %}
-            </button>
-            <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
-                <i class="fas fa-eraser me-1"></i> {% trans "action_reset_filter" context "exams.template.teacher_exam_results" %}
-            </button>
+
+            <div class="ter-filter-actions">
+                <button type="submit" class="ter-btn ter-btn--primary">
+                    <i class="fas fa-filter"></i> {% trans "action_apply_filter" context "exams.template.teacher_exam_results" %}
+                </button>
+                <button type="button" id="resultsClearFiltersBtn" class="ter-btn ter-btn--ghost js-clear-results-filters">
+                    <i class="fas fa-eraser"></i> {% trans "action_reset_filter" context "exams.template.teacher_exam_results" %}
+                </button>
+            </div>
         </form>
     </div>
 
     {% if can_delete_attempts %}
-        <div class="results-toolbar">
-            <span class="selected-counter">
-                {% trans "label_selected" context "exams.template.teacher_exam_results" %} <span id="selectedAttemptCount">0</span>
+        <div class="ter-toolbar">
+            <span class="ter-selected-counter">
+                <i class="fas fa-mouse-pointer"></i>
+                {% trans "label_selected" context "exams.template.teacher_exam_results" %}
+                <strong id="selectedAttemptCount">0</strong>
             </span>
-            <div class="results-toolbar__actions">
-                <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllAttemptsBtn">
+            <div class="ter-toolbar-actions">
+                <button type="button" class="ter-btn ter-btn--sm ter-btn--primary" id="selectAllAttemptsBtn">
                     <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.teacher_exam_results" %}
                 </button>
-                <button type="button" class="btn results-bulk-btn results-bulk-btn--clear" id="clearAttemptsBtn">
+                <button type="button" class="ter-btn ter-btn--sm ter-btn--ghost" id="clearAttemptsBtn">
                     <i class="fas fa-eraser"></i> {% trans "action_clear_selection" context "exams.template.teacher_exam_results" %}
                 </button>
-                <button type="button" class="btn results-bulk-btn results-bulk-btn--delete" id="deleteSelectedAttemptsBtn">
+                <button type="button" class="ter-btn ter-btn--sm ter-btn--danger" id="deleteSelectedAttemptsBtn">
                     <i class="fas fa-trash"></i> {% trans "action_delete_selected" context "exams.template.teacher_exam_results" %}
                 </button>
             </div>
         </div>
     {% endif %}
 
-    <h3>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
+    <div class="ter-results-card">
+        <div class="ter-results-card-head">
+            <h2 class="ter-results-title">
+                <i class="fas fa-users"></i>
+                {% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}
+            </h2>
+            {% if page_obj %}
+            <span class="ter-results-count">{{ page_obj.paginator.count }}</span>
+            {% endif %}
+        </div>
 
-    {% if attempts_data %}
-        <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle">
+        {% if attempts_data %}
+        <div class="ter-table-wrap">
+            <table class="ter-table">
                 <thead>
                     <tr>
-                        {% if can_delete_attempts %}
-                            <th></th>
-                        {% endif %}
-                        <th>#</th>
-                        <th>
-                            <a href="?{{ sort_base_query }}&sort_by=user&sort_dir={% if sort_by == 'user' and sort_dir == 'asc' %}desc{% elif sort_by == 'user' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_user" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "user" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "user" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                        {% if can_delete_attempts %}<th class="ter-col-check"></th>{% endif %}
+                        <th class="ter-col-num">#</th>
+                        <th class="ter-th-left">
+                            <a href="?{{ sort_base_query }}&sort_by=user&sort_dir={% if sort_by == 'user' and sort_dir == 'asc' %}desc{% elif sort_by == 'user' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>Ad Soyad</span>
+                                {% if sort_by == "user" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "user" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
+                            </a>
+                        </th>
+                        <th class="ter-th-left">
+                            <a href="?{{ sort_base_query }}&sort_by=username&sort_dir={% if sort_by == 'username' and sort_dir == 'asc' %}desc{% elif sort_by == 'username' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>İstifadəçi adı</span>
+                                {% if sort_by == "username" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "username" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
+                            </a>
+                        </th>
+                        <th class="ter-th-left">
+                            <a href="?{{ sort_base_query }}&sort_by=email&sort_dir={% if sort_by == 'email' and sort_dir == 'asc' %}desc{% elif sort_by == 'email' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>E-poçt</span>
+                                {% if sort_by == "email" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "email" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=status&sort_dir={% if sort_by == 'status' and sort_dir == 'asc' %}desc{% elif sort_by == 'status' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_status" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "status" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "status" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                            <a href="?{{ sort_base_query }}&sort_by=status&sort_dir={% if sort_by == 'status' and sort_dir == 'asc' %}desc{% elif sort_by == 'status' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>{% trans "col_status" context "exams.template.teacher_exam_results" %}</span>
+                                {% if sort_by == "status" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "status" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=correct&sort_dir={% if sort_by == 'correct' and sort_dir == 'asc' %}desc{% elif sort_by == 'correct' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_correct" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "correct" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "correct" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                            <a href="?{{ sort_base_query }}&sort_by=correct&sort_dir={% if sort_by == 'correct' and sort_dir == 'asc' %}desc{% elif sort_by == 'correct' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="Düzgün / Verilmiş sual">
+                                <span>Düzgün / Sual</span>
+                                {% if sort_by == "correct" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "correct" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=wrong&sort_dir={% if sort_by == 'wrong' and sort_dir == 'asc' %}desc{% elif sort_by == 'wrong' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_wrong" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "wrong" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "wrong" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                            <a href="?{{ sort_base_query }}&sort_by=wrong&sort_dir={% if sort_by == 'wrong' and sort_dir == 'asc' %}desc{% elif sort_by == 'wrong' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="Səhv / Verilmiş sual">
+                                <span>Səhv / Sual</span>
+                                {% if sort_by == "wrong" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "wrong" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         {% if exam.exam_type == 'test' %}
                             <th>Cavabsız</th>
-                            <th>Verilmiş sual</th>
                             <th>Bal</th>
                             <th>Faiz</th>
                         {% endif %}
                         {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
                             <th>
-                                <a href="?{{ sort_base_query }}&sort_by=score&sort_dir={% if sort_by == 'score' and sort_dir == 'asc' %}desc{% elif sort_by == 'score' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                    {% trans "col_score" context "exams.template.teacher_exam_results" %}
-                                    {% if sort_by == "score" and sort_dir == "asc" %}
-                                        <i class="fas fa-sort-up"></i>
-                                    {% elif sort_by == "score" and sort_dir == "desc" %}
-                                        <i class="fas fa-sort-down"></i>
-                                    {% else %}
-                                        <i class="fas fa-sort text-muted"></i>
-                                    {% endif %}
+                                <a href="?{{ sort_base_query }}&sort_by=score&sort_dir={% if sort_by == 'score' and sort_dir == 'asc' %}desc{% elif sort_by == 'score' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                    <span>{% trans "col_score" context "exams.template.teacher_exam_results" %}</span>
+                                    {% if sort_by == "score" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                    {% elif sort_by == "score" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                    {% else %}<i class="fas fa-sort"></i>{% endif %}
                                 </a>
                             </th>
                         {% endif %}
-                        <th>
-                            <a href="?{{ sort_base_query }}&sort_by=start&sort_dir={% if sort_by == 'start' and sort_dir == 'asc' %}desc{% elif sort_by == 'start' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_start_time" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "start" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "start" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                        <th class="ter-th-left">
+                            <a href="?{{ sort_base_query }}&sort_by=start&sort_dir={% if sort_by == 'start' and sort_dir == 'asc' %}desc{% elif sort_by == 'start' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>{% trans "col_start_time" context "exams.template.teacher_exam_results" %}</span>
+                                {% if sort_by == "start" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "start" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
+                            </a>
+                        </th>
+                        <th class="ter-th-left">
+                            <a href="?{{ sort_base_query }}&sort_by=end&sort_dir={% if sort_by == 'end' and sort_dir == 'asc' %}desc{% elif sort_by == 'end' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
+                                <span>{% trans "col_end_time" context "exams.template.teacher_exam_results" %}</span>
+                                {% if sort_by == "end" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "end" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=end&sort_dir={% if sort_by == 'end' and sort_dir == 'asc' %}desc{% elif sort_by == 'end' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_end_time" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "end" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "end" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
+                            <a href="?{{ sort_base_query }}&sort_by=duration&sort_dir={% if sort_by == 'duration' and sort_dir == 'asc' %}desc{% elif sort_by == 'duration' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="saat:dəq:san">
+                                <span>{% trans "col_duration" context "exams.template.teacher_exam_results" %}</span>
+                                {% if sort_by == "duration" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
+                                {% elif sort_by == "duration" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
+                                {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
-                        <th>
-                            <a href="?{{ sort_base_query }}&sort_by=duration&sort_dir={% if sort_by == 'duration' and sort_dir == 'asc' %}desc{% elif sort_by == 'duration' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="text-decoration-none text-dark d-inline-flex align-items-center gap-1">
-                                {% trans "col_duration" context "exams.template.teacher_exam_results" %}
-                                {% if sort_by == "duration" and sort_dir == "asc" %}
-                                    <i class="fas fa-sort-up"></i>
-                                {% elif sort_by == "duration" and sort_dir == "desc" %}
-                                    <i class="fas fa-sort-down"></i>
-                                {% else %}
-                                    <i class="fas fa-sort text-muted"></i>
-                                {% endif %}
-                            </a>
-                        </th>
-                        <th>{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
+                        <th class="ter-col-action">{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -300,82 +349,91 @@
                         {% with att=item.attempt %}
                         <tr data-seconds-remaining="{{ item.countdown_seconds|default:0 }}">
                             {% if can_delete_attempts %}
-                                <td>
-                                    <input type="checkbox"
-                                           class="results-table-checkbox js-attempt-checkbox"
-                                           value="{{ att.id }}">
-                                </td>
+                                <td><input type="checkbox" class="ter-checkbox js-attempt-checkbox" value="{{ att.id }}"></td>
                             {% endif %}
-                            <td class="fw-bold text-muted">{{ forloop.counter0|add:page_obj.start_index }}</td>
-                            <td class="student-name-cell">
+                            <td class="ter-num">{{ forloop.counter0|add:page_obj.start_index }}</td>
+                            <td class="ter-user-cell ter-cell-left">
                                 {% if item.can_view_name %}
-                                    <strong>{{ item.real_name }}</strong>
-                                    <div class="text-muted small">@{{ att.user.username }}</div>
+                                    <div class="ter-user-name">{{ item.real_name }}</div>
                                 {% else %}
-                                    <strong class="anonymous-name">{{ item.anonymous_name }}</strong>
-                                    <div class="text-muted small">{% trans "label_anonymous_view" context "exams.template.teacher_exam_results" %}</div>
+                                    <div class="ter-user-name ter-user-name--anon">{{ item.anonymous_name }}</div>
+                                    <div class="ter-user-handle">{% trans "label_anonymous_view" context "exams.template.teacher_exam_results" %}</div>
+                                {% endif %}
+                            </td>
+                            <td class="ter-cell-left">
+                                {% if item.can_view_name %}
+                                    <span class="ter-user-handle ter-user-handle--strong">@{{ att.user.username }}</span>
+                                {% else %}
+                                    <span class="ter-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="ter-cell-left">
+                                {% if item.can_view_name and att.user.email %}
+                                    <span class="ter-email">{{ att.user.email }}</span>
+                                {% else %}
+                                    <span class="ter-muted">—</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if att.status == 'expired' %}
-                                    <span class="badge bg-secondary">{{ att.get_status_display }}</span>
+                                    <span class="ter-badge ter-badge--neutral">{{ att.get_status_display }}</span>
                                 {% elif exam.exam_type == 'test' or att.checked_by_teacher %}
-                                    <span class="badge bg-success">{{ att.get_status_display }}</span>
+                                    <span class="ter-badge ter-badge--success">{{ att.get_status_display }}</span>
                                 {% else %}
-                                    <span class="badge bg-info text-dark">{{ att.get_status_display }}</span>
+                                    <span class="ter-badge ter-badge--info">{{ att.get_status_display }}</span>
                                 {% endif %}
                                 {% if att.checked_by_teacher %}
-                                    <div class="mt-2">
-                                        <span class="badge bg-secondary">{% trans "badge_checked" context "exams.template.teacher_exam_results" %}</span>
-                                    </div>
+                                    <span class="ter-badge ter-badge--checked"><i class="fas fa-check"></i> {% trans "badge_checked" context "exams.template.teacher_exam_results" %}</span>
                                 {% endif %}
                             </td>
                             {% if exam.exam_type == 'test' %}
-                                <td>{{ item.test_result.correct_count }}</td>
-                                <td>{{ item.test_result.wrong_count }}</td>
-                                <td>{{ item.test_result.unanswered_count }}</td>
-                                <td>{{ item.test_result.delivered_count }}</td>
-                                <td><strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong></td>
-                                <td><strong>{{ item.test_result.percentage_display }}%</strong></td>
+                                <td class="ter-num ter-num--success">{{ item.test_result.correct_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.test_result.delivered_count }}</span></td>
+                                <td class="ter-num ter-num--danger">{{ item.test_result.wrong_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.test_result.delivered_count }}</span></td>
+                                <td class="ter-num">{{ item.test_result.unanswered_count }}</td>
+                                <td class="ter-num"><strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong></td>
+                                <td class="ter-num ter-num--accent"><strong>{{ item.test_result.percentage_display }}%</strong></td>
                             {% else %}
-                                <td>{{ att.correct_count }}</td>
-                                <td>{{ att.wrong_count }}</td>
+                                <td class="ter-num ter-num--success">{{ att.correct_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.delivered_count }}</span></td>
+                                <td class="ter-num ter-num--danger">{{ att.wrong_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.delivered_count }}</span></td>
                             {% endif %}
                             {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
-                                <td><strong>{{ att.teacher_score|default:0 }}</strong></td>
+                                <td class="ter-num"><strong>{{ att.teacher_score|default:0 }}</strong></td>
                             {% endif %}
-                            <td>{{ att.started_at|date:"d.m.Y H:i" }}</td>
-                            <td>
-                                {% if att.finished_at %}
-                                    {{ att.finished_at|date:"d.m.Y H:i" }}
+                            <td class="ter-date ter-cell-left">{{ att.started_at|date:"d.m.Y H:i" }}</td>
+                            <td class="ter-date ter-cell-left">
+                                {% if item.effective_finish %}
+                                    {{ item.effective_finish|date:"d.m.Y H:i" }}
+                                    {% if item.finish_inferred %}
+                                        <span class="ter-date-tag" title="Tələbə imtahanı bitirməyib — müddət bitmə vaxtı göstərilir">avto</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="text-muted">-</span>
+                                    <span class="ter-muted">—</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if att.duration_seconds %}
-                                    {{ att.duration_seconds|format_duration }}
+                            <td class="ter-date">
+                                {% if item.effective_duration_seconds %}
+                                    <span class="ter-clock">{{ item.effective_duration_seconds|format_duration_clock }}</span>
                                 {% else %}
-                                    <span class="text-muted">-</span>
+                                    <span class="ter-muted">—</span>
                                 {% endif %}
                             </td>
-                            <td class="action-cell">
-                                <div class="results-action-buttons">
-                                    <a href="{{ item.action_url }}"
-                                       class="btn btn-sm {% if item.action_label == 'Bax' %}btn-outline-primary{% elif item.action_label == 'Yenidən yoxla' %}btn-outline-warning{% else %}btn-outline-warning{% endif %}">
+                            <td class="ter-action-cell">
+                                <div class="ter-action-stack">
+                                    <a href="{{ item.action_url }}" class="ter-btn ter-btn--sm
+                                        {% if item.action_label == 'Bax' %}ter-btn--info
+                                        {% elif item.action_label == 'Yenidən yoxla' %}ter-btn--warning
+                                        {% else %}ter-btn--warning{% endif %}">
                                         <i class="fas {% if item.action_label == 'Bax' %}fa-eye{% elif item.action_label == 'Yenidən yoxla' %}fa-edit{% else %}fa-clipboard-check{% endif %}"></i>
                                         {{ item.action_label }}
                                     </a>
                                     {% if item.countdown_seconds %}
-                                        <div class="countdown-timer mt-2">
+                                        <div class="ter-countdown">
                                             <i class="fas {% if item.countdown_mode == 'recheck' %}fa-clock{% else %}fa-user-secret{% endif %}"></i>
                                             <span class="timer-display">--:--</span>
                                         </div>
                                     {% endif %}
                                     {% if can_delete_attempts %}
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger js-single-delete-attempt"
-                                                data-attempt-id="{{ att.id }}">
+                                        <button type="button" class="ter-btn ter-btn--sm ter-btn--ghost-danger js-single-delete-attempt" data-attempt-id="{{ att.id }}">
                                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.teacher_exam_results" %}
                                         </button>
                                     {% endif %}
@@ -388,17 +446,12 @@
             </table>
         </div>
         {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
-    {% else %}
-        <p class="text-muted text-center py-4">
-            <i class="fas fa-inbox"></i>
-            {% trans "empty_no_attempts" context "exams.template.teacher_exam_results" %}
-        </p>
-    {% endif %}
-
-    <div class="results-page-actions">
-        <a href="{{ profile_return_url }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> {{ source_back_label }}
-        </a>
+        {% else %}
+            <div class="ter-empty">
+                <i class="fas fa-inbox"></i>
+                <p>{% trans "empty_no_attempts" context "exams.template.teacher_exam_results" %}</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -454,9 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     rows.forEach(row => {
         let secondsLeft = parseInt(row.dataset.secondsRemaining, 10) || 0;
-
         if (secondsLeft <= 0) return;
-
         const timerDisplay = row.querySelector('.timer-display');
         if (!timerDisplay) return;
 
@@ -465,11 +516,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.reload();
                 return;
             }
-
             const minutes = Math.floor(secondsLeft / 60);
             const seconds = secondsLeft % 60;
             timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
             secondsLeft--;
         };
 
@@ -495,10 +544,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     {% endif %}
 
-    // --- Loading overlay on navigation ---
     var loadingOverlay = document.getElementById("loadingOverlay");
     function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
-    document.querySelectorAll("thead th a, .pagination-wrapper a").forEach(function(el) {
+    document.querySelectorAll(".ter-sort-link, .pagination-wrapper a").forEach(function(el) {
         el.addEventListener("click", showLoading);
     });
     var filtersForm = document.getElementById("resultsFiltersForm");

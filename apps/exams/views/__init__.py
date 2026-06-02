@@ -42,6 +42,7 @@ from .teacher.questions import add_exam_question, delete_exam_question, edit_exa
 from .teacher.results import (
     ai_grade_answer,
     delete_exam_attempts,
+    export_exam_results_xlsx,
     teacher_check_attempt,
     teacher_exam_results,
     teacher_pending_attempts,
@@ -94,6 +95,7 @@ __all__ = [
     # Teacher - Results
     "teacher_exam_results",
     "delete_exam_attempts",
+    "export_exam_results_xlsx",
     "teacher_view_attempt",
     "teacher_check_attempt",
     "teacher_pending_attempts",

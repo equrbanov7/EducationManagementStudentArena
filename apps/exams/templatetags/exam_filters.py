@@ -47,3 +47,19 @@ def format_duration(seconds):
     if secs > 0 or not parts:
         parts.append(f"{secs} {pgettext('exams.filter.duration', 'unit_seconds')}")
     return " ".join(parts)
+
+
+@register.filter
+def format_duration_clock(seconds):
+    """Format duration as HH:MM:SS clock string. Empty for None/invalid."""
+    if seconds is None:
+        return ""
+    try:
+        total = int(seconds)
+    except (ValueError, TypeError):
+        return ""
+    total = max(total, 0)
+    hours = total // 3600
+    minutes = (total % 3600) // 60
+    secs = total % 60
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
