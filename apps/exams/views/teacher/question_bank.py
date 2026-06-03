@@ -1146,7 +1146,7 @@ def test_question_bank(request, slug):
             fp = build_fp_from_parsed(q)
             fp_groups.setdefault(fp, []).append(idx)
 
-        for fp, indices in fp_groups.items():
+        for _fp, indices in fp_groups.items():
             if len(indices) < 2:
                 continue
             for pos, idx in enumerate(indices):
@@ -1277,7 +1277,7 @@ def test_question_bank(request, slug):
             "clean": 0,  # heç bir warning olmayan sual
         }
 
-        for idx, q in enumerate(parsed, start=1):
+        for _idx, q in enumerate(parsed, start=1):
             warnings = q.get("warnings") or []
             counts = {"error": 0, "warning": 0, "info": 0}
             dup_refs = []
