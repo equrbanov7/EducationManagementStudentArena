@@ -3,12 +3,13 @@ import os
 import re
 import zipfile
 from collections import defaultdict
-from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
-from apps.exams.services.utils import _norm
 
 from django.utils.translation import pgettext
 
 from docx import Document
+
+from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
+from apps.exams.services.utils import _norm
 
 try:
     from pypdf import PdfReader
