@@ -32,41 +32,79 @@
             {% if direct_profile_section_template %}
             {% include direct_profile_section_template %}
             {% else %}
-            {% include "accounts/profile/sections/_profile_info.html" %}
-            {% include "accounts/profile/sections/_notifications.html" %}
-            {% include "accounts/profile/sections/_publish_notification.html" %}
-            {% include "accounts/profile/sections/_create_post.html" %}
-            {% include "accounts/profile/sections/_posts.html" %}
-            {% include "accounts/profile/sections/_my_exams.html" %}
-            {% include "accounts/profile/sections/_my_courses.html" %}
-            {% include "accounts/profile/sections/_courses.html" %}
-            {% include "accounts/profile/sections/_assigned_exams.html" %}
-            {% include "accounts/profile/sections/_assigned_courses.html" %}
-            {% include "accounts/profile/sections/_my_results.html" %}
-            {% include "accounts/profile/sections/_pending_answers.html" %}
-            {% include "accounts/profile/sections/_groups.html" %}
-            {% include "accounts/profile/sections/_pending_post_approvals.html" %}
-            {% include "accounts/profile/sections/_pending_review.html" %}
-            {% include "accounts/profile/sections/_review_results.html" %}
-            {% include "accounts/profile/sections/_role_assignment.html" %}
-            {% include "accounts/profile/sections/_student_org_request.html" %}
-            {% include "accounts/profile/sections/_student_org_management.html" %}
-            {% include "accounts/profile/sections/_permission_editor.html" %}
-            {% include "accounts/profile/sections/_manage_roles.html" %}
-            {% include "accounts/profile/sections/_create_category.html" %}
-            {% include "accounts/profile/sections/_category_management.html" %}
-            {% include "accounts/profile/sections/_superadmin_org_features.html" %}
-            {% include "accounts/profile/sections/_superadmin_organizations.html" %}
-            {% include "accounts/profile/sections/_superadmin_user_management.html" %}
-            {% include "accounts/profile/sections/_superadmin_ai_settings.html" %}
-            {% if 'superadmin-contact-messages' in allowed_sections %}
-            {% include "accounts/profile/sections/_superadmin_contact_messages.html" %}
+            {# P1.2 — Yalnız aktiv section partial-ını render edirik.
+               profile-info üçün shortcut/delete-account modalı və profil identity
+               partial-ları lazım olduğu üçün onları profile-info-da saxlayırıq. #}
+            {% if active_section == "profile-info" %}
+                {% include "accounts/profile/sections/_profile_info.html" %}
+            {% elif active_section == "notifications" %}
+                {% include "accounts/profile/sections/_notifications.html" %}
+            {% elif active_section == "publish-notification" %}
+                {% include "accounts/profile/sections/_publish_notification.html" %}
+            {% elif active_section == "create-post" %}
+                {% include "accounts/profile/sections/_create_post.html" %}
+            {% elif active_section == "posts" %}
+                {% include "accounts/profile/sections/_posts.html" %}
+            {% elif active_section == "my-exams" %}
+                {% include "accounts/profile/sections/_my_exams.html" %}
+            {% elif active_section == "my-courses" %}
+                {% include "accounts/profile/sections/_my_courses.html" %}
+            {% elif active_section == "courses" %}
+                {% include "accounts/profile/sections/_courses.html" %}
+            {% elif active_section == "assigned-exams" %}
+                {% include "accounts/profile/sections/_assigned_exams.html" %}
+            {% elif active_section == "assigned-courses" %}
+                {% include "accounts/profile/sections/_assigned_courses.html" %}
+            {% elif active_section == "my-results" %}
+                {% include "accounts/profile/sections/_my_results.html" %}
+            {% elif active_section == "pending-answers" %}
+                {% include "accounts/profile/sections/_pending_answers.html" %}
+            {% elif active_section == "groups" %}
+                {% include "accounts/profile/sections/_groups.html" %}
+            {% elif active_section == "pending-post-approvals" %}
+                {% include "accounts/profile/sections/_pending_post_approvals.html" %}
+            {% elif active_section == "pending-review" %}
+                {% include "accounts/profile/sections/_pending_review.html" %}
+            {% elif active_section == "review-results" %}
+                {% include "accounts/profile/sections/_review_results.html" %}
+            {% elif active_section == "role-assignment" %}
+                {% include "accounts/profile/sections/_role_assignment.html" %}
+            {% elif active_section == "student-organization-request" %}
+                {% include "accounts/profile/sections/_student_org_request.html" %}
+            {% elif active_section == "student-organization-management" %}
+                {% include "accounts/profile/sections/_student_org_management.html" %}
+            {% elif active_section == "permission-editor" %}
+                {% include "accounts/profile/sections/_permission_editor.html" %}
+            {% elif active_section == "manage-roles" %}
+                {% include "accounts/profile/sections/_manage_roles.html" %}
+            {% elif active_section == "create-category" %}
+                {% include "accounts/profile/sections/_create_category.html" %}
+            {% elif active_section == "category-management" %}
+                {% include "accounts/profile/sections/_category_management.html" %}
+            {% elif active_section == "superadmin-org-features" %}
+                {% include "accounts/profile/sections/_superadmin_org_features.html" %}
+            {% elif active_section == "superadmin-organizations" %}
+                {% include "accounts/profile/sections/_superadmin_organizations.html" %}
+            {% elif active_section == "superadmin-users" %}
+                {% include "accounts/profile/sections/_superadmin_user_management.html" %}
+            {% elif active_section == "superadmin-ai" %}
+                {% include "accounts/profile/sections/_superadmin_ai_settings.html" %}
+            {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
+                {% include "accounts/profile/sections/_superadmin_contact_messages.html" %}
+            {% elif active_section == "statistics" %}
+                {% include "accounts/profile/sections/_statistics.html" %}
+            {% elif active_section == "edit-profile" %}
+                {% include "accounts/profile/sections/_edit_profile.html" %}
+            {% elif active_section == "change-password" %}
+                {% include "accounts/profile/sections/_change_password.html" %}
+            {% else %}
+                {# Naməlum və ya shortcut section: profile-info-ya fallback. #}
+                {% include "accounts/profile/sections/_profile_info.html" %}
+                {% include "accounts/profile/sections/_shortcut_sections.html" %}
             {% endif %}
-            {% include "accounts/profile/sections/_statistics.html" %}
-            {% include "accounts/profile/sections/_edit_profile.html" %}
-            {% include "accounts/profile/sections/_change_password.html" %}
+
+            {# Delete-account modalı sidebar düyməsindən hər bölmədə işə düşməlidir. #}
             {% include "accounts/profile/sections/_delete_account.html" %}
-            {% include "accounts/profile/sections/_shortcut_sections.html" %}
             {% endif %}
         </div>
     </main>

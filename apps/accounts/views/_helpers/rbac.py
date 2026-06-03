@@ -104,13 +104,36 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, orga
         )
 
 
-def _collect_actor_permissions(user, organization):
+def _collect_actor_permissions(user, organization, *, request=None):
     """
     Return two sets:
     1. effective permissions user currently has in org
     2. explicitly grantable permissions declared as `grant:<permission>` in role permissions
+
+    P1.4 — Per-request memoization (təhlükəsiz):
+    Eyni request boyunca eyni (user_id, organization_id) cütü üçün təkrar
+    DB sorğusu olmaması üçün nəticə `request._actor_perms_cache` dict-ində
+    saxlanılır. Cross-request cache yoxdur — RLS və icazə dəyişiklikləri
+    request başında həmişə yenidən qiymətləndirilir.
     """
     from apps.organizations.models import Membership
+
+    user_id = getattr(user, "pk", None) or getattr(user, "id", None)
+    org_id = getattr(organization, "pk", None) or getattr(organization, "id", None)
+    cache_key = (user_id, org_id)
+    cache_owner = request if request is not None else None
+    if cache_owner is not None and user_id is not None and org_id is not None:
+        cache = getattr(cache_owner, "_actor_perms_cache", None)
+        if cache is None:
+            cache = {}
+            try:
+                cache_owner._actor_perms_cache = cache
+            except Exception:  # noqa: BLE001 — request obyekti immutable ola bilər
+                cache_owner = None
+        if cache_owner is not None and cache_key in cache:
+            cached_effective, cached_grantable = cache[cache_key]
+            # Cache-i mutasiya etməmək üçün surət qaytarırıq.
+            return set(cached_effective), set(cached_grantable)
 
     effective_permissions = set()
     grantable_permissions = set()
@@ -122,6 +145,11 @@ def _collect_actor_permissions(user, organization):
                 grantable_permissions.add(permission.split("grant:", 1)[1].strip())
             else:
                 effective_permissions.add(permission)
+
+    if cache_owner is not None and user_id is not None and org_id is not None:
+        cache = getattr(cache_owner, "_actor_perms_cache", None)
+        if cache is not None:
+            cache[cache_key] = (set(effective_permissions), set(grantable_permissions))
 
     return effective_permissions, grantable_permissions
 
