@@ -52,6 +52,18 @@ urlpatterns = [
     # Profile
     path("profile/", views.user_profile, name="profile"),
     path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),
+    # P3.1 + P3.2 — progressive enhancement endpoints. Heç bir mövcud URL
+    # toxunulmur; bunlar JS-li klientlər üçün lazy-load üçündür.
+    path(
+        "profile/api/sections/<str:section>/",
+        views.profile_section_fragment,
+        name="profile_section_fragment",
+    ),
+    path(
+        "profile/api/badges/",
+        views.profile_badges_api,
+        name="profile_badges_api",
+    ),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
     path("users/<str:username>/", views.public_user_profile, name="public_profile"),
     # Role management

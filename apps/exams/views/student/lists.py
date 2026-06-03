@@ -49,7 +49,7 @@ def assigned_student_exam_list(request):
             )
         )
         .distinct()
-        .select_related("author", "organization")
+        .select_related("author", "organization", "course")
         .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
     )
 
@@ -65,10 +65,28 @@ def assigned_student_exam_list(request):
     # Sıralama
     exams_qs = exams_qs.order_by("-created_at")
 
-    # 2) PYTHON MƏNTİQİ (Permissions & List Construction) — EYNİDİR
-    exam_items = []
+    # 2) P2.C — Paginasiya queryset səviyyəsində.
+    # Köhnə davranış: bütün queryset Python-a çəkilirdi, sonra paginate olunurdu.
+    # Yeni davranış: candidate qs üzərindən paginate edirik, sonra yalnız səhifədə
+    # olan exam-lar üçün ağır model metodlarını (can_user_see/can_user_start/
+    # attempts_left_for) çağırırıq. Bu sayda çağırış N=ümumi→N=səhifə_ölçüsü
+    # qədər azalır.
+    #
+    # Mühüm: total_count qiyməti candidate qs-ə əsaslanır, görünməyən imtahanlar
+    # (məs. attempts_left==0, can_user_see=False) total-a daxildir. UX aspektində
+    # bir-iki "boş" görünə bilər, lakin biznes loqika pozulmur — visibility
+    # yoxlamasından keçməyən exam-lar siyahıya əlavə edilmir.
+    paginator = Paginator(exams_qs, 2)
+    page_number = request.GET.get("page")
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
-    for exam in exams_qs:
+    exam_items = []
+    for exam in page_obj.object_list:
         # bu user ümumiyyətlə bu imtahan kartını görməlidir?
         if not exam.can_user_see(user):
             continue
@@ -104,16 +122,9 @@ def assigned_student_exam_list(request):
             }
         )
 
-    # 3) PAGINATION (Səhifələmə) — eyni saxla
-    paginator = Paginator(exam_items, 2)
-    page_number = request.GET.get("page")
-
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+    # Pagination obyektinin object_list-i visible item-lərlə əvəz edirik ki,
+    # template `{% for item in page_obj %}` davranışı dəyişməsin.
+    page_obj.object_list = exam_items
 
     context = {
         "page_obj": page_obj,
@@ -158,7 +169,7 @@ def student_exam_list(request):
         )
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
         .distinct()
-        .select_related("author", "organization")
+        .select_related("author", "organization", "course")
         .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
     )
 
@@ -173,10 +184,21 @@ def student_exam_list(request):
 
     exams_qs = exams_qs.order_by("-created_at")
 
-    exam_items = []
+    # P2.C — Paginasiya queryset səviyyəsində (eyni rasional, assigned versiyada
+    # olduğu kimi). Yalnız səhifədə olan exam-lar üçün ağır model metodları
+    # çağırılır. `is_after_end` filtri SQL səviyyəsində artıq tətbiq olunub.
+    paginator = Paginator(exams_qs, 2)
+    page_number = request.GET.get("page")
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
-    for exam in exams_qs:
-        # 2) SAFETY: hər ehtimala qarşı (timezone / query bypass)
+    exam_items = []
+    for exam in page_obj.object_list:
+        # SAFETY: hər ehtimala qarşı (timezone / query bypass)
         if exam.is_after_end():
             continue
 
@@ -208,15 +230,7 @@ def student_exam_list(request):
             }
         )
 
-    paginator = Paginator(exam_items, 2)
-    page_number = request.GET.get("page")
-
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+    page_obj.object_list = exam_items
 
     context = {
         "page_obj": page_obj,

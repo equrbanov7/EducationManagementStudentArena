@@ -101,6 +101,17 @@ document.addEventListener("DOMContentLoaded", function () {
     var sectionLinks = document.querySelectorAll(".js-profile-section-link[data-section]");
     var sidebarSectionLinks = document.querySelectorAll(".profile-sidebar .js-profile-section-link[data-section]");
     var sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
+
+    // P3 — Progressive enhancement: AJAX-safe section adları və endpoint URL şablonu.
+    // Atribut boş olarsa AJAX yolu deaktivləşir, brauzer normal naviqasiya edir.
+    var ajaxSectionsRaw = profilePage.getAttribute("data-ajax-sections") || "";
+    var ajaxSafeSections = ajaxSectionsRaw
+        .split(",")
+        .map(function (s) { return s.trim(); })
+        .filter(function (s) { return !!s; });
+    var sectionFragmentUrlTemplate = profilePage.getAttribute("data-section-fragment-url") || "";
+    var sectionsHost = document.getElementById("profileSectionsContainer");
+    var ajaxLoadInFlight = null; // AbortController, ya da null
     var sectionTitle = document.getElementById("profileSectionTitle");
     var createExamModal = document.getElementById("createExamModal");
     var createExamModalBody = document.getElementById("createExamModalBody");
@@ -267,13 +278,156 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function setActiveSection(section, updateUrl) {
-        var hasTargetPanel = false;
+    // P3 — Lazy load helpers.
+    function isAjaxSafeSection(section) {
+        return ajaxSafeSections.indexOf(section) !== -1
+            && sectionFragmentUrlTemplate
+            && sectionsHost
+            && typeof window.fetch === "function";
+    }
 
+    function buildSectionFragmentUrl(section) {
+        // Backend URL şablonunda `__SECTION__` yer-tutucusu var.
+        return sectionFragmentUrlTemplate.replace("__SECTION__", encodeURIComponent(section));
+    }
+
+    function updateSidebarActiveState(section) {
+        sidebarSectionLinks.forEach(function (link) {
+            var isMatch = link.getAttribute("data-section") === section;
+            link.classList.toggle("active", isMatch);
+            if (isMatch && sectionTitle) {
+                sectionTitle.textContent = link.getAttribute("data-title") || defaultSectionTitle;
+            }
+        });
+        openSidebarMenuGroupForSection(section);
+    }
+
+    function pushSectionUrl(section) {
+        if (!window.history || !window.history.pushState) {
+            return;
+        }
+        try {
+            var nextUrl = new URL(profileBaseUrl, window.location.origin);
+            nextUrl.searchParams.set("section", section);
+            window.history.pushState({ section: section, ajax: true }, "", nextUrl.pathname + nextUrl.search);
+        } catch (e) { /* ignore */ }
+    }
+
+    function extractSectionFromHtml(html, section) {
+        try {
+            var tmp = document.createElement("div");
+            tmp.innerHTML = html;
+            var selector = '[data-profile-section-panel="' + section + '"]';
+            return tmp.querySelector(selector);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function showSectionLoading() {
+        if (sectionsHost) {
+            sectionsHost.setAttribute("aria-busy", "true");
+            sectionsHost.classList.add("is-loading");
+        }
+    }
+
+    function clearSectionLoading() {
+        if (sectionsHost) {
+            sectionsHost.removeAttribute("aria-busy");
+            sectionsHost.classList.remove("is-loading");
+        }
+    }
+
+    /**
+     * AJAX-load the given section. Returns a Promise that resolves to true on
+     * success (DOM was swapped) or false on any failure (caller should fall
+     * back to a full page navigation).
+     */
+    function tryAjaxLoadSection(section, options) {
+        options = options || {};
+        if (!isAjaxSafeSection(section)) {
+            return Promise.resolve(false);
+        }
+        // Cancel any in-flight load.
+        if (ajaxLoadInFlight) {
+            try { ajaxLoadInFlight.abort(); } catch (e) { /* ignore */ }
+        }
+        var controller = (typeof AbortController === "function") ? new AbortController() : null;
+        ajaxLoadInFlight = controller;
+        showSectionLoading();
+
+        var fetchOpts = {
+            credentials: "same-origin",
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        };
+        if (controller) {
+            fetchOpts.signal = controller.signal;
+        }
+
+        return fetch(buildSectionFragmentUrl(section), fetchOpts)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("http_" + response.status);
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                if (!payload || payload.ok !== true || !payload.html) {
+                    throw new Error("bad_payload");
+                }
+                var node = extractSectionFromHtml(payload.html, section);
+                if (!node) {
+                    throw new Error("section_not_in_response");
+                }
+                // Mövcud panel-i ya əvəz et, ya da host-a əlavə et.
+                var existing = sectionsHost.querySelector(
+                    '[data-profile-section-panel="' + section + '"]'
+                );
+                node.classList.add("is-active");
+                if (existing) {
+                    existing.parentNode.replaceChild(node, existing);
+                } else {
+                    // Mövcud aktiv panel-ləri sil və yenisini əlavə et.
+                    var oldPanels = sectionsHost.querySelectorAll("[data-profile-section-panel]");
+                    oldPanels.forEach(function (p) { p.parentNode.removeChild(p); });
+                    sectionsHost.appendChild(node);
+                }
+                // Sidebar/Title/URL yenilə
+                updateSidebarActiveState(section);
+                if (options.updateUrl !== false) {
+                    pushSectionUrl(section);
+                }
+                // sectionPanels referansını təzələ ki, gələcək setActiveSection-larda işləsin.
+                sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
+                // Mobile-də sidebar-ı bağla.
+                if (typeof isMobileViewport === "function" && isMobileViewport()) {
+                    setSidebarCollapsed(true);
+                }
+                return true;
+            })
+            .catch(function (err) {
+                // Fail soft — caller will full-page navigate.
+                return false;
+            })
+            .then(function (result) {
+                clearSectionLoading();
+                if (ajaxLoadInFlight === controller) {
+                    ajaxLoadInFlight = null;
+                }
+                return result;
+            });
+    }
+
+    function setActiveSection(section, updateUrl) {
+        // P2 cleanup — Hədəf paneli olmadıqda mövcud "is-active"-i ləğv etmə,
+        // brauzeri təbii naviqasiyaya burax. Köhnə davranış cari paneldən
+        // is-active-i bir an üçün silirdi (kiçik flash).
+        var hasTargetPanel = false;
         sectionPanels.forEach(function (panel) {
-            var isMatch = panel.getAttribute("data-profile-section-panel") === section;
-            panel.classList.toggle("is-active", isMatch);
-            if (isMatch) {
+            if (panel.getAttribute("data-profile-section-panel") === section) {
                 hasTargetPanel = true;
             }
         });
@@ -281,6 +435,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!hasTargetPanel) {
             return false;
         }
+
+        sectionPanels.forEach(function (panel) {
+            var isMatch = panel.getAttribute("data-profile-section-panel") === section;
+            panel.classList.toggle("is-active", isMatch);
+        });
 
         sidebarSectionLinks.forEach(function (link) {
             var isMatch = link.getAttribute("data-section") === section;
@@ -1005,11 +1164,51 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            // P3 — AJAX-safe section üçün lazy load cəhd edirik.
+            // Uğursuz olarsa fail-soft → təbii naviqasiya.
+            if (isAjaxSafeSection(section)) {
+                event.preventDefault();
+                tryAjaxLoadSection(section, { updateUrl: true }).then(function (ok) {
+                    if (!ok) {
+                        // Fallback: tam səhifə naviqasiyası.
+                        var nextUrl = new URL(profileBaseUrl, window.location.origin);
+                        nextUrl.searchParams.set("section", section);
+                        window.location.href = nextUrl.pathname + nextUrl.search;
+                    }
+                });
+                return;
+            }
+
+            // Non-AJAX section — köhnə davranış: setActiveSection cəhd, alınmazsa təbii naviqasiya.
             if (setActiveSection(section, true)) {
                 event.preventDefault();
                 if (isMobileViewport()) {
                     setSidebarCollapsed(true);
                 }
+            }
+        });
+    });
+
+    // P3 — Browser back/forward dəstəyi (yalnız AJAX ilə naviqasiya etdiyimiz state-lər üçün).
+    window.addEventListener("popstate", function (event) {
+        var state = event.state || {};
+        var section = state.section;
+        if (!section) {
+            // URL-dən parse et (AJAX rejimi xaricində daxil olunan səhifə)
+            try {
+                var params = new URLSearchParams(window.location.search);
+                section = params.get("section") || defaultSection;
+            } catch (e) {
+                section = defaultSection;
+            }
+        }
+        if (!isAjaxSafeSection(section)) {
+            // Tam reload kömək edir — köhnə davranışı saxla.
+            return;
+        }
+        tryAjaxLoadSection(section, { updateUrl: false }).then(function (ok) {
+            if (!ok) {
+                window.location.reload();
             }
         });
     });

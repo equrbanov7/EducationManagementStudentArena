@@ -20,21 +20,25 @@
 <div class="profile-page"
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
-     data-default-section-title="{% trans 'title' context 'profile.sidebar' %}">
+     data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
+     {# P3 — AJAX-safe section-ların siyahısı; JS yalnız bunlar üçün lazy load edir.
+        Atribut boş və ya yox olarsa progressive enhancement deaktivdir. #}
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals"
+     data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
+     data-badges-url="{% url 'accounts:profile_badges_api' %}">
     {% include "accounts/profile/_sidebar.html" %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
- 
+
     <main class="profile-main">
         {% include "accounts/profile/_messages.html" %}
             {% include "accounts/profile/_header.html" %}
 
-        <div class="profile-sections">
+        
+        <div class="profile-sections" id="profileSectionsContainer" data-profile-sections-host="1">
             {% if direct_profile_section_template %}
             {% include direct_profile_section_template %}
             {% else %}
-            {# P1.2 — Yalnız aktiv section partial-ını render edirik.
-               profile-info üçün shortcut/delete-account modalı və profil identity
-               partial-ları lazım olduğu üçün onları profile-info-da saxlayırıq. #}
+           
             {% if active_section == "profile-info" %}
                 {% include "accounts/profile/sections/_profile_info.html" %}
             {% elif active_section == "notifications" %}

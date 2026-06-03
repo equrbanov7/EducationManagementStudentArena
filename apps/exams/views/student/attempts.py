@@ -34,12 +34,22 @@ from ._helpers import (
 )
 
 
-def _attempt_answers_queryset(attempt):
-    return (
+def _attempt_answers_queryset(attempt, *, question_ids=None):
+    """
+    Return the answers (with question/options/files prefetched) for `attempt`.
+
+    P2.E — when `question_ids` is provided (autosave fast-path) the queryset is
+    narrowed to only the changed questions so we don't load the full answer set
+    for every autosave request.
+    """
+    qs = (
         attempt.answers.select_related("question", "question__exam", "question__block")
         .prefetch_related("question__options", "selected_options", "files")
         .order_by("id")
     )
+    if question_ids is not None:
+        qs = qs.filter(question_id__in=list(question_ids))
+    return qs
 
 
 def _selected_option_ids_from_request(request, question):
@@ -161,6 +171,8 @@ def _save_written_answer_if_changed(request, answer, question, *, allow_binary_u
 
 
 def _previous_attempts_for_context(request, exam, attempt):
+    # P2.D — select_related ile exam-ı tək sorğuda gətir; annotate_attempt_result_visibility
+    # `attempt.exam.*` field-lərinə müraciət edir.
     previous_attempts = annotate_attempt_result_visibility(
         list(
             ExamAttempt.objects.filter(
@@ -169,6 +181,7 @@ def _previous_attempts_for_context(request, exam, attempt):
                 status__in=["submitted", "graded", "expired"],
             )
             .exclude(id=attempt.id)
+            .select_related("exam")
             .order_by("-started_at")
         )
     )
@@ -227,8 +240,16 @@ def start_exam(request, slug):
 @login_required
 def take_exam(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
+    # P2.D — select_related ile attempt + exam + user + exam.author/course-u tək
+    # sorğuda yüklə (əvvəlcə hər biri ayrı round-trip idi).
     attempt = get_object_or_404(
-        ExamAttempt,
+        ExamAttempt.objects.select_related(
+            "exam",
+            "exam__author",
+            "exam__course",
+            "exam__organization",
+            "user",
+        ),
         id=attempt_id,
         exam__in=tenant_scoped_exams(request),
         exam__slug=slug,
@@ -261,14 +282,43 @@ def take_exam(request, slug, attempt_id):
 
         mark_student_returned(attempt)
 
-    # Sualları Attempt-ə bağlanmış cavablardan götürürük
-    answers = list(_attempt_answers_queryset(attempt))
+    # P2.E — Autosave fast-path: yalnız dəyişən sual(lar) üçün cavabları yüklə.
+    # POST + action=="autosave" + changed_questions[] dolu olduqda full answer-set
+    # əvəzinə yalnız o sualları gətiririk. GET-də və finish/submit/save_draft-də
+    # hələ də tam answer-set lazımdır (timer, template render, recalculate_score).
+    # Coding exam-lar üçün ayrı `coding_autosave` view-i var — burada fast-path
+    # yalnız test/written exam üçün aktivdir.
+    is_autosave_post = (
+        request.method == "POST"
+        and (request.POST.get("submit_action") or "").strip() == "autosave"
+        and exam.exam_type != "coding"
+    )
+    autosave_question_ids_for_fetch = None
+    if is_autosave_post:
+        raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
+        parsed_ids = set()
+        for raw_id in raw_ids:
+            try:
+                parsed_ids.add(int(raw_id))
+            except (TypeError, ValueError):
+                continue
+        if parsed_ids:
+            autosave_question_ids_for_fetch = parsed_ids
 
-    if not answers:
-        generate_random_questions_for_attempt(attempt)
-        answers = list(_attempt_answers_queryset(attempt))
+    answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
 
+    # P2 cleanup — Əgər autosave fast-path işləyirsə amma DB-də o sual üçün
+    # answer hələ yaranmayıbsa, generate-i bir dəfə çağır və yenidən yüklə.
+    # Bu, GET-dən qabaq autosave-in gəlməsi kimi nadir, lakin sıfır olmayan
+    # ssenariyə qarşı təhlükəsizlik xəttidir.
     if not answers:
+        # Yalnız attempt üçün heç bir answer yoxdursa generate çağırırıq.
+        # Bu count tək sorğudur; fast-path-də yalnız ehtiyac olduqda işləyir.
+        if not attempt.answers.exists():
+            generate_random_questions_for_attempt(attempt)
+        answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+
+    if not answers and autosave_question_ids_for_fetch is None:
         message_key = (
             "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         )

@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
@@ -402,6 +402,14 @@ def user_profile(request):
         assigned_exams_count = assigned_exams_qs.count()
         assigned_courses_count = enrolled_courses_qs.count()
 
+        # P2.A — Sidebar badge-ləri ucuz aqreqatla hesabla (P1-də qalan minor regresiya).
+        # Hər biri 4-5 cüt COUNT(*); tam siyahıları yükləməkdən qat-qat ucuzdur.
+        from .._dashboard_helpers.cheap_counts import (
+            count_assigned_tasks,
+            count_my_results,
+            count_pending_answers,
+        )
+
         # Ağır siyahılar yalnız müvafiq aktiv bölmə üçün.
         if active_section == "assigned-exams":
             assigned_task_items, assigned_task_counts, assigned_tasks_active_filter = _collect_assigned_tasks(
@@ -412,9 +420,9 @@ def user_profile(request):
             assigned_tasks_count = assigned_task_counts.get("all", 0)
             assigned_tasks_search_query = (request.GET.get("assigned_search", "") or "").strip()
         else:
-            # Sidebar badge üçün ucuz təxmini sayğac — yalnız imtahanlar.
-            # Tam aqreqasiya (assignments/labs/projects) yalnız bölmə açıldıqda hesablanır.
-            assigned_tasks_count = assigned_exams_count
+            # Cheap aggregate (P2.A) — tam `_collect_assigned_tasks` məntiqi ilə uyğun
+            # üzv qaydaları, lakin heç bir formatting/ordering yoxdur.
+            assigned_tasks_count = count_assigned_tasks(request, request.user)
 
         if active_section == "assigned-courses":
             assigned_courses_search_query = (request.GET.get("assigned_course_search", "") or "").strip()
@@ -441,6 +449,9 @@ def user_profile(request):
                 results_search=my_results_search_query,
             )
             my_results_count = my_result_counts.get("all", 0)
+        else:
+            # P2.A — sidebar badge üçün ucuz aqreqat.
+            my_results_count = count_my_results(request, request.user)
 
         if active_section == "pending-answers":
             (
@@ -454,71 +465,85 @@ def user_profile(request):
                 filter_type=request.GET.get("pending_type"),
             )
             pending_answers_count = pending_answer_counts.get("all", 0)
+        else:
+            # P2.A — sidebar badge üçün ucuz aqreqat.
+            pending_answers_count = count_pending_answers(request, request.user)
 
     pending_review_count = 0
     evaluated_review_count = 0
     if capabilities["can_review_submissions"]:
+        from django.db.models import Count
+
         review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
-        pending_review_count = (
-            ExamAttempt.objects.filter(
-                exam__in=my_exams_qs,
-                status__in=["submitted", "expired"],
-            )
-            .filter(Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
-            .exclude(exam__exam_type="test")
-            .count()
-        )
-        pending_review_count += (
-            Submission.objects.filter(assignment__course__in=teacher_courses)
-            .filter(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff))
-            .count()
-        )
-        pending_review_count += (
-            ProjectSubmission.objects.filter(project__course__in=teacher_courses)
-            .filter(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff))
-            .count()
-        )
-        pending_review_count += (
-            LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses)
-            .filter(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff))
-            .count()
+
+        # P2.B — 8 ayrı COUNT-u 4 aqreqasiyaya endir.
+        # Hər model üçün eyni filtrlər iki Q ifadəsi ilə tək sorğuda hesablanır.
+
+        exam_attempt_counts = ExamAttempt.objects.filter(
+            exam__in=my_exams_qs,
+            status__in=["submitted", "expired"],
+        ).aggregate(
+            pending=Count(
+                "id",
+                filter=(
+                    ~Q(exam__exam_type="test")
+                    & (Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
+                ),
+            ),
+            evaluated=Count(
+                "id",
+                filter=(
+                    Q(exam__exam_type="test")
+                    | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                    | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+                ),
+            ),
         )
 
+        submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+
+        project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+
+        lab_counts = LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+
+        pending_review_count = (
+            (exam_attempt_counts.get("pending") or 0)
+            + (submission_counts.get("pending") or 0)
+            + (project_counts.get("pending") or 0)
+            + (lab_counts.get("pending") or 0)
+        )
         evaluated_review_count = (
-            ExamAttempt.objects.filter(
-                exam__in=my_exams_qs,
-                status__in=["submitted", "expired"],
-            )
-            .filter(
-                Q(exam__exam_type="test")
-                | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
-                | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
-            )
-            .count()
-        )
-        evaluated_review_count += (
-            Submission.objects.filter(
-                assignment__course__in=teacher_courses,
-                status="graded",
-            )
-            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .count()
-        )
-        evaluated_review_count += (
-            ProjectSubmission.objects.filter(
-                project__course__in=teacher_courses,
-                status="graded",
-            )
-            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .count()
-        )
-        evaluated_review_count += (
-            LabSubmission.objects.filter(
-                assignment__lab__course__in=teacher_courses,
-                status="graded",
-            )
-            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
-            .count()
+            (exam_attempt_counts.get("evaluated") or 0)
+            + (submission_counts.get("evaluated") or 0)
+            + (project_counts.get("evaluated") or 0)
+            + (lab_counts.get("evaluated") or 0)
         )
 
     teacher_groups = []

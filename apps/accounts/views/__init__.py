@@ -70,6 +70,8 @@ from .post_management import (
 # Profile views
 from .profile import (
     profile_avatar,
+    profile_badges_api,
+    profile_section_fragment,
     public_user_profile,
     statistics_export_csv,
     user_profile,
@@ -107,6 +109,8 @@ __all__ = [
     "public_user_profile",
     "profile_avatar",
     "statistics_export_csv",
+    "profile_section_fragment",
+    "profile_badges_api",
     # Dashboard
     "dashboard",
     "teacher_dashboard",
