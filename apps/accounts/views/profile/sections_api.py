@@ -31,8 +31,10 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
+
 # from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
+
 from apps.accounts.models import UserProfile
 from apps.notifications.services import (
     build_profile_notification_state,
