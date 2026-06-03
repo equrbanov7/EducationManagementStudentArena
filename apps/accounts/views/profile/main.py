@@ -284,8 +284,12 @@ def user_profile(request):
     else:
         visible_courses_qs = created_courses_qs
 
-    my_courses = list(visible_courses_qs[:10])
+    # P1.1 — Sidebar/profile-info üçün hər zaman ucuz sayğacları saxla,
+    # ağır siyahıları yalnız aktiv bölmə üçün hesabla.
     courses_count = visible_courses_qs.count()
+    my_courses = []
+    if active_section == "courses":
+        my_courses = list(visible_courses_qs[:10])
 
     my_created_courses = []
     my_created_courses_count = 0
@@ -294,23 +298,29 @@ def user_profile(request):
     my_exams_filter_type = ""
     my_exams_page_obj = None
     if capabilities["can_view_owned_learning"]:
-        my_created_courses = list(created_courses_qs[:10])
+        # Sayğac sidebar/profile-info üçün hər zaman ucuz olaraq qalır.
         my_created_courses_count = created_courses_qs.count()
+        if active_section == "my-courses":
+            my_created_courses = list(created_courses_qs[:10])
 
-        # --- Search ---
-        my_exams_search_query = (request.GET.get("exam_q", "") or "").strip()
-        if my_exams_search_query:
-            my_exams_qs = my_exams_qs.filter(title__icontains=my_exams_search_query)
+        if active_section == "my-exams":
+            # --- Search ---
+            my_exams_search_query = (request.GET.get("exam_q", "") or "").strip()
+            if my_exams_search_query:
+                my_exams_qs = my_exams_qs.filter(title__icontains=my_exams_search_query)
 
-        # --- Filter by exam type ---
-        my_exams_filter_type = (request.GET.get("exam_type", "") or "").strip()
-        if my_exams_filter_type not in {"", "test", "written", "coding"}:
-            my_exams_filter_type = ""
-        if my_exams_filter_type:
-            my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
+            # --- Filter by exam type ---
+            my_exams_filter_type = (request.GET.get("exam_type", "") or "").strip()
+            if my_exams_filter_type not in {"", "test", "written", "coding"}:
+                my_exams_filter_type = ""
+            if my_exams_filter_type:
+                my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
 
-        my_exams_count = my_exams_qs.count()
-        my_exams_page_obj = Paginator(my_exams_qs, 6).get_page(request.GET.get("exam_page"))
+            my_exams_count = my_exams_qs.count()
+            my_exams_page_obj = Paginator(my_exams_qs, 6).get_page(request.GET.get("exam_page"))
+        else:
+            # Yalnız sidebar/profile-info üçün ucuz sayğac.
+            my_exams_count = my_exams_qs.count()
 
     user_posts = None
     posts_count = 0
@@ -327,16 +337,18 @@ def user_profile(request):
             .prefetch_related("approval_logs")
             .order_by("-created_at")
         )
+        # Sidebar/profile-info üçün ucuz sayğac hər zaman.
         posts_count = user_posts_qs.count()
-        user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
-        post_category_tree = get_post_category_tree()
-        post_category_root_options, post_category_subcategory_options = build_post_category_picker_options(
-            post_category_tree
-        )
-        post_creation_requires_approval = author_requires_post_approval(request.user)
-        can_publish, blocked_reason = can_user_publish_post(request.user)
-        posting_blocked = not can_publish
-        posting_blocked_reason = blocked_reason
+        if active_section in {"posts", "create-post"}:
+            user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
+            post_category_tree = get_post_category_tree()
+            post_category_root_options, post_category_subcategory_options = build_post_category_picker_options(
+                post_category_tree
+            )
+            post_creation_requires_approval = author_requires_post_approval(request.user)
+            can_publish, blocked_reason = can_user_publish_post(request.user)
+            posting_blocked = not can_publish
+            posting_blocked_reason = blocked_reason
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -386,50 +398,62 @@ def user_profile(request):
             "-start_datetime",
             "-created_at",
         )
+        # Sidebar üçün ucuz sayğaclar — hər zaman.
         assigned_exams_count = assigned_exams_qs.count()
-        assigned_task_items, assigned_task_counts, assigned_tasks_active_filter = _collect_assigned_tasks(
-            request,
-            filter_type=request.GET.get("assigned_type"),
-            search=request.GET.get("assigned_search"),
-        )
-        assigned_tasks_count = assigned_task_counts.get("all", 0)
-        assigned_tasks_search_query = (request.GET.get("assigned_search", "") or "").strip()
-
         assigned_courses_count = enrolled_courses_qs.count()
-        assigned_courses_search_query = (request.GET.get("assigned_course_search", "") or "").strip()
-        assigned_courses_qs = enrolled_courses_qs
-        if assigned_courses_search_query:
-            assigned_courses_qs = assigned_courses_qs.filter(
-                Q(title__icontains=assigned_courses_search_query)
-                | Q(description__icontains=assigned_courses_search_query)
-            )
-        assigned_courses = list(assigned_courses_qs[:20])
 
-        my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
-            request,
-            filter_type=request.GET.get("results_type"),
-            search=request.GET.get("results_search"),
-        )
-        my_results_search_query = (request.GET.get("results_search", "") or "").strip()
-        my_results_page_obj = Paginator(my_result_items, 6).get_page(request.GET.get(my_results_page_param))
-        my_result_items = my_results_page_obj
-        my_results_pagination_query = _query_string(
-            section="my-results",
-            results_type=my_results_active_filter,
-            results_search=my_results_search_query,
-        )
-        my_results_count = my_result_counts.get("all", 0)
-        (
-            pending_answer_items,
-            pending_answer_counts,
-            pending_answers_active_filter,
-            pending_answers_search_query,
-        ) = _collect_pending_answer_items(
-            request,
-            search=request.GET.get("pending_search"),
-            filter_type=request.GET.get("pending_type"),
-        )
-        pending_answers_count = pending_answer_counts.get("all", 0)
+        # Ağır siyahılar yalnız müvafiq aktiv bölmə üçün.
+        if active_section == "assigned-exams":
+            assigned_task_items, assigned_task_counts, assigned_tasks_active_filter = _collect_assigned_tasks(
+                request,
+                filter_type=request.GET.get("assigned_type"),
+                search=request.GET.get("assigned_search"),
+            )
+            assigned_tasks_count = assigned_task_counts.get("all", 0)
+            assigned_tasks_search_query = (request.GET.get("assigned_search", "") or "").strip()
+        else:
+            # Sidebar badge üçün ucuz təxmini sayğac — yalnız imtahanlar.
+            # Tam aqreqasiya (assignments/labs/projects) yalnız bölmə açıldıqda hesablanır.
+            assigned_tasks_count = assigned_exams_count
+
+        if active_section == "assigned-courses":
+            assigned_courses_search_query = (request.GET.get("assigned_course_search", "") or "").strip()
+            assigned_courses_qs = enrolled_courses_qs
+            if assigned_courses_search_query:
+                assigned_courses_qs = assigned_courses_qs.filter(
+                    Q(title__icontains=assigned_courses_search_query)
+                    | Q(description__icontains=assigned_courses_search_query)
+                )
+            assigned_courses = list(assigned_courses_qs[:20])
+
+        if active_section == "my-results":
+            my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
+                request,
+                filter_type=request.GET.get("results_type"),
+                search=request.GET.get("results_search"),
+            )
+            my_results_search_query = (request.GET.get("results_search", "") or "").strip()
+            my_results_page_obj = Paginator(my_result_items, 6).get_page(request.GET.get(my_results_page_param))
+            my_result_items = my_results_page_obj
+            my_results_pagination_query = _query_string(
+                section="my-results",
+                results_type=my_results_active_filter,
+                results_search=my_results_search_query,
+            )
+            my_results_count = my_result_counts.get("all", 0)
+
+        if active_section == "pending-answers":
+            (
+                pending_answer_items,
+                pending_answer_counts,
+                pending_answers_active_filter,
+                pending_answers_search_query,
+            ) = _collect_pending_answer_items(
+                request,
+                search=request.GET.get("pending_search"),
+                filter_type=request.GET.get("pending_type"),
+            )
+            pending_answers_count = pending_answer_counts.get("all", 0)
 
     pending_review_count = 0
     evaluated_review_count = 0
@@ -510,6 +534,8 @@ def user_profile(request):
     selected_group_students_filtered_count = 0
     group_students_search_query = (request.GET.get("student_q") or "").strip()
     group_students_pagination_query = ""
+    # student_member_groups profile-info üçün də göstərilir, ona görə yüngül
+    # variantı her zaman hazırlayırıq.
     student_member_groups_qs = (
         StudentGroup.objects.filter(students=request.user)
         .select_related("organization", "teacher")
@@ -522,7 +548,7 @@ def user_profile(request):
     group_form = None
     can_multi_assign_group_teachers = False
     groups_section_return_url = f"{reverse('accounts:profile')}?section=groups"
-    if "groups" in allowed_sections:
+    if "groups" in allowed_sections and active_section == "groups":
         if active_organization is not None:
             current_role_level = (
                 request.user._highest_role_level()
@@ -652,7 +678,10 @@ def user_profile(request):
     pending_post_approval_page_obj = None
     pending_post_approval_pagination_query = ""
     pending_post_approval_total_count = 0
-    if "pending-post-approvals" in allowed_sections:
+    # Sidebar badge üçün ucuz sayğacı bölmə qeyri-aktiv olanda da göstər.
+    if "pending-post-approvals" in allowed_sections and active_section != "pending-post-approvals":
+        pending_post_approval_count = count_pending_reviewable_posts(request.user)
+    if "pending-post-approvals" in allowed_sections and active_section == "pending-post-approvals":
         (
             pending_post_approval_items,
             pending_post_approval_search_query,
@@ -702,7 +731,7 @@ def user_profile(request):
     evaluated_review_submitted_order = "newest"
     evaluated_review_page_obj = None
     evaluated_review_pagination_query = ""
-    if "pending-review" in allowed_sections or "review-results" in allowed_sections:
+    if active_section == "pending-review" and "pending-review" in allowed_sections:
         (
             pending_review_items,
             pending_review_search_query,
@@ -726,6 +755,7 @@ def user_profile(request):
             pr_extra.append(f"pr_group={pending_review_filter_group}")
         pending_review_pagination_query = "&".join(pr_extra)
 
+    if active_section == "review-results" and "review-results" in allowed_sections:
         (
             evaluated_review_items,
             evaluated_review_search_query,
@@ -782,13 +812,17 @@ def user_profile(request):
         "sent_invites_page_param": "student_org_sent_invites_page",
         "sent_invites_pagination_query": "",
     }
+    # Sidebar `student_org_request_section.pending_invites_count` badge-i hər
+    # bölmədə görünməlidir, ona görə default olaraq notification_state-dən
+    # gələn ucuz dəyərləri buraya köçürürük. Tam dataset yalnız profile-info
+    # və ya öz tab-ı üçün `_build_student_org_request_section`-dən doldurulur.
     student_org_request_section = {
         "organizations": [],
         "search_query": "",
         "org_type_filter": "",
-        "pending_invites": [],
-        "pending_invites_count": 0,
-        "has_pending_invites": False,
+        "pending_invites": list(pending_student_invites or []),
+        "pending_invites_count": len(pending_student_invites or []),
+        "has_pending_invites": bool(pending_student_invites),
         "pending_student_requests": [],
         "pending_student_requests_count": 0,
         "has_pending_student_requests": False,
@@ -876,7 +910,12 @@ def user_profile(request):
     management_grantable_permissions = set()
     management_can_assign_roles = False
     management_min_level_ok = False
-    if (
+    _management_sections = {
+        "role-assignment",
+        "permission-editor",
+        "student-organization-management",
+    }
+    if active_section in _management_sections and (
         "role-assignment" in allowed_sections
         or "permission-editor" in allowed_sections
         or "student-organization-management" in allowed_sections
@@ -893,6 +932,7 @@ def user_profile(request):
             management_actor_permissions, management_grantable_permissions = _collect_actor_permissions(
                 request.user,
                 management_org,
+                request=request,
             )
             management_can_assign_roles = (
                 capabilities["is_superadmin"]
@@ -907,7 +947,7 @@ def user_profile(request):
             )
             management_min_level_ok = capabilities["is_superadmin"] or management_user_level >= 50
 
-    if "role-assignment" in allowed_sections:
+    if "role-assignment" in allowed_sections and active_section == "role-assignment":
         from apps.organizations.models import Membership, Role
 
         role_assignment_search = request.GET.get("q", request.GET.get("search", ""))
@@ -1005,7 +1045,7 @@ def user_profile(request):
                 unassigned_search=role_assignment_unassigned_search,
             )
 
-    if "student-organization-management" in allowed_sections:
+    if "student-organization-management" in allowed_sections and active_section == "student-organization-management":
         student_org_management_section = _build_student_org_management_section(
             request=request,
             organization=management_org,
@@ -1042,7 +1082,13 @@ def user_profile(request):
             organization_type=student_org_management_section["organization_type_filter"],
         )
 
-    if "student-organization-request" in allowed_sections:
+    # `_profile_org_invites.html` profile-info üçün də student_org_request_section-ın
+    # bir neçə açarına müraciət edir (has_pending_invites/current_organization/pending_invites).
+    # Ona görə profile-info və müvafiq tab üçün hazırlayırıq.
+    if "student-organization-request" in allowed_sections and active_section in {
+        "student-organization-request",
+        "profile-info",
+    }:
         student_org_request_section = _build_student_org_request_section(request=request, profile=profile)
         student_org_request_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),
@@ -1051,7 +1097,7 @@ def user_profile(request):
             student_org_request_type=student_org_request_section["org_type_filter"],
         )
 
-    if "permission-editor" in allowed_sections:
+    if "permission-editor" in allowed_sections and active_section == "permission-editor":
         from apps.organizations.models import Role
         from apps.organizations.permissions import PERMISSION_CATEGORIES
 
@@ -1086,7 +1132,7 @@ def user_profile(request):
             permission_editor_section["roles"] = roles
             permission_editor_section["selected_role"] = selected_permission_role
 
-    if "manage-roles" in allowed_sections:
+    if "manage-roles" in allowed_sections and active_section == "manage-roles":
         manage_roles_search = request.GET.get("manage_roles_search", "")
         manage_roles_org = _get_active_organization(request)
         _bind_active_role_context(
@@ -1162,7 +1208,15 @@ def user_profile(request):
             manage_roles_search=manage_roles_search,
         )
 
-    if "superadmin-org-features" in allowed_sections or "superadmin-organizations" in allowed_sections:
+    # Superadmin "pending org" badge sidebar üçündür — ucuz `Organization.objects... .count()`-i hər zaman saxla.
+    if "superadmin-organizations" in allowed_sections and active_section != "superadmin-organizations":
+        from apps.organizations.models import Organization as _PendingOrg
+
+        superadmin_organizations_section["pending_count"] = _PendingOrg.objects.filter(status="pending").count()
+
+    if ("superadmin-org-features" in allowed_sections and active_section == "superadmin-org-features") or (
+        "superadmin-organizations" in allowed_sections and active_section == "superadmin-organizations"
+    ):
         from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
 
         superadmin_organizations_queryset = (
@@ -1180,7 +1234,7 @@ def user_profile(request):
                 status="suspended"
             )
 
-        if "superadmin-org-features" in allowed_sections:
+        if "superadmin-org-features" in allowed_sections and active_section == "superadmin-org-features":
             superadmin_feature_org_page = request.GET.get("superadmin_feature_org_page")
             superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
                 superadmin_feature_org_page
@@ -1205,7 +1259,7 @@ def user_profile(request):
                 superadmin_feature_org_page=superadmin_feature_org_page,
             )
 
-        if "superadmin-organizations" in allowed_sections:
+        if "superadmin-organizations" in allowed_sections and active_section == "superadmin-organizations":
             superadmin_org_page = request.GET.get("superadmin_org_page")
             superadmin_organizations_section["organizations"] = Paginator(
                 superadmin_organizations_queryset, 12
@@ -1233,7 +1287,7 @@ def user_profile(request):
             )
             superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 
-    if "superadmin-users" in allowed_sections:
+    if "superadmin-users" in allowed_sections and active_section == "superadmin-users":
         superadmin_users_section.update(
             build_superadmin_user_management_context(
                 request,
@@ -1242,42 +1296,49 @@ def user_profile(request):
             )
         )
 
-    if "superadmin-ai" in allowed_sections:
+    if "superadmin-ai" in allowed_sections and active_section == "superadmin-ai":
         superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
         superadmin_ai_settings_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),
             section="superadmin-ai",
         )
 
-    # InAppNotification data for profile notifications section
-    notif_filter = request.GET.get("notif_filter", "all")
-    if notif_filter not in ("all", "unread", "read"):
-        notif_filter = "all"
-    notif_search_query = _normalize_public_profile_query_value(
-        request.GET.get("notif_search"),
-        max_length=100,
-    )
-    in_app_notifications_qs = get_user_notifications(
-        user=request.user,
-        filter_by=notif_filter,
-        search_query=notif_search_query,
-    )
-    # recipient=user is the security boundary; bypass RLS so the profile inbox
-    # shows the user's notifications across every organisation (see
-    # get_user_notifications docstring).
-    in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
-    with bypass_rls():
-        in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
-        in_app_notifications_page.object_list = list(in_app_notifications_page.object_list)
-    notif_pagination_query = _query_string(
-        section="notifications",
-        notif_filter=notif_filter,
-        notif_search=notif_search_query,
-    )
+    # InAppNotification data for profile notifications section.
+    # Sidebar yalnız `notifications_unread_count`-dan istifadə edir; tam siyahını
+    # yalnız notifications bölməsi açıq olduqda hazırla.
+    notif_filter = "all"
+    notif_search_query = ""
+    notif_pagination_query = ""
+    in_app_notifications_page = None
+    if active_section == "notifications":
+        notif_filter = request.GET.get("notif_filter", "all")
+        if notif_filter not in ("all", "unread", "read"):
+            notif_filter = "all"
+        notif_search_query = _normalize_public_profile_query_value(
+            request.GET.get("notif_search"),
+            max_length=100,
+        )
+        in_app_notifications_qs = get_user_notifications(
+            user=request.user,
+            filter_by=notif_filter,
+            search_query=notif_search_query,
+        )
+        # recipient=user is the security boundary; bypass RLS so the profile inbox
+        # shows the user's notifications across every organisation (see
+        # get_user_notifications docstring).
+        in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
+        with bypass_rls():
+            in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+            in_app_notifications_page.object_list = list(in_app_notifications_page.object_list)
+        notif_pagination_query = _query_string(
+            section="notifications",
+            notif_filter=notif_filter,
+            notif_search=notif_search_query,
+        )
 
     # Publish-notification data (teacher groups, org info)
     publish_notification_targets = []
-    if "publish-notification" in allowed_sections:
+    if "publish-notification" in allowed_sections and active_section == "publish-notification":
         publish_notification_targets = _get_publish_notification_targets(request.user, capabilities)
 
     category_management_page = None
@@ -1290,7 +1351,10 @@ def user_profile(request):
     category_management_pagination_query = ""
     category_management_total_count = 0
     category_management_filtered_count = 0
-    if {"create-category", "category-management"} & set(allowed_sections):
+    if {"create-category", "category-management"} & set(allowed_sections) and active_section in {
+        "create-category",
+        "category-management",
+    }:
         if category_management_create_form is None:
             category_management_create_form = CategoryManagementForm()
 
@@ -1304,7 +1368,7 @@ def user_profile(request):
         ]
         category_management_create_selected_parent_id = category_management_create_form["parent"].value() or ""
 
-    if "category-management" in allowed_sections:
+    if "category-management" in allowed_sections and active_section == "category-management":
         category_management_search_query = _normalize_public_profile_query_value(
             request.GET.get("category_search"),
             max_length=100,
