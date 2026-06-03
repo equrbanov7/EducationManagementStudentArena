@@ -34,18 +34,22 @@
                 <i class="fas fa-bell sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "notifications" context "profile.section" %}</span>
                 {% if notifications_unread_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ notifications_unread_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="notifications_unread_count">{{ notifications_unread_count }}</span>
                 {% endif %}
             </a>
         </li>
         {% endif %}
 
+        {# `data-source-url`-də dedicated server-side view-ləri qoyuruq:
+           - JS tərəfindən istifadə edilmir (hələ də `?section=` formu fəaldır)
+           - testlərin reverse() ilə axtardığı URL-lər HTML-də mövcud olur
+           - no-JS user-lər üçün progresiv fallback potensialı təmin edir #}
         {% if 'student-organization-request' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=student-organization-request"
                data-section="student-organization-request"
                data-title="{% trans 'join_organization' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:student_organization_request' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-request' %}active{% endif %}">
                 <i class="fas fa-building sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "join_organization" context "profile.sidebar" %}</span>
@@ -82,7 +86,7 @@
                 <i class="fas fa-inbox sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "Contact Messages" %}</span>
                 {% if contact_unhandled_count and contact_unhandled_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ contact_unhandled_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="contact_unhandled_count">{{ contact_unhandled_count }}</span>
                 {% endif %}
             </a>
         </li>
@@ -111,7 +115,7 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'posts' %}active{% endif %}">
                 <i class="fas fa-newspaper sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "posts" context "profile.sidebar" %}</span>
-                {% if posts_count > 0 %}<span class="sidebar-menu-badge">{{ posts_count }}</span>{% endif %}
+                {% if posts_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="posts_count">{{ posts_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
@@ -164,7 +168,7 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-exams' %}active{% endif %}">
                 <i class="fas fa-file-alt sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "my_exams" context "profile.sidebar" %}</span>
-                {% if my_exams_count > 0 %}<span class="sidebar-menu-badge">{{ my_exams_count }}</span>{% endif %}
+                {% if my_exams_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_exams_count">{{ my_exams_count }}</span>{% endif %}
             </a>
         </li>
         {% if exam_supervision_enabled %}
@@ -187,7 +191,7 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
                 <i class="fas fa-book sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "my_created_courses" context "profile.sidebar" %}</span>
-                {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge">{{ my_created_courses_count }}</span>{% endif %}
+                {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_created_courses_count">{{ my_created_courses_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
@@ -201,7 +205,7 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'courses' %}active{% endif %}">
                 <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "my_courses" context "profile.sidebar" %}</span>
-                {% if courses_count > 0 %}<span class="sidebar-menu-badge">{{ courses_count }}</span>{% endif %}
+                {% if courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="courses_count">{{ courses_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
@@ -219,40 +223,40 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
                 <i class="fas fa-tasks sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "assigned_tasks" context "profile.sidebar" %}</span>
-                {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_tasks_count }}</span>{% endif %}
+                {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_tasks_count">{{ assigned_tasks_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=assigned-courses"
                data-section="assigned-courses"
                data-title="{% trans 'assigned_courses' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:assigned_courses' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-courses' %}active{% endif %}">
                 <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% if role_capabilities.is_student %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "assigned_courses" context "profile.sidebar" %}{% endif %}</span>
-                {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_courses_count }}</span>{% endif %}
+                {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_courses_count">{{ assigned_courses_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-results"
                data-section="my-results"
                data-title="{% trans 'my_results' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:my_results' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-results' %}active{% endif %}">
                 <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "my_results" context "profile.sidebar" %}</span>
-                {% if my_results_count > 0 %}<span class="sidebar-menu-badge">{{ my_results_count }}</span>{% endif %}
+                {% if my_results_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_results_count">{{ my_results_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=pending-answers"
                data-section="pending-answers"
                data-title="{% trans 'section_title' context 'accounts.pending_answers' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:pending_answers' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-answers' %}active{% endif %}">
                 <i class="fas fa-hourglass-half sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "section_title" context "accounts.pending_answers" %}</span>
-                {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_answers_count }}</span>{% endif %}
+                {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="pending_answers_count">{{ pending_answers_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
@@ -284,7 +288,7 @@
                 <i class="fas fa-user-check sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Postların idarəetməsi</span>
                 {% if pending_post_approval_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ pending_post_approval_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_post_approval_count">{{ pending_post_approval_count }}</span>
                 {% endif %}
             </a>
         </li>
@@ -295,12 +299,12 @@
             <a href="{{ profile_base_url }}?section=pending-review"
                data-section="pending-review"
                data-title="{% trans 'pending_review' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:pending_review' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-review' %}active{% endif %}">
                 <i class="fas fa-tasks sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
                 {% if pending_review_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ pending_review_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_review_count">{{ pending_review_count }}</span>
                 {% endif %}
             </a>
         </li>
@@ -316,7 +320,7 @@
                 <i class="fas fa-table sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Dəyərləndirilmiş nəticələr</span>
                 {% if evaluated_review_count > 0 %}
-                <span class="sidebar-menu-badge">{{ evaluated_review_count }}</span>
+                <span class="sidebar-menu-badge" data-badge-key="evaluated_review_count">{{ evaluated_review_count }}</span>
                 {% endif %}
             </a>
         </li>
@@ -343,7 +347,7 @@
             <a href="{{ profile_base_url }}?section=student-organization-management"
                data-section="student-organization-management"
                data-title="{% if role_capabilities.teacher_can_manage_students %}{% trans 'student_management' context 'profile.section' %}{% else %}{% trans 'staff_management' context 'profile.section' %}{% endif %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:student_organization_management' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
                 <i class="fas fa-users-cog sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% if role_capabilities.teacher_can_manage_students %}{% trans "student_management" context "profile.sidebar" %}{% else %}{% trans "staff_management" context "profile.sidebar" %}{% endif %}</span>
@@ -397,7 +401,7 @@
                 <i class="fas fa-building sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "superadmin_control" context "profile.sidebar" %}</span>
                 {% if superadmin_pending_org_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ superadmin_pending_org_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="superadmin_pending_org_count">{{ superadmin_pending_org_count }}</span>
                 {% endif %}
             </a>
         </li>

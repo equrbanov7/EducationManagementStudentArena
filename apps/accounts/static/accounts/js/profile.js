@@ -110,8 +110,63 @@ document.addEventListener("DOMContentLoaded", function () {
         .map(function (s) { return s.trim(); })
         .filter(function (s) { return !!s; });
     var sectionFragmentUrlTemplate = profilePage.getAttribute("data-section-fragment-url") || "";
+    var badgesUrl = profilePage.getAttribute("data-badges-url") || "";
     var sectionsHost = document.getElementById("profileSectionsContainer");
     var ajaxLoadInFlight = null; // AbortController, ya da null
+    var badgesRefreshInFlight = null;
+
+    // P3-extra — Sidebar badge-lərini API-dən yenilə. Fail-soft: səhv olarsa
+    // mövcud DOM-u dəyişmə, naviqasiyanı pozma. Yalnız mövcud span-ları
+    // yenilə (data-badge-key="<key>"). Yeni badge yaratmırıq — count 0-dan
+    // böyüyə dəyişərsə, tam reload-da göstəriləcək (kənar hal, qəbul edilən).
+    function refreshBadges() {
+        if (!badgesUrl || typeof window.fetch !== "function") {
+            return;
+        }
+        if (badgesRefreshInFlight) {
+            try { badgesRefreshInFlight.abort(); } catch (e) { /* ignore */ }
+        }
+        var controller = (typeof AbortController === "function") ? new AbortController() : null;
+        badgesRefreshInFlight = controller;
+        var opts = {
+            credentials: "same-origin",
+            headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" }
+        };
+        if (controller) { opts.signal = controller.signal; }
+        fetch(badgesUrl, opts)
+            .then(function (resp) {
+                if (!resp.ok) { throw new Error("badges_http_" + resp.status); }
+                return resp.json();
+            })
+            .then(function (payload) {
+                if (!payload || payload.ok !== true || !payload.badges) {
+                    return;
+                }
+                var badges = payload.badges;
+                Object.keys(badges).forEach(function (key) {
+                    var value = badges[key];
+                    var nodes = document.querySelectorAll(
+                        '.profile-sidebar [data-badge-key="' + key + '"]'
+                    );
+                    nodes.forEach(function (node) {
+                        if (value && value > 0) {
+                            node.textContent = String(value);
+                            node.style.display = "";
+                        } else {
+                            // Sıfır olduqda gizlət (DOM-dan silmirik — ölçü stabil qalır).
+                            node.textContent = "";
+                            node.style.display = "none";
+                        }
+                    });
+                });
+            })
+            .catch(function () { /* fail-soft */ })
+            .then(function () {
+                if (badgesRefreshInFlight === controller) {
+                    badgesRefreshInFlight = null;
+                }
+            });
+    }
     var sectionTitle = document.getElementById("profileSectionTitle");
     var createExamModal = document.getElementById("createExamModal");
     var createExamModalBody = document.getElementById("createExamModalBody");
@@ -406,6 +461,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (typeof isMobileViewport === "function" && isMobileViewport()) {
                     setSidebarCollapsed(true);
                 }
+                // P3-extra — badge-ləri arxa planda yenilə. Səhv olarsa naviqasiya
+                // pozulmur (fail-soft); badge refresh məcburi deyil.
+                try { refreshBadges(); } catch (e) { /* ignore */ }
                 return true;
             })
             .catch(function (err) {
