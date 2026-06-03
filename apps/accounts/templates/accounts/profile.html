@@ -109,6 +109,16 @@
 
             {# Delete-account modalı sidebar düyməsindən hər bölmədə işə düşməlidir. #}
             {% include "accounts/profile/sections/_delete_account.html" %}
+
+            
+            {% for ph_section in allowed_sections %}
+                {% if ph_section != active_section %}
+                    <section class="profile-section-panel profile-section-placeholder"
+                             data-profile-section-panel="{{ ph_section }}"
+                             aria-hidden="true"
+                             hidden></section>
+                {% endif %}
+            {% endfor %}
             {% endif %}
         </div>
     </main>

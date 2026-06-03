@@ -33,6 +33,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
 # from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from apps.accounts.models import UserProfile
@@ -144,6 +145,7 @@ def _ensure_section_allowed(request: HttpRequest, section: str):
 # --------------------------------------------------------------------------- #
 
 
+@never_cache
 @login_required
 @require_GET
 def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse:
@@ -153,6 +155,9 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     Reuses ``user_profile``'s full context builder so all permission, tenant,
     RLS, search, filter and pagination behaviour is identical to
     ``/accounts/profile/?section=<name>``.
+
+    P3-extra — `@never_cache` qoyulub. Bu response istifadəçi/sessiya/təşkilat-a
+    bağlı olduğu üçün brauzer və ya proxy onu kəş etməməlidir.
     """
     access = _ensure_section_allowed(request, section)
     if access is None:
@@ -229,6 +234,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
 # --------------------------------------------------------------------------- #
 
 
+@never_cache
 @login_required
 @require_GET
 def profile_badges_api(request: HttpRequest) -> JsonResponse:
@@ -237,6 +243,8 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     allowed to see. Uses ``cheap_counts.py`` and pre-existing cheap aggregates
     from ``user_profile``. No heavy collectors. No cache (invalidation is not
     obviously safe).
+
+    P3-extra — `@never_cache` qoyulub. Counts user/tenant-specifikdir.
     """
     profile, _created = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)

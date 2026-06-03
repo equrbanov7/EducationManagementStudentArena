@@ -836,6 +836,10 @@ def user_profile(request):
         "unassigned_pagination_query": "",
         "sent_invites_page_param": "student_org_sent_invites_page",
         "sent_invites_pagination_query": "",
+        # `context.update(student_org_management_section)` aşağıda bu açarı
+        # top-level kontekstə qaldırır. Skelet variantında boş string-lə
+        # default verilir ki, ProfileContextContractTest pozulmasın.
+        "post_next_url": "",
     }
     # Sidebar `student_org_request_section.pending_invites_count` badge-i hər
     # bölmədə görünməlidir, ona görə default olaraq notification_state-dən
