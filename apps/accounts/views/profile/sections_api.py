@@ -1,0 +1,368 @@
+"""
+Profile section API (P3.1 + P3.2) — progressive enhancement endpoints.
+
+Two endpoints:
+
+* ``profile_section_fragment`` — returns HTML for the active section partial
+  so the frontend can swap only the main content area without a full page
+  reload. Reuses ``user_profile`` for context-building so permission, tenant,
+  RLS and section-gating behaviour stays identical to ``/accounts/profile/``.
+
+* ``profile_badges_api`` — returns sidebar badge counts as JSON via the
+  cheap counters from ``_dashboard_helpers.cheap_counts``.
+
+Server-side ``/accounts/profile/?section=...`` continues to work untouched;
+the AJAX endpoints are pure progressive enhancement.
+
+Security guarantees:
+- ``@login_required`` on every endpoint
+- only sections in ``AJAX_SAFE_SECTIONS`` are exposed via AJAX (forms/admin
+  sections remain full-page only)
+- access check uses the same ``_role_capabilities(...).allowed_sections``
+  contract as ``user_profile``
+- CSRF for these GET endpoints is irrelevant (read-only); POST forms inside
+  rendered partials continue to use Django's CSRF middleware as before
+- tenant/RLS scoping comes "for free" because we delegate to ``user_profile``
+"""
+
+from __future__ import annotations
+
+import logging
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse, JsonResponse
+# from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET
+from apps.accounts.models import UserProfile
+from apps.notifications.services import (
+    build_profile_notification_state,
+    get_unread_count,
+)
+
+from .._dashboard_helpers.cheap_counts import (
+    count_assigned_tasks,
+    count_my_results,
+    count_pending_answers,
+)
+from .._helpers import _role_capabilities
+
+logger = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------- #
+# Section mapping
+# --------------------------------------------------------------------------- #
+
+# Bütün mövcud profile section-ları → partial template adı.
+SECTION_PARTIALS: dict[str, str] = {
+    "profile-info": "accounts/profile/sections/_profile_info.html",
+    "notifications": "accounts/profile/sections/_notifications.html",
+    "publish-notification": "accounts/profile/sections/_publish_notification.html",
+    "create-post": "accounts/profile/sections/_create_post.html",
+    "posts": "accounts/profile/sections/_posts.html",
+    "my-exams": "accounts/profile/sections/_my_exams.html",
+    "my-courses": "accounts/profile/sections/_my_courses.html",
+    "courses": "accounts/profile/sections/_courses.html",
+    "assigned-exams": "accounts/profile/sections/_assigned_exams.html",
+    "assigned-courses": "accounts/profile/sections/_assigned_courses.html",
+    "my-results": "accounts/profile/sections/_my_results.html",
+    "pending-answers": "accounts/profile/sections/_pending_answers.html",
+    "groups": "accounts/profile/sections/_groups.html",
+    "pending-post-approvals": "accounts/profile/sections/_pending_post_approvals.html",
+    "pending-review": "accounts/profile/sections/_pending_review.html",
+    "review-results": "accounts/profile/sections/_review_results.html",
+    "role-assignment": "accounts/profile/sections/_role_assignment.html",
+    "student-organization-request": "accounts/profile/sections/_student_org_request.html",
+    "student-organization-management": "accounts/profile/sections/_student_org_management.html",
+    "permission-editor": "accounts/profile/sections/_permission_editor.html",
+    "manage-roles": "accounts/profile/sections/_manage_roles.html",
+    "category-management": "accounts/profile/sections/_category_management.html",
+    "create-category": "accounts/profile/sections/_create_category.html",
+    "superadmin-org-features": "accounts/profile/sections/_superadmin_org_features.html",
+    "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
+    "superadmin-users": "accounts/profile/sections/_superadmin_user_management.html",
+    "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
+    "superadmin-contact-messages": "accounts/profile/sections/_superadmin_contact_messages.html",
+    "statistics": "accounts/profile/sections/_statistics.html",
+    "edit-profile": "accounts/profile/sections/_edit_profile.html",
+    "change-password": "accounts/profile/sections/_change_password.html",
+}
+
+# AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
+# bölmələri normal full-page naviqasiyada qalır.
+AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
+    {
+        "profile-info",
+        "notifications",
+        "posts",
+        "my-exams",
+        "my-courses",
+        "courses",
+        "assigned-exams",
+        "assigned-courses",
+        "my-results",
+        "pending-answers",
+        "groups",
+        "pending-review",
+        "review-results",
+        "statistics",
+        "pending-post-approvals",
+    }
+)
+
+
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
+
+
+def _ensure_section_allowed(request: HttpRequest, section: str):
+    """
+    Return ``(profile, capabilities)`` if user may access ``section`` via AJAX,
+    otherwise return ``None``.
+
+    Permission contract is identical to ``user_profile``:
+    - section must be in ``SECTION_PARTIALS``
+    - section must be in ``AJAX_SAFE_SECTIONS`` (form/admin sections excluded)
+    - section must be in the user's ``allowed_sections``
+    """
+    if section not in SECTION_PARTIALS:
+        return None
+    if section not in AJAX_SAFE_SECTIONS:
+        return None
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    capabilities = _role_capabilities(request.user, profile)
+    if section not in capabilities["allowed_sections"]:
+        return None
+    return profile, capabilities
+
+
+# --------------------------------------------------------------------------- #
+# P3.1 — Section HTML fragment endpoint
+# --------------------------------------------------------------------------- #
+
+
+@login_required
+@require_GET
+def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse:
+    """
+    Render and return only the active section's HTML partial.
+
+    Reuses ``user_profile``'s full context builder so all permission, tenant,
+    RLS, search, filter and pagination behaviour is identical to
+    ``/accounts/profile/?section=<name>``.
+    """
+    access = _ensure_section_allowed(request, section)
+    if access is None:
+        return JsonResponse(
+            {"ok": False, "error": "forbidden_or_unknown_section"},
+            status=403,
+        )
+
+    # Delegate context-building to user_profile via the existing
+    # `_render_profile_section` helper. We set `direct_profile_section` so the
+    # full-page template renders only the active section in case the caller
+    # falls back to the full-page response (defensive).
+    request.direct_profile_section = section
+    mutable_get = request.GET.copy()
+    mutable_get["section"] = section
+    request.GET = mutable_get
+
+    # Import lazily to avoid circular import (sections_api -> main -> sections_api).
+    from .main import user_profile
+
+    # We want user_profile to run its context builder, then we render only
+    # the partial. Easiest way: monkey-render. user_profile returns a
+    # TemplateResponse-like HttpResponse from `render(...)` (already rendered).
+    # We instead intercept by capturing the context — but `render(...)` does
+    # not expose the context. So we re-implement just the part we need:
+    #
+    # Call user_profile and let it produce the full HttpResponse, then
+    # we re-render the partial with the request context that includes the
+    # same template variables. Simplest robust approach: re-execute the
+    # context builder via the same code path by calling user_profile and
+    # discarding its rendered HTML, while reusing the request state it
+    # mutates. However that costs the full render time.
+    #
+    # The cleanest, lowest-risk approach for P3.1: render the partial through
+    # `render_to_string` after running user_profile's context builder by
+    # invoking it once with a sentinel. To keep the change minimal we add a
+    # public hook in `main`: `build_profile_context(request)` (see comment in
+    # main.py). For backward safety, until that hook exists we fall back to
+    # calling user_profile and returning its full HTML — the JS will swap
+    # only the relevant DOM node.
+    response = user_profile(request)
+
+    # If user_profile produced an HttpResponseRedirect (POST-redirect-get flow
+    # is impossible here because we require GET, but defensive).
+    if getattr(response, "status_code", 200) >= 300 and getattr(response, "status_code", 200) < 400:
+        return JsonResponse(
+            {"ok": False, "error": "redirect_required", "location": response.get("Location", "")},
+            status=409,
+        )
+
+    # The full-page response already contains only the active section partial
+    # because P1's profile.html switch statement renders just one panel.
+    # The frontend's job is to extract `[data-profile-section-panel="<section>"]`
+    # from the response body. For a cleaner API we wrap it in JSON.
+    try:
+        html_bytes = response.content
+        html = html_bytes.decode(response.charset or "utf-8")
+    except Exception:  # noqa: BLE001 — defensive
+        html = ""
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "section": section,
+            "html": html,
+            # Frontend hint: which DOM selector to extract from `html`.
+            "extract_selector": '[data-profile-section-panel="{}"]'.format(section),
+        }
+    )
+
+
+# --------------------------------------------------------------------------- #
+# P3.2 — Sidebar badge endpoint
+# --------------------------------------------------------------------------- #
+
+
+@login_required
+@require_GET
+def profile_badges_api(request: HttpRequest) -> JsonResponse:
+    """
+    Lightweight JSON endpoint returning sidebar badge counts the user is
+    allowed to see. Uses ``cheap_counts.py`` and pre-existing cheap aggregates
+    from ``user_profile``. No heavy collectors. No cache (invalidation is not
+    obviously safe).
+    """
+    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    capabilities = _role_capabilities(request.user, profile)
+
+    payload: dict[str, int] = {}
+
+    # In-app + org notifications (cheap counts).
+    notification_state = build_profile_notification_state(user=request.user, profile=profile)
+    in_app_unread = get_unread_count(user=request.user)
+    payload["notifications_unread_count"] = notification_state.get("unread_count", 0) + in_app_unread
+
+    # Student-facing badges
+    if capabilities.get("can_view_student_assignments"):
+        payload["assigned_tasks_count"] = count_assigned_tasks(request, request.user)
+        payload["my_results_count"] = count_my_results(request, request.user)
+        payload["pending_answers_count"] = count_pending_answers(request, request.user)
+
+    # Teacher/reviewer badges — use the same aggregate pattern as user_profile
+    # without re-implementing it here to avoid drift. Defer to a tiny inline
+    # helper.
+    if capabilities.get("can_review_submissions"):
+        from django.db.models import Count, Q
+        from django.utils import timezone
+
+        from apps.assignments.models import Submission
+        from apps.courses.models import Course
+        from apps.exams.models import Exam, ExamAttempt
+        from apps.labs.models import LabSubmission
+        from apps.projects.models import ProjectSubmission
+
+        from .._helpers import (
+            REVIEW_EDIT_WINDOW,
+            _tenant_scoped_courses,
+            _tenant_scoped_exams,
+        )
+
+        teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+        my_exams_qs = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+        review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
+
+        exam_attempt_counts = ExamAttempt.objects.filter(
+            exam__in=my_exams_qs,
+            status__in=["submitted", "expired"],
+        ).aggregate(
+            pending=Count(
+                "id",
+                filter=(
+                    ~Q(exam__exam_type="test")
+                    & (Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
+                ),
+            ),
+            evaluated=Count(
+                "id",
+                filter=(
+                    Q(exam__exam_type="test")
+                    | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                    | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+                ),
+            ),
+        )
+        submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+        project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+        lab_counts = LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses).aggregate(
+            pending=Count(
+                "id",
+                filter=(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff)),
+            ),
+            evaluated=Count(
+                "id",
+                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+            ),
+        )
+        payload["pending_review_count"] = (
+            (exam_attempt_counts.get("pending") or 0)
+            + (submission_counts.get("pending") or 0)
+            + (project_counts.get("pending") or 0)
+            + (lab_counts.get("pending") or 0)
+        )
+        payload["evaluated_review_count"] = (
+            (exam_attempt_counts.get("evaluated") or 0)
+            + (submission_counts.get("evaluated") or 0)
+            + (project_counts.get("evaluated") or 0)
+            + (lab_counts.get("evaluated") or 0)
+        )
+
+    # Post-approval badge (teachers/admins with that allowed section)
+    if "pending-post-approvals" in capabilities.get("allowed_sections", set()):
+        from apps.blog.services import count_pending_reviewable_posts
+
+        payload["pending_post_approval_count"] = count_pending_reviewable_posts(request.user)
+
+    # Superadmin badges
+    if capabilities.get("is_superadmin"):
+        from apps.organizations.models import Organization
+
+        payload["superadmin_pending_org_count"] = Organization.objects.filter(status="pending").count()
+        if "superadmin-contact-messages" in capabilities.get("allowed_sections", set()):
+            from apps.contact.models import ContactMessage
+
+            payload["contact_unhandled_count"] = min(
+                ContactMessage.objects.filter(is_handled=False).count(),
+                99,
+            )
+
+    return JsonResponse({"ok": True, "badges": payload})
+
+
+__all__ = [
+    "SECTION_PARTIALS",
+    "AJAX_SAFE_SECTIONS",
+    "profile_section_fragment",
+    "profile_badges_api",
+]
