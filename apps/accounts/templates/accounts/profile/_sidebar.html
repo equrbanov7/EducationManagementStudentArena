@@ -360,7 +360,7 @@
             <a href="{{ profile_base_url }}?section=permission-editor"
                data-section="permission-editor"
                data-title="{% trans 'permissions' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
+               data-source-url="{% url 'accounts:permission_editor' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'permission-editor' %}active{% endif %}">
                 <i class="fas fa-key sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "permissions" context "profile.sidebar" %}</span>

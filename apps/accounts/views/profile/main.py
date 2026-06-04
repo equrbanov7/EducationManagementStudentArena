@@ -156,7 +156,12 @@ def _get_publish_notification_targets(user, capabilities):
                     "is_exclusive": False,
                 }
             )
-    elif is_org_admin:
+        return targets
+
+    # Non-superadmin targets are cumulative: a user can be both an organization
+    # admin (e.g. an owner) and a teacher, in which case they should be able to
+    # target the whole organization as well as their own student groups.
+    if is_org_admin:
         # Get user's active org memberships
         org_memberships = (
             Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
@@ -175,7 +180,8 @@ def _get_publish_notification_targets(user, capabilities):
                     "is_exclusive": False,
                 }
             )
-    elif is_teacher:
+
+    if is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
         for group in teacher_groups:
             targets.append(

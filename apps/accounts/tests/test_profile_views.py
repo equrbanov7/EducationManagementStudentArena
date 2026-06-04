@@ -1825,8 +1825,19 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:permission_editor"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         self.assertContains(response, reverse("exams:teacher_group_list"))
-        self.assertContains(response, "Təşkilat daxili rol (səviyyəli rol)")
-        self.assertContains(response, "Profil rolları (multi-role / checkbox)")
+        # Management-section CONTENT is delivered lazily by the AJAX section
+        # loader (the base profile page only renders the active section plus
+        # empty placeholders), so assert the navigation entries here and verify
+        # the level-role / multi-role content via the actual section endpoints.
+        self.assertContains(response, f"{reverse('accounts:profile')}?section=manage-roles")
+
+        role_assignment_response = self.client.get(reverse("accounts:profile") + "?section=role-assignment")
+        self.assertEqual(role_assignment_response.status_code, 200)
+        self.assertContains(role_assignment_response, "Təşkilat daxili rol (səviyyəli rol)")
+
+        manage_roles_response = self.client.get(reverse("accounts:profile") + "?section=manage-roles")
+        self.assertEqual(manage_roles_response.status_code, 200)
+        self.assertContains(manage_roles_response, "Profil rolları (multi-role / checkbox)")
 
     def test_org_admin_profile_staff_management_marks_all_invite_forms_for_frontend(self):
         organization = Organization.objects.create(
