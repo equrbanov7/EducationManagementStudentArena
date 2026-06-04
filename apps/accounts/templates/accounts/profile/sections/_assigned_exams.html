@@ -120,9 +120,10 @@
         </div>
         {% endif %}
     </div>
-</section>
 
-<div id="assignedExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
+    {# İmtahan məlumat modalı — panel DAXİLİNDƏ olmalıdır: AJAX swap yalnız
+       [data-profile-section-panel] elementini götürür, kənardakı modal atılır. #}
+    <div id="assignedExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
     <div class="assigned-exam-info-modal" role="dialog" aria-modal="true" aria-labelledby="assignedExamInfoTitle">
         <button type="button" class="assigned-exam-info-close" id="assignedExamInfoClose" aria-label="Bağla">
             <i class="fas fa-times"></i>
@@ -177,4 +178,5 @@
         </div>
     </div>
 </div>
+</section>
 {% endif %}

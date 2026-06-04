@@ -48,7 +48,8 @@
         if (anchor.target && anchor.target !== "_self") return false;
         if (anchor.hasAttribute("download")) return false;
         if (anchor.matches(
-            ".js-open-create-exam, .js-open-exam-form-modal, .js-open-question-form-modal, " +
+            ".js-open-create-exam, .js-open-create-course, .js-open-create-post, " +
+            ".js-open-exam-form-modal, .js-open-question-form-modal, " +
             ".js-open-delete-confirm-modal, .js-open-assigned-exam-modal, [data-open-exam-start-modal], " +
             "[data-no-route-loading]"
         )) {

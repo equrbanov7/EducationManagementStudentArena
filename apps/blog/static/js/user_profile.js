@@ -1,4 +1,8 @@
-document.addEventListener("DOMContentLoaded", function () {
+// AJAX-safe: EMSReady bu init-i ilk yüklənmədə VƏ hər `profile:section:loaded`
+// swap-dan sonra yenidən işə salır — beləcə posts bölməsi AJAX-la açılanda
+// edit/delete düymələri "ölü" qalmır (refresh tələb olunmur). EMSReady hələ
+// yüklənməyibsə (script sırası), adi DOMContentLoaded-a düşürük.
+(window.EMSReady || function (fn) { document.addEventListener("DOMContentLoaded", fn); })(function () {
   const profilePageWrapper = document.querySelector(".profile-page-wrapper");
   const createPostUrl =
     profilePageWrapper?.dataset.createPostUrl || "/posts/create/";
@@ -10,8 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const createModal = document.getElementById("createModal");
   const createFormContainer = document.querySelector("[data-create-post-form-container]");
 
+  // Modalları <body>-yə köçür ki, overflow/transform tərəfindən kəsilməsin.
+  // İdempotent: init AJAX swap-da yenidən işləyə bildiyi üçün əvvəlki run-dan
+  // <body>-də qalmış eyni id-li orfan modalı əvvəlcə təmizləyirik — əks halda
+  // hər swap-da dublikat modallar yığılardı.
   [editModal, warningModal].forEach(function (modal) {
-    if (modal && modal.parentElement !== document.body) {
+    if (!modal || !modal.id) {
+      return;
+    }
+    document.querySelectorAll("#" + modal.id).forEach(function (dup) {
+      if (dup !== modal && dup.parentElement === document.body) {
+        dup.remove();
+      }
+    });
+    if (modal.parentElement !== document.body) {
       document.body.appendChild(modal);
     }
   });
@@ -264,6 +280,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Edit düyməsinə klik (yalnız post kartındakı düymələr)
   document.querySelectorAll(".js-edit-post").forEach((btn) => {
     btn.addEventListener("click", function () {
+      // Müdafiə: edit modalı bu bölmədə yoxdursa (məs. partial include
+      // olunmayıbsa) null xətası atmaq əvəzinə səssizcə çıx.
+      if (!editModal || !editTitle || !editForm) {
+        return;
+      }
       currentPostId = this.dataset.postId;
       currentEditUrl = this.dataset.editUrl || "";
 
@@ -428,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Formu submit et
-  editForm.addEventListener("submit", async function (e) {
+  if (editForm) editForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     if (!currentPostId) return;
@@ -477,23 +498,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  cancelEditBtn.addEventListener("click", attemptCloseEditModal);
-  closeEditModalBtn.addEventListener("click", attemptCloseEditModal);
+  if (cancelEditBtn) cancelEditBtn.addEventListener("click", attemptCloseEditModal);
+  if (closeEditModalBtn) closeEditModalBtn.addEventListener("click", attemptCloseEditModal);
 
   // Overlay-ə klik edəndə
-  editModal.addEventListener("click", function (e) {
+  if (editModal) editModal.addEventListener("click", function (e) {
     if (e.target === editModal) {
       attemptCloseEditModal();
     }
   });
 
   // Warning modal davranışları
-  stayOnModalBtn.addEventListener("click", function () {
+  if (stayOnModalBtn) stayOnModalBtn.addEventListener("click", function () {
     hideModal(warningModal);
     pendingClose = false;
   });
 
-  discardChangesBtn.addEventListener("click", function () {
+  if (discardChangesBtn) discardChangesBtn.addEventListener("click", function () {
     hasUnsavedChanges = false;
     hideModal(warningModal);
     hideModal(editModal);
@@ -515,7 +536,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Silməni təsdiqlə
-  confirmDeleteBtn.addEventListener("click", async function () {
+  if (confirmDeleteBtn) confirmDeleteBtn.addEventListener("click", async function () {
     if (!currentPostId) return;
     if (!currentDeleteUrl) return;
 
@@ -543,11 +564,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Delete modalı bağla
-  cancelDeleteBtn.addEventListener("click", function () {
+  if (cancelDeleteBtn) cancelDeleteBtn.addEventListener("click", function () {
     hideModal(deleteModal);
   });
 
-  deleteModal.addEventListener("click", function (e) {
+  if (deleteModal) deleteModal.addEventListener("click", function (e) {
     if (e.target === deleteModal) {
       hideModal(deleteModal);
     }
@@ -582,18 +603,26 @@ document.addEventListener("DOMContentLoaded", function () {
     return cookieValue;
   }
 
-  // ESC düyməsi ilə modalları bağla
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      if (warningModal && warningModal.classList.contains("active")) {
-        hideModal(warningModal);
-      } else if (createModal && createModal.classList.contains("active")) {
-        hideModal(createModal);
-      } else if (editModal && editModal.classList.contains("active")) {
-        attemptCloseEditModal();
-      } else if (deleteModal && deleteModal.classList.contains("active")) {
-        hideModal(deleteModal);
-      }
+  // ESC düyməsi ilə modalları bağla.
+  // İdempotent: init AJAX swap-da yenidən işləyə bildiyi üçün əvvəlki keydown
+  // listener-ini silib yenisini (cari closure referensləri ilə) qoşuruq —
+  // beləcə nə listener yığılır, nə də köhnə/detached modal referensinə bağlı qalırıq.
+  if (window.__emsPostEscHandler) {
+    document.removeEventListener("keydown", window.__emsPostEscHandler);
+  }
+  window.__emsPostEscHandler = function (e) {
+    if (e.key !== "Escape") {
+      return;
     }
-  });
+    if (warningModal && warningModal.classList.contains("active")) {
+      hideModal(warningModal);
+    } else if (createModal && createModal.classList.contains("active")) {
+      hideModal(createModal);
+    } else if (editModal && editModal.classList.contains("active")) {
+      attemptCloseEditModal();
+    } else if (deleteModal && deleteModal.classList.contains("active")) {
+      hideModal(deleteModal);
+    }
+  };
+  document.addEventListener("keydown", window.__emsPostEscHandler);
 });

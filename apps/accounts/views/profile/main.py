@@ -724,6 +724,14 @@ def user_profile(request):
         )
         pending_post_approval_total_count = len(pending_post_approval_items)
         pending_post_approval_count = count_pending_reviewable_posts(request.user)
+        # Moderator "Redaktə et" modalı posts bölməsi ilə eyni `_post_edit_modal.html`-i
+        # istifadə edir → kateqoriya select-lərinin dolması üçün picker option-larını
+        # burada da qururuq (bu bölmə `can_manage_blog`-dan asılı deyil).
+        if not post_category_root_options:
+            post_category_tree = get_post_category_tree()
+            post_category_root_options, post_category_subcategory_options = build_post_category_picker_options(
+                post_category_tree
+            )
         pending_post_approval_page_obj = Paginator(pending_post_approval_items, 10).get_page(
             request.GET.get("approval_page", 1)
         )

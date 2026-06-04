@@ -1,0 +1,13 @@
+{% load static i18n %}
+<!-- Courses app global JS: only loaded on course pages via include in extraJs block. -->
+<script nonce="{{ request.csp_nonce }}">
+    window.COURSES_I18N = {
+        errorsLabel: "{% filter escapejs %}{% trans 'errors_label' context 'courses.common.js' %}{% endfilter %}",
+        pleaseWait: "{% filter escapejs %}{% trans 'please_wait' context 'courses.common.js' %}{% endfilter %}",
+        retryError: "{% filter escapejs %}{% trans 'retry_error' context 'courses.common.js' %}{% endfilter %}"
+    };
+</script>
+<script src="{% static 'courses/js/accordion.js' %}"></script>
+<script src="{% static 'courses/js/modal.js' %}"></script>
+<script src="{% static 'courses/js/forms.js' %}"></script>
+<script src="{% static 'courses/js/notifications.js' %}"></script>

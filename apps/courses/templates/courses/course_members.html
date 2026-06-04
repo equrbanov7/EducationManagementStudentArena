@@ -5,7 +5,12 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_members" context "courses.members_page" %}{% endblock %}
 
 {% block extraCss %}
+    {% include "courses/partials/_courses_assets_css.html" %}
     <link rel="stylesheet" href="{% static 'courses/css/course_members.css' %}">
+{% endblock %}
+
+{% block extraJs %}
+    {% include "courses/partials/_courses_assets_js.html" %}
 {% endblock %}
 
 {% block content %}

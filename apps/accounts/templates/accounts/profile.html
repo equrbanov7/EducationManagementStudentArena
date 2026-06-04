@@ -21,11 +21,10 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     {# P3 — AJAX-safe section-ların siyahısı; JS yalnız bunlar üçün lazy load edir.
-        Atribut boş və ya yox olarsa progressive enhancement deaktivdir. #}
      data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
-     data-badges-url="{% url 'accounts:profile_badges_api' %}">
+     data-badges-url="{% url 'accounts:profile_badges_api' %}"
+     data-csp-nonce="{{ request.csp_nonce }}">
     {% include "accounts/profile/_sidebar.html" %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
 
@@ -111,6 +110,16 @@
             {% include "accounts/profile/sections/_delete_account.html" %}
 
             
+            {% if 'my-courses' in allowed_sections %}
+                {% include "courses/partials/_create_course_modal.html" %}
+            {% endif %}
+
+            {# Create-exam modalı — eyni səbəbdən qlobal saxlanılır. #}
+            {% if 'my-exams' in allowed_sections %}
+                {% include "exams/teacher/partials/_create_exam_modal.html" %}
+            {% endif %}
+
+            
             {% for ph_section in allowed_sections %}
                 {% if ph_section != active_section %}
                     <section class="profile-section-panel profile-section-placeholder"
@@ -163,7 +172,7 @@ window.MODAL_SUPERVISION_TPL_INFO = {
     }
 };
 </script>
-<script src="{% static 'accounts/js/profile.js' %}"></script>
+<script src="{% static 'accounts/js/profile.js' %}?v=20260604-reinitevent"></script>
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script src="{% static 'accounts/js/statistics.js' %}"></script>
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
@@ -172,7 +181,7 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 <script src="{% static 'accounts/js/manage_roles.js' %}"></script>
 <script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
 <script src="{% static 'js/post_category_picker.js' %}"></script>
-<script src="{% static 'js/user_profile.js' %}"></script>
-<script src="{% static 'courses/js/create_course_modal.js' %}"></script>
+<script src="{% static 'js/user_profile.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
 <script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260510-1"></script>
 {% endblock %}

@@ -5,7 +5,7 @@
 {% block title %}{% trans "page_title" context "courses.my_courses" %}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
+{% include "courses/partials/_courses_assets_css.html" %}
 <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
 <style nonce="{{ request.csp_nonce }}">
   .my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
@@ -222,5 +222,6 @@
 {% endblock %}
 
 {% block extraJs %}
+{% include "courses/partials/_courses_assets_js.html" %}
 <script src="{% static 'courses/js/create_course_modal.js' %}"></script>
 {% endblock %}

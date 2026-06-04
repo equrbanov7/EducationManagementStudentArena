@@ -4,6 +4,14 @@
 
 {% block title %}{% trans "page_title" context "courses.student_courses" %}{% endblock %}
 
+{% block extraCss %}
+    {% include "courses/partials/_courses_assets_css.html" %}
+{% endblock %}
+
+{% block extraJs %}
+    {% include "courses/partials/_courses_assets_js.html" %}
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     
