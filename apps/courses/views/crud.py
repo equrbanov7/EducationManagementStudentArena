@@ -100,13 +100,10 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
                     "form": form,
                 },
             )
-        # Standalone səhifə deaktiv edildi: kurs yaratma yalnız modal vasitəsi
-        # ilə həyata keçirilir. Düz GET sorğusu my-courses profile bölməsinə
-        # yönləndirilir (orada modal-ı tetikleyən düymə var).
-        try:
-            return redirect(reverse("accounts:profile") + "?section=my-courses")
-        except Exception:
-            return redirect("/accounts/profile/?section=my-courses")
+        # Düz GET sorğusu standalone kurs yaratma formasını render edir.
+        # İcazə yoxlaması artıq ``dispatch``-də aparılır (course.create), ona
+        # görə bura çatan istifadəçi formaya baxa bilər.
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         organization = get_request_organization(self.request)
