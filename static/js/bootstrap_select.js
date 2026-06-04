@@ -144,6 +144,12 @@
         initBootstrapSelects(document);
     });
 
+    // AJAX section swap-dan sonra avtomatik re-init.
+    document.addEventListener("profile:section:loaded", function (event) {
+        var panel = event.detail && event.detail.panel ? event.detail.panel : document;
+        initBootstrapSelects(panel);
+    });
+
     window.EMSBootstrapSelect = {
         enhance: enhanceBootstrapSelect,
         init: initBootstrapSelects,

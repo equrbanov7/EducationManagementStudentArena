@@ -370,12 +370,145 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function extractSectionFromHtml(html, section) {
         try {
-            var tmp = document.createElement("div");
-            tmp.innerHTML = html;
+            // DOMParser server-render edilmiş tam HTML sənədini parse edir
+            // (sections_api.py full profile.html qaytarır, sonra biz panel-i çıxarırıq).
+            // Fallback olaraq, parse uğursuz olarsa, div+innerHTML üsulunu istifadə edirik.
+            var doc = null;
+            if (typeof window.DOMParser === "function") {
+                try {
+                    doc = new window.DOMParser().parseFromString(html, "text/html");
+                } catch (e) { doc = null; }
+            }
+            var root = doc || (function () {
+                var tmp = document.createElement("div");
+                tmp.innerHTML = html;
+                return tmp;
+            })();
             var selector = '[data-profile-section-panel="' + section + '"]';
-            return tmp.querySelector(selector);
+            return root.querySelector(selector);
         } catch (e) {
             return null;
+        }
+    }
+
+    /**
+     * AJAX swap-dan sonra panel daxilindəki <script> teqlərini yenidən
+     * yaradıb DOM-a daxil et — innerHTML/replaceChild script-ləri execute
+     * etmir, ona görə bizim həll əl ilə cloneScripts edib hostu run edir.
+     * Bu olmadan notifications/posts/statistics və s. section-ların
+     * inline JS-i işləmir → content görünmür və ya boş qalır.
+     *
+     * CSP qeydi: brauzer DOMParser-də parse olunan script-lərdən nonce
+     * atributunu təhlükəsizlik səbəbi ilə silir. Bu səbəbdən cari sənədin
+     * canlı nonce-unu profile.html root elementindəki `data-csp-nonce`
+     * atributundan götürüb yeni script-lərə tətbiq edirik.
+     */
+    function getDocumentCspNonce() {
+        if (profilePage) {
+            var n = profilePage.getAttribute("data-csp-nonce");
+            if (n) { return n; }
+        }
+        // Fallback: any script with nonce already in document.
+        var anyScript = document.querySelector("script[nonce]");
+        if (anyScript) {
+            return anyScript.nonce || anyScript.getAttribute("nonce") || "";
+        }
+        return "";
+    }
+
+    function executeInlineScripts(panel) {
+        if (!panel) {
+            return;
+        }
+        var cspNonce = getDocumentCspNonce();
+        var scripts = panel.querySelectorAll("script");
+        scripts.forEach(function (oldScript) {
+            var newScript = document.createElement("script");
+            // Atributları köçür (type, src, async, defer, vb.) — nonce istisna,
+            // çünki DOMParser onu silmiş ola bilər; aşağıda canlı dəyəri qoyuruq.
+            for (var i = 0; i < oldScript.attributes.length; i++) {
+                var attr = oldScript.attributes[i];
+                if (attr.name === "nonce") { continue; }
+                try { newScript.setAttribute(attr.name, attr.value); } catch (e) { /* ignore */ }
+            }
+            // Inline məzmun
+            if (oldScript.textContent) {
+                newScript.textContent = oldScript.textContent;
+            }
+            // CSP nonce — cari sənədin canlı dəyərini istifadə et.
+            if (cspNonce) {
+                try {
+                    newScript.setAttribute("nonce", cspNonce);
+                    newScript.nonce = cspNonce;
+                } catch (e) { /* ignore */ }
+            }
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+    }
+
+    /**
+     * AJAX-la dəyişdirilən section-un script-lərini yenidən işə salmaq üçün
+     * universal hook. profile.html-də bütün `extraJs`-də olan external
+     * script-lər `DOMContentLoaded`-a bağlıdır və AJAX swap zamanı yenidən
+     * işə düşmür → form və düymələr "ölü" olur. Həll: AJAX-dan sonra:
+     *  1. Custom event göndər ki, ehtiyac duyan script-lər dinləsin.
+     *  2. window.EMSProfileReinit() funksiyaları varsa onları çağır.
+     *  3. Bootstrap select və debounce search kimi geniş istifadə olunan
+     *     bind-ləri panel daxilində yenidən qur.
+     */
+    function notifySectionLoaded(section, panel) {
+        try {
+            var ev = new CustomEvent("profile:section:loaded", {
+                detail: { section: section, panel: panel },
+                bubbles: true,
+                cancelable: false
+            });
+            document.dispatchEvent(ev);
+            if (panel) {
+                panel.dispatchEvent(ev);
+            }
+        } catch (e) { /* ignore */ }
+
+        // Geriyə uyğunluq: registered re-init helper-lərini çağır.
+        try {
+            if (window.EMSProfileReinitHooks && typeof window.EMSProfileReinitHooks === "object") {
+                Object.keys(window.EMSProfileReinitHooks).forEach(function (key) {
+                    var hook = window.EMSProfileReinitHooks[key];
+                    if (typeof hook === "function") {
+                        try { hook(panel, section); } catch (err) { /* ignore */ }
+                    }
+                });
+            }
+        } catch (e) { /* ignore */ }
+
+        // Generic re-bind-lər — panel daxilində.
+        try { rebindCommonControls(panel); } catch (e) { /* ignore */ }
+    }
+
+    /**
+     * Section panel daxilindəki ümumi UI kontrollarını yenidən qoş.
+     * Yalnız mövcud script API-lərini çağırır — heç bir yeni davranış
+     * gətirmir.
+     */
+    function rebindCommonControls(panel) {
+        if (!panel) { return; }
+
+        // Bootstrap select wrappers.
+        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.init === "function") {
+            try { window.EMSBootstrapSelect.init(panel); } catch (e) { /* ignore */ }
+        }
+
+        // Bizim öz profile-spesifik debounce search.
+        try { initDebouncedSearchForms(); } catch (e) { /* ignore */ }
+
+        // Qlobal debounce search forms (base.html-də yüklənir).
+        if (window.EMSDebouncedSearchForms && typeof window.EMSDebouncedSearchForms.init === "function") {
+            try { window.EMSDebouncedSearchForms.init(panel); } catch (e) { /* ignore */ }
+        }
+
+        // Pagination — varsa init et.
+        if (window.EMSPagination && typeof window.EMSPagination.init === "function") {
+            try { window.EMSPagination.init(panel); } catch (e) { /* ignore */ }
         }
     }
 
@@ -437,19 +570,47 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!node) {
                     throw new Error("section_not_in_response");
                 }
-                // Mövcud panel-i ya əvəz et, ya da host-a əlavə et.
-                var existing = sectionsHost.querySelector(
-                    '[data-profile-section-panel="' + section + '"]'
-                );
                 node.classList.add("is-active");
-                if (existing) {
-                    existing.parentNode.replaceChild(node, existing);
-                } else {
-                    // Mövcud aktiv panel-ləri sil və yenisini əlavə et.
-                    var oldPanels = sectionsHost.querySelectorAll("[data-profile-section-panel]");
-                    oldPanels.forEach(function (p) { p.parentNode.removeChild(p); });
-                    sectionsHost.appendChild(node);
+                // ƏVVƏLCƏ host-dakı bütün REAL (placeholder olmayan) panel-ləri
+                // sil — əks halda əvvəlki bölmə DOM-da qalır və üst-üstə düşür.
+                // Eyni zamanda hədəf section-un placeholder-ini də sil ki,
+                // dublikat olmasın.
+                var oldPanels = sectionsHost.querySelectorAll("[data-profile-section-panel]");
+                oldPanels.forEach(function (p) {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                    }
+                });
+                sectionsHost.appendChild(node);
+                // Digər allowed section-lar üçün placeholder-ləri yenidən qur ki,
+                // setActiveSection / DOM query-lər doğru işləsin.
+                var responseDoc = (function () {
+                    try {
+                        return new window.DOMParser().parseFromString(payload.html, "text/html");
+                    } catch (e) { return null; }
+                })();
+                if (responseDoc) {
+                    var responsePanels = responseDoc.querySelectorAll("[data-profile-section-panel]");
+                    responsePanels.forEach(function (p) {
+                        var key = p.getAttribute("data-profile-section-panel");
+                        if (!key || key === section) { return; }
+                        if (sectionsHost.querySelector('[data-profile-section-panel="' + key + '"]')) {
+                            return;
+                        }
+                        // Placeholder klonu (boş, hidden) — script-siz.
+                        var ph = document.createElement("section");
+                        ph.className = "profile-section-panel profile-section-placeholder";
+                        ph.setAttribute("data-profile-section-panel", key);
+                        ph.setAttribute("aria-hidden", "true");
+                        ph.hidden = true;
+                        sectionsHost.appendChild(ph);
+                    });
                 }
+                // Inline script-ləri DOM-a yenidən qoş ki, section-un öz JS-i
+                // (notif modal, statistika chart, və s.) işləsin.
+                try { executeInlineScripts(node); } catch (e) { /* ignore */ }
+                // Universal hook — external script-lərin re-bind etməsi üçün.
+                try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
                 // Sidebar/Title/URL yenilə
                 updateSidebarActiveState(section);
                 if (options.updateUrl !== false) {
@@ -483,14 +644,25 @@ document.addEventListener("DOMContentLoaded", function () {
         // P2 cleanup — Hədəf paneli olmadıqda mövcud "is-active"-i ləğv etmə,
         // brauzeri təbii naviqasiyaya burax. Köhnə davranış cari paneldən
         // is-active-i bir an üçün silirdi (kiçik flash).
+        //
+        // Vacib: server-side profile.html yalnız BİR section-u real content ilə
+        // render edir; digər allowed_sections üçün boş `profile-section-placeholder`
+        // qoyur. Əgər hədəf panel yalnız placeholder-dirsə (real content yox),
+        // setActiveSection FALSE qaytarmalıdır ki, çağıran tam naviqasiyaya
+        // keçə bilsin — əks halda boş content göstərilir və content yalnız
+        // manual refresh-də gəlir.
         var hasTargetPanel = false;
+        var targetIsPlaceholder = false;
         sectionPanels.forEach(function (panel) {
             if (panel.getAttribute("data-profile-section-panel") === section) {
                 hasTargetPanel = true;
+                if (panel.classList.contains("profile-section-placeholder")) {
+                    targetIsPlaceholder = true;
+                }
             }
         });
 
-        if (!hasTargetPanel) {
+        if (!hasTargetPanel || targetIsPlaceholder) {
             return false;
         }
 
@@ -1303,8 +1475,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     var assignedExamInfoBackdrop = document.getElementById("assignedExamInfoBackdrop");
-    var assignedExamInfoCloseBtn = document.getElementById("assignedExamInfoClose");
-    var assignedExamInfoCancelBtn = document.getElementById("assignedExamInfoCancelBtn");
+    // Qeyd: close/cancel/start düymələri artıq delegasiya ilə idarə olunur
+    // (aşağıda), ona görə birbaşa element referensləri saxlanmır.
     var assignedExamInfoStartBtn = document.getElementById("assignedExamInfoStartBtn");
     var assignedExamInfoExamName = document.getElementById("assignedExamInfoExamName");
     var assignedExamInfoType = document.getElementById("assignedExamInfoType");
@@ -1331,6 +1503,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function openAssignedExamInfoModal(trigger) {
+        // AJAX swap-dan sonra modal yeni DOM elementidir — loader yalnız bir dəfə
+        // işlədiyi üçün köhnə referenslər stale olur. Açılış anında təzələ.
+        assignedExamInfoBackdrop = document.getElementById("assignedExamInfoBackdrop");
+        assignedExamInfoExamName = document.getElementById("assignedExamInfoExamName");
+        assignedExamInfoType = document.getElementById("assignedExamInfoType");
+        assignedExamInfoDuration = document.getElementById("assignedExamInfoDuration");
+        assignedExamInfoStart = document.getElementById("assignedExamInfoStart");
+        assignedExamInfoEnd = document.getElementById("assignedExamInfoEnd");
+        assignedExamInfoNote = document.getElementById("assignedExamInfoNote");
+        assignedExamInfoStartBtn = document.getElementById("assignedExamInfoStartBtn");
+        assignedExamCodeForm = document.getElementById("assignedExamCodeForm");
+        assignedExamCodeSlug = document.getElementById("assignedExamCodeSlug");
+        assignedExamAccessCodeInput = document.getElementById("assignedExamAccessCodeInput");
+        assignedExamCodeError = document.getElementById("assignedExamCodeError");
+
         if (!assignedExamInfoBackdrop || !trigger) {
             return;
         }
@@ -1388,6 +1575,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function closeAssignedExamInfoModal() {
+        assignedExamInfoBackdrop = document.getElementById("assignedExamInfoBackdrop");
         if (!assignedExamInfoBackdrop) {
             return;
         }
@@ -1407,25 +1595,25 @@ document.addEventListener("DOMContentLoaded", function () {
         openAssignedExamInfoModal(trigger);
     });
 
-    if (assignedExamInfoBackdrop) {
-        assignedExamInfoBackdrop.addEventListener("click", function (event) {
-            if (event.target === assignedExamInfoBackdrop) {
-                closeAssignedExamInfoModal();
-            }
-        });
-    }
-    if (assignedExamInfoCloseBtn) {
-        assignedExamInfoCloseBtn.addEventListener("click", closeAssignedExamInfoModal);
-    }
-    if (assignedExamInfoCancelBtn) {
-        assignedExamInfoCancelBtn.addEventListener("click", closeAssignedExamInfoModal);
-    }
-    if (assignedExamAccessCodeInput) {
-        assignedExamAccessCodeInput.addEventListener("input", function () {
-            this.value = this.value.replace(/[^0-9]/g, "");
+    // Bağlama/ləğv + kod input — DELEGASİYA (document üzərində bir dəfə).
+    // AJAX swap-dan sonra modal yeni element olduğu üçün birbaşa bind "ölü"
+    // qalardı; delegasiya cari və gələcək modal elementlərini də tutur.
+    document.addEventListener("click", function (event) {
+        var backdrop = document.getElementById("assignedExamInfoBackdrop");
+        if (backdrop && event.target === backdrop) {
+            closeAssignedExamInfoModal();
+            return;
+        }
+        if (event.target.closest && event.target.closest("#assignedExamInfoClose, #assignedExamInfoCancelBtn")) {
+            closeAssignedExamInfoModal();
+        }
+    });
+    document.addEventListener("input", function (event) {
+        if (event.target && event.target.id === "assignedExamAccessCodeInput") {
+            event.target.value = event.target.value.replace(/[^0-9]/g, "");
             setAssignedExamCodeError("");
-        });
-    }
+        }
+    });
 
     async function submitAssignedExamCodeForm() {
         if (!assignedExamCodeForm || !assignedExamAccessCodeInput) {
@@ -1481,25 +1669,25 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    if (assignedExamCodeForm) {
-        assignedExamCodeForm.addEventListener("submit", function (event) {
+    // Kod formu submit + "Başla" düyməsi — DELEGASİYA (AJAX-safe, bir dəfə bind).
+    document.addEventListener("submit", function (event) {
+        if (event.target && event.target.id === "assignedExamCodeForm") {
             event.preventDefault();
             submitAssignedExamCodeForm();
-        });
-    }
-
-    if (assignedExamInfoStartBtn) {
-        assignedExamInfoStartBtn.addEventListener("click", function () {
-            if (assignedExamModalRequiresCode) {
-                submitAssignedExamCodeForm();
-                return;
-            }
-
-            if (assignedExamModalStartUrl) {
-                window.location.href = assignedExamModalStartUrl;
-            }
-        });
-    }
+        }
+    });
+    document.addEventListener("click", function (event) {
+        if (!event.target.closest || !event.target.closest("#assignedExamInfoStartBtn")) {
+            return;
+        }
+        if (assignedExamModalRequiresCode) {
+            submitAssignedExamCodeForm();
+            return;
+        }
+        if (assignedExamModalStartUrl) {
+            window.location.href = assignedExamModalStartUrl;
+        }
+    });
 
     function initDebouncedSearchForms() {
         var forms = document.querySelectorAll("form.js-profile-debounce-search");
@@ -1564,8 +1752,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.addEventListener("popstate", function () {
         var section = resolveSectionFromUrl();
+        // Əgər AJAX-safe-dirsə, yuxarıdakı AJAX popstate handler-i icra olunur.
+        // Burada yalnız non-AJAX hallar üçün setActiveSection cəhd edirik.
+        if (isAjaxSafeSection(section)) {
+            return;
+        }
         if (!setActiveSection(section, false)) {
-            setActiveSection(defaultSection, false);
+            // Hədəf section yalnız placeholder kimi mövcuddur (real content yox).
+            // Tam reload ilə server-side real content çəkək.
+            window.location.reload();
         }
     });
 

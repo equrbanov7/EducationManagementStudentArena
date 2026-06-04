@@ -334,19 +334,22 @@
             </div>
         </div>
     {% endif %}
-</section>
-
-{# ===== Shared confirmation modal ===== #}
-<div id="postActionConfirmModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="postActionConfirmTitle">
-    <div class="modal-content">
-        <h3 id="postActionConfirmTitle" class="modal-title">Əminsiniz?</h3>
-        <p id="postActionConfirmMsg" class="modal-body-text"></p>
-        <div class="modal-buttons">
-            <button id="postActionConfirmCancel" class="modal-cancel-btn" type="button">Ləğv et</button>
-            <button id="postActionConfirmOk" class="modal-confirm-btn" type="button">Təsdiqlə</button>
+    {# ===== Shared confirmation modal — panel DAXİLİNDƏ olmalıdır, əks halda
+       AJAX swap (yalnız [data-profile-section-panel] götürür) onu atır və
+       deaktiv/sil düymələri "ölü" qalır. ===== #}
+    <div id="postActionConfirmModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="postActionConfirmTitle">
+        <div class="modal-content">
+            <h3 id="postActionConfirmTitle" class="modal-title">Əminsiniz?</h3>
+            <p id="postActionConfirmMsg" class="modal-body-text"></p>
+            <div class="modal-buttons">
+                <button id="postActionConfirmCancel" class="modal-cancel-btn" type="button">Ləğv et</button>
+                <button id="postActionConfirmOk" class="modal-confirm-btn" type="button">Təsdiqlə</button>
+            </div>
         </div>
     </div>
-</div>
+
+    {# Moderator edit modalı — posts ilə eyni paylaşılan partial (AJAX-safe). #}
+    {% include "accounts/profile/sections/_post_edit_modal.html" %}
 
 <script nonce="{{ request.csp_nonce }}">
 (function () {
@@ -429,7 +432,17 @@
     }
     if (modal) {
         modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
-        document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.style.display === "flex") closeModal(); });
+    }
+    // ESC — document-level listener YALNIZ BİR DƏFƏ (script AJAX swap-da yenidən
+    // işlədiyi üçün yığılmasın). Modalı hadisə anında id ilə tapırıq ki, köhnə
+    // (detached) referensə bağlı qalmayaq.
+    if (!window.__emsPendingEscBound) {
+        window.__emsPendingEscBound = true;
+        document.addEventListener("keydown", function (e) {
+            if (e.key !== "Escape") return;
+            var m = document.getElementById("postActionConfirmModal");
+            if (m && m.style.display === "flex") { m.style.display = "none"; }
+        });
     }
 
     /* ---- Action button handler (all action buttons use js-post-action-btn) ---- */
@@ -476,4 +489,5 @@
     });
 })();
 </script>
+</section>
 {% endif %}

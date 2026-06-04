@@ -37,8 +37,9 @@
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
 
-    <!-- Courses app CSS -->
-    <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
+    {% comment %} {# Courses app CSS köçürüldü: yalnız courses səhifələrində
+       `apps/courses/templates/courses/partials/_courses_assets_css.html`
+       partial-ı vasitəsi ilə yüklənir (extraCss block daxilində). #} {% endcomment %}
 
     {% block extraCss %}{% endblock %}
 </head>
@@ -83,28 +84,19 @@
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
     <!-- Sənin JS-lərin -->
+    <!-- Universal AJAX-safe init + event delegation (EMSReady / EMSDelegate).
+         Section script-lərindən ƏVVƏL yüklənməlidir ki, global mövcud olsun. -->
+    <script src="{% static 'js/ems_ajax_init.js' %}?v=20260604-ajaxinit"></script>
     <script src="{% static 'js/burgerMenu.js' %}"></script>
     <script src="{% static 'js/pagination.js' %}"></script>
-    <script src="{% static 'js/debounced_search_forms.js' %}"></script>
+    <script src="{% static 'js/debounced_search_forms.js' %}?v=20260604-ajaxhook"></script>
     <script src="{% static 'js/search_controls.js' %}"></script>
-    <script src="{% static 'js/bootstrap_select.js' %}"></script>
+    <script src="{% static 'js/bootstrap_select.js' %}?v=20260604-ajaxhook"></script>
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260603-warning-click"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
-    <script src="{% static 'js/route_loading.js' %}"></script>
+    <script src="{% static 'js/route_loading.js' %}?v=20260604-modalskip"></script>
 
-    <script nonce="{{ request.csp_nonce }}">
-        window.COURSES_I18N = {
-            errorsLabel: "{% trans 'errors_label' context 'courses.common.js' %}",
-            pleaseWait: "{% trans 'please_wait' context 'courses.common.js' %}",
-            retryError: "{% trans 'retry_error' context 'courses.common.js' %}"
-        };
-    </script>
-
-    <!-- Courses app JS -->
-    <script src="{% static 'courses/js/accordion.js' %}"></script>
-    <script src="{% static 'courses/js/modal.js' %}"></script>
-    <script src="{% static 'courses/js/forms.js' %}"></script>
-    <script src="{% static 'courses/js/notifications.js' %}"></script>
+   
 
     <!-- AI Assistant Widget -->
     {% block ai_assistant_js %}<script src="{% static 'js/ai_assistant.js' %}"></script>{% endblock %}

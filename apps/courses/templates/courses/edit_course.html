@@ -5,6 +5,7 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_edit" context "courses.edit_page" %} - EMSArena{% endblock %}
 
 {% block extraCss%}
+{% include "courses/partials/_courses_assets_css.html" %}
 <style nonce="{{ request.csp_nonce }}">
     :root {
         --edit-primary: #d97706; /* Amber 600 - İsti kəhrəba rəngi */
@@ -440,4 +441,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endblock %}
+
+{% block extraJs %}
+    {% include "courses/partials/_courses_assets_js.html" %}
 {% endblock %}

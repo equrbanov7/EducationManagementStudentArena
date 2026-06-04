@@ -1,0 +1,115 @@
+{% load i18n %}
+{# ===========================================================================
+   Paylaşılan post edit/delete/warning modalları.
+   posts VƏ pending-post-approvals bölmələri eyni `.js-edit-post` axınını
+   (user_profile.js) istifadə etdiyi üçün bu modallar hər iki bölmənin
+   `[data-profile-section-panel]` İÇİNDƏ include olunmalıdır — əks halda AJAX
+   swap onları gətirmir və `editTitle` null olur (TypeError).
+   Tələb olunan kontekst: post_category_root_options, post_category_subcategory_options.
+   =========================================================================== #}
+<div id="editModal" class="modal-overlay profile-post-edit-modal">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>{% trans "modal_edit_title" context "profile.posts" %}</h3>
+            <button class="modal-close-btn" id="closeEditModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="form-meta">
+            <p><strong>{% trans "meta_slug" context "profile.posts" %}:</strong> <span id="editSlugInfo"></span></p>
+            <p><strong>{% trans "meta_created" context "profile.posts" %}:</strong> <span id="editCreatedAtInfo"></span></p>
+            <p><strong>{% trans "meta_updated" context "profile.posts" %}:</strong> <span id="editUpdatedAtInfo"></span></p>
+        </div>
+
+        <div id="editApprovalNotice" class="approval-notice" hidden>
+            Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.
+        </div>
+
+        <form id="editForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="editTitle">{% trans "label_title" context "profile.posts" %}</label>
+                <input type="text" id="editTitle" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editCategory">{% trans "label_category" context "profile.posts" %}</label>
+                <div class="profile-post-category-picker js-post-category-picker">
+                    <div class="profile-post-category-grid">
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Category" field_label_class="profile-post-category-grid__label" field_id="editCategory" field_name="category" field_placeholder="Select a category" field_options=post_category_root_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-root required" %}
+
+                        {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Subcategory" field_optional_label="Optional" field_label_class="profile-post-category-grid__label" field_id="editSubcategory" field_name="subcategory" field_placeholder="Select a subcategory" field_options=post_category_subcategory_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-sub" field_hint="Optional: choose a more specific subcategory if it matches your post." field_hint_class="profile-post-category-grid__hint" field_hint_attrs="data-post-category-sub-hint" %}
+                    </div>
+
+                    <small class="profile-post-category-picker__footer">
+                        Categories are managed by SuperAdmin. New categories cannot be created here.
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="editExcerpt">{% trans "label_excerpt" context "profile.posts" %}</label>
+                <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editContent">{% trans "label_content" context "profile.posts" %}</label>
+                <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>{% trans "label_current_image" context "profile.posts" %}</label>
+                <div id="editImagePreviewWrapper" class="image-preview-wrapper">
+                    <img id="editImagePreview" src="" alt="{% trans 'post_image_alt' context 'profile.posts' %}" class="image-preview" style="display:none;">
+                    <p id="noImageText" class="no-image-text">{% trans "no_image" context "profile.posts" %}</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="editImage">{% trans "label_upload_new_image" context "profile.posts" %}</label>
+                <input type="file" id="editImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
+                <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editImageUrl">{% trans "label_image_url_if_no_file" context "profile.posts" %}</label>
+                <input type="url" id="editImageUrl" name="image_url" class="form-control">
+            </div>
+
+            <div class="form-group form-check">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="editIsPublished" name="is_published">
+                    {% trans "publish_article" context "profile.posts" %}
+                </label>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" id="cancelEdit" class="modal-cancel-btn">{% trans "cancel" context "profile.posts" %}</button>
+                <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>{% trans "save" context "profile.posts" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>{% trans "confirm_delete_title" context "profile.posts" %}</h3>
+        <p>{% trans "confirm_delete_prefix" context "profile.posts" %} <span id="deleteTitle" class="fw-bold"></span> {% trans "confirm_delete_suffix" context "profile.posts" %}</p>
+        <div class="modal-buttons">
+            <button id="cancelDelete" class="modal-cancel-btn">{% trans "cancel" context "profile.posts" %}</button>
+            <button id="confirmDelete" class="modal-confirm-btn delete-btn">{% trans "delete" context "profile.posts" %}</button>
+        </div>
+    </div>
+</div>
+
+<div id="warningModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>{% trans "unsaved_title" context "profile.posts" %}</h3>
+        <p>{% trans "unsaved_message" context "profile.posts" %}</p>
+        <div class="modal-buttons">
+            <button id="stayOnModal" class="modal-cancel-btn">{% trans "stay" context "profile.posts" %}</button>
+            <button id="discardChanges" class="modal-confirm-btn warning-btn">{% trans "discard_changes" context "profile.posts" %}</button>
+        </div>
+    </div>
+</div>

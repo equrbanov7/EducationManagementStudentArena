@@ -239,6 +239,35 @@
         {% endif %}
     </div>
 
+    {# Silmə təsdiq modal-ı — həm tək, həm də bulk silmə üçün #}
+    <div class="modal fade" id="profileNotifDeleteConfirmModal" tabindex="-1"
+         aria-labelledby="profileNotifDeleteConfirmLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom-color: #dc3545;">
+                    <h5 class="modal-title" id="profileNotifDeleteConfirmLabel" style="color:#dc3545;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% trans "Silməyi təsdiqləyin" %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.notifications' %}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="profileNotifDeleteConfirmMessage">
+                        {% trans "Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz." %}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>{% trans "cancel" context "profile.edit" %}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="profileNotifDeleteConfirmBtn">
+                        <i class="fas fa-trash me-1"></i>{% trans "delete" context "profile.notifications" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {# Notification detail modal #}
     <div class="modal fade" id="profileNotifModal" tabindex="-1"
          aria-labelledby="profileNotifModalLabel" aria-modal="true" role="dialog">
@@ -466,6 +495,64 @@
                 }
             });
         });
+
+        // ── Delete confirmation modal (single + bulk) ──
+        var deleteModalEl = document.getElementById('profileNotifDeleteConfirmModal');
+        var deleteConfirmBtn = document.getElementById('profileNotifDeleteConfirmBtn');
+        var deleteMessageEl = document.getElementById('profileNotifDeleteConfirmMessage');
+        var pendingDeleteForm = null;
+        var defaultDeleteMessage = deleteMessageEl ? deleteMessageEl.textContent : '';
+        var bulkDeleteMessage = "{% filter escapejs %}{% trans 'Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.' %}{% endfilter %}" || defaultDeleteMessage;
+
+        function showDeleteConfirm(form, isBulk) {
+            if (!deleteModalEl || !form) { return; }
+            pendingDeleteForm = form;
+            if (deleteMessageEl) {
+                deleteMessageEl.textContent = isBulk ? bulkDeleteMessage : defaultDeleteMessage;
+            }
+            var bsModal = bootstrap.Modal.getOrCreateInstance(deleteModalEl);
+            bsModal.show();
+        }
+
+        // Tək notification silmə formları — bütün `.profile-notif-actions` daxilindəki delete form-lar.
+        document.querySelectorAll('.profile-notif-actions form[action*="delete"]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (form.dataset.confirmed === '1') { return; }
+                event.preventDefault();
+                showDeleteConfirm(form, false);
+            });
+        });
+
+        // Bulk delete form
+        var bulkDeleteForm = document.getElementById('profileNotifBulkDeleteForm');
+        if (bulkDeleteForm) {
+            bulkDeleteForm.addEventListener('submit', function (event) {
+                if (bulkDeleteForm.dataset.confirmed === '1') { return; }
+                var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
+                if (!checked.length) {
+                    event.preventDefault();
+                    return;
+                }
+                event.preventDefault();
+                showDeleteConfirm(bulkDeleteForm, true);
+            });
+        }
+
+        if (deleteConfirmBtn) {
+            deleteConfirmBtn.addEventListener('click', function () {
+                if (!pendingDeleteForm) { return; }
+                pendingDeleteForm.dataset.confirmed = '1';
+                var bsModal = bootstrap.Modal.getOrCreateInstance(deleteModalEl);
+                bsModal.hide();
+                // Form-u yenidən submit et — bu dəfə guard keçər.
+                if (typeof pendingDeleteForm.requestSubmit === 'function') {
+                    pendingDeleteForm.requestSubmit();
+                } else {
+                    pendingDeleteForm.submit();
+                }
+                pendingDeleteForm = null;
+            });
+        }
     })();
     </script>
 </section>

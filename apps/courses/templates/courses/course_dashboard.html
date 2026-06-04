@@ -6,12 +6,17 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_dashboard" context "courses.dashboard" %}{% endblock %}
 
 {% block extraCss %}
+    {% include "courses/partials/_courses_assets_css.html" %}
     {% if is_student %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
     {% endif %}
     {% if is_owner or user_role == 'teacher' %}
     <link rel="stylesheet" href="{% static 'exams/css/course_exam_modal.css' %}">
     {% endif %}
+{% endblock %}
+
+{% block extraJs %}
+    {% include "courses/partials/_courses_assets_js.html" %}
 {% endblock %}
 
 {% block content %}
