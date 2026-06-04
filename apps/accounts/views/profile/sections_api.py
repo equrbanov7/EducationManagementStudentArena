@@ -175,6 +175,21 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     mutable_get["section"] = section
     request.GET = mutable_get
 
+    # KRİTİK: fragment KANONİK profil URL-i kimi render olunmalıdır.
+    # Şablonlarda çoxlu form `next`/canonical üçün `request.get_full_path`-i
+    # istifadə edir. Bu endpoint (`/accounts/profile/api/sections/...`) ilə
+    # render olunanda həmin `next` API URL-inə işarələyir; full form submit
+    # (moderate/delete/dil dəyişmə) `url_has_allowed_host_and_scheme`-dən keçib
+    # istifadəçini xam JSON səhifəsinə aparır. `request.path`-i kanonik profil
+    # URL-inə çeviririk ki, `get_full_path()` `/accounts/profile/?section=...`
+    # qaytarsın. `resolver_match` (nav-active) dəyişmir, çünki o ayrıca atributdur.
+    from django.urls import reverse
+
+    _canonical_profile_path = reverse("accounts:profile")
+    request.path = _canonical_profile_path
+    request.path_info = _canonical_profile_path
+    request.META["QUERY_STRING"] = mutable_get.urlencode()
+
     # Import lazily to avoid circular import (sections_api -> main -> sections_api).
     from .main import user_profile
 
