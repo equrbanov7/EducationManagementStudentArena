@@ -195,7 +195,7 @@ def analyze_question_bank(exam) -> QuestionBankAnalysis:
     # 3) Bank daxili dublikat aşkarlanması (eyni mətn + variant fingerprint)
     for indices in fp_groups.values():
         if len(indices) < 2:
-            continue 
+            continue
         for position in enumerate(indices):
             others = [i for i in indices if i != position]
             primary_ref = others[0]
