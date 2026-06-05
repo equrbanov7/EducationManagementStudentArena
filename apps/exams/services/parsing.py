@@ -7,6 +7,7 @@ from collections import defaultdict
 from django.utils.translation import pgettext
 
 from docx import Document
+from docx.enum.text import WD_COLOR_INDEX
 
 from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
 from apps.exams.services.utils import _norm
@@ -15,6 +16,13 @@ try:
     from pypdf import PdfReader
 except ImportError:
     PdfReader = None
+
+# PyMuPDF (fitz) — PDF highlight (annotation) oxuması üçün. Opsionaldır:
+# quraşdırılmayıbsa, mətn yenə çıxarılır, sadəcə PDF-də highlight→düz cavab işləməz.
+try:
+    import fitz
+except ImportError:
+    fitz = None
 
 logger = logging.getLogger(__name__)
 
@@ -172,6 +180,121 @@ def normalize_pdf_extracted_text(text: str) -> str:
     return t.strip()
 
 
+# ---- Highlight (mark) → düz cavab ----------------------------------------------
+# İdeya: DOCX-də sarı/rəngli işarələnmiş, PDF-də highlight annotation ilə qeyd
+# edilmiş variant "düz cavab" sayılır. Parser-i dəyişmirik — sadəcə extraction
+# mərhələsində belə variant sətrinin əvvəlinə artıq mövcud olan "*" markerini
+# əlavə edirik (OPTION_RE onsuz da "*A)" formatını düz cavab kimi tanıyır).
+# Bu yanaşma heç bir mövcud parser məntiqini və ya testini pozmur.
+
+_HIGHLIGHT_CORE_RE = re.compile(r"[^0-9a-zəğıöüçşı]+")
+
+
+def _highlight_core(text: str) -> str:
+    """Müqayisə üçün variant mətnini sadələşdir (kiçik hərf, yalnız söz simvolları)."""
+    return _HIGHLIGHT_CORE_RE.sub(" ", (text or "").lower()).strip()
+
+
+def _frag_label_and_core(fragment: str) -> tuple[str | None, str]:
+    """Highlight fraqmentindən (varsa) A–E etiketini və sadələşmiş mətn nüvəsini al."""
+    m = OPTION_RE.match((fragment or "").strip())
+    if m:
+        return m.group(2).upper(), _highlight_core(m.group(3))
+    return None, _highlight_core(fragment)
+
+
+def _fragment_matches_option(frag_label, frag_core, opt_label, opt_core) -> bool:
+    """
+    Bir highlight fraqmentinin konkret variant sətrinə aid olub-olmadığını qərarlaşdır.
+    - Fraqmentdə etiket varsa (məs. "D) ..."), yalnız etiketə görə uyğunlaşdırırıq (ən etibarlı).
+    - Etiket yoxdursa, mətnə görə: ya tam bərabər, ya da variant nüvəsi fraqment
+      nüvəsinin tam içindədir (yarımçıq highlight səbəbli yanlış uyğunluqdan qaçmaq üçün).
+    """
+    if frag_label:
+        return frag_label == opt_label
+    if not frag_core or not opt_core:
+        return False
+    return opt_core == frag_core or (len(opt_core) >= 3 and opt_core in frag_core)
+
+
+def _mark_correct_option_lines(text: str, highlight_fragments: list[str]) -> str:
+    """
+    highlight_fragments ilə uyğun gələn variant sətrlərinin əvvəlinə "*" əlavə edir.
+    Yalnız OPTION_RE-yə uyğun (A–E) sətrlərə toxunur; sual mətninə toxunmur.
+    Fraqment yoxdursa mətn olduğu kimi qaytarılır (davranış dəyişmir).
+    """
+    if not highlight_fragments:
+        return text
+
+    parsed = [_frag_label_and_core(f) for f in highlight_fragments]
+    out_lines = []
+    for line in text.splitlines():
+        m = OPTION_RE.match(line)
+        if m and not m.group(1):  # variant sətridir və hələ "*" ilə işarələnməyib
+            opt_label = m.group(2).upper()
+            opt_core = _highlight_core(m.group(3))
+            if any(_fragment_matches_option(fl, fc, opt_label, opt_core) for fl, fc in parsed):
+                line = re.sub(r"^(\s*)", r"\1*", line, count=1)
+        out_lines.append(line)
+    return "\n".join(out_lines)
+
+
+def _docx_paragraph_is_highlighted(paragraph) -> bool:
+    """DOCX paraqrafında ən azı bir run rənglə işarələnibsə True qaytarır."""
+    for run in paragraph.runs:
+        font = getattr(run, "font", None)
+        color = getattr(font, "highlight_color", None) if font is not None else None
+        if color is not None and color != WD_COLOR_INDEX.AUTO:
+            return True
+    return False
+
+
+def _extract_pdf_highlights(uploaded_file) -> list[str]:
+    """
+    PDF-dəki highlight annotation-larının altındakı mətni çıxarır (PyMuPDF ilə).
+    Tam müdafiəlidir: fitz yoxdursa və ya hər hansı xəta olarsa boş siyahı qaytarır,
+    beləliklə yükləmə heç vaxt highlight oxuması səbəbindən sınmır.
+    """
+    if fitz is None:
+        return []
+
+    try:
+        uploaded_file.seek(0)
+        data = uploaded_file.read()
+        uploaded_file.seek(0)
+    except Exception:
+        return []
+
+    fragments: list[str] = []
+    try:
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            for page in doc:
+                annot = page.first_annot
+                while annot is not None:
+                    try:
+                        # 8 == PDF_ANNOT_HIGHLIGHT
+                        if annot.type and annot.type[0] == 8:
+                            verts = annot.vertices or []
+                            parts = []
+                            # vertices hər highlight üçün 4 nöqtəlik (quad) qruplarla gəlir
+                            for i in range(0, len(verts) - 3, 4):
+                                rect = fitz.Quad(verts[i : i + 4]).rect
+                                chunk = page.get_textbox(rect)
+                                if chunk and chunk.strip():
+                                    parts.append(chunk.strip())
+                            frag = " ".join(parts).strip()
+                            if frag:
+                                fragments.append(frag)
+                    except Exception:
+                        pass
+                    annot = annot.next
+    except Exception as exc:
+        logger.warning("PDF highlight extraction failed: %s", exc)
+        return []
+
+    return fragments
+
+
 # Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf
 
 
@@ -216,11 +339,16 @@ def extract_text_from_upload(uploaded_file) -> str:
             raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
 
         lines = []
+        highlight_fragments = []
         for p in doc.paragraphs:
             t = (p.text or "").strip()
-            if t:
-                lines.append(t)
-        return "\n".join(lines)
+            if not t:
+                continue
+            lines.append(t)
+            # Rənglə işarələnmiş variant paraqrafını "düz cavab" namizədi kimi yığ
+            if _docx_paragraph_is_highlighted(p):
+                highlight_fragments.append(t)
+        return _mark_correct_option_lines("\n".join(lines), highlight_fragments)
 
     if ext == ".pdf":
         if PdfReader is None:
@@ -259,7 +387,10 @@ def extract_text_from_upload(uploaded_file) -> str:
                 parts.append(txt)
 
         raw = "\n\n".join(parts)
-        return normalize_pdf_extracted_text(raw)
+        normalized = normalize_pdf_extracted_text(raw)
+        # PDF highlight annotation-ları ilə mark olunmuş variantı "*" ilə işarələ
+        highlight_fragments = _extract_pdf_highlights(uploaded_file)
+        return _mark_correct_option_lines(normalized, highlight_fragments)
 
     raise ValueError(pgettext("exams.service.parsing.error", "unsupported_file_type"))
 
