@@ -73,12 +73,57 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     return bool(memberships)
 
 
+def _resolve_profile_fallback_org(user, resolved_profile):
+    """
+    Bərpa üçün hədəf təşkilatı tap:
+
+    1) Profil təşkilatı (əlçatandırsa) — köhnə davranış, dəyişmir.
+    2) Profil təşkilatı yoxdursa/əlçatmazdırsa, istifadəçinin YEGANƏ aktiv
+       təşkilatı (üzvlük və ya sahiblik). Bu, OrganizationMiddleware-in tək-org
+       auto-select məntiqini təkrarlayır və tenant-təhlükəsizdir, çünki yalnız
+       istifadəçinin həqiqətən aid olduğu org bərpa olunur.
+    3) Bir neçə aktiv org varsa, təxmin etmirik (None) — istifadəçi seçməlidir.
+
+    Bu, "təzə sessiyada my-exams/my-courses boş görünür, yalnız yeni element
+    yaradandan sonra çıxır" problemini həll edir: session aktiv org saxlamayanda
+    siyahı scope-u artıq boş qalmır.
+    """
+    profile_org = getattr(resolved_profile, "organization", None)
+    if _is_tenant_accessible_organization(profile_org):
+        return profile_org
+
+    from apps.organizations.models import Membership, Organization
+
+    with bypass_rls():
+        candidate_ids = set(
+            Membership.objects.filter(
+                user=user,
+                organization__is_active=True,
+                organization__status="active",
+                is_active=True,
+            ).values_list("organization_id", flat=True)
+        )
+        candidate_ids |= set(
+            Organization.objects.filter(
+                owner=user,
+                is_active=True,
+                status="active",
+            ).values_list("id", flat=True)
+        )
+        # Yalnız tək, qeyri-müəyyənliksiz org bərpa olunur.
+        if len(candidate_ids) != 1:
+            return None
+        return Organization.objects.filter(id=next(iter(candidate_ids))).first()
+
+
 def restore_request_organization_from_profile(request, *, profile=None, allow_multi_org_restore=False):
     """
     Re-hydrate ``request.organization`` from the user's profile organization.
 
     This is a recovery path for org-bound actions reached from profile
-    sections when the session lost its active tenant selection.
+    sections when the session lost its active tenant selection. Profil org-u
+    təyin olunmayıbsa, istifadəçinin yeganə aktiv/sahib org-una fallback edilir
+    (bax: ``_resolve_profile_fallback_org``).
     """
     if request is None or get_request_organization(request) is not None:
         return False
@@ -94,7 +139,7 @@ def restore_request_organization_from_profile(request, *, profile=None, allow_mu
             resolved_profile = user.profile
         except (AttributeError, ObjectDoesNotExist):
             resolved_profile = None
-    fallback_org = getattr(resolved_profile, "organization", None)
+    fallback_org = _resolve_profile_fallback_org(user, resolved_profile)
     if not _is_tenant_accessible_organization(fallback_org):
         return False
 

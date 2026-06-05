@@ -23,8 +23,11 @@ document.addEventListener("DOMContentLoaded", function () {
   
       const ext = (extension || fileName.split(".").pop() || "").toLowerCase();
       const isPdf = ext === "pdf";
-      const icon = isPdf ? "bi-file-earmark-pdf-fill" : "bi-file-earmark-check-fill";
-      const color = isPdf ? "#e74c3c" : "#4361ee";
+      const isImage = ["png", "jpg", "jpeg"].includes(ext);
+      const icon = isPdf
+        ? "bi-file-earmark-pdf-fill"
+        : (isImage ? "bi-file-earmark-image-fill" : "bi-file-earmark-check-fill");
+      const color = isPdf ? "#e74c3c" : (isImage ? "#0f9f8f" : "#4361ee");
   
       display.classList.add("show");
       display.innerHTML = `
@@ -38,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function highlightFormatTag(extension) {
         const tags = document.querySelectorAll(".format-tag");
         tags.forEach(t => {
-          t.classList.remove("is-active", "is-pdf", "is-docx", "is-txt");
+          t.classList.remove("is-active", "is-pdf", "is-docx", "is-txt", "is-img");
         });
       
         const ext = (extension || "").toLowerCase();
@@ -49,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (ext === "pdf") active.classList.add("is-pdf");
         if (ext === "docx") active.classList.add("is-docx");
         if (ext === "txt") active.classList.add("is-txt");
+        if (["png", "jpg", "jpeg"].includes(ext)) active.classList.add("is-img");
       }
   
     function clearFileState() {
@@ -355,19 +359,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // ====== Faylın client-side validation (UX cəhəti — server-side əsasdır) ======
     // .docm/.exe və s. uzantıları client-side bloklayırıq və istifadəçiyə yumşaq mesaj.
     const FORBIDDEN_EXT = ["docm", "dotm", "xlsm", "pptm", "bin", "exe", "scr", "js", "html", "htm"];
-    const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB — server limiti ilə uyğun
+    const MAX_FILE_BYTES = 45 * 1024 * 1024; // 45MB — server limiti ilə uyğun
     function validateFileClientSide(input) {
       if (!input || !input.files || !input.files[0]) return true;
       const f = input.files[0];
       const ext = (f.name.split(".").pop() || "").toLowerCase();
       if (FORBIDDEN_EXT.includes(ext)) {
-        alert("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .docx / .pdf / .txt yükləyin.");
+        alert("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .docx / .pdf / .txt / .png / .jpg yükləyin.");
         input.value = "";
         clearFileState();
         return false;
       }
       if (f.size > MAX_FILE_BYTES) {
-        alert("Fayl ölçüsü 5MB-dan böyükdür.");
+        alert("Fayl ölçüsü 45MB-dan böyükdür.");
         input.value = "";
         clearFileState();
         return false;

@@ -720,7 +720,7 @@
                                 </label>
                                 <label class="ai-block-field ai-file-field" for="writtenAiSourceFile{{ forloop.counter }}">
                                     <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                                    <input id="writtenAiSourceFile{{ forloop.counter }}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                                    <input id="writtenAiSourceFile{{ forloop.counter }}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                                     <span class="ai-file-picker">
                                         <i class="fas fa-upload"></i>
                                         <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
@@ -825,7 +825,7 @@
                                 </label>
                                 <label class="ai-block-field ai-file-field" for="writtenAiSourceFile1">
                                     <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                                    <input id="writtenAiSourceFile1" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                                    <input id="writtenAiSourceFile1" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                                     <span class="ai-file-picker">
                                         <i class="fas fa-upload"></i>
                                         <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
@@ -1026,7 +1026,7 @@ function renderAiBlockPanel(uniqueID, defaultTitle) {
                 </label>
                 <label class="ai-block-field ai-file-field" for="${fileInputId}">
                     <span>${I18N_QBANK.aiLectureFile}</span>
-                    <input id="${fileInputId}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                    <input id="${fileInputId}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                     <span class="ai-file-picker">
                         <i class="fas fa-upload"></i>
                         <strong>${I18N_QBANK.aiChooseFile}</strong>

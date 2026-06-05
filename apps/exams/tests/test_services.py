@@ -1377,6 +1377,24 @@ class ExamParsingServicesTest(TestCase):
 
         self.assertIn("pypdf", str(exc.exception))
 
+    def test_extract_text_from_upload_routes_png_to_ocr(self):
+        uploaded = SimpleUploadedFile("scan.png", _TINY_PNG_BYTES, content_type="image/png")
+
+        with patch.object(parsing, "_ocr_image_text", return_value="1. Sual?\n*A) bir\nB) iki") as ocr_image:
+            text = parsing.extract_text_from_upload(uploaded)
+
+        self.assertIn("*A) bir", text)
+        ocr_image.assert_called_once_with(uploaded)
+
+    def test_extract_text_from_upload_rejects_fake_png(self):
+        uploaded = SimpleUploadedFile("scan.png", b"not-a-png", content_type="image/png")
+
+        with patch.object(parsing, "_ocr_image_text") as ocr_image:
+            with self.assertRaises(ValueError):
+                parsing.extract_text_from_upload(uploaded)
+
+        ocr_image.assert_not_called()
+
     # ---- Highlight (mark) → düz cavab -----------------------------------------
 
     def _build_docx_bytes(self, rows):
@@ -1489,6 +1507,158 @@ class ExamParsingServicesTest(TestCase):
 
         parsed = parsing.parse_bulk_mcq(text)
         self.assertEqual(parsed[0]["correct"], ["D"])
+
+    # ---- Skan edilmiş (şəkil əsaslı) PDF + OCR --------------------------------
+
+    @staticmethod
+    def _build_scanned_pdf(lines):
+        """Mətni şəkilə çevirib mətn qatı OLMAYAN (skan kimi) PDF qaytarır."""
+        fitz = parsing.fitz
+        # 1) Mətnli müvəqqəti səhifə → pixmap (şəkil)
+        src = fitz.open()
+        page = src.new_page()
+        y = 60
+        for line in lines:
+            page.insert_text((50, y), line, fontsize=14)
+            y += 26
+        pix = page.get_pixmap(dpi=200)
+        png = pix.tobytes("png")
+        src.close()
+        # 2) Şəkli yeni PDF-ə yerləşdir → mətn qatı yoxdur
+        out = fitz.open()
+        opage = out.new_page(width=pix.width, height=pix.height)
+        opage.insert_image(opage.rect, stream=png)
+        data = out.tobytes()
+        out.close()
+        return data
+
+    @staticmethod
+    def _ocr_available():
+        if parsing.fitz is None:
+            return False
+        try:
+            doc = parsing.fitz.open()
+            page = doc.new_page()
+            page.insert_text((20, 20), "test", fontsize=12)
+            page.get_textpage_ocr(full=True, language="eng", dpi=72)
+            doc.close()
+            return True
+        except Exception:
+            return False
+
+    @skipUnless(parsing.fitz is not None, "PyMuPDF (fitz) quraşdırılmayıb")
+    @override_settings(EXAM_PDF_OCR_ENABLED=False)
+    def test_scanned_pdf_without_text_raises_clear_error_when_ocr_disabled(self):
+        data = self._build_scanned_pdf(["1. Sual?", "A) bir", "B) iki", "C) uc", "D) dord"])
+        # Mətn qatı yoxdur (skan); OCR deaktivdir → aydın xəta atılmalıdır.
+        self.assertIs(parsing._pdf_has_text_layer(SimpleUploadedFile("scan.pdf", data)), False)
+        with self.assertRaises(ValueError) as exc:
+            parsing.extract_text_from_upload(SimpleUploadedFile("scan.pdf", data))
+        self.assertIn("pdf_no_text_layer", str(exc.exception))
+
+    @override_settings(EXAM_PDF_OCR_ENABLED=True, EXAM_PDF_OCR_LANG="eng", EXAM_PDF_OCR_MAX_PAGES=2)
+    def test_ocr_extracts_questions_from_scanned_pdf(self):
+        if not self._ocr_available():
+            self.skipTest("Tesseract OCR mövcud deyil (sistemdə tesseract-ocr quraşdırılmayıb)")
+        data = self._build_scanned_pdf(
+            [
+                "1. Massivler uzerinde hansi emeliyyat?",
+                "A) hesabi",
+                "B) nisbet",
+                "C) indeks",
+                "D) mentiqi",
+            ]
+        )
+        text = parsing.extract_text_from_upload(SimpleUploadedFile("scan.pdf", data))
+        self.assertTrue(text.strip(), "OCR mətn qaytarmalıdır")
+        parsed = parsing.parse_bulk_mcq(text)
+        self.assertGreaterEqual(len(parsed), 1)
+        self.assertIn("A", parsed[0]["options"])
+
+    def test_yellow_highlight_mask_detects_region(self):
+        """
+        Skan PDF-də düz cavabın aşkarı üçün sarı maska məntiqi (OCR-dan asılı deyil).
+        """
+        from PIL import Image
+
+        img = Image.new("RGB", (120, 80), (255, 255, 255))
+        for x in range(20, 90):
+            for y in range(15, 45):
+                img.putpixel((x, y), (255, 235, 40))  # sarı highlight bloku
+
+        mask = parsing._build_yellow_mask(img)
+        # Sarı bloğun içində nisbət yüksək, ağ sahədə ~0 olmalıdır.
+        self.assertGreater(parsing._line_yellow_ratio(mask, (20, 15, 90, 45)), 0.8)
+        self.assertEqual(parsing._line_yellow_ratio(mask, (95, 50, 120, 80)), 0.0)
+        self.assertEqual(parsing._line_yellow_ratio(mask, (5, 5, 5, 5)), 0.0)
+
+
+class ExamParsingOcrHighlightHelperTest(SimpleTestCase):
+    @staticmethod
+    def _ocr_page_text_from_words(words, yellow_rects, *, width=260, height=160):
+        import io
+
+        from PIL import Image, ImageDraw
+
+        img = Image.new("RGB", (width, height), (255, 255, 255))
+        draw = ImageDraw.Draw(img)
+        for rect in yellow_rects:
+            draw.rectangle(rect, fill=(255, 235, 40))
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        png_bytes = buffer.getvalue()
+
+        class Pix:
+            def tobytes(self, image_format):
+                return png_bytes
+
+        class Page:
+            def get_text(self, mode=None, **kwargs):
+                if mode == "words":
+                    return words
+                return ""
+
+            def get_pixmap(self, dpi=None):
+                return Pix()
+
+        return parsing._ocr_page_text_with_highlights(Page(), object(), 1.0, True, 0.10, Image, 72)
+
+    def test_ocr_page_text_marks_option_when_only_answer_word_is_yellow(self):
+        words = [
+            (10, 10, 20, 22, "1.", 0, 0, 0),
+            (24, 10, 74, 22, "Sual?", 0, 0, 1),
+            (10, 35, 24, 48, "A)", 0, 1, 0),
+            (30, 35, 58, 48, "bir", 0, 1, 1),
+            (10, 60, 24, 73, "D)", 0, 2, 0),
+            (30, 60, 100, 73, "indekslesme", 0, 2, 1),
+        ]
+
+        text = self._ocr_page_text_from_words(words, [(30, 58, 100, 75)])
+
+        self.assertIn("*D) indekslesme", text)
+        self.assertNotIn("*A)", text)
+
+    def test_ocr_page_text_marks_option_from_highlighted_continuation_line(self):
+        words = [
+            (10, 10, 20, 22, "1.", 0, 0, 0),
+            (24, 10, 74, 22, "Sual?", 0, 0, 1),
+            (10, 35, 24, 48, "A)", 0, 1, 0),
+            (30, 35, 58, 48, "bir", 0, 1, 1),
+            (10, 60, 24, 73, "B)", 0, 2, 0),
+            (30, 60, 105, 73, "uzun", 0, 2, 1),
+            (10, 85, 120, 98, "davam", 0, 3, 0),
+            (126, 85, 170, 98, "hisse", 0, 3, 1),
+            (10, 110, 24, 123, "C)", 0, 4, 0),
+            (30, 110, 48, 123, "uc", 0, 4, 1),
+            (10, 135, 24, 148, "D)", 0, 5, 0),
+            (30, 135, 60, 148, "dord", 0, 5, 1),
+        ]
+
+        text = self._ocr_page_text_from_words(words, [(10, 82, 170, 101)], height=180)
+        parsed = parsing.parse_bulk_mcq(text)
+
+        self.assertIn("*B) uzun", text)
+        self.assertEqual(parsed[0]["correct"], ["B"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -248,6 +248,12 @@ EXAM_START_WAIT_TIMEOUT_SECONDS = _env_float_setting("EXAM_START_WAIT_TIMEOUT_SE
 EXAM_START_POLL_INTERVAL_SECONDS = _env_float_setting("EXAM_START_POLL_INTERVAL_SECONDS", 0.05, minimum=0.01)
 EXAM_START_LOCK_LEASE_SECONDS = _env_int_setting("EXAM_START_LOCK_LEASE_SECONDS", 120, minimum=1)
 EXAM_RANDOMIZER_USAGE_CACHE_SECONDS = _env_int_setting("EXAM_RANDOMIZER_USAGE_CACHE_SECONDS", 30, minimum=0)
+EXAM_PDF_OCR_ENABLED = _env_bool_setting("EXAM_PDF_OCR_ENABLED", True)
+EXAM_PDF_OCR_LANG = os.getenv("EXAM_PDF_OCR_LANG", "aze").strip() or "aze"
+EXAM_PDF_OCR_DPI = _env_int_setting("EXAM_PDF_OCR_DPI", 160, minimum=72)
+EXAM_PDF_OCR_MAX_PAGES = _env_int_setting("EXAM_PDF_OCR_MAX_PAGES", 40, minimum=1)
+EXAM_PDF_OCR_HIGHLIGHT = _env_bool_setting("EXAM_PDF_OCR_HIGHLIGHT", True)
+EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10, minimum=0.0)
 
 
 # Request queueing for mutating HTTP calls. This protects every app view from
