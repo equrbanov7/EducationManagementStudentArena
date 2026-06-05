@@ -241,6 +241,7 @@ def _sync_written_block_questions(block, question_texts):
 
 _WARNING_TYPE_LABELS = {
     "duplicate_in_import": "Dublikat",
+    "duplicate_in_bank": "Bankda dublikat",
     "already_in_exam": "Bankda dublikat",
     "duplicate_option_text": "Təkrar variant",
     "missing_option": "Variant çatışmır",
@@ -263,6 +264,10 @@ _WARNING_FEEDBACK = {
     "already_in_exam": (
         "Bu sual imtahan bankında artıq mövcuddur. Yeni sual kimi əlavə ediləcəksə mətni "
         "fərqləndirin, əks halda importdan çıxarın."
+    ),
+    "duplicate_in_bank": (
+        "Bu sual bankda başqa bir sualla eynidir. Təkrarlanan suallardan birini silin "
+        "və ya sual/variant mətnlərini fərqləndirin."
     ),
     "duplicate_option_text": "Eyni mətnli variantları dəyişin; hər variant ayrı məna daşımalıdır.",
     "missing_option": "A-D minimum variantlarını tamamlayın.",

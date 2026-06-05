@@ -92,7 +92,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return template.replace("{count}", String(count));
   }
 
+  function syncCardState(checkbox) {
+    var card = checkbox.closest(".qb-card");
+    if (card) {
+      card.classList.toggle("is-selected", checkbox.checked);
+    }
+  }
+
   function updateSelectionUI() {
+    checkboxes.forEach(syncCardState);
+
     var selectedCount = checkboxes.filter(function (item) {
       return item.checked;
     }).length;
@@ -167,6 +176,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   checkboxes.forEach(function (item) {
     item.addEventListener("change", updateSelectionUI);
+  });
+
+  // Kart gövdəsinə klik → seçim toggle (interaktiv elementlər istisna)
+  var INTERACTIVE_SELECTOR = "a,button,input,textarea,select,details,summary,label";
+  document.querySelectorAll(".qb-card").forEach(function (card) {
+    card.addEventListener("click", function (event) {
+      if (event.target.closest(INTERACTIVE_SELECTOR)) {
+        return;
+      }
+      var cb = card.querySelector(".question-checkbox");
+      if (!cb) return;
+      cb.checked = !cb.checked;
+      updateSelectionUI();
+    });
   });
 
   if (bulkForm) {

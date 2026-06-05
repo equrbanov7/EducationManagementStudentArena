@@ -4,17 +4,18 @@
 {% block title %}{{ exam.title }} - {% trans "title_questions_bank" context "exams.template.teacher_questions_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank.css' %}?v=20260606-redesign">
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
+{% url 'exams:teacher_questions_bank' exam.slug as qb_base_url %}
 <div class="qb-page">
     <div class="qb-shell">
         <header class="qb-header">
-            <div>
+            <div class="qb-header-titles">
                 <h1>{{ exam.title }}</h1>
                 <p>{% trans "subtitle_questions_bank" context "exams.template.teacher_questions_bank" %}</p>
             </div>
@@ -40,23 +41,65 @@
             </div>
         </header>
 
+        {# ---- Stat kartlar: ümumi sayğaclar + (test üçün) keyfiyyət sayğacları ---- #}
         <section class="qb-stats">
             <article class="qb-stat-card">
-                <span>{% trans "label_total_questions" context "exams.template.teacher_questions_bank" %}</span>
-                <strong>{{ total_questions }}</strong>
+                <span class="qb-stat-card__icon qb-ic-slate"><i class="fas fa-database"></i></span>
+                <div class="qb-stat-card__body">
+                    <span class="qb-stat-card__label">{% trans "label_total_questions" context "exams.template.teacher_questions_bank" %}</span>
+                    <strong>{{ total_questions }}</strong>
+                </div>
             </article>
             <article class="qb-stat-card qb-stat-card-green">
-                <span>{% trans "label_active_questions" context "exams.template.teacher_questions_bank" %}</span>
-                <strong>{{ active_questions }}</strong>
+                <span class="qb-stat-card__icon qb-ic-green"><i class="fas fa-circle-check"></i></span>
+                <div class="qb-stat-card__body">
+                    <span class="qb-stat-card__label">{% trans "label_active_questions" context "exams.template.teacher_questions_bank" %}</span>
+                    <strong>{{ active_questions }}</strong>
+                </div>
             </article>
             <article class="qb-stat-card qb-stat-card-blue">
-                <span>{% trans "label_inactive_questions" context "exams.template.teacher_questions_bank" %}</span>
-                <strong>{{ inactive_questions }}</strong>
+                <span class="qb-stat-card__icon qb-ic-blue"><i class="fas fa-pause-circle"></i></span>
+                <div class="qb-stat-card__body">
+                    <span class="qb-stat-card__label">{% trans "label_inactive_questions" context "exams.template.teacher_questions_bank" %}</span>
+                    <strong>{{ inactive_questions }}</strong>
+                </div>
             </article>
+
+            {% if analysis_enabled %}
+                <a class="qb-stat-card qb-stat-card--clickable qb-stat-card-red {% if active_flag == 'has-error' %}is-active{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-error"
+                   title="{% trans 'Yalnız xətalı sualları göstər' context 'exams.template.teacher_questions_bank' %}">
+                    <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-circle-xmark"></i></span>
+                    <div class="qb-stat-card__body">
+                        <span class="qb-stat-card__label">{% trans "Xətalı" context "exams.template.teacher_questions_bank" %}</span>
+                        <strong>{{ error_count|default:0 }}</strong>
+                    </div>
+                </a>
+                <a class="qb-stat-card qb-stat-card--clickable qb-stat-card-amber {% if active_flag == 'has-warning' %}is-active{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-warning"
+                   title="{% trans 'Yalnız xəbərdarlıqlı sualları göstər' context 'exams.template.teacher_questions_bank' %}">
+                    <span class="qb-stat-card__icon qb-ic-amber"><i class="fas fa-triangle-exclamation"></i></span>
+                    <div class="qb-stat-card__body">
+                        <span class="qb-stat-card__label">{% trans "Xəbərdarlıq" context "exams.template.teacher_questions_bank" %}</span>
+                        <strong>{{ warning_count|default:0 }}</strong>
+                    </div>
+                </a>
+                <a class="qb-stat-card qb-stat-card--clickable qb-stat-card-purple {% if active_flag == 'has-dup' %}is-active{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-dup"
+                   title="{% trans 'Yalnız dublikat sualları göstər' context 'exams.template.teacher_questions_bank' %}">
+                    <span class="qb-stat-card__icon qb-ic-purple"><i class="fas fa-clone"></i></span>
+                    <div class="qb-stat-card__body">
+                        <span class="qb-stat-card__label">{% trans "Dublikat" context "exams.template.teacher_questions_bank" %}</span>
+                        <strong>{{ duplicate_count|default:0 }}</strong>
+                    </div>
+                </a>
+            {% endif %}
         </section>
 
+        {# ---- Axtarış + status + sıralama (server-side, mövcud davranış qorunur) ---- #}
         <section class="qb-filters">
             <form id="questionSearchForm" method="get" class="qb-filter-form">
+                {% if active_flag %}<input type="hidden" name="flag" value="{{ active_flag }}">{% endif %}
                 {% if navigation_from_section %}
                     <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
                 {% endif %}
@@ -107,14 +150,96 @@
                         </option>
                     </select>
                 </div>
+
+                {% if analysis_enabled %}
+                    <a class="qb-btn qb-btn-report" href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}export=report">
+                        <i class="fas fa-file-excel"></i> {% trans "Hesabatı yüklə" context "exams.template.teacher_questions_bank" %}
+                    </a>
+                {% endif %}
             </form>
         </section>
+
+        {# ---- Keyfiyyət çipləri: sualları kateqoriyaya görə süzgəcləyir (server-side) ---- #}
+        {% if analysis_enabled %}
+        <section class="qb-quality">
+            <div class="qb-chip-bar" role="tablist" aria-label="{% trans 'Keyfiyyət süzgəci' context 'exams.template.teacher_questions_bank' %}">
+                <span class="qb-chip-bar__label"><i class="fas fa-filter"></i> {% trans "Süzgəc" context "exams.template.teacher_questions_bank" %}:</span>
+
+                <a class="qb-chip {% if not active_flag %}is-active{% endif %}"
+                   href="{{ qb_base_url }}{% if filters_query %}?{{ filters_query }}{% endif %}">
+                    {% trans "Hamısı" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ analyzed_total }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--error {% if active_flag == 'has-error' %}is-active{% endif %} {% if not error_count %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-error"
+                   title="{% trans 'Xətalı: imtahanda problem yarada biləcək suallar — çatışmayan A–D variantı, boş variant mətni, düz cavabın variantlar arasında olmaması, bankda eyni sualın təkrarı.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-circle-xmark"></i>
+                    {% trans "Xətalı" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ error_count|default:0 }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--warning {% if active_flag == 'has-warning' %}is-active{% endif %} {% if not category_counts.warnings %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-warning"
+                   title="{% trans 'Xəbərdarlıq: imtahanı bloklamayan, lakin diqqət tələb edən hallar — variant sayının 5-dən az olması (məs. yalnız A–D), eyni mətnli təkrar variantlar. Sual işləyir, amma keyfiyyət üçün düzəliş tövsiyə olunur.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    {% trans "Xəbərdarlıq" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ category_counts.warnings|default:0 }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--duplicate {% if active_flag == 'has-dup' %}is-active{% endif %} {% if not duplicate_count %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-dup"
+                   title="{% trans 'Dublikat: bankda eyni sual mətni və eyni variantlarla təkrarlanan suallar.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-clone"></i>
+                    {% trans "Dublikat" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ duplicate_count|default:0 }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--structure {% if active_flag == 'has-structure' %}is-active{% endif %} {% if not category_counts.structure %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-structure"
+                   title="{% trans 'Variant problemi: variant strukturu ilə bağlı suallar — çatışmayan variant, boş variant mətni və ya tövsiyə olunan sayın altında variant.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-list-ol"></i>
+                    {% trans "Variant problemi" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ category_counts.structure|default:0 }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--balance {% if active_flag == 'has-balance' %}is-active{% endif %} {% if not category_counts.balance %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-balance"
+                   title="{% trans 'Uzunluq balansı: düz cavabın digər variantlardan nəzərəçarpacaq dərəcədə uzun və ya qısa olması — bu, cavabı təxmin etməyi asanlaşdıra bilər.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-scale-unbalanced"></i>
+                    {% trans "Uzunluq balansı" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ category_counts.balance|default:0 }}</span>
+                </a>
+
+                <a class="qb-chip qb-chip--clean {% if active_flag == 'is-clean' %}is-active{% endif %} {% if not category_counts.clean %}is-empty{% endif %}"
+                   href="{{ qb_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=is-clean"
+                   title="{% trans 'Təmiz: heç bir xəta və ya xəbərdarlıq aşkarlanmayan suallar.' context 'exams.template.teacher_questions_bank' %}">
+                    <i class="fas fa-check-circle"></i>
+                    {% trans "Təmiz" context "exams.template.teacher_questions_bank" %}
+                    <span class="qb-chip__count">{{ category_counts.clean|default:0 }}</span>
+                </a>
+            </div>
+
+            <details class="qb-legend">
+                <summary><i class="fas fa-circle-info"></i> {% trans "Süzgəc kateqoriyaları nə deməkdir?" context "exams.template.teacher_questions_bank" %}</summary>
+                <dl class="qb-legend__list">
+                    <div><dt class="qb-legend__error">{% trans "Xətalı" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "İmtahanda problem yarada bilər: çatışmayan A–D variantı, boş variant, düz cavabın variantlar arasında olmaması və ya bank dublikatı." context "exams.template.teacher_questions_bank" %}</dd></div>
+                    <div><dt class="qb-legend__warning">{% trans "Xəbərdarlıq" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "Bloklamayan, amma diqqət tələb edən hallar: 5-dən az variant, eyni mətnli təkrar variant. Düzəliş tövsiyə olunur." context "exams.template.teacher_questions_bank" %}</dd></div>
+                    <div><dt class="qb-legend__duplicate">{% trans "Dublikat" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "Bankda eyni mətn və variantlarla təkrarlanan suallar." context "exams.template.teacher_questions_bank" %}</dd></div>
+                    <div><dt class="qb-legend__structure">{% trans "Variant problemi" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "Variant strukturu ilə bağlı problemlər: çatışmayan/boş variant və ya az sayda variant." context "exams.template.teacher_questions_bank" %}</dd></div>
+                    <div><dt class="qb-legend__balance">{% trans "Uzunluq balansı" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "Düz cavab digər variantlardan çox uzun/qısadır — cavabı təxmin etməyi asanlaşdıra bilər." context "exams.template.teacher_questions_bank" %}</dd></div>
+                    <div><dt class="qb-legend__clean">{% trans "Təmiz" context "exams.template.teacher_questions_bank" %}</dt><dd>{% trans "Heç bir xəta və ya xəbərdarlıq aşkarlanmayıb." context "exams.template.teacher_questions_bank" %}</dd></div>
+                </dl>
+            </details>
+        </section>
+        {% endif %}
 
         <form method="post" id="bulkForm">
             {% csrf_token %}
             <input type="hidden" name="q" value="{{ search_query }}">
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
+            <input type="hidden" name="flag" value="{{ active_flag }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
             {% if navigation_from_section %}
                 <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
@@ -131,6 +256,10 @@
                     <button type="button" id="clearSelectionBtn" class="qb-btn qb-btn-soft">
                         <i class="fas fa-eraser"></i> {% trans "action_clear_selection" context "exams.template.teacher_questions_bank" %}
                     </button>
+                    <label class="qb-select-all-inline">
+                        <input type="checkbox" id="tableSelectAll">
+                        <span>{% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}</span>
+                    </label>
                     <span id="selectedCountLabel" class="qb-selected-counter">
                         {% trans "selected_count_zero" context "exams.template.teacher_questions_bank" %}
                     </span>
@@ -156,96 +285,141 @@
             </section>
 
             {% if page_obj.object_list %}
-                <div class="qb-table-wrap">
-                    <table class="qb-table">
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col">
-                                    <input type="checkbox" id="tableSelectAll">
-                                </th>
-                                <th>{% trans "col_question" context "exams.template.teacher_questions_bank" %}</th>
-                                <th>{% trans "col_block" context "exams.template.teacher_questions_bank" %}</th>
-                                <th>{% trans "col_status" context "exams.template.teacher_questions_bank" %}</th>
-                                <th>{% trans "col_actions" context "exams.template.teacher_questions_bank" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for q in page_obj.object_list %}
-                            <tr class="{% if not q.is_active %}is-inactive{% endif %}">
-                                <td class="checkbox-col">
-                                    <input type="checkbox" class="question-checkbox" name="selected_question_ids" value="{{ q.id }}">
-                                </td>
-                                <td>
-                                    <div class="qb-question-text">{{ q.text }}</div>
-                                    <div class="qb-question-meta">
-                                        {% trans "label_added_at" context "exams.template.teacher_questions_bank" %}: {{ q.created_at|date:"d.m.Y H:i" }}
-                                    </div>
-                                    {% if exam.exam_type == "test" %}
-                                        <ul class="qb-options">
-                                            {% for opt in q.options.all %}
-                                                <li class="{% if opt.is_correct %}is-correct{% endif %}">
-                                                    <span>{{ opt.label|default:"•" }})</span> {{ opt.text }}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if q.block %}
-                                        <span class="qb-chip">{{ q.block.name }}</span>
-                                    {% else %}
-                                        <span class="qb-chip qb-chip-muted">{% trans "label_no_block" context "exams.template.teacher_questions_bank" %}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
+                <div class="qb-card-list">
+                    {% for q in page_obj.object_list %}
+                    {% with meta=q.analysis_meta %}
+                    <article class="qb-card{% if not q.is_active %} is-inactive{% endif %}{% if meta and meta.top_severity != 'none' %} qb-card--sev-{{ meta.top_severity }}{% endif %}"
+                             id="qcard-{{ q.id }}">
+                        <div class="qb-card__select">
+                            <input type="checkbox" class="question-checkbox" name="selected_question_ids" value="{{ q.id }}">
+                        </div>
+
+                        <div class="qb-card__main">
+                            <div class="qb-card__top">
+                                <div class="qb-card__heading">
+                                    <span class="qb-card__num">#{{ q.order }}</span>
+                                    <p class="qb-question-text">{{ q.text }}</p>
+                                </div>
+
+                                <div class="qb-card__badges">
                                     {% if q.is_active %}
                                         <span class="qb-status qb-status-active">{% trans "status_active" context "exams.template.teacher_questions_bank" %}</span>
                                     {% else %}
                                         <span class="qb-status qb-status-inactive">{% trans "status_inactive" context "exams.template.teacher_questions_bank" %}</span>
                                     {% endif %}
-                                </td>
-                                <td>
-                                    <div class="qb-row-actions">
-                                        <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
-                                           class="qb-btn qb-btn-inline js-open-question-form-modal"
-                                           data-question-modal-mode="edit"
-                                           data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
-                                            <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_questions_bank" %}
-                                        </a>
-                                        {% if q.is_active %}
-                                            <button type="button"
-                                                    class="qb-btn qb-btn-inline qb-btn-inline-warn js-single-question-action"
-                                                    data-action-value="deactivate"
-                                                    data-question-id="{{ q.id }}">
-                                                <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_questions_bank" %}
-                                            </button>
+
+                                    {% if analysis_enabled %}
+                                        {% if meta and meta.total_count %}
+                                            {% if meta.error_count %}
+                                            <span class="qb-badge qb-badge--error" title="{% trans 'Xəta' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-circle-xmark"></i> {{ meta.error_count }}</span>
+                                            {% endif %}
+                                            {% if meta.warning_count %}
+                                            <span class="qb-badge qb-badge--warning" title="{% trans 'Xəbərdarlıq' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-triangle-exclamation"></i> {{ meta.warning_count }}</span>
+                                            {% endif %}
+                                            {% if meta.has_duplicate %}
+                                            <span class="qb-badge qb-badge--duplicate" title="{% trans 'Dublikat' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-clone"></i></span>
+                                            {% endif %}
+                                            {% if meta.has_balance_issue %}
+                                            <span class="qb-badge qb-badge--balance" title="{% trans 'Uzunluq balansı' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-scale-unbalanced"></i></span>
+                                            {% endif %}
                                         {% else %}
-                                            <button type="button"
-                                                    class="qb-btn qb-btn-inline qb-btn-inline-success js-single-question-action"
-                                                    data-action-value="activate"
-                                                    data-question-id="{{ q.id }}">
-                                                <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_questions_bank" %}
-                                            </button>
+                                            <span class="qb-badge qb-badge--clean" title="{% trans 'Təmiz' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-check"></i></span>
                                         {% endif %}
-                                        <button
-                                            type="button"
-                                            class="qb-btn qb-btn-inline qb-btn-inline-danger js-open-delete-modal"
-                                            data-question-id="{{ q.id }}"
-                                            data-question-text="{{ q.text|truncatechars:120|escape }}"
-                                        >
-                                            <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_questions_bank" %}
-                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="qb-card__meta">
+                                {% if q.block %}
+                                    <span class="qb-chip-tag">{{ q.block.name }}</span>
+                                {% else %}
+                                    <span class="qb-chip-tag qb-chip-tag--muted">{% trans "label_no_block" context "exams.template.teacher_questions_bank" %}</span>
+                                {% endif %}
+                                <span class="qb-card__date"><i class="far fa-clock"></i> {% trans "label_added_at" context "exams.template.teacher_questions_bank" %}: {{ q.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+
+                            {% if exam.exam_type == "test" %}
+                                <div class="qb-options">
+                                    {% for opt in q.options.all %}
+                                        <div class="qb-opt {% if opt.is_correct %}is-correct{% endif %}">
+                                            <span class="qb-opt__label">{{ opt.label|default:"•" }}</span>
+                                            <span class="qb-opt__text">{{ opt.text }}</span>
+                                            {% if opt.is_correct %}<i class="fas fa-check qb-opt__tick"></i>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if analysis_enabled and q.analysis_warnings %}
+                                <details class="qb-warnings qb-warnings--{{ meta.top_severity|default:'warning' }}" {% if meta.error_count or meta.has_duplicate %}open{% endif %}>
+                                    <summary>
+                                        <span class="qb-warnings__label"><i class="fas fa-list-check"></i> {% trans "Xəbərdarlıqları göstər" context "exams.template.teacher_questions_bank" %}</span>
+                                        <span class="qb-warnings__tags">
+                                            {% if meta.has_duplicate %}<span class="qb-warnings__tag qb-warnings__tag--dup"><i class="fas fa-clone"></i> {% trans "Dublikat" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                                            {% if meta.has_structure_issue %}<span class="qb-warnings__tag qb-warnings__tag--struct"><i class="fas fa-list-ol"></i> {% trans "Variant" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                                            {% if meta.has_balance_issue %}<span class="qb-warnings__tag qb-warnings__tag--bal"><i class="fas fa-scale-unbalanced"></i> {% trans "Balans" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                                        </span>
+                                        <span class="qb-warnings__count">{{ meta.total_count }}</span>
+                                        <i class="fas fa-chevron-down qb-warnings__chevron"></i>
+                                    </summary>
+                                    <div class="qb-warnings__body">
+                                        {% for w in q.analysis_warnings %}
+                                            <div class="qb-warning qb-warning--{{ w.severity|default:'warning' }}">
+                                                <span class="qb-warning__icon">
+                                                    {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                                                </span>
+                                                <span class="qb-warning__text">{{ w.msg }}</span>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </details>
+                            {% endif %}
+
+                            <div class="qb-card__actions">
+                                <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
+                                   class="qb-btn qb-btn-inline js-open-question-form-modal"
+                                   data-question-modal-mode="edit"
+                                   data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
+                                    <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_questions_bank" %}
+                                </a>
+                                {% if q.is_active %}
+                                    <button type="button"
+                                            class="qb-btn qb-btn-inline qb-btn-inline-warn js-single-question-action"
+                                            data-action-value="deactivate"
+                                            data-question-id="{{ q.id }}">
+                                        <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_questions_bank" %}
+                                    </button>
+                                {% else %}
+                                    <button type="button"
+                                            class="qb-btn qb-btn-inline qb-btn-inline-success js-single-question-action"
+                                            data-action-value="activate"
+                                            data-question-id="{{ q.id }}">
+                                        <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_questions_bank" %}
+                                    </button>
+                                {% endif %}
+                                <button
+                                    type="button"
+                                    class="qb-btn qb-btn-inline qb-btn-inline-danger js-open-delete-modal"
+                                    data-question-id="{{ q.id }}"
+                                    data-question-text="{{ q.text|truncatechars:120|escape }}"
+                                >
+                                    <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_questions_bank" %}
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                    {% endwith %}
+                    {% endfor %}
                 </div>
             {% else %}
                 <div class="qb-empty">
                     <i class="far fa-lightbulb"></i>
-                    {% if search_query %}
+                    {% if active_flag %}
+                        <p>{% trans "Bu süzgəcə uyğun sual yoxdur." context "exams.template.teacher_questions_bank" %}</p>
+                        <a class="qb-btn qb-btn-soft-blue" href="{{ qb_base_url }}{% if filters_query %}?{{ filters_query }}{% endif %}">
+                            <i class="fas fa-rotate-left"></i> {% trans "Süzgəci sıfırla" context "exams.template.teacher_questions_bank" %}
+                        </a>
+                    {% elif search_query %}
                         <p>{% trans "empty_no_results" context "exams.template.teacher_questions_bank" %}</p>
                     {% else %}
                         <p>{% trans "empty_no_questions" context "exams.template.teacher_questions_bank" %}</p>
@@ -263,6 +437,7 @@
             <input type="hidden" name="q" value="{{ search_query }}">
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
+            <input type="hidden" name="flag" value="{{ active_flag }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
             {% if navigation_from_section %}
                 <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
@@ -279,6 +454,7 @@
             <input type="hidden" name="q" value="{{ search_query }}">
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
+            <input type="hidden" name="flag" value="{{ active_flag }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
             {% if navigation_from_section %}
                 <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
@@ -326,5 +502,5 @@ window.TEACHER_QUESTIONS_BANK_I18N = {
 };
 </script>
 <script src="{% static 'exams/js/question_form.js' %}"></script>
-<script src="{% static 'exams/js/teacher_questions_bank.js' %}"></script>
+<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20260606-redesign"></script>
 {% endblock %}

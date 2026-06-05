@@ -17,6 +17,7 @@ from django.views.decorators.http import require_http_methods
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.bank_analysis import analyze_question_bank
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
@@ -170,6 +171,7 @@ def teacher_questions_bank(request, slug):
 
     allowed_statuses = {"all", "active", "inactive"}
     allowed_sorts = {"newest", "oldest", "az", "za"}
+    allowed_flags = {"has-error", "has-warning", "has-dup", "has-structure", "has-balance", "is-clean"}
 
     if request.method == "POST":
         action = (request.POST.get("bulk_action") or "").strip().lower()
@@ -206,6 +208,7 @@ def teacher_questions_bank(request, slug):
         redirect_q = (request.POST.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
         redirect_status = (request.POST.get("status") or "all").strip().lower()
         redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
+        redirect_flag = (request.POST.get("flag") or "").strip().lower()
         redirect_page = (request.POST.get("page") or "").strip()
 
         if redirect_q:
@@ -214,6 +217,8 @@ def teacher_questions_bank(request, slug):
             redirect_params["status"] = redirect_status
         if redirect_sort in allowed_sorts:
             redirect_params["sort"] = redirect_sort
+        if redirect_flag in allowed_flags:
+            redirect_params["flag"] = redirect_flag
         if redirect_page.isdigit():
             redirect_params["page"] = redirect_page
         if navigation_from_section:
@@ -229,10 +234,36 @@ def teacher_questions_bank(request, slug):
     search_query = (request.GET.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
     status_filter = (request.GET.get("status") or "all").strip().lower()
     sort_filter = (request.GET.get("sort") or "newest").strip().lower()
+    flag_filter = (request.GET.get("flag") or "").strip().lower()
     if status_filter not in allowed_statuses:
         status_filter = "all"
     if sort_filter not in allowed_sorts:
         sort_filter = "newest"
+    if flag_filter not in allowed_flags:
+        flag_filter = ""
+
+    # Bütün bank üzrə keyfiyyət analizi (yalnız test imtahanları üçün mənalıdır).
+    # Stat kartları, filter çipləri və hesabat real ümumi rəqəmləri göstərsin deyə
+    # analiz səhifələmədən asılı olmayaraq bütün suallar üzərində işləyir.
+    analysis = analyze_question_bank(exam)
+
+    # Excel hesabatının yüklənməsi (mövcud import-report builder təkrar istifadə olunur).
+    if analysis.enabled and request.GET.get("export") == "report":
+        from apps.exams.views.teacher.question_bank import _build_question_bank_report_xlsx
+
+        try:
+            return _build_question_bank_report_xlsx(
+                exam=exam,
+                raw_text="",
+                parsed=analysis.parsed_for_report,
+                test_level_warnings=[],
+                category_counts=analysis.category_counts,
+                warning_count=analysis.warning_count,
+                duplicate_count=analysis.duplicate_count,
+                error_count=analysis.error_count,
+            )
+        except RuntimeError as exc:
+            messages.error(request, str(exc))
 
     questions = exam.questions.select_related("block").prefetch_related("options")
 
@@ -253,6 +284,13 @@ def teacher_questions_bank(request, slug):
     elif status_filter == "inactive":
         questions = questions.filter(is_active=False)
 
+    # Keyfiyyət çipi filtri (dublikat, xəbərdarlıq, balans və s.) — bütün bank üzrə
+    # hesablanmış flag dəstlərinə əsasən server tərəfdə süzgəcləyir.
+    active_flag = flag_filter if (flag_filter and analysis.enabled) else ""
+    if active_flag:
+        flagged = analysis.flagged_ids.get(active_flag, set())
+        questions = questions.filter(id__in=flagged)
+
     if sort_filter == "oldest":
         questions = questions.order_by("created_at", "id")
     elif sort_filter == "az":
@@ -265,6 +303,17 @@ def teacher_questions_bank(request, slug):
     paginator = Paginator(questions, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
 
+    # Cari səhifədəki suallara analiz nəticəsini (badge/warning üçün) bağlayırıq.
+    if analysis.enabled:
+        for question in page_obj.object_list:
+            entry = analysis.analysis_by_id.get(question.id)
+            if entry:
+                question.analysis_meta = entry["meta"]
+                question.analysis_warnings = entry["warnings"]
+            else:
+                question.analysis_meta = None
+                question.analysis_warnings = []
+
     total_questions = exam.questions.count()
     active_questions = exam.questions.filter(is_active=True).count()
     inactive_questions = max(total_questions - active_questions, 0)
@@ -276,10 +325,15 @@ def teacher_questions_bank(request, slug):
         base_query_params["status"] = status_filter
     if sort_filter != "newest":
         base_query_params["sort"] = sort_filter
+    if active_flag:
+        base_query_params["flag"] = active_flag
     if navigation_from_section:
         base_query_params["from_section"] = navigation_from_section
     if navigation_return_to:
         base_query_params["return_to"] = navigation_return_to
+
+    # Hesabat/çip linkləri üçün naviqasiya + axtarış kontekstini saxlayan query
+    filters_query_params = {key: value for key, value in base_query_params.items() if key != "flag"}
 
     return render(
         request,
@@ -290,10 +344,19 @@ def teacher_questions_bank(request, slug):
             "search_query": search_query,
             "status_filter": status_filter,
             "sort_filter": sort_filter,
+            "active_flag": active_flag,
             "total_questions": total_questions,
             "active_questions": active_questions,
             "inactive_questions": inactive_questions,
             "pagination_query": urlencode(base_query_params),
+            "filters_query": urlencode(filters_query_params),
+            "analysis_enabled": analysis.enabled,
+            "category_counts": analysis.category_counts,
+            "duplicate_count": analysis.duplicate_count,
+            "error_count": analysis.error_count,
+            "warning_count": analysis.warning_count,
+            "clean_count": analysis.clean_count,
+            "analyzed_total": analysis.total_analyzed,
             "question_bank_navigation_query": navigation_query,
             "navigation_from_section": navigation_from_section,
             "navigation_return_to": navigation_return_to,
