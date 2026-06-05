@@ -15,7 +15,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
-from django.utils.translation import override
+from django.utils.translation import override, pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
@@ -1554,7 +1554,11 @@ class ExamParsingServicesTest(TestCase):
         self.assertIs(parsing._pdf_has_text_layer(SimpleUploadedFile("scan.pdf", data)), False)
         with self.assertRaises(ValueError) as exc:
             parsing.extract_text_from_upload(SimpleUploadedFile("scan.pdf", data))
-        self.assertIn("pdf_no_text_layer", str(exc.exception))
+        # Tərcümədən asılı olmadan düzgün msgid-in (pdf_no_text_layer) atıldığını yoxlayırıq.
+        # LANGUAGE_CODE="az" altında pgettext açarı tərcümə edir, ona görə literal açar
+        # sözü deyil, msgid-in real dəyəri ilə müqayisə edirik.
+        expected_message = pgettext("exams.service.parsing.error", "pdf_no_text_layer")
+        self.assertEqual(str(exc.exception), expected_message)
 
     @override_settings(EXAM_PDF_OCR_ENABLED=True, EXAM_PDF_OCR_LANG="eng", EXAM_PDF_OCR_MAX_PAGES=2)
     def test_ocr_extracts_questions_from_scanned_pdf(self):
