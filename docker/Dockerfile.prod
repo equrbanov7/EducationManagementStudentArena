@@ -27,7 +27,11 @@ RUN apt-get update \
         libpq-dev \
         libc6-dev \
         gcc \
+        tesseract-ocr \
+        tesseract-ocr-aze \
     && rm -rf /var/lib/apt/lists/*
+
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 # Create a dedicated non-root user for runtime security.
 RUN groupadd --system appgroup \

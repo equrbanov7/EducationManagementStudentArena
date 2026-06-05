@@ -3518,15 +3518,17 @@ msgstr "AI settings saved successfully."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Registration completed, your request has been recorded."
-"Registration completed and your organization request is recorded. Verify the"
-" email code to continue."
+msgstr ""
+"Registration completed, your request has been recorded.Registration "
+"completed and your organization request is recorded. Verify the email code "
+"to continue."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Registration completed, you can log in now."
-"Registration completed. Verify the email code to activate your account."
+msgstr ""
+"Registration completed, you can log in now.Registration completed. Verify "
+"the email code to activate your account."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3565,9 +3567,9 @@ msgstr "A new verification code has been sent."
 
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
-msgstr "Failed to send the registration email."
-"Registration failed: we could not send the verification email. Please check "
-"your email address and try again."
+msgstr ""
+"Failed to send the registration email.Registration failed: we could not send"
+" the verification email. Please check your email address and try again."
 
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
@@ -8790,7 +8792,7 @@ msgstr "Exam started! (Attempt #{attempt_number})"
 #: apps/exams/services/parsing.py:64
 msgctxt "exams.service.parsing.error"
 msgid "file_too_large"
-msgstr "File is too large (max 5MB)."
+msgstr "File is too large (max 45MB)."
 
 #: apps/exams/services/parsing.py:82
 msgctxt "exams.service.parsing.error"
@@ -21294,7 +21296,8 @@ msgstr "Live tracking"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "header_subtitle"
-msgstr "Live monitoring of the exam process — observation only, no intervention."
+msgstr ""
+"Live monitoring of the exam process — observation only, no intervention."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "poll_auto_refresh"
@@ -21570,7 +21573,9 @@ msgstr "Remove from exam"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_msg"
-msgstr "Do you want to permanently stop this student's exam? It will be submitted immediately and cannot be reversed."
+msgstr ""
+"Do you want to permanently stop this student's exam? It will be submitted "
+"immediately and cannot be reversed."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_btn"
@@ -21582,7 +21587,9 @@ msgstr "Temporarily block"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_msg"
-msgstr "The student's screen will be locked. The exam will not be submitted — you can resume later."
+msgstr ""
+"The student's screen will be locked. The exam will not be submitted — you "
+"can resume later."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_btn"
@@ -21594,7 +21601,9 @@ msgstr "Resume"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_msg"
-msgstr "Do you want to allow the student to continue their exam? An extra chance will be granted."
+msgstr ""
+"Do you want to allow the student to continue their exam? An extra chance "
+"will be granted."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_btn"
@@ -21782,7 +21791,10 @@ msgstr "Students pending approval"
 
 msgctxt "accounts.student_org"
 msgid "pending_desc"
-msgstr "Here you can add students who selected this organization at sign-up, individually or all at once. Requests of those already accepted by another organization will appear as \"Closed\"."
+msgstr ""
+"Here you can add students who selected this organization at sign-up, "
+"individually or all at once. Requests of those already accepted by another "
+"organization will appear as \"Closed\"."
 
 msgctxt "accounts.student_org"
 msgid "pending_search_ph"
@@ -21826,7 +21838,10 @@ msgstr "Students not linked to an organization"
 
 msgctxt "accounts.student_org"
 msgid "unassigned_desc"
-msgstr "Send invitations to students who signed up without selecting an organization. They join the organization after accepting the invitation in their account."
+msgstr ""
+"Send invitations to students who signed up without selecting an "
+"organization. They join the organization after accepting the invitation in "
+"their account."
 
 msgctxt "accounts.student_org"
 msgid "unassigned_search_ph"
@@ -21854,7 +21869,9 @@ msgstr "Sent invitations"
 
 msgctxt "accounts.student_org"
 msgid "sent_invites_desc"
-msgstr "You can revoke invitations that have not been accepted yet, individually or in bulk."
+msgstr ""
+"You can revoke invitations that have not been accepted yet, individually or "
+"in bulk."
 
 msgctxt "accounts.student_org"
 msgid "sent_invite_search_ph"
@@ -21882,7 +21899,9 @@ msgstr "Teacher / Staff requests"
 
 msgctxt "accounts.student_org"
 msgid "ts_requests_desc"
-msgstr "In this section you can view, approve or reject requests from users who signed up as a teacher or staff member and selected this organization."
+msgstr ""
+"In this section you can view, approve or reject requests from users who "
+"signed up as a teacher or staff member and selected this organization."
 
 msgctxt "accounts.student_org"
 msgid "ts_search_ph"
@@ -21918,7 +21937,8 @@ msgstr "Confirm that you want to revoke the selected invitations."
 
 msgctxt "accounts.student_org"
 msgid "remove_lead"
-msgstr "Confirm that you want to remove the following user from the organization."
+msgstr ""
+"Confirm that you want to remove the following user from the organization."
 
 msgctxt "accounts.student_org"
 msgid "field_name"
@@ -21990,7 +22010,9 @@ msgstr "My Questions"
 
 msgctxt "admin.verify_otp"
 msgid "description"
-msgstr "Access to the admin panel is granted only after OTP verification. Enter the 6-digit code sent to your email address."
+msgstr ""
+"Access to the admin panel is granted only after OTP verification. Enter the "
+"6-digit code sent to your email address."
 
 msgctxt "admin.verify_otp"
 msgid "expiry"
@@ -22066,7 +22088,11 @@ msgstr "Organization features"
 
 msgctxt "accounts.superadmin_org_features"
 msgid "intro"
-msgstr "Here you can enable or disable review-visibility features for each organization. When enabled, the teacher can see the student's name even before the anonymous window ends, while the grade-editing window stays the same."
+msgstr ""
+"Here you can enable or disable review-visibility features for each "
+"organization. When enabled, the teacher can see the student's name even "
+"before the anonymous window ends, while the grade-editing window stays the "
+"same."
 
 msgctxt "accounts.superadmin_org_features"
 msgid "flags_title"
@@ -22347,4 +22373,13 @@ msgstr "Practical"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_manual_msg"
-msgstr "Allow the student to continue the exam? The violation count will not change."
+msgstr ""
+"Allow the student to continue the exam? The violation count will not change."
+
+#. apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "pdf_no_text_layer"
+msgstr ""
+"This PDF contains only scanned images with no text layer, and OCR could not "
+"extract any text (Tesseract/aze may be missing on the server or the scan "
+"quality is low). Please upload a text-based PDF or DOCX."

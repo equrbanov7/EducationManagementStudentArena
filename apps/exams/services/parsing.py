@@ -1,9 +1,11 @@
+import io
 import logging
 import os
 import re
 import zipfile
 from collections import defaultdict
 
+from django.conf import settings
 from django.utils.translation import pgettext
 
 from docx import Document
@@ -27,8 +29,8 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # ---- Fayl yükləmə təhlükəsizliyi -----------------------------------------------
-# Configurable via settings.EXAM_UPLOAD_MAX_BYTES; default 5MB (uyğun mövcud kodla)
-MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+# settings.EXAM_UPLOAD_MAX_BYTES ilə konfiqurasiya edilə bilər; default 45MB.
+MAX_UPLOAD_BYTES = getattr(settings, "EXAM_UPLOAD_MAX_BYTES", 45 * 1024 * 1024)
 
 # DOCX/ZIP "zip-bomb" qarşısı: hər hansı entry-nin uncompressed ölçüsü 50MB-dan çox olmamalıdır
 # və ümumi uncompressed ölçü 100MB-dan çox olmamalıdır.
@@ -38,9 +40,12 @@ MAX_DOCX_TOTAL_UNCOMPRESSED = 100 * 1024 * 1024
 # Magic bytes (real signature) — uzantıya görə yox, faktiki məzmuna görə yoxlayırıq.
 FILE_SIGNATURES = {
     "pdf": [b"%PDF-"],
+    "png": [b"\x89PNG\r\n\x1a\n"],
+    "jpg": [b"\xff\xd8\xff"],
     # DOCX/XLSX/PPTX hamısı ZIP-dir, "PK\x03\x04" və ya boş zip "PK\x05\x06"
     "docx": [b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"],
 }
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
 
 def _ensure_within_size_limit(uploaded_file, limit: int) -> None:
@@ -295,14 +300,326 @@ def _extract_pdf_highlights(uploaded_file) -> list[str]:
     return fragments
 
 
-# Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf
+# ---- Skan edilmiş (şəkil əsaslı) PDF üçün OCR ----------------------------------
+# Bəzi PDF-lər tamamilə şəkildən ibarətdir (mətn qatı yoxdur). Belə fayllarda
+# pypdf/PyMuPDF mətn çıxara bilmir. Bu halda PyMuPDF-in daxili Tesseract OCR-ı ilə
+# mətni şəkildən tanıyırıq. OCR yalnız mətn qatı OLMAYANDA işə düşür (performans).
+# Server-də `tesseract-ocr` + `tesseract-ocr-aze` quraşdırılmalıdır.
+
+
+def _pdf_has_text_layer(uploaded_file) -> bool | None:
+    """
+    PyMuPDF ilə sürətli yoxlama: PDF-də çıxarıla bilən mətn qatı varmı?
+
+    Returns:
+        True  — ən azı bir səhifədə mətn var.
+        False — heç bir səhifədə mətn yoxdur (skan edilmiş PDF).
+        None  — müəyyən edilə bilmədi (fitz yoxdur və ya fayl açılmadı) →
+                çağıran tərəf köhnə pypdf yolu ilə davam etməlidir.
+    """
+    if fitz is None:
+        return None
+    try:
+        uploaded_file.seek(0)
+        data = uploaded_file.read()
+        uploaded_file.seek(0)
+    except Exception:
+        return None
+    try:
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            for page in doc:
+                if (page.get_text("text") or "").strip():
+                    return True
+            return False
+    except Exception:
+        return None
+
+
+def _build_yellow_mask(pil_image):
+    """
+    RGB şəkildən sarı highlight maskası qurur (mode "L", 0/255). Yalnız PIL —
+    numpy asılılığı yoxdur. Sarı = yüksək R, yüksək G, aşağı B (R-B və G-B fərqi
+    kifayət qədər böyük). Skan edilmiş PDF-də düz cavabın sarı işarələnməsini
+    aşkar etmək üçün istifadə olunur.
+    """
+    from PIL import ImageChops
+
+    r, g, b = pil_image.split()
+
+    def at_least(channel, threshold):
+        return channel.point(lambda v, t=threshold: 255 if v >= t else 0)
+
+    r_high = at_least(r, 150)
+    g_high = at_least(g, 150)
+    b_low = b.point(lambda v: 255 if v < 150 else 0)
+    # ImageChops.subtract 0-da kəsir, ona görə R-B / G-B fərqi üçün uyğundur.
+    rb_gap = at_least(ImageChops.subtract(r, b), 40)
+    gb_gap = at_least(ImageChops.subtract(g, b), 40)
+
+    mask = r_high
+    for layer in (g_high, b_low, rb_gap, gb_gap):
+        mask = ImageChops.multiply(mask, layer)  # 0/255 maskalar üçün məntiqi AND
+    return mask
+
+
+def _line_yellow_ratio(mask, bbox) -> float:
+    """Verilmiş düzbucaqlıda sarı piksellərin nisbəti (0..1)."""
+    x0, y0, x1, y1 = bbox
+    if x1 <= x0 or y1 <= y0:
+        return 0.0
+    crop = mask.crop((x0, y0, x1, y1))
+    total = crop.size[0] * crop.size[1]
+    if not total:
+        return 0.0
+    histogram = crop.histogram()
+    yellow_pixels = histogram[255] if len(histogram) >= 256 else 0
+    return yellow_pixels / total
+
+
+def _word_bbox(word, zoom: float, mask_w: int, mask_h: int) -> tuple[int, int, int, int]:
+    return (
+        max(0, int(word[0] * zoom)),
+        max(0, int(word[1] * zoom)),
+        min(mask_w, int(word[2] * zoom)),
+        min(mask_h, int(word[3] * zoom)),
+    )
+
+
+def _line_words_have_yellow(mask, line_words, zoom: float, min_ratio: float, mask_w: int, mask_h: int) -> bool:
+    """
+    OCR söz qutularını sarı highlight maskası ilə müqayisə edir.
+    Həm bütün sətrə, həm də ayrıca söz qutularına baxırıq: skan PDF-lərdə müəllim
+    bəzən yalnız cavab sözünü boyayır, sətrin tam eni isə ağ qalır.
+    """
+    if mask is None or not line_words:
+        return False
+
+    line_bbox = (
+        max(0, int(min(w[0] for w in line_words) * zoom)),
+        max(0, int(min(w[1] for w in line_words) * zoom)),
+        min(mask_w, int(max(w[2] for w in line_words) * zoom)),
+        min(mask_h, int(max(w[3] for w in line_words) * zoom)),
+    )
+    if _line_yellow_ratio(mask, line_bbox) >= min_ratio:
+        return True
+
+    return any(_line_yellow_ratio(mask, _word_bbox(word, zoom, mask_w, mask_h)) >= min_ratio for word in line_words)
+
+
+def _ensure_tessdata_prefix() -> None:
+    """
+    PyMuPDF OCR requires TESSDATA_PREFIX even when the tesseract CLI can find
+    languages by itself. Debian/Ubuntu packages keep traineddata here.
+    """
+    if os.getenv("TESSDATA_PREFIX"):
+        return
+
+    candidates = (
+        "/usr/share/tesseract-ocr/5/tessdata",
+        "/usr/share/tesseract-ocr/4.00/tessdata",
+        "/usr/share/tessdata",
+    )
+    for path in candidates:
+        if os.path.exists(os.path.join(path, "eng.traineddata")):
+            os.environ["TESSDATA_PREFIX"] = path
+            return
+
+
+def _ocr_pdf_text(uploaded_file) -> str:
+    """
+    Skan edilmiş PDF-dən OCR ilə mətn çıxarır (PyMuPDF daxili Tesseract) və
+    şəkilə "baked" sarı highlight ilə işarələnmiş düz cavabı aşkar edib mövcud
+    "*" markerini həmin variant sətrinə əlavə edir. Beləliklə skan PDF-də belə
+    highlight→düz cavab işləyir (annotation olmasa da).
+
+    Konfiqurasiya (settings):
+      - EXAM_PDF_OCR_ENABLED            (default True)
+      - EXAM_PDF_OCR_LANG               (default "aze") — Tesseract dili; işləməsə "eng"
+      - EXAM_PDF_OCR_DPI                (default 160)
+      - EXAM_PDF_OCR_MAX_PAGES          (default 40) — request timeout-dan qoruyan limit
+      - EXAM_PDF_OCR_HIGHLIGHT          (default True) — sarı→düz cavab aşkarı
+      - EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO(default 0.10) — sətrin sarı örtük həddi
+
+    Tam müdafiəlidir: fitz/Tesseract yoxdursa və ya xəta olarsa boş sətir qaytarır.
+    """
+    if fitz is None or not getattr(settings, "EXAM_PDF_OCR_ENABLED", True):
+        return ""
+
+    _ensure_tessdata_prefix()
+
+    lang = getattr(settings, "EXAM_PDF_OCR_LANG", "aze")
+    detect_highlight = getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT", True)
+    try:
+        dpi = int(getattr(settings, "EXAM_PDF_OCR_DPI", 160))
+        max_pages = int(getattr(settings, "EXAM_PDF_OCR_MAX_PAGES", 40))
+        min_ratio = float(getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10))
+    except (TypeError, ValueError):
+        dpi, max_pages, min_ratio = 160, 40, 0.10
+
+    try:
+        uploaded_file.seek(0)
+        data = uploaded_file.read()
+        uploaded_file.seek(0)
+    except Exception:
+        return ""
+
+    # Konfiqurasiya olunmuş dil, sonra "eng" fallback. İlk işləyən dili "kilidləyirik".
+    languages_to_try = [lang] + (["eng"] if lang != "eng" else [])
+    active_lang = None
+    zoom = dpi / 72.0
+    parts: list[str] = []
+    try:
+        from PIL import Image
+    except Exception:
+        Image = None
+        detect_highlight = False
+
+    try:
+        with fitz.open(stream=data, filetype="pdf") as doc:
+            for index, page in enumerate(doc):
+                if index >= max_pages:
+                    logger.info("PDF OCR truncated at %d pages (doc has %d).", max_pages, doc.page_count)
+                    break
+
+                # OCR textpage (mətn + söz qutuları). İlk işləyən dili tap.
+                textpage = None
+                for candidate in ([active_lang] if active_lang else languages_to_try):
+                    try:
+                        textpage = page.get_textpage_ocr(full=True, language=candidate, dpi=dpi)
+                        active_lang = candidate
+                        break
+                    except Exception:
+                        continue
+                if textpage is None:
+                    continue
+
+                page_text = _ocr_page_text_with_highlights(
+                    page, textpage, zoom, detect_highlight, min_ratio, Image, dpi
+                )
+                if page_text.strip():
+                    parts.append(page_text.strip())
+    except Exception as exc:
+        logger.warning("PDF OCR failed: %s", exc)
+        return ""
+
+    return normalize_pdf_extracted_text("\n\n".join(parts))
+
+
+def _ocr_image_text(uploaded_file) -> str:
+    """
+    PNG/JPG faylını OCR üçün tək səhifəlik image-only PDF kimi emal edir.
+    Bu, ayrıca Tesseract wrapper-i əlavə etmədən skan-PDF üçün yazılmış
+    highlight→düz cavab məntiqindən birbaşa şəkil fayllarında da istifadə edir.
+    """
+    if fitz is None or not getattr(settings, "EXAM_PDF_OCR_ENABLED", True):
+        return ""
+
+    try:
+        from PIL import Image
+    except Exception:
+        return ""
+
+    try:
+        uploaded_file.seek(0)
+        image = Image.open(uploaded_file)
+        image.load()
+        uploaded_file.seek(0)
+    except Exception as exc:
+        logger.warning("Image OCR open failed for upload %s: %s", getattr(uploaded_file, "name", ""), exc)
+        return ""
+
+    try:
+        dpi = max(72, int(getattr(settings, "EXAM_PDF_OCR_DPI", 160)))
+    except (TypeError, ValueError):
+        dpi = 160
+
+    image = image.convert("RGB")
+    width, height = image.size
+    if width <= 0 or height <= 0:
+        return ""
+
+    png_buffer = io.BytesIO()
+    image.save(png_buffer, format="PNG")
+    page_width = max(1, width * 72 / dpi)
+    page_height = max(1, height * 72 / dpi)
+
+    doc = fitz.open()
+    try:
+        page = doc.new_page(width=page_width, height=page_height)
+        page.insert_image(page.rect, stream=png_buffer.getvalue())
+        pdf_buffer = io.BytesIO(doc.tobytes())
+    finally:
+        doc.close()
+
+    return _ocr_pdf_text(pdf_buffer)
+
+
+def _ocr_page_text_with_highlights(page, textpage, zoom, detect_highlight, min_ratio, Image, dpi) -> str:
+    """
+    Bir səhifə üçün OCR mətnini sətir-sətir qurur. Sarı highlight aşkarı aktivdirsə,
+    variant sətrinin söz-qutusu sarı ilə örtülübsə əvvəlinə "*" əlavə edir.
+    """
+    words = page.get_text("words", textpage=textpage) or []
+    if not words:
+        # Fallback: highlight aşkarı mümkün deyilsə düz mətn.
+        return page.get_text(textpage=textpage) or ""
+
+    mask = None
+    if detect_highlight and Image is not None:
+        try:
+            pix = page.get_pixmap(dpi=dpi)
+            rgb = Image.open(io.BytesIO(pix.tobytes("png"))).convert("RGB")
+            mask = _build_yellow_mask(rgb)
+        except Exception:
+            mask = None
+
+    mask_w, mask_h = mask.size if mask is not None else (0, 0)
+
+    # Sözləri oxu sırasına görə (block, line) sətrlərə qrupla.
+    from collections import OrderedDict
+
+    grouped: "OrderedDict[tuple, list]" = OrderedDict()
+    for word in words:
+        # word = (x0, y0, x1, y1, text, block_no, line_no, word_no)
+        grouped.setdefault((word[5], word[6]), []).append(word)
+
+    lines_out: list[str] = []
+    current_option_index = None
+    for line_words in grouped.values():
+        text = " ".join(w[4] for w in line_words).strip()
+        if not text:
+            continue
+
+        line_has_yellow = _line_words_have_yellow(mask, line_words, zoom, min_ratio, mask_w, mask_h)
+        match = OPTION_RE.match(text)
+
+        if mask is not None:
+            if match and not match.group(1):  # variant sətri, hələ ulduzsuz
+                if line_has_yellow:
+                    text = "*" + text
+            elif line_has_yellow and current_option_index is not None:
+                existing = lines_out[current_option_index]
+                if OPTION_RE.match(existing) and not existing.lstrip().startswith("*"):
+                    lines_out[current_option_index] = re.sub(r"^(\s*)", r"\1*", existing, count=1)
+
+        if match:
+            current_option_index = len(lines_out)
+        elif QUESTION_RE.match(text):
+            current_option_index = None
+
+        lines_out.append(text)
+
+    return "\n".join(lines_out)
+
+
+# Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf, .png, .jpg
 
 
 def extract_text_from_upload(uploaded_file) -> str:
     """
-    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf.
+    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf, .png, .jpg.
     Çoxsaylı təhlükəsizlik yoxlamaları ilə birlikdə:
-      - Ölçü limiti (default 5MB)
+      - Ölçü limiti (default 45MB, settings.EXAM_UPLOAD_MAX_BYTES)
       - Faktiki magic bytes (uzantı saxtalaşdırıla bilər)
       - DOCX: makro (.docm/.vbaproject), ZIP-bomb və path-traversal yoxlanışı
       - PDF: aktiv kontent (JS/OpenAction/EmbeddedFile) yoxlanışı
@@ -321,6 +638,17 @@ def extract_text_from_upload(uploaded_file) -> str:
     if ext == ".txt":
         # TXT üçün magic bytes yoxdur — sadəcə oxuyuruq, lakin UTF-8 səhvini ignoryalayırıq
         return uploaded_file.read().decode("utf-8", errors="ignore")
+
+    if ext in IMAGE_EXTENSIONS:
+        signature_key = "png" if ext == ".png" else "jpg"
+        head = _peek_magic_bytes(uploaded_file, 12)
+        if not _verify_magic_bytes(head, signature_key):
+            raise ValueError(pgettext("exams.service.parsing.error", "file_signature_mismatch"))
+
+        normalized = _ocr_image_text(uploaded_file)
+        if not normalized.strip():
+            raise ValueError(pgettext("exams.service.parsing.error", "pdf_no_text_layer"))
+        return normalized
 
     if ext == ".docx":
         head = _peek_magic_bytes(uploaded_file, 8)
@@ -366,28 +694,44 @@ def extract_text_from_upload(uploaded_file) -> str:
         except Exception:
             pass
 
-        try:
-            reader = PdfReader(uploaded_file)
-        except Exception as exc:
-            logger.warning("PDF parse failed for upload %s: %s", name, exc)
-            raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
+        # Skan edilmiş (mətn qatı olmayan) PDF-də pypdf 0 nəticə üçün uzun müddət
+        # (saniyələrlə) sərf edir. Əvvəlcə sürətli yoxlama: mətn qatı varmı?
+        # Yoxdursa (False) birbaşa OCR-a keçirik və pypdf israfını ötürürük.
+        has_text_layer = _pdf_has_text_layer(uploaded_file)
 
-        # Şifrli PDF-i rədd edirik — content extraction işləməz, lakin pis niyyət üçün də səbəb olar
-        if getattr(reader, "is_encrypted", False):
-            raise ValueError(pgettext("exams.service.parsing.error", "file_pdf_encrypted"))
-
-        parts = []
-        for page in reader.pages:
+        normalized = ""
+        if has_text_layer is not False:
+            # True və ya naməlum (köhnə/test yolu) — mövcud pypdf çıxarışı işləyir.
             try:
-                txt = page.extract_text() or ""
-            except Exception:
-                continue
-            txt = txt.strip()
-            if txt:
-                parts.append(txt)
+                reader = PdfReader(uploaded_file)
+            except Exception as exc:
+                logger.warning("PDF parse failed for upload %s: %s", name, exc)
+                raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
 
-        raw = "\n\n".join(parts)
-        normalized = normalize_pdf_extracted_text(raw)
+            # Şifrli PDF-i rədd edirik — content extraction işləməz, lakin pis niyyət üçün də səbəb olar
+            if getattr(reader, "is_encrypted", False):
+                raise ValueError(pgettext("exams.service.parsing.error", "file_pdf_encrypted"))
+
+            parts = []
+            for page in reader.pages:
+                try:
+                    txt = page.extract_text() or ""
+                except Exception:
+                    continue
+                txt = txt.strip()
+                if txt:
+                    parts.append(txt)
+
+            normalized = normalize_pdf_extracted_text("\n\n".join(parts))
+
+        # Mətn qatı tapılmadısa (skan edilmiş PDF) — OCR fallback.
+        if not normalized.strip():
+            normalized = _ocr_pdf_text(uploaded_file)
+            if not normalized.strip():
+                # OCR da nəticə vermədi (Tesseract yoxdur / şəkil keyfiyyəti aşağı /
+                # OCR deaktivdir) — istifadəçiyə aydın səbəb göstəririk.
+                raise ValueError(pgettext("exams.service.parsing.error", "pdf_no_text_layer"))
+
         # PDF highlight annotation-ları ilə mark olunmuş variantı "*" ilə işarələ
         highlight_fragments = _extract_pdf_highlights(uploaded_file)
         return _mark_correct_option_lines(normalized, highlight_fragments)

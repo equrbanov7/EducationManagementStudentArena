@@ -97,7 +97,7 @@
 
             <label class="ai-field ai-file-field" for="testAiSourceFile">
                 <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt">
+                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                 <span class="ai-file-picker">
                     <i class="fas fa-upload"></i>
                     <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
@@ -167,7 +167,7 @@
                     type="file"
                     name="upload_file"
                     id="fileInput"
-                    accept=".docx,.pdf,.txt"
+                    accept=".docx,.pdf,.txt,.png,.jpg,.jpeg"
                     data-file-selected-callback="fileSelected">
                                  <label for="fileInput" class="upload-zone" id="dropZone">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -181,6 +181,8 @@
                     <span class="format-tag" data-ext="docx">DOCX</span>
                     <span class="format-tag" data-ext="pdf">PDF</span>
                     <span class="format-tag" data-ext="txt">TXT</span>
+                    <span class="format-tag" data-ext="png">PNG</span>
+                    <span class="format-tag" data-ext="jpg">JPG</span>
                 </div>
 
                 {# ---- Şablon endirmə (müəllim nümunəni endirib doldurub geri yükləyə bilsin) ---- #}

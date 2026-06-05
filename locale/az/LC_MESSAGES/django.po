@@ -3307,8 +3307,9 @@ msgstr "Bu email artıq istifadə olunur."
 #: apps/accounts/views.py:1244
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr "Tələbə üçün universitet və ya məktəb tələb olunur."
-"Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir."
+msgstr ""
+"Tələbə üçün universitet və ya məktəb tələb olunur.Student rolu üçün "
+"universitet adı və ya məktəb identifikatoru mütləqdir."
 
 #: apps/accounts/views.py:1250
 msgctxt "accounts.profile_edit.message"
@@ -3318,9 +3319,9 @@ msgstr "Profil uğurla yeniləndi!"
 #: apps/accounts/views.py:1711
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Yeni paylaşım yaradın və kimlərin görə biləcəyini seçin."
-"Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə "
-"edin."
+msgstr ""
+"Yeni paylaşım yaradın və kimlərin görə biləcəyini seçin.Yeni postu standart "
+"redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin."
 
 #: apps/accounts/views.py:1712
 msgctxt "profile.shortcut"
@@ -3436,8 +3437,9 @@ msgstr "İstifadəçi artıq başqa təşkilata bağlıdır."
 #: apps/accounts/views.py:2218
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "İstifadəçi qeydiyyat zamanı bu təşkilatı seçməyib."
-"Bu istifadəçi signup zamanı seçməyib və sizin təşkilatınıza qoşula bilməz."
+msgstr ""
+"İstifadəçi qeydiyyat zamanı bu təşkilatı seçməyib.Bu istifadəçi signup "
+"zamanı seçməyib və sizin təşkilatınıza qoşula bilməz."
 
 #: apps/accounts/views.py:2236
 msgctxt "accounts.role_assignment.message"
@@ -3447,14 +3449,16 @@ msgstr "Bu istifadəçinin rolunu dəyişməyə icazəniz yoxdur."
 #: apps/accounts/views.py:2274
 msgctxt "accounts.role_assignment.message"
 msgid "user_added_to_org_with_role"
-msgstr "İstifadəçi təşkilata rol ilə əlavə edildi."
-"%(username)s təşkilata əlavə edildi və `%(role_display)s` rolu verildi."
+msgstr ""
+"İstifadəçi təşkilata rol ilə əlavə edildi.%(username)s təşkilata əlavə "
+"edildi və `%(role_display)s` rolu verildi."
 
 #: apps/accounts/views.py:2289
 msgctxt "accounts.role_assignment.message"
 msgid "change_lower_level_users_only"
-msgstr "Yalnız özünüzdən aşağı səviyyəli istifadəçiləri dəyişə bilərsiniz."
-"Yalnız sizdən aşağı səviyyəli istifadəçilərin rolunu dəyişə bilərsiniz."
+msgstr ""
+"Yalnız özünüzdən aşağı səviyyəli istifadəçiləri dəyişə bilərsiniz.Yalnız "
+"sizdən aşağı səviyyəli istifadəçilərin rolunu dəyişə bilərsiniz."
 
 #: apps/accounts/views.py:2328
 msgctxt "accounts.role_assignment.message"
@@ -3474,9 +3478,9 @@ msgstr "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olu
 #: apps/accounts/views.py:2441
 msgctxt "accounts.permission_editor.message"
 msgid "manage_lower_role_permissions_only"
-msgstr "Yalnız özünüzdən aşağı rolların icazələrini idarə edə bilərsiniz."
-"Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə "
-"bilərsiniz."
+msgstr ""
+"Yalnız özünüzdən aşağı rolların icazələrini idarə edə bilərsiniz.Yalnız "
+"sizdən aşağı səviyyəli rolların permission-larını idarə edə bilərsiniz."
 
 #: apps/accounts/views.py:2446
 msgctxt "accounts.permission_editor.message"
@@ -3486,8 +3490,10 @@ msgstr "Yanlış permission seçimi."
 #: apps/accounts/views.py:2460
 msgctxt "accounts.permission_editor.message"
 msgid "grant_only_owned_or_grantable_permissions"
-msgstr "Yalnız sahib olduğunuz və ya vermə icazəniz olan icazələri verə bilərsiniz."
-"Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə bilərsiniz"
+msgstr ""
+"Yalnız sahib olduğunuz və ya vermə icazəniz olan icazələri verə "
+"bilərsiniz.Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə"
+" bilərsiniz"
 
 #: apps/accounts/views.py:2465
 msgctxt "accounts.permission_editor.message"
@@ -3531,16 +3537,16 @@ msgstr "AI tənzimləmələri uğurla yeniləndi."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Qeydiyyat tamamlandı, müraciətiniz qeydə alındı."
-"Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email "
-"kodunu təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı, müraciətiniz qeydə alındı.Qeydiyyat tamamlandı və "
+"müraciətiniz qeydə alındı. Davam etmək üçün email kodunu təsdiqləyin."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Qeydiyyat tamamlandı, indi daxil ola bilərsiniz."
-"Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu "
-"təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı, indi daxil ola bilərsiniz.Qeydiyyat tamamlandı. Hesabı"
+" aktivləşdirmək üçün emailə göndərilən kodu təsdiqləyin."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3579,9 +3585,10 @@ msgstr "Yeni təsdiq kodu göndərildi."
 
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
-msgstr "Qeydiyyat e-poçtu göndərilə bilmədi."
-"Qeydiyyat uğursuz oldu: doğrulama emaili göndərilə bilmədi. Zəhmət olmasa "
-"email ünvanınızı yoxlayın və yenidən cəhd edin."
+msgstr ""
+"Qeydiyyat e-poçtu göndərilə bilmədi.Qeydiyyat uğursuz oldu: doğrulama emaili"
+" göndərilə bilmədi. Zəhmət olmasa email ünvanınızı yoxlayın və yenidən cəhd "
+"edin."
 
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
@@ -3590,8 +3597,9 @@ msgstr "Uğurla çıxış etdiniz."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr "OTP kodu e-poçtu göndərilə bilmədi."
-"Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
+msgstr ""
+"OTP kodu e-poçtu göndərilə bilmədi.Təsdiq kodunun göndərilməsi uğursuz oldu."
+" Xahiş edirik, yenidən cəhd edin."
 
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
@@ -5157,8 +5165,9 @@ msgstr "Bu tapşırığa giriş icazəniz yoxdur"
 #: apps/assignments/views.py:313
 msgctxt "assignment.message"
 msgid "submission_not_allowed_attempts_or_deadline"
-msgstr "Təhvil mümkün deyil: cəhd limiti bitib və ya son tarix keçib."
-"Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib."
+msgstr ""
+"Təhvil mümkün deyil: cəhd limiti bitib və ya son tarix keçib.Cavab göndərmək"
+" mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib."
 
 #: apps/assignments/views.py:330
 msgctxt "assignment.message"
@@ -6256,9 +6265,9 @@ msgstr ""
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
-msgstr "Təsdiq e-poçtu göndərildi."
-"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu "
-"yoxlayın."
+msgstr ""
+"Təsdiq e-poçtu göndərildi.'{email}' ünvanına təsdiq maili göndərildi. Zəhmət"
+" olmasa poçt qutunuzu yoxlayın."
 
 #: apps/blog/views.py:197
 msgctxt "blog.subscribe.message"
@@ -6349,8 +6358,9 @@ msgstr "Yeni kod göndərildi."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr "OTP kodu e-poçtu göndərilə bilmədi."
-"Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
+msgstr ""
+"OTP kodu e-poçtu göndərilə bilmədi.Təsdiq kodunun göndərilməsi uğursuz oldu."
+" Xahiş edirik, yenidən cəhd edin."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"
@@ -8820,7 +8830,7 @@ msgstr "İmtahan başladı! (Cəhd #{attempt_number})"
 #: apps/exams/services/parsing.py:64
 msgctxt "exams.service.parsing.error"
 msgid "file_too_large"
-msgstr "Fayl çox böyükdür (max 5MB)."
+msgstr "Fayl çox böyükdür (max 45MB)."
 
 #: apps/exams/services/parsing.py:82
 msgctxt "exams.service.parsing.error"
@@ -8835,17 +8845,22 @@ msgstr "Yalnız .docx, .pdf, .txt qəbul olunur."
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
 msgid "file_zip_bomb"
-msgstr "Fayl şübhəlidir: daxili məzmun çox böyükdür (ZIP-bomb riski). Faylı yenidən hazırlayın."
+msgstr ""
+"Fayl şübhəlidir: daxili məzmun çox böyükdür (ZIP-bomb riski). Faylı yenidən "
+"hazırlayın."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr "Makro daxil olan fayllar (.docm/.xlsm və ya VBA daxili) qəbul edilmir. Yalnız təmiz .docx yükləyin."
+msgstr ""
+"Makro daxil olan fayllar (.docm/.xlsm və ya VBA daxili) qəbul edilmir. "
+"Yalnız təmiz .docx yükləyin."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
 msgid "file_unsafe_entry"
-msgstr "Fayl içində təhlükəli yol (path traversal) aşkar edildi. Fayl rədd edildi."
+msgstr ""
+"Fayl içində təhlükəli yol (path traversal) aşkar edildi. Fayl rədd edildi."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
@@ -8855,12 +8870,16 @@ msgstr "Fayl xarab və ya tanınmır."
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
 msgid "file_signature_mismatch"
-msgstr "Faylın uzantısı və faktiki məzmunu uyğun gəlmir. Düzgün .docx / .pdf yükləyin."
+msgstr ""
+"Faylın uzantısı və faktiki məzmunu uyğun gəlmir. Düzgün .docx / .pdf "
+"yükləyin."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_active_content"
-msgstr "PDF-də JavaScript və ya aktiv kontent aşkar edildi. Bu fayl təhlükəsizlik səbəbi ilə qəbul edilmir."
+msgstr ""
+"PDF-də JavaScript və ya aktiv kontent aşkar edildi. Bu fayl təhlükəsizlik "
+"səbəbi ilə qəbul edilmir."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.error"
@@ -8890,12 +8909,16 @@ msgstr "Düz cavab kimi işarələnən {option} variantı yoxdur."
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.warning"
 msgid "option_count_recommend_5"
-msgstr "Sualda {count} variant var — tövsiyə olunan say 5-dir (A–E). E variantı əlavə etmək məsləhət görülür."
+msgstr ""
+"Sualda {count} variant var — tövsiyə olunan say 5-dir (A–E). E variantı "
+"əlavə etmək məsləhət görülür."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.warning"
 msgid "option_count_too_low"
-msgstr "Sualda yalnız {count} variant tapıldı — minimum 4 variant (A–D) tələb olunur."
+msgstr ""
+"Sualda yalnız {count} variant tapıldı — minimum 4 variant (A–D) tələb "
+"olunur."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.warning"
@@ -8905,12 +8928,16 @@ msgstr "{option} variantının mətni boşdur."
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
-msgstr "Düz cavab digər variantlardan xeyli uzundur — tələbə üçün gözəgörünən ipucu yaranır."
+msgstr ""
+"Düz cavab digər variantlardan xeyli uzundur — tələbə üçün gözəgörünən ipucu "
+"yaranır."
 
 #: apps/exams/services/parsing.py
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_short"
-msgstr "Düz cavab digər variantlardan xeyli qısadır — tələbə üçün gözəgörünən ipucu yaranır."
+msgstr ""
+"Düz cavab digər variantlardan xeyli qısadır — tələbə üçün gözəgörünən ipucu "
+"yaranır."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:9
 msgctxt "exams.partial.exam_modals"
@@ -11957,27 +11984,37 @@ msgstr "Fayl oxunmadı: {error}"
 #: apps/exams/views/teacher/question_bank.py:255
 msgctxt "exams.view.question_bank.warning"
 msgid "duplicate_in_import"
-msgstr "Təkrar sual: #{index} əvvəlki #{previous_index} ilə eynidir — “{preview}”."
+msgstr ""
+"Təkrar sual: #{index} əvvəlki #{previous_index} ilə eynidir — “{preview}”."
 
 #: apps/exams/views/teacher/question_bank.py
 msgctxt "exams.view.question_bank.warning"
 msgid "duplicate_in_import_first"
-msgstr "Bu sualın {count} dublikatı tapıldı — növbəti dublikat #{next_index}: “{preview}”."
+msgstr ""
+"Bu sualın {count} dublikatı tapıldı — növbəti dublikat #{next_index}: "
+"“{preview}”."
 
 #: apps/exams/views/teacher/question_bank.py:275
 msgctxt "exams.view.question_bank.warning"
 msgid "already_in_exam"
-msgstr "İmport #{index} artıq bu imtahanda var — DB-də #{db_index}: “{preview}”."
+msgstr ""
+"İmport #{index} artıq bu imtahanda var — DB-də #{db_index}: “{preview}”."
 
 #: apps/exams/views/teacher/question_bank.py
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_long"
-msgstr "Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli uzundur. Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu balanslaşdırın."
+msgstr ""
+"Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli uzundur."
+" Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu "
+"balanslaşdırın."
 
 #: apps/exams/views/teacher/question_bank.py
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
-msgstr "Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli qısadır. Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu balanslaşdırın."
+msgstr ""
+"Testdəki sualların ~{ratio}%-də düz cavab digər variantlardan xeyli qısadır."
+" Bu, tələbə üçün gözəgörünən ipucu yaradır — variantların uzunluğunu "
+"balanslaşdırın."
 
 #: apps/exams/views/teacher/question_bank.py:375
 msgctxt "exams.view.question_bank.message"
@@ -21892,7 +21929,9 @@ msgstr "İmtahandan uzaqlaşdır"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_msg"
-msgstr "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək."
+msgstr ""
+"Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal "
+"təslim ediləcək və geri qaytarıla bilməyəcək."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_btn"
@@ -21904,7 +21943,9 @@ msgstr "Müvəqqəti blokla"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_msg"
-msgstr "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz."
+msgstr ""
+"Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa "
+"edə bilərsiniz."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_btn"
@@ -21916,7 +21957,9 @@ msgstr "Bərpa et"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_msg"
-msgstr "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək."
+msgstr ""
+"Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da "
+"veriləcək."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_btn"
@@ -22104,7 +22147,10 @@ msgstr "Təsdiq gözləyən tələbələr"
 
 msgctxt "accounts.student_org"
 msgid "pending_desc"
-msgstr "Qeydiyyat zamanı bu təşkilatı seçən tələbələri buradan tək-tək və ya hamısını seçib əlavə edə bilərsiniz. Artıq başqa təşkilata qəbul olanların müraciəti \"Bağlanıb\" kimi görünəcək."
+msgstr ""
+"Qeydiyyat zamanı bu təşkilatı seçən tələbələri buradan tək-tək və ya "
+"hamısını seçib əlavə edə bilərsiniz. Artıq başqa təşkilata qəbul olanların "
+"müraciəti \"Bağlanıb\" kimi görünəcək."
 
 msgctxt "accounts.student_org"
 msgid "pending_search_ph"
@@ -22148,7 +22194,9 @@ msgstr "Təşkilata bağlı olmayan tələbələr"
 
 msgctxt "accounts.student_org"
 msgid "unassigned_desc"
-msgstr "Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə kabinetində qəbul etdikdən sonra təşkilata qoşulacaq."
+msgstr ""
+"Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə "
+"kabinetində qəbul etdikdən sonra təşkilata qoşulacaq."
 
 msgctxt "accounts.student_org"
 msgid "unassigned_search_ph"
@@ -22176,7 +22224,9 @@ msgstr "Göndərilmiş dəvətlər"
 
 msgctxt "accounts.student_org"
 msgid "sent_invites_desc"
-msgstr "Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə bilərsiniz."
+msgstr ""
+"Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə"
+" bilərsiniz."
 
 msgctxt "accounts.student_org"
 msgid "sent_invite_search_ph"
@@ -22204,7 +22254,9 @@ msgstr "Müəllim / İşçi müraciətləri"
 
 msgctxt "accounts.student_org"
 msgid "ts_requests_desc"
-msgstr "Bu bölmədə müəllim və ya işçi olaraq qeydiyyatdan keçib bu təşkilatı seçən istifadəçilərin müraciətlərini görə, təsdiqləyə və ya rədd edə bilərsiniz."
+msgstr ""
+"Bu bölmədə müəllim və ya işçi olaraq qeydiyyatdan keçib bu təşkilatı seçən "
+"istifadəçilərin müraciətlərini görə, təsdiqləyə və ya rədd edə bilərsiniz."
 
 msgctxt "accounts.student_org"
 msgid "ts_search_ph"
@@ -22240,7 +22292,8 @@ msgstr "Seçilən dəvətləri geri çəkmək istədiyinizi təsdiqləyin."
 
 msgctxt "accounts.student_org"
 msgid "remove_lead"
-msgstr "Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin."
+msgstr ""
+"Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin."
 
 msgctxt "accounts.student_org"
 msgid "field_name"
@@ -22312,7 +22365,9 @@ msgstr "Suallarım"
 
 msgctxt "admin.verify_otp"
 msgid "description"
-msgstr "Admin panelə keçid yalnız OTP təsdiqindən sonra açılır. E-poçt ünvanınıza göndərilən 6 rəqəmli kodu daxil edin."
+msgstr ""
+"Admin panelə keçid yalnız OTP təsdiqindən sonra açılır. E-poçt ünvanınıza "
+"göndərilən 6 rəqəmli kodu daxil edin."
 
 msgctxt "admin.verify_otp"
 msgid "expiry"
@@ -22388,7 +22443,10 @@ msgstr "Təşkilat xüsusiyyətləri"
 
 msgctxt "accounts.superadmin_org_features"
 msgid "intro"
-msgstr "Buradan təşkilatlara aid yoxlama görünürlüyü xüsusiyyətlərini ayrıca açıb-bağlaya bilərsiniz. Xüsusiyyət aktiv olanda müəllim tələbə adını anonim pəncərə bitmədən də görür, lakin bal redaktəsi vaxtı olduğu kimi qalır."
+msgstr ""
+"Buradan təşkilatlara aid yoxlama görünürlüyü xüsusiyyətlərini ayrıca açıb-"
+"bağlaya bilərsiniz. Xüsusiyyət aktiv olanda müəllim tələbə adını anonim "
+"pəncərə bitmədən də görür, lakin bal redaktəsi vaxtı olduğu kimi qalır."
 
 msgctxt "accounts.superadmin_org_features"
 msgid "flags_title"
@@ -22517,7 +22575,9 @@ msgstr "Kateqoriyaları idarə et"
 
 msgctxt "profile.category_management"
 msgid "subtitle"
-msgstr "Standart kateqoriyalar, yeni yaradılanlar və alt kateqoriyalar burada görünür."
+msgstr ""
+"Standart kateqoriyalar, yeni yaradılanlar və alt kateqoriyalar burada "
+"görünür."
 
 msgctxt "profile.category_management"
 msgid "root_categories"
@@ -22573,7 +22633,8 @@ msgstr "Filtrlənənləri göstərir"
 
 msgctxt "profile.category_management"
 msgid "clear_before_delete"
-msgstr "Silmək üçün əvvəlcə bağlı paylaşımları və ya alt kateqoriyaları təmizləyin."
+msgstr ""
+"Silmək üçün əvvəlcə bağlı paylaşımları və ya alt kateqoriyaları təmizləyin."
 
 msgctxt "profile.category_management"
 msgid "zero_subcategories"
@@ -22669,4 +22730,13 @@ msgstr "Praktiki"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_manual_msg"
-msgstr "Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."
+msgstr ""
+"Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."
+
+#. apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "pdf_no_text_layer"
+msgstr ""
+"PDF skan edilmiş şəkillərdən ibarətdir və oxunaqlı mətn qatı yoxdur. OCR ilə"
+" də mətn çıxarmaq mümkün olmadı (server-də Tesseract/aze quraşdırılmayıb və "
+"ya şəkil keyfiyyəti aşağıdır). Mətn əsaslı PDF və ya DOCX yükləyin."

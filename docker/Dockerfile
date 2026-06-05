@@ -4,15 +4,20 @@ FROM python:3.12-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 # Set work directory
 WORKDIR /app
 
 # Apply OS security patches; install postgresql-client for pg_isready in entrypoint.
+# tesseract-ocr + aze: skan edilmiş (şəkil əsaslı) imtahan PDF-lərini OCR ilə oxumaq üçün.
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends postgresql-client \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        tesseract-ocr \
+        tesseract-ocr-aze \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

@@ -3316,9 +3316,9 @@ msgstr "Profil başarıyla güncellendi!"
 #: apps/accounts/views.py:1711
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Yeni bir gönderi oluşturun ve kimlerin görebileceğini seçin."
-"Varsayılan düzenleyicide yeni bir gönderi oluşturmak için aşağıdaki düğmeyi "
-"kullanın."
+msgstr ""
+"Yeni bir gönderi oluşturun ve kimlerin görebileceğini seçin.Varsayılan "
+"düzenleyicide yeni bir gönderi oluşturmak için aşağıdaki düğmeyi kullanın."
 
 #: apps/accounts/views.py:1712
 msgctxt "profile.shortcut"
@@ -3434,9 +3434,9 @@ msgstr "Kullanıcı zaten başka bir kuruluşa bağlı."
 #: apps/accounts/views.py:2218
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "Kullanıcı kayıt sırasında bu organizasyonu seçmedi."
-"Bu kullanıcı kayıt sırasında kaydolmamıştır ve kuruluşunuza "
-"katılamamaktadır."
+msgstr ""
+"Kullanıcı kayıt sırasında bu organizasyonu seçmedi.Bu kullanıcı kayıt "
+"sırasında kaydolmamıştır ve kuruluşunuza katılamamaktadır."
 
 #: apps/accounts/views.py:2236
 msgctxt "accounts.role_assignment.message"
@@ -3525,9 +3525,9 @@ msgstr "AI ayarları başarıyla kaydedildi."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Kayıt tamamlandı, talebiniz kaydedildi."
-"Kayıt tamamlandı ve kuruluş başvurunuz kaydedildi. Devam etmek için email "
-"kodunu doğrulayın."
+msgstr ""
+"Kayıt tamamlandı, talebiniz kaydedildi.Kayıt tamamlandı ve kuruluş "
+"başvurunuz kaydedildi. Devam etmek için email kodunu doğrulayın."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
@@ -5142,8 +5142,9 @@ msgstr "Bu göreve erişiminiz yok"
 #: apps/assignments/views.py:313
 msgctxt "assignment.message"
 msgid "submission_not_allowed_attempts_or_deadline"
-msgstr "Gönderim mümkün değil: deneme hakkı doldu veya son tarih geçti."
-"Yanıt gönderilemiyor. Deneme sınırınızın süresi dolmuş veya sona ermiştir."
+msgstr ""
+"Gönderim mümkün değil: deneme hakkı doldu veya son tarih geçti.Yanıt "
+"gönderilemiyor. Deneme sınırınızın süresi dolmuş veya sona ermiştir."
 
 #: apps/assignments/views.py:330
 msgctxt "assignment.message"
@@ -6236,9 +6237,9 @@ msgstr ""
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
-msgstr "Onay e-postası gönderildi."
-"'{email}' adresine doğrulama e-postası gönderildi. Lütfen gelen kutunuzu "
-"kontrol edin."
+msgstr ""
+"Onay e-postası gönderildi.'{email}' adresine doğrulama e-postası gönderildi."
+" Lütfen gelen kutunuzu kontrol edin."
 
 #: apps/blog/views.py:197
 msgctxt "blog.subscribe.message"
@@ -8798,7 +8799,7 @@ msgstr "Sınav başladı! (Deneme #{attempt_number})"
 #: apps/exams/services/parsing.py:64
 msgctxt "exams.service.parsing.error"
 msgid "file_too_large"
-msgstr "Dosya çok büyük (maksimum 5MB)."
+msgstr "Dosya çok büyük (maksimum 45MB)."
 
 #: apps/exams/services/parsing.py:82
 msgctxt "exams.service.parsing.error"
@@ -21525,7 +21526,9 @@ msgstr "Sınavdan uzaklaştır"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_msg"
-msgstr "Bu öğrencinin sınavını kalıcı olarak durdurmak istiyor musunuz? Sınav hemen teslim edilecek ve geri alınamaz."
+msgstr ""
+"Bu öğrencinin sınavını kalıcı olarak durdurmak istiyor musunuz? Sınav hemen "
+"teslim edilecek ve geri alınamaz."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_btn"
@@ -21537,7 +21540,9 @@ msgstr "Geçici olarak engelle"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_msg"
-msgstr "Öğrencinin ekranı kilitlenecek. Sınav teslim edilmeyecek — sonra geri yükleyebilirsiniz."
+msgstr ""
+"Öğrencinin ekranı kilitlenecek. Sınav teslim edilmeyecek — sonra geri "
+"yükleyebilirsiniz."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_btn"
@@ -21549,7 +21554,9 @@ msgstr "Geri yükle"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_msg"
-msgstr "Öğrencinin sınava devam etmesine izin vermek istiyor musunuz? Ek şans verilecek."
+msgstr ""
+"Öğrencinin sınava devam etmesine izin vermek istiyor musunuz? Ek şans "
+"verilecek."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_btn"
@@ -21737,7 +21744,10 @@ msgstr "Onay bekleyen öğrenciler"
 
 msgctxt "accounts.student_org"
 msgid "pending_desc"
-msgstr "Kayıt sırasında bu organizasyonu seçen öğrencileri buradan tek tek veya hepsini seçerek ekleyebilirsiniz. Başka bir organizasyona kabul edilmiş olanların başvurusu \"Kapatıldı\" olarak görünür."
+msgstr ""
+"Kayıt sırasında bu organizasyonu seçen öğrencileri buradan tek tek veya "
+"hepsini seçerek ekleyebilirsiniz. Başka bir organizasyona kabul edilmiş "
+"olanların başvurusu \"Kapatıldı\" olarak görünür."
 
 msgctxt "accounts.student_org"
 msgid "pending_search_ph"
@@ -21781,7 +21791,9 @@ msgstr "Organizasyona bağlı olmayan öğrenciler"
 
 msgctxt "accounts.student_org"
 msgid "unassigned_desc"
-msgstr "Organizasyon seçmeden kayıt olan öğrencilere davet gönderin. Öğrenci kendi hesabında kabul ettikten sonra organizasyona katılır."
+msgstr ""
+"Organizasyon seçmeden kayıt olan öğrencilere davet gönderin. Öğrenci kendi "
+"hesabında kabul ettikten sonra organizasyona katılır."
 
 msgctxt "accounts.student_org"
 msgid "unassigned_search_ph"
@@ -21809,7 +21821,9 @@ msgstr "Gönderilen davetler"
 
 msgctxt "accounts.student_org"
 msgid "sent_invites_desc"
-msgstr "Henüz kabul edilmemiş davetleri buradan tek tek veya toplu olarak geri çekebilirsiniz."
+msgstr ""
+"Henüz kabul edilmemiş davetleri buradan tek tek veya toplu olarak geri "
+"çekebilirsiniz."
 
 msgctxt "accounts.student_org"
 msgid "sent_invite_search_ph"
@@ -21837,7 +21851,10 @@ msgstr "Öğretmen / Personel başvuruları"
 
 msgctxt "accounts.student_org"
 msgid "ts_requests_desc"
-msgstr "Bu bölümde öğretmen veya personel olarak kayıt olup bu organizasyonu seçen kullanıcıların başvurularını görüntüleyebilir, onaylayabilir veya reddedebilirsiniz."
+msgstr ""
+"Bu bölümde öğretmen veya personel olarak kayıt olup bu organizasyonu seçen "
+"kullanıcıların başvurularını görüntüleyebilir, onaylayabilir veya "
+"reddedebilirsiniz."
 
 msgctxt "accounts.student_org"
 msgid "ts_search_ph"
@@ -21873,7 +21890,8 @@ msgstr "Seçilen davetleri geri çekmek istediğinizi onaylayın."
 
 msgctxt "accounts.student_org"
 msgid "remove_lead"
-msgstr "Aşağıdaki kullanıcıyı organizasyondan çıkarmak istediğinizi onaylayın."
+msgstr ""
+"Aşağıdaki kullanıcıyı organizasyondan çıkarmak istediğinizi onaylayın."
 
 msgctxt "accounts.student_org"
 msgid "field_name"
@@ -21945,7 +21963,9 @@ msgstr "Sorularım"
 
 msgctxt "admin.verify_otp"
 msgid "description"
-msgstr "Yönetici paneline erişim yalnızca OTP doğrulamasından sonra açılır. E-posta adresinize gönderilen 6 haneli kodu girin."
+msgstr ""
+"Yönetici paneline erişim yalnızca OTP doğrulamasından sonra açılır. E-posta "
+"adresinize gönderilen 6 haneli kodu girin."
 
 msgctxt "admin.verify_otp"
 msgid "expiry"
@@ -22021,7 +22041,11 @@ msgstr "Organizasyon özellikleri"
 
 msgctxt "accounts.superadmin_org_features"
 msgid "intro"
-msgstr "Buradan her organizasyon için değerlendirme görünürlüğü özelliklerini ayrı ayrı açıp kapatabilirsiniz. Özellik etkinleştirildiğinde öğretmen, anonim pencere bitmeden de öğrencinin adını görür; not düzenleme süresi ise aynı kalır."
+msgstr ""
+"Buradan her organizasyon için değerlendirme görünürlüğü özelliklerini ayrı "
+"ayrı açıp kapatabilirsiniz. Özellik etkinleştirildiğinde öğretmen, anonim "
+"pencere bitmeden de öğrencinin adını görür; not düzenleme süresi ise aynı "
+"kalır."
 
 msgctxt "accounts.superadmin_org_features"
 msgid "flags_title"
@@ -22150,7 +22174,9 @@ msgstr "Kategorileri yönet"
 
 msgctxt "profile.category_management"
 msgid "subtitle"
-msgstr "Varsayılan kategoriler, yeni oluşturulanlar ve alt kategoriler burada görünür."
+msgstr ""
+"Varsayılan kategoriler, yeni oluşturulanlar ve alt kategoriler burada "
+"görünür."
 
 msgctxt "profile.category_management"
 msgid "root_categories"
@@ -22302,4 +22328,13 @@ msgstr "Pratik"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_manual_msg"
-msgstr "Öğrencinin sınava devam etmesine izin verilsin mi? İhlal sayısı değişmez."
+msgstr ""
+"Öğrencinin sınava devam etmesine izin verilsin mi? İhlal sayısı değişmez."
+
+#. apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "pdf_no_text_layer"
+msgstr ""
+"Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de"
+" metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi "
+"düşük). Lütfen metin tabanlı bir PDF veya DOCX yükleyin."

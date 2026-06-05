@@ -3310,8 +3310,9 @@ msgstr "Этот адрес электронной почты уже испол�
 #: apps/accounts/views.py:1244
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr "Для студента требуется указать университет или школу."
-"Для роли Студента требуется название университета или идентификатор школы."
+msgstr ""
+"Для студента требуется указать университет или школу.Для роли Студента "
+"требуется название университета или идентификатор школы."
 
 #: apps/accounts/views.py:1250
 msgctxt "accounts.profile_edit.message"
@@ -3321,9 +3322,9 @@ msgstr "Профиль успешно обновлен!"
 #: apps/accounts/views.py:1711
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Создайте новую публикацию и выберите, кто её увидит."
-"Используйте кнопку ниже, чтобы создать новую публикацию в редакторе по "
-"умолчанию."
+msgstr ""
+"Создайте новую публикацию и выберите, кто её увидит.Используйте кнопку ниже,"
+" чтобы создать новую публикацию в редакторе по умолчанию."
 
 #: apps/accounts/views.py:1712
 msgctxt "profile.shortcut"
@@ -3363,8 +3364,9 @@ msgstr "Вы можете управлять пользователями тол
 #: apps/accounts/views.py:1830
 msgctxt "accounts.manage_roles.message"
 msgid "insufficient_level_for_target_user"
-msgstr "Вашего уровня недостаточно для этого пользователя."
-"Ваш уровень недостаточно высок, чтобы управлять ролью этого пользователя."
+msgstr ""
+"Вашего уровня недостаточно для этого пользователя.Ваш уровень недостаточно "
+"высок, чтобы управлять ролью этого пользователя."
 
 #: apps/accounts/views.py:1845
 msgctxt "accounts.manage_roles.message"
@@ -3440,9 +3442,9 @@ msgstr "Пользователь уже подключен к другой ор�
 #: apps/accounts/views.py:2218
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "Пользователь не выбрал эту организацию при регистрации."
-"Этот пользователь не дал согласия при регистрации и не может присоединиться "
-"к вашей организации."
+msgstr ""
+"Пользователь не выбрал эту организацию при регистрации.Этот пользователь не "
+"дал согласия при регистрации и не может присоединиться к вашей организации."
 
 #: apps/accounts/views.py:2236
 msgctxt "accounts.role_assignment.message"
@@ -3452,8 +3454,9 @@ msgstr "У вас нет разрешения на изменение роли �
 #: apps/accounts/views.py:2274
 msgctxt "accounts.role_assignment.message"
 msgid "user_added_to_org_with_role"
-msgstr "Пользователь добавлен в организацию с ролью."
-"%(username)s добавлен в организацию и ему присвоена роль `%(role_display)s`."
+msgstr ""
+"Пользователь добавлен в организацию с ролью.%(username)s добавлен в "
+"организацию и ему присвоена роль `%(role_display)s`."
 
 #: apps/accounts/views.py:2289
 msgctxt "accounts.role_assignment.message"
@@ -3488,9 +3491,10 @@ msgstr "Неверный выбор разрешения."
 #: apps/accounts/views.py:2460
 msgctxt "accounts.permission_editor.message"
 msgid "grant_only_owned_or_grantable_permissions"
-msgstr "Вы можете предоставлять только те разрешения, которыми владеете или вправе выдавать."
-"Вы можете предоставлять только разрешения, которыми владеете или можете "
-"предоставить."
+msgstr ""
+"Вы можете предоставлять только те разрешения, которыми владеете или вправе "
+"выдавать.Вы можете предоставлять только разрешения, которыми владеете или "
+"можете предоставить."
 
 #: apps/accounts/views.py:2465
 msgctxt "accounts.permission_editor.message"
@@ -3534,21 +3538,23 @@ msgstr "Настройки ИИ успешно сохранены."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Регистрация завершена, ваша заявка зарегистрирована."
-"Регистрация завершена, заявка в организацию сохранена. Подтвердите код из "
-"email, чтобы продолжить."
+msgstr ""
+"Регистрация завершена, ваша заявка зарегистрирована.Регистрация завершена, "
+"заявка в организацию сохранена. Подтвердите код из email, чтобы продолжить."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Регистрация завершена, теперь вы можете войти."
-"Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
+msgstr ""
+"Регистрация завершена, теперь вы можете войти.Регистрация завершена. "
+"Подтвердите код из email, чтобы активировать аккаунт."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
 msgid "verification_email_not_found_register_again"
-msgstr "Письмо для подтверждения не найдено, зарегистрируйтесь снова."
-"Электронная почта для подтверждения не найдена. Зарегистрируйтесь еще раз."
+msgstr ""
+"Письмо для подтверждения не найдено, зарегистрируйтесь снова.Электронная "
+"почта для подтверждения не найдена. Зарегистрируйтесь еще раз."
 
 #: apps/accounts/views.py:2747 apps/accounts/views.py:2791
 msgctxt "accounts.auth.message"
@@ -3587,8 +3593,9 @@ msgstr "Вы успешно выступили."
 
 msgctxt "accounts.auth.message"
 msgid "otp_email_send_failed"
-msgstr "Не удалось отправить письмо с OTP-кодом."
-"Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
+msgstr ""
+"Не удалось отправить письмо с OTP-кодом.Не удалось отправить код "
+"подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
@@ -6248,9 +6255,9 @@ msgstr ""
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
-msgstr "Письмо с подтверждением отправлено."
-"На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте"
-" почту."
+msgstr ""
+"Письмо с подтверждением отправлено.На адрес '{email}' отправлено письмо с "
+"подтверждением. Пожалуйста, проверьте почту."
 
 #: apps/blog/views.py:197
 msgctxt "blog.subscribe.message"
@@ -6339,8 +6346,9 @@ msgstr "Новый код отправлен."
 
 msgctxt "blog.verify.message"
 msgid "otp_email_send_failed"
-msgstr "Не удалось отправить письмо с OTP-кодом."
-"Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
+msgstr ""
+"Не удалось отправить письмо с OTP-кодом.Не удалось отправить код "
+"подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"
@@ -8813,7 +8821,7 @@ msgstr "Экзамен начат! (Попытка #{attempt_number})"
 #: apps/exams/services/parsing.py:64
 msgctxt "exams.service.parsing.error"
 msgid "file_too_large"
-msgstr "Файл слишком большой (максимум 5MB)."
+msgstr "Файл слишком большой (максимум 45MB)."
 
 #: apps/exams/services/parsing.py:82
 msgctxt "exams.service.parsing.error"
@@ -21292,7 +21300,9 @@ msgstr "Онлайн-отслеживание"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "header_subtitle"
-msgstr "Мониторинг экзамена в реальном времени — только наблюдение, без вмешательства."
+msgstr ""
+"Мониторинг экзамена в реальном времени — только наблюдение, без "
+"вмешательства."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "poll_auto_refresh"
@@ -21568,7 +21578,9 @@ msgstr "Удалить с экзамена"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_msg"
-msgstr "Вы хотите окончательно остановить экзамен этого студента? Он будет сдан немедленно и не может быть отменён."
+msgstr ""
+"Вы хотите окончательно остановить экзамен этого студента? Он будет сдан "
+"немедленно и не может быть отменён."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_stop_btn"
@@ -21580,7 +21592,9 @@ msgstr "Временно заблокировать"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_msg"
-msgstr "Экран студента будет заблокирован. Экзамен не будет сдан — вы можете восстановить позже."
+msgstr ""
+"Экран студента будет заблокирован. Экзамен не будет сдан — вы можете "
+"восстановить позже."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_pause_btn"
@@ -21592,7 +21606,9 @@ msgstr "Восстановить"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_msg"
-msgstr "Вы хотите позволить студенту продолжить экзамен? Будет предоставлен дополнительный шанс."
+msgstr ""
+"Вы хотите позволить студенту продолжить экзамен? Будет предоставлен "
+"дополнительный шанс."
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_btn"
@@ -21780,7 +21796,10 @@ msgstr "Студенты, ожидающие подтверждения"
 
 msgctxt "accounts.student_org"
 msgid "pending_desc"
-msgstr "Здесь вы можете добавить студентов, выбравших эту организацию при регистрации, по одному или всех сразу. Заявки тех, кто уже принят в другую организацию, отобразятся как «Закрыто»."
+msgstr ""
+"Здесь вы можете добавить студентов, выбравших эту организацию при "
+"регистрации, по одному или всех сразу. Заявки тех, кто уже принят в другую "
+"организацию, отобразятся как «Закрыто»."
 
 msgctxt "accounts.student_org"
 msgid "pending_search_ph"
@@ -21824,7 +21843,9 @@ msgstr "Студенты без организации"
 
 msgctxt "accounts.student_org"
 msgid "unassigned_desc"
-msgstr "Отправьте приглашения студентам, которые зарегистрировались без выбора организации. Они присоединятся после принятия приглашения в личном кабинете."
+msgstr ""
+"Отправьте приглашения студентам, которые зарегистрировались без выбора "
+"организации. Они присоединятся после принятия приглашения в личном кабинете."
 
 msgctxt "accounts.student_org"
 msgid "unassigned_search_ph"
@@ -21880,7 +21901,10 @@ msgstr "Заявки преподавателей / сотрудников"
 
 msgctxt "accounts.student_org"
 msgid "ts_requests_desc"
-msgstr "В этом разделе вы можете просматривать, подтверждать или отклонять заявки пользователей, которые зарегистрировались как преподаватель или сотрудник и выбрали эту организацию."
+msgstr ""
+"В этом разделе вы можете просматривать, подтверждать или отклонять заявки "
+"пользователей, которые зарегистрировались как преподаватель или сотрудник и "
+"выбрали эту организацию."
 
 msgctxt "accounts.student_org"
 msgid "ts_search_ph"
@@ -21916,7 +21940,8 @@ msgstr "Подтвердите, что хотите отозвать выбра�
 
 msgctxt "accounts.student_org"
 msgid "remove_lead"
-msgstr "Подтвердите, что хотите удалить указанного пользователя из организации."
+msgstr ""
+"Подтвердите, что хотите удалить указанного пользователя из организации."
 
 msgctxt "accounts.student_org"
 msgid "field_name"
@@ -21988,7 +22013,9 @@ msgstr "Мои вопросы"
 
 msgctxt "admin.verify_otp"
 msgid "description"
-msgstr "Доступ к панели администратора открывается только после подтверждения OTP. Введите 6-значный код, отправленный на ваш адрес эл. почты."
+msgstr ""
+"Доступ к панели администратора открывается только после подтверждения OTP. "
+"Введите 6-значный код, отправленный на ваш адрес эл. почты."
 
 msgctxt "admin.verify_otp"
 msgid "expiry"
@@ -22064,7 +22091,11 @@ msgstr "Возможности организации"
 
 msgctxt "accounts.superadmin_org_features"
 msgid "intro"
-msgstr "Здесь вы можете включать или отключать функции видимости проверки для каждой организации. Когда функция включена, преподаватель видит имя студента ещё до окончания анонимного окна, при этом окно редактирования оценки остаётся прежним."
+msgstr ""
+"Здесь вы можете включать или отключать функции видимости проверки для каждой"
+" организации. Когда функция включена, преподаватель видит имя студента ещё "
+"до окончания анонимного окна, при этом окно редактирования оценки остаётся "
+"прежним."
 
 msgctxt "accounts.superadmin_org_features"
 msgid "flags_title"
@@ -22249,7 +22280,8 @@ msgstr "Показаны отфильтрованные"
 
 msgctxt "profile.category_management"
 msgid "clear_before_delete"
-msgstr "Чтобы удалить, сначала очистите связанные публикации или подкатегории."
+msgstr ""
+"Чтобы удалить, сначала очистите связанные публикации или подкатегории."
 
 msgctxt "profile.category_management"
 msgid "zero_subcategories"
@@ -22345,4 +22377,13 @@ msgstr "Практический"
 
 msgctxt "exams.template.exam_live_monitor"
 msgid "confirm_resume_manual_msg"
-msgstr "Разрешить студенту продолжить экзамен? Количество нарушений не изменится."
+msgstr ""
+"Разрешить студенту продолжить экзамен? Количество нарушений не изменится."
+
+#. apps/exams/services/parsing.py
+msgctxt "exams.service.parsing.error"
+msgid "pdf_no_text_layer"
+msgstr ""
+"PDF состоит из отсканированных изображений без текстового слоя, и OCR не "
+"смог извлечь текст (на сервере может отсутствовать Tesseract/aze или низкое "
+"качество скана). Загрузите PDF или DOCX с текстовым слоем."
