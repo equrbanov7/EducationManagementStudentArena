@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "accounts.register" %} | EMSArena{% endblock %}
  
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}?v=20260605-layout">
 {% endblock %}
 
 {% block content %}
@@ -33,11 +33,26 @@
             </div>
         </div>
 
-        {% if form.non_field_errors %}
-            <div class="register-global-errors">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
+        {% if form.errors %}
+            <div class="register-global-errors" id="registerErrorSummary" role="alert" tabindex="-1" aria-live="assertive">
+                <p class="register-global-errors__title">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    {% trans "Formada bəzi xətalar var. Zəhmət olmasa aşağıdakıları düzəldin:" %}
+                </p>
+                <ul class="register-global-errors__list">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <li>
+                                <a href="#{{ field.id_for_label }}" data-error-jump="{{ field.id_for_label }}">
+                                    {% if field.label %}{{ field.label }}: {% endif %}{{ field.errors.0 }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             </div>
         {% endif %}
 
@@ -193,16 +208,37 @@
 
                 <!-- Join org (student / teacher / staff) search -->
                 <div id="studentJoinFields" hidden>
+                    {# Records whether the user made an explicit choice ("org" / "none"). #}
+                    {{ form.join_organization_choice }}
                     <div class="register-form-field">
                         <label for="organizationSearchInput" id="organizationSearchLabel">{% trans "institution_search_label" context "accounts.register" %}</label>
-                        <input type="text" id="organizationSearchInput" class="form-control" autocomplete="off" placeholder="{% trans 'institution_search_placeholder' context 'accounts.register' %}">
-                        <div id="organizationSearchList" class="register-search-list" hidden></div>
+                        <input type="text" id="organizationSearchInput" class="form-control" autocomplete="off"
+                               placeholder="{% trans 'institution_search_placeholder' context 'accounts.register' %}"
+                               aria-describedby="studentJoinHint organizationSearchError"
+                               role="combobox" aria-expanded="false" aria-autocomplete="list"
+                               aria-controls="organizationSearchList">
+                        <div id="organizationSearchList" class="register-search-list" role="listbox" hidden></div>
+
+                        {# Clearly shows that a real organization is now selected. #}
+                        <div id="organizationSelectedChip" class="register-selected-chip" hidden>
+                            <span class="register-selected-chip__icon" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+                            <span class="register-selected-chip__label" id="organizationSelectedChipLabel"></span>
+                            <button type="button" class="register-selected-chip__clear" id="organizationSelectedChipClear"
+                                    aria-label="{% trans 'Seçimi təmizlə' %}">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        {# Server-side error for the organization choice. #}
                         {% if form.join_organization.errors %}
-                            <div class="register-field-error">{{ form.join_organization.errors.0 }}</div>
+                            <div class="register-field-error" id="organizationServerError">{{ form.join_organization.errors.0 }}</div>
                         {% endif %}
+                        {# Client-side error: typed but nothing chosen. #}
+                        <div class="register-field-error" id="organizationSearchError" hidden aria-live="polite"></div>
+
                         <small class="register-help-text" id="studentJoinHint"></small>
-                        <small class="register-help-text">
-                            {% trans "join_org_optional_hint" context "accounts.register" %}
+                        <small class="register-help-text" id="organizationSelectionRequiredHint">
+                            {% trans "Davam etmək üçün siyahıdan təşkilat seçin və ya “Heç bir təşkilata aid deyiləm” seçimini edin." %}
                         </small>
                     </div>
 
@@ -216,7 +252,7 @@
                     <button type="button" class="register-back-btn" data-wizard-back="2">
                         <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
-                    <button type="button" class="register-submit-btn" data-wizard-next="4">
+                    <button type="button" class="register-submit-btn" id="step3ContinueBtn" data-wizard-next="4">
                         {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -431,7 +467,10 @@
                     <button type="button" class="register-back-btn" data-wizard-back="3">
                         <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
-                    <button type="submit" class="register-submit-btn">{% trans "submit" context "accounts.register" %}</button>
+                    <button type="submit" class="register-submit-btn" id="registerSubmitBtn">
+                        <span class="register-submit-btn__label">{% trans "submit" context "accounts.register" %}</span>
+                        <span class="register-submit-btn__spinner" hidden aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </form>
@@ -572,7 +611,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260601-search-draft"></script>
+<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260605-org-choice-2"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script nonce="{{ request.csp_nonce }}">

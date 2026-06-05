@@ -1,5 +1,15 @@
 /* apps/accounts/static/accounts/css/register.css */
 
+/* Page-scoped guard: on register/signup pages, never allow a horizontal scroll
+   gutter (the blank strip that appeared on the right). `clip` does not create a
+   scroll container, so it is safe for the sticky navbar. Scoped via :has() so
+   only register pages are affected. */
+html:has(.register-page-wrapper),
+body:has(.register-page-wrapper) {
+    overflow-x: clip;
+    max-width: 100%;
+}
+
 /* --- Ümumi Səhifə Fonu və Mərkəzləşdirmə --- */
 .register-page-wrapper {
     min-height: calc(100vh - 170px); /* Header və footer hündürlüyünü nəzərə alaraq (təxmini) */
@@ -9,6 +19,19 @@
     padding: 40px 20px;
     background: linear-gradient(135deg, #e0f2f7 0%, #f0f8ff 100%); /* Yüngül gradient fon */
     font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+    /* Guard: never let inner content create a horizontal scroll gutter. */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* Every register box honours its container width so nothing can overflow the
+   viewport (which previously left a blank strip on the right). */
+.register-card,
+.register-card--signup {
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 /* --- Qeydiyyat Kartı (Formanın olduğu əsas qutu) --- */
@@ -1041,5 +1064,131 @@
     .register-persona-card__desc {
         font-size: 0.76rem;
         -webkit-line-clamp: 2;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Error summary (form-level)
+   ───────────────────────────────────────────────────────────────────────── */
+.register-global-errors__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.register-global-errors__list {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.register-global-errors__list a {
+    color: #991b1b;
+    text-decoration: underline;
+}
+
+.register-global-errors:focus {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Selected organization chip
+   ───────────────────────────────────────────────────────────────────────── */
+.register-selected-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--primary-color, #2563eb);
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: 100%;
+}
+
+.register-selected-chip.is-neutral {
+    border-color: #9ca3af;
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.register-selected-chip__icon {
+    display: inline-flex;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.register-selected-chip__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.register-selected-chip__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(30, 64, 175, 0.12);
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.register-selected-chip__clear:hover {
+    background-color: rgba(30, 64, 175, 0.25);
+}
+
+/* Search input invalid state */
+#organizationSearchInput[aria-invalid="true"] {
+    border-color: #ef4444;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Submit button: disabled + loading states
+   ───────────────────────────────────────────────────────────────────────── */
+.register-submit-btn:disabled,
+.register-submit-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.register-submit-btn:disabled:hover,
+.register-submit-btn.is-disabled:hover {
+    background-color: var(--primary-color, #2563eb);
+    transform: none;
+}
+
+.register-submit-btn.is-loading {
+    cursor: progress;
+}
+
+.register-submit-btn__spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 8px;
+    vertical-align: -0.125em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: register-spin 0.7s linear infinite;
+}
+
+@keyframes register-spin {
+    to {
+        transform: rotate(360deg);
     }
 }

@@ -20,32 +20,47 @@ POST_LOGIN_REDIRECT_GUARD_SESSION_KEY = "post_login_redirect_guard"
 
 class SessionTimeoutMiddleware:
     """
-    Middleware to automatically logout users after 3 days of inactivity.
-    Tracks the last activity time in the session.
+    Automatically log users out after a period of inactivity.
+
+    Performance note: the ``last_activity`` timestamp is only written back to
+    the session at most once every ``SESSION_ACTIVITY_WRITE_INTERVAL`` seconds.
+    Writing it on every request marked the session dirty on every authenticated
+    hit, forcing a session save (a DB write under db/cached_db backends) for
+    each request and serialising authenticated traffic under load. Throttling
+    the write keeps inactivity enforcement accurate (the stored value is at most
+    one interval stale against a multi-hour timeout) while removing that
+    per-request write.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
         self.timeout_seconds = settings.SESSION_INACTIVITY_TIMEOUT
+        self.write_interval = getattr(settings, "SESSION_ACTIVITY_WRITE_INTERVAL", 300)
 
     def __call__(self, request):
         if request.user.is_authenticated:
-            # Get the last activity time from session
+            now = timezone.now()
             last_activity = request.session.get("last_activity")
 
             if last_activity:
-                # Convert to datetime if it's a string
                 if isinstance(last_activity, str):
-                    last_activity = datetime.fromisoformat(last_activity)
+                    try:
+                        last_activity = datetime.fromisoformat(last_activity)
+                    except ValueError:
+                        last_activity = None
 
-                # Check if session has expired
-                time_since_activity = timezone.now() - last_activity
-                if time_since_activity.total_seconds() > self.timeout_seconds:
-                    # Session expired, logout the user
+            if last_activity:
+                seconds_since_activity = (now - last_activity).total_seconds()
+                if seconds_since_activity > self.timeout_seconds:
+                    # Session expired through inactivity → log the user out.
                     logout(request)
-
-            # Update last activity time
-            request.session["last_activity"] = timezone.now().isoformat()
+                elif seconds_since_activity >= self.write_interval:
+                    # Refresh the timestamp only once per interval to avoid a
+                    # session write on every request.
+                    request.session["last_activity"] = now.isoformat()
+            else:
+                # First authenticated request (or unparseable value): seed it.
+                request.session["last_activity"] = now.isoformat()
 
         response = self.get_response(request)
         return response

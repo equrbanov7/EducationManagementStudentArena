@@ -81,6 +81,15 @@ document.addEventListener("DOMContentLoaded", function () {
     var organizationSelect = document.getElementById("id_join_organization");
     var organizationSearchDebounceTimer = null;
 
+    // Explicit organization-choice tracking for join flows.
+    var joinChoiceInput = document.getElementById("id_join_organization_choice");
+    var organizationSelectedChip = document.getElementById("organizationSelectedChip");
+    var organizationSelectedChipLabel = document.getElementById("organizationSelectedChipLabel");
+    var organizationSelectedChipClear = document.getElementById("organizationSelectedChipClear");
+    var organizationSearchError = document.getElementById("organizationSearchError");
+    var step3ContinueBtn = document.getElementById("step3ContinueBtn");
+    var registerSubmitBtn = document.getElementById("registerSubmitBtn");
+
     var initialRoleField = document.getElementById("initialRoleField");
     var autoRoleInfoField = document.getElementById("autoRoleInfoField");
     var autoRoleInfoText = document.getElementById("autoRoleInfoText");
@@ -351,6 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
             organizationSearchInput.dataset.noOrganizationSelected = "1";
         }
         hideOrganizationSearchList();
+        refreshOrganizationChoiceUI();
         updateSelectionSummary();
         saveSignupDraft();
     }
@@ -599,6 +609,85 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function hideOrganizationSearchList() {
         if (organizationSearchList) organizationSearchList.hidden = true;
+        if (organizationSearchInput) organizationSearchInput.setAttribute("aria-expanded", "false");
+    }
+
+    // ── Explicit join-organization choice + selection feedback ────────────────
+
+    function setJoinChoice(value) {
+        if (joinChoiceInput) joinChoiceInput.value = value || "";
+    }
+
+    function showOrganizationSelectedChip(label, isNeutral) {
+        if (!organizationSelectedChip) return;
+        if (organizationSelectedChipLabel) organizationSelectedChipLabel.textContent = label || "";
+        organizationSelectedChip.classList.toggle("is-neutral", Boolean(isNeutral));
+        organizationSelectedChip.hidden = false;
+    }
+
+    function hideOrganizationSelectedChip() {
+        if (!organizationSelectedChip) return;
+        organizationSelectedChip.hidden = true;
+        if (organizationSelectedChipLabel) organizationSelectedChipLabel.textContent = "";
+    }
+
+    function showOrganizationSearchError(message) {
+        if (!organizationSearchError) return;
+        organizationSearchError.textContent =
+            message || tr("choose_organization_from_list", "Zəhmət olmasa siyahıdan təşkilat seçin.");
+        organizationSearchError.hidden = false;
+        if (organizationSearchInput) organizationSearchInput.setAttribute("aria-invalid", "true");
+    }
+
+    function clearOrganizationSearchError() {
+        if (organizationSearchError) {
+            organizationSearchError.hidden = true;
+            organizationSearchError.textContent = "";
+        }
+    }
+
+    function setStep3ContinueEnabled(enabled) {
+        if (!step3ContinueBtn) return;
+        step3ContinueBtn.disabled = !enabled;
+        step3ContinueBtn.setAttribute("aria-disabled", enabled ? "false" : "true");
+        step3ContinueBtn.classList.toggle("is-disabled", !enabled);
+    }
+
+    // Re-derive the explicit choice ("org" / "none" / "") from current state and
+    // sync the chip, the continue button and aria flags. This is the single
+    // source of truth for "has the user really chosen an organization?".
+    function refreshOrganizationChoiceUI() {
+        if (!isJoinMode(currentSelection().mode)) {
+            setJoinChoice("");
+            hideOrganizationSelectedChip();
+            clearOrganizationSearchError();
+            setStep3ContinueEnabled(true);
+            return;
+        }
+
+        var hasOrg = organizationSelect && organizationSelect.value;
+        if (hasOrg) {
+            setJoinChoice("org");
+            showOrganizationSelectedChip(
+                selectedOptionText(organizationSelect) ||
+                    (organizationSearchInput ? organizationSearchInput.value.trim() : ""),
+                false
+            );
+            clearOrganizationSearchError();
+        } else if (isNoOrganizationSelected()) {
+            setJoinChoice("none");
+            showOrganizationSelectedChip(noOrganizationAffiliationLabel(), true);
+            clearOrganizationSearchError();
+        } else {
+            setJoinChoice("");
+            hideOrganizationSelectedChip();
+        }
+
+        var resolved = Boolean(joinChoiceInput && joinChoiceInput.value);
+        setStep3ContinueEnabled(resolved);
+        if (organizationSearchInput) {
+            organizationSearchInput.setAttribute("aria-invalid", resolved ? "false" : "true");
+        }
     }
 
     function keepOrganizationSearchFocus(button) {
@@ -646,6 +735,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderOrganizationSearchList(searchText) {
         if (!organizationSearchList || !organizationSearchInput) return;
+        organizationSearchInput.setAttribute("aria-expanded", "true");
         var options = filteredOrganizations(searchText);
         organizationSearchList.innerHTML = "";
 
@@ -694,6 +784,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 organizationSearchInput.dataset.selectedValue = String(organization.id);
                 clearNoOrganizationSelection();
                 hideOrganizationSearchList();
+                refreshOrganizationChoiceUI();
                 updateSelectionSummary();
                 saveSignupDraft();
             });
@@ -1041,6 +1132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 syncPrivacyConsentState();
             }
 
+            refreshOrganizationChoiceUI();
             updateSelectionSummary();
             return parsedDraft;
         } catch (error) {
@@ -1152,6 +1244,7 @@ document.addEventListener("DOMContentLoaded", function () {
             updateStudentJoinCopy(selection.orgType);
             populateJoinOrganizationOptions(organizationSearchInput ? organizationSearchInput.value : "");
             syncSearchInputWithSelectedOrganization();
+            refreshOrganizationChoiceUI();
         } else {
             if (organizationSearchDebounceTimer) {
                 clearTimeout(organizationSearchDebounceTimer);
@@ -1163,6 +1256,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 organizationSearchInput.dataset.noOrganizationSelected = "";
             }
             hideOrganizationSearchList();
+            refreshOrganizationChoiceUI();
         }
 
         syncStep2CardSelection();
@@ -1239,6 +1333,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Typing without an actual pick is not a valid selection.
+            refreshOrganizationChoiceUI();
+            if ((organizationSearchInput.value || "").trim() && !(joinChoiceInput && joinChoiceInput.value)) {
+                showOrganizationSearchError();
+            } else {
+                clearOrganizationSearchError();
+            }
+
             if (organizationSearchDebounceTimer) {
                 clearTimeout(organizationSearchDebounceTimer);
             }
@@ -1259,7 +1361,41 @@ document.addEventListener("DOMContentLoaded", function () {
                 clearNoOrganizationSelection();
             }
             syncSearchInputWithSelectedOrganization();
+            refreshOrganizationChoiceUI();
             updateSelectionSummary();
+        });
+    }
+
+    // Clear the current organization selection from the selected chip.
+    if (organizationSelectedChipClear) {
+        organizationSelectedChipClear.addEventListener("click", function () {
+            if (organizationSelect) {
+                organizationSelect.value = "";
+                organizationSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+            clearNoOrganizationSelection();
+            if (organizationSearchInput) {
+                organizationSearchInput.value = "";
+                organizationSearchInput.dataset.selectedValue = "";
+            }
+            refreshOrganizationChoiceUI();
+            updateSelectionSummary();
+            saveSignupDraft();
+            if (organizationSearchInput) organizationSearchInput.focus();
+        });
+    }
+
+    // Block the step 3 → step 4 transition until an explicit organization choice
+    // was made. Runs before the global wizard handler (stopImmediatePropagation).
+    if (step3ContinueBtn) {
+        step3ContinueBtn.addEventListener("click", function (event) {
+            if (!isJoinMode(currentSelection().mode)) return;
+            if (joinChoiceInput && joinChoiceInput.value) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            showOrganizationSearchError();
+            setStep3ContinueEnabled(false);
+            if (organizationSearchInput) organizationSearchInput.focus();
         });
     }
 
@@ -1330,6 +1466,40 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Client mirror of the backend rule: a join flow needs an explicit
+    // organization choice. Reveal step 3 and surface the error if missing.
+    if (registerForm) {
+        registerForm.addEventListener("submit", function (event) {
+            if (event.defaultPrevented) return;
+            if (!isJoinMode(currentSelection().mode)) return;
+            if (joinChoiceInput && joinChoiceInput.value) return;
+
+            event.preventDefault();
+            wizardNext(3);
+            showOrganizationSearchError();
+            setStep3ContinueEnabled(false);
+            if (organizationSearchInput) organizationSearchInput.focus();
+        });
+    }
+
+    // Double-submit guard + loading state. Registered last so it can read
+    // defaultPrevented from every earlier submit handler and only engages on a
+    // real submission.
+    if (registerForm && registerSubmitBtn) {
+        registerForm.addEventListener("submit", function (event) {
+            if (event.defaultPrevented) return;
+            if (registerForm.dataset.submitting === "1") {
+                event.preventDefault();
+                return;
+            }
+            registerForm.dataset.submitting = "1";
+            registerSubmitBtn.disabled = true;
+            registerSubmitBtn.classList.add("is-loading");
+            var spinner = registerSubmitBtn.querySelector(".register-submit-btn__spinner");
+            if (spinner) spinner.hidden = false;
+        });
+    }
+
     if (groupNumberInput) {
         groupNumberInput.addEventListener("input", function () {
             if ((groupNumberInput.value || "").trim()) {
@@ -1368,20 +1538,74 @@ document.addEventListener("DOMContentLoaded", function () {
     updateStep2State();
     updateStep3State();
 
-    // If form has errors, reveal the relevant step.
-    var hasErrors = document.querySelector(".register-global-errors, .register-field-error:not([hidden])");
+    // Reveal the step that contains a field error and focus it.
+    function stepNumberForElement(element) {
+        var panel = element ? element.closest(".wizard-panel") : null;
+        if (panel && panel.id) {
+            return normalizeWizardStep(panel.id.replace("step", ""));
+        }
+        return 4;
+    }
+
+    // inline:"nearest" guarantees we never trigger horizontal scrolling (which
+    // would leave a blank gutter on the side of the page).
+    function scrollIntoViewSafely(element, block) {
+        if (!element || typeof element.scrollIntoView !== "function") return;
+        try {
+            element.scrollIntoView({ block: block || "center", inline: "nearest" });
+        } catch (error) {
+            element.scrollIntoView();
+        }
+    }
+
+    function focusWithoutScroll(element) {
+        if (!element || typeof element.focus !== "function") return;
+        try {
+            element.focus({ preventScroll: true });
+        } catch (error) {
+            element.focus();
+        }
+    }
+
+    function focusErrorSummaryOrField() {
+        var summary = document.getElementById("registerErrorSummary");
+        if (summary) {
+            focusWithoutScroll(summary);
+            scrollIntoViewSafely(summary, "start");
+            return;
+        }
+        scrollIntoViewSafely(
+            document.querySelector(".register-field-error:not([hidden]), .register-global-errors"),
+            "center"
+        );
+    }
+
+    // Clicking an entry in the error summary reveals its step and focuses the field.
+    document.querySelectorAll("[data-error-jump]").forEach(function (link) {
+        link.addEventListener("click", function (event) {
+            event.preventDefault();
+            var targetId = link.getAttribute("data-error-jump");
+            var field = document.getElementById(targetId);
+            if (!field) return;
+            wizardNext(stepNumberForElement(field));
+            focusWithoutScroll(field);
+            scrollIntoViewSafely(field, "center");
+        });
+    });
+
+    // If form has errors, reveal the step that holds the FIRST error so the user
+    // lands where they need to act, then surface the summary.
+    var firstErrorField = document.querySelector(".register-field-error:not([hidden])");
+    var hasErrors = firstErrorField || document.querySelector(".register-global-errors");
     if (hasErrors) {
-        var step2Error = document.querySelector("#step2 .register-field-error");
-        if (step2Error) {
-            // Show step 2 with step 2b visible (errors are in org-specific fields)
-            wizardNext(2);
+        var targetStep = firstErrorField ? stepNumberForElement(firstErrorField) : 4;
+        wizardNext(targetStep);
+        if (targetStep === 2) {
+            // Step 2 errors live in the org-specific sub-step.
             if (step2a) step2a.hidden = true;
             if (step2b) step2b.hidden = false;
-        } else if (document.querySelector("#step3 .register-field-error")) {
-            wizardNext(3);
-        } else {
-            wizardNext(4);
         }
+        focusErrorSummaryOrField();
         return;
     }
 

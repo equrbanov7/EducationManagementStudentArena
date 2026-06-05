@@ -63,6 +63,16 @@ JOIN_ORG_TYPE_MAP = {
     **STAFF_JOIN_ORG_TYPE_MAP,
 }
 
+# Signup modes where the user joins an existing organization. For these the user
+# must make an explicit choice — pick a real organization from the list, or
+# explicitly opt out via the "no organization affiliation" option — so that
+# typing a search term without selecting anything cannot pass silently.
+JOIN_SIGNUP_MODES = {"student_join", "teacher_join", "staff_join"}
+
+# Error shown when a join-flow user neither selected an organization nor made
+# the explicit "no affiliation" choice.
+ORGANIZATION_SELECTION_REQUIRED_MESSAGE = "Zəhmət olmasa siyahıdan təşkilatı (universitet/məktəb/kurs mərkəzi) seçin."
+
 
 class RegisterForm(forms.ModelForm):
     """User registration form with multi-step wizard support."""
@@ -181,6 +191,15 @@ class RegisterForm(forms.ModelForm):
             "invalid_choice": "Düzgün seçim edin. Bu seçim mövcud seçimlərdən biri deyil.",
         },
         widget=forms.Select(attrs={"class": "form-control"}),
+    )
+
+    # Records the user's explicit organization decision in join flows so the
+    # backend can tell "typed a search term but selected nothing" (empty) apart
+    # from "deliberately joined with no affiliation" ("none"). Set by the
+    # registration wizard JS; validated in clean().
+    join_organization_choice = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(attrs={"data-join-organization-choice": "true"}),
     )
 
     institution_not_listed_name = forms.CharField(
@@ -381,6 +400,15 @@ class RegisterForm(forms.ModelForm):
         elif selected_registration_type == OrganizationType.INDIVIDUAL:
             signup_mode = "individual"
             organization_type = OrganizationType.INDIVIDUAL
+
+        # Authoritative organization-selection check for join flows. The user
+        # must either pick a real organization or explicitly choose "no
+        # affiliation"; otherwise the submission is rejected so a half-typed
+        # search can never slip through as an empty organization.
+        if signup_mode in JOIN_SIGNUP_MODES:
+            join_choice = (cleaned_data.get("join_organization_choice") or "").strip().lower()
+            if not join_organization and join_choice != "none":
+                self.add_error("join_organization", ORGANIZATION_SELECTION_REQUIRED_MESSAGE)
 
         if signup_mode == "organization_create":
             if not institution_not_listed_name:
