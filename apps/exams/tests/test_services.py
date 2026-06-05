@@ -7,6 +7,7 @@ from collections import Counter
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
+from unittest import skipUnless
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
@@ -1375,6 +1376,119 @@ class ExamParsingServicesTest(TestCase):
                 parsing.extract_text_from_upload(uploaded)
 
         self.assertIn("pypdf", str(exc.exception))
+
+    # ---- Highlight (mark) → düz cavab -----------------------------------------
+
+    def _build_docx_bytes(self, rows):
+        """rows: list[(text, highlighted_bool)] → in-memory .docx bytes."""
+        import io
+
+        from docx import Document
+        from docx.enum.text import WD_COLOR_INDEX
+
+        doc = Document()
+        for text, highlighted in rows:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(text)
+            if highlighted:
+                run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        return buffer.getvalue()
+
+    def test_extract_text_from_upload_marks_highlighted_docx_option(self):
+        data = self._build_docx_bytes(
+            [
+                ("1) Massivlər üzərində hansı əməliyyat?", False),
+                ("A) hesabi/nisbət", False),
+                ("B) nisbət", False),
+                ("C) hesabi", False),
+                ("D) indeksləşmə", True),  # sarı ilə işarələnmiş = düz cavab
+                ("E) məntiqi", False),
+            ]
+        )
+        uploaded = SimpleUploadedFile("q.docx", data)
+
+        text = parsing.extract_text_from_upload(uploaded)
+        self.assertIn("*D) indeksləşmə", text)
+        self.assertNotIn("*A)", text)
+
+        parsed = parsing.parse_bulk_mcq(text)
+        self.assertEqual(parsed[0]["correct"], ["D"])
+        self.assertEqual(parsed[0]["answer_mode"], "single")
+
+    def test_extract_text_from_upload_docx_without_highlight_has_no_star(self):
+        data = self._build_docx_bytes(
+            [
+                ("1) Sual?", False),
+                ("A) bir", False),
+                ("B) iki", False),
+                ("C) üç", False),
+                ("D) dörd", False),
+            ]
+        )
+        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.docx", data))
+        self.assertNotIn("*", text)
+
+    def test_extract_text_from_upload_marks_multiple_highlighted_docx_options(self):
+        data = self._build_docx_bytes(
+            [
+                ("1) Çoxseçimli sual?", False),
+                ("A) bir", True),
+                ("B) iki", False),
+                ("C) üç", True),
+                ("D) dörd", False),
+            ]
+        )
+        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.docx", data))
+        parsed = parsing.parse_bulk_mcq(text)
+        self.assertEqual(parsed[0]["correct"], ["A", "C"])
+        self.assertEqual(parsed[0]["answer_mode"], "multiple")
+
+    def test_mark_correct_option_lines_label_match_no_false_positive(self):
+        text = "1) Sual?\nA) hesabi nisbət\nB) nisbət\nC) hesabi\nD) indeks"
+        # "B) nisbət" highlight olunub — yalnız B işarələnməli, A yox (mətn oxşardır)
+        marked = parsing._mark_correct_option_lines(text, ["B) nisbət"])
+        self.assertIn("*B) nisbət", marked)
+        self.assertNotIn("*A)", marked)
+
+    def test_mark_correct_option_lines_empty_fragments_unchanged(self):
+        text = "A) bir\nB) iki"
+        self.assertEqual(parsing._mark_correct_option_lines(text, []), text)
+
+    def test_extract_pdf_highlights_safe_on_invalid_bytes(self):
+        uploaded = SimpleUploadedFile("bad.pdf", b"%PDF-1.4 not-a-real-pdf")
+        # Heç vaxt exception atmamalı — boş siyahı qaytarmalı
+        self.assertEqual(parsing._extract_pdf_highlights(uploaded), [])
+
+    @skipUnless(parsing.fitz is not None, "PyMuPDF (fitz) quraşdırılmayıb")
+    def test_extract_text_from_upload_marks_highlighted_pdf_option(self):
+        fitz = parsing.fitz
+        doc = fitz.open()
+        page = doc.new_page()
+        lines = [
+            "1. Massivler uzerinde hansi emeliyyat?",
+            "A) hesabi/nisbet",
+            "B) nisbet",
+            "C) hesabi",
+            "D) indekslesme",
+            "E) mentiqi",
+        ]
+        y = 72
+        for line in lines:
+            page.insert_text((72, y), line, fontsize=12)
+            y += 24
+        for rect in page.search_for("D) indekslesme"):
+            page.add_highlight_annot(rect)
+        data = doc.tobytes()
+        doc.close()
+
+        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.pdf", data))
+        self.assertIn("*D) indekslesme", text)
+        self.assertNotIn("*A)", text)
+
+        parsed = parsing.parse_bulk_mcq(text)
+        self.assertEqual(parsed[0]["correct"], ["D"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
