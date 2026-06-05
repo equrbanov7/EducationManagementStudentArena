@@ -196,7 +196,7 @@ def analyze_question_bank(exam) -> QuestionBankAnalysis:
     for indices in fp_groups.values():
         if len(indices) < 2:
             continue
-        for position in enumerate(indices):
+        for position in indices:
             others = [i for i in indices if i != position]
             primary_ref = others[0]
             primary_q = parsed[primary_ref - 1]
