@@ -290,22 +290,22 @@
                 {% endwith %}
             {% endfor %}
                 </div>
-            </section>
-        </div>
 
-        <div class="exam-footer">
-            <button type="button" id="prev-btn" class="nav-btn btn-outline">
-                <i class="fas fa-arrow-left"></i> {% trans "action_previous" context "exams.template.take_exam" %}
-            </button>
-        
-            <button type="button" id="next-btn" class="nav-btn btn-outline">
-                {% trans "action_next" context "exams.template.take_exam" %} <i class="fas fa-arrow-right"></i>
-            </button>
-        
-            {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
-            <button style = "display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
-                <i class="fas fa-save"></i> {% trans "action_save_as_draft" context "exams.template.take_exam" %}
-            </button>
+                <div class="exam-footer">
+                    <button type="button" id="prev-btn" class="nav-btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> {% trans "action_previous" context "exams.template.take_exam" %}
+                    </button>
+
+                    <button type="button" id="next-btn" class="nav-btn btn-outline">
+                        {% trans "action_next" context "exams.template.take_exam" %} <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
+                    <button style="display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
+                        <i class="fas fa-save"></i> {% trans "action_save_as_draft" context "exams.template.take_exam" %}
+                    </button>
+                </div>
+            </section>
         </div>
     </form>
 </div>
