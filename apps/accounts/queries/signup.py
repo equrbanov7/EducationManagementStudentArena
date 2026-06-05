@@ -3,11 +3,22 @@ Signup lookups for accounts.
 """
 
 from apps.organizations.models import Country, Organization
+from core.cache import get_or_set_cached_signup_lookup
 from core.constants import OrganizationType
 
 
 def get_signup_lookup_payload():
-    """Return country and organization lookup data used during signup."""
+    """Return cached country + organization lookup data used during signup.
+
+    The payload changes only when countries/organizations are mutated, so it is
+    cached in Redis and invalidated by apps.organizations.signals. This removes
+    two full-table scans from every register GET and POST.
+    """
+    return get_or_set_cached_signup_lookup(_build_signup_lookup_payload)
+
+
+def _build_signup_lookup_payload():
+    """Assemble the signup lookup payload directly from the database."""
     countries = list(Country.objects.filter(is_active=True).values("code", "name").order_by("name"))
     country_codes = {country["code"] for country in countries}
     country_name_to_code = {country["name"].strip().lower(): country["code"] for country in countries}
@@ -52,4 +63,4 @@ def get_signup_lookup_payload():
     }
 
 
-__all__ = ["get_signup_lookup_payload"]
+__all__ = ["get_signup_lookup_payload", "_build_signup_lookup_payload"]

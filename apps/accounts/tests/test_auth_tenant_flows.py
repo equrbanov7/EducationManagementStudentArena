@@ -271,6 +271,9 @@ class SignupAndLoginFlowTest(TestCase):
         user = self._register_and_verify(
             organization_type="school_student",
             join_organization="",
+            # New contract: joining with no organization is still allowed, but the
+            # user must make it an explicit choice rather than submitting blank.
+            join_organization_choice="none",
             specialization="Computer Science",
             group_number="CS-101",
         )
@@ -280,6 +283,26 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertEqual(user.profile.requested_organization_name, "")
         self.assertEqual(user.profile.student_specialization, "Computer Science")
         self.assertEqual(user.profile.student_group_number, "CS-101")
+
+    def test_student_join_rejects_missing_organization_choice(self):
+        """A join flow with no organization AND no explicit 'none' choice is rejected.
+
+        This guards the silent-pass bug: typing a search term without picking an
+        item leaves join_organization empty and join_organization_choice unset.
+        """
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type="school_student",
+                join_organization="",
+                join_organization_choice="",
+                specialization="Computer Science",
+                group_number="CS-101",
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("join_organization", response.context["form"].errors)
+        self.assertFalse(User.objects.filter(username="newuser").exists())
 
     def test_student_join_rejects_suspended_organization(self):
         owner = User.objects.create_user(
@@ -412,6 +435,7 @@ class SignupAndLoginFlowTest(TestCase):
             email="teacher_user@example.com",
             organization_type="university_teacher",
             join_organization="",
+            join_organization_choice="none",
             department="Faculty of Engineering",
         )
         profile = user.profile
@@ -453,6 +477,7 @@ class SignupAndLoginFlowTest(TestCase):
             email="staff_user@example.com",
             organization_type="school_staff",
             join_organization="",
+            join_organization_choice="none",
             department="Administration",
             staff_position="Secretary",
         )

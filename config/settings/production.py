@@ -271,6 +271,15 @@ SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(1 * 24 * 60 * 60)))
 # Inactivity timeout enforced by SessionTimeoutMiddleware: 8 hours.
 SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(8 * 60 * 60)))
 
+# Store sessions in Redis (read path) with DB durability (write path). Avoids a
+# DB read on every authenticated request; combined with the throttled
+# last_activity write this removes the per-request session DB write that
+# bottlenecked login/auth under concurrent load. Redis is always present in
+# production (cache, channels, celery, rate limiting all use it).
+SESSION_ENGINE = os.getenv("SESSION_ENGINE", "django.contrib.sessions.backends.cached_db")
+SESSION_CACHE_ALIAS = os.getenv("SESSION_CACHE_ALIAS", "default")
+SESSION_ACTIVITY_WRITE_INTERVAL = int(os.getenv("SESSION_ACTIVITY_WRITE_INTERVAL", str(5 * 60)))
+
 # HSTS settings
 SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if SECURE_SSL_REDIRECT else "0"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", SECURE_HSTS_SECONDS > 0)

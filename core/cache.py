@@ -218,6 +218,47 @@ def _statistics_key(*, role: str, scope_id, filters: dict | None) -> str:
     return f"{_PREFIX}:accounts:statistics:{role}:{scope_id}:{filters_hash}"
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Signup lookup payload (countries + joinable organizations)
+# ──────────────────────────────────────────────────────────────────────────────
+# The register page (GET and POST) needs the full list of active countries and
+# joinable organizations. These change very rarely, but the query scanned both
+# tables on every request. Cache the assembled payload and invalidate it from
+# Country / Organization mutations (see apps.organizations.signals).
+
+SIGNUP_LOOKUP_TTL = 600  # seconds
+
+
+def _signup_lookup_key() -> str:
+    return f"{_PREFIX}:accounts:signup_lookup_payload"
+
+
+def get_or_set_cached_signup_lookup(compute):
+    """Return the cached signup lookup payload, computing + caching on a miss.
+
+    *compute* is a zero-arg callable returning the payload dict. Degrades
+    gracefully to a direct ``compute()`` call if Redis is unavailable.
+    """
+    key = _signup_lookup_key()
+    cached = _safe_cache_get(key)
+    if cached is not None:
+        return cached
+    payload = compute()
+    try:
+        cache.set(key, payload, timeout=SIGNUP_LOOKUP_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; signup lookup cache not populated")
+    return payload
+
+
+def invalidate_signup_lookup_cache() -> None:
+    """Drop the cached signup lookup payload (call on Country/Organization change)."""
+    try:
+        cache.delete(_signup_lookup_key())
+    except Exception:
+        logger.warning("Redis unavailable; could not invalidate signup lookup cache")
+
+
 def get_or_set_cached_statistics(*, role: str, scope_id, filters: dict | None, compute):
     """Return cached statistics for the given key, computing + caching on a miss.
 

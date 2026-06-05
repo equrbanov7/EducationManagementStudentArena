@@ -273,11 +273,24 @@ REQUEST_QUEUE_LOCK_LEASE_SECONDS = _env_int_setting("REQUEST_QUEUE_LOCK_LEASE_SE
 REQUEST_QUEUE_LOCAL_LOCK_TTL_SECONDS = _env_int_setting("REQUEST_QUEUE_LOCAL_LOCK_TTL_SECONDS", 300, minimum=1)
 REQUEST_QUEUE_RETRY_AFTER_SECONDS = _env_int_setting("REQUEST_QUEUE_RETRY_AFTER_SECONDS", 2, minimum=1)
 REQUEST_QUEUE_CACHE_ALIAS = os.getenv("REQUEST_QUEUE_CACHE_ALIAS", RATELIMIT_USE_CACHE)
+# NOTE: Authentication / onboarding POST endpoints are intentionally excluded
+# from the request queue. They are unauthenticated (so the per-actor lock keys
+# every visitor behind a shared proxy IP onto the SAME lock, serialising all
+# logins) and they must never be gated by the global write-concurrency
+# semaphore — otherwise concurrent logins queue up to
+# REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS and time out under load. Authenticated
+# mutating /accounts/ endpoints (profile, role/org management) are NOT listed
+# here, so they keep their double-submit protection.
 REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
     prefix.strip()
     for prefix in os.getenv(
         "REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES",
-        "/static/,/media/,/metrics/,/ping/,/health/",
+        (
+            "/static/,/media/,/metrics/,/ping/,/health/,"
+            "/accounts/login/,/accounts/register/,/accounts/verify-code/,"
+            "/accounts/resend-code/,/accounts/send-otp/,/accounts/verify-otp/,"
+            "/accounts/resend-otp/,/accounts/password-reset/,/accounts/reset/"
+        ),
     ).split(",")
     if prefix.strip()
 )
@@ -327,6 +340,27 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # logged out on their next request, even if SESSION_COOKIE_AGE has not yet
 # elapsed.  Default: 3 days.
 SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(3 * 24 * 60 * 60)))
+
+# ---------------------------------------------------------------------------
+# Session storage backend (performance)
+# ---------------------------------------------------------------------------
+# Default to ``cached_db``: session reads are served from Redis (no DB hit on
+# every authenticated request) while writes still persist to the DB so a Redis
+# restart does not log everyone out mid-exam. Combined with the throttled
+# ``last_activity`` write in SessionTimeoutMiddleware (see below), this removes
+# the per-request session write that previously serialised authenticated
+# traffic on the database under load. Override with SESSION_ENGINE=... if a
+# deployment prefers pure-cache or pure-db sessions.
+SESSION_ENGINE = os.getenv("SESSION_ENGINE", "django.contrib.sessions.backends.cached_db")
+SESSION_CACHE_ALIAS = os.getenv("SESSION_CACHE_ALIAS", "default")
+
+# SessionTimeoutMiddleware records the last activity timestamp on the session.
+# Writing it on EVERY request marks the session dirty and forces a save (and a
+# DB write under cached_db/db) on every hit. Instead we only persist the
+# timestamp once per this interval; inactivity is still enforced accurately
+# because the stored value is at most this many seconds stale relative to the
+# multi-hour inactivity timeout. Default: 5 minutes.
+SESSION_ACTIVITY_WRITE_INTERVAL = int(os.getenv("SESSION_ACTIVITY_WRITE_INTERVAL", str(5 * 60)))
 
 # ---------------------------------------------------------------------------
 # Cookie security settings

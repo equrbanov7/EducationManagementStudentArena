@@ -270,6 +270,18 @@ else:
     CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", True)
     CELERY_TASK_EAGER_PROPAGATES = _env_bool("CELERY_TASK_EAGER_PROPAGATES", True)
 
+# Session backend: use Redis-backed sessions (cached_db) for the read-fast,
+# DB-durable path when Redis is available; fall back to plain DB sessions when
+# running without Redis so a per-process LocMem cache cannot fragment sessions
+# across workers. Throttled last_activity writes (see SessionTimeoutMiddleware)
+# apply in both cases.
+if USE_REDIS:
+    SESSION_ENGINE = os.getenv("SESSION_ENGINE", "django.contrib.sessions.backends.cached_db")
+    SESSION_CACHE_ALIAS = os.getenv("SESSION_CACHE_ALIAS", "default")
+else:
+    SESSION_ENGINE = os.getenv("SESSION_ENGINE", "django.contrib.sessions.backends.db")
+SESSION_ACTIVITY_WRITE_INTERVAL = int(os.getenv("SESSION_ACTIVITY_WRITE_INTERVAL", str(5 * 60)))
+
 # Email backend:
 # - If EMAIL_BACKEND is set explicitly, use it.
 # - Otherwise, keep local/dev on the console backend by default so browser

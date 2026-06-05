@@ -2,13 +2,14 @@
 Signal handlers for the organizations app.
 """
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
+from core.cache import invalidate_signup_lookup_cache
 from core.rls import bypass_rls
 
 from .default_roles import get_default_roles_for_org_type
-from .models import Organization, Role
+from .models import Country, Organization, Role
 
 
 @receiver(post_save, sender=Organization)
@@ -36,3 +37,19 @@ def create_default_roles(sender, instance, created, **kwargs):
                         "is_active": True,
                     },
                 )
+
+
+# ── Signup lookup cache invalidation ──────────────────────────────────────────
+# The register page caches the country + joinable-organization payload. Drop it
+# whenever an organization or country is created/updated/deleted so the signup
+# dropdowns never serve a stale list.
+
+
+@receiver([post_save, post_delete], sender=Organization)
+def invalidate_signup_lookup_on_organization_change(sender, instance, **kwargs):
+    invalidate_signup_lookup_cache()
+
+
+@receiver([post_save, post_delete], sender=Country)
+def invalidate_signup_lookup_on_country_change(sender, instance, **kwargs):
+    invalidate_signup_lookup_cache()

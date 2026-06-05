@@ -9,24 +9,27 @@ from django.dispatch import receiver
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_user_profile(sender, instance, created, **kwargs):
+def ensure_user_profile(sender, instance, created, update_fields=None, **kwargs):
     """
-    Automatically create a UserProfile when a new User is created.
-    """
-    if created:
-        # Import here to avoid circular imports
-        from apps.accounts.models import UserProfile
+    Ensure every User has a UserProfile.
 
-        UserProfile.objects.get_or_create(user=instance)
+    Performance: this fires on *every* ``User.save()`` — including the
+    ``user.save(update_fields=["last_login"])`` that Django runs on each login.
+    Previously a second receiver also called ``profile.save()`` on every user
+    save, issuing a full-row UPDATE (and a SELECT) per login for no reason. We
+    now:
 
+    * skip all profile work when the save only touched ``last_login`` (the hot
+      login path), and
+    * only ``get_or_create`` the profile otherwise, never re-saving it blindly.
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def save_user_profile(sender, instance, **kwargs):
+    The profile is created on user creation; the ``else`` branch is purely a
+    defensive backfill for legacy users that predate this signal.
     """
-    Automatically save the UserProfile when the User is saved.
-    Ensures profile exists even if it wasn't created initially.
-    """
+    # Hot path: login updates only last_login — no profile change is implied.
+    if update_fields is not None and set(update_fields) <= {"last_login"}:
+        return
+
     from apps.accounts.models import UserProfile
 
-    profile, _created = UserProfile.objects.get_or_create(user=instance)
-    profile.save()
+    UserProfile.objects.get_or_create(user=instance)
