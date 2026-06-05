@@ -23,4 +23,9 @@ if [ -n "${PROMETHEUS_MULTIPROC_DIR:-}" ]; then
 fi
 
 echo "Starting Daphne ASGI server…"
-exec daphne -b 0.0.0.0 -p 8000 config.asgi:application
+exec daphne \
+  -b 0.0.0.0 \
+  -p 8000 \
+  --http-timeout "${DAPHNE_HTTP_TIMEOUT:-900}" \
+  --application-close-timeout "${DAPHNE_APPLICATION_CLOSE_TIMEOUT:-120}" \
+  config.asgi:application

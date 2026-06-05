@@ -11,4 +11,4 @@ echo "PostgreSQL is ready!"
 python manage.py migrate --noinput
 
 # Start development server
-python manage.py runserver 0.0.0.0:8000
+python manage.py runserver --http_timeout "${DAPHNE_HTTP_TIMEOUT:-900}" 0.0.0.0:8000

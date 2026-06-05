@@ -392,6 +392,38 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
+    function guardLongSubmit(form) {
+      if (!form) return;
+      form.addEventListener("submit", function (event) {
+        if (form.dataset.isSubmitting === "true") {
+          event.preventDefault();
+          return;
+        }
+
+        const fileInput = form.querySelector('input[type="file"]');
+        if (fileInput && !validateFileClientSide(fileInput)) {
+          event.preventDefault();
+          return;
+        }
+
+        form.dataset.isSubmitting = "true";
+        const submitter = event.submitter || form.querySelector('button[type="submit"]');
+        if (submitter) {
+          if (!submitter.dataset.defaultLabel) {
+            submitter.dataset.defaultLabel = submitter.innerHTML;
+          }
+          submitter.disabled = true;
+          submitter.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Yüklənir...';
+        }
+        form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+          if (button !== submitter) button.disabled = true;
+        });
+      });
+    }
+
+    guardLongSubmit(document.querySelector(".split-layout"));
+    guardLongSubmit(document.getElementById("saveForm"));
+
     // ====== Scroll-to-top FAB ======
     (function setupScrollTopFab() {
       const fab = document.createElement("button");
