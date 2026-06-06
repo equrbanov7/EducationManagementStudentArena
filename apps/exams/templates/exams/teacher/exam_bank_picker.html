@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Bankdan sual əlavə et — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1040px;">
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h4 mb-1">Mövcud bankdan sual əlavə et</h1>
+            <div class="text-muted small">{{ exam.title }}</div>
+        </div>
+        <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>İmtahana qayıt
+        </a>
+    </div>
+
+    {# ── Bank seçimi + filtr (GET) ── #}
+    <form method="get" class="card card-body mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small text-muted mb-1" for="bank">Bank</label>
+                <select class="form-select form-select-sm" id="bank" name="bank">
+                    <option value="">— Bank seçin —</option>
+                    {% for bank in banks %}
+                    <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="Sual mətnində axtar">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" name="difficulty">
+                    <option value="">Çətinlik</option>
+                    {% for value, label in difficulty_choices %}
+                    <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" name="language">
+                    <option value="">Dil</option>
+                    {% for code, label in language_choices %}
+                    <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Göstər</button>
+            </div>
+        </div>
+    </form>
+
+    {% if selected_bank %}
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="text-muted small">Tapılan suallar: <strong>{{ total_count }}</strong>{% if total_count > 300 %} (ilk 300 göstərilir){% endif %}</div>
+    </div>
+
+    {% if questions %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="attach">
+        <input type="hidden" name="bank" value="{{ selected_bank.id }}">
+
+        <div class="list-group mb-3">
+            {% for q in questions %}
+            <label class="list-group-item d-flex gap-2 align-items-start">
+                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" name="question_ids" value="{{ q.id }}">
+                <span>
+                    <span>{{ q.text|striptags|truncatechars:180 }}</span>
+                    <span class="badge bg-light text-dark ms-1">{{ q.get_difficulty_display }}</span>
+                    <span class="badge bg-light text-dark">{{ q.get_language_display }}</span>
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Seçilmişləri imtahana əlavə et
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <div class="text-center text-muted py-5">Filtrlərə uyğun sual tapılmadı.</div>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-secondary">Sual əlavə etmək üçün yuxarıdan bank seçin.</div>
+    {% endif %}
+</div>
+{% endblock %}

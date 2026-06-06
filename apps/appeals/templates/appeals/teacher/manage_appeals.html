@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Apellyasiyaların idarəsi{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1180px;">
+
+    <h1 class="h4 mb-3">Apellyasiyaların idarəsi</h1>
+
+    {# ── Filtrlər ── #}
+    <form method="get" class="card card-body mb-3">
+        <div class="row g-2">
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label small text-muted mb-1" for="q">Axtarış (imtahan / tələbə)</label>
+                <input type="text" class="form-control form-control-sm" id="q" name="q" value="{{ search_query }}">
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small text-muted mb-1" for="status">Status</label>
+                <select class="form-select form-select-sm" id="status" name="status">
+                    <option value="">Hamısı</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted mb-1" for="exam">İmtahan</label>
+                <select class="form-select form-select-sm" id="exam" name="exam">
+                    <option value="">Bütün imtahanlar</option>
+                    {% for slug, title in exam_options %}
+                    <option value="{{ slug }}" {% if exam_slug == slug %}selected{% endif %}>{{ title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted mb-1" for="type">Səbəb tipi</label>
+                <select class="form-select form-select-sm" id="type" name="type">
+                    <option value="">Hamısı</option>
+                    {% for value, label in type_choices %}
+                    <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted mb-1" for="date_from">Tarix (başlanğıc)</label>
+                <input type="date" class="form-control form-control-sm" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-muted mb-1" for="date_to">Tarix (son)</label>
+                <input type="date" class="form-control form-control-sm" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+            <div class="col-lg-3 col-md-6 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filtrlə</button>
+                <a href="{% url 'appeals:manage_appeals' %}" class="btn btn-outline-secondary btn-sm">Sıfırla</a>
+            </div>
+        </div>
+    </form>
+
+    {% if appeals %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>İmtahan</th>
+                    <th>Tələbə</th>
+                    <th class="text-center">Suallar</th>
+                    <th>Tarix</th>
+                    <th>Status</th>
+                    <th class="text-end">Əməliyyat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appeal in appeals %}
+                <tr>
+                    <td>{{ appeal.exam.title }}</td>
+                    <td>{{ appeal.student.get_full_name|default:appeal.student.username }}</td>
+                    <td class="text-center">{{ appeal.items.count }}</td>
+                    <td class="small text-muted">{{ appeal.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>{% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}</td>
+                    <td class="text-end">
+                        <a href="{% url 'appeals:review_appeal' appeal.id %}" class="btn btn-sm btn-outline-primary">Bax</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-2">
+        <ul class="pagination pagination-sm justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&status={{ status_filter }}&exam={{ exam_slug }}&type={{ type_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">&laquo;</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&status={{ status_filter }}&exam={{ exam_slug }}&type={{ type_filter }}&date_from={{ date_from }}&date_to={{ date_to }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+        Uyğun apellyasiya tapılmadı.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

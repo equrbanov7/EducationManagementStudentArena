@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Dil idarəetməsi — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 960px;">
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h4 mb-1">Dil variantları</h1>
+            <div class="text-muted small">{{ exam.title }}</div>
+        </div>
+        <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>İmtahana qayıt
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana
+        başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir.
+    </div>
+
+    {# ── Mövcud variantlar ── #}
+    <div class="card mb-4">
+        <div class="card-header fw-semibold">Mövcud dillər</div>
+        <div class="card-body p-0">
+            {% if variant_rows %}
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Dil</th>
+                        <th class="text-center">Sual sayı</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in variant_rows %}
+                    <tr>
+                        <td class="fw-semibold">{{ row.variant.display_name|default:row.label }}</td>
+                        <td class="text-center">{{ row.count }}</td>
+                        <td class="text-center">
+                            {% if row.variant.is_active %}
+                            <span class="badge bg-success rounded-pill">Aktiv</span>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">Deaktiv</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_variant">
+                                <input type="hidden" name="variant_id" value="{{ row.variant.id }}">
+                                <button type="submit" class="btn btn-sm {% if row.variant.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %}">
+                                    {% if row.variant.is_active %}Deaktiv et{% else %}Aktiv et{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-muted text-center py-4">Hələ heç bir dil variantı yoxdur.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── Yeni variant əlavə et ── #}
+    {% if addable_languages %}
+    <div class="card mb-4">
+        <div class="card-header fw-semibold">Yeni dil əlavə et</div>
+        <div class="card-body">
+            <form method="post" class="row g-2 align-items-end">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_variant">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted mb-1" for="add_language">Dil</label>
+                    <select class="form-select form-select-sm" id="add_language" name="language">
+                        {% for code, label in addable_languages %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small text-muted mb-1" for="add_display_name">Göstəriş adı (opsional)</label>
+                    <input type="text" class="form-control form-control-sm" id="add_display_name" name="display_name"
+                           placeholder="məs. Azərbaycan (2024 buraxılış)">
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-primary btn-sm">Əlavə et</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Dilə toplu sual yüklə (yalnız test imtahanı) ── #}
+    {% if is_test_exam and variant_rows %}
+    <div class="card">
+        <div class="card-header fw-semibold">Dilə toplu sual yüklə</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upload_questions">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1" for="upload_language">Dil</label>
+                        <select class="form-select form-select-sm" id="upload_language" name="language">
+                            {% for row in variant_rows %}
+                            <option value="{{ row.variant.language }}">{{ row.variant.display_name|default:row.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <label class="form-label small text-muted mb-1" for="bulk_text">Suallar (mətn formatında)</label>
+                <textarea class="form-control form-control-sm" id="bulk_text" name="bulk_text" rows="10"
+                          placeholder="1. Sual mətni&#10;A) variant&#10;B) variant&#10;*C) düz cavab&#10;D) variant&#10;&#10;2. ..."></textarea>
+                <div class="form-text">Format mövcud sual bankı yükləməsi ilə eynidir (düz cavabı <code>*</code> ilə işarələyin).</div>
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-1"></i>Sualları yüklə
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

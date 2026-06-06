@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "apps.ai_assistant.apps.AIAssistantConfig",
     "daphne",
     "apps.exams",
+    "apps.appeals.apps.AppealsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",

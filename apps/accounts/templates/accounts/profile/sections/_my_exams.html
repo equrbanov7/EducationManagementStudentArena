@@ -66,22 +66,44 @@
         {% trans "exam" context "profile.my_exams" as profile_exam_default %}
         <div class="exam-cards-grid">
             {% for exam in my_exams %}
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}" class="modern-exam-card">
-                <div class="exam-card-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="exam-card-content">
-                    <h4 class="exam-card-title">{{ exam.title }}</h4>
-                    <div class="exam-card-meta">
-                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d M Y" }}</span>
-                        <span class="meta-divider">•</span>
-                        <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:profile_exam_default }}</span>
+            <div class="exam-card-cell">
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}" class="modern-exam-card">
+                    <div class="exam-card-icon">
+                        <i class="fas fa-file-alt"></i>
                     </div>
+                    <div class="exam-card-content">
+                        <h4 class="exam-card-title">{{ exam.title }}</h4>
+                        <div class="exam-card-meta">
+                            <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d M Y" }}</span>
+                            <span class="meta-divider">•</span>
+                            <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:profile_exam_default }}</span>
+                        </div>
+                        <div class="exam-card-badges">
+                            {% if exam.is_active %}
+                                <span class="ec-badge ec-badge--active">Aktiv</span>
+                            {% else %}
+                                <span class="ec-badge ec-badge--inactive">Deaktiv</span>
+                            {% endif %}
+                            <span class="ec-badge ec-badge--info"><i class="fas fa-list-ol"></i> {{ exam.card_question_count }}</span>
+                            {% if exam.card_appeal_count %}
+                                <span class="ec-badge ec-badge--warn"><i class="fas fa-gavel"></i> {{ exam.card_appeal_count }}</span>
+                            {% endif %}
+                            {% for variant in exam.active_language_variants %}
+                                <span class="ec-badge ec-badge--lang">{{ variant.language|upper }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="exam-card-action">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+                <div class="exam-card-actions">
+                    <a href="{% url 'exams:edit_exam' exam.slug %}" class="ec-action"><i class="fas fa-edit"></i> Redaktə</a>
+                    <a href="{% url 'exams:exam_language_manager' exam.slug %}" class="ec-action"><i class="fas fa-language"></i> Dillər</a>
+                    <a href="{% url 'exams:exam_bank_picker' exam.slug %}" class="ec-action"><i class="fas fa-layer-group"></i> Bankdan sual</a>
+                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="ec-action"><i class="fas fa-chart-bar"></i> Nəticələr</a>
                 </div>
-                <div class="exam-card-action">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
+            </div>
             {% endfor %}
         </div>
         

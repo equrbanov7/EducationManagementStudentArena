@@ -348,6 +348,39 @@ DEFAULT_ROLES = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Apellyasiya icazələrinin avtomatik əlavəsi
+#
+# Tək mənbədən qayda: imtahanı idarə edən rollar (exam.create/edit/host/manage
+# və ya exam.*) apellyasiyalara cavab verə/qərar verə bilər (respond + decide);
+# yalnız imtahana baxan rollar (exam.view) apellyasiya yarada bilər (create).
+# "*" rolları onsuz da hər şeyi əhatə edir. Bu qayda mövcud rollar üçün
+# organizations data migration-da da eyni cür tətbiq olunur.
+# ---------------------------------------------------------------------------
+_EXAM_MANAGEMENT_PERMS = ("exam.*", "exam.create", "exam.edit", "exam.host", "exam.manage")
+
+
+def _augment_with_appeal_permissions(roles_by_type):
+    for roles in roles_by_type.values():
+        for role in roles:
+            perms = role["permissions"]
+            if "*" in perms:
+                continue
+            manages_exams = any(perm in perms for perm in _EXAM_MANAGEMENT_PERMS)
+            views_exams = "exam.view" in perms or "exam.*" in perms
+            to_add = []
+            if manages_exams:
+                to_add = ["appeal.create", "appeal.respond", "appeal.decide"]
+            elif views_exams:
+                to_add = ["appeal.create"]
+            for perm in to_add:
+                if perm not in perms:
+                    perms.append(perm)
+
+
+_augment_with_appeal_permissions(DEFAULT_ROLES)
+
+
 def get_default_roles_for_org_type(org_type: str):
     """
     Get default role templates for a specific organization type.

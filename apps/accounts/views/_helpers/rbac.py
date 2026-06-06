@@ -293,12 +293,22 @@ def _role_capabilities(user, profile):
     if can_approve_posts:
         allowed_sections.add("pending-post-approvals")
 
+    # İmtahan sistemi redizaynı (Faza 5) — yeni modulların sidebar görünürlüyü.
+    # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
+    # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.
+    can_use_question_bank = is_superadmin or is_teacher or is_org_admin
+    can_manage_appeals = is_superadmin or is_teacher or is_org_admin
+    can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_superadmin)
+
     return {
         "role": role,
         "is_superadmin": is_superadmin,
         "is_student": is_student,
         "is_teacher": is_teacher,
         "is_org_admin": is_org_admin,
+        "can_use_question_bank": can_use_question_bank,
+        "can_manage_appeals": can_manage_appeals,
+        "can_view_my_appeals": can_view_my_appeals,
         "can_manage_org": can_manage_org,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,
