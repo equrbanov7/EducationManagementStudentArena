@@ -11,7 +11,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.exams.models import Exam, ExamLanguageVariant, ExamQuestion, ExamQuestionOption, ExamAttempt
+from apps.exams.models import Exam, ExamAttempt, ExamLanguageVariant, ExamQuestion, ExamQuestionOption
 from apps.exams.services import language_variants as lv
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.organizations.models import Organization
@@ -41,9 +41,7 @@ class MultiLanguageExamTests(TestCase):
         )
 
     def _question(self, *, order, language, correct_label="A"):
-        q = ExamQuestion.objects.create(
-            exam=self.exam, order=order, text=f"Q{order}-{language}", language=language
-        )
+        q = ExamQuestion.objects.create(exam=self.exam, order=order, text=f"Q{order}-{language}", language=language)
         for label in ("A", "B"):
             ExamQuestionOption.objects.create(
                 question=q, label=label, text=f"opt-{label}", is_correct=(label == correct_label)

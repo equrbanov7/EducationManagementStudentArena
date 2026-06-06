@@ -10,10 +10,9 @@ Apellyasiya icazə məntiqi — mərkəzi RBAC üzərində.
 Bütün hallarda tenant uyğunluğu yoxlanılır (superadmin istisna).
 """
 
+from apps.appeals.constants import PERM_APPEAL_CREATE, PERM_APPEAL_DECIDE, PERM_APPEAL_RESPOND
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import get_request_organization
-
-from apps.appeals.constants import PERM_APPEAL_CREATE, PERM_APPEAL_DECIDE, PERM_APPEAL_RESPOND
 
 from .window import is_within_appeal_window
 

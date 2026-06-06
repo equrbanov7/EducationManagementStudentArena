@@ -44,9 +44,7 @@ def appeal_score_state(attempt):
     return {
         "bonus_points": bonus,
         "adjustment_count": len(adjustments),
-        "credited_question_ids": {
-            adj.question_id for adj in adjustments if adj.delta_points and adj.delta_points > 0
-        },
+        "credited_question_ids": {adj.question_id for adj in adjustments if adj.delta_points and adj.delta_points > 0},
     }
 
 

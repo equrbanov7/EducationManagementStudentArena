@@ -46,9 +46,7 @@ APPEAL_STATUS_CHOICES = (
     (APPEAL_STATUS_PARTIALLY_ACCEPTED, pgettext_lazy("appeals.choice.status", "Qismən qəbul edildi")),
 )
 APPEAL_STATUS_VALUES = frozenset(code for code, _ in APPEAL_STATUS_CHOICES)
-APPEAL_STATUS_FINAL = frozenset(
-    {APPEAL_STATUS_ACCEPTED, APPEAL_STATUS_REJECTED, APPEAL_STATUS_PARTIALLY_ACCEPTED}
-)
+APPEAL_STATUS_FINAL = frozenset({APPEAL_STATUS_ACCEPTED, APPEAL_STATUS_REJECTED, APPEAL_STATUS_PARTIALLY_ACCEPTED})
 
 # İcazəli status keçidləri (nəzarətli state-machine). Yekun statuslardan yalnız
 # yenidən baxış üçün `under_review`-a qayıtmaq mümkündür (icazə yoxlaması ilə).

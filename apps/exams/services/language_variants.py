@@ -17,7 +17,7 @@ from django.db.models import Max
 from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
-from apps.exams.models import ExamLanguageVariant, ExamQuestion, ExamQuestionOption
+from apps.exams.models import ExamQuestion, ExamQuestionOption
 from apps.exams.services.utils import _effective_needed_count
 
 EXAM_LANGUAGE_LABELS = dict(EXAM_LANGUAGE_CHOICES)

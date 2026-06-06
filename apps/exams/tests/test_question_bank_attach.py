@@ -5,7 +5,7 @@ Sual bankı kitabxanası + snapshot attach testləri (Faza 6).
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.exams.models import BankQuestion, Exam, ExamLanguageVariant, ExamQuestion, QuestionBank
+from apps.exams.models import Exam, ExamLanguageVariant, QuestionBank
 from apps.exams.services.question_bank_attach import (
     accessible_banks,
     attach_bank_questions_to_exam,

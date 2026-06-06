@@ -32,6 +32,7 @@ from .teacher.groups import (
     teacher_remove_student_from_group,
     teacher_update_group,
 )
+from .teacher.languages import exam_language_manager
 from .teacher.question_bank import (
     ai_generate_question_bank,
     create_question_bank,
@@ -39,7 +40,6 @@ from .teacher.question_bank import (
     test_question_bank,
     test_question_bank_template_download,
 )
-from .teacher.languages import exam_language_manager
 from .teacher.question_library import exam_bank_picker, question_bank_detail, question_bank_list
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (

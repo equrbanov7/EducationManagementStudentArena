@@ -58,9 +58,7 @@ class AppealCreationTests(TestCase):
 
     def test_duplicate_question_rejected(self):
         with self.assertRaises(ValidationError):
-            create_appeal(
-                attempt=self.attempt, student=self.student, items=[self._item(self.q1), self._item(self.q1)]
-            )
+            create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1), self._item(self.q1)])
 
     def test_question_not_in_attempt_rejected(self):
         with self.assertRaises(ValidationError):

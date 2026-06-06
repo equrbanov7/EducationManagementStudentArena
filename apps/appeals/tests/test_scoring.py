@@ -12,7 +12,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
+
 
 from apps.appeals.constants import (
     APPEAL_ITEM_STATUS_REJECTED,
@@ -25,7 +25,6 @@ from apps.appeals.services import (
     accept_appeal_item,
     appeal_score_state,
     effective_test_score,
-    recompute_appeal_status,
     reject_appeal_item,
 )
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
