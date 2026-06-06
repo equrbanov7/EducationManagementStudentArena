@@ -19,10 +19,10 @@ WORKDIR /app
 # libpq-dev, libc6-dev and gcc are required to compile psycopg2 from source;
 # the official Python image already contains headers for /usr/local/bin/python.
 ARG APT_SECURITY_REFRESH=manual
-ARG APT_PRIMARY_MIRROR=http://deb.debian.org/debian
-ARG APT_PRIMARY_SECURITY_MIRROR=http://deb.debian.org/debian-security
-ARG APT_FALLBACK_MIRROR=http://ftp.debian.org/debian
-ARG APT_FALLBACK_SECURITY_MIRROR=http://security.debian.org/debian-security
+ARG APT_PRIMARY_MIRROR=https://deb.debian.org/debian
+ARG APT_PRIMARY_SECURITY_MIRROR=https://deb.debian.org/debian-security
+ARG APT_FALLBACK_MIRROR=https://ftp.debian.org/debian
+ARG APT_FALLBACK_SECURITY_MIRROR=https://security.debian.org/debian-security
 RUN set -eux; \
     write_debian_sources() { \
         printf '%s\n' \
@@ -39,7 +39,10 @@ RUN set -eux; \
             'Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg' \
             > /etc/apt/sources.list.d/debian.sources; \
     }; \
-    apt_update() { \
+    apt_update_from() { \
+        write_debian_sources "$1" "$2"; \
+        rm -rf /var/lib/apt/lists/*; \
+        echo "Running apt-get update using $1 and $2"; \
         apt-get update \
             -o Acquire::Retries=3 \
             -o Acquire::http::Timeout=20 \
@@ -47,13 +50,9 @@ RUN set -eux; \
             -o APT::Update::Error-Mode=any; \
     }; \
     echo "APT security refresh: ${APT_SECURITY_REFRESH}"; \
-    write_debian_sources "${APT_PRIMARY_MIRROR}" "${APT_PRIMARY_SECURITY_MIRROR}"; \
-    rm -rf /var/lib/apt/lists/*; \
-    if ! apt_update; then \
+    if ! apt_update_from "${APT_PRIMARY_MIRROR}" "${APT_PRIMARY_SECURITY_MIRROR}"; then \
         echo "Primary Debian mirror failed; retrying with fallback mirror ${APT_FALLBACK_MIRROR}"; \
-        write_debian_sources "${APT_FALLBACK_MIRROR}" "${APT_FALLBACK_SECURITY_MIRROR}"; \
-        rm -rf /var/lib/apt/lists/*; \
-        apt_update; \
+        apt_update_from "${APT_FALLBACK_MIRROR}" "${APT_FALLBACK_SECURITY_MIRROR}"; \
     fi; \
     apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
