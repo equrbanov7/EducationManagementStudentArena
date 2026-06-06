@@ -141,7 +141,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None):
     """
     item = (
         AppealItem.objects.select_for_update()
-        .select_related("appeal", "appeal__attempt", "appeal__attempt__exam", "question", "answer")
+        .select_related("appeal", "appeal__attempt", "appeal__attempt__exam", "question")
         .get(pk=item.pk)
     )
     appeal = item.appeal
