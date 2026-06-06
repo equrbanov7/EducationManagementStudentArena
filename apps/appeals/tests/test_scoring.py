@@ -13,7 +13,6 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-
 from apps.appeals.constants import (
     APPEAL_ITEM_STATUS_REJECTED,
     APPEAL_STATUS_ACCEPTED,
