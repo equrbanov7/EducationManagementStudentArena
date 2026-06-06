@@ -180,7 +180,9 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
 
     questions_by_id = {
         bank_question.id: bank_question
-        for bank_question in BankQuestion.objects.filter(id__in=requested_ids, is_active=True).prefetch_related("options")
+        for bank_question in BankQuestion.objects.filter(id__in=requested_ids, is_active=True).prefetch_related(
+            "options"
+        )
     }
     bank_questions = [questions_by_id[question_id] for question_id in requested_ids if question_id in questions_by_id]
     if not bank_questions:
