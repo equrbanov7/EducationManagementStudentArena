@@ -19,9 +19,43 @@ WORKDIR /app
 # libpq-dev, libc6-dev and gcc are required to compile psycopg2 from source;
 # the official Python image already contains headers for /usr/local/bin/python.
 ARG APT_SECURITY_REFRESH=manual
-RUN apt-get update \
-    && echo "APT security refresh: ${APT_SECURITY_REFRESH}" \
-    && apt-get upgrade -y \
+ARG APT_PRIMARY_MIRROR=http://deb.debian.org/debian
+ARG APT_PRIMARY_SECURITY_MIRROR=http://deb.debian.org/debian-security
+ARG APT_FALLBACK_MIRROR=http://ftp.debian.org/debian
+ARG APT_FALLBACK_SECURITY_MIRROR=http://security.debian.org/debian-security
+RUN set -eux; \
+    write_debian_sources() { \
+        printf '%s\n' \
+            'Types: deb' \
+            "URIs: $1" \
+            'Suites: bookworm bookworm-updates' \
+            'Components: main' \
+            'Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg' \
+            '' \
+            'Types: deb' \
+            "URIs: $2" \
+            'Suites: bookworm-security' \
+            'Components: main' \
+            'Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg' \
+            > /etc/apt/sources.list.d/debian.sources; \
+    }; \
+    apt_update() { \
+        apt-get update \
+            -o Acquire::Retries=3 \
+            -o Acquire::http::Timeout=20 \
+            -o Acquire::https::Timeout=20 \
+            -o APT::Update::Error-Mode=any; \
+    }; \
+    echo "APT security refresh: ${APT_SECURITY_REFRESH}"; \
+    write_debian_sources "${APT_PRIMARY_MIRROR}" "${APT_PRIMARY_SECURITY_MIRROR}"; \
+    rm -rf /var/lib/apt/lists/*; \
+    if ! apt_update; then \
+        echo "Primary Debian mirror failed; retrying with fallback mirror ${APT_FALLBACK_MIRROR}"; \
+        write_debian_sources "${APT_FALLBACK_MIRROR}" "${APT_FALLBACK_SECURITY_MIRROR}"; \
+        rm -rf /var/lib/apt/lists/*; \
+        apt_update; \
+    fi; \
+    apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         libpq5 \
         libpq-dev \

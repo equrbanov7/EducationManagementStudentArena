@@ -120,6 +120,9 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
+      args:
+        APT_PRIMARY_MIRROR: ${APT_PRIMARY_MIRROR:-http://ftp.debian.org/debian}
+        APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-http://security.debian.org/debian-security}
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       RUN_RELEASE_ON_START: ${RUN_RELEASE_ON_START:-true}
@@ -238,6 +241,9 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
+      args:
+        APT_PRIMARY_MIRROR: ${APT_PRIMARY_MIRROR:-http://ftp.debian.org/debian}
+        APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-http://security.debian.org/debian-security}
     command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=${CELERY_WORKER_CONCURRENCY:-2}"]
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
