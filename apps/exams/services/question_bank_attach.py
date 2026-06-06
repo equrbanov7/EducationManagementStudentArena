@@ -169,9 +169,20 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
 
     Qaytarır: yaradılmış ``ExamQuestion`` obyektlərinin siyahısı.
     """
-    bank_questions = list(
-        BankQuestion.objects.filter(id__in=list(bank_question_ids), is_active=True).prefetch_related("options")
-    )
+    requested_ids = []
+    for raw_id in bank_question_ids or []:
+        try:
+            requested_id = int(raw_id)
+        except (TypeError, ValueError):
+            continue
+        if requested_id not in requested_ids:
+            requested_ids.append(requested_id)
+
+    questions_by_id = {
+        bank_question.id: bank_question
+        for bank_question in BankQuestion.objects.filter(id__in=requested_ids, is_active=True).prefetch_related("options")
+    }
+    bank_questions = [questions_by_id[question_id] for question_id in requested_ids if question_id in questions_by_id]
     if not bank_questions:
         return []
 

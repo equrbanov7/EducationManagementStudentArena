@@ -111,7 +111,19 @@ def effective_needed_count_for_attempt(attempt):
     variant = getattr(attempt, "language_variant", None)
     if variant is not None and variant.question_count_override:
         return variant.question_count_override
-    return _effective_needed_count(attempt.exam)
+
+    configured_count = getattr(attempt.exam, "random_question_count", None)
+    if configured_count is None:
+        return _effective_needed_count(attempt.exam)
+
+    try:
+        configured_count = int(configured_count)
+    except (TypeError, ValueError):
+        return _effective_needed_count(attempt.exam)
+
+    if configured_count <= 0:
+        return scoped_active_questions(attempt.exam, getattr(attempt, "language", None)).count()
+    return configured_count
 
 
 # ---------------------------------------------------------------------------
