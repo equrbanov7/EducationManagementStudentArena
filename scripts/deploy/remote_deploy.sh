@@ -147,6 +147,37 @@ ensure_origin_cert() {
   chmod 644 "$cert_file"
 }
 
+repair_cloudflare_docker_user_firewall() {
+  local iface
+  local port
+
+  if ! command -v iptables >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! $SUDO iptables -S DOCKER-USER >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! $SUDO iptables -S EMSARENA-CF-WEB >/dev/null 2>&1; then
+    return 0
+  fi
+
+  iface="$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')"
+  if [ -z "$iface" ]; then
+    return 0
+  fi
+
+  for port in 80 443; do
+    while $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null; do
+      $SUDO iptables -D DOCKER-USER -i "$iface" -p tcp -m conntrack --ctorigdstport "$port" -j EMSARENA-CF-WEB
+    done
+
+    $SUDO iptables -C DOCKER-USER -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB 2>/dev/null \
+      || $SUDO iptables -I DOCKER-USER 1 -i "$iface" -p tcp -m conntrack --ctstate NEW --ctorigdstport "$port" -j EMSARENA-CF-WEB
+  done
+}
+
 app_replicas_ready() {
   local ids=()
   local id
@@ -184,6 +215,7 @@ docker_deploy() {
 
   docker compose version >/dev/null
   ensure_origin_cert
+  repair_cloudflare_docker_user_firewall
 
   docker compose -f "$COMPOSE_FILE" config >/tmp/emsarena-compose-config.yml
   docker compose -f "$COMPOSE_FILE" build
