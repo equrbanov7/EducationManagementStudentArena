@@ -138,6 +138,22 @@ def exam_result(request, slug, attempt_id):
             submission.file_items = _coding_submission_file_items(submission)
             coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
+    # ── Apellyasiya konteksti ──────────────────────────────────────────────
+    # Lazy import: exams view-larını appeals-dən asılı saxlamamaq üçün.
+    from apps.appeals.services import (
+        appeal_score_state,
+        can_create_appeal,
+        effective_test_score,
+        remaining_window_seconds,
+    )
+
+    can_appeal = can_create_appeal(request, attempt)
+    appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
+    appeal_remaining_seconds = remaining_window_seconds(attempt)
+    # Qəbul olunmuş apellyasiya bonusları nəticədə əks olunsun (test üçün).
+    effective_score_info = effective_test_score(attempt) if exam.exam_type == "test" else None
+    appeal_bonus_points = appeal_score_state(attempt)["bonus_points"]
+
     return render(
         request,
         "exams/student/exam_result.html",
@@ -153,6 +169,12 @@ def exam_result(request, slug, attempt_id):
             "back_url": back_url,
             "previous_attempts": previous_attempts,
             "previous_attempts_count": len(previous_attempts) + 1,
+            "can_appeal": can_appeal,
+            "appeal_create_url": appeal_create_url,
+            "appeal_remaining_seconds": appeal_remaining_seconds,
+            "my_appeals_url": reverse("appeals:my_appeals"),
+            "effective_score_info": effective_score_info,
+            "appeal_bonus_points": appeal_bonus_points,
         },
     )
 

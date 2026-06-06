@@ -323,7 +323,24 @@ def user_profile(request):
                 my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
 
             my_exams_count = my_exams_qs.count()
-            my_exams_page_obj = Paginator(my_exams_qs, 6).get_page(request.GET.get("exam_page"))
+            # Kart redizaynı üçün: sual sayı + apellyasiya sayı (annotate) və
+            # aktiv dil variantları (prefetch). Yalnız göstərilən səhifəyə tətbiq
+            # olunur — baza queryset toxunulmur.
+            from django.db.models import Count, Prefetch
+
+            from apps.exams.models import ExamLanguageVariant
+
+            my_exams_display_qs = my_exams_qs.annotate(
+                card_question_count=Count("questions", filter=Q(questions__is_active=True), distinct=True),
+                card_appeal_count=Count("appeals", distinct=True),
+            ).prefetch_related(
+                Prefetch(
+                    "language_variants",
+                    queryset=ExamLanguageVariant.objects.filter(is_active=True).order_by("language"),
+                    to_attr="active_language_variants",
+                )
+            )
+            my_exams_page_obj = Paginator(my_exams_display_qs, 6).get_page(request.GET.get("exam_page"))
         else:
             # Yalnız sidebar/profile-info üçün ucuz sayğac.
             my_exams_count = my_exams_qs.count()

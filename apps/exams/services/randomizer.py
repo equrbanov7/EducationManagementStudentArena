@@ -8,7 +8,8 @@ from django.db.models import Count
 
 from apps.exams.constants import LABELS
 from apps.exams.models import ExamAnswer
-from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+from apps.exams.services.language_variants import effective_needed_count_for_attempt
+from apps.exams.services.utils import _attempt_has_any_answer
 
 _DIFFICULTY_ORDER = ("easy", "medium", "hard")
 _QUESTION_SOFT_USAGE_CAP = 4
@@ -257,10 +258,17 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                 return
             attempt.answers.all().delete()
 
-        total_needed = _effective_needed_count(exam)
+        total_needed = effective_needed_count_for_attempt(attempt)
+
+        # Çoxdilli imtahanda yalnız attempt-in seçilmiş dilindəki sualları
+        # nəzərə alırıq. Dil seçilməyibsə (tək-dilli/legacy) bütün suallar.
+        attempt_language = getattr(attempt, "language", None)
+        active_question_filter = {"is_active": True}
+        if attempt_language:
+            active_question_filter["language"] = attempt_language
 
         # bütün sualları al (DB hit az olsun)
-        all_qs = list(exam.questions.filter(is_active=True))
+        all_qs = list(exam.questions.filter(**active_question_filter))
 
         if not all_qs:
             return
@@ -291,7 +299,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                 block_question_map = {}
                 non_empty_blocks = []
                 for block in blocks:
-                    block_qs = list(block.questions.filter(is_active=True))
+                    block_qs = list(block.questions.filter(**active_question_filter))
                     if block_qs:
                         block_question_map[block.id] = block_qs
                         non_empty_blocks.append(block)

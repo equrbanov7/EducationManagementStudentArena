@@ -1,0 +1,235 @@
+"""
+Sual bankından imtahana sual əlavə etmə (snapshot) servisi.
+
+Dizayn qərarı: **snapshot-on-attach** — bank sualı (``BankQuestion``) imtahana
+əlavə ediləndə məzmunu ``ExamQuestion``-a KOPYALANIR (variantları və medisı ilə
+birlikdə), mənbəyə ``source_bank_question`` linki saxlanılır. Beləliklə bankdakı
+sonrakı redaktələr köhnə imtahanlara təsir etmir (imtahanlar "dondurulur").
+
+Modul həm də bank-picker üçün tenant-təhlükəsiz siyahı/filtr/say köməkçilərini
+təqdim edir.
+"""
+
+import hashlib
+import logging
+import os
+
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.db.models import Max, Q
+
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
+from apps.exams.models import (
+    BankQuestion,
+    BankQuestionOption,
+    ExamQuestion,
+    ExamQuestionOption,
+    QuestionBank,
+)
+from apps.exams.services.language_variants import ensure_default_variant
+from apps.exams.services.question_bank import normalize_question_text
+
+logger = logging.getLogger(__name__)
+
+
+def _question_fingerprint(text):
+    normalized = normalize_question_text(text or "")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:64]
+
+
+# ---------------------------------------------------------------------------
+# Bank-picker — tenant-təhlükəsiz siyahı / filtr / say
+# ---------------------------------------------------------------------------
+def accessible_banks(user, organization, *, include_shared=True):
+    """
+    İstifadəçinin görə biləcəyi aktiv banklar: öz bankları + (eyni təşkilatda
+    paylaşılan banklar). Legacy (org=NULL) paylaşılan banklar tenant sızması
+    olmasın deyə yalnız sahib vasitəsilə görünür.
+    """
+    visibility = Q(created_by=user)
+    if include_shared and organization is not None:
+        visibility |= Q(is_shared=True, organization=organization)
+    return QuestionBank.objects.filter(is_active=True).filter(visibility).distinct()
+
+
+def bank_questions_queryset(
+    bank,
+    *,
+    language=None,
+    difficulty=None,
+    question_type=None,
+    search=None,
+    tags=None,
+    only_active=True,
+):
+    """Bankın kitabxana suallarını verilmiş filtrlərə görə qaytarır."""
+    qs = bank.library_questions.all()
+    if only_active:
+        qs = qs.filter(is_active=True)
+    if language:
+        qs = qs.filter(language=language)
+    if difficulty:
+        qs = qs.filter(difficulty=difficulty)
+    if question_type:
+        qs = qs.filter(question_type=question_type)
+    if search:
+        qs = qs.filter(text__icontains=search)
+    if tags:
+        for tag in tags:
+            qs = qs.filter(tags__contains=tag)
+    return qs.order_by("-created_at", "id")
+
+
+def count_bank_questions(bank, **filters):
+    return bank_questions_queryset(bank, **filters).count()
+
+
+@transaction.atomic
+def create_bank_questions_from_parsed(
+    bank, parsed_questions, *, language=DEFAULT_EXAM_LANGUAGE, question_type="test", created_by=None, default_points=1
+):
+    """
+    ``parse_bulk_mcq`` nəticəsindən kitabxana sualları (BankQuestion + variantlar)
+    yaradır. İmtahandan asılı deyil — sonradan picker ilə imtahanlara snapshot
+    kimi əlavə olunur.
+    """
+    language = (language or DEFAULT_EXAM_LANGUAGE).strip().lower()
+    created = []
+    for question in parsed_questions or []:
+        options = question.get("options") or {}
+        if any(label not in options for label in ("A", "B", "C", "D")):
+            continue
+        text = question.get("text", "")
+        bank_question = BankQuestion.objects.create(
+            bank=bank,
+            text=text,
+            question_type=question_type,
+            answer_mode=question.get("answer_mode", "single"),
+            difficulty="medium",
+            language=language,
+            points=default_points or 1,
+            fingerprint=_question_fingerprint(text),
+            created_by=created_by,
+        )
+        correct = set(question.get("correct") or [])
+        option_rows = [
+            BankQuestionOption(
+                question=bank_question,
+                label=label,
+                text=options[label],
+                is_correct=(label in correct),
+            )
+            for label in "ABCDE"
+            if label in options
+        ]
+        if option_rows:
+            BankQuestionOption.objects.bulk_create(option_rows)
+        created.append(bank_question)
+    return created
+
+
+# ---------------------------------------------------------------------------
+# Snapshot köçürmə
+# ---------------------------------------------------------------------------
+def _duplicate_filefield(source_fieldfile, target_instance, target_field_name):
+    """
+    Mənbə fayl sahəsinin məzmununu hədəf instansiyaya kopyalayır (snapshot).
+
+    Uğursuzluq attach-i pozmasın deyə xəta tutulur və loglanır — sual mediasız
+    yaradılır.
+    """
+    if not source_fieldfile:
+        return
+    try:
+        source_fieldfile.open("rb")
+        try:
+            content = source_fieldfile.read()
+        finally:
+            source_fieldfile.close()
+        name = os.path.basename(source_fieldfile.name)
+        getattr(target_instance, target_field_name).save(name, ContentFile(content), save=True)
+    except Exception:
+        logger.warning(
+            "Bank sualı mediası kopyalana bilmədi (q=%s, field=%s).",
+            getattr(target_instance, "id", None),
+            target_field_name,
+            exc_info=True,
+        )
+
+
+@transaction.atomic
+def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, created_by=None, default_points=None):
+    """
+    Seçilmiş bank suallarını imtahana SNAPSHOT olaraq köçürür.
+
+    - Hər bank sualı üçün yeni ``ExamQuestion`` (+ variantlar + media) yaradılır.
+    - ``source_bank_question`` mənbəyə link saxlayır; ``bank`` origin tag-i qalır.
+    - Sualın dilinə uyğun ``ExamLanguageVariant`` yoxdursa avtomatik yaradılır.
+    - ``order`` imtahandakı mövcud maksimumdan sonra davam edir.
+
+    Qaytarır: yaradılmış ``ExamQuestion`` obyektlərinin siyahısı.
+    """
+    bank_questions = list(
+        BankQuestion.objects.filter(id__in=list(bank_question_ids), is_active=True).prefetch_related("options")
+    )
+    if not bank_questions:
+        return []
+
+    last_order = exam.questions.aggregate(max_order=Max("order")).get("max_order") or 0
+    variant_cache = {}
+    created_questions = []
+
+    for offset, bank_question in enumerate(bank_questions, start=1):
+        language = bank_question.language or DEFAULT_EXAM_LANGUAGE
+        if language not in variant_cache:
+            variant_cache[language] = ensure_default_variant(exam, language)
+        variant = variant_cache[language]
+
+        exam_question = ExamQuestion.objects.create(
+            exam=exam,
+            block=block,
+            bank=bank_question.bank,
+            source_bank_question=bank_question,
+            language=language,
+            language_variant=variant,
+            text=bank_question.text,
+            correct_answer=bank_question.correct_answer,
+            answer_mode=bank_question.answer_mode,
+            difficulty=bank_question.difficulty,
+            difficulty_source="manual",
+            points=default_points or bank_question.points or 1,
+            tags=list(bank_question.tags or []),
+            explanation=bank_question.explanation,
+            fingerprint=bank_question.fingerprint or "",
+            order=last_order + offset,
+            is_active=True,
+        )
+
+        options = [
+            ExamQuestionOption(
+                question=exam_question,
+                label=option.label,
+                text=option.text,
+                is_correct=option.is_correct,
+            )
+            for option in bank_question.options.all()
+        ]
+        if options:
+            ExamQuestionOption.objects.bulk_create(options)
+
+        # Media-nı snapshot kimi DUBLİKAT et (mənbə silinsə imtahan qorunsun).
+        _duplicate_filefield(bank_question.image, exam_question, "image")
+        _duplicate_filefield(bank_question.video, exam_question, "video")
+
+        created_questions.append(exam_question)
+
+    return created_questions
+
+
+__all__ = [
+    "accessible_banks",
+    "attach_bank_questions_to_exam",
+    "bank_questions_queryset",
+    "count_bank_questions",
+    "create_bank_questions_from_parsed",
+]

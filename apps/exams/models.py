@@ -11,10 +11,14 @@ from apps.exams.domain.ai_config import AIConfiguration
 from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ProctoringLog
 from apps.exams.domain.coding import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase
 from apps.exams.domain.exam_definition import Exam, QuestionBlock
+from apps.exams.domain.language import ExamLanguageVariant
 from apps.exams.domain.question_bank import (
+    BankQuestion,
+    BankQuestionOption,
     ExamQuestion,
     ExamQuestionOption,
     QuestionBank,
+    bank_question_media_path,
     question_media_path,
     validate_video_size,
 )
@@ -22,6 +26,8 @@ from apps.exams.domain.supervision import ExamSupervisionConfig, SupervisionInci
 
 __all__ = [
     "AIConfiguration",
+    "BankQuestion",
+    "BankQuestionOption",
     "CodingExamQuestion",
     "CodingFile",
     "CodingSubmission",
@@ -30,6 +36,7 @@ __all__ = [
     "ExamAnswer",
     "ExamAnswerFile",
     "ExamAttempt",
+    "ExamLanguageVariant",
     "ExamQuestion",
     "ExamQuestionOption",
     "ExamSupervisionConfig",

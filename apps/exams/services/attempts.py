@@ -8,14 +8,20 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import caches
 from django.db import transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.services.language_variants import (
+    available_language_options,
+    effective_needed_count_for_attempt,
+    get_active_variant,
+    resolve_requested_language,
+)
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
-from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+from apps.exams.services.utils import _attempt_has_any_answer
 
 logger = logging.getLogger(__name__)
 
@@ -299,11 +305,36 @@ def _start_or_resume_attempt(request, exam: Exam):
         or request.POST.get("next"),
     )
 
+    # ── Çoxdilli imtahan: yeni attempt üçün dil seçimi ──────────────────────
+    # Mövcud aktiv attempt varsa, dil onsuz da seçilib — resume zamanı sormuruq.
+    # Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
+    # gəlməyibsə, dil seçim səhifəsi göstərilir (kilid almazdan əvvəl).
+    chosen_language = None
+    if get_active_attempt_for_user(exam, user) is None:
+        language_options = available_language_options(exam)
+        if len(language_options) == 1:
+            chosen_language = language_options[0]["language"]
+        elif len(language_options) > 1:
+            chosen_language = resolve_requested_language(
+                exam, request.GET.get("language") or request.POST.get("language")
+            )
+            if chosen_language is None:
+                return render(
+                    request,
+                    "exams/student/exam_language_select.html",
+                    {
+                        "exam": exam,
+                        "language_options": language_options,
+                        "return_to": return_to,
+                        "start_url": reverse("exams:start_exam", kwargs={"slug": exam.slug}),
+                    },
+                )
+
     try:
         with _exam_start_actor_lock(exam.id, user.id), _exam_start_capacity_gate(exam.id):
             current = get_active_attempt_for_user(exam, user)
             if current:
-                desired = _effective_needed_count(exam)
+                desired = effective_needed_count_for_attempt(current)
                 current_count = current.answers.count()
 
                 if current_count != desired and not _attempt_has_any_answer(current):
@@ -333,6 +364,8 @@ def _start_or_resume_attempt(request, exam: Exam):
                 exam=exam,
                 attempt_number=next_attempt_number,
                 status="in_progress",
+                language=chosen_language,
+                language_variant=get_active_variant(exam, chosen_language) if chosen_language else None,
             )
 
             generate_random_questions_for_attempt(attempt)

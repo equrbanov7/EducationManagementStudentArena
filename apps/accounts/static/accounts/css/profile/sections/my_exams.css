@@ -646,3 +646,63 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* --- Kart redizaynı (badge-lər + sürətli əməliyyatlar) --- */
+.exam-card-cell {
+    display: flex;
+    flex-direction: column;
+}
+
+.exam-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+}
+
+.ec-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    line-height: 1.6;
+}
+
+.ec-badge--active { background: #dcfce7; color: #166534; }
+.ec-badge--inactive { background: #f1f5f9; color: #64748b; }
+.ec-badge--info { background: #eff6ff; color: #1d4ed8; }
+.ec-badge--warn { background: #fef3c7; color: #92400e; }
+.ec-badge--lang { background: #ede9fe; color: #6d28d9; text-transform: uppercase; }
+
+.exam-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+}
+
+.ec-action {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    padding: 0.32rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #ffffff;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.ec-action:hover {
+    color: var(--primary-blue);
+    border-color: #bfdbfe;
+    background: #f8fafc;
+}

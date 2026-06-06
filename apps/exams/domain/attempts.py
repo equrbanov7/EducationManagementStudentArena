@@ -5,6 +5,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
+from apps.exams.constants import EXAM_LANGUAGE_CHOICES
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 from .grading import AnswerGradingMixin, AttemptGradingMixin
@@ -39,6 +40,23 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts")
     exam = models.ForeignKey("exams.Exam", on_delete=models.CASCADE, related_name="attempts")
+    # Student imtahana başlayarkən seçdiyi dil. Çoxdilli imtahanlarda yalnız bu
+    # dilin sualları yüklənir; tək-dilli imtahanlarda boş qala bilər.
+    language = models.CharField(
+        max_length=10,
+        choices=EXAM_LANGUAGE_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "language"),
+    )
+    language_variant = models.ForeignKey(
+        "exams.ExamLanguageVariant",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attempts",
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "language_variant"),
+    )
     attempt_number = models.PositiveIntegerField(
         default=1,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "attempt_number"),

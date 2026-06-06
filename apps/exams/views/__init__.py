@@ -39,6 +39,8 @@ from .teacher.question_bank import (
     test_question_bank,
     test_question_bank_template_download,
 )
+from .teacher.languages import exam_language_manager
+from .teacher.question_library import exam_bank_picker, question_bank_detail, question_bank_list
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (
     ai_grade_answer,
@@ -104,6 +106,12 @@ __all__ = [
     "ai_grade_answer",
     # Teacher - Statistics
     "teacher_exam_statistics",
+    # Teacher - Language variants
+    "exam_language_manager",
+    # Teacher - Question bank library + picker
+    "question_bank_list",
+    "question_bank_detail",
+    "exam_bank_picker",
     # Teacher - Supervision
     "supervision_monitor",
     "supervision_detail",

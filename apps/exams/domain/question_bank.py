@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
+
 User = get_user_model()
 
 
@@ -13,6 +15,13 @@ def question_media_path(instance, filename):
 
 
 question_media_path.__module__ = "apps.exams.models"
+
+
+def bank_question_media_path(instance, filename):
+    return f"bank_media/bank_{instance.bank_id}/q_{instance.id or 'new'}/{filename}"
+
+
+bank_question_media_path.__module__ = "apps.exams.models"
 
 
 def validate_video_size(f):
@@ -45,6 +54,39 @@ class QuestionBank(models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.question_bank.field", "subject"),
         help_text=pgettext_lazy("exams.model.question_bank.help", "subject"),
+    )
+    topic = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "topic"),
+        help_text=pgettext_lazy("exams.model.question_bank.help", "topic"),
+    )
+    language = models.CharField(
+        max_length=10,
+        choices=EXAM_LANGUAGE_CHOICES,
+        default=DEFAULT_EXAM_LANGUAGE,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "language"),
+        help_text=pgettext_lazy("exams.model.question_bank.help", "language"),
+    )
+    # Tenant izolyasiyası üçün. Hələ null/blank — köhnə banklar üçün data
+    # migration ilə dolduruldqdan sonra məcburi edilə bilər.
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="question_banks",
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "organization"),
+    )
+    # Faculty/department səviyyəli scope (gələcək rollar üçün hazır).
+    org_unit = models.ForeignKey(
+        "organizations.OrgUnit",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="question_banks",
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "org_unit"),
     )
     organization_type = models.CharField(
         max_length=50,
@@ -133,6 +175,35 @@ class ExamQuestion(models.Model):
         related_name="bank_questions",
         verbose_name=pgettext_lazy("exams.model.question.field", "bank"),
         help_text=pgettext_lazy("exams.model.question.help", "bank"),
+    )
+    # Snapshot izi: bu sual mövcud bir kitabxana sualından (BankQuestion)
+    # kopyalanıbsa, mənbəyə link saxlanılır. Mənbə silinsə belə imtahan sualı
+    # qalır (SET_NULL) — köhnə imtahanlar dondurulmuş olur.
+    source_bank_question = models.ForeignKey(
+        "exams.BankQuestion",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exam_questions",
+        verbose_name=pgettext_lazy("exams.model.question.field", "source_bank_question"),
+        help_text=pgettext_lazy("exams.model.question.help", "source_bank_question"),
+    )
+    language = models.CharField(
+        max_length=10,
+        choices=EXAM_LANGUAGE_CHOICES,
+        default=DEFAULT_EXAM_LANGUAGE,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.question.field", "language"),
+        help_text=pgettext_lazy("exams.model.question.help", "language"),
+    )
+    language_variant = models.ForeignKey(
+        "exams.ExamLanguageVariant",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="questions",
+        verbose_name=pgettext_lazy("exams.model.question.field", "language_variant"),
+        help_text=pgettext_lazy("exams.model.question.help", "language_variant"),
     )
     difficulty = models.CharField(
         max_length=20,
@@ -340,10 +411,154 @@ class ExamQuestionOption(models.Model):
         return f"{prefix} {self.text[:50]}"
 
 
+class BankQuestion(models.Model):
+    """
+    Kitabxana sualı — imtahandan ASILI DEYİL. Bir dəfə yaradılır, çoxlu
+    imtahanda istifadə oluna bilər. İmtahana əlavə edildikdə məzmun
+    ``ExamQuestion``-a kopyalanır (snapshot), beləliklə bankdakı sonrakı
+    redaktələr köhnə imtahanlara təsir etmir.
+    """
+
+    ANSWER_MODE_CHOICES = ExamQuestion.ANSWER_MODE_CHOICES
+    DIFFICULTY_CHOICES = ExamQuestion.DIFFICULTY_CHOICES
+    QUESTION_TYPE_CHOICES = (
+        ("test", pgettext_lazy("exams.model.bank_question.choice.question_type", "test")),
+        ("written", pgettext_lazy("exams.model.bank_question.choice.question_type", "written")),
+    )
+
+    bank = models.ForeignKey(
+        "exams.QuestionBank",
+        on_delete=models.CASCADE,
+        related_name="library_questions",
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "bank"),
+    )
+    text = models.TextField(
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "text"),
+    )
+    question_type = models.CharField(
+        max_length=20,
+        choices=QUESTION_TYPE_CHOICES,
+        default="test",
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "question_type"),
+    )
+    answer_mode = models.CharField(
+        max_length=20,
+        choices=ANSWER_MODE_CHOICES,
+        default="single",
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "answer_mode"),
+    )
+    correct_answer = models.TextField(
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "correct_answer"),
+    )
+    difficulty = models.CharField(
+        max_length=20,
+        choices=DIFFICULTY_CHOICES,
+        default="medium",
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "difficulty"),
+    )
+    language = models.CharField(
+        max_length=10,
+        choices=EXAM_LANGUAGE_CHOICES,
+        default=DEFAULT_EXAM_LANGUAGE,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "language"),
+    )
+    points = models.PositiveIntegerField(default=1)
+    tags = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "tags"),
+    )
+    explanation = models.TextField(
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "explanation"),
+    )
+    fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
+    image = models.ImageField(
+        upload_to=bank_question_media_path,
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "image"),
+    )
+    video = models.FileField(
+        upload_to=bank_question_media_path,
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "webm", "mov"]),
+            validate_video_size,
+        ],
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "video"),
+    )
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "is_active"),
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bank_library_questions",
+        verbose_name=pgettext_lazy("exams.model.bank_question.field", "created_by"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = pgettext_lazy("exams.model.bank_question.meta", "singular")
+        verbose_name_plural = pgettext_lazy("exams.model.bank_question.meta", "plural")
+        ordering = ["-created_at", "id"]
+        indexes = [
+            models.Index(fields=["bank", "is_active"], name="bankq_bank_active_idx"),
+            models.Index(fields=["bank", "language"], name="bankq_bank_lang_idx"),
+            models.Index(fields=["bank", "difficulty"], name="bankq_bank_diff_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.bank_id} · {self.text[:50]}"
+
+    @property
+    def correct_options(self):
+        return self.options.filter(is_correct=True)
+
+
+class BankQuestionOption(models.Model):
+    LABEL_CHOICES = ExamQuestionOption.LABEL_CHOICES
+
+    question = models.ForeignKey(
+        "exams.BankQuestion",
+        on_delete=models.CASCADE,
+        related_name="options",
+        verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "question"),
+    )
+    label = models.CharField(max_length=1, choices=LABEL_CHOICES, null=True, blank=True)
+    text = models.TextField(
+        verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "text"),
+    )
+    is_correct = models.BooleanField(
+        default=False,
+        verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "is_correct"),
+    )
+
+    class Meta:
+        verbose_name = pgettext_lazy("exams.model.bank_question_option.meta", "singular")
+        verbose_name_plural = pgettext_lazy("exams.model.bank_question_option.meta", "plural")
+
+    def __str__(self):
+        prefix = "✓" if self.is_correct else "•"
+        return f"{prefix} {self.text[:50]}"
+
+
 __all__ = [
+    "BankQuestion",
+    "BankQuestionOption",
     "ExamQuestion",
     "ExamQuestionOption",
     "QuestionBank",
+    "bank_question_media_path",
     "question_media_path",
     "validate_video_size",
 ]

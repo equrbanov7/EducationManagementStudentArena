@@ -59,6 +59,8 @@ urlpatterns = [
     path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
     # exams
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
+    # appeals (imtahan apellyasiyaları)
+    path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),
     # organizations
     path(
         "organizations/",

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Apellyasiya — {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 920px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1">Apellyasiya göndər</h1>
+            <div class="text-muted small">{{ exam.title }}</div>
+        </div>
+        <a href="{{ result_url }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Nəticəyə qayıt
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        Apellyasiya etmək istədiyiniz sualları seçin. Hər sual üçün səbəb tipini seçin və
+        ən azı {{ min_comment_length }} simvol şərh yazın.
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for answer in answers %}
+        {% with q=answer.question %}
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           name="appeal_q_{{ q.id }}" id="appeal_q_{{ q.id }}" value="1">
+                    <label class="form-check-label fw-semibold" for="appeal_q_{{ q.id }}">
+                        {{ forloop.counter }}. {{ q.text|striptags|truncatechars:160 }}
+                    </label>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-1" for="appeal_type_{{ q.id }}">Səbəb tipi</label>
+                        <select class="form-select form-select-sm" name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}">
+                            {% for value, label in appeal_type_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label small text-muted mb-1" for="comment_{{ q.id }}">Şərh</label>
+                        <textarea class="form-control form-control-sm" name="comment_{{ q.id }}"
+                                  id="comment_{{ q.id }}" rows="2" minlength="{{ min_comment_length }}"
+                                  placeholder="Apellyasiya səbəbinizi ən azı {{ min_comment_length }} simvol ilə izah edin"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="alert alert-warning">Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı.</div>
+        {% endfor %}
+
+        {% if answers %}
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{{ result_url }}" class="btn btn-outline-secondary">Ləğv et</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-gavel me-1"></i>Apellyasiyanı göndər
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -20,6 +20,11 @@ urlpatterns = [
     path("create/", views.createAndEditExamView, name="create_exam"),
     path("pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"),
     # ==========================
+    # TEACHER - Question Bank library (imtahandan asılı olmayan) (sabit)
+    # ==========================
+    path("question-bank/", views.question_bank_list, name="question_bank_list"),
+    path("question-bank/<int:bank_id>/", views.question_bank_detail, name="question_bank_detail"),
+    # ==========================
     # TEACHER - Student Groups (sabit)
     # ==========================
     path("groups/", views.teacher_group_list, name="teacher_group_list"),
@@ -132,6 +137,10 @@ urlpatterns = [
     # ==========================
     path("<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
     path("<slug:slug>/statistics/", views.teacher_exam_statistics, name="teacher_exam_statistics"),
+    # Çoxdilli imtahan — dil variantlarının idarəsi
+    path("<slug:slug>/languages/", views.exam_language_manager, name="exam_language_manager"),
+    # Sual bankından imtahana sual əlavə et (picker)
+    path("<slug:slug>/bank-picker/", views.exam_bank_picker, name="exam_bank_picker"),
     path(
         "<slug:slug>/results/delete-attempts/",
         views.delete_exam_attempts,
