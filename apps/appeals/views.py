@@ -249,9 +249,7 @@ def manage_appeals(request):
     appeals = appeals.order_by("-created_at")
 
     # Filtr dropdown-u üçün apellyasiyası olan imtahanlar.
-    exam_options = list(
-        appeals.values_list("exam__slug", "exam__title").distinct().order_by("exam__title")[:200]
-    )
+    exam_options = list(appeals.values_list("exam__slug", "exam__title").distinct().order_by("exam__title")[:200])
 
     paginator = Paginator(appeals, 20)
     page_obj = paginator.get_page(request.GET.get("page", 1))

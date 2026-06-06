@@ -23,9 +23,7 @@ def can_transition(current, target):
 def assert_transition(current, target):
     if not can_transition(current, target):
         raise InvalidAppealTransition(
-            pgettext("appeals.service.state.error", "invalid_transition").format(
-                current=current, target=target
-            )
+            pgettext("appeals.service.state.error", "invalid_transition").format(current=current, target=target)
         )
 
 
