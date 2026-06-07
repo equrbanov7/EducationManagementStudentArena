@@ -13,6 +13,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>
-<script src="{% static 'exams/js/questionWorkbench.js' %}?v=20260607-workbench"></script>
+{% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
 {% endblock %}

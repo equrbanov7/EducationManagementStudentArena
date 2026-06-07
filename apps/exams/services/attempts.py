@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import caches
 from django.db import transaction
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
@@ -308,7 +308,7 @@ def _start_or_resume_attempt(request, exam: Exam):
     # ── Çoxdilli imtahan: yeni attempt üçün dil seçimi ──────────────────────
     # Mövcud aktiv attempt varsa, dil onsuz da seçilib — resume zamanı sormuruq.
     # Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
-    # gəlməyibsə, dil seçim səhifəsi göstərilir (kilid almazdan əvvəl).
+    # gəlməyibsə, attempt yaratmadan siyahıya qaytarılır (modal seçim göndərməlidir).
     chosen_language = None
     if get_active_attempt_for_user(exam, user) is None:
         language_options = available_language_options(exam)
@@ -319,16 +319,11 @@ def _start_or_resume_attempt(request, exam: Exam):
                 exam, request.GET.get("language") or request.POST.get("language")
             )
             if chosen_language is None:
-                return render(
+                messages.warning(
                     request,
-                    "exams/student/exam_language_select.html",
-                    {
-                        "exam": exam,
-                        "language_options": language_options,
-                        "return_to": return_to,
-                        "start_url": reverse("exams:start_exam", kwargs={"slug": exam.slug}),
-                    },
+                    pgettext("exams.service.attempt.message", "language_required_for_multilingual_exam"),
                 )
+                return redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
 
     try:
         with _exam_start_actor_lock(exam.id, user.id), _exam_start_capacity_gate(exam.id):

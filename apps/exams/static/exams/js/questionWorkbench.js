@@ -43,6 +43,13 @@
             : editor.getAttribute("data-placeholder-test");
         if (next) editor.setAttribute("placeholder", next);
       }
+
+      // AI bloku da seçilmiş formata uyğun sual yaratsın (bank səhifəsi).
+      document.querySelectorAll("[data-ai-format-mirror]").forEach((input) => {
+        input.value = value;
+      });
+      const aiPanel = document.querySelector("[data-ai-question-form]");
+      if (aiPanel) aiPanel.setAttribute("data-ai-context", value);
     }
 
     pills.forEach((pill) => {

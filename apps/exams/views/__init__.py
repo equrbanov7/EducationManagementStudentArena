@@ -41,6 +41,7 @@ from .teacher.question_bank import (
     test_question_bank_template_download,
 )
 from .teacher.question_library import (
+    ai_generate_bank_questions,
     bank_question_add,
     bank_question_edit,
     exam_bank_picker,
@@ -48,6 +49,7 @@ from .teacher.question_library import (
     question_bank_delete,
     question_bank_detail,
     question_bank_list,
+    question_bank_template_download,
     question_bank_update,
 )
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
@@ -123,6 +125,8 @@ __all__ = [
     "question_bank_update",
     "question_bank_delete",
     "question_bank_bulk_add",
+    "question_bank_template_download",
+    "ai_generate_bank_questions",
     "bank_question_add",
     "bank_question_edit",
     "exam_bank_picker",

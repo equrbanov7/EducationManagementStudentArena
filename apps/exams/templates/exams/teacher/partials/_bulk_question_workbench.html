@@ -46,6 +46,14 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     {{ wb_back_label|default:_("Geri") }}
                 </a>
                 {% endif %}
+                {% if wb_picker_url %}
+                <button type="button" class="page-header-link page-header-link--accent"
+                        data-bank-picker-open
+                        data-picker-url="{{ wb_picker_url }}">
+                    <i class="fas fa-book-bookmark"></i>
+                    {{ wb_picker_label|default:_("Suallar bankına bax") }}
+                </button>
+                {% endif %}
                 {% if wb_secondary_url %}
                 <a href="{{ wb_secondary_url }}" class="page-header-link">
                     <i class="fas {{ wb_secondary_icon|default:'fa-layer-group' }}"></i>
@@ -123,6 +131,10 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
              data-ai-context="{{ wb_ai_context|default:'test' }}"
              data-ai-url="{{ wb_ai_url }}"
              data-ai-target="#testRawEditor">
+        {# Format toggle olan səhifələrdə (bank) AI da seçilmiş formata uyğun yaradır. #}
+        {% if wb_show_format %}
+        <input type="hidden" name="q_format" data-ai-format-mirror value="{{ wb_format|default:'test' }}">
+        {% endif %}
         <div class="ai-bank-card__intro">
             <div class="ai-bank-card__icon"><i class="fas fa-robot"></i></div>
             <div>
@@ -237,7 +249,6 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 {% endif %}
 
                 <h5 class="section-title"><i class="fas fa-file-upload"></i> {% trans "section_upload_file" context "exams.template.test_question_bank" %}</h5>
-                <p class="section-desc">{% trans "section_upload_file_desc" context "exams.template.test_question_bank" %}</p>
 
                 <div class="upload-zone-wrapper">
                     <input class="file-input-hidden" type="file" name="upload_file" id="fileInput"
@@ -314,8 +325,8 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         </div>
                     </div>
 
-                    {# ── Yazılı format qaydaları ── #}
-                    {% if wb_show_format %}
+                    {# ── Yazılı format qaydaları (toggle olmasa da format yazılıdırsa göstərilir) ── #}
+                    {% if wb_show_format or wb_format == 'written' %}
                     <div class="textarea-header compact-guide" data-format-guide="written" {% if wb_format != 'written' %}hidden{% endif %}>
                         <span class="guide-label"><i class="fas fa-circle-info"></i> {% trans "Qayda" %}:</span>
                         <div class="rule-group">
@@ -546,5 +557,10 @@ D) Printer yığılması{% endif %}">{{ raw_text }}</textarea>
             </div>
         </form>
     </div>
+    {% endif %}
+
+    {# ──────────────── BANK PICKER MODAL (yalnız imtahan axını) ───────────── #}
+    {% if wb_picker_url %}
+    {% include "exams/teacher/partials/_bank_picker_shell.html" with picker_url=wb_picker_url %}
     {% endif %}
 </div>

@@ -249,6 +249,87 @@
     font-weight: 700;
 }
 
+.assigned-exam-language {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.62fr);
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.85rem;
+    padding: 0.85rem;
+    border: 2px solid #4f6df5;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
+    box-shadow: 0 14px 30px rgba(79, 109, 245, 0.14);
+}
+
+.assigned-exam-language.is-hidden {
+    display: none;
+}
+
+.assigned-exam-language-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.assigned-exam-language-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #ffffff;
+    background: linear-gradient(135deg, #4f6df5 0%, #2563eb 100%);
+}
+
+.assigned-exam-language-label {
+    display: block;
+    color: #0f172a;
+    font-size: 0.98rem;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.assigned-exam-language p {
+    margin: 0.2rem 0 0;
+    color: #475569;
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.assigned-exam-language-select-wrap,
+.assigned-exam-language-select-wrap .form-select,
+.assigned-exam-language-select-wrap .bootstrap-single-select__dropdown {
+    width: 100%;
+}
+
+.assigned-exam-language-select-wrap .bootstrap-single-select__toggle {
+    width: 100%;
+    min-height: 46px;
+    justify-content: space-between;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.assigned-exam-language-select-wrap .bootstrap-single-select__toggle:hover,
+.assigned-exam-language-select-wrap .bootstrap-single-select__toggle:focus,
+.assigned-exam-language-select-wrap .bootstrap-single-select__toggle.show {
+    border-color: #4f6df5;
+    box-shadow: 0 0 0 0.22rem rgba(79, 109, 245, 0.14);
+}
+
+.assigned-exam-language-select-wrap .bootstrap-single-select__menu {
+    width: 100%;
+    min-width: 100%;
+    border-radius: 12px;
+}
+
 .assigned-exam-info-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -386,6 +467,14 @@
 
     .assigned-exam-info-grid {
         grid-template-columns: 1fr;
+    }
+
+    .assigned-exam-language {
+        grid-template-columns: 1fr;
+    }
+
+    .assigned-exam-language-copy {
+        align-items: flex-start;
     }
 
     .assigned-exam-info-actions {

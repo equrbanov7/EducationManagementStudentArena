@@ -2625,10 +2625,41 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, f'data-exam-slug="{self.course_assigned_exam.slug}"')
         self.assertContains(response, f'data-exam-slug="{self.course_code_exam.slug}"')
         self.assertContains(response, 'data-requires-code="1"')
+        self.assertContains(response, 'id="courseExamLanguageBlock"')
+        self.assertContains(response, 'id="courseExamLanguageSelect"')
+        self.assertContains(response, 'name="language" id="courseExamCodeLanguage"')
         self.assertContains(
             response,
             f'name="next" value="{reverse("courses:course_dashboard", args=[self.assigned_course.id])}"',
         )
+
+    def test_course_dashboard_exam_modal_embeds_language_options(self):
+        variant_az = self.course_assigned_exam.language_variants.create(
+            language="az",
+            display_name="Azərbaycan dili",
+        )
+        variant_en = self.course_assigned_exam.language_variants.create(language="en", display_name="English")
+        self.course_assigned_exam.questions.update(language="az", language_variant=variant_az)
+        ExamQuestion.objects.create(
+            exam=self.course_assigned_exam,
+            text="Course EN modal question",
+            order=2,
+            points=1,
+            language="en",
+            language_variant=variant_en,
+        )
+
+        response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'data-language-options-id="course-exam-language-options-{self.course_assigned_exam.id}"',
+        )
+        self.assertContains(response, f'id="course-exam-language-options-{self.course_assigned_exam.id}"')
+        self.assertContains(response, '"display_name": "English"', html=False)
+        self.assertNotContains(response, '"count"', html=False)
+        self.assertNotContains(response, "Tövsiyə olunan")
 
     def test_student_exam_list_actions_use_bootstrap_info_modal(self):
         available_response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
@@ -2654,6 +2685,90 @@ class StudentExamVisibilityFilteringTest(TestCase):
             code_response,
             'modalAccessCodeDescriptionWithTitle: "\\u0022{title}\\u0022 imtahanına başlamaq üçün giriş kodunu daxil edin."',
             html=False,
+        )
+
+    def test_student_exam_list_modal_embeds_language_select_for_multilingual_exam(self):
+        multilingual_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Student Modal Language Exam",
+            is_active=True,
+            is_public=True,
+        )
+        variant_az = multilingual_exam.language_variants.create(language="az", display_name="Azərbaycan dili")
+        variant_en = multilingual_exam.language_variants.create(language="en", display_name="English")
+        ExamQuestion.objects.create(
+            exam=multilingual_exam,
+            text="AZ modal question",
+            order=1,
+            points=1,
+            language="az",
+            language_variant=variant_az,
+        )
+        ExamQuestion.objects.create(
+            exam=multilingual_exam,
+            text="EN modal question",
+            order=2,
+            points=1,
+            language="en",
+            language_variant=variant_en,
+        )
+
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": multilingual_exam.title})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="examStartLanguageBlock"')
+        self.assertContains(response, 'id="examStartLanguageSelect"')
+        self.assertContains(response, "İmtahan hansı dildə olsun?")
+        self.assertContains(response, f'data-language-options-id="exam-language-options-{multilingual_exam.id}"')
+        self.assertContains(response, f'id="exam-language-options-{multilingual_exam.id}"')
+        self.assertContains(response, '"display_name": "English"', html=False)
+        self.assertContains(response, "buildStartUrlWithLanguage")
+        self.assertNotContains(response, '"count"', html=False)
+        self.assertNotContains(response, "Tövsiyə olunan")
+
+    def test_multilingual_exam_start_uses_selected_language_without_language_page(self):
+        multilingual_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Selected Language Start Exam",
+            is_active=True,
+            is_public=True,
+        )
+        variant_az = multilingual_exam.language_variants.create(language="az", display_name="Azərbaycan dili")
+        variant_en = multilingual_exam.language_variants.create(language="en", display_name="English")
+        ExamQuestion.objects.create(
+            exam=multilingual_exam,
+            text="AZ start question",
+            order=1,
+            points=1,
+            language="az",
+            language_variant=variant_az,
+        )
+        ExamQuestion.objects.create(
+            exam=multilingual_exam,
+            text="EN start question",
+            order=2,
+            points=1,
+            language="en",
+            language_variant=variant_en,
+        )
+
+        missing_language_response = self.client.get(reverse("exams:start_exam", args=[multilingual_exam.slug]))
+        self.assertEqual(missing_language_response.status_code, 302)
+        self.assertEqual(missing_language_response.url, reverse("exams:student_exam_list"))
+        self.assertFalse(multilingual_exam.attempts.filter(user=self.student).exists())
+
+        selected_language_response = self.client.get(
+            reverse("exams:start_exam", args=[multilingual_exam.slug]),
+            {"language": "en"},
+        )
+
+        self.assertEqual(selected_language_response.status_code, 302)
+        attempt = multilingual_exam.attempts.get(user=self.student)
+        self.assertEqual(attempt.language, "en")
+        self.assertEqual(attempt.language_variant, variant_en)
+        self.assertEqual(
+            selected_language_response.url,
+            reverse("exams:take_exam", args=[multilingual_exam.slug, attempt.id]),
         )
 
     def test_course_dashboard_student_history_button_shows_attempt_count(self):
@@ -3361,6 +3476,63 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(ExamQuestion.objects.filter(id=self.questions[3].id).exists())
         self.assertFalse(ExamQuestion.objects.filter(id=self.questions[4].id).exists())
+
+    def test_questions_bank_filters_by_language(self):
+        ExamQuestion.objects.filter(id__in=[self.questions[0].id, self.questions[1].id]).update(language="ru")
+
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"language": "ru"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["language_filter"], "ru")
+        self.assertEqual(response.context["total_questions"], 2)
+        object_ids = {q.id for q in response.context["page_obj"].object_list}
+        self.assertEqual(object_ids, {self.questions[0].id, self.questions[1].id})
+        self.assertContains(response, 'name="language"', html=False)
+        self.assertContains(response, 'id="questionLangDeleteForm"', html=False)
+        self.assertContains(response, "Bu dildəki bütün sualları sil")
+
+    def test_questions_bank_deletes_selected_language_questions(self):
+        ExamQuestion.objects.filter(id__in=[self.questions[0].id, self.questions[1].id]).update(language="ru")
+        ExamQuestion.objects.filter(id=self.questions[2].id).update(language="en")
+
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "delete_language",
+                "language": "ru",
+                "status": "all",
+                "q": "",
+                "sort": "newest",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("language=ru", response.url)
+        self.assertFalse(self.exam.questions.filter(language="ru").exists())
+        self.assertTrue(self.exam.questions.filter(language="az").exists())
+        self.assertTrue(self.exam.questions.filter(language="en").exists())
+
+    def test_questions_bank_deletes_all_exam_questions(self):
+        ExamQuestion.objects.filter(id__in=[self.questions[0].id, self.questions[1].id]).update(language="ru")
+
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "delete_all",
+                "language": "ru",
+                "status": "all",
+                "q": "",
+                "sort": "newest",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.exam.questions.count(), 0)
 
     def test_questions_bank_search_matches_option_text_without_duplicates(self):
         ExamQuestionOption.objects.create(

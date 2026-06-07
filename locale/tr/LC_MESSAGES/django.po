@@ -8796,6 +8796,11 @@ msgctxt "exams.service.attempt.message"
 msgid "exam_started"
 msgstr "Sınav başladı! (Deneme #{attempt_number})"
 
+#: apps/exams/services/attempts.py
+msgctxt "exams.service.attempt.message"
+msgid "language_required_for_multilingual_exam"
+msgstr "Sınava başlamadan önce sınav dilini seçin."
+
 #: apps/exams/services/parsing.py:64
 msgctxt "exams.service.parsing.error"
 msgid "file_too_large"
@@ -9187,17 +9192,17 @@ msgstr "Maksimum çaba"
 #: apps/exams/templates/exams/student/student_exam_list.html:4
 msgctxt "exams.template.student_exam_list"
 msgid "page_title"
-msgstr "Yeni Kurs Oluştur"
+msgstr "Sınavlar"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:14
 msgctxt "exams.template.student_exam_list"
 msgid "default_page_title"
-msgstr "Sil"
+msgstr "Sınavlar"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:24
 msgctxt "exams.template.student_exam_list"
 msgid "placeholder_search_exam_or_teacher"
-msgstr "Öğretmen aranıyor..."
+msgstr "Sınav veya öğretmen ara..."
 
 #: apps/exams/templates/exams/student/student_exam_list.html:30
 msgctxt "exams.template.student_exam_list"
@@ -9227,12 +9232,12 @@ msgstr "Yazılı/Pratik"
 #: apps/exams/templates/exams/student/student_exam_list.html:40
 msgctxt "exams.template.student_exam_list"
 msgid "action_search"
-msgstr "Belleğe kaydet"
+msgstr "Ara"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:44
 msgctxt "exams.template.student_exam_list"
 msgid "action_reset"
-msgstr "Silmek"
+msgstr "Sıfırla"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:75
 #, python-format
@@ -9243,28 +9248,28 @@ msgstr "%(minutes)s dk"
 #: apps/exams/templates/exams/student/student_exam_list.html:94
 msgctxt "exams.template.student_exam_list"
 msgid "label_attempt_left"
-msgstr "Deneme sınırı"
+msgstr "Kalan deneme"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:98
 msgctxt "exams.template.student_exam_list"
 msgid "label_attempts_unlimited"
-msgstr "Deneme sınırı"
+msgstr "Deneme sınırsız"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:109
 #: apps/exams/templates/exams/student/student_exam_list.html:114
 msgctxt "exams.template.student_exam_list"
 msgid "action_start_exam"
-msgstr "Start exam"
+msgstr "Sınavı başlat"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:132
 msgctxt "exams.template.student_exam_list"
 msgid "empty_no_exam_found"
-msgstr "Kontrol edilecek iş bulunamadı."
+msgstr "Sınav bulunamadı."
 
 #: apps/exams/templates/exams/student/student_exam_list.html:136
 msgctxt "exams.template.student_exam_list"
 msgid "action_show_all_exams"
-msgstr "Tümünü gör"
+msgstr "Tüm sınavları göster"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:153
 #: apps/exams/templates/exams/student/student_exam_list.html:172
@@ -9291,6 +9296,16 @@ msgstr "Onayla"
 msgctxt "exams.template.student_exam_list"
 msgid "modal_access_code_description_with_title"
 msgstr "\"{title}\" sınavına başlamak için erişim kodunu girin."
+
+#: apps/exams/templates/exams/student/student_exam_list.html
+msgctxt "exams.template.student_exam_list"
+msgid "modal_language_question"
+msgstr "Sınav hangi dilde olsun?"
+
+#: apps/exams/templates/exams/student/student_exam_list.html
+msgctxt "exams.template.student_exam_list"
+msgid "modal_language_help"
+msgstr "Sorular yalnızca seçtiğiniz dilde gösterilecek."
 
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
@@ -22338,3 +22353,145 @@ msgstr ""
 "Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de"
 " metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi "
 "düşük). Lütfen metin tabanlı bir PDF veya DOCX yükleyin."
+
+#. Question management shared UI
+msgid "Sual Bankı"
+msgstr "Soru Bankası"
+
+msgid "Bankı redaktə et"
+msgstr "Bankayı düzenle"
+
+msgid "Bankı sil"
+msgstr "Bankayı sil"
+
+msgid "Bankın adı"
+msgstr "Banka adı"
+
+msgid "Fənn / Mövzu"
+msgstr "Ders / Konu"
+
+msgid "Əsas dil"
+msgstr "Ana dil"
+
+msgid "Default format"
+msgstr "Varsayılan format"
+
+msgid "Təşkilatda paylaş"
+msgstr "Organizasyonda paylaş"
+
+msgid "İmtina"
+msgstr "İptal"
+
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgid "Yazılı"
+msgstr "Yazılı"
+
+msgid "Test"
+msgstr "Test"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün sual bankını sil"
+msgstr "Tüm soru bankasını sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Dil"
+msgstr "Dil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün dillər"
+msgstr "Tüm diller"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Hazırkı dil"
+msgstr "Geçerli dil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "bu dildə"
+msgstr "bu dilde"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sual"
+msgstr "soru"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bu dildəki bütün sualları sil"
+msgstr "Bu dildeki tüm soruları sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin."
+msgstr "Tüm diller gösteriliyor. Belirli bir dilin durumunu (kopyalar, uyarılar) görmek için yukarıdan dil seçin."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Silməyi təsdiqlə"
+msgstr "Silmeyi onayla"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Deaktiv etməyi təsdiqlə"
+msgstr "Devre dışı bırakmayı onayla"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Aktiv etməyi təsdiqlə"
+msgstr "Etkinleştirmeyi onayla"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bəli, sil"
+msgstr "Evet, sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bəli, deaktiv et"
+msgstr "Evet, devre dışı bırak"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bəli, aktiv et"
+msgstr "Evet, etkinleştir"
+
+#, python-brace-format
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr "Seçilen {count} soru kalıcı olarak silinecek. Devam edilsin mi?"
+
+#, python-brace-format
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"
+msgstr "Seçilen {count} soru devre dışı bırakılacak. Devam edilsin mi?"
+
+#, python-brace-format
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"
+msgstr "Seçilen {count} soru etkinleştirilecek. Devam edilsin mi?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bu sual deaktiv ediləcək. Davam edək?"
+msgstr "Bu soru devre dışı bırakılacak. Devam edilsin mi?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bu sual aktiv ediləcək. Davam edək?"
+msgstr "Bu soru etkinleştirilecek. Devam edilsin mi?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Dil üzrə sil"
+msgstr "Dile göre sil"
+
+#, python-brace-format
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr "Seçilen dildeki {count} soru kalıcı olarak silinecek. Devam edilsin mi?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bankı sil"
+msgstr "Bankayı sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
+msgstr "Tüm soru bankası ve içindeki tüm sorular kalıcı olarak silinecek. Devam edilsin mi?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Sual bankını sil"
+msgstr "Soru bankasını sil"
+
+#, python-brace-format
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr "Tüm soru bankası ve içindeki {count} soru kalıcı olarak silinecek. Devam edilsin mi?"

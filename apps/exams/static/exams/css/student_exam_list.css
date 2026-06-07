@@ -259,6 +259,101 @@ li.list-group-item .status-red {
     border-color: #fecaca;
 }
 
+.exam-start-modal__language {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.6fr);
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 2px solid #4f6df5;
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at top right, rgba(79, 109, 245, 0.16), transparent 32%),
+        linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
+    box-shadow: 0 18px 42px rgba(79, 109, 245, 0.16);
+}
+
+.exam-start-modal__language-copy {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    min-width: 0;
+}
+
+.exam-start-modal__language-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #ffffff;
+    background: linear-gradient(135deg, #4f6df5 0%, #2563eb 100%);
+    box-shadow: 0 14px 24px rgba(37, 99, 235, 0.22);
+}
+
+.exam-start-modal__language-text {
+    min-width: 0;
+}
+
+.exam-start-modal__language-label {
+    display: block;
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.05rem;
+    font-weight: 850;
+    line-height: 1.25;
+}
+
+.exam-start-modal__language-text p {
+    margin: 0.25rem 0 0;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.exam-start-modal__language-select-wrap,
+.exam-start-modal__language-select-wrap .form-select,
+.exam-start-modal__language-select-wrap .bootstrap-single-select__dropdown {
+    width: 100%;
+}
+
+.exam-start-modal__language-select-wrap .bootstrap-single-select__toggle {
+    width: 100%;
+    min-height: 52px;
+    justify-content: space-between;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.1);
+}
+
+.exam-start-modal__language-select-wrap .bootstrap-single-select__toggle:hover,
+.exam-start-modal__language-select-wrap .bootstrap-single-select__toggle:focus,
+.exam-start-modal__language-select-wrap .bootstrap-single-select__toggle.show {
+    border-color: #4f6df5;
+    box-shadow: 0 0 0 0.25rem rgba(79, 109, 245, 0.16);
+}
+
+.exam-start-modal__language-select-wrap .bootstrap-single-select__menu {
+    width: 100%;
+    min-width: 100%;
+    margin-top: 0.4rem;
+    border-radius: 16px;
+    border-color: rgba(79, 109, 245, 0.2);
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+}
+
+.exam-start-modal__language-select-wrap .bootstrap-single-select__option {
+    border-radius: 12px;
+    padding: 0.78rem 0.9rem;
+    font-weight: 750;
+}
+
 .exam-start-modal__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -767,6 +862,27 @@ li.list-group-item {
         gap: 5px;
     }
 
+    .exam-start-modal__language {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        padding: 0.9rem;
+        border-radius: 18px;
+    }
+
+    .exam-start-modal__language-copy {
+        align-items: flex-start;
+    }
+
+    .exam-start-modal__language-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+    }
+
+    .exam-start-modal__language-label {
+        font-size: 0.98rem;
+    }
+
     .exam-start-modal__grid {
         grid-template-columns: 1fr;
     }
@@ -849,6 +965,10 @@ li.list-group-item {
 
     .exam-start-modal__badge-row {
         gap: 0.45rem;
+    }
+
+    .exam-start-modal__language-copy {
+        flex-direction: column;
     }
 
     .exam-start-modal__badge {

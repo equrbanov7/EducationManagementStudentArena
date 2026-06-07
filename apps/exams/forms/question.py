@@ -69,6 +69,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
         fields = [
             "text",
             "block",
+            "language",
             "answer_mode",
             "time_limit_seconds",
             "correct_answer",
@@ -77,6 +78,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
             "enable_paint",
         ]
         widgets = {
+            "language": forms.Select(
+                attrs={
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
+                }
+            ),
             "text": forms.Textarea(
                 attrs={
                     "class": "form-control",
@@ -170,6 +177,16 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     self.initial["enable_paint"] = bool(self.exam.enable_paint)
         else:
             self.fields["block"].empty_label = pgettext_lazy("exams.form.question.select", "block_empty")
+
+        # Yeni sual üçün dilin ilkin dəyəri: imtahanın tək aktiv variantına uyğun
+        # (tək-dilli imtahan), çoxdilli imtahanda model default ('az') qalır.
+        if "language" in self.fields and not self.is_bound and not (instance and getattr(instance, "pk", None)):
+            if self.exam is not None:
+                variant_langs = list(
+                    self.exam.language_variants.filter(is_active=True).values_list("language", flat=True)
+                )
+                if len(variant_langs) == 1:
+                    self.initial["language"] = variant_langs[0]
 
         # Edit zamanı mövcud variantları inputlara doldur
         instance = getattr(self, "instance", None)

@@ -11,13 +11,15 @@ Müəllim — Sual Bankı kitabxanası (imtahandan asılı olmayan).
 - ``exam_bank_picker``        — imtahan üçün bankdan sual seçib snapshot əlavə et.
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -26,8 +28,9 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.forms import BankQuestionCreateForm
-from apps.exams.models import BankQuestion, BankQuestionOption, QuestionBank
+from apps.exams.models import BankQuestion, BankQuestionOption, QuestionBank, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.bank_analysis import analyze_bank_questions
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
@@ -50,6 +53,47 @@ from core.tenancy import get_request_organization
 _DIFFICULTY_CHOICES = (("easy", "Asan"), ("medium", "Orta"), ("hard", "Çətin"))
 _ALLOWED_STATUSES = {"all", "active", "inactive"}
 _ALLOWED_SORTS = {"newest", "oldest", "az", "za"}
+# Picker modalında lazy-scroll səhifə ölçüsü.
+_PICKER_PAGE_SIZE = 40
+
+logger = logging.getLogger(__name__)
+
+# Nümunə şablonlar (toplu sual yükləməsi üçün "Necə yazmalı?" endirməsi)
+_BANK_TEMPLATE_TEST_TXT = """\
+# EMSArena — Test sual bankı şablonu
+# Hər sualın 4 və ya 5 variantı olmalıdır (A–E). Düz cavabı 3 üsuldan biri ilə qeyd edin:
+#   1) Sual sonunda "Cavab: B"   2) Düz variantın əvvəlinə * qoyun "*B)"   3) İşarə yoxdursa A.
+# Çox cavablı: "Cavab: A,C". Hər sualdan sonra boş sətir buraxın.
+
+1. Şəbəkədə məlumat hansı ölçü vahidi ilə ötürülür?
+A) Bit
+B) Bayt
+C) Volt
+D) Hertz
+Cavab: A
+
+2. Aşağıdakılardan hansı proqramlaşdırma dilidir?
+A) Python
+*B) JavaScript
+C) Word
+D) Excel
+
+3. HTML nədir?
+A) Proqramlaşdırma dili
+B) İşarələmə dili
+C) Verilənlər bazası
+D) Əməliyyat sistemi
+Cavab: B
+"""
+
+_BANK_TEMPLATE_WRITTEN_TXT = """\
+# EMSArena — Yazılı sual bankı şablonu
+# Hər sual yeni sətirdə nömrə ilə başlasın. Variant lazım deyil — yalnız sual mətni.
+
+1. Verilənlər strukturu nədir? İzah edin.
+2. Stack və Queue arasındakı fərqi yazın.
+3. Binary axtarış alqoritmini addım-addım təsvir edin.
+"""
 
 
 def _normalize_format(value):
@@ -195,7 +239,7 @@ def question_bank_detail(request, bank_id):
                 )
             redirect_params = {}
             keep_lang = (request.POST.get("language") or "").strip()
-            if keep_lang and bank.created_by_id != request.user.id:
+            if keep_lang:
                 redirect_params["language"] = keep_lang
             redirect_url = reverse("exams:question_bank_detail", kwargs={"bank_id": bank.id})
             if redirect_params:
@@ -461,14 +505,29 @@ def question_bank_bulk_add(request, bank_id):
         "wb_back_url": reverse("exams:question_bank_detail", kwargs={"bank_id": bank.id}),
         "wb_back_label": pgettext("exams.template.question_bank_detail", "Banka qayıt"),
         "wb_show_settings": False,
-        "wb_ai_url": "",
+        # AI bloku imtahan səhifəsi ilə eyni olsun deyə bankda da göstərilir.
+        "wb_ai_url": reverse("exams:ai_generate_bank_questions", kwargs={"bank_id": bank.id}),
+        "wb_ai_context": q_format,
         "wb_show_language": True,
         "wb_languages": EXAM_LANGUAGE_CHOICES,
         "wb_selected_language": selected_language,
-        "wb_show_format": True,
+        # Format toggle YOXDUR — bank yaradılarkən seçilmiş tipə (test/yazılı) görə
+        # avtomatik açılır, beləcə imtahan test-bankı ilə eyni görünür.
+        "wb_show_format": False,
         "wb_format": q_format,
         "wb_show_report": False,
-        "wb_templates": [],
+        "wb_templates": [
+            {
+                "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=docx",
+                "label": "DOCX",
+                "kind": "docx",
+            },
+            {
+                "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=txt",
+                "label": "TXT",
+                "kind": "txt",
+            },
+        ],
         "wb_save_label": pgettext("exams.template.question_bank_detail", "Seçilmişləri banka əlavə et"),
     }
     return render(request, "exams/teacher/question_bank_bulk_add.html", context)
@@ -539,6 +598,102 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
         if option_rows:
             BankQuestionOption.objects.bulk_create(option_rows, batch_size=500)
     return len(created)
+
+
+# ---------------------------------------------------------------------------
+# Nümunə şablon endir (bank toplu-yükləməsi üçün — imtahan səhifəsi ilə eyni)
+# ---------------------------------------------------------------------------
+@login_required
+def question_bank_template_download(request, bank_id):
+    _ensure_teacher(request.user)
+    organization = get_request_organization(request)
+    bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+
+    q_format = _normalize_format(bank.default_question_type)
+    template_text = _BANK_TEMPLATE_WRITTEN_TXT if q_format == "written" else _BANK_TEMPLATE_TEST_TXT
+    file_format = (request.GET.get("format") or "txt").lower().strip()
+
+    if file_format == "docx":
+        try:
+            from io import BytesIO
+
+            from docx import Document
+
+            doc = Document()
+            doc.add_heading("EMSArena — Sual bankı şablonu", level=1)
+            for line in template_text.splitlines():
+                if line.startswith("#") or not line.strip():
+                    continue
+                doc.add_paragraph(line)
+            buf = BytesIO()
+            doc.save(buf)
+            buf.seek(0)
+            response = HttpResponse(
+                buf.read(),
+                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+            response["Content-Disposition"] = 'attachment; filename="sual_sablonu.docx"'
+            return response
+        except Exception:  # noqa: BLE001 — docx yoxdursa TXT-ə düş
+            logger.exception("Bank DOCX template generation failed for bank %s", bank.pk)
+
+    response = HttpResponse(template_text, content_type="text/plain; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="sual_sablonu.txt"'
+    return response
+
+
+# ---------------------------------------------------------------------------
+# AI ilə bankı sualları yarat (imtahandan asılı olmayan) — workbench AI bloku
+# imtahan səhifəsi ilə eyni olsun deyə bank toplu-yükləməsində də işləyir.
+# ---------------------------------------------------------------------------
+@login_required
+def ai_generate_bank_questions(request, bank_id):
+    _ensure_teacher(request.user)
+    organization = get_request_organization(request)
+    bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+
+    # Format: AI kartından (q_format) gəlir, yoxsa bankın default tipi.
+    q_format = _normalize_format(request.POST.get("q_format") or bank.default_question_type)
+
+    source_text = (request.POST.get("source_text") or "").strip()
+    uploaded = request.FILES.get("source_file") or request.FILES.get("ai_source_file")
+    if uploaded:
+        try:
+            extracted_text = extract_text_from_upload(uploaded)
+        except Exception as exc:  # noqa: BLE001
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": pgettext("exams.view.bank.ai.error", "Fayl oxunmadı: {error}").format(error=exc),
+                },
+                status=400,
+            )
+        source_text = "\n\n".join(part for part in [source_text, extracted_text] if part.strip())
+
+    try:
+        result = generate_question_bank_text(
+            exam_title=bank.name,
+            exam_type=q_format,
+            prompt_text=request.POST.get("prompt", ""),
+            source_text=source_text,
+            question_count=request.POST.get("question_count") or 5,
+            difficulty=request.POST.get("difficulty") or "medium",
+            block_name="",
+            language_code=request.LANGUAGE_CODE,
+            user_id=request.user.pk,
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception("AI bank question endpoint failed for bank %s", bank.pk)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": pgettext(
+                    "exams.view.bank.ai.error", "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+                ),
+            },
+            status=500,
+        )
+    return JsonResponse(result, status=200 if result.get("ok") else 400)
 
 
 # ---------------------------------------------------------------------------
@@ -645,43 +800,158 @@ def bank_question_edit(request, bank_id, question_id):
 # ---------------------------------------------------------------------------
 # İmtahan üçün bankdan sual seç (picker)
 # ---------------------------------------------------------------------------
+def _exam_compatible_question_type(exam):
+    """İmtahanın tipinə uyğun bank sual tipi (uyğunsuz sual əlavə olunmasın)."""
+    return "test" if exam.exam_type == "test" else "written"
+
+
+def _first_or_default_block(exam):
+    """Yazılı imtahan üçün birinci blok (yoxdursa yarat).
+
+    Bankdan əlavə edilən suallar birinci bloka düşür ki, müəllim sonradan onları
+    redaktorda istədiyi kimi bloklara böləbilsin.
+    """
+    block = exam.question_blocks.order_by("order", "id").first()
+    if block is None:
+        block = QuestionBlock.objects.create(
+            exam=exam,
+            name=pgettext("exams.view.bank.message", "Bölmə 1"),
+            order=1,
+        )
+    return block
+
+
+def _bank_language_stats(bank, *, question_type=None):
+    """Bank üçün dil üzrə statistika: [(code, label, count)], ümumi, dil sayı."""
+    labels = dict(EXAM_LANGUAGE_CHOICES)
+    rows = (
+        bank_questions_queryset(bank, question_type=question_type)
+        .values("language")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    stats = []
+    total = 0
+    for row in rows:
+        code = row["language"] or DEFAULT_EXAM_LANGUAGE
+        count = row["count"]
+        total += count
+        stats.append({"code": code, "label": labels.get(code, code), "count": count})
+    return stats, total, len(stats)
+
+
 @login_required
 def exam_bank_picker(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     organization = get_request_organization(request)
-    banks = accessible_banks(request.user, organization).order_by("-created_at")
+    is_modal = _is_modal_request(request)
+    compatible_type = _exam_compatible_question_type(exam)
+    # Yalnız imtahan tipinə uyğun banklar görünsün (test→test bankı, yazılı→yazılı).
+    banks = (
+        accessible_banks(request.user, organization)
+        .filter(default_question_type=compatible_type)
+        .order_by("-created_at")
+    )
 
     bank_id = (request.GET.get("bank") or request.POST.get("bank") or "").strip()
     selected_bank = banks.filter(id=bank_id).first() if bank_id else None
 
     if request.method == "POST" and (request.POST.get("action") == "attach"):
         if selected_bank is None:
+            if is_modal:
+                return JsonResponse(
+                    {"success": False, "error": str(pgettext("exams.view.bank.message", "Əvvəlcə bank seçin."))},
+                    status=400,
+                )
             messages.error(request, pgettext("exams.view.bank.message", "Əvvəlcə bank seçin."))
         else:
-            raw_ids = request.POST.getlist("question_ids")
-            requested_ids = [int(value) for value in raw_ids if value.isdigit()]
-            valid_ids = list(
-                bank_questions_queryset(selected_bank).filter(id__in=requested_ids).values_list("id", flat=True)
+            # "Hamısını seç" rejimi: cari filtrlərə uyğun BÜTÜN sualları əlavə et
+            # (yalnız görünən 300-ü deyil), istisna edilənləri çıxmaqla.
+            if request.POST.get("select_all") == "1":
+                excluded = {int(v) for v in request.POST.getlist("excluded_ids") if v.isdigit()}
+                matching_qs = bank_questions_queryset(
+                    selected_bank,
+                    question_type=compatible_type,
+                    language=(request.POST.get("language") or "").strip() or None,
+                    difficulty=(request.POST.get("difficulty") or "").strip() or None,
+                    search=(request.POST.get("q") or "").strip() or None,
+                )
+                valid_ids = [qid for qid in matching_qs.values_list("id", flat=True) if qid not in excluded]
+            else:
+                raw_ids = request.POST.getlist("question_ids")
+                requested_ids = [int(value) for value in raw_ids if value.isdigit()]
+                # Yalnız imtahanla uyğun tipdə (test/yazılı) sualları əlavə et.
+                valid_ids = list(
+                    bank_questions_queryset(selected_bank, question_type=compatible_type)
+                    .filter(id__in=requested_ids)
+                    .values_list("id", flat=True)
+                )
+            # Yazılı/praktiki imtahanda suallar birinci bloka düşür (sonradan müəllim
+            # özü bloklara bölə bilər). Test imtahanında blok məcburi deyil.
+            attach_block = None if exam.exam_type == "test" else _first_or_default_block(exam)
+            created = attach_bank_questions_to_exam(exam, valid_ids, block=attach_block, created_by=request.user)
+            success_msg = pgettext("exams.view.bank.message", "{count} sual imtahana əlavə olundu.").format(
+                count=len(created)
             )
-            created = attach_bank_questions_to_exam(exam, valid_ids, created_by=request.user)
-            messages.success(
-                request,
-                pgettext("exams.view.bank.message", "{count} sual imtahana əlavə olundu.").format(count=len(created)),
-            )
-            return redirect("exams:teacher_exam_detail", slug=exam.slug)
+            # Yönləndirmə: test → test bankı; yazılı/praktiki → blok redaktoru.
+            if exam.exam_type == "test":
+                redirect_url = reverse("exams:test_question_bank", kwargs={"slug": exam.slug})
+            else:
+                redirect_url = reverse("exams:create_question_bank", kwargs={"slug": exam.slug})
+                # Müəllimə bloklara bölmə imkanı barədə məlumat ver (redaktorda görünür).
+                if created and attach_block is not None:
+                    messages.info(
+                        request,
+                        pgettext(
+                            "exams.view.bank.message",
+                            "{count} sual “{block}” blokuna əlavə olundu. İstəsəniz redaktorda onları "
+                            "ayrı bölmələrə bölə bilərsiniz.",
+                        ).format(count=len(created), block=attach_block.name),
+                    )
+            if is_modal:
+                return JsonResponse(
+                    {"success": True, "count": len(created), "message": success_msg, "redirect_url": redirect_url}
+                )
+            messages.success(request, success_msg)
+            return redirect(redirect_url)
+
+    try:
+        page = max(1, int(request.GET.get("page") or 1))
+    except (TypeError, ValueError):
+        page = 1
+
+    items_mode = request.GET.get("items") == "1"
 
     questions = []
     total_count = 0
+    bank_language_stats = []
+    bank_total_questions = 0
+    bank_language_count = 0
+    has_more = False
     if selected_bank is not None:
+        # Variantlar (akkordeon) üçün prefetch — N+1 sorğunun qarşısını alır.
         question_qs = bank_questions_queryset(
             selected_bank,
+            question_type=compatible_type,
             language=(request.GET.get("language") or "").strip() or None,
             difficulty=(request.GET.get("difficulty") or "").strip() or None,
             search=(request.GET.get("q") or "").strip() or None,
-        )
-        total_count = question_qs.count()
-        questions = list(question_qs[:300])
+        ).prefetch_related("options")
+        offset = (page - 1) * _PICKER_PAGE_SIZE
+        if items_mode:
+            # Scroll əlavəsi: stats/count sorğusu YOX — bir əlavə element çəkib
+            # növbəti səhifə olub-olmadığını bilirik (daha sürətli).
+            window = list(question_qs[offset : offset + _PICKER_PAGE_SIZE + 1])
+            questions = window[:_PICKER_PAGE_SIZE]
+            has_more = len(window) > _PICKER_PAGE_SIZE
+        else:
+            bank_language_stats, bank_total_questions, bank_language_count = _bank_language_stats(
+                selected_bank, question_type=compatible_type
+            )
+            total_count = question_qs.count()
+            questions = list(question_qs[offset : offset + _PICKER_PAGE_SIZE])
+            has_more = total_count > offset + len(questions)
 
     context = {
         "exam": exam,
@@ -689,10 +959,25 @@ def exam_bank_picker(request, slug):
         "selected_bank": selected_bank,
         "questions": questions,
         "total_count": total_count,
+        "bank_language_stats": bank_language_stats,
+        "bank_total_questions": bank_total_questions,
+        "bank_language_count": bank_language_count,
+        "compatible_type": compatible_type,
         "language_choices": EXAM_LANGUAGE_CHOICES,
         "difficulty_choices": _DIFFICULTY_CHOICES,
         "search_query": (request.GET.get("q") or "").strip(),
         "language_filter": (request.GET.get("language") or "").strip(),
         "difficulty_filter": (request.GET.get("difficulty") or "").strip(),
+        "picker_url": reverse("exams:exam_bank_picker", kwargs={"slug": exam.slug}),
+        "page": page,
+        "next_page": page + 1,
+        "has_more": has_more,
     }
+    # AJAX rejimləri: yalnız sual elementləri (scroll əlavəsi) və ya tam content (filtr).
+    if request.GET.get("items") == "1":
+        return render(request, "exams/teacher/partials/_exam_bank_picker_items.html", context)
+    if request.GET.get("content") == "1":
+        return render(request, "exams/teacher/partials/_exam_bank_picker_content.html", context)
+    if is_modal:
+        return render(request, "exams/teacher/partials/_exam_bank_picker_modal.html", context)
     return render(request, "exams/teacher/exam_bank_picker.html", context)

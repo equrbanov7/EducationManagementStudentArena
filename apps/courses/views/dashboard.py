@@ -22,8 +22,10 @@ from django.views.generic import DetailView
 from apps.assignments.models import Submission
 from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
 from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
+from apps.exams.services.language_variants import available_language_options
 from apps.labs.models import LabAssignment, LabSubmission
 from apps.projects.models import ProjectSubmission
 from core.helpers import (
@@ -37,6 +39,28 @@ from core.tenancy import get_request_organization, scoped_by_organization
 from ._helpers import _student_users_queryset
 
 User = get_user_model()
+
+
+def _build_exam_language_modal_context(exam):
+    options = [
+        {
+            "language": option["language"],
+            "display_name": option["display_name"],
+        }
+        for option in available_language_options(exam)
+    ]
+    codes = {option["language"] for option in options}
+    default_language = ""
+    if DEFAULT_EXAM_LANGUAGE in codes:
+        default_language = DEFAULT_EXAM_LANGUAGE
+    elif options:
+        default_language = options[0]["language"]
+
+    return {
+        "language_options": options,
+        "language_options_id": f"course-exam-language-options-{exam.id}",
+        "default_language": default_language,
+    }
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -308,6 +332,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                             "attempts_left": attempts_left,
                             "can_start": can_start_without_code or requires_code,
                             "requires_code": requires_code,
+                            **_build_exam_language_modal_context(exam),
                         }
                     )
 

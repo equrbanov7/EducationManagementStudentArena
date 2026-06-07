@@ -5,7 +5,9 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.services.language_variants import available_language_options
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
@@ -17,6 +19,28 @@ def _apply_exam_type_filter(queryset, filter_type):
     if filter_type in VALID_EXAM_TYPE_FILTERS:
         return queryset.filter(exam_type=filter_type)
     return queryset
+
+
+def _build_language_modal_context(exam):
+    options = [
+        {
+            "language": option["language"],
+            "display_name": option["display_name"],
+        }
+        for option in available_language_options(exam)
+    ]
+    codes = {option["language"] for option in options}
+    default_language = ""
+    if DEFAULT_EXAM_LANGUAGE in codes:
+        default_language = DEFAULT_EXAM_LANGUAGE
+    elif options:
+        default_language = options[0]["language"]
+
+    return {
+        "language_options": options,
+        "language_options_id": f"exam-language-options-{exam.id}",
+        "default_language": default_language,
+    }
 
 
 @login_required
@@ -119,6 +143,7 @@ def assigned_student_exam_list(request):
                 "requires_code": requires_code,
                 "access_label": access_label,
                 "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
+                **_build_language_modal_context(exam),
             }
         )
 
@@ -227,6 +252,7 @@ def student_exam_list(request):
                 "requires_code": requires_code,
                 "access_label": access_label,
                 "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
+                **_build_language_modal_context(exam),
             }
         )
 
