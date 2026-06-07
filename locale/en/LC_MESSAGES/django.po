@@ -2007,7 +2007,7 @@ msgstr "Create first course"
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:10
 msgctxt "profile.my_exams"
 msgid "title"
-msgstr "Title"
+msgstr "My exams"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:18
 msgctxt "profile.my_exams"

@@ -89,6 +89,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "statistics": "accounts/profile/sections/_statistics.html",
     "edit-profile": "accounts/profile/sections/_edit_profile.html",
     "change-password": "accounts/profile/sections/_change_password.html",
+    "question-bank": "accounts/profile/sections/_question_bank.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -110,6 +111,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "review-results",
         "statistics",
         "pending-post-approvals",
+        "question-bank",
     }
 )
 

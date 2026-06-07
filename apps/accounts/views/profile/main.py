@@ -303,6 +303,14 @@ def user_profile(request):
     my_exams_search_query = ""
     my_exams_filter_type = ""
     my_exams_page_obj = None
+    question_bank_banks = []
+    question_bank_page_obj = None
+    question_bank_search_query = ""
+    question_bank_pagination_query = _query_string(section="question-bank")
+    question_bank_create_next_url = _append_query_params(reverse("accounts:profile"), section="question-bank")
+    question_bank_back_url = question_bank_create_next_url
+    question_bank_language_choices = []
+    question_bank_default_type_choices = []
     if capabilities["can_view_owned_learning"]:
         # Sayğac sidebar/profile-info üçün hər zaman ucuz olaraq qalır.
         my_created_courses_count = created_courses_qs.count()
@@ -344,6 +352,40 @@ def user_profile(request):
         else:
             # Yalnız sidebar/profile-info üçün ucuz sayğac.
             my_exams_count = my_exams_qs.count()
+
+    if active_section == "question-bank" and "question-bank" in allowed_sections:
+        from django.db.models import Count
+
+        from apps.exams.constants import EXAM_LANGUAGE_CHOICES
+        from apps.exams.models import QuestionBank
+        from apps.exams.services.question_bank_attach import accessible_banks
+        from core.tenancy import get_request_organization
+
+        organization = get_request_organization(request)
+        question_bank_search_query = (request.GET.get("bank_q") or "").strip()[:120]
+        question_bank_qs = accessible_banks(request.user, organization).annotate(
+            lib_count=Count("library_questions", filter=Q(library_questions__is_active=True))
+        )
+        if question_bank_search_query:
+            question_bank_qs = question_bank_qs.filter(
+                Q(name__icontains=question_bank_search_query) | Q(subject__icontains=question_bank_search_query)
+            )
+        question_bank_qs = question_bank_qs.order_by("-created_at")
+
+        question_bank_page_obj = Paginator(question_bank_qs, 9).get_page(request.GET.get("bank_page"))
+        question_bank_banks = question_bank_page_obj.object_list
+        question_bank_pagination_query = _query_string(
+            section="question-bank",
+            bank_q=question_bank_search_query,
+        )
+        question_bank_back_url = _append_query_params(
+            reverse("accounts:profile"),
+            section="question-bank",
+            bank_q=question_bank_search_query,
+            bank_page=request.GET.get("bank_page"),
+        )
+        question_bank_language_choices = EXAM_LANGUAGE_CHOICES
+        question_bank_default_type_choices = QuestionBank.DEFAULT_QUESTION_TYPE_CHOICES
 
     user_posts = None
     posts_count = 0
@@ -1751,6 +1793,7 @@ def user_profile(request):
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
         "change-password": pgettext_lazy("profile.section", "change_password"),
         "statistics": pgettext_lazy("profile.section", "statistics"),
+        "question-bank": "Sual Bankı",
     }
 
     shortcut_sections = []
@@ -1809,6 +1852,14 @@ def user_profile(request):
         "my_exams_count": my_exams_count,
         "my_exams_search_query": my_exams_search_query,
         "my_exams_filter_type": my_exams_filter_type,
+        "question_bank_banks": question_bank_banks,
+        "question_bank_page_obj": question_bank_page_obj,
+        "question_bank_search_query": question_bank_search_query,
+        "question_bank_pagination_query": question_bank_pagination_query,
+        "question_bank_create_next_url": question_bank_create_next_url,
+        "question_bank_back_url": question_bank_back_url,
+        "question_bank_language_choices": question_bank_language_choices,
+        "question_bank_default_type_choices": question_bank_default_type_choices,
         "my_created_courses": my_created_courses,
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,

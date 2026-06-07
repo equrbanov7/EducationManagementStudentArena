@@ -489,8 +489,12 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, 'name="course_id"')
         self.assertContains(response, f'value="{self.course.id}"')
 
-    def test_create_exam_form_includes_random_question_count_with_default_ten(self):
-        response = self.client.get(reverse("exams:create_exam"))
+    def test_modal_create_exam_form_includes_random_question_count_with_default_ten(self):
+        response = self.client.get(
+            reverse("exams:create_exam"),
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertRegex(response.content.decode(), r'name="random_question_count"[^>]*value="10"')
@@ -626,14 +630,15 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
 
         self.assertFalse(Exam.objects.filter(title="Blocked Without Org").exists())
 
-    def test_create_exam_auto_selects_single_membership_organization(self):
+    def test_create_exam_full_page_redirects_after_single_membership_org_restore(self):
         session = self.client.session
         session.pop("active_organization", None)
         session.save()
 
         response = self.client.get(reverse("exams:create_exam"))
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
         self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
 
     def test_org_admin_can_open_and_submit_create_exam_modal(self):
@@ -946,10 +951,17 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
         self.assertEqual(response.status_code, 404)
 
-    def test_edit_exam_updates_random_question_count(self):
+    def test_edit_exam_full_page_redirects_to_profile_my_exams(self):
+        response = self.client.get(reverse("exams:edit_exam", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
+
+    def test_modal_edit_exam_updates_random_question_count(self):
         response = self.client.post(
-            reverse("exams:edit_exam", args=[self.exam_visible.slug]),
+            reverse("exams:edit_exam", args=[self.exam_visible.slug]) + "?modal=1",
             {
+                "modal": "1",
                 "title": self.exam_visible.title,
                 "description": "Updated random draw count.",
                 "exam_type": "test",
@@ -959,9 +971,11 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
                 "fair_question_distribution_enabled": "false",
                 "ai_difficulty_balance_enabled": "false",
             },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
         self.exam_visible.refresh_from_db()
         self.assertEqual(self.exam_visible.random_question_count, 25)
         self.assertFalse(self.exam_visible.fair_question_distribution_enabled)

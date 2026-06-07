@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ bank.name }} — {% trans "Toplu sual əlavə et" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260607-overflow-fix">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-drawer">
+{% endblock %}
+
+{% block content %}
+    {% include "exams/teacher/partials/_bulk_question_workbench.html" %}
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>
+<script src="{% static 'exams/js/questionWorkbench.js' %}?v=20260607-workbench"></script>
+{% endblock %}

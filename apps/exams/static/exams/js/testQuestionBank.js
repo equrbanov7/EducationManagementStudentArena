@@ -3,9 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
   
       
 
-    // ====== Keys (per exam) ======
-    const examSlug = document.body.dataset.examSlug || "default_exam";
-    const fileKey = `tqb_last_file_${examSlug}`;
+    // ====== Keys (per workbench: exam / bank / dil variantı) ======
+    const wrapperEl = document.querySelector(".bulk-page-wrapper");
+    const workbenchKey =
+      (wrapperEl && wrapperEl.dataset.workbenchKey) ||
+      document.body.dataset.examSlug ||
+      "default_exam";
+    const fileKey = `tqb_last_file_${workbenchKey}`;
   
     // ====== Helpers ======
     function setUploadUI(fileName = "", extension = "") {

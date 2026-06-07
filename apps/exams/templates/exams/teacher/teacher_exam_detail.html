@@ -5,8 +5,8 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
 {% endblock %}
 
 {% block content %}
@@ -365,5 +365,5 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 };
 </script>
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
-<script src="{% static 'exams/js/teacher_exam_detail.js' %}"></script>
+<script src="{% static 'exams/js/teacher_exam_detail.js' %}?v=20260607-unified-question-modal"></script>
 {% endblock %}

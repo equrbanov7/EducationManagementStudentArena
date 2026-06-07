@@ -40,7 +40,16 @@ from .teacher.question_bank import (
     test_question_bank,
     test_question_bank_template_download,
 )
-from .teacher.question_library import exam_bank_picker, question_bank_detail, question_bank_list
+from .teacher.question_library import (
+    bank_question_add,
+    bank_question_edit,
+    exam_bank_picker,
+    question_bank_bulk_add,
+    question_bank_delete,
+    question_bank_detail,
+    question_bank_list,
+    question_bank_update,
+)
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (
     ai_grade_answer,
@@ -111,6 +120,11 @@ __all__ = [
     # Teacher - Question bank library + picker
     "question_bank_list",
     "question_bank_detail",
+    "question_bank_update",
+    "question_bank_delete",
+    "question_bank_bulk_add",
+    "bank_question_add",
+    "bank_question_edit",
     "exam_bank_picker",
     # Teacher - Supervision
     "supervision_monitor",

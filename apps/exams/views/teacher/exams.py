@@ -248,6 +248,7 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     is_editing = slug is not None
+    is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
     allow_organization_selection = False
 
     if not is_editing and is_superadmin_user(request.user) and get_request_organization(request) is None:
@@ -274,8 +275,11 @@ def createAndEditExamView(request, slug=None):
         exam = _get_editable_exam_or_404(request, slug)
     else:
         exam = None
+
+    if not is_modal_request:
+        return redirect(_teacher_profile_my_exams_url())
+
     linked_course = None if is_editing else _get_requested_course_for_exam(request)
-    is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
     # Load existing supervision config for edit mode
     supervision_config = None
@@ -396,24 +400,21 @@ def createAndEditExamView(request, slug=None):
                     else pgettext_lazy("exams.view.exams.message", "exam_created")
                 ),
             )
-            if is_modal_request:
-                return JsonResponse({"success": True, "slug": exam_instance.slug})
-            return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
+            return JsonResponse({"success": True, "slug": exam_instance.slug})
         group_student_map = _build_group_student_map(form)
-        if is_modal_request:
-            html = render_to_string(
-                "exams/teacher/partials/_create_exam_modal_form.html",
-                {
-                    "form": form,
-                    "is_editing": is_editing,
-                    "exam": exam,
-                    "linked_course": linked_course,
-                    "group_student_map": group_student_map,
-                    "supervision_config": supervision_config,
-                },
-                request=request,
-            )
-            return JsonResponse({"success": False, "html": html}, status=400)
+        html = render_to_string(
+            "exams/teacher/partials/_create_exam_modal_form.html",
+            {
+                "form": form,
+                "is_editing": is_editing,
+                "exam": exam,
+                "linked_course": linked_course,
+                "group_student_map": group_student_map,
+                "supervision_config": supervision_config,
+            },
+            request=request,
+        )
+        return JsonResponse({"success": False, "html": html}, status=400)
     else:
         # GET request
         if is_editing:
@@ -422,23 +423,9 @@ def createAndEditExamView(request, slug=None):
             form = ExamForm(**form_kwargs)
     group_student_map = _build_group_student_map(form)
 
-    if is_modal_request:
-        return render(
-            request,
-            "exams/teacher/partials/_create_exam_modal_form.html",
-            {
-                "form": form,
-                "exam": exam,
-                "is_editing": is_editing,
-                "linked_course": linked_course,
-                "group_student_map": group_student_map,
-                "supervision_config": supervision_config,
-            },
-        )
-
     return render(
         request,
-        "exams/teacher/createAndEditExam.html",
+        "exams/teacher/partials/_create_exam_modal_form.html",
         {
             "form": form,
             "exam": exam,

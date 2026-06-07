@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from io import BytesIO
@@ -21,9 +20,14 @@ from apps.exams.constants import QUESTION_RE
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_question_generation import generate_question_bank_text
+from apps.exams.services.bulk_workbench import (
+    analyze_mcq_bulk,
+    exam_question_fp_map,
+    parse_points_payload,
+    parse_selected_indices,
+)
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
-from apps.exams.services.parsing import END_QUESTION_RE, extract_text_from_upload, parse_bulk_mcq
-from apps.exams.services.utils import _norm
+from apps.exams.services.parsing import END_QUESTION_RE, extract_text_from_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 WRITTEN_QUESTION_PREFIX_RE = re.compile(r"^\s*\d+\s*[\.\)]\s*", re.MULTILINE)
@@ -113,6 +117,39 @@ def _append_navigation_query(path, navigation_query):
     return f"{path}{separator}{navigation_query}"
 
 
+def _test_workbench_context(exam, navigation_query):
+    """Ortaq ``_bulk_question_workbench`` partial-ı üçün imtahan test bankı konteksti."""
+    download_base = reverse("exams:test_question_bank_template_download", kwargs={"slug": exam.slug})
+    detail_url = _append_navigation_query(
+        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}), navigation_query
+    )
+    questions_url = _append_navigation_query(
+        reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug}), navigation_query
+    )
+    return {
+        "wb_workbench_key": f"exam-{exam.slug}",
+        "wb_title": exam.title,
+        "wb_subtitle": pgettext("exams.template.test_question_bank", "subtitle_management_panel"),
+        "wb_back_url": detail_url,
+        "wb_back_label": pgettext("exams.template.test_question_bank", "action_back"),
+        "wb_secondary_url": questions_url,
+        "wb_secondary_label": pgettext("exams.template.test_question_bank", "action_view_questions_bank"),
+        "wb_secondary_icon": "fa-layer-group",
+        "wb_show_settings": True,
+        "wb_ai_url": reverse("exams:ai_generate_question_bank", kwargs={"slug": exam.slug}),
+        "wb_ai_context": "test",
+        "wb_show_language": False,
+        "wb_show_format": False,
+        "wb_format": "test",
+        "wb_show_report": True,
+        "wb_templates": [
+            {"url": f"{download_base}?format=docx", "label": "DOCX", "kind": "docx"},
+            {"url": f"{download_base}?format=txt", "label": "TXT", "kind": "txt"},
+        ],
+        "wb_save_label": pgettext("exams.template.test_question_bank", "action_save_selected"),
+    }
+
+
 def _parse_written_questions(content_text):
     text = (content_text or "").strip()
     if not text:
@@ -157,46 +194,13 @@ def _optional_non_negative_int(value):
     return parsed if parsed >= 0 else None
 
 
+# Geriyə uyğunluq üçün nazik adapterlər — məntiq ortaq ``bulk_workbench`` servisindədir.
 def _parse_selected_question_indices(post_data):
-    if "selected_indices" in post_data:
-        compact_value = (post_data.get("selected_indices") or "").strip()
-        if compact_value:
-            raw_values = compact_value.split(",")
-        else:
-            legacy_values = post_data.getlist("selected")
-            if legacy_values:
-                raw_values = legacy_values
-            else:
-                return set()
-    else:
-        raw_values = post_data.getlist("selected")
-        if not raw_values:
-            return None
-
-    selected = set()
-    for raw_value in raw_values:
-        try:
-            value = int(str(raw_value).strip())
-        except (TypeError, ValueError):
-            continue
-        if value > 0:
-            selected.add(value)
-    return selected
+    return parse_selected_indices(post_data)
 
 
 def _parse_points_payload(post_data):
-    raw_payload = (post_data.get("points_payload") or "").strip()
-    if not raw_payload:
-        return {}
-
-    try:
-        payload = json.loads(raw_payload)
-    except (TypeError, ValueError, json.JSONDecodeError):
-        return {}
-
-    if not isinstance(payload, dict):
-        return {}
-    return payload
+    return parse_points_payload(post_data)
 
 
 def _sync_written_block_questions(block, question_texts):
@@ -1064,24 +1068,7 @@ def test_question_bank(request, slug):
     rq_value = str(rq_default)
     dp_value = str(dp_default)
 
-    def build_fp_from_parsed(q):
-        return _norm(q["text"]) + "||" + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
-
-    def build_fp_from_db(eq):
-        # DB-də option-lar label saxlamadığı üçün sıra ilə götürürük (A..E)
-        opt_map = {}
-        opts = list(eq.options.all())
-        labels = list("ABCDE")
-        for i, opt in enumerate(opts[:5]):
-            opt_map[labels[i]] = opt.text
-        return _norm(eq.text) + "||" + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
-
-    def _short_preview(text, length=60):
-        """DB dublikat referansı üçün qısa preview (sual nömrəsi yanında göstərmək üçün)."""
-        clean = (text or "").strip().replace("\n", " ")
-        if len(clean) <= length:
-            return clean
-        return clean[: length - 1].rstrip() + "…"
+    wb_ctx = _test_workbench_context(exam, navigation_query)
 
     # GET
     if request.method != "POST":
@@ -1105,6 +1092,7 @@ def test_question_bank(request, slug):
                 "question_bank_navigation_query": navigation_query,
                 "navigation_from_section": navigation_from_section,
                 "navigation_return_to": navigation_return_to,
+                **wb_ctx,
             },
         )
 
@@ -1135,133 +1123,17 @@ def test_question_bank(request, slug):
                 pgettext("exams.view.question_bank.message", "file_read_failed").format(error=e),
             )
 
-    # 3) preview/save üçün parse et
+    # 3) preview/save üçün parse + tam validasiya — ortaq workbench mühərriki.
+    #    (Dublikat aşkarlanması, struktur/balans xəbərdarlıqları, meta bayraqları
+    #     və kateqoriya sayğacları artıq servis daxilində hesablanır.)
     if action in ("preview", "save", "download_report"):
-        parsed = parse_bulk_mcq(raw_text) or []
-
-        # təhlükəsizlik: warnings açarı hər sualda olsun
-        for q in parsed:
-            q.setdefault("warnings", [])
-
-        # ---- Duplicate check: import daxilində ----
-        # Hər bir fingerprint üçün bütün indeksləri yığırıq, sonra hər sualda
-        # qarşılıqlı çarpaz-referans qoyuruq.
-        fp_groups = {}
-        for idx, q in enumerate(parsed, start=1):
-            fp = build_fp_from_parsed(q)
-            fp_groups.setdefault(fp, []).append(idx)
-
-        for _fp, indices in fp_groups.items():
-            if len(indices) < 2:
-                continue
-            for pos, idx in enumerate(indices):
-                # Sual bu group-da nə dərəcədə yerləşir
-                others = [i for i in indices if i != idx]
-                # Ən yaxşı referans: ilk variant (ən kiçik nömrə)
-                primary_ref = others[0]
-                primary_preview = _short_preview(parsed[primary_ref - 1].get("text", ""))
-                if pos == 0:
-                    # ilk dublikat — sonrakı eyni sualı göstər
-                    msg = pgettext("exams.view.question_bank.warning", "duplicate_in_import_first").format(
-                        index=idx,
-                        next_index=others[0],
-                        count=len(others),
-                        preview=_short_preview(parsed[others[0] - 1].get("text", "")),
-                    )
-                else:
-                    # sonrakı dublikat — əvvəlki ilk variantı göstər
-                    msg = pgettext("exams.view.question_bank.warning", "duplicate_in_import").format(
-                        index=idx,
-                        previous_index=primary_ref,
-                        preview=primary_preview,
-                    )
-
-                parsed[idx - 1]["warnings"].append(
-                    {
-                        "type": "duplicate_in_import",
-                        "severity": "error",
-                        "msg": msg,
-                        "ref": primary_ref if pos > 0 else others[0],
-                        "all_refs": others,
-                    }
-                )
-
-        # ---- Duplicate check: DB-də artıq var? ----
-        existing = ExamQuestion.objects.filter(exam=exam).prefetch_related("options").order_by("order", "id")
-        existing_by_fp = {}
-        for eq in existing:
-            existing_by_fp[build_fp_from_db(eq)] = eq
-
-        for idx, q in enumerate(parsed, start=1):
-            fp = build_fp_from_parsed(q)
-            matched = existing_by_fp.get(fp)
-            if matched is not None:
-                db_order = matched.order or matched.pk
-                db_preview = _short_preview(matched.text)
-                q["warnings"].append(
-                    {
-                        "type": "already_in_exam",
-                        "severity": "error",
-                        "msg": pgettext("exams.view.question_bank.warning", "already_in_exam").format(
-                            index=idx,
-                            db_index=db_order,
-                            preview=db_preview,
-                        ),
-                        "ref_db_id": matched.pk,
-                        "ref_db_order": db_order,
-                    }
-                )
-
-        # ---- Test miqyasında "yalnız doğru cavabın uzunluğu" pattern-i ----
-        # Tək-tək sualda zərərsiz ola bilər, amma testin böyük hissəsində bu pattern varsa
-        # cəlbedici (gözəgörünən) ipucu yaranır — ona görə xəbərdarlıq edirik.
-        if parsed:
-            long_correct_count = 0
-            short_correct_count = 0
-            applicable_count = 0
-            for q in parsed:
-                opts = q.get("options", {}) or {}
-                correct = [c for c in q.get("correct", []) if c in opts]
-                wrong = [lab for lab in opts if lab not in correct]
-                if not correct or not wrong:
-                    continue
-                applicable_count += 1
-                lens_correct = [len((opts.get(c) or "").strip()) for c in correct]
-                lens_wrong = [len((opts.get(w) or "").strip()) for w in wrong]
-                if not lens_correct or not lens_wrong:
-                    continue
-                max_c = max(lens_correct)
-                avg_w = sum(lens_wrong) / max(1, len(lens_wrong))
-                if max_c >= 15 and avg_w > 0 and max_c >= avg_w * 1.8:
-                    long_correct_count += 1
-                if max(lens_wrong) >= 15 and max_c > 0 and max_c <= avg_w * 0.4:
-                    short_correct_count += 1
-
-            # Test həcminin ≥40%-də pattern varsa — informativ xəbərdarlıq
-            threshold = max(3, int(applicable_count * 0.4))
-            test_level_warnings = []
-            if applicable_count >= 5 and long_correct_count >= threshold:
-                test_level_warnings.append(
-                    {
-                        "type": "bulk_correct_too_long",
-                        "severity": "warning",
-                        "msg": pgettext("exams.view.question_bank.warning", "bulk_correct_too_long").format(
-                            ratio=int((long_correct_count / applicable_count) * 100),
-                        ),
-                    }
-                )
-            if applicable_count >= 5 and short_correct_count >= threshold:
-                test_level_warnings.append(
-                    {
-                        "type": "bulk_correct_too_short",
-                        "severity": "warning",
-                        "msg": pgettext("exams.view.question_bank.warning", "bulk_correct_too_short").format(
-                            ratio=int((short_correct_count / applicable_count) * 100),
-                        ),
-                    }
-                )
-        else:
-            test_level_warnings = []
+        analysis = analyze_mcq_bulk(raw_text, existing_fp_map=exam_question_fp_map(exam))
+        parsed = analysis["parsed"]
+        category_counts = analysis["category_counts"]
+        warning_count = analysis["warning_count"]
+        duplicate_count = analysis["duplicate_count"]
+        error_count = analysis["error_count"]
+        test_level_warnings = analysis["test_level_warnings"]
 
         # ---- Seçilən suallar ----
         selected_from_request = _parse_selected_question_indices(request.POST)
@@ -1269,100 +1141,6 @@ def test_question_bank(request, slug):
             selected = set(range(1, len(parsed) + 1))
         else:
             selected = selected_from_request
-
-        # ---- Hər sual üçün meta xülasə (UI filter & badge üçün) ----
-        # Severity prioriteti: error > warning > info > none
-        # severity_rank = {"error": 3, "warning": 2, "info": 1, "none": 0}
-        category_counts = {
-            "errors": 0,
-            "warnings": 0,
-            "duplicates": 0,
-            "structure": 0,  # variant sayı, boş variant, missing option
-            "balance": 0,  # uzunluq balansı
-            "clean": 0,  # heç bir warning olmayan sual
-        }
-
-        for _idx, q in enumerate(parsed, start=1):
-            warnings = q.get("warnings") or []
-            counts = {"error": 0, "warning": 0, "info": 0}
-            dup_refs = []
-            types = set()
-            for w in warnings:
-                sev = w.get("severity", "warning")
-                if sev in counts:
-                    counts[sev] += 1
-                types.add(w.get("type"))
-                if w.get("type") == "duplicate_in_import" and w.get("ref"):
-                    dup_refs.append({"kind": "import", "index": w["ref"]})
-                if w.get("type") == "already_in_exam":
-                    dup_refs.append(
-                        {
-                            "kind": "db",
-                            "index": w.get("ref_db_order"),
-                            "db_id": w.get("ref_db_id"),
-                        }
-                    )
-
-            top_sev = "none"
-            for sev in ("error", "warning", "info"):
-                if counts[sev]:
-                    top_sev = sev
-                    break
-
-            has_dup = bool({"duplicate_in_import", "already_in_exam"} & types)
-            has_structure = bool(
-                {"missing_option", "option_count_recommend_5", "option_count_too_low", "empty_option_text"} & types
-            )
-            has_balance = bool({"correct_too_long", "correct_too_short"} & types)
-
-            q["meta"] = {
-                "top_severity": top_sev,
-                "error_count": counts["error"],
-                "warning_count": counts["warning"],
-                "info_count": counts["info"],
-                "total_count": counts["error"] + counts["warning"] + counts["info"],
-                "has_duplicate": has_dup,
-                "has_structure_issue": has_structure,
-                "has_balance_issue": has_balance,
-                "dup_refs": dup_refs,
-                # JS filtering üçün space-separated tag list
-                "flags": " ".join(
-                    filter(
-                        None,
-                        [
-                            f"sev-{top_sev}" if top_sev != "none" else "sev-clean",
-                            "has-dup" if has_dup else "",
-                            "has-structure" if has_structure else "",
-                            "has-balance" if has_balance else "",
-                            "has-error" if counts["error"] else "",
-                            "has-warning" if counts["warning"] else "",
-                            "has-info" if counts["info"] else "",
-                            "is-clean" if not warnings else "",
-                        ],
-                    )
-                ),
-            }
-
-            if counts["error"]:
-                category_counts["errors"] += 1
-            if counts["warning"]:
-                category_counts["warnings"] += 1
-            if has_dup:
-                category_counts["duplicates"] += 1
-            if has_structure:
-                category_counts["structure"] += 1
-            if has_balance:
-                category_counts["balance"] += 1
-            if not warnings:
-                category_counts["clean"] += 1
-
-        # ---- warning sayları (üst panel üçün) ----
-        # severity == "info" sayılmır — yumşaq qeyddir
-        warning_count = sum(1 for q in parsed for w in q.get("warnings", []) if w.get("severity", "warning") != "info")
-        # test miqyaslı warning-lər də sayılsın
-        warning_count += sum(1 for w in test_level_warnings if w.get("severity", "warning") != "info")
-        duplicate_count = category_counts["duplicates"]
-        error_count = category_counts["errors"]
 
     # 4) REPORT DOWNLOAD
     if action == "download_report":

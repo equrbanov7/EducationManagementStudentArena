@@ -54,8 +54,14 @@
             }
 
             if (questionModalHeader) {
-                questionModalHeader.classList.remove("bg-primary", "bg-info");
-                questionModalHeader.classList.add(isEdit ? "bg-primary" : "bg-info");
+                questionModalHeader.classList.remove(
+                    "bg-primary",
+                    "bg-info",
+                    "question-form-modal__header--create",
+                    "question-form-modal__header--edit"
+                );
+                questionModalHeader.classList.add("question-form-modal__header");
+                questionModalHeader.classList.add(isEdit ? "question-form-modal__header--edit" : "question-form-modal__header--create");
                 questionModalHeader.classList.add("text-white");
             }
         }

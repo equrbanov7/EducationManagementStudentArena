@@ -155,16 +155,13 @@ def build_question_meta(warnings: list) -> dict:
     }
 
 
-def analyze_question_bank(exam) -> QuestionBankAnalysis:
-    """Bütün imtahan bankını analiz edir və UI/report üçün nəticə qaytarır.
+def _run_analysis(questions) -> QuestionBankAnalysis:
+    """Verilmiş sual obyektləri siyahısını analiz edir (ExamQuestion və ya BankQuestion).
 
-    Yalnız ``exam.exam_type == "test"`` üçün işləyir; əks halda boş (enabled=False)
-    nəticə qaytarır.
+    Dublikat (dil, fingerprint) cütünə görə qruplaşır — fərqli dillərdə eyni mətnli
+    suallar dublikat sayılmır. ``order`` sahəsi olmayan obyektlər üçün sıra mövqedən
+    götürülür (BankQuestion).
     """
-    if getattr(exam, "exam_type", None) != "test":
-        return _empty_analysis()
-
-    questions = list(exam.questions.prefetch_related("options").order_by("order", "id"))
     if not questions:
         result = _empty_analysis()
         result.enabled = True
@@ -172,14 +169,16 @@ def analyze_question_bank(exam) -> QuestionBankAnalysis:
 
     # 1) Hər sual üçün parser strukturunu qur
     parsed: list[dict] = []
-    fp_groups: dict[str, list[int]] = {}
+    fp_groups: dict = {}
     for position, question in enumerate(questions, start=1):
         opt_map, correct = _options_map(question)
+        order = getattr(question, "order", None) or position
+        language = getattr(question, "language", "") or ""
         parsed.append(
             {
                 "db_id": question.id,
-                "q_no": question.order or position,
-                "order": question.order or position,
+                "q_no": order,
+                "order": order,
                 "position": position,
                 "text": question.text or "",
                 "options": opt_map,
@@ -187,7 +186,7 @@ def analyze_question_bank(exam) -> QuestionBankAnalysis:
                 "warnings": [],
             }
         )
-        fp_groups.setdefault(_fingerprint(question.text or "", opt_map), []).append(position)
+        fp_groups.setdefault((language, _fingerprint(question.text or "", opt_map)), []).append(position)
 
     # 2) Per-sual validasiya (parsing servisini təkrar istifadə)
     _validate_questions(parsed)
@@ -279,3 +278,19 @@ def analyze_question_bank(exam) -> QuestionBankAnalysis:
         total_analyzed=len(parsed),
         enabled=True,
     )
+
+
+def analyze_question_bank(exam) -> QuestionBankAnalysis:
+    """İmtahan bankını analiz edir (yalnız ``exam_type == "test"``)."""
+    if getattr(exam, "exam_type", None) != "test":
+        return _empty_analysis()
+    questions = list(exam.questions.prefetch_related("options").order_by("order", "id"))
+    return _run_analysis(questions)
+
+
+def analyze_bank_questions(bank, *, language=None) -> QuestionBankAnalysis:
+    """Müstəqil bankın test suallarını analiz edir (opsional dil üzrə)."""
+    queryset = bank.library_questions.filter(question_type="test").prefetch_related("options")
+    if language:
+        queryset = queryset.filter(language=language)
+    return _run_analysis(list(queryset.order_by("-created_at", "id")))

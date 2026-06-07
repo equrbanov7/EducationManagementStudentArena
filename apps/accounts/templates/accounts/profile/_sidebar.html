@@ -182,9 +182,13 @@
         {% endif %}
         {% endif %}
 
-        {% if role_capabilities.can_use_question_bank %}
+        {% if 'question-bank' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'exams:question_bank_list' %}" class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=question-bank"
+               data-section="question-bank"
+               data-title="Sual Bankı"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-bank' %}active{% endif %}">
                 <i class="fas fa-layer-group sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Sual Bankı</span>
             </a>
