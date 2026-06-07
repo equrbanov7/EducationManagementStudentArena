@@ -203,7 +203,8 @@ def create_questions_for_variant(exam, language, parsed_questions, *, default_po
                 text=question.get("text", ""),
                 answer_mode=question.get("answer_mode", "single"),
                 order=start_order,
-                points=default_points or 1,
+                # Sual üzrə bal verilibsə onu, yoxsa default balı işlət (geriyə uyğun).
+                points=question.get("points") or default_points or 1,
             )
         )
         option_payloads.append((options, set(question.get("correct") or [])))

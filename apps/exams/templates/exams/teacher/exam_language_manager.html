@@ -1,58 +1,66 @@
 {% extends "base.html" %}
+{% load static i18n %}
 
-{% block title %}Dil idarəetməsi — {{ exam.title }}{% endblock %}
+{% block title %}{% trans "Dil idarəetməsi" %} — {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260607-overflow-fix">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-drawer">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 960px;">
+<div class="bulk-page-wrapper" style="padding-bottom:0;">
 
-    <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-            <h1 class="h4 mb-1">Dil variantları</h1>
-            <div class="text-muted small">{{ exam.title }}</div>
+    <header class="page-header">
+        <div class="title-section">
+            <h1 class="page-title">{% trans "Dil variantları" %}</h1>
+            <p class="page-subtitle">{{ exam.title }}</p>
         </div>
-        <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>İmtahana qayıt
-        </a>
+        <div class="page-header-links">
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="page-header-link page-header-link--secondary">
+                <i class="fas fa-arrow-left"></i> {% trans "İmtahana qayıt" %}
+            </a>
+        </div>
+    </header>
+
+    <div class="wb-info-banner">
+        <i class="fas fa-circle-info"></i>
+        <span>{% trans "Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir." %}</span>
     </div>
 
-    <div class="alert alert-info">
-        Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana
-        başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir.
-    </div>
-
-    {# ── Mövcud variantlar ── #}
-    <div class="card mb-4">
-        <div class="card-header fw-semibold">Mövcud dillər</div>
-        <div class="card-body p-0">
+    {# ── Mövcud dillər ── #}
+    <div class="wb-panel">
+        <div class="wb-panel__head"><i class="fas fa-language"></i> {% trans "Mövcud dillər" %}</div>
+        <div class="wb-panel__body" style="padding:0;">
             {% if variant_rows %}
-            <table class="table mb-0 align-middle">
+            <table class="wb-lang-table">
                 <thead>
                     <tr>
-                        <th>Dil</th>
-                        <th class="text-center">Sual sayı</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-end">Əməliyyat</th>
+                        <th>{% trans "Dil" %}</th>
+                        <th>{% trans "Sual sayı" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th style="text-align:right;">{% trans "Əməliyyat" %}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in variant_rows %}
                     <tr>
-                        <td class="fw-semibold">{{ row.variant.display_name|default:row.label }}</td>
-                        <td class="text-center">{{ row.count }}</td>
-                        <td class="text-center">
+                        <td class="wb-lang-table__name">{{ row.variant.display_name|default:row.label }}</td>
+                        <td class="wb-lang-table__count">{{ row.count }}</td>
+                        <td>
                             {% if row.variant.is_active %}
-                            <span class="badge bg-success rounded-pill">Aktiv</span>
+                            <span class="wb-status wb-status--active"><i class="fas fa-circle-check"></i> {% trans "Aktiv" %}</span>
                             {% else %}
-                            <span class="badge bg-secondary rounded-pill">Deaktiv</span>
+                            <span class="wb-status wb-status--inactive"><i class="fas fa-circle-pause"></i> {% trans "Deaktiv" %}</span>
                             {% endif %}
                         </td>
-                        <td class="text-end">
-                            <form method="post" class="d-inline">
+                        <td style="text-align:right;">
+                            <form method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="toggle_variant">
                                 <input type="hidden" name="variant_id" value="{{ row.variant.id }}">
-                                <button type="submit" class="btn btn-sm {% if row.variant.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %}">
-                                    {% if row.variant.is_active %}Deaktiv et{% else %}Aktiv et{% endif %}
+                                <button type="submit" class="qbx-btn qbx-btn--ghost" style="padding:7px 14px;">
+                                    {% if row.variant.is_active %}{% trans "Deaktiv et" %}{% else %}{% trans "Aktiv et" %}{% endif %}
                                 </button>
                             </form>
                         </td>
@@ -61,71 +69,48 @@
                 </tbody>
             </table>
             {% else %}
-            <div class="text-muted text-center py-4">Hələ heç bir dil variantı yoxdur.</div>
+            <div class="qb-empty" style="padding:32px;">{% trans "Hələ heç bir dil variantı yoxdur." %}</div>
             {% endif %}
         </div>
     </div>
 
-    {# ── Yeni variant əlavə et ── #}
+    {# ── Yeni dil əlavə et ── #}
     {% if addable_languages %}
-    <div class="card mb-4">
-        <div class="card-header fw-semibold">Yeni dil əlavə et</div>
-        <div class="card-body">
-            <form method="post" class="row g-2 align-items-end">
+    <div class="wb-panel">
+        <div class="wb-panel__head"><i class="fas fa-plus-circle"></i> {% trans "Yeni dil əlavə et" %}</div>
+        <div class="wb-panel__body">
+            <form method="post" class="wb-mini-form">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="add_variant">
-                <div class="col-md-4">
-                    <label class="form-label small text-muted mb-1" for="add_language">Dil</label>
-                    <select class="form-select form-select-sm" id="add_language" name="language">
+                <div class="qb-field">
+                    <label class="qb-field__label" for="add_language">{% trans "Dil" %}</label>
+                    <select class="qb-select" id="add_language" name="language">
                         {% for code, label in addable_languages %}
                         <option value="{{ code }}">{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-5">
-                    <label class="form-label small text-muted mb-1" for="add_display_name">Göstəriş adı (opsional)</label>
-                    <input type="text" class="form-control form-control-sm" id="add_display_name" name="display_name"
-                           placeholder="məs. Azərbaycan (2024 buraxılış)">
+                <div class="qb-field">
+                    <label class="qb-field__label" for="add_display_name">{% trans "Göstəriş adı (opsional)" %}</label>
+                    <input type="text" class="qb-input" id="add_display_name" name="display_name"
+                           placeholder="{% trans 'məs. Azərbaycan (2024 buraxılış)' %}">
                 </div>
-                <div class="col-md-3 d-grid">
-                    <button type="submit" class="btn btn-primary btn-sm">Əlavə et</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    {% endif %}
-
-    {# ── Dilə toplu sual yüklə (yalnız test imtahanı) ── #}
-    {% if is_test_exam and variant_rows %}
-    <div class="card">
-        <div class="card-header fw-semibold">Dilə toplu sual yüklə</div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="upload_questions">
-                <div class="row g-2 mb-2">
-                    <div class="col-md-4">
-                        <label class="form-label small text-muted mb-1" for="upload_language">Dil</label>
-                        <select class="form-select form-select-sm" id="upload_language" name="language">
-                            {% for row in variant_rows %}
-                            <option value="{{ row.variant.language }}">{{ row.variant.display_name|default:row.label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <label class="form-label small text-muted mb-1" for="bulk_text">Suallar (mətn formatında)</label>
-                <textarea class="form-control form-control-sm" id="bulk_text" name="bulk_text" rows="10"
-                          placeholder="1. Sual mətni&#10;A) variant&#10;B) variant&#10;*C) düz cavab&#10;D) variant&#10;&#10;2. ..."></textarea>
-                <div class="form-text">Format mövcud sual bankı yükləməsi ilə eynidir (düz cavabı <code>*</code> ilə işarələyin).</div>
-                <div class="d-flex justify-content-end mt-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload me-1"></i>Sualları yüklə
-                    </button>
+                <div class="qb-field" style="justify-content:flex-end;">
+                    <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Əlavə et" %}</button>
                 </div>
             </form>
         </div>
     </div>
     {% endif %}
-
 </div>
+
+{# ── Dilə toplu sual yüklə (ortaq workbench — yalnız test imtahanı) ── #}
+{% if is_test_exam and variant_rows %}
+    {% include "exams/teacher/partials/_bulk_question_workbench.html" %}
+{% endif %}
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>
+<script src="{% static 'exams/js/questionWorkbench.js' %}?v=20260607-workbench"></script>
 {% endblock %}

@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260527-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260607-1">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}">
@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-profile-link">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
 {% endblock %}
 
@@ -21,7 +23,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -50,6 +52,8 @@
                 {% include "accounts/profile/sections/_posts.html" %}
             {% elif active_section == "my-exams" %}
                 {% include "accounts/profile/sections/_my_exams.html" %}
+            {% elif active_section == "question-bank" %}
+                {% include "accounts/profile/sections/_question_bank.html" %}
             {% elif active_section == "my-courses" %}
                 {% include "accounts/profile/sections/_my_courses.html" %}
             {% elif active_section == "courses" %}
@@ -117,6 +121,7 @@
             {# Create-exam modalı — eyni səbəbdən qlobal saxlanılır. #}
             {% if 'my-exams' in allowed_sections %}
                 {% include "exams/teacher/partials/_create_exam_modal.html" %}
+                {% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
             {% endif %}
 
             
@@ -171,6 +176,12 @@ window.MODAL_SUPERVISION_TPL_INFO = {
         ]
     }
 };
+window.EXAM_CREATE_EDIT_MODAL_I18N = {
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
+    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
+    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+};
 </script>
 <script src="{% static 'accounts/js/profile.js' %}?v=20260604-assignedexam-deleg"></script>
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
@@ -184,4 +195,6 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 <script src="{% static 'js/user_profile.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
 <script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260510-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
+<script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
 {% endblock %}

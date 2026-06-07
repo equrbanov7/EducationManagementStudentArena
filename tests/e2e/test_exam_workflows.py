@@ -75,11 +75,11 @@ class TestTeacherExamPages:
         not E2E_USERNAME or not E2E_PASSWORD,
         reason="E2E_USERNAME / E2E_PASSWORD not set",
     )
-    def test_create_exam_page_loads(self, authenticated_page: Page) -> None:
-        """Exam creation page must load without a server error."""
+    def test_create_exam_direct_url_redirects_without_server_error(self, authenticated_page: Page) -> None:
+        """Direct exam creation URL must redirect to the profile modal entry point without a server error."""
         response = authenticated_page.goto(CREATE_EXAM_URL)
         assert response is not None
-        assert response.status < 500, f"Create exam page returned HTTP {response.status}"
+        assert response.status < 500, f"Create exam direct URL returned HTTP {response.status}"
         authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
 
@@ -87,9 +87,9 @@ class TestTeacherExamPages:
         not E2E_USERNAME or not E2E_PASSWORD,
         reason="E2E_USERNAME / E2E_PASSWORD not set",
     )
-    def test_create_exam_page_has_form(self, authenticated_page: Page) -> None:
-        """Create exam page must render a form when the user is authorized."""
-        response = authenticated_page.goto(CREATE_EXAM_URL)
+    def test_create_exam_modal_has_form(self, authenticated_page: Page) -> None:
+        """Create exam modal endpoint must render a form when the user is authorized."""
+        response = authenticated_page.goto(f"{CREATE_EXAM_URL}?modal=1")
         assert response is not None
         if response.status == 200:
             authenticated_page.wait_for_load_state("domcontentloaded")

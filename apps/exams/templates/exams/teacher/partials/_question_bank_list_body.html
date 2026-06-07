@@ -1,0 +1,221 @@
+{% load static i18n %}
+{% comment %}
+Sual Bankı siyahısının native profil gövdəsi.
+Ayrıca ``question_bank_list.html`` səhifəsi silinib; görünən siyahı burada render olunur.
+
+Kontekst:
+  banks, page_obj, search_query, language_choices, default_type_choices
+  qbl_create_next   — bank yaradıldıqdan sonra qayıdış (profil bölməsi / boş)
+  qbl_section       — profil bölməsində "question-bank" (axtarış/pagination üçün)
+  qbl_pagination_query — pagination extra_query (bank_q + section)
+  qbl_back_url      — redaktə/sil sonrası profil bölməsinə qayıdış
+{% endcomment %}
+<div class="qb-page">
+
+    <div class="qb-page__head">
+        <div>
+            <h1 class="qb-page__title">{% trans "Sual Bankı" %}</h1>
+            <p class="qb-page__subtitle">{% trans "Təkrar istifadə oluna bilən sual kitabxanaları — imtahanlardan asılı deyil." %}</p>
+        </div>
+    </div>
+
+    {# ── Yeni bank yarat ── #}
+    <div class="qb-create-card">
+        <div class="qb-create-card__head">
+            <div class="qb-create-card__icon"><i class="fas fa-layer-group"></i></div>
+            <div>
+                <h2 class="qb-create-card__title">{% trans "Yeni sual bankı yarat" %}</h2>
+                <p class="qb-create-card__desc">{% trans "Bankı yaradın, sonra ona test və ya yazılı suallar əlavə edin." %}</p>
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'exams:question_bank_list' %}" class="qb-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_bank">
+            {% if qbl_create_next %}<input type="hidden" name="next" value="{{ qbl_create_next }}">{% endif %}
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankName">{% trans "Bankın adı" %} <span style="color:var(--danger,#e74c3c)">*</span></label>
+                <input type="text" class="qb-input" id="bankName" name="name" required
+                       placeholder="{% trans 'məs. Verilənlər strukturu — 1-ci kurs' %}">
+                <span class="qb-field__hint">{% trans "Bankı tanımaq üçün ad. İmtahan adı deyil." %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankSubject">{% trans "Fənn / Mövzu" %}</label>
+                <input type="text" class="qb-input" id="bankSubject" name="subject"
+                       placeholder="{% trans 'məs. İnformatika, Riyaziyyat...' %}">
+                <span class="qb-field__hint">{% trans "Hansı fənnə və ya mövzuya aiddir (opsional)." %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankLanguage">{% trans "Əsas dil" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" id="bankLanguage" name="language" data-bootstrap-select>
+                        {% for code, label in language_choices %}
+                        <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <span class="qb-field__hint">{% trans "Sualların standart dili (sonra dəyişə bilərsiniz)." %}</span>
+            </div>
+
+            <div class="qb-field">
+                <label class="qb-field__label" for="bankFormat">{% trans "İmtahan növü / format" %}</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" id="bankFormat" name="default_question_type" data-bootstrap-select>
+                        {% for value, label in default_type_choices %}
+                        <option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı (sərbəst cavab)" %}{% else %}{% trans "Test (variantlı)" %}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <span class="qb-field__hint">{% trans "Default sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</span>
+            </div>
+
+            <div class="qb-form__footer">
+                <label class="qb-switch">
+                    <input type="checkbox" name="is_shared" value="1">
+                    <span class="qb-switch__track"></span>
+                    <span class="qb-switch__text">
+                        <span class="qb-switch__title">{% trans "Təşkilatda paylaş" %}</span>
+                        <span class="qb-switch__hint">{% trans "Eyni təşkilatdakı digər müəllimlər bu bankı görə bilər." %}</span>
+                    </span>
+                </label>
+                <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Bank yarat" %}</button>
+            </div>
+        </form>
+    </div>
+
+    {# ── Axtarış ── #}
+    <form method="get" class="qb-banklist-search js-profile-section-link-skip">
+        {% if qbl_section %}<input type="hidden" name="section" value="{{ qbl_section }}">{% endif %}
+        <div class="qb-input-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" name="bank_q" value="{{ search_query }}" placeholder="{% trans 'Bank adı və ya fənn üzrə axtar...' %}">
+        </div>
+        <button type="submit" class="qbx-btn qbx-btn--ghost"><i class="fas fa-filter"></i> {% trans "Axtar" %}</button>
+    </form>
+
+    {# ── Banklar ── #}
+    {% if banks %}
+    <div class="qb-grid">
+        {% for bank in banks %}
+        <div class="qb-card">
+            <a href="{% url 'exams:question_bank_detail' bank.id %}"
+               class="qb-card__stretched-link"
+               aria-label="{{ bank.name }}"></a>
+            <div class="qb-card__top">
+                <h3 class="qb-card__name">{{ bank.name }}</h3>
+                {% if bank.created_by_id == request.user.id %}
+                <div class="qb-card__icons">
+                    <button type="button" class="qb-icon-btn js-edit-bank" title="{% trans 'Redaktə et' %}"
+                            data-update-url="{% url 'exams:question_bank_update' bank.id %}"
+                            data-name="{{ bank.name|escape }}" data-subject="{{ bank.subject|escape }}"
+                            data-language="{{ bank.language }}" data-format="{{ bank.default_question_type }}"
+                            data-shared="{% if bank.is_shared %}1{% else %}0{% endif %}">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="qb-icon-btn qb-icon-btn--danger js-delete-bank" title="{% trans 'Sil' %}"
+                            data-delete-url="{% url 'exams:question_bank_delete' bank.id %}" data-name="{{ bank.name|escape }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="qb-card__meta">
+                {% if bank.subject %}<span>{{ bank.subject }}</span><span class="dot">·</span>{% endif %}
+                <span>{{ bank.get_language_display }}</span>
+                <span class="dot">·</span>
+                <span>{% if bank.default_question_type == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</span>
+                {% if bank.is_shared %}<span class="qb-chip qb-chip--shared"><i class="fas fa-users"></i> {% trans "Paylaşılıb" %}</span>{% endif %}
+            </div>
+            <div class="qb-card__foot">
+                <span class="qb-chip qb-chip--count"><i class="fas fa-list-check"></i> {{ bank.lib_count }} {% trans "sual" %}</span>
+                <span class="qb-card__created"><i class="far fa-clock"></i> {{ bank.created_at|date:"d.m.Y" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% include "partials/_pagination.html" with page_obj=page_obj extra_query=qbl_pagination_query page_param="bank_page" %}
+
+    {% else %}
+    <div class="qb-empty">
+        <i class="fas fa-layer-group d-block"></i>
+        {% if search_query %}
+            {% trans "Axtarışa uyğun bank tapılmadı." %}
+        {% else %}
+            {% trans "Hələ heç bir sual bankınız yoxdur. Yuxarıdan ilk bankınızı yaradın." %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{# ── Bankı redaktə modalı ── #}
+<div class="modal fade" id="editBankModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">{% trans "Bankı redaktə et" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
+            </div>
+            <form method="post" id="editBankForm" action="">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ qbl_back_url }}">
+                <div class="modal-body qb-edit-form">
+                    <div class="qb-edit-field">
+                        <label for="editBankName2">{% trans "Bankın adı" %}</label>
+                        <input type="text" id="editBankName2" name="name" required>
+                    </div>
+                    <div class="qb-edit-field">
+                        <label for="editBankSubject2">{% trans "Fənn / Mövzu" %}</label>
+                        <input type="text" id="editBankSubject2" name="subject">
+                    </div>
+                    <div class="qb-edit-row">
+                        <div class="qb-edit-field">
+                            <label for="editBankLanguage2">{% trans "Əsas dil" %}</label>
+                            <select id="editBankLanguage2" name="language" class="form-select">
+                                {% for code, label in language_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="qb-edit-field">
+                            <label for="editBankFormat2">{% trans "Default format" %}</label>
+                            <select id="editBankFormat2" name="default_question_type" class="form-select">
+                                {% for value, label in default_type_choices %}<option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <label class="qb-edit-switch">
+                        <input type="checkbox" id="editBankShared2" name="is_shared" value="1">
+                        <span>{% trans "Təşkilatda paylaş" %}</span>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="qbx-btn qbx-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" %}</button>
+                    <button type="submit" class="qbx-btn">{% trans "Yadda saxla" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Bankı sil təsdiq modalı ── #}
+<div class="modal fade" id="deleteBankModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="qb-confirm-icon qb-confirm-icon--danger"><i class="fas fa-trash-alt"></i></div>
+                <h5>{% trans "Bankı sil" %}</h5>
+                <p id="deleteBankBody" class="text-muted"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="qbx-btn qbx-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" %}</button>
+                <form method="post" id="deleteBankForm" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ qbl_back_url }}">
+                    <button type="submit" class="qbx-btn qbx-btn--danger">{% trans "Bəli, sil" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

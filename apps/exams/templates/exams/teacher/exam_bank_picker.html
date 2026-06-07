@@ -20,31 +20,40 @@
         <div class="row g-2 align-items-end">
             <div class="col-md-4">
                 <label class="form-label small text-muted mb-1" for="bank">Bank</label>
-                <select class="form-select form-select-sm" id="bank" name="bank">
-                    <option value="">— Bank seçin —</option>
-                    {% for bank in banks %}
-                    <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" id="bank" name="bank" data-bootstrap-select>
+                        <option value="">— Bank seçin —</option>
+                        {% for bank in banks %}
+                        <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="Sual mətnində axtar">
+                <label class="form-label small text-muted mb-1" for="pickerSearch">Axtarış</label>
+                <input type="text" id="pickerSearch" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="Sual mətnində axtar">
             </div>
             <div class="col-md-2">
-                <select class="form-select form-select-sm" name="difficulty">
-                    <option value="">Çətinlik</option>
-                    {% for value, label in difficulty_choices %}
-                    <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label small text-muted mb-1">Çətinlik</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" name="difficulty" data-bootstrap-select>
+                        <option value="">Bütün çətinliklər</option>
+                        {% for value, label in difficulty_choices %}
+                        <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-2">
-                <select class="form-select form-select-sm" name="language">
-                    <option value="">Dil</option>
-                    {% for code, label in language_choices %}
-                    <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label small text-muted mb-1">Dil</label>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" name="language" data-bootstrap-select>
+                        <option value="">Bütün dillər</option>
+                        {% for code, label in language_choices %}
+                        <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-1 d-grid">
                 <button type="submit" class="btn btn-outline-primary btn-sm">Göstər</button>

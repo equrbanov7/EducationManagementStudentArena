@@ -894,3 +894,86 @@
     .qb-card__top { flex-direction: column; }
     .qb-card__badges { order: -1; }
 }
+
+/* Yazılı bank sualının cavab xülasəsi (idarəetmə kartında) */
+.qb-written-answer {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #f3f6ff;
+    border: 1px solid #e2e9f7;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #2d3436;
+    line-height: 1.45;
+}
+
+/* ── Bank başlıq əməliyyat düymələri (redaktə / sil) ── */
+.qb-btn-outline {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+}
+.qb-btn-outline-danger {
+    background: #fff;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+}
+.qb-btn-outline-danger:hover { background: #fef2f2; }
+
+/* ── Ümumi təsdiq modalı (aktiv/deaktiv/sil) ── */
+.qb-confirm-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    margin: 0 auto 14px;
+}
+.qb-confirm-icon--danger { background: #fef2f2; color: #dc2626; }
+.qb-confirm-icon--warn { background: #fffbeb; color: #d97706; }
+.qb-confirm-icon--success { background: #ecfdf5; color: #16a34a; }
+.qb-confirm-icon--info { background: #eff6ff; color: #2563eb; }
+
+/* Dil üzrə kontekst paneli (bank idarəetmə) */
+.qb-lang-context {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: #eff6ff;
+    border: 1px solid #cfe3fb;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    color: #1e3a5f;
+}
+.qb-lang-context strong { color: #0f172a; }
+.qb-lang-context .qb-btn { margin-left: auto; }
+
+/* Embed (offcanvas iframe) rejimi — kompakt boşluqlar */
+.qb-embed-body { background: #fff; }
+.qb-embed-body .qb-page { padding: 16px 16px 60px; }
+.qb-embed-body .qb-header { margin-top: 0; }
+
+/* Bankı redaktə modalı (form) */
+.qb-modal-dialog--form { text-align: left; max-width: 540px; }
+.qb-edit-form { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; }
+.qb-edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.qb-edit-field { display: flex; flex-direction: column; gap: 6px; }
+.qb-edit-field label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+.qb-edit-field input[type="text"] {
+    padding: 11px 14px;
+    border: 1px solid #d8deea;
+    border-radius: 11px;
+    font-size: 0.95rem;
+    color: #2d3436;
+}
+.qb-edit-field input[type="text"]:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.14);
+}
+.qb-edit-switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; cursor: pointer; }
+@media (max-width: 560px) { .qb-edit-row { grid-template-columns: 1fr; } }

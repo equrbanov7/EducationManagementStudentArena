@@ -98,7 +98,12 @@
                     </div>
                 </a>
                 <div class="exam-card-actions">
-                    <a href="{% url 'exams:edit_exam' exam.slug %}" class="ec-action"><i class="fas fa-edit"></i> Redaktə</a>
+                    <a href="{% url 'exams:edit_exam' exam.slug %}"
+                       class="ec-action ec-action--primary js-open-exam-form-modal"
+                       data-exam-modal-mode="edit"
+                       data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
+                        <i class="fas fa-edit"></i> Redaktə
+                    </a>
                     <a href="{% url 'exams:exam_language_manager' exam.slug %}" class="ec-action"><i class="fas fa-language"></i> Dillər</a>
                     <a href="{% url 'exams:exam_bank_picker' exam.slug %}" class="ec-action"><i class="fas fa-layer-group"></i> Bankdan sual</a>
                     <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="ec-action"><i class="fas fa-chart-bar"></i> Nəticələr</a>

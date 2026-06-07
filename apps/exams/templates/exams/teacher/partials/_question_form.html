@@ -29,11 +29,17 @@
         </div>
     {% else %}
         <div class="question-form-modal-intro">
-            <p class="question-form-modal-context">{{ exam.title }}</p>
-            {% if editing %}
-                <p class="info-text">{% trans "info_editing_question" context "exams.template.add_exam_question" %}</p>
+            <p class="question-form-modal-context">{% if bank %}{{ bank.name }}{% else %}{{ exam.title }}{% endif %}</p>
+            {% if bank %}
+                <p class="info-text">
+                    {% if form.question_type == 'written' %}{% trans "Yazılı (sərbəst cavab) sual" %}{% else %}{% trans "Test (variantlı) sual" %}{% endif %}
+                </p>
             {% else %}
-                <p class="info-text">{% trans "info_adding_question" context "exams.template.add_exam_question" %}</p>
+                {% if editing %}
+                    <p class="info-text">{% trans "info_editing_question" context "exams.template.add_exam_question" %}</p>
+                {% else %}
+                    <p class="info-text">{% trans "info_adding_question" context "exams.template.add_exam_question" %}</p>
+                {% endif %}
             {% endif %}
         </div>
     {% endif %}
@@ -55,12 +61,14 @@
             {{ form.text }}
             <div class="error-msg">{{ form.text.errors }}</div>
 
+            {% if form.image or form.video or form.enable_paint %}
             <div class="media-help">
                 <strong class="media-help-title">{% trans "media_help_title" context "exams.template.add_exam_question" %}</strong>
                 <p class="media-help-text">{% trans "media_help_text" context "exams.template.add_exam_question" %}</p>
             </div>
 
             <div class="form-row">
+                {% if form.image %}
                 <div class="form-group half">
                     <label for="{{ form.image.id_for_label }}">{{ form.image.label }}:</label>
                     <div class="file-input-wrapper">
@@ -84,7 +92,9 @@
                         <img src="" alt="Preview" data-new-image>
                     </div>
                 </div>
+                {% endif %}
 
+                {% if form.video %}
                 <div class="form-group half">
                     <label for="{{ form.video.id_for_label }}">{{ form.video.label }}:</label>
                     <div class="file-input-wrapper">
@@ -112,6 +122,7 @@
                         </video>
                     </div>
                 </div>
+                {% endif %}
 
                 {% if form.enable_paint %}
                     <div class="form-group paint-answer-form-group">
@@ -160,6 +171,7 @@
                     {% endif %}
                 {% endif %}
             </div>
+            {% endif %}
         </div>
 
         {% if exam.exam_type == "written" or exam.exam_type == "coding" %}
@@ -173,7 +185,37 @@
         </div>
         {% endif %}
 
-        {% if exam.exam_type == "test" %}
+        {% if form.difficulty or form.language or form.points %}
+        <div class="form-row">
+            {% if form.difficulty %}
+            <div class="form-group half">
+                <label for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}:</label>
+                <div class="bootstrap-single-select question-block-select-wrap">
+                    {{ form.difficulty }}
+                </div>
+                <div class="error-msg">{{ form.difficulty.errors }}</div>
+            </div>
+            {% endif %}
+            {% if form.language %}
+            <div class="form-group half">
+                <label for="{{ form.language.id_for_label }}">{{ form.language.label }}:</label>
+                <div class="bootstrap-single-select question-block-select-wrap">
+                    {{ form.language }}
+                </div>
+                <div class="error-msg">{{ form.language.errors }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if form.points %}
+        <div class="form-group">
+            <label for="{{ form.points.id_for_label }}">{{ form.points.label }}:</label>
+            {{ form.points }}
+            <div class="error-msg">{{ form.points.errors }}</div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        {% if form.answer_mode and exam.exam_type == "test" %}
             <div class="form-row">
                 <div class="form-group half">
                     <label for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}:</label>
@@ -188,7 +230,7 @@
                     <p class="help-text">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
                 </div>
             </div>
-        {% else %}
+        {% elif form.time_limit_seconds %}
             <div class="form-group">
                 <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
                 {{ form.time_limit_seconds }}
@@ -197,12 +239,14 @@
             </div>
         {% endif %}
 
-        {% if exam.exam_type == "written" or exam.exam_type == "coding" %}
+        {% if exam.exam_type == "written" or exam.exam_type == "coding" or form.question_type == "written" %}
+            {% if form.correct_answer %}
             <div class="form-group">
                 <label for="{{ form.correct_answer.id_for_label }}">{{ form.correct_answer.label }}:</label>
                 {{ form.correct_answer }}
                 <div class="error-msg">{{ form.correct_answer.errors }}</div>
             </div>
+            {% endif %}
         {% else %}
             <div class="variants-section">
                 <div class="variants-header">

@@ -300,6 +300,10 @@ def _role_capabilities(user, profile):
     can_manage_appeals = is_superadmin or is_teacher or is_org_admin
     can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_superadmin)
 
+    # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
+    if can_use_question_bank:
+        allowed_sections.add("question-bank")
+
     return {
         "role": role,
         "is_superadmin": is_superadmin,

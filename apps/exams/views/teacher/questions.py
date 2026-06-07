@@ -335,11 +335,40 @@ def teacher_questions_bank(request, slug):
     # Hesabat/çip linkləri üçün naviqasiya + axtarış kontekstini saxlayan query
     filters_query_params = {key: value for key, value in base_query_params.items() if key != "flag"}
 
+    # Ortaq idarəetmə partial-ı üçün kontekst (imtahan sualları)
+    if exam.exam_type == "test":
+        qm_bulk_add_url = _append_navigation_query(
+            reverse("exams:test_question_bank", kwargs={"slug": exam.slug}), navigation_query
+        )
+    else:
+        qm_bulk_add_url = _append_navigation_query(
+            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}), navigation_query
+        )
+    qm_context = {
+        "qm_context": "exam",
+        "qm_title": exam.title,
+        "qm_subtitle": pgettext("exams.template.teacher_questions_bank", "subtitle_questions_bank"),
+        "qm_base_url": reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug}),
+        "qm_back_url": _append_navigation_query(
+            reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}), navigation_query
+        ),
+        "qm_back_label": pgettext("exams.template.teacher_questions_bank", "action_back_exam_detail"),
+        "qm_bulk_add_url": qm_bulk_add_url,
+        "qm_bulk_add_label": pgettext("exams.template.teacher_questions_bank", "action_bulk_add_blocks"),
+        "qm_add_single_url": _append_navigation_query(
+            reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+        ),
+        "qm_show_language_filter": False,
+        "qm_show_report": True,
+        "qm_is_owner": False,
+    }
+
     return render(
         request,
         "exams/teacher/teacher_questions_bank.html",
         {
             "exam": exam,
+            **qm_context,
             "page_obj": page_obj,
             "search_query": search_query,
             "status_filter": status_filter,

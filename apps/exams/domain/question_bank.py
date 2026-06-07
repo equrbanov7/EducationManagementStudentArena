@@ -69,6 +69,19 @@ class QuestionBank(models.Model):
         verbose_name=pgettext_lazy("exams.model.question_bank.field", "language"),
         help_text=pgettext_lazy("exams.model.question_bank.help", "language"),
     )
+    # Bankın default sual formatı — yaratma anında seçilir, sual əlavə edərkən
+    # ilkin format (test/yazılı) kimi istifadə olunur. Bank yenə hər iki formatı
+    # saxlaya bilər (format sual səviyyəsində BankQuestion.question_type-dadır).
+    DEFAULT_QUESTION_TYPE_CHOICES = (
+        ("test", pgettext_lazy("exams.model.question_bank.choice.default_question_type", "test")),
+        ("written", pgettext_lazy("exams.model.question_bank.choice.default_question_type", "written")),
+    )
+    default_question_type = models.CharField(
+        max_length=20,
+        choices=DEFAULT_QUESTION_TYPE_CHOICES,
+        default="test",
+        verbose_name=pgettext_lazy("exams.model.question_bank.field", "default_question_type"),
+    )
     # Tenant izolyasiyası üçün. Hələ null/blank — köhnə banklar üçün data
     # migration ilə dolduruldqdan sonra məcburi edilə bilər.
     organization = models.ForeignKey(

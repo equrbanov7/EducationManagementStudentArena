@@ -24,6 +24,15 @@ urlpatterns = [
     # ==========================
     path("question-bank/", views.question_bank_list, name="question_bank_list"),
     path("question-bank/<int:bank_id>/", views.question_bank_detail, name="question_bank_detail"),
+    path("question-bank/<int:bank_id>/update/", views.question_bank_update, name="question_bank_update"),
+    path("question-bank/<int:bank_id>/delete/", views.question_bank_delete, name="question_bank_delete"),
+    path("question-bank/<int:bank_id>/bulk-add/", views.question_bank_bulk_add, name="question_bank_bulk_add"),
+    path("question-bank/<int:bank_id>/questions/add/", views.bank_question_add, name="bank_question_add"),
+    path(
+        "question-bank/<int:bank_id>/questions/<int:question_id>/edit/",
+        views.bank_question_edit,
+        name="bank_question_edit",
+    ),
     # ==========================
     # TEACHER - Student Groups (sabit)
     # ==========================

@@ -1,103 +1,36 @@
 {% extends "base.html" %}
+{% load static i18n %}
 
-{% block title %}{{ bank.name }} — Sual Bankı{% endblock %}
+{% block title %}{{ bank.name }} — {% trans "Sual Bankı" %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank.css' %}?v=20260607-mgmt2">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 1040px;">
+{% include "exams/teacher/partials/_question_management.html" %}
+{% endblock %}
 
-    <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-            <h1 class="h4 mb-1">{{ bank.name }}</h1>
-            <div class="text-muted small">
-                {% if bank.subject %}{{ bank.subject }} · {% endif %}{{ bank.get_language_display }}
-            </div>
-        </div>
-        <a href="{% url 'exams:question_bank_list' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Banklar
-        </a>
-    </div>
-
-    {# ── Toplu sual əlavə et ── #}
-    <div class="card mb-4">
-        <div class="card-header fw-semibold">Toplu sual əlavə et</div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="add_questions">
-                <div class="row g-2 mb-2">
-                    <div class="col-md-3">
-                        <label class="form-label small text-muted mb-1" for="language">Dil</label>
-                        <select class="form-select form-select-sm" id="language" name="language">
-                            {% for code, label in language_choices %}
-                            <option value="{{ code }}" {% if bank.language == code %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <textarea class="form-control form-control-sm" name="bulk_text" rows="8"
-                          placeholder="1. Sual mətni&#10;A) variant&#10;*B) düz cavab&#10;C) variant&#10;D) variant"></textarea>
-                <div class="form-text">Düz cavabı <code>*</code> ilə işarələyin.</div>
-                <div class="d-flex justify-content-end mt-2">
-                    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Əlavə et</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {# ── Filtr ── #}
-    <form method="get" class="row g-2 align-items-end mb-3">
-        <div class="col-sm-5">
-            <input type="text" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="Sual mətnində axtar">
-        </div>
-        <div class="col-sm-3">
-            <select class="form-select form-select-sm" name="difficulty">
-                <option value="">Bütün çətinliklər</option>
-                {% for value, label in difficulty_choices %}
-                <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-sm-2">
-            <select class="form-select form-select-sm" name="language">
-                <option value="">Bütün dillər</option>
-                {% for code, label in language_choices %}
-                <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-sm-2 d-grid">
-            <button type="submit" class="btn btn-outline-primary btn-sm">Filtrlə</button>
-        </div>
-    </form>
-
-    {% if questions %}
-    <div class="list-group">
-        {% for q in questions %}
-        <div class="list-group-item">
-            <div class="d-flex justify-content-between">
-                <div>{{ forloop.counter0|add:page_obj.start_index }}. {{ q.text|striptags|truncatechars:160 }}</div>
-                <span class="badge bg-light text-dark">{{ q.get_difficulty_display }}</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if page_obj.has_other_pages %}
-    <nav class="mt-3">
-        <ul class="pagination pagination-sm justify-content-center">
-            {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&difficulty={{ difficulty_filter }}&language={{ language_filter }}">&laquo;</a></li>
-            {% endif %}
-            <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-            {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&difficulty={{ difficulty_filter }}&language={{ language_filter }}">&raquo;</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
-
-    {% else %}
-    <div class="text-center text-muted py-5">Bu bankda hələ sual yoxdur.</div>
-    {% endif %}
-</div>
+{% block extraJs %}
+{% trans "heading_add_new_question" context "exams.template.add_exam_question" as question_create_title %}
+{% trans "heading_edit_question" context "exams.template.add_exam_question" as question_edit_title %}
+<script nonce="{{ request.csp_nonce }}">
+window.TEACHER_QUESTIONS_BANK_I18N = {
+    confirmDelete: "{% trans 'confirm_delete_selected' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    selectedCount: "{% trans 'selected_count' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    selectedCountZero: "{% trans 'selected_count_zero' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    selectAtLeastOne: "{% trans 'select_at_least_one' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    deleteQuestionBody: "{% trans 'modal_delete_question_body' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal'|escapejs %}",
+    questionCreateTitle: "{{ question_create_title|escapejs }}",
+    questionEditTitle: "{{ question_edit_title|escapejs }}",
+    submitError: "{% trans 'retry_error' context 'courses.common.js'|escapejs %}"
+};
+</script>
+<script src="{% static 'exams/js/question_form.js' %}"></script>
+<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20260607-unified-question-modal"></script>
+<script src="{% static 'exams/js/bankManagement.js' %}?v=20260607-bankmgmt"></script>
 {% endblock %}

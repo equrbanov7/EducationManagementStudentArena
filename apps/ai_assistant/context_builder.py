@@ -115,8 +115,8 @@ _PAGE_CONTEXT_MAP = [
         r"/exams/create/?$",
         {
             "name": "İmtahan Yaratmaq / Create Exam",
-            "description": "Form to create a new exam.",
-            "hints": "User can set exam title, duration, question count, passing score, add questions, and configure exam settings.",
+            "description": "Redirects to the profile My exams section where the create exam modal is opened.",
+            "hints": "Users create exams from My exams using the modal form for title, duration, question count, access, and other settings.",
         },
     ),
     (
@@ -252,7 +252,7 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
         lines.append("- Exams: /exams/")
 
     if request_has_permission_from_list(permissions, "exam.create"):
-        lines.append("- Create exam: /exams/create/")
+        lines.append("- Create exam: /accounts/profile/?section=my-exams")
 
     if request_has_permission_from_list(permissions, "member.view"):
         lines.append(f"- Members: /organizations/{slug}/members/")

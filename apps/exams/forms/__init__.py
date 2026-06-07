@@ -6,6 +6,7 @@ Re-exports all form classes from sub-modules so that existing imports remain
 stable: ``from apps.exams.forms import ExamForm`` still works.
 """
 
+from .bank_question import BankQuestionCreateForm
 from .coding import CodingExamQuestionForm
 from .exam import ExamForm
 from .group import StudentGroupForm
@@ -13,6 +14,7 @@ from .question import ExamQuestionCreateForm
 
 __all__ = [
     "ExamForm",
+    "BankQuestionCreateForm",
     "CodingExamQuestionForm",
     "ExamQuestionCreateForm",
     "StudentGroupForm",
