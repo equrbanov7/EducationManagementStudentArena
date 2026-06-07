@@ -1,0 +1,48 @@
+{% load i18n %}
+{% comment %}
+Picker sual elementləri (bir səhifə). Həm content partialı daxilində, həm də
+lazy-scroll zamanı (items=1) tək-tək əlavə üçün istifadə olunur. Sonda sentinel
+varsa, IntersectionObserver növbəti səhifəni yükləyir.
+{% endcomment %}
+{% for q in questions %}
+<div class="bankpicker-item" data-q-id="{{ q.id }}">
+    <input class="bankpicker-item__check" type="checkbox" data-picker-checkbox value="{{ q.id }}"
+           aria-label="{% trans 'Sualı seç' %}">
+    <button type="button" class="bankpicker-item__toggle"
+            {% if q.question_type != 'test' %}data-picker-noexpand{% else %}data-picker-toggle{% endif %}>
+        <span class="bankpicker-item__main">
+            <span class="bankpicker-item__text">{{ q.text|striptags|truncatechars:220 }}</span>
+            <span class="bankpicker-item__meta">
+                <span class="bankpicker-tag">{{ q.get_language_display }}</span>
+                <span class="bankpicker-tag bankpicker-tag--soft">{{ q.get_difficulty_display }}</span>
+            </span>
+        </span>
+        {% if q.question_type == 'test' %}
+        <i class="fas fa-chevron-down bankpicker-item__chevron" aria-hidden="true"></i>
+        {% endif %}
+    </button>
+    {% if q.question_type == 'test' %}
+    <div class="bankpicker-item__options">
+        {% for opt in q.options.all %}
+        <div class="bankpicker-opt {% if opt.is_correct %}is-correct{% endif %}">
+            <span class="bankpicker-opt__label">{{ opt.label|default:'•' }}</span>
+            <span class="bankpicker-opt__text">{{ opt.text }}</span>
+            {% if opt.is_correct %}<i class="fas fa-check bankpicker-opt__mark" aria-hidden="true"></i>{% endif %}
+        </div>
+        {% empty %}
+        <div class="bankpicker-opt bankpicker-opt--muted">{% trans "Variant yoxdur" %}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% empty %}
+<div class="bankpicker-empty bankpicker-empty--inline">
+    <i class="fas fa-filter-circle-xmark"></i>
+    <p>{% trans "Filtrlərə uyğun sual tapılmadı." %}</p>
+</div>
+{% endfor %}
+{% if has_more %}
+<div class="bankpicker-sentinel" data-picker-sentinel data-next-page="{{ next_page }}">
+    <span class="bankpicker-spinner" aria-hidden="true"></span> {% trans "Yüklənir..." %}
+</div>
+{% endif %}

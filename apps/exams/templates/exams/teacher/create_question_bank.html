@@ -4,6 +4,7 @@
 {% block title %}{{ question_bank_page_title }} - {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
+<link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20260607-picker">
 <style nonce="{{ request.csp_nonce }}">
     .bank-container {
         max-width: 900px;
@@ -614,6 +615,13 @@
         <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}" class="btn-back-main">
             <i class="fas fa-arrow-left"></i> Geri
         </a>
+        {% if exam.exam_type == 'written' %}
+        <button type="button" class="bankpicker-open-btn"
+                data-bank-picker-open
+                data-picker-url="{% url 'exams:exam_bank_picker' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}">
+            <i class="fas fa-book-bookmark"></i> {% trans "Suallar bankından seç" %}
+        </button>
+        {% endif %}
     </div>
 
     {% if messages %}
@@ -649,6 +657,20 @@
                    placeholder="{% trans 'placeholder_all_questions' context 'exams.template.create_question_bank' %}">
             <small style="color:grey">
                 {% trans "help_total_question_count" context "exams.template.create_question_bank" %}
+            </small>
+        </div>
+
+        <div class="settings-card">
+            <label><i class="fas fa-globe"></i> {% trans "Sualların dili" %}:</label>
+            <div class="bootstrap-single-select">
+                <select name="language" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                    {% for code, label in language_choices %}
+                    <option value="{{ code }}" {% if code == selected_language %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <small style="color:grey">
+                {% trans "Bu bölmələrdəki suallar tələbə həmin dili seçəndə görünəcək." %}
             </small>
         </div>
 
@@ -1217,4 +1239,9 @@ window.addEventListener('click', function(event) {
 });
 </script>
 <script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+{% if exam.exam_type == 'written' %}
+{% url 'exams:exam_bank_picker' exam.slug as picker_url %}
+{% include "exams/teacher/partials/_bank_picker_shell.html" with picker_url=picker_url %}
+<script src="{% static 'exams/js/examBankPicker.js' %}?v=20260607-picker-modal"></script>
+{% endif %}
 {% endblock %}

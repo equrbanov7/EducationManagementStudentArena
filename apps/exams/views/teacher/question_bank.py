@@ -16,7 +16,12 @@ from django.utils.text import slugify
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
-from apps.exams.constants import QUESTION_RE
+from apps.exams.constants import (
+    DEFAULT_EXAM_LANGUAGE,
+    EXAM_LANGUAGE_CHOICES,
+    EXAM_LANGUAGE_VALUES,
+    QUESTION_RE,
+)
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_question_generation import generate_question_bank_text
@@ -27,6 +32,7 @@ from apps.exams.services.bulk_workbench import (
     parse_selected_indices,
 )
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
+from apps.exams.services.language_variants import active_variants, ensure_default_variant
 from apps.exams.services.parsing import END_QUESTION_RE, extract_text_from_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
@@ -117,7 +123,28 @@ def _append_navigation_query(path, navigation_query):
     return f"{path}{separator}{navigation_query}"
 
 
-def _test_workbench_context(exam, navigation_query):
+def _default_exam_language(exam):
+    """İmtahanın ilkin dili: tək aktiv variant varsa onun dili, yoxsa default `az`.
+
+    Bu, toplu sual yükləmə panelində dil seçicisinin başlanğıc dəyəridir — köhnə
+    (tək-dilli) imtahanlarda davranış dəyişmir, çoxdilli imtahanda isə müəllimin
+    son işlədiyi məntiqlə uyğun gəlir.
+    """
+    languages = list(active_variants(exam).values_list("language", flat=True))
+    if len(languages) == 1:
+        return languages[0]
+    return DEFAULT_EXAM_LANGUAGE
+
+
+def _normalize_exam_language(value, exam):
+    """POST/GET-dən gələn dil kodunu təhlükəsiz normallaşdırır."""
+    code = (value or "").strip().lower()
+    if code in EXAM_LANGUAGE_VALUES:
+        return code
+    return _default_exam_language(exam)
+
+
+def _test_workbench_context(exam, navigation_query, *, selected_language=None):
     """Ortaq ``_bulk_question_workbench`` partial-ı üçün imtahan test bankı konteksti."""
     download_base = reverse("exams:test_question_bank_template_download", kwargs={"slug": exam.slug})
     detail_url = _append_navigation_query(
@@ -126,19 +153,31 @@ def _test_workbench_context(exam, navigation_query):
     questions_url = _append_navigation_query(
         reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug}), navigation_query
     )
+    picker_url = _append_navigation_query(
+        reverse("exams:exam_bank_picker", kwargs={"slug": exam.slug}), navigation_query
+    )
     return {
         "wb_workbench_key": f"exam-{exam.slug}",
         "wb_title": exam.title,
         "wb_subtitle": pgettext("exams.template.test_question_bank", "subtitle_management_panel"),
         "wb_back_url": detail_url,
         "wb_back_label": pgettext("exams.template.test_question_bank", "action_back"),
+        # Köhnə "Suallar bankına bax" düyməsi artıq idarəetmə keçididir — adı dəyişdik
+        # ki, kitabxana picker modalı ilə qarışmasın.
         "wb_secondary_url": questions_url,
-        "wb_secondary_label": pgettext("exams.template.test_question_bank", "action_view_questions_bank"),
-        "wb_secondary_icon": "fa-layer-group",
+        "wb_secondary_label": pgettext("exams.template.test_question_bank", "Sualları idarə et"),
+        "wb_secondary_icon": "fa-sliders",
+        # "Suallar bankına bax" → kitabxana picker MODALINI açır (Part B).
+        "wb_picker_url": picker_url,
+        "wb_picker_label": pgettext("exams.template.test_question_bank", "Suallar bankına bax"),
         "wb_show_settings": True,
         "wb_ai_url": reverse("exams:ai_generate_question_bank", kwargs={"slug": exam.slug}),
         "wb_ai_context": "test",
-        "wb_show_language": False,
+        # İmtahan test bankı yalnız test formatındadır — amma dil seçici bank
+        # toplu yükləməsi ilə eyni olsun deyə həmişə göstərilir.
+        "wb_show_language": True,
+        "wb_languages": EXAM_LANGUAGE_CHOICES,
+        "wb_selected_language": selected_language or _default_exam_language(exam),
         "wb_show_format": False,
         "wb_format": "test",
         "wb_show_report": True,
@@ -203,9 +242,10 @@ def _parse_points_payload(post_data):
     return parse_points_payload(post_data)
 
 
-def _sync_written_block_questions(block, question_texts):
+def _sync_written_block_questions(block, question_texts, *, language=None, language_variant=None):
     existing_questions = list(block.questions.order_by("order", "id"))
     normalized_texts = [text for text in question_texts if text]
+    effective_language = language or DEFAULT_EXAM_LANGUAGE
 
     for index, q_text in enumerate(normalized_texts, start=1):
         if index <= len(existing_questions):
@@ -227,6 +267,13 @@ def _sync_written_block_questions(block, question_texts):
             if question.answer_mode != "single":
                 question.answer_mode = "single"
                 update_fields.append("answer_mode")
+            # Seçilmiş dili sualların hamısına tətbiq et (çoxdilli imtahan).
+            if language is not None and question.language != effective_language:
+                question.language = effective_language
+                update_fields.append("language")
+            if language_variant is not None and question.language_variant_id != language_variant.id:
+                question.language_variant = language_variant
+                update_fields.append("language_variant")
 
             if update_fields:
                 question.save(update_fields=update_fields)
@@ -237,6 +284,8 @@ def _sync_written_block_questions(block, question_texts):
                 text=q_text,
                 order=index,
                 answer_mode="single",
+                language=effective_language,
+                language_variant=language_variant,
             )
 
     for stale_question in existing_questions[len(normalized_texts) :]:
@@ -894,6 +943,9 @@ def create_question_bank(request, slug):
             "question_bank_navigation_query": navigation_query,
             "navigation_from_section": navigation_from_section,
             "navigation_return_to": navigation_return_to,
+            # Sualların dili seçicisi (test bankı ilə eyni davranış).
+            "language_choices": EXAM_LANGUAGE_CHOICES,
+            "selected_language": _default_exam_language(exam),
             **_question_bank_title_context(exam),
         },
     )
@@ -917,6 +969,10 @@ def process_question_bank(request, slug):
         if random_count is not None:
             exam.random_question_count = random_count
             exam.save()
+
+        # Seçilmiş dil — bütün yazılı suallar bu dil variantına bağlanacaq.
+        selected_language = _normalize_exam_language(request.POST.get("language"), exam)
+        selected_variant = ensure_default_variant(exam, selected_language)
 
         # Adların təkrar olub-olmadığını yoxlamaq üçün set
         used_names = set()
@@ -1001,7 +1057,9 @@ def process_question_bank(request, slug):
 
                     # Sualların Parse edilməsi
                     questions = _parse_written_questions(content_text) if content_text.strip() else []
-                    _sync_written_block_questions(block, questions)
+                    _sync_written_block_questions(
+                        block, questions, language=selected_language, language_variant=selected_variant
+                    )
 
         if exam.exam_type == "coding":
             sync_coding_questions_for_exam(exam)
@@ -1068,7 +1126,10 @@ def test_question_bank(request, slug):
     rq_value = str(rq_default)
     dp_value = str(dp_default)
 
-    wb_ctx = _test_workbench_context(exam, navigation_query)
+    # Seçilmiş dil — bu suallar həmin dil variantına bağlanacaq (çoxdilli imtahan).
+    selected_language = _normalize_exam_language(request.POST.get("language") or request.GET.get("language"), exam)
+
+    wb_ctx = _test_workbench_context(exam, navigation_query, selected_language=selected_language)
 
     # GET
     if request.method != "POST":
@@ -1127,7 +1188,9 @@ def test_question_bank(request, slug):
     #    (Dublikat aşkarlanması, struktur/balans xəbərdarlıqları, meta bayraqları
     #     və kateqoriya sayğacları artıq servis daxilində hesablanır.)
     if action in ("preview", "save", "download_report"):
-        analysis = analyze_mcq_bulk(raw_text, existing_fp_map=exam_question_fp_map(exam))
+        # Dublikat yoxlanışı yalnız EYNİ dildəki mövcud suallara qarşı aparılır —
+        # eyni sual başqa dildə təkrar deyil.
+        analysis = analyze_mcq_bulk(raw_text, existing_fp_map=exam_question_fp_map(exam, language=selected_language))
         parsed = analysis["parsed"]
         category_counts = analysis["category_counts"]
         warning_count = analysis["warning_count"]
@@ -1201,6 +1264,11 @@ def test_question_bank(request, slug):
             elif block_id:
                 block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
 
+            # ---- dil variantı: suallar seçilmiş dilə bağlanır ----
+            # Köhnə tək-dilli imtahanlarda da `az` varyantı yaranır (geriyə uyğun,
+            # student dil seçimi axını üçün lazımdır).
+            language_variant = ensure_default_variant(exam, selected_language)
+
             # ---- order başlanğıcı ----
             start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
 
@@ -1229,6 +1297,8 @@ def test_question_bank(request, slug):
                         answer_mode=q["answer_mode"],
                         order=start_order,
                         points=points,
+                        language=selected_language,
+                        language_variant=language_variant,
                     )
                 )
                 option_payloads.append((q["options"], set(q["correct"])))
@@ -1291,5 +1361,7 @@ def test_question_bank(request, slug):
             "question_bank_navigation_query": navigation_query,
             "navigation_from_section": navigation_from_section,
             "navigation_return_to": navigation_return_to,
+            # Workbench konteksti (başlıq, düymələr, dil seçici) preview-də də qalmalıdır.
+            **wb_ctx,
         },
     )

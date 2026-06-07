@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
   var singleQuestionActionForm = document.getElementById("singleQuestionActionForm");
   var singleQuestionActionValue = document.getElementById("singleQuestionActionValue");
   var singleQuestionActionQuestionId = document.getElementById("singleQuestionActionQuestionId");
+  var questionLangDeleteForm = document.getElementById("questionLangDeleteForm");
+  var questionLangDeleteValue = document.getElementById("questionLangDeleteValue");
+  var questionBankDeleteAllForm = document.getElementById("questionBankDeleteAllForm");
   var questionModalElement = document.getElementById("questionFormModal");
   var questionModalBody = document.getElementById("questionFormModalBody");
   var questionModalTitle = document.getElementById("questionFormModalTitle");
@@ -45,6 +48,10 @@ document.addEventListener("DOMContentLoaded", function () {
     singleDelete: i18n.deleteQuestionBody || "Bu sual silinəcək: {question}",
     singleDeactivate: i18n.singleDeactivateBody || "Bu sual deaktiv ediləcək. Davam edək?",
     singleActivate: i18n.singleActivateBody || "Bu sual aktiv ediləcək. Davam edək?",
+    deleteAllTitle: i18n.deleteAllTitle || "Sual bankını sil",
+    deleteAllBody: i18n.deleteAllBody || "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?",
+    languageDeleteTitle: i18n.languageDeleteTitle || "Dil üzrə sil",
+    languageDeleteBody: i18n.languageDeleteBody || "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?",
   };
 
   var checkboxes = Array.prototype.slice.call(document.querySelectorAll(".question-checkbox"));
@@ -372,6 +379,41 @@ document.addEventListener("DOMContentLoaded", function () {
           singleQuestionActionValue.value = action;
           singleQuestionActionQuestionId.value = qid;
           singleQuestionActionForm.submit();
+        },
+      });
+    });
+  });
+
+  // ── Seçilmiş dil üzrə bütün sualları sil ──
+  document.querySelectorAll(".js-delete-language").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var lang = button.getAttribute("data-language") || "";
+      var count = button.getAttribute("data-count") || "0";
+      openConfirm({
+        variant: "danger",
+        title: TXT.languageDeleteTitle,
+        body: TXT.languageDeleteBody.replace("{count}", String(count)),
+        okLabel: TXT.okDelete,
+        onConfirm: function () {
+          if (!questionLangDeleteForm || !questionLangDeleteValue || !lang) return;
+          questionLangDeleteValue.value = lang;
+          questionLangDeleteForm.submit();
+        },
+      });
+    });
+  });
+
+  // ── İmtahanın bütün sual bankını sil ──
+  document.querySelectorAll(".js-delete-all-questions").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var count = button.getAttribute("data-count") || "0";
+      openConfirm({
+        variant: "danger",
+        title: TXT.deleteAllTitle,
+        body: TXT.deleteAllBody.replace("{count}", String(count)),
+        okLabel: TXT.okDelete,
+        onConfirm: function () {
+          if (questionBankDeleteAllForm) questionBankDeleteAllForm.submit();
         },
       });
     });

@@ -4,6 +4,7 @@
  * Təsdiq üçün teacher_questions_bank.js-dəki window.qbConfirm istifadə olunur.
  */
 document.addEventListener("DOMContentLoaded", function () {
+  var i18n = window.TEACHER_QUESTIONS_BANK_I18N || {};
   var confirmFn = window.qbConfirm || function (o) {
     if (window.confirm(o.body || "?") && typeof o.onConfirm === "function") o.onConfirm();
   };
@@ -30,29 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
     b.addEventListener("click", function () {
       confirmFn({
         variant: "danger",
-        title: "Bankı sil",
-        body: "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?",
-        okLabel: "Bəli, sil",
+        title: i18n.bankDeleteTitle || "Bankı sil",
+        body: i18n.bankDeleteBody || "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?",
+        okLabel: i18n.okDelete || "Bəli, sil",
         onConfirm: function () { if (deleteForm) deleteForm.submit(); },
-      });
-    });
-  });
-
-  // ── Dil üzrə bütün sualları sil ──
-  var langForm = document.getElementById("bankLangDeleteForm");
-  var langVal = document.getElementById("bankLangDeleteValue");
-  document.querySelectorAll(".js-delete-language").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var lang = b.getAttribute("data-language") || "";
-      var count = b.getAttribute("data-count") || "0";
-      confirmFn({
-        variant: "danger",
-        title: "Dil üzrə sil",
-        body: "Seçilmiş dildəki " + count + " sual həmişəlik silinəcək. Davam edək?",
-        okLabel: "Bəli, sil",
-        onConfirm: function () {
-          if (langForm && langVal) { langVal.value = lang; langForm.submit(); }
-        },
       });
     });
   });

@@ -1,0 +1,71 @@
+{% load static i18n %}
+{% comment %}
+================================================================================
+BANK PICKER — MODAL BODY (AJAX). Strukturu:
+  • Toolbar (bank + axtarış + dil + çətinlik) — STATİK, bootstrap-select ilə.
+  • Content (stats + siyahı) — filtr/bank dəyişəndə yenilənir (data-picker-content).
+  • Footer (seçim sayğacı + əlavə et) — statik.
+examBankPicker.js açılışda bütün gövdəni bir dəfə yükləyir, sonra yalnız content-i
+yeniləyir → bootstrap-select bir dəfə init olunur, lazy-scroll content daxilindədir.
+================================================================================
+{% endcomment %}
+<div class="bankpicker" data-picker-url="{{ picker_url }}" data-compatible-type="{{ compatible_type }}">
+
+    {# ── Toolbar (statik) ── #}
+    <div class="bankpicker-toolbar">
+        <label class="bankpicker-field bankpicker-field--bank">
+            <span class="bankpicker-field__label"><i class="fas fa-database"></i> {% trans "Bank" %}</span>
+            <div class="bootstrap-single-select">
+                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="bank">
+                    <option value="">{% trans "— Bank seçin —" %}</option>
+                    {% for bank in banks %}
+                    <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+
+        <label class="bankpicker-field bankpicker-field--search">
+            <span class="bankpicker-field__label"><i class="fas fa-magnifying-glass"></i> {% trans "Axtarış" %}</span>
+            <input type="search" class="bankpicker-input" data-picker-control="q"
+                   value="{{ search_query }}" placeholder="{% trans 'Sual mətnində axtar...' %}" autocomplete="off">
+        </label>
+
+        <label class="bankpicker-field bankpicker-field--lang">
+            <span class="bankpicker-field__label"><i class="fas fa-globe"></i> {% trans "Dil" %}</span>
+            <div class="bootstrap-single-select">
+                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="language">
+                    <option value="">{% trans "Bütün dillər" %}</option>
+                    {% for code, label in language_choices %}
+                    <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+
+        <label class="bankpicker-field bankpicker-field--diff">
+            <span class="bankpicker-field__label"><i class="fas fa-gauge-high"></i> {% trans "Çətinlik" %}</span>
+            <div class="bootstrap-single-select">
+                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="difficulty">
+                    <option value="">{% trans "Hamısı" %}</option>
+                    {% for value, label in difficulty_choices %}
+                    <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </label>
+    </div>
+
+    {# ── Content (dəyişən) ── #}
+    <div class="bankpicker-content" data-picker-content>
+        {% include "exams/teacher/partials/_exam_bank_picker_content.html" %}
+    </div>
+
+    {# ── Footer (statik) ── #}
+    <div class="bankpicker-footer">
+        <span class="bankpicker-selcount" data-picker-selected-count>0 {% trans "seçilib" %}</span>
+        <button type="button" class="bankpicker-attach" data-picker-attach disabled>
+            <i class="fas fa-plus"></i> {% trans "Seçilmişləri imtahana əlavə et" %}
+        </button>
+    </div>
+</div>

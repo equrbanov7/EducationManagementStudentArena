@@ -49,6 +49,12 @@ Kontekst (view-dən):
                     <i class="fas fa-trash-alt"></i> {% trans "Bankı sil" %}
                 </button>
                 {% endif %}
+                {% if qm_show_delete_all %}
+                <button type="button" class="qb-btn qb-btn-outline-danger js-delete-all-questions"
+                        data-count="{{ all_questions_total|default:total_questions }}">
+                    <i class="fas fa-trash-alt"></i> {% trans "Bütün sual bankını sil" context "exams.template.teacher_questions_bank" %}
+                </button>
+                {% endif %}
             </div>
         </header>
 
@@ -127,8 +133,8 @@ Kontekst (view-dən):
 
                 {% if qm_show_language_filter %}
                 <div class="bootstrap-single-select">
-                    <select name="language" class="form-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'Dil' %}">
-                        <option value="">{% trans "Bütün dillər" %}</option>
+                    <select name="language" class="form-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'Dil' context 'exams.template.teacher_questions_bank' %}">
+                        <option value="">{% trans "Bütün dillər" context "exams.template.teacher_questions_bank" %}</option>
                         {% for code, label in language_choices %}
                         <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -183,21 +189,21 @@ Kontekst (view-dən):
         </section>
         {% endif %}
 
-        {% if qm_context == 'bank' %}
+        {% if qm_show_language_filter %}
         <div class="qb-lang-context">
             <i class="fas fa-globe"></i>
             {% if language_filter %}
-                <span>{% trans "Hazırkı dil" %}:
+                <span>{% trans "Hazırkı dil" context "exams.template.teacher_questions_bank" %}:
                     <strong>{% for code, label in language_choices %}{% if code == language_filter %}{{ label }}{% endif %}{% endfor %}</strong>
-                    — {% trans "bu dildə" %} {{ total_questions }} {% trans "sual" %}.</span>
-                {% if qm_is_owner %}
+                    — {% trans "bu dildə" context "exams.template.teacher_questions_bank" %} {{ total_questions }} {% trans "sual" context "exams.template.teacher_questions_bank" %}.</span>
+                {% if qm_can_delete_language or qm_is_owner %}
                 <button type="button" class="qb-btn qb-btn-outline-danger js-delete-language"
                         data-language="{{ language_filter }}" data-count="{{ total_questions }}">
-                    <i class="fas fa-trash-alt"></i> {% trans "Bu dildəki bütün sualları sil" %}
+                    <i class="fas fa-trash-alt"></i> {% trans "Bu dildəki bütün sualları sil" context "exams.template.teacher_questions_bank" %}
                 </button>
                 {% endif %}
             {% else %}
-                <span>{% trans "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin." %}</span>
+                <span>{% trans "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin." context "exams.template.teacher_questions_bank" %}</span>
             {% endif %}
         </div>
         {% endif %}
@@ -277,6 +283,7 @@ Kontekst (view-dən):
                             <div class="qb-card__meta">
                                 {% if qm_context == 'exam' %}
                                     {% if q.block %}<span class="qb-chip-tag">{{ q.block.name }}</span>{% else %}<span class="qb-chip-tag qb-chip-tag--muted">{% trans "label_no_block" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                                    {% if qm_show_language_filter %}<span class="qb-chip-tag qb-chip-tag--muted">{{ q.get_language_display }}</span>{% endif %}
                                 {% else %}
                                     <span class="qb-chip-tag">{% if q.question_type == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</span>
                                     <span class="qb-chip-tag qb-chip-tag--muted">{{ q.get_language_display }}</span>
@@ -413,14 +420,41 @@ Kontekst (view-dən):
 {% if qm_context == 'bank' and qm_is_owner %}
 {# ── Bankı sil (gizli form) ── #}
 <form method="post" id="bankDeleteForm" class="qb-hidden-form" action="{{ qm_delete_url }}">{% csrf_token %}</form>
+{% endif %}
 
+{% if qm_show_language_filter and qm_can_delete_language or qm_context == 'bank' and qm_is_owner %}
 {# ── Dil üzrə toplu sil (gizli form) ── #}
-<form method="post" id="bankLangDeleteForm" class="qb-hidden-form">
+<form method="post" id="questionLangDeleteForm" class="qb-hidden-form">
     {% csrf_token %}
     <input type="hidden" name="bulk_action" value="delete_language">
-    <input type="hidden" name="language" id="bankLangDeleteValue" value="">
+    <input type="hidden" name="language" id="questionLangDeleteValue" value="">
+    <input type="hidden" name="q" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="sort" value="{{ sort_filter }}">
+    <input type="hidden" name="flag" value="{{ active_flag }}">
+    <input type="hidden" name="page" value="{{ page_obj.number }}">
+    {% if navigation_from_section %}<input type="hidden" name="from_section" value="{{ navigation_from_section }}">{% endif %}
+    {% if navigation_return_to %}<input type="hidden" name="return_to" value="{{ navigation_return_to }}">{% endif %}
 </form>
+{% endif %}
 
+{% if qm_show_delete_all %}
+{# ── İmtahanın bütün suallarını sil (gizli form) ── #}
+<form method="post" id="questionBankDeleteAllForm" class="qb-hidden-form">
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" value="delete_all">
+    <input type="hidden" name="q" value="{{ search_query }}">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    <input type="hidden" name="sort" value="{{ sort_filter }}">
+    <input type="hidden" name="flag" value="{{ active_flag }}">
+    {% if qm_show_language_filter %}<input type="hidden" name="language" value="{{ language_filter }}">{% endif %}
+    <input type="hidden" name="page" value="{{ page_obj.number }}">
+    {% if navigation_from_section %}<input type="hidden" name="from_section" value="{{ navigation_from_section }}">{% endif %}
+    {% if navigation_return_to %}<input type="hidden" name="return_to" value="{{ navigation_return_to }}">{% endif %}
+</form>
+{% endif %}
+
+{% if qm_context == 'bank' and qm_is_owner %}
 {# ── Bankı redaktə et (modal) ── #}
 <div class="qb-modal" id="bankEditModal" aria-hidden="true">
     <div class="qb-modal-backdrop js-edit-bank-close"></div>

@@ -1,0 +1,61 @@
+{% load i18n %}
+{% comment %}
+Picker modalının DƏYİŞƏN hissəsi (stats + siyahı başlığı + ilk səhifə).
+Toolbar/footer statik qalır; bu hissə filtr/bank dəyişəndə yenidən yüklənir.
+data-picker-total selection JS-i üçün ümumi sayı daşıyır.
+{% endcomment %}
+{% if not selected_bank %}
+<div class="bankpicker-empty">
+    <i class="fas fa-arrow-up"></i>
+    <p>{% trans "Başlamaq üçün yuxarıdan bir sual bankı seçin." %}</p>
+</div>
+{% else %}
+<div class="bankpicker-content-inner" data-picker-total="{{ total_count }}">
+    {# ── Statistika ── #}
+    <div class="bankpicker-stats">
+        <div class="bankpicker-stat">
+            <span class="bankpicker-stat__value">{{ bank_total_questions }}</span>
+            <span class="bankpicker-stat__label">
+                {% if compatible_type == 'written' %}{% trans "yazılı sual" %}{% else %}{% trans "test sualı" %}{% endif %}
+            </span>
+        </div>
+        <div class="bankpicker-stat">
+            <span class="bankpicker-stat__value">{{ bank_language_count }}</span>
+            <span class="bankpicker-stat__label">{% trans "dil" %}</span>
+        </div>
+        <div class="bankpicker-stat bankpicker-stat--chips">
+            <span class="bankpicker-stat__label">{% trans "Dil üzrə" %}:</span>
+            <div class="bankpicker-langchips">
+                {% for stat in bank_language_stats %}
+                <button type="button" class="bankpicker-langchip {% if language_filter == stat.code %}is-active{% endif %}"
+                        data-picker-lang="{{ stat.code }}" title="{{ stat.label }}">
+                    {{ stat.label }} <strong>{{ stat.count }}</strong>
+                </button>
+                {% empty %}
+                <span class="bankpicker-langchip bankpicker-langchip--muted">{% trans "Bu bankda uyğun sual yoxdur" %}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Siyahı başlığı ── #}
+    <div class="bankpicker-listhead">
+        <span class="bankpicker-found">
+            {{ total_count }} {% trans "sual tapıldı" %}
+        </span>
+        <div class="bankpicker-listhead__actions">
+            <button type="button" class="bankpicker-textbtn" data-picker-select-all>
+                <i class="fas fa-check-double"></i> {% trans "Hamısını seç" %}
+            </button>
+            <button type="button" class="bankpicker-textbtn" data-picker-deselect-all>
+                <i class="fas fa-xmark"></i> {% trans "Təmizlə" %}
+            </button>
+        </div>
+    </div>
+
+    {# ── Sual siyahısı (lazy-scroll əlavələri buraya gəlir) ── #}
+    <div class="bankpicker-list" data-picker-list>
+        {% include "exams/teacher/partials/_exam_bank_picker_items.html" %}
+    </div>
+</div>
+{% endif %}

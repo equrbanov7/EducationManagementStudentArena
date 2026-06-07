@@ -280,11 +280,14 @@ def _run_analysis(questions) -> QuestionBankAnalysis:
     )
 
 
-def analyze_question_bank(exam) -> QuestionBankAnalysis:
+def analyze_question_bank(exam, *, language=None) -> QuestionBankAnalysis:
     """İmtahan bankını analiz edir (yalnız ``exam_type == "test"``)."""
     if getattr(exam, "exam_type", None) != "test":
         return _empty_analysis()
-    questions = list(exam.questions.prefetch_related("options").order_by("order", "id"))
+    queryset = exam.questions.prefetch_related("options")
+    if language:
+        queryset = queryset.filter(language=language)
+    questions = list(queryset.order_by("order", "id"))
     return _run_analysis(questions)
 
 

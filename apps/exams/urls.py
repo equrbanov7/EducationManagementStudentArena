@@ -27,6 +27,16 @@ urlpatterns = [
     path("question-bank/<int:bank_id>/update/", views.question_bank_update, name="question_bank_update"),
     path("question-bank/<int:bank_id>/delete/", views.question_bank_delete, name="question_bank_delete"),
     path("question-bank/<int:bank_id>/bulk-add/", views.question_bank_bulk_add, name="question_bank_bulk_add"),
+    path(
+        "question-bank/<int:bank_id>/bulk-add/template-download/",
+        views.question_bank_template_download,
+        name="question_bank_template_download",
+    ),
+    path(
+        "question-bank/<int:bank_id>/ai-generate/",
+        views.ai_generate_bank_questions,
+        name="ai_generate_bank_questions",
+    ),
     path("question-bank/<int:bank_id>/questions/add/", views.bank_question_add, name="bank_question_add"),
     path(
         "question-bank/<int:bank_id>/questions/<int:question_id>/edit/",

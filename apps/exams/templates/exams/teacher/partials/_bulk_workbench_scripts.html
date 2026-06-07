@@ -1,0 +1,35 @@
+{% load static i18n %}
+{% comment %}
+================================================================================
+ORTAQ WORKBENCH SKRİPTLƏRİ — AI i18n + əsas JS-lər (tək mənbə)
+--------------------------------------------------------------------------------
+İmtahan test bankı VƏ müstəqil bank toplu-yükləməsi EYNİ skriptləri işlədir.
+Hər iki səhifə bu partial-ı include edir ki, kod təkrarı olmasın.
+================================================================================
+{% endcomment %}
+<script nonce="{{ request.csp_nonce }}">
+{% trans "Yaradılır..." context "exams.template.ai_question_bank" as ai_i18n_generating %}
+{% trans "AI endpoint tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_endpoint_missing %}
+{% trans "Prompt yazın və ya fayl yükləyin." context "exams.template.ai_question_bank" as ai_i18n_empty_input %}
+{% trans "Gemini 2.5 Pro sualları hazırlayır..." context "exams.template.ai_question_bank" as ai_i18n_loading %}
+{% trans "AI sual yaratma alınmadı." context "exams.template.ai_question_bank" as ai_i18n_generate_failed %}
+{% trans "Qalan sorğu" context "exams.template.ai_question_bank" as ai_i18n_remaining_requests %}
+{% trans "{count} sual hazırdır. Önizləmə ilə yoxlayın." context "exams.template.ai_question_bank" as ai_i18n_ready_template %}
+{% trans "Mətn sahəsi tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_target_missing %}
+{% trans "AI boş cavab qaytardı." context "exams.template.ai_question_bank" as ai_i18n_empty_response %}
+{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" as ai_i18n_no_file_selected %}
+window.AI_QUESTION_BANK_I18N = {
+    generating: "{{ ai_i18n_generating|escapejs }}",
+    endpointMissing: "{{ ai_i18n_endpoint_missing|escapejs }}",
+    emptyInput: "{{ ai_i18n_empty_input|escapejs }}",
+    loading: "{{ ai_i18n_loading|escapejs }}",
+    generateFailed: "{{ ai_i18n_generate_failed|escapejs }}",
+    remainingRequests: "{{ ai_i18n_remaining_requests|escapejs }}",
+    readyTemplate: "{{ ai_i18n_ready_template|escapejs }}",
+    targetMissing: "{{ ai_i18n_target_missing|escapejs }}",
+    emptyResponse: "{{ ai_i18n_empty_response|escapejs }}",
+    noFileSelected: "{{ ai_i18n_no_file_selected|escapejs }}"
+};
+</script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>

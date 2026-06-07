@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}
+================================================================================
+BANK PICKER MODAL SHELL (ortaq) — examBankPicker.js bunu AJAX ilə doldurur.
+Parametr: picker_url (exam_bank_picker URL-i).
+Həm imtahan test-bankı, həm yazılı imtahan redaktoru bu shell-i include edir.
+================================================================================
+{% endcomment %}
+<div class="bankpicker-overlay" id="bankPickerModal" data-picker-url="{{ picker_url }}" hidden>
+    <div class="bankpicker-dialog" role="dialog" aria-modal="true" aria-labelledby="bankPickerTitle">
+        <header class="bankpicker-dialog__head">
+            <div class="bankpicker-dialog__title">
+                <i class="fas fa-book-bookmark"></i>
+                <div>
+                    <h3 id="bankPickerTitle">{% trans "Suallar bankından seç" %}</h3>
+                    <p>{% trans "Kitabxanadan sual seçib bu imtahana birbaşa əlavə et." %}</p>
+                </div>
+            </div>
+            <button type="button" class="bankpicker-dialog__close" data-bank-picker-close aria-label="{% trans 'Bağla' %}">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </header>
+        <div class="bankpicker-dialog__body" data-bank-picker-body>
+            <div class="bankpicker-loading">
+                <span class="bankpicker-spinner" aria-hidden="true"></span>
+                {% trans "Yüklənir..." %}
+            </div>
+        </div>
+    </div>
+</div>

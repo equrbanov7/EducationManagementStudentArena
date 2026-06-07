@@ -65,8 +65,8 @@
         <ul class="list-group">
             {% for item in exam_items %}
                 {% with exam=item.exam left=item.left %}
+                {{ item.language_options|json_script:item.language_options_id }}
                 <li class="list-group-item">
-                    
                     {# Sol tərəf: Məlumatlar #}
                     <div class="exam-info">
                         <strong>{{ exam.title }}</strong>
@@ -128,6 +128,8 @@
                                     data-exam-access="{{ item.access_label }}"
                                     data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
                                     data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                    data-language-options-id="{{ item.language_options_id }}"
+                                    data-default-language="{{ item.default_language }}"
                                     data-requires-code="1">
                                 {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </button>
@@ -145,6 +147,8 @@
                                data-exam-access="{{ item.access_label }}"
                                data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
                                data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                               data-language-options-id="{{ item.language_options_id }}"
+                               data-default-language="{{ item.default_language }}"
                                data-requires-code="0">
                                 {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </a>
@@ -205,6 +209,25 @@
                     <span class="exam-start-modal__badge exam-start-modal__badge--muted" id="examStartModalAttempts">-</span>
                 </div>
 
+                <div class="exam-start-modal__language d-none" id="examStartLanguageBlock">
+                    <div class="exam-start-modal__language-copy">
+                        <span class="exam-start-modal__language-icon">
+                            <i class="fas fa-language"></i>
+                        </span>
+                        <div class="exam-start-modal__language-text">
+                            <label for="examStartLanguageSelect" class="exam-start-modal__language-label">
+                                {% trans "modal_language_question" context "exams.template.student_exam_list" %}
+                            </label>
+                            <p>{% trans "modal_language_help" context "exams.template.student_exam_list" %}</p>
+                        </div>
+                    </div>
+                    <div class="bootstrap-single-select exam-start-modal__language-select-wrap">
+                        <select id="examStartLanguageSelect"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select></select>
+                    </div>
+                </div>
+
                 <div class="exam-start-modal__grid">
                     <div class="exam-start-modal__info-card">
                         <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>
@@ -235,6 +258,7 @@
                       class="exam-start-modal__code-form d-none">
                     {% csrf_token %}
                     <input type="hidden" name="exam_slug" id="examStartModalSlug">
+                    <input type="hidden" name="language" id="examStartModalCodeLanguage">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <div class="exam-start-modal__code-head">
                         <div class="exam-start-modal__code-icon">
@@ -317,11 +341,15 @@
         const codeInput = document.getElementById("examStartModalCodeInput");
         const codeErrorEl = document.getElementById("examStartModalCodeError");
         const codeHintEl = document.getElementById("examStartModalCodeHint");
+        const codeLanguageInput = document.getElementById("examStartModalCodeLanguage");
+        const languageBlock = document.getElementById("examStartLanguageBlock");
+        const languageSelect = document.getElementById("examStartLanguageSelect");
         const actionBtn = document.getElementById("examStartModalActionBtn");
 
         let startUrl = "";
         let requiresCode = false;
         let codeSubmitInFlight = false;
+        let selectedLanguage = "";
 
         function setCodeError(message) {
             if (codeInput) {
@@ -358,12 +386,100 @@
             }
         }
 
+        function getLanguageOptions(trigger) {
+            const optionsId = trigger.getAttribute("data-language-options-id") || "";
+            const optionsScript = optionsId ? document.getElementById(optionsId) : null;
+            if (!optionsScript) {
+                return [];
+            }
+
+            try {
+                const parsed = JSON.parse(optionsScript.textContent || "[]");
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function setSelectedLanguage(language) {
+            selectedLanguage = language || "";
+            if (codeLanguageInput) {
+                codeLanguageInput.value = selectedLanguage;
+            }
+        }
+
+        function buildStartUrlWithLanguage(rawUrl) {
+            if (!rawUrl || !selectedLanguage) {
+                return rawUrl;
+            }
+
+            try {
+                const url = new URL(rawUrl, window.location.origin);
+                url.searchParams.set("language", selectedLanguage);
+                return `${url.pathname}${url.search}${url.hash}`;
+            } catch (error) {
+                const separator = rawUrl.indexOf("?") === -1 ? "?" : "&";
+                return `${rawUrl}${separator}language=${encodeURIComponent(selectedLanguage)}`;
+            }
+        }
+
+        function refreshLanguageSelect() {
+            if (!languageSelect) {
+                return;
+            }
+
+            if (window.EMSBootstrapSelect) {
+                window.EMSBootstrapSelect.refresh(languageSelect);
+            }
+        }
+
+        function configureLanguageChoice(trigger) {
+            const options = getLanguageOptions(trigger);
+            const defaultLanguage = trigger.getAttribute("data-default-language") || "";
+            const defaultOption = options.find(function(option) {
+                return option.language === defaultLanguage;
+            }) || options[0] || null;
+
+            if (!languageSelect || !languageBlock) {
+                setSelectedLanguage(defaultOption ? defaultOption.language : "");
+                return;
+            }
+
+            languageSelect.innerHTML = "";
+            options.forEach(function(option) {
+                const optionEl = document.createElement("option");
+                optionEl.value = option.language || "";
+                optionEl.textContent = option.display_name || option.language || "";
+                languageSelect.appendChild(optionEl);
+            });
+
+            if (defaultOption) {
+                languageSelect.value = defaultOption.language;
+                setSelectedLanguage(defaultOption.language);
+            } else {
+                setSelectedLanguage("");
+            }
+
+            languageBlock.classList.toggle("d-none", options.length <= 1);
+            languageSelect.required = options.length > 1;
+            refreshLanguageSelect();
+        }
+
         function resetModalState() {
             startUrl = "";
             requiresCode = false;
+            setSelectedLanguage("");
 
             if (accessEl) {
                 accessEl.classList.remove("exam-start-modal__badge--danger", "exam-start-modal__badge--success");
+            }
+            if (languageBlock) {
+                languageBlock.classList.add("d-none");
+            }
+            if (languageSelect) {
+                languageSelect.innerHTML = "";
+                languageSelect.required = false;
+                refreshLanguageSelect();
             }
             if (noteWrapEl) {
                 noteWrapEl.classList.remove("is-empty");
@@ -395,6 +511,7 @@
 
             startUrl = trigger.getAttribute("data-start-url") || trigger.getAttribute("href") || "";
             requiresCode = trigger.getAttribute("data-requires-code") === "1";
+            configureLanguageChoice(trigger);
 
             if (examNameEl) {
                 examNameEl.textContent = trigger.getAttribute("data-exam-title") || "";
@@ -462,6 +579,12 @@
             });
         }
 
+        if (languageSelect) {
+            languageSelect.addEventListener("change", function() {
+                setSelectedLanguage(this.value || "");
+            });
+        }
+
         if (codeForm) {
             codeForm.addEventListener("submit", async function(event) {
                 event.preventDefault();
@@ -495,7 +618,7 @@
                     if (contentType.indexOf("application/json") !== -1) {
                         const payload = await response.json();
                         if (response.ok && payload.success) {
-                            window.location.href = payload.redirect_url || startUrl || window.location.href;
+                            window.location.href = payload.redirect_url || buildStartUrlWithLanguage(startUrl) || window.location.href;
                             return;
                         }
                         setCodeError(payload.error || I18N_STUDENT_EXAM_LIST.modalAccessCodeGenericError);
@@ -535,7 +658,7 @@
                 }
 
                 if (startUrl) {
-                    window.location.href = startUrl;
+                    window.location.href = buildStartUrlWithLanguage(startUrl);
                 }
             });
         }

@@ -14,11 +14,13 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
+from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.bank_analysis import analyze_question_bank
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
+from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 QUESTION_BANK_SEARCH_MAX_LENGTH = 240
@@ -175,40 +177,64 @@ def teacher_questions_bank(request, slug):
 
     if request.method == "POST":
         action = (request.POST.get("bulk_action") or "").strip().lower()
-        selected_ids = [int(item) for item in request.POST.getlist("selected_question_ids") if item.isdigit()]
-        selected_qs = ExamQuestion.objects.filter(exam=exam, id__in=selected_ids)
-        selected_count = selected_qs.count()
 
-        if selected_count == 0:
-            messages.warning(request, pgettext("exams.view.questions_bank.message", "select_at_least_one"))
-        elif action == "deactivate":
-            updated = selected_qs.update(is_active=False)
-            messages.success(
-                request,
-                pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
-            )
-        elif action == "activate":
-            updated = selected_qs.update(is_active=True)
-            messages.success(
-                request,
-                pgettext("exams.view.questions_bank.message", "activated_selected").format(count=updated),
-            )
-        elif action == "delete":
-            deleted = selected_count
-            selected_qs.delete()
+        if action == "delete_all":
+            deleted = exam.questions.count()
+            exam.questions.all().delete()
             _resequence_exam_questions(exam)
             messages.success(
                 request,
-                pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
+                pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
             )
+        elif action == "delete_language":
+            lang = (request.POST.get("language") or "").strip().lower()
+            if lang not in EXAM_LANGUAGE_VALUES:
+                messages.error(request, pgettext("exams.view.questions_bank.message", "Düzgün dil seçin."))
+            else:
+                scoped_qs = exam.questions.filter(language=lang)
+                deleted = scoped_qs.count()
+                scoped_qs.delete()
+                _resequence_exam_questions(exam)
+                messages.success(
+                    request,
+                    pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
+                )
         else:
-            messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
+            selected_ids = [int(item) for item in request.POST.getlist("selected_question_ids") if item.isdigit()]
+            selected_qs = ExamQuestion.objects.filter(exam=exam, id__in=selected_ids)
+            selected_count = selected_qs.count()
+
+            if selected_count == 0:
+                messages.warning(request, pgettext("exams.view.questions_bank.message", "select_at_least_one"))
+            elif action == "deactivate":
+                updated = selected_qs.update(is_active=False)
+                messages.success(
+                    request,
+                    pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
+                )
+            elif action == "activate":
+                updated = selected_qs.update(is_active=True)
+                messages.success(
+                    request,
+                    pgettext("exams.view.questions_bank.message", "activated_selected").format(count=updated),
+                )
+            elif action == "delete":
+                deleted = selected_count
+                selected_qs.delete()
+                _resequence_exam_questions(exam)
+                messages.success(
+                    request,
+                    pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
+                )
+            else:
+                messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
 
         redirect_params = {}
         redirect_q = (request.POST.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
         redirect_status = (request.POST.get("status") or "all").strip().lower()
         redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
         redirect_flag = (request.POST.get("flag") or "").strip().lower()
+        redirect_language = (request.POST.get("language") or "").strip().lower()
         redirect_page = (request.POST.get("page") or "").strip()
 
         if redirect_q:
@@ -219,6 +245,8 @@ def teacher_questions_bank(request, slug):
             redirect_params["sort"] = redirect_sort
         if redirect_flag in allowed_flags:
             redirect_params["flag"] = redirect_flag
+        if redirect_language in EXAM_LANGUAGE_VALUES:
+            redirect_params["language"] = redirect_language
         if redirect_page.isdigit():
             redirect_params["page"] = redirect_page
         if navigation_from_section:
@@ -234,18 +262,21 @@ def teacher_questions_bank(request, slug):
     search_query = (request.GET.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
     status_filter = (request.GET.get("status") or "all").strip().lower()
     sort_filter = (request.GET.get("sort") or "newest").strip().lower()
+    language_filter = (request.GET.get("language") or "").strip().lower()
     flag_filter = (request.GET.get("flag") or "").strip().lower()
     if status_filter not in allowed_statuses:
         status_filter = "all"
     if sort_filter not in allowed_sorts:
         sort_filter = "newest"
+    if language_filter not in EXAM_LANGUAGE_VALUES:
+        language_filter = ""
     if flag_filter not in allowed_flags:
         flag_filter = ""
 
     # Bütün bank üzrə keyfiyyət analizi (yalnız test imtahanları üçün mənalıdır).
     # Stat kartları, filter çipləri və hesabat real ümumi rəqəmləri göstərsin deyə
     # analiz səhifələmədən asılı olmayaraq bütün suallar üzərində işləyir.
-    analysis = analyze_question_bank(exam)
+    analysis = analyze_question_bank(exam, language=language_filter or None)
 
     # Excel hesabatının yüklənməsi (mövcud import-report builder təkrar istifadə olunur).
     if analysis.enabled and request.GET.get("export") == "report":
@@ -283,6 +314,8 @@ def teacher_questions_bank(request, slug):
         questions = questions.filter(is_active=True)
     elif status_filter == "inactive":
         questions = questions.filter(is_active=False)
+    if language_filter:
+        questions = questions.filter(language=language_filter)
 
     # Keyfiyyət çipi filtri (dublikat, xəbərdarlıq, balans və s.) — bütün bank üzrə
     # hesablanmış flag dəstlərinə əsasən server tərəfdə süzgəcləyir.
@@ -314,8 +347,12 @@ def teacher_questions_bank(request, slug):
                 question.analysis_meta = None
                 question.analysis_warnings = []
 
-    total_questions = exam.questions.count()
-    active_questions = exam.questions.filter(is_active=True).count()
+    all_questions_total = exam.questions.count()
+    scoped_questions = exam.questions.all()
+    if language_filter:
+        scoped_questions = scoped_questions.filter(language=language_filter)
+    total_questions = scoped_questions.count()
+    active_questions = scoped_questions.filter(is_active=True).count()
     inactive_questions = max(total_questions - active_questions, 0)
 
     base_query_params = {}
@@ -325,6 +362,8 @@ def teacher_questions_bank(request, slug):
         base_query_params["status"] = status_filter
     if sort_filter != "newest":
         base_query_params["sort"] = sort_filter
+    if language_filter:
+        base_query_params["language"] = language_filter
     if active_flag:
         base_query_params["flag"] = active_flag
     if navigation_from_section:
@@ -358,7 +397,9 @@ def teacher_questions_bank(request, slug):
         "qm_add_single_url": _append_navigation_query(
             reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
         ),
-        "qm_show_language_filter": False,
+        "qm_show_language_filter": True,
+        "qm_can_delete_language": True,
+        "qm_show_delete_all": True,
         "qm_show_report": True,
         "qm_is_owner": False,
     }
@@ -373,8 +414,10 @@ def teacher_questions_bank(request, slug):
             "search_query": search_query,
             "status_filter": status_filter,
             "sort_filter": sort_filter,
+            "language_filter": language_filter,
             "active_flag": active_flag,
             "total_questions": total_questions,
+            "all_questions_total": all_questions_total,
             "active_questions": active_questions,
             "inactive_questions": inactive_questions,
             "pagination_query": urlencode(base_query_params),
@@ -390,6 +433,7 @@ def teacher_questions_bank(request, slug):
             "navigation_from_section": navigation_from_section,
             "navigation_return_to": navigation_return_to,
             "question_bank_search_max_length": QUESTION_BANK_SEARCH_MAX_LENGTH,
+            "language_choices": EXAM_LANGUAGE_CHOICES,
         },
     )
 
@@ -423,6 +467,9 @@ def add_exam_question(request, slug):
             question = form.save(commit=False)
             question.exam = exam
             question.order = next_order
+
+            # Seçilmiş dilin variantını təmin et (çoxdilli imtahan + student dil axını).
+            question.language_variant = ensure_default_variant(exam, question.language)
 
             # Yazılı/praktiki imtahan üçün answer_mode-u zorla "single" edə bilərik
             if exam.exam_type in {"written", "coding"}:
@@ -537,6 +584,9 @@ def edit_exam_question(request, slug, question_id):
         if form.is_valid():
             q = form.save(commit=False)
             q.exam = exam
+
+            # Seçilmiş dilin variantını təmin et (çoxdilli imtahan).
+            q.language_variant = ensure_default_variant(exam, q.language)
 
             if exam.exam_type in {"written", "coding"}:
                 q.answer_mode = "single"

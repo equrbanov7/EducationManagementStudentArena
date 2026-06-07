@@ -154,6 +154,7 @@
                     <div class="list-group list-group-flush">
                         {% for item in exams_with_data %}
                         {% with exam=item.exam %}
+                        {{ item.language_options|json_script:item.language_options_id }}
                         <div class="list-group-item border-0 border-bottom pb-3 mb-3">
                             <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                                 <h6 class="mb-1 fw-bold">
@@ -235,6 +236,8 @@
                                                 data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
                                                 data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
                                                 data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                                data-language-options-id="{{ item.language_options_id }}"
+                                                data-default-language="{{ item.default_language }}"
                                                 data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
                                             <i class="fas fa-redo"></i> {% trans "action_restart_exam" context "exams.partial.exam_section" %}
                                         </button>
@@ -251,6 +254,8 @@
                                             data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
                                             data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
                                             data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                            data-language-options-id="{{ item.language_options_id }}"
+                                            data-default-language="{{ item.default_language }}"
                                             data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
                                         <i class="fas fa-play"></i> {% trans "action_start_exam" context "exams.partial.exam_section" %}
                                     </button>
@@ -307,6 +312,25 @@
         </h3>
         <p class="assigned-exam-info-subtitle" id="courseExamInfoExamName"></p>
 
+        <div class="assigned-exam-language is-hidden" id="courseExamLanguageBlock">
+            <div class="assigned-exam-language-copy">
+                <span class="assigned-exam-language-icon">
+                    <i class="fas fa-language"></i>
+                </span>
+                <div>
+                    <label for="courseExamLanguageSelect" class="assigned-exam-language-label">
+                        {% trans "modal_language_question" context "exams.template.student_exam_list" %}
+                    </label>
+                    <p>{% trans "modal_language_help" context "exams.template.student_exam_list" %}</p>
+                </div>
+            </div>
+            <div class="bootstrap-single-select assigned-exam-language-select-wrap">
+                <select id="courseExamLanguageSelect"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select></select>
+            </div>
+        </div>
+
         <div class="assigned-exam-info-grid">
             <div class="assigned-exam-info-row">
                 <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>
@@ -337,6 +361,7 @@
               class="assigned-exam-code-form is-hidden">
             {% csrf_token %}
             <input type="hidden" name="exam_slug" id="courseExamCodeSlug">
+            <input type="hidden" name="language" id="courseExamCodeLanguage">
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
             <label for="courseExamAccessCodeInput" class="assigned-exam-code-label">
                 {% trans "modal_access_code_label" context "exams.partial.exam_section" %}
@@ -380,11 +405,15 @@
     var noteEl = document.getElementById("courseExamInfoNote");
     var codeForm = document.getElementById("courseExamCodeForm");
     var codeSlug = document.getElementById("courseExamCodeSlug");
+    var codeLanguage = document.getElementById("courseExamCodeLanguage");
     var codeInput = document.getElementById("courseExamAccessCodeInput");
     var codeError = document.getElementById("courseExamCodeError");
+    var languageBlock = document.getElementById("courseExamLanguageBlock");
+    var languageSelect = document.getElementById("courseExamLanguageSelect");
     var startUrl = "";
     var requiresCode = false;
     var codeSubmitInFlight = false;
+    var selectedLanguage = "";
     var emptyNoteText = "{% trans 'modal_note_empty' context 'exams.partial.exam_section'|escapejs %}";
     var directStartText = "{% trans 'modal_action_start' context 'exams.partial.exam_section'|escapejs %}";
     var confirmCodeText = "{% trans 'modal_action_confirm_code' context 'exams.partial.exam_section'|escapejs %}";
@@ -399,6 +428,84 @@
             codeError.textContent = message || "";
             codeError.hidden = !message;
         }
+    }
+
+    function getLanguageOptions(trigger) {
+        var optionsId = trigger.getAttribute("data-language-options-id") || "";
+        var optionsScript = optionsId ? document.getElementById(optionsId) : null;
+        if (!optionsScript) {
+            return [];
+        }
+
+        try {
+            var parsed = JSON.parse(optionsScript.textContent || "[]");
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function setSelectedLanguage(language) {
+        selectedLanguage = language || "";
+        if (codeLanguage) {
+            codeLanguage.value = selectedLanguage;
+        }
+    }
+
+    function buildStartUrlWithLanguage(rawUrl) {
+        if (!rawUrl || !selectedLanguage) {
+            return rawUrl;
+        }
+
+        try {
+            var url = new URL(rawUrl, window.location.origin);
+            url.searchParams.set("language", selectedLanguage);
+            return url.pathname + url.search + url.hash;
+        } catch (error) {
+            var separator = rawUrl.indexOf("?") === -1 ? "?" : "&";
+            return rawUrl + separator + "language=" + encodeURIComponent(selectedLanguage);
+        }
+    }
+
+    function refreshLanguageSelect() {
+        if (!languageSelect) {
+            return;
+        }
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.refresh(languageSelect);
+        }
+    }
+
+    function configureLanguageChoice(trigger) {
+        var options = getLanguageOptions(trigger);
+        var defaultLanguage = trigger.getAttribute("data-default-language") || "";
+        var defaultOption = options.find(function (option) {
+            return option.language === defaultLanguage;
+        }) || options[0] || null;
+
+        if (!languageBlock || !languageSelect) {
+            setSelectedLanguage(defaultOption ? defaultOption.language : "");
+            return;
+        }
+
+        languageSelect.innerHTML = "";
+        options.forEach(function (option) {
+            var optionEl = document.createElement("option");
+            optionEl.value = option.language || "";
+            optionEl.textContent = option.display_name || option.language || "";
+            languageSelect.appendChild(optionEl);
+        });
+
+        if (defaultOption) {
+            languageSelect.value = defaultOption.language;
+            setSelectedLanguage(defaultOption.language);
+        } else {
+            setSelectedLanguage("");
+        }
+
+        languageBlock.classList.toggle("is-hidden", options.length <= 1);
+        languageSelect.required = options.length > 1;
+        refreshLanguageSelect();
     }
 
     function closeModal() {
@@ -417,6 +524,7 @@
 
         startUrl = trigger.getAttribute("data-start-url") || "";
         requiresCode = trigger.getAttribute("data-requires-code") === "1";
+        configureLanguageChoice(trigger);
 
         if (titleEl) {
             titleEl.textContent = trigger.getAttribute("data-exam-title") || "";
@@ -491,6 +599,11 @@
             setCodeError("");
         });
     }
+    if (languageSelect) {
+        languageSelect.addEventListener("change", function () {
+            setSelectedLanguage(this.value || "");
+        });
+    }
 
     async function submitCodeForm() {
         if (!codeForm || !codeInput) {
@@ -520,7 +633,7 @@
             if (contentType.indexOf("application/json") !== -1) {
                 var payload = await response.json();
                 if (response.ok && payload.success) {
-                    window.location.href = payload.redirect_url || startUrl || window.location.href;
+                    window.location.href = payload.redirect_url || buildStartUrlWithLanguage(startUrl) || window.location.href;
                     return;
                 }
                 setCodeError(payload.error || startFailedText);
@@ -556,7 +669,7 @@
             }
 
             if (startUrl) {
-                window.location.href = startUrl;
+                window.location.href = buildStartUrlWithLanguage(startUrl);
             }
         });
     }
