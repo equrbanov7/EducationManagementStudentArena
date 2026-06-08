@@ -7,6 +7,7 @@ import re
 from django import forms
 from django.utils.translation import pgettext_lazy
 
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
@@ -149,6 +150,8 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
         self._ensure_option_fields_exist()
 
+        self.fields["language"].required = False
+
         # Yazılı imtahanlarda enable_paint field-ini silmə
         if self.exam_type != "written":
             self.fields.pop("enable_paint", None)
@@ -197,6 +200,18 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 self.fields[f"option{idx}_is_correct"].initial = opt.is_correct
 
         self.option_fields = self._build_option_fields()
+
+    def _fallback_language(self):
+        instance = getattr(self, "instance", None)
+        if instance and getattr(instance, "pk", None) and instance.language:
+            return instance.language
+
+        if self.exam is not None:
+            variant_langs = list(self.exam.language_variants.filter(is_active=True).values_list("language", flat=True))
+            if len(variant_langs) == 1:
+                return variant_langs[0]
+
+        return DEFAULT_EXAM_LANGUAGE
 
     def _resolve_option_indexes(self, *, data=None, instance=None):
         max_index = self.MIN_TEST_OPTIONS
@@ -276,6 +291,9 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     }
                 )
         return options
+
+    def clean_language(self):
+        return self.cleaned_data.get("language") or self._fallback_language()
 
     def clean(self):
         cleaned_data = super().clean()

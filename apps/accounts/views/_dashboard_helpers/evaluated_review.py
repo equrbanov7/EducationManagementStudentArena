@@ -87,15 +87,13 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
         for attempt in attempts:
             course = attempt.exam.course
             submitted_at = attempt.finished_at or attempt.started_at
-            # Test: apellyasiyadan SONRAKI effektiv balı bal olaraq göstər
-            # (X / maks) + faiz; yazılı/praktiki: müəllim balı.
             if attempt.exam.exam_type == "test":
                 eff = effective_test_score(attempt)
-                score_display = "{} / {}".format(
-                    _format_score_display(eff["effective_score"]),
-                    _format_score_display(eff["max_score"]),
+                score_value = (
+                    attempt.teacher_score if attempt.teacher_score is not None else eff["effective_percentage"]
                 )
-                score_percent_display = "{}%".format(_format_score_display(eff["effective_percentage"]))
+                score_display = _format_score_display(score_value)
+                score_percent_display = ""
             else:
                 score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
                 score_display = _format_score_display(score_value)
