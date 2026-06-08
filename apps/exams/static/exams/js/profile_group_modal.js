@@ -1,11 +1,38 @@
-document.addEventListener("DOMContentLoaded", function () {
-  var modalElement = document.getElementById("profileGroupModal");
-  var deleteModalElement = document.getElementById("profileGroupDeleteModal");
-  var form = document.getElementById("profileGroupForm");
+(window.EMSReady || function (fn) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { fn(null); });
+  } else {
+    fn(null);
+  }
+})(function (detail) {
+  if (detail && detail.section && detail.section !== "groups") {
+    return;
+  }
+
+  var panel = detail && detail.panel ? detail.panel : document;
+  var modalElement = panel.querySelector("#profileGroupModal");
+  var deleteModalElement = panel.querySelector("#profileGroupDeleteModal");
+  var form = panel.querySelector("#profileGroupForm");
 
   if (!modalElement || !form || typeof window.bootstrap === "undefined") {
     return;
   }
+
+  Array.from(document.querySelectorAll("#profileGroupModal")).forEach(function (node) {
+    if (node !== modalElement && node.parentNode) {
+      node.parentNode.removeChild(node);
+    }
+  });
+  Array.from(document.querySelectorAll("#profileGroupDeleteModal")).forEach(function (node) {
+    if (node !== deleteModalElement && node.parentNode) {
+      node.parentNode.removeChild(node);
+    }
+  });
+
+  if (modalElement.getAttribute("data-profile-group-modal-ready") === "1") {
+    return;
+  }
+  modalElement.setAttribute("data-profile-group-modal-ready", "1");
 
   if (modalElement.parentElement !== document.body) {
     document.body.appendChild(modalElement);
@@ -14,14 +41,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.appendChild(deleteModalElement);
   }
 
-  var modal = new window.bootstrap.Modal(modalElement);
-  var deleteModal = deleteModalElement ? new window.bootstrap.Modal(deleteModalElement) : null;
-  var titleEl = document.getElementById("profileGroupModalTitle");
-  var submitLabel = document.getElementById("profileGroupSubmitLabel");
-  var nextInput = document.getElementById("profileGroupNextInput");
+  var modal = window.bootstrap.Modal.getOrCreateInstance(modalElement);
+  var deleteModal = deleteModalElement ? window.bootstrap.Modal.getOrCreateInstance(deleteModalElement) : null;
+  var titleEl = modalElement.querySelector("#profileGroupModalTitle");
+  var submitLabel = modalElement.querySelector("#profileGroupSubmitLabel");
+  var nextInput = modalElement.querySelector("#profileGroupNextInput");
   var modalBody = form.querySelector(".profile-group-modal__body");
-  var deleteNameEl = document.getElementById("profileGroupDeleteName");
-  var deleteConfirmBtn = document.getElementById("profileGroupDeleteConfirmBtn");
+  var deleteNameEl = deleteModalElement ? deleteModalElement.querySelector("#profileGroupDeleteName") : null;
+  var deleteConfirmBtn = deleteModalElement ? deleteModalElement.querySelector("#profileGroupDeleteConfirmBtn") : null;
   var pendingDeleteForm = null;
 
   var createUrl = modalElement.getAttribute("data-create-url") || "";
@@ -41,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var primaryTeacherSearchInput = form.querySelector("#profileGroupPrimaryTeacherSearch");
   var studentsSelect = form.querySelector('select[name="students"]');
   var assignedTeachersSelect = form.querySelector('select[name="assigned_teachers"]');
-  var payloadScript = document.getElementById("profileGroupPayloads");
+  var payloadScript = panel.querySelector("#profileGroupPayloads");
   var groupPayloadMap = {};
   var activeEditState = null;
 
@@ -571,25 +598,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  document.addEventListener("click", function (event) {
-    var createButton = event.target.closest(".jsOpenCreateGroupProfile");
-    if (createButton) {
-      event.preventDefault();
-      openCreateModal();
-      return;
-    }
+  window.EMSDelegate.on("click", ".jsOpenCreateGroupProfile", function (event) {
+    event.preventDefault();
+    openCreateModal();
+  });
 
-    var editButton = event.target.closest(".jsOpenEditGroupProfile");
-    if (editButton) {
-      event.preventDefault();
-      openEditModal(editButton);
-      return;
-    }
+  window.EMSDelegate.on("click", ".jsOpenEditGroupProfile", function (event, editButton) {
+    event.preventDefault();
+    openEditModal(editButton);
+  });
 
-    var deleteButton = event.target.closest(".jsOpenDeleteGroupProfile");
-    if (!deleteButton) {
-      return;
-    }
+  window.EMSDelegate.on("click", ".jsOpenDeleteGroupProfile", function (event, deleteButton) {
     if (!deleteModal) {
       return;
     }

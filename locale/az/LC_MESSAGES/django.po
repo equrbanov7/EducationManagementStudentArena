@@ -916,6 +916,54 @@ msgctxt "profile.groups"
 msgid "remove_student_confirm_button"
 msgstr "Qrupdan çıxar"
 
+msgctxt "profile.groups"
+msgid "search_placeholder_groups"
+msgstr "Qrup adı, müəllim və ya tələbə üzrə axtar"
+
+msgctxt "profile.groups"
+msgid "search_action"
+msgstr "Axtar"
+
+msgctxt "profile.groups"
+msgid "clear_search"
+msgstr "Təmizlə"
+
+msgctxt "profile.groups"
+msgid "filtered_group_count %(filtered_count)s %(total_count)s"
+msgstr "%(filtered_count)s nəticə · %(total_count)s ümumi qrup"
+
+msgctxt "profile.groups"
+msgid "total_group_count %(count)s"
+msgstr "%(count)s qrup"
+
+msgctxt "profile.groups"
+msgid "view"
+msgstr "Bax"
+
+msgctxt "profile.groups"
+msgid "no_group_search_results"
+msgstr "Axtarışa uyğun qrup tapılmadı."
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_title"
+msgstr "Qrupun tələbələrinə baxın"
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_description"
+msgstr "İstənilən qrupda \"Bax\" düyməsinə klikləyərək həmin qrupun tələbə siyahısını aça bilərsiniz."
+
+msgctxt "profile.groups"
+msgid "additional_teachers"
+msgstr "Əlavə müəllimlər"
+
+msgctxt "profile.groups"
+msgid "student_search_placeholder"
+msgstr "Tələbə adı, istifadəçi adı və ya email üzrə axtar"
+
+msgctxt "profile.groups"
+msgid "no_student_search_results"
+msgstr "Bu axtarışa uyğun tələbə tapılmadı."
+
 #: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
 msgctxt "profile.manage_roles"
 msgid "info_title"
@@ -1684,6 +1732,22 @@ msgctxt "profile.sidebar"
 msgid "groups"
 msgstr "Qruplar"
 
+msgctxt "profile.section"
+msgid "post_management"
+msgstr "Postların idarəetməsi"
+
+msgctxt "profile.sidebar"
+msgid "post_management"
+msgstr "Postların idarəetməsi"
+
+msgctxt "profile.section"
+msgid "review_results"
+msgstr "Dəyərləndirilmiş nəticələr"
+
+msgctxt "profile.sidebar"
+msgid "review_results"
+msgstr "Dəyərləndirilmiş nəticələr"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html:156
 #: apps/accounts/views.py:1693
 msgctxt "profile.section"
@@ -2078,6 +2142,30 @@ msgstr "Axtarış meyarlarına uyğun imtahan tapılmadı."
 msgctxt "profile.my_exams"
 msgid "clear_filters"
 msgstr "Filtrləri təmizlə"
+
+msgctxt "profile.my_exams"
+msgid "active_status"
+msgstr "Aktiv"
+
+msgctxt "profile.my_exams"
+msgid "inactive_status"
+msgstr "Deaktiv"
+
+msgctxt "profile.my_exams"
+msgid "action_edit"
+msgstr "Redaktə"
+
+msgctxt "profile.my_exams"
+msgid "action_languages"
+msgstr "Dillər"
+
+msgctxt "profile.my_exams"
+msgid "action_question_bank"
+msgstr "Bankdan sual"
+
+msgctxt "profile.my_exams"
+msgid "action_results"
+msgstr "Nəticələr"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"

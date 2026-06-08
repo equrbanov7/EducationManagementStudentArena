@@ -38,11 +38,11 @@
                 class="form-control"
                 name="group_q"
                 value="{{ teacher_groups_search_query }}"
-                placeholder="Qrup adı, müəllim və ya tələbə üzrə axtar"
+                placeholder="{% trans 'search_placeholder_groups' context 'profile.groups' %}"
             >
-            <button type="submit" class="btn btn-outline-primary">Axtar</button>
+            <button type="submit" class="btn btn-outline-primary">{% trans "search_action" context "profile.groups" %}</button>
             {% if teacher_groups_search_query %}
-                <a href="?section=groups{% if selected_teacher_group %}&group={{ selected_teacher_group.id }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
+                <a href="?section=groups{% if selected_teacher_group %}&group={{ selected_teacher_group.id }}{% endif %}" class="btn btn-outline-secondary">{% trans "clear_search" context "profile.groups" %}</a>
             {% endif %}
         </div>
     </form>
@@ -50,9 +50,13 @@
     {% if teacher_groups %}
         <div class="profile-group-count mb-2">
             {% if teacher_groups_search_query %}
-                {{ teacher_groups_filtered_count }} nəticə · {{ teacher_groups_count }} ümumi qrup
+                {% blocktrans trimmed context "profile.groups" with filtered_count=teacher_groups_filtered_count total_count=teacher_groups_count %}
+                    filtered_group_count {{ filtered_count }} {{ total_count }}
+                {% endblocktrans %}
             {% else %}
-                {{ teacher_groups_count }} qrup
+                {% blocktrans trimmed context "profile.groups" with count=teacher_groups_count %}
+                    total_group_count {{ count }}
+                {% endblocktrans %}
             {% endif %}
         </div>
         <div class="posts-grid">
@@ -79,7 +83,7 @@
                             data-group-id="{{ group.id }}"
                         >
                             <i class="fas fa-eye"></i>
-                            <span>Bax</span>
+                            <span>{% trans "view" context "profile.groups" %}</span>
                         </a>
                         {% if group_form %}
                             <button
@@ -119,7 +123,7 @@
             <i class="fas fa-users-slash"></i>
             <p>
                 {% if teacher_groups_search_query %}
-                    Axtarışa uyğun qrup tapılmadı.
+                    {% trans "no_group_search_results" context "profile.groups" %}
                 {% else %}
                     {% trans "empty_visible_groups" context "profile.groups" %}
                 {% endif %}
@@ -131,8 +135,8 @@
         <div class="profile-group-detail profile-group-detail--empty">
             <i class="fas fa-users"></i>
             <div>
-                <h3>Qrupun tələbələrinə baxın</h3>
-                <p>İstənilən qrupda "Bax" düyməsinə klikləyərək həmin qrupun tələbə siyahısını aça bilərsiniz.</p>
+                <h3>{% trans "group_detail_empty_title" context "profile.groups" %}</h3>
+                <p>{% trans "group_detail_empty_description" context "profile.groups" %}</p>
             </div>
         </div>
     {% endif %}
@@ -167,7 +171,7 @@
             <div class="modal-body p-0">
                 {% if selected_teacher_group.teachers.all %}
                     <div class="profile-group-teacher-strip px-3 pt-3">
-                        <span>Əlavə müəllimlər</span>
+                        <span>{% trans "additional_teachers" context "profile.groups" %}</span>
                         <div>
                             {% for teacher in selected_teacher_group.teachers.all %}
                                 <span class="profile-group-chip">{{ teacher.get_full_name|default:teacher.username }}</span>
@@ -192,11 +196,11 @@
                             class="form-control"
                             name="student_q"
                             value="{{ group_students_search_query }}"
-                            placeholder="Tələbə adı, istifadəçi adı və ya email üzrə axtar"
+                            placeholder="{% trans 'student_search_placeholder' context 'profile.groups' %}"
                         >
-                        <button type="submit" class="btn btn-outline-primary">Axtar</button>
+                        <button type="submit" class="btn btn-outline-primary">{% trans "search_action" context "profile.groups" %}</button>
                         {% if group_students_search_query %}
-                            <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">Təmizlə</a>
+                            <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">{% trans "clear_search" context "profile.groups" %}</a>
                         {% endif %}
                     </div>
                 </form>
@@ -241,7 +245,7 @@
                     {% else %}
                         <div class="profile-group-detail__empty px-3 py-3">
                             {% if group_students_search_query %}
-                                Bu axtarışa uyğun tələbə tapılmadı.
+                                {% trans "no_student_search_results" context "profile.groups" %}
                             {% else %}
                                 {% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}
                             {% endif %}
@@ -280,7 +284,7 @@
 
 <script nonce="{{ request.csp_nonce }}">
 (function () {
-    document.addEventListener("DOMContentLoaded", function () {
+    function initProfileGroupDetailModals() {
         if (typeof window.bootstrap === "undefined") { return; }
         var detailModalEl = document.getElementById("profileGroupDetailModal");
         var removeModalEl = document.getElementById("profileGroupRemoveStudentModal");
@@ -290,29 +294,40 @@
         var removeConfirmText = "{% filter escapejs %}{% trans 'remove_student_confirm_body' context 'profile.groups' %}{% endfilter %}";
 
         if (detailModalEl) {
+            Array.from(document.querySelectorAll("#profileGroupDetailModal")).forEach(function (node) {
+                if (node !== detailModalEl && node.parentNode) {
+                    node.parentNode.removeChild(node);
+                }
+            });
             if (detailModalEl.parentElement !== document.body) {
                 document.body.appendChild(detailModalEl);
             }
             var detailModal = window.bootstrap.Modal.getOrCreateInstance(detailModalEl);
             detailModal.show();
 
-            detailModalEl.addEventListener("hide.bs.modal", function () {
-                var closeUrl = detailModalEl.getAttribute("data-close-url");
-                if (closeUrl) {
-                    window.location.href = closeUrl;
-                }
-            });
+            if (detailModalEl.getAttribute("data-profile-group-detail-ready") !== "1") {
+                detailModalEl.setAttribute("data-profile-group-detail-ready", "1");
+                detailModalEl.addEventListener("hide.bs.modal", function () {
+                    var closeUrl = detailModalEl.getAttribute("data-close-url");
+                    if (closeUrl) {
+                        window.location.href = closeUrl;
+                    }
+                });
+            }
         }
 
         if (removeModalEl) {
+            Array.from(document.querySelectorAll("#profileGroupRemoveStudentModal")).forEach(function (node) {
+                if (node !== removeModalEl && node.parentNode) {
+                    node.parentNode.removeChild(node);
+                }
+            });
             if (removeModalEl.parentElement !== document.body) {
                 document.body.appendChild(removeModalEl);
             }
             var removeModal = window.bootstrap.Modal.getOrCreateInstance(removeModalEl);
 
-            document.addEventListener("click", function (event) {
-                var btn = event.target.closest(".jsOpenRemoveStudentFromGroup");
-                if (!btn) { return; }
+            window.EMSDelegate.on("click", ".jsOpenRemoveStudentFromGroup", function (event, btn) {
                 event.preventDefault();
                 var studentName = btn.getAttribute("data-student-name") || "";
                 var removeUrl = btn.getAttribute("data-remove-url") || "";
@@ -330,7 +345,9 @@
                 removeModal.show();
             });
         }
-    });
+    }
+
+    initProfileGroupDetailModals();
 })();
 </script>
 {% endif %}

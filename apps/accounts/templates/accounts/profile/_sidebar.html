@@ -307,11 +307,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=pending-post-approvals"
                data-section="pending-post-approvals"
-               data-title="Postların idarəetməsi"
+               data-title="{% trans 'post_management' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-post-approvals' %}active{% endif %}">
                 <i class="fas fa-user-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Postların idarəetməsi</span>
+                <span class="sidebar-menu-text">{% trans "post_management" context "profile.sidebar" %}</span>
                 {% if pending_post_approval_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_post_approval_count">{{ pending_post_approval_count }}</span>
                 {% endif %}
@@ -339,11 +339,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=review-results"
                data-section="review-results"
-               data-title="Dəyərləndirilmiş nəticələr"
+               data-title="{% trans 'review_results' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'review-results' %}active{% endif %}">
                 <i class="fas fa-table sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Dəyərləndirilmiş nəticələr</span>
+                <span class="sidebar-menu-text">{% trans "review_results" context "profile.sidebar" %}</span>
                 {% if evaluated_review_count > 0 %}
                 <span class="sidebar-menu-badge" data-badge-key="evaluated_review_count">{{ evaluated_review_count }}</span>
                 {% endif %}
