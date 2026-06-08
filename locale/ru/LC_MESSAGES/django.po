@@ -22469,8 +22469,12 @@ msgid "Bu dildəki bütün sualları sil"
 msgstr "Удалить все вопросы на этом языке"
 
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin."
-msgstr "Показаны все языки. Чтобы увидеть состояние конкретного языка (дубликаты, предупреждения), выберите язык выше."
+msgid ""
+"Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) "
+"görmək üçün yuxarıdan dil seçin."
+msgstr ""
+"Показаны все языки. Чтобы увидеть состояние конкретного языка (дубликаты, "
+"предупреждения), выберите язык выше."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Silməyi təsdiqlə"
@@ -22526,15 +22530,19 @@ msgstr "Удалить по языку"
 #, python-brace-format
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "В выбранном языке {count} вопросов будет удалено безвозвратно. Продолжить?"
+msgstr ""
+"В выбранном языке {count} вопросов будет удалено безвозвратно. Продолжить?"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Bankı sil"
 msgstr "Удалить банк"
 
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
-msgstr "Весь банк вопросов и все вопросы внутри будут удалены безвозвратно. Продолжить?"
+msgid ""
+"Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"Весь банк вопросов и все вопросы внутри будут удалены безвозвратно. "
+"Продолжить?"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "Sual bankını sil"
@@ -22542,5 +22550,530 @@ msgstr "Удалить банк вопросов"
 
 #, python-brace-format
 msgctxt "exams.template.teacher_questions_bank"
-msgid "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
-msgstr "Весь банк вопросов и {count} вопросов внутри будут удалены безвозвратно. Продолжить?"
+msgid ""
+"Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"
+msgstr ""
+"Весь банк вопросов и {count} вопросов внутри будут удалены безвозвратно. "
+"Продолжить?"
+
+# Added for appeal/result redesign
+msgctxt "exams.template.student_exam_result"
+msgid "label_points"
+msgstr "Баллы"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_unanswered"
+msgstr "Без ответа"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_delivered_questions"
+msgstr "Выданные вопросы"
+
+msgctxt "exams.template.student_exam_result"
+msgid "label_marked"
+msgstr "Отмечено"
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_center"
+msgstr "Апелляция"
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_center_title"
+msgstr "Вы можете подать апелляцию по этому результату"
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_center_desc_open"
+msgstr ""
+"Окно апелляции открыто. Переход всегда виден даже при большом числе "
+"вопросов."
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_center_desc_closed"
+msgstr ""
+"Срок подачи новой апелляции закрыт, но вы можете посмотреть прошлые "
+"обращения."
+
+msgctxt "exams.template.student_exam_result"
+msgid "action_create_appeal"
+msgstr "Подать апелляцию"
+
+msgctxt "exams.template.student_exam_result"
+msgid "action_my_appeals"
+msgstr "Мои апелляции"
+
+msgctxt "exams.template.student_exam_result"
+msgid "marked_question_badge"
+msgstr "Вопрос, отмеченный на экзамене"
+
+msgctxt "exams.template.student_exam_result"
+msgid "heading_other_attempts"
+msgstr "Другие попытки"
+
+msgctxt "exams.template.student_exam_result"
+msgid "col_date"
+msgstr "Дата"
+
+msgctxt "exams.template.student_exam_result"
+msgid "col_status"
+msgstr "Статус"
+
+msgctxt "exams.template.student_exam_result"
+msgid "col_result"
+msgstr "Результат"
+
+msgctxt "exams.template.student_exam_result"
+msgid "col_action"
+msgstr "Действие"
+
+msgctxt "exams.template.student_exam_result"
+msgid "status_hidden"
+msgstr "Скрыто"
+
+msgctxt "exams.template.student_exam_result"
+msgid "status_checking"
+msgstr "Проверяется"
+
+msgctxt "exams.template.student_exam_result"
+msgid "status_waiting"
+msgstr "Ожидает"
+
+msgctxt "exams.template.student_exam_result"
+msgid "action_view"
+msgstr "Открыть"
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_score_updated"
+msgstr "Ваш балл обновлен после апелляции"
+
+msgctxt "exams.template.student_exam_result"
+msgid "result_actions"
+msgstr "Действия с результатом"
+
+msgctxt "exams.template.student_exam_result"
+msgid "action_my_answers"
+msgstr "Мои ответы"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya göndər"
+msgstr "Подать апелляцию"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya mərkəzi"
+msgstr "Центр апелляций"
+
+msgctxt "appeals.template"
+msgid "Nəticəyə qayıt"
+msgstr "Вернуться к результату"
+
+msgctxt "appeals.template"
+msgid "Apellyasiyalarım"
+msgstr "Мои апелляции"
+
+msgctxt "appeals.template"
+msgid "Seçin, səbəbi yazın, göndərin"
+msgstr "Выберите, объясните, отправьте"
+
+#, python-format
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən "
+"azı %(min)s simvol izah yazın."
+msgstr ""
+"Отметьте вопросы для апелляции, выберите причину и напишите не менее %(min)s"
+" символов."
+
+msgctxt "appeals.template"
+msgid "Tələbənin işarələdiyi sual"
+msgstr "Вопрос, отмеченный студентом"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya et"
+msgstr "Апелляция"
+
+msgctxt "appeals.template"
+msgid "Səbəb tipi"
+msgstr "Тип причины"
+
+msgctxt "appeals.template"
+msgid "İzahınız"
+msgstr "Ваше объяснение"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Səbəbinizi ən azı %(min)s simvol ilə izah edin"
+msgstr "Опишите причину минимум в %(min)s символов"
+
+msgctxt "appeals.template"
+msgid "Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı."
+msgstr "Для этой попытки не найдено вопросов для апелляции."
+
+msgctxt "appeals.template"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "appeals.template"
+msgid "Apellyasiyanı göndər"
+msgstr "Отправить апелляцию"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya tarixçəsi"
+msgstr "История апелляций"
+
+msgctxt "appeals.template"
+msgid ""
+"Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal "
+"dəyişikliklərini buradan izləyin."
+msgstr ""
+"Здесь отслеживайте статус, ответ преподавателя и изменения баллов по "
+"обращениям."
+
+msgctxt "appeals.template"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "appeals.template"
+msgid "İmtahan adı üzrə axtar"
+msgstr "Поиск по названию экзамена"
+
+msgctxt "appeals.template"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "appeals.template"
+msgid "Bütün statuslar"
+msgstr "Все статусы"
+
+msgctxt "appeals.template"
+msgid "Filtrlə"
+msgstr "Фильтровать"
+
+msgctxt "appeals.template"
+msgid "sual"
+msgstr "вопросов"
+
+msgctxt "appeals.template"
+msgid "Səhifələmə"
+msgstr "Пагинация"
+
+msgctxt "appeals.template"
+msgid "Hələ apellyasiya yoxdur"
+msgstr "Апелляций пока нет"
+
+msgctxt "appeals.template"
+msgid ""
+"Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada "
+"görünəcək."
+msgstr "После подачи апелляции со страницы результата она появится здесь."
+
+msgctxt "appeals.template"
+msgid "Apellyasiya detalı"
+msgstr "Детали апелляции"
+
+msgctxt "appeals.template"
+msgid "Müraciət detalı"
+msgstr "Детали обращения"
+
+msgctxt "appeals.template"
+msgid "Göndərilib"
+msgstr "Отправлено"
+
+msgctxt "appeals.template"
+msgid "Baxılıb"
+msgstr "Рассмотрено"
+
+msgctxt "appeals.template"
+msgid "Apellyasiya nəticəsində balınız yeniləndi"
+msgstr "Ваш балл обновлен после апелляции"
+
+msgctxt "appeals.template"
+msgid "Baxan şəxsin qeydi"
+msgstr "Примечание проверяющего"
+
+msgctxt "appeals.template"
+msgid "İmtahanda işarələnmişdi"
+msgstr "Было отмечено на экзамене"
+
+msgctxt "appeals.template"
+msgid "Şərhiniz"
+msgstr "Ваш комментарий"
+
+msgctxt "appeals.template"
+msgid "Cavab"
+msgstr "Ответ"
+
+msgctxt "appeals.template"
+msgid "Bal dəyişikliyi"
+msgstr "Изменение балла"
+
+msgctxt "appeals.template"
+msgid "Siyahıya qayıt"
+msgstr "Вернуться к списку"
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaların idarəsi"
+msgstr "Управление апелляциями"
+
+msgctxt "appeals.template"
+msgid "Reviewer workspace"
+msgstr "Рабочая область проверяющего"
+
+msgctxt "appeals.template"
+msgid ""
+"Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün "
+"detal səhifəsinə keçin."
+msgstr ""
+"Фильтруйте обращения по статусу, экзамену, причине и дате; для решения "
+"откройте детали."
+
+msgctxt "appeals.template"
+msgid "İmtahan və ya tələbə"
+msgstr "Экзамен или студент"
+
+msgctxt "appeals.template"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "appeals.template"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "appeals.template"
+msgid "Bütün imtahanlar"
+msgstr "Все экзамены"
+
+msgctxt "appeals.template"
+msgid "Başlanğıc tarixi"
+msgstr "Дата начала"
+
+msgctxt "appeals.template"
+msgid "Son tarix"
+msgstr "Дата окончания"
+
+msgctxt "appeals.template"
+msgid "Sıfırla"
+msgstr "Сбросить"
+
+msgctxt "appeals.template"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "appeals.template"
+msgid "Suallar"
+msgstr "Вопросы"
+
+msgctxt "appeals.template"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "appeals.template"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "appeals.template"
+msgid "Bax"
+msgstr "Открыть"
+
+msgctxt "appeals.template"
+msgid "Uyğun apellyasiya tapılmadı"
+msgstr "Подходящие апелляции не найдены"
+
+msgctxt "appeals.template"
+msgid "Filtrləri dəyişib yenidən yoxlayın."
+msgstr "Измените фильтры и попробуйте снова."
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaya bax"
+msgstr "Рассмотреть апелляцию"
+
+msgctxt "appeals.template"
+msgid "Qərar paneli"
+msgstr "Панель решения"
+
+msgctxt "appeals.template"
+msgid "Hazırkı effektiv bal"
+msgstr "Текущий эффективный балл"
+
+msgctxt "appeals.template"
+msgid "Tələbənin şərhi"
+msgstr "Комментарий студента"
+
+msgctxt "appeals.template"
+msgid "Qərar"
+msgstr "Решение"
+
+msgctxt "appeals.template"
+msgid "Toxunma"
+msgstr "Не менять"
+
+msgctxt "appeals.template"
+msgid "Qəbul et"
+msgstr "Принять"
+
+msgctxt "appeals.template"
+msgid "Rədd et"
+msgstr "Отклонить"
+
+msgctxt "appeals.template"
+msgid "İzah / cavab"
+msgstr "Пояснение / ответ"
+
+msgctxt "appeals.template"
+msgid "Balın niyə artırıldığını və ya artırılmadığını izah edin"
+msgstr "Объясните, почему балл был или не был повышен"
+
+msgctxt "appeals.template"
+msgid "Ümumi qeyd"
+msgstr "Общее примечание"
+
+msgctxt "appeals.template"
+msgid "Opsional daxili qeyd"
+msgstr "Необязательное внутреннее примечание"
+
+msgctxt "appeals.template"
+msgid "Qərarları yadda saxla"
+msgstr "Сохранить решения"
+
+msgctxt "appeals.template"
+msgid "Sualı seçin"
+msgstr "Выберите вопрос"
+
+msgctxt "appeals.template"
+msgid "Səbəbi seçin və izah yazın"
+msgstr "Выберите причину и напишите пояснение"
+
+msgctxt "appeals.template"
+msgid "Göndərin"
+msgstr "Отправьте"
+
+msgctxt "appeals.template"
+msgid "Şərhə yazmağa başlayan kimi sual avtomatik seçilir"
+msgstr "Вопрос выбирается автоматически, как только вы начинаете печатать"
+
+msgctxt "appeals.template"
+msgid "Sualları axtar"
+msgstr "Поиск вопросов"
+
+msgctxt "appeals.template"
+msgid "İşarələnmişləri seç"
+msgstr "Выбрать отмеченные"
+
+msgctxt "appeals.template"
+msgid "Səbəb seçin"
+msgstr "Выберите причину"
+
+msgctxt "appeals.template"
+msgid "simvol"
+msgstr "символов"
+
+msgctxt "appeals.template"
+msgid "Ən azı bir sual seçin."
+msgstr "Выберите хотя бы один вопрос."
+
+msgctxt "appeals.template"
+msgid "Səbəb tipini seçin."
+msgstr "Выберите тип причины."
+
+msgctxt "appeals.template"
+msgid "Daha {n} simvol yazın."
+msgstr "Напишите ещё {n} символов."
+
+msgctxt "appeals.template"
+msgid "{n} sual seçildi"
+msgstr "Выбрано вопросов: {n}"
+
+msgctxt "appeals.template"
+msgid "0 sual seçildi"
+msgstr "Выбрано вопросов: 0"
+
+msgctxt "appeals.template"
+msgid "Qəbul"
+msgstr "Принято"
+
+msgctxt "appeals.template"
+msgid "Rədd"
+msgstr "Отклонено"
+
+msgctxt "appeals.template"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "appeals.template"
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Не удалось загрузить, попробуйте снова."
+
+msgctxt "appeals.template"
+msgid "Apellyasiyalar"
+msgstr "Апелляции"
+
+msgctxt "appeals.template"
+msgid "0 qərar verildi"
+msgstr "Принято решений: 0"
+
+msgctxt "appeals.template"
+msgid "{n} qərar verildi"
+msgstr "Принято решений: {n}"
+
+msgctxt "appeals.template"
+msgid "Hər qərar üçün izah/cavab yazın."
+msgstr "Напишите пояснение для каждого решения."
+
+msgctxt "appeals.template"
+msgid "Hazırkı bal"
+msgstr "Текущий балл"
+
+msgctxt "appeals.template"
+msgid "Yeni bal (təxmini)"
+msgstr "Новый балл (примерно)"
+
+msgctxt "appeals.template"
+msgid "Veriləcək bal"
+msgstr "Начисляемый балл"
+
+msgctxt "appeals.template"
+msgid "bal"
+msgstr "балл"
+
+msgctxt "appeals.template"
+msgid "Qərar verilib — dəyişdirilə bilməz"
+msgstr "Решение принято — изменить нельзя"
+
+msgctxt "appeals.template"
+msgid "Verilən bal"
+msgstr "Начисленный балл"
+
+msgctxt "appeals.template"
+msgid "Variantlar"
+msgstr "Варианты"
+
+msgctxt "appeals.template"
+msgid "Düzgün cavab"
+msgstr "Правильный ответ"
+
+msgctxt "appeals.template"
+msgid "Tələbənin cavabı"
+msgstr "Ответ студента"
+
+msgctxt "appeals.template"
+msgid "Cavab seçilməyib"
+msgstr "Ответ не выбран"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
+msgstr "Вы можете изменить решение примерно в течение %(n)s минут."
+
+msgctxt "exams.template.student_exam_result"
+msgid "appeal_corrected_badge"
+msgstr "Исправлено по апелляции"
+
+msgctxt "appeals.template"
+msgid "Dəyişmək üçün qalan vaxt"
+msgstr "Осталось времени для изменения"
+
+msgctxt "exams.template.teacher_view_attempt"
+msgid "appeal_effective_score"
+msgstr "После апелляции"
+
+msgctxt "exams.template.teacher_view_attempt"
+msgid "appeal_corrected_short"
+msgstr "Исправлено по апелляции"

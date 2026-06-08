@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n exam_filters %}
+{% load static i18n exam_filters get_item %}
 
 {% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ student_display }}{% endblock %}
 
@@ -109,6 +109,14 @@
                             <span class="details text-muted">
                                 {{ test_result.delivered_count }} verilmiş sual, {{ test_result.score_display }} / {{ test_result.max_score_display }} bal
                             </span>
+                            {% if appeal_bonus_points and appeal_bonus_points > 0 and effective_score_info %}
+                            <span class="score badge bg-success mt-1">
+                                <i class="fas fa-gavel me-1"></i>{{ effective_score_info.effective_percentage }}% · {{ effective_score_info.effective_score }} / {{ effective_score_info.max_score }}
+                            </span>
+                            <span class="details text-success fw-semibold">
+                                {% trans "appeal_effective_score" context "exams.template.teacher_view_attempt" %}
+                            </span>
+                            {% endif %}
                         </span>
                     {% else %}
                         {% if attempt.checked_by_teacher %}
@@ -163,6 +171,11 @@
                         <span class="q-points badge bg-light text-dark float-end">
                             {{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}
                         </span>
+                        {% if appeal_corrected_qids|get_item:item.question.id %}
+                        <span class="q-corrected badge bg-success float-end me-2">
+                            <i class="fas fa-gavel me-1"></i>{% trans "appeal_corrected_short" context "exams.template.teacher_view_attempt" %}
+                        </span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body question-body">

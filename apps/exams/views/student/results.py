@@ -1,3 +1,4 @@
+import json
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.contrib import messages
@@ -122,6 +123,11 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers]
     answers_by_qid = {a.question_id: a for a in answers}
     answer_has_selection_by_qid = {a.question_id: bool(list(a.selected_options.all())) for a in answers}
+    marked_question_ids = {
+        int(question_id)
+        for question_id in (getattr(attempt, "marked_question_ids", None) or [])
+        if str(question_id).isdigit()
+    }
     test_result = calculate_test_attempt_result(attempt, answers=answers) if exam.exam_type == "test" else None
     coding_submissions_by_qid = {}
     if exam.exam_type == "coding":
@@ -152,7 +158,10 @@ def exam_result(request, slug, attempt_id):
     appeal_remaining_seconds = remaining_window_seconds(attempt)
     # Qəbul olunmuş apellyasiya bonusları nəticədə əks olunsun (test üçün).
     effective_score_info = effective_test_score(attempt) if exam.exam_type == "test" else None
-    appeal_bonus_points = appeal_score_state(attempt)["bonus_points"]
+    _appeal_state = appeal_score_state(attempt)
+    appeal_bonus_points = _appeal_state["bonus_points"]
+    # Hansı sualların balı apellyasiya ilə düzəlib (nəticədə işarələmək üçün).
+    appeal_corrected_qids = {question_id: True for question_id in _appeal_state["credited_question_ids"]}
 
     return render(
         request,
@@ -163,6 +172,9 @@ def exam_result(request, slug, attempt_id):
             "questions": questions,
             "answers_by_qid": answers_by_qid,
             "answer_has_selection_by_qid": answer_has_selection_by_qid,
+            "marked_question_by_qid": {question_id: True for question_id in marked_question_ids},
+            "marked_question_count": len(marked_question_ids),
+            "marked_question_ids_json": json.dumps(sorted(marked_question_ids)),
             "test_result": test_result,
             "coding_submissions_by_qid": coding_submissions_by_qid,
             "history_url": history_url,
@@ -172,9 +184,11 @@ def exam_result(request, slug, attempt_id):
             "can_appeal": can_appeal,
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
-            "my_appeals_url": reverse("appeals:my_appeals"),
+            # Tələbə apellyasiyalarını ayrıca səhifə yox, dashboard bölməsində görür.
+            "my_appeals_url": reverse("accounts:profile") + "?section=my-appeals",
             "effective_score_info": effective_score_info,
             "appeal_bonus_points": appeal_bonus_points,
+            "appeal_corrected_qids": appeal_corrected_qids,
         },
     )
 

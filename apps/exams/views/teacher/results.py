@@ -908,6 +908,18 @@ def teacher_view_attempt(request, slug, attempt_id):
 
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
     test_result = calculate_test_attempt_result(attempt, answers=list(answers_qs)) if exam.exam_type == "test" else None
+
+    # Apellyasiya nəticəsində bal düzəlibsə effektiv balı + düzəlmiş sualları göstər.
+    effective_score_info = None
+    appeal_bonus_points = 0
+    appeal_corrected_qids = {}
+    if exam.exam_type == "test":
+        from apps.appeals.services import appeal_score_state, effective_test_score
+
+        effective_score_info = effective_test_score(attempt)
+        _appeal_state = appeal_score_state(attempt)
+        appeal_bonus_points = _appeal_state["bonus_points"]
+        appeal_corrected_qids = {qid: True for qid in _appeal_state["credited_question_ids"]}
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
@@ -950,6 +962,9 @@ def teacher_view_attempt(request, slug, attempt_id):
         "qa_page": questions_page,
         "qa_search_query": search_query,
         "test_result": test_result,
+        "effective_score_info": effective_score_info,
+        "appeal_bonus_points": appeal_bonus_points,
+        "appeal_corrected_qids": appeal_corrected_qids,
         "qa_pagination_query": pagination_query,
         "qa_clear_search_url": clear_search_url,
         "read_only": True,  # ✅ Yalnız oxumaq rejimi

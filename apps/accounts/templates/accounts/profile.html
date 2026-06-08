@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-profile-link">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals.css' %}?v=20260608-1">
 {% endblock %}
 
 {% block content %}
@@ -23,7 +24,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -64,6 +65,10 @@
                 {% include "accounts/profile/sections/_assigned_courses.html" %}
             {% elif active_section == "my-results" %}
                 {% include "accounts/profile/sections/_my_results.html" %}
+            {% elif active_section == "my-appeals" %}
+                {% include "accounts/profile/sections/_my_appeals.html" %}
+            {% elif active_section == "manage-appeals" %}
+                {% include "accounts/profile/sections/_manage_appeals.html" %}
             {% elif active_section == "pending-answers" %}
                 {% include "accounts/profile/sections/_pending_answers.html" %}
             {% elif active_section == "groups" %}
@@ -197,4 +202,5 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
 <script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260510-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
+<script src="{% static 'appeals/js/appeals_review.js' %}?v=20260608-1"></script>
 {% endblock %}

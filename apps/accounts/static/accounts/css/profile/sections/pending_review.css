@@ -358,6 +358,15 @@
     font-weight: 700;
 }
 
+.pending-review-score-pct {
+    display: inline-block;
+    margin-left: 6px;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
 .pending-review-evaluator {
     display: inline-flex;
     align-items: center;

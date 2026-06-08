@@ -1,0 +1,108 @@
+{% load i18n get_item %}
+{% comment %}
+  Ortaq apellyasiya detal gövdəsi (DRY) — standalone səhifə və dashboard
+  daxili AJAX swap üçün eyni markup.
+  Kontekst: appeal, items, score_info, item_stats, marked_question_by_qid,
+            appeal_detail_back_url (opsional)
+{% endcomment %}
+
+{% if appeal_detail_back_url %}
+<div class="appeal-detail-back">
+    <a href="{{ appeal_detail_back_url }}" class="btn btn-outline-secondary btn-sm" data-appeal-detail-back>
+        <i class="fas fa-arrow-left me-2"></i>{% trans "Siyahıya qayıt" context "appeals.template" %}
+    </a>
+</div>
+{% endif %}
+
+<header class="appeal-hero appeal-hero--icon">
+    <div class="appeal-hero__lead">
+        <span class="appeal-hero__badge"><i class="fas fa-file-signature"></i></span>
+        <div>
+            <span class="appeal-hero__eyebrow">{% trans "Müraciət detalı" context "appeals.template" %}</span>
+            <h1>{{ appeal.exam.title }}</h1>
+            <p>
+                {% trans "Göndərilib" context "appeals.template" %}: {{ appeal.created_at|date:"d.m.Y H:i" }}
+                {% if appeal.reviewed_at %} · {% trans "Baxılıb" context "appeals.template" %}: {{ appeal.reviewed_at|date:"d.m.Y H:i" }}{% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="appeal-hero__actions">
+        {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
+    </div>
+</header>
+
+{% if item_stats %}
+<div class="appeal-summary-grid">
+    <div class="appeal-summary-tile">
+        <span>{% trans "Suallar" context "appeals.template" %}</span>
+        <strong>{{ item_stats.total }}</strong>
+    </div>
+    <div class="appeal-summary-tile">
+        <span>{% trans "Qəbul" context "appeals.template" %}</span>
+        <strong class="text-success">{{ item_stats.accepted }}</strong>
+    </div>
+    <div class="appeal-summary-tile">
+        <span>{% trans "Rədd" context "appeals.template" %}</span>
+        <strong class="text-danger">{{ item_stats.rejected }}</strong>
+    </div>
+    <div class="appeal-summary-tile">
+        <span>{% trans "Gözləyir" context "appeals.template" %}</span>
+        <strong class="text-warning">{{ item_stats.pending }}</strong>
+    </div>
+</div>
+{% endif %}
+
+{% if score_info and score_info.bonus_points > 0 %}
+<div class="alert alert-success d-flex justify-content-between align-items-center">
+    <span><i class="fas fa-gavel me-2"></i>{% trans "Apellyasiya nəticəsində balınız yeniləndi" context "appeals.template" %}</span>
+    <strong>{{ score_info.effective_score }} / {{ score_info.max_score }} ({{ score_info.effective_percentage }}%)</strong>
+</div>
+{% endif %}
+
+{% if appeal.reviewer_note %}
+<section class="appeal-note-card p-3 mb-3">
+    <div class="small text-muted fw-bold mb-1">{% trans "Baxan şəxsin qeydi" context "appeals.template" %}</div>
+    <div>{{ appeal.reviewer_note|linebreaksbr }}</div>
+</section>
+{% endif %}
+
+<div class="appeal-list">
+    {% for item in items %}
+    {% with is_marked=marked_question_by_qid|get_item:item.question_id %}
+    <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}">
+        <div class="appeal-question-card__top">
+            <div class="appeal-question-card__main">
+                <p class="appeal-question-title">
+                    <span class="appeal-question-number">{{ forloop.counter }}</span>
+                    {{ item.question.text|striptags|truncatechars:190 }}
+                </p>
+                <div class="appeal-meta">
+                    <span class="appeal-chip">{{ item.get_appeal_type_display }}</span>
+                    {% if is_marked %}
+                    <span class="appeal-marked-chip">
+                        <i class="fas fa-bookmark"></i>{% trans "İmtahanda işarələnmişdi" context "appeals.template" %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display %}
+        </div>
+
+        <div class="appeal-detail-grid">
+            <div class="appeal-detail-label">{% trans "Şərhiniz" context "appeals.template" %}</div>
+            <div class="appeal-detail-value">{{ item.comment|linebreaksbr }}</div>
+
+            {% if item.reviewer_response %}
+            <div class="appeal-detail-label">{% trans "Cavab" context "appeals.template" %}</div>
+            <div class="appeal-detail-value">{{ item.reviewer_response|linebreaksbr }}</div>
+            {% endif %}
+
+            {% if item.score_adjustment and item.score_adjustment.delta_points %}
+            <div class="appeal-detail-label">{% trans "Bal dəyişikliyi" context "appeals.template" %}</div>
+            <div class="appeal-detail-value text-success fw-bold">+{{ item.score_adjustment.delta_points }}</div>
+            {% endif %}
+        </div>
+    </section>
+    {% endwith %}
+    {% endfor %}
+</div>

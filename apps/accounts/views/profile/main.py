@@ -1794,6 +1794,8 @@ def user_profile(request):
         "change-password": pgettext_lazy("profile.section", "change_password"),
         "statistics": pgettext_lazy("profile.section", "statistics"),
         "question-bank": "Sual Bankı",
+        "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
+        "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
     }
 
     shortcut_sections = []
@@ -2038,5 +2040,32 @@ def user_profile(request):
             active_section=active_section,
         )
     )
+
+    # "Apellyasiyalarım" bölməsi — yalnız aktiv olduqda sorğu et (ucuz saxla).
+    # Tenant/sahiblik scope-u selektor səviyyəsində (yalnız öz apellyasiyaları)
+    # qorunur; əlavə icazə build_my_appeals_context daxilində tələb olunmur.
+    if active_section == "my-appeals" and "my-appeals" in allowed_sections:
+        from apps.appeals.views import build_my_appeals_context
+
+        context.update(
+            build_my_appeals_context(
+                request,
+                list_action=reverse("accounts:profile"),
+                section="my-appeals",
+            )
+        )
+
+    # "Apellyasiyalar" (müəllim/reviewer) idarəetmə bölməsi — dashboard daxili.
+    if active_section == "manage-appeals" and "manage-appeals" in allowed_sections:
+        from apps.appeals.views import _can_open_appeal_management, build_manage_appeals_context
+
+        if _can_open_appeal_management(request):
+            context.update(
+                build_manage_appeals_context(
+                    request,
+                    list_action=reverse("accounts:profile"),
+                    section="manage-appeals",
+                )
+            )
 
     return render(request, "accounts/profile.html", context)
