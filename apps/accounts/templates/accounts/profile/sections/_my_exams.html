@@ -80,9 +80,9 @@
                         </div>
                         <div class="exam-card-badges">
                             {% if exam.is_active %}
-                                <span class="ec-badge ec-badge--active">Aktiv</span>
+                                <span class="ec-badge ec-badge--active">{% trans "active_status" context "profile.my_exams" %}</span>
                             {% else %}
-                                <span class="ec-badge ec-badge--inactive">Deaktiv</span>
+                                <span class="ec-badge ec-badge--inactive">{% trans "inactive_status" context "profile.my_exams" %}</span>
                             {% endif %}
                             <span class="ec-badge ec-badge--info"><i class="fas fa-list-ol"></i> {{ exam.card_question_count }}</span>
                             {% if exam.card_appeal_count %}
@@ -102,11 +102,11 @@
                        class="ec-action ec-action--primary js-open-exam-form-modal"
                        data-exam-modal-mode="edit"
                        data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
-                        <i class="fas fa-edit"></i> Redaktə
+                        <i class="fas fa-edit"></i> {% trans "action_edit" context "profile.my_exams" %}
                     </a>
-                    <a href="{% url 'exams:exam_language_manager' exam.slug %}" class="ec-action"><i class="fas fa-language"></i> Dillər</a>
-                    <a href="{% url 'exams:exam_bank_picker' exam.slug %}" class="ec-action"><i class="fas fa-layer-group"></i> Bankdan sual</a>
-                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="ec-action"><i class="fas fa-chart-bar"></i> Nəticələr</a>
+                    <a href="{% url 'exams:exam_language_manager' exam.slug %}" class="ec-action"><i class="fas fa-language"></i> {% trans "action_languages" context "profile.my_exams" %}</a>
+                    <a href="{% url 'exams:exam_bank_picker' exam.slug %}" class="ec-action"><i class="fas fa-layer-group"></i> {% trans "action_question_bank" context "profile.my_exams" %}</a>
+                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="ec-action"><i class="fas fa-chart-bar"></i> {% trans "action_results" context "profile.my_exams" %}</a>
                 </div>
             </div>
             {% endfor %}

@@ -914,6 +914,54 @@ msgctxt "profile.groups"
 msgid "remove_student_confirm_button"
 msgstr "Remove from group"
 
+msgctxt "profile.groups"
+msgid "search_placeholder_groups"
+msgstr "Search by group name, teacher, or student"
+
+msgctxt "profile.groups"
+msgid "search_action"
+msgstr "Search"
+
+msgctxt "profile.groups"
+msgid "clear_search"
+msgstr "Clear"
+
+msgctxt "profile.groups"
+msgid "filtered_group_count %(filtered_count)s %(total_count)s"
+msgstr "%(filtered_count)s results · %(total_count)s total groups"
+
+msgctxt "profile.groups"
+msgid "total_group_count %(count)s"
+msgstr "%(count)s groups"
+
+msgctxt "profile.groups"
+msgid "view"
+msgstr "View"
+
+msgctxt "profile.groups"
+msgid "no_group_search_results"
+msgstr "No matching group was found."
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_title"
+msgstr "View group students"
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_description"
+msgstr "Click \"View\" on any group to open its student list."
+
+msgctxt "profile.groups"
+msgid "additional_teachers"
+msgstr "Additional teachers"
+
+msgctxt "profile.groups"
+msgid "student_search_placeholder"
+msgstr "Search by student name, username, or email"
+
+msgctxt "profile.groups"
+msgid "no_student_search_results"
+msgstr "No student matched this search."
+
 #: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
 msgctxt "profile.manage_roles"
 msgid "info_title"
@@ -1679,6 +1727,22 @@ msgctxt "profile.sidebar"
 msgid "groups"
 msgstr "Groups"
 
+msgctxt "profile.section"
+msgid "post_management"
+msgstr "Post management"
+
+msgctxt "profile.sidebar"
+msgid "post_management"
+msgstr "Post management"
+
+msgctxt "profile.section"
+msgid "review_results"
+msgstr "Reviewed results"
+
+msgctxt "profile.sidebar"
+msgid "review_results"
+msgstr "Reviewed results"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html:156
 #: apps/accounts/views.py:1693
 msgctxt "profile.section"
@@ -2073,6 +2137,30 @@ msgstr "No exams match the search criteria."
 msgctxt "profile.my_exams"
 msgid "clear_filters"
 msgstr "Clear filters"
+
+msgctxt "profile.my_exams"
+msgid "active_status"
+msgstr "Active"
+
+msgctxt "profile.my_exams"
+msgid "inactive_status"
+msgstr "Inactive"
+
+msgctxt "profile.my_exams"
+msgid "action_edit"
+msgstr "Edit"
+
+msgctxt "profile.my_exams"
+msgid "action_languages"
+msgstr "Languages"
+
+msgctxt "profile.my_exams"
+msgid "action_question_bank"
+msgstr "Question bank"
+
+msgctxt "profile.my_exams"
+msgid "action_results"
+msgstr "Results"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"

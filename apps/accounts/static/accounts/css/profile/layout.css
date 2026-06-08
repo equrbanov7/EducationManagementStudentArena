@@ -1,11 +1,13 @@
 .profile-main {
     flex: 1;
+    min-width: 0;
     padding: 2.5rem;
     overflow-y: auto;
 }
 
 .profile-section-panel {
     display: none;
+    min-width: 0;
 }
 
 .profile-section-panel.is-active {

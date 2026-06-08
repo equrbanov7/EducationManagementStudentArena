@@ -915,6 +915,54 @@ msgctxt "profile.groups"
 msgid "remove_student_confirm_button"
 msgstr "Gruptan çıkar"
 
+msgctxt "profile.groups"
+msgid "search_placeholder_groups"
+msgstr "Grup adı, öğretmen veya öğrenciye göre ara"
+
+msgctxt "profile.groups"
+msgid "search_action"
+msgstr "Ara"
+
+msgctxt "profile.groups"
+msgid "clear_search"
+msgstr "Temizle"
+
+msgctxt "profile.groups"
+msgid "filtered_group_count %(filtered_count)s %(total_count)s"
+msgstr "%(filtered_count)s sonuç · %(total_count)s toplam grup"
+
+msgctxt "profile.groups"
+msgid "total_group_count %(count)s"
+msgstr "%(count)s grup"
+
+msgctxt "profile.groups"
+msgid "view"
+msgstr "Bak"
+
+msgctxt "profile.groups"
+msgid "no_group_search_results"
+msgstr "Aramaya uygun grup bulunamadı."
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_title"
+msgstr "Grubun öğrencilerini görüntüleyin"
+
+msgctxt "profile.groups"
+msgid "group_detail_empty_description"
+msgstr "Herhangi bir grupta \"Bak\" düğmesine tıklayarak öğrenci listesini açabilirsiniz."
+
+msgctxt "profile.groups"
+msgid "additional_teachers"
+msgstr "Ek öğretmenler"
+
+msgctxt "profile.groups"
+msgid "student_search_placeholder"
+msgstr "Öğrenci adı, kullanıcı adı veya e-postaya göre ara"
+
+msgctxt "profile.groups"
+msgid "no_student_search_results"
+msgstr "Bu aramaya uygun öğrenci bulunamadı."
+
 #: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
 msgctxt "profile.manage_roles"
 msgid "info_title"
@@ -1683,6 +1731,22 @@ msgctxt "profile.sidebar"
 msgid "groups"
 msgstr "Gruplar"
 
+msgctxt "profile.section"
+msgid "post_management"
+msgstr "Post yönetimi"
+
+msgctxt "profile.sidebar"
+msgid "post_management"
+msgstr "Post yönetimi"
+
+msgctxt "profile.section"
+msgid "review_results"
+msgstr "Değerlendirilmiş sonuçlar"
+
+msgctxt "profile.sidebar"
+msgid "review_results"
+msgstr "Değerlendirilmiş sonuçlar"
+
 #: apps/accounts/templates/accounts/profile/_sidebar.html:156
 #: apps/accounts/views.py:1693
 msgctxt "profile.section"
@@ -2077,6 +2141,30 @@ msgstr "Arama ölçütlerine uygun sınav bulunamadı."
 msgctxt "profile.my_exams"
 msgid "clear_filters"
 msgstr "Filtreleri temizle"
+
+msgctxt "profile.my_exams"
+msgid "active_status"
+msgstr "Aktif"
+
+msgctxt "profile.my_exams"
+msgid "inactive_status"
+msgstr "Pasif"
+
+msgctxt "profile.my_exams"
+msgid "action_edit"
+msgstr "Düzenle"
+
+msgctxt "profile.my_exams"
+msgid "action_languages"
+msgstr "Diller"
+
+msgctxt "profile.my_exams"
+msgid "action_question_bank"
+msgstr "Banktan soru"
+
+msgctxt "profile.my_exams"
+msgid "action_results"
+msgstr "Sonuçlar"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
 msgctxt "profile.results"
