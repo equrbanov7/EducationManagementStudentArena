@@ -1,71 +1,186 @@
 {% extends "base.html" %}
+{% load static i18n get_item %}
 
-{% block title %}Apellyasiya — {{ exam.title }}{% endblock %}
+{% block title %}{% trans "Apellyasiya göndər" context "appeals.template" %} — {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'appeals/css/appeals.css' %}?v=20260608-1">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 920px;">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1 class="h4 mb-1">Apellyasiya göndər</h1>
-            <div class="text-muted small">{{ exam.title }}</div>
-        </div>
-        <a href="{{ result_url }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Nəticəyə qayıt
-        </a>
-    </div>
-
-    <div class="alert alert-info">
-        Apellyasiya etmək istədiyiniz sualları seçin. Hər sual üçün səbəb tipini seçin və
-        ən azı {{ min_comment_length }} simvol şərh yazın.
-    </div>
-
-    <form method="post" novalidate>
-        {% csrf_token %}
-
-        {% for answer in answers %}
-        {% with q=answer.question %}
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox"
-                           name="appeal_q_{{ q.id }}" id="appeal_q_{{ q.id }}" value="1">
-                    <label class="form-check-label fw-semibold" for="appeal_q_{{ q.id }}">
-                        {{ forloop.counter }}. {{ q.text|striptags|truncatechars:160 }}
-                    </label>
-                </div>
-
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <label class="form-label small text-muted mb-1" for="appeal_type_{{ q.id }}">Səbəb tipi</label>
-                        <select class="form-select form-select-sm" name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}">
-                            {% for value, label in appeal_type_choices %}
-                            <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label small text-muted mb-1" for="comment_{{ q.id }}">Şərh</label>
-                        <textarea class="form-control form-control-sm" name="comment_{{ q.id }}"
-                                  id="comment_{{ q.id }}" rows="2" minlength="{{ min_comment_length }}"
-                                  placeholder="Apellyasiya səbəbinizi ən azı {{ min_comment_length }} simvol ilə izah edin"></textarea>
-                    </div>
-                </div>
+<div class="appeal-shell appeal-shell--narrow">
+    <header class="appeal-hero appeal-hero--icon">
+        <div class="appeal-hero__lead">
+            <span class="appeal-hero__badge"><i class="fas fa-gavel"></i></span>
+            <div>
+                <span class="appeal-hero__eyebrow">{% trans "Apellyasiya mərkəzi" context "appeals.template" %}</span>
+                <h1>{% trans "Apellyasiya göndər" context "appeals.template" %}</h1>
+                <p>{{ exam.title }}</p>
             </div>
         </div>
-        {% endwith %}
-        {% empty %}
-        <div class="alert alert-warning">Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı.</div>
-        {% endfor %}
+        <div class="appeal-hero__actions">
+            <a href="{{ result_url }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>{% trans "Nəticəyə qayıt" context "appeals.template" %}
+            </a>
+            <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary">
+                <i class="fas fa-list-ul me-2"></i>{% trans "Apellyasiyalarım" context "appeals.template" %}
+            </a>
+        </div>
+    </header>
+
+    {# Necə işləyir — qısa addımlar #}
+    <div class="appeal-steps">
+        <div class="appeal-step">
+            <span class="appeal-step__num">1</span>
+            <span class="appeal-step__text">{% trans "Sualı seçin" context "appeals.template" %}</span>
+        </div>
+        <div class="appeal-step">
+            <span class="appeal-step__num">2</span>
+            <span class="appeal-step__text">{% trans "Səbəbi seçin və izah yazın" context "appeals.template" %}</span>
+        </div>
+        <div class="appeal-step">
+            <span class="appeal-step__num">3</span>
+            <span class="appeal-step__text">{% trans "Göndərin" context "appeals.template" %}</span>
+        </div>
+    </div>
+
+    <div class="appeal-info-card">
+        <i class="fas fa-circle-info"></i>
+        <div>
+            <strong>{% trans "Şərhə yazmağa başlayan kimi sual avtomatik seçilir" context "appeals.template" %}</strong>
+            <p>
+                {% blocktrans trimmed context "appeals.template" with min=min_comment_length %}
+                    Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən azı {{ min }} simvol izah yazın.
+                {% endblocktrans %}
+            </p>
+        </div>
+    </div>
+
+    {% if answers %}
+    <div class="appeal-toolbar">
+        <div class="appeal-toolbar__search">
+            <i class="fas fa-search"></i>
+            <input type="search" class="form-control" data-appeal-search
+                   placeholder="{% trans 'Sualları axtar' context 'appeals.template' %}" aria-label="{% trans 'Sualları axtar' context 'appeals.template' %}">
+        </div>
+        {% if has_marked %}
+        <button type="button" class="btn btn-outline-warning btn-sm" data-appeal-select-marked>
+            <i class="fas fa-bookmark me-1"></i>{% trans "İşarələnmişləri seç" context "appeals.template" %}
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate
+          class="appeal-create-form"
+          data-appeals-form
+          data-min="{{ min_comment_length }}"
+          data-i18n-need-one="{% trans 'Ən azı bir sual seçin.' context 'appeals.template' %}"
+          data-i18n-choose-reason="{% trans 'Səbəb tipini seçin.' context 'appeals.template' %}"
+          data-i18n-too-short="{% trans 'Daha {n} simvol yazın.' context 'appeals.template' %}"
+          data-i18n-selected="{% trans '{n} sual seçildi' context 'appeals.template' %}">
+        {% csrf_token %}
+
+        <div class="appeal-list">
+            {% for answer in answers %}
+            {% with q=answer.question %}
+            {% with is_marked=marked_question_by_qid|get_item:q.id %}
+            <section class="appeal-question-card{% if is_marked %} is-marked{% endif %}"
+                     data-appeal-card
+                     data-appeal-marked="{% if is_marked %}1{% else %}0{% endif %}"
+                     data-appeal-text="{{ q.text|striptags }}">
+                <div class="appeal-question-card__top">
+                    <div class="appeal-question-card__main">
+                        <p class="appeal-question-title">
+                            <span class="appeal-question-number">{{ forloop.counter }}</span>
+                            {{ q.text|striptags|truncatechars:190 }}
+                        </p>
+                        {% if is_marked %}
+                        <div class="appeal-meta">
+                            <span class="appeal-marked-chip">
+                                <i class="fas fa-bookmark"></i>{% trans "Tələbənin işarələdiyi sual" context "appeals.template" %}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-check form-switch appeal-q-switch">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               data-appeal-toggle
+                               name="appeal_q_{{ q.id }}" id="appeal_q_{{ q.id }}" value="1">
+                        <label class="form-check-label" for="appeal_q_{{ q.id }}">
+                            {% trans "Apellyasiya et" context "appeals.template" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="appeal-q-body" data-appeal-body>
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted fw-bold" for="appeal_type_{{ q.id }}">
+                                {% trans "Səbəb tipi" context "appeals.template" %}<span class="appeal-required-star">*</span>
+                            </label>
+                            <div class="bootstrap-single-select">
+                                <select class="form-select bootstrap-single-select__native" data-appeal-type data-bootstrap-select
+                                        name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}">
+                                    <option value="">{% trans "Səbəb seçin" context "appeals.template" %}</option>
+                                    {% for value, label in appeal_type_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="appeal-q-label-row">
+                                <label class="form-label small text-muted fw-bold mb-0" for="comment_{{ q.id }}">
+                                    {% trans "İzahınız" context "appeals.template" %}<span class="appeal-required-star">*</span>
+                                </label>
+                                <span class="appeal-q-counter" data-appeal-counter>
+                                    <span data-appeal-counter-cur>0</span> / {{ min_comment_length }}
+                                    <span class="appeal-q-counter__unit">{% trans "simvol" context "appeals.template" %}</span>
+                                </span>
+                            </div>
+                            <textarea class="form-control" data-appeal-comment name="comment_{{ q.id }}"
+                                      id="comment_{{ q.id }}" rows="3"
+                                      placeholder="{% blocktrans trimmed context 'appeals.template' with min=min_comment_length %}Səbəbinizi ən azı {{ min }} simvol ilə izah edin{% endblocktrans %}"></textarea>
+                            <p class="appeal-q-error" data-appeal-error hidden role="alert"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endwith %}
+            {% endwith %}
+            {% empty %}
+            <div class="appeal-empty">
+                <i class="fas fa-inbox"></i>
+                <p>{% trans "Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı." context "appeals.template" %}</p>
+            </div>
+            {% endfor %}
+        </div>
 
         {% if answers %}
-        <div class="d-flex justify-content-end gap-2">
-            <a href="{{ result_url }}" class="btn btn-outline-secondary">Ləğv et</a>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-gavel me-1"></i>Apellyasiyanı göndər
-            </button>
+        <div class="appeal-sticky-actions">
+            <div class="appeal-sticky-actions__inner">
+                <div class="appeal-sticky-actions__status">
+                    <span class="appeal-selected-pill" data-appeal-selected-count>{% trans "0 sual seçildi" context "appeals.template" %}</span>
+                    <span class="appeal-empty-hint" data-appeal-empty-hint hidden>
+                        <i class="fas fa-circle-exclamation me-1"></i>{% trans "Ən azı bir sual seçin." context "appeals.template" %}
+                    </span>
+                </div>
+                <div class="appeal-sticky-actions__buttons">
+                    <a href="{{ result_url }}" class="btn btn-outline-secondary">
+                        {% trans "Ləğv et" context "appeals.template" %}
+                    </a>
+                    <button type="submit" class="btn btn-primary" data-appeal-submit disabled>
+                        <i class="fas fa-paper-plane me-2"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
+                    </button>
+                </div>
+            </div>
         </div>
         {% endif %}
     </form>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'appeals/js/appeals_form.js' %}?v=20260608-1"></script>
 {% endblock %}

@@ -14,7 +14,7 @@ item üçün bal İKİ DƏFƏ artırıla bilmir.
 """
 
 import logging
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone
@@ -94,6 +94,26 @@ def _question_already_correct(answer, question):
     return bool(correct and selected == correct)
 
 
+def _coerce_awarded_points(value, max_points):
+    """
+    Reviewer-in əl ilə daxil etdiyi balı [0, max_points] aralığına gətirir.
+
+    None / boş / yanlış → None qaytarır (default davranış: tam bal). Bu sayədə
+    mövcud çağırışlar (awarded_points verilmədikdə) heç dəyişmir.
+    """
+    if value is None or value == "":
+        return None
+    try:
+        points = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+    if points < 0:
+        points = Decimal("0")
+    if max_points is not None and points > max_points:
+        points = max_points
+    return points
+
+
 def _mark_item_resolved(item, status, reviewer, response_text):
     item.status = status
     if response_text:
@@ -132,9 +152,13 @@ def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
 # Qərar əməliyyatları
 # ---------------------------------------------------------------------------
 @transaction.atomic
-def accept_appeal_item(item, *, reviewer, response_text="", request=None):
+def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarded_points=None):
     """
     Bir AppealItem-i qəbul edir və (test üçün) idempotent bal düzəlişi tətbiq edir.
+
+    ``awarded_points`` (opsional): reviewer həmin suala neçə bal veriləcəyini əl
+    ilə təyin edə bilər (0..sualın maksimum balı). Verilmədikdə (None) davranış
+    əvvəlki kimidir — sual üçün TAM bal verilir.
 
     Eyni item üçün artıq aktiv düzəliş varsa, bal təkrar ARTIRILMIR — yalnız
     status/cavab yenilənir.
@@ -165,13 +189,19 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None):
     previous_answer_score = None
     question_points = Decimal(str(question.points or 1))
 
+    awarded = _coerce_awarded_points(awarded_points, question_points)
+
     if getattr(exam, "exam_type", None) == "test":
         # Test: bal cavab açarından hesablandığı üçün additiv bonus (delta).
         prev_is_correct = _question_already_correct(answer, question)
         previous_score = effective_test_score(attempt)["effective_score"]
-        if not prev_is_correct:
-            delta = question_points
-        new_is_correct = True
+        base_contribution = question_points if prev_is_correct else Decimal("0")
+        # Default (awarded=None) → tam bal; əks halda reviewer-in təyin etdiyi bal.
+        target = question_points if awarded is None else awarded
+        delta = target - base_contribution
+        if delta < 0:
+            delta = Decimal("0")
+        new_is_correct = True if target >= question_points else None
         new_score = previous_score + delta
     else:
         # Yazılı/praktiki: sual üçün TAM bal verilir (answer.teacher_score = points),
@@ -183,9 +213,16 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None):
             Decimal(str(answer.teacher_score)) if (answer is not None and answer.teacher_score is not None) else None
         )
         previous_score = calculate_attempt_score(attempt)
-        if answer is not None and (previous_answer_score is None or previous_answer_score < question_points):
-            answer.teacher_score = int(question_points)
-            answer.save(update_fields=["teacher_score", "updated_at"])
+        if answer is not None:
+            if awarded is None:
+                # Default: tam bal (yalnız əvvəlki bal tamdan azdırsa qaldır).
+                if previous_answer_score is None or previous_answer_score < question_points:
+                    answer.teacher_score = int(question_points)
+                    answer.save(update_fields=["teacher_score", "updated_at"])
+            else:
+                # Reviewer-in təyin etdiyi bal (qismən bal mümkündür).
+                answer.teacher_score = int(awarded)
+                answer.save(update_fields=["teacher_score", "updated_at"])
         new_score = calculate_attempt_score(attempt)
         delta = new_score - previous_score
         attempt.teacher_score = int(new_score) if new_score and new_score > 0 else attempt.teacher_score

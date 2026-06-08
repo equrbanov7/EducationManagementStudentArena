@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.conf import settings
@@ -170,6 +171,46 @@ def _save_written_answer_if_changed(request, answer, question, *, allow_binary_u
         answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
 
 
+def _marked_question_ids_from_request(request, valid_question_ids):
+    raw_payload = (request.POST.get("marked_question_ids") or "").strip()
+    if not raw_payload:
+        return None
+
+    try:
+        parsed_payload = json.loads(raw_payload)
+    except (TypeError, ValueError):
+        parsed_payload = raw_payload.split(",")
+
+    if not isinstance(parsed_payload, (list, tuple, set)):
+        return []
+
+    valid_question_ids = {int(question_id) for question_id in valid_question_ids}
+    marked_question_ids = []
+    seen_question_ids = set()
+    for raw_question_id in parsed_payload:
+        try:
+            question_id = int(raw_question_id)
+        except (TypeError, ValueError):
+            continue
+        if question_id not in valid_question_ids or question_id in seen_question_ids:
+            continue
+        marked_question_ids.append(question_id)
+        seen_question_ids.add(question_id)
+    return marked_question_ids
+
+
+def _save_marked_question_ids_from_request(request, attempt):
+    valid_question_ids = attempt.answers.values_list("question_id", flat=True)
+    marked_question_ids = _marked_question_ids_from_request(request, valid_question_ids)
+    if marked_question_ids is None:
+        return
+    current_marked_question_ids = list(getattr(attempt, "marked_question_ids", None) or [])
+    if current_marked_question_ids == marked_question_ids:
+        return
+    attempt.marked_question_ids = marked_question_ids
+    attempt.save(update_fields=["marked_question_ids"])
+
+
 def _previous_attempts_for_context(request, exam, attempt):
     # P2.D — select_related ile exam-ı tək sorğuda gətir; annotate_attempt_result_visibility
     # `attempt.exam.*` field-lərinə müraciət edir.
@@ -302,8 +343,7 @@ def take_exam(request, slug, attempt_id):
                 parsed_ids.add(int(raw_id))
             except (TypeError, ValueError):
                 continue
-        if parsed_ids:
-            autosave_question_ids_for_fetch = parsed_ids
+        autosave_question_ids_for_fetch = parsed_ids
 
     answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
 
@@ -366,11 +406,12 @@ def take_exam(request, slug, attempt_id):
     if request.method == "POST":
         action = (request.POST.get("submit_action") or "").strip()
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        _save_marked_question_ids_from_request(request, attempt)
         autosave_changed_question_ids = None
         raw_changed_question_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist(
             "changed_questions"
         )
-        if action == "autosave" and raw_changed_question_ids:
+        if action == "autosave":
             autosave_changed_question_ids = set()
             for raw_question_id in raw_changed_question_ids:
                 try:
@@ -478,5 +519,6 @@ def take_exam(request, slug, attempt_id):
         "exam_autosave_interval_ms": settings.EXAM_AUTOSAVE_INTERVAL_MS,
         "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
         "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
+        "marked_question_ids_json": json.dumps(getattr(attempt, "marked_question_ids", None) or []),
     }
     return render(request, "exams/student/take_exam.html", context)

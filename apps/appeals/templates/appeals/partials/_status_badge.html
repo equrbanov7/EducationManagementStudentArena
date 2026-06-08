@@ -1,12 +1,12 @@
 {% comment %}Apellyasiya status nişanı. Parametrlər: status (kod), label (göstəriş){% endcomment %}
 {% if status == "accepted" %}
-<span class="badge rounded-pill bg-success">{{ label }}</span>
+<span class="badge appeal-status-badge bg-success">{{ label }}</span>
 {% elif status == "rejected" %}
-<span class="badge rounded-pill bg-danger">{{ label }}</span>
+<span class="badge appeal-status-badge bg-danger">{{ label }}</span>
 {% elif status == "partially_accepted" %}
-<span class="badge rounded-pill bg-info text-dark">{{ label }}</span>
+<span class="badge appeal-status-badge bg-info text-dark">{{ label }}</span>
 {% elif status == "under_review" %}
-<span class="badge rounded-pill bg-warning text-dark">{{ label }}</span>
+<span class="badge appeal-status-badge bg-warning text-dark">{{ label }}</span>
 {% else %}
-<span class="badge rounded-pill bg-secondary">{{ label }}</span>
+<span class="badge appeal-status-badge bg-secondary">{{ label }}</span>
 {% endif %}

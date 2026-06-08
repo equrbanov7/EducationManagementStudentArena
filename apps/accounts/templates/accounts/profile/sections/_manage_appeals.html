@@ -1,0 +1,192 @@
+{% load static i18n %}
+{% comment %}
+  "Apellyasiyalar" (müəllim/reviewer) profil bölməsi — dashboard sağ content
+  hissəsində AJAX ilə açılır. Qərar (review) eyni panel daxilində swap olur və
+  AJAX ilə yadda saxlanılır; JS uğursuz olarsa standalone səhifəyə keçir.
+{% endcomment %}
+<section class="profile-section-panel profile-section--manage-appeals {% if active_section == 'manage-appeals' %}is-active{% endif %}"
+         data-profile-section-panel="manage-appeals"
+         data-manage-url="{% url 'appeals:manage_appeals' %}"
+         data-source-url="{% url 'appeals:manage_appeals' %}">
+    <div class="appeal-embedded">
+        <div data-manage-list-view>
+            <header class="appeal-hero appeal-hero--icon">
+                <div class="appeal-hero__lead">
+                    <span class="appeal-hero__badge"><i class="fas fa-scale-balanced"></i></span>
+                    <div>
+                        <span class="appeal-hero__eyebrow">{% trans "Reviewer workspace" context "appeals.template" %}</span>
+                        <h1>{% trans "Apellyasiyaların idarəsi" context "appeals.template" %}</h1>
+                        <p>{% trans "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün detal səhifəsinə keçin." context "appeals.template" %}</p>
+                    </div>
+                </div>
+            </header>
+
+            <div data-manage-body>
+                {% include "appeals/partials/_manage_appeals_body.html" %}
+            </div>
+        </div>
+
+        <div data-manage-detail-view hidden></div>
+    </div>
+
+    <script nonce="{{ request.csp_nonce }}">
+    (function () {
+        function initManageSection() {
+            var panel = document.querySelector('[data-profile-section-panel="manage-appeals"]');
+            if (!panel || panel.getAttribute("data-manage-swap-bound") === "1") {
+                return;
+            }
+            panel.setAttribute("data-manage-swap-bound", "1");
+
+            var listView = panel.querySelector("[data-manage-list-view]");
+            var bodyHost = panel.querySelector("[data-manage-body]");
+            var detailView = panel.querySelector("[data-manage-detail-view]");
+            var manageUrl = panel.getAttribute("data-manage-url");
+            if (!listView || !bodyHost || !detailView) { return; }
+
+            var backLabel = "{% filter escapejs %}{% trans 'Siyahıya qayıt' context 'appeals.template' %}{% endfilter %}";
+            var loadErr = "{% filter escapejs %}{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}{% endfilter %}";
+            var currentDetailUrl = null;
+            var pendingFlash = null;
+
+            function withParam(url, extra) {
+                return url + (url.indexOf("?") === -1 ? "?" : "&") + extra;
+            }
+
+            function listQuery() {
+                try {
+                    var p = new URLSearchParams(window.location.search);
+                    p.delete("section");
+                    p.delete("page");
+                    return p.toString();
+                } catch (e) { return ""; }
+            }
+
+            function scrollTop() {
+                if (panel.scrollIntoView) { panel.scrollIntoView({ behavior: "smooth", block: "start" }); }
+            }
+
+            function makeAlert(type, msg) {
+                var div = document.createElement("div");
+                div.className = "alert alert-" + type;
+                div.setAttribute("role", "alert");
+                div.setAttribute("data-manage-flash", "1");
+                div.textContent = msg;
+                return div;
+            }
+
+            function clearFlash(root) {
+                var old = root.querySelectorAll("[data-manage-flash]");
+                Array.prototype.forEach.call(old, function (n) { n.remove(); });
+            }
+
+            function showList() {
+                detailView.hidden = true;
+                detailView.innerHTML = "";
+                listView.hidden = false;
+                scrollTop();
+            }
+
+            function reloadList() {
+                var q = listQuery();
+                fetch(withParam(manageUrl, "fragment=1&embedded=1" + (q ? "&" + q : "")), {
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (r) { if (!r.ok) { throw new Error("http"); } return r.text(); })
+                    .then(function (html) {
+                        bodyHost.innerHTML = html;
+                        if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.init) {
+                            window.EMSBootstrapSelect.init(bodyHost);
+                        }
+                    })
+                    .catch(function () { /* fail-soft: köhnə siyahı qalır */ });
+            }
+
+            function showDetail(url) {
+                currentDetailUrl = url;
+                listView.hidden = true;
+                detailView.hidden = false;
+                detailView.innerHTML = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
+                scrollTop();
+                fetch(withParam(url, "fragment=1"), {
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (r) { if (!r.ok) { throw new Error("http"); } return r.text(); })
+                    .then(function (html) {
+                        var back = '<div class="appeal-detail-back"><button type="button" class="btn btn-outline-secondary btn-sm" data-manage-detail-back><i class="fas fa-arrow-left me-2"></i>' + backLabel + "</button></div>";
+                        detailView.innerHTML = back + html;
+                        // Yadda saxlamadan sonra uğur mesajını detalın başında göstər.
+                        if (pendingFlash) {
+                            detailView.insertBefore(makeAlert("success", pendingFlash), detailView.firstChild);
+                            pendingFlash = null;
+                        }
+                        // Bootstrap select-ləri yenidən qur (native deyil).
+                        if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.init) {
+                            window.EMSBootstrapSelect.init(detailView);
+                        }
+                        if (window.EMSAppealsReview && window.EMSAppealsReview.init) {
+                            window.EMSAppealsReview.init();
+                        }
+                    })
+                    .catch(function () { window.location.href = url; });
+            }
+
+            // Siyahıdan "Bax" → detalı eyni paneldə aç.
+            listView.addEventListener("click", function (e) {
+                var link = e.target && e.target.closest ? e.target.closest("[data-appeal-review-url]") : null;
+                if (!link) { return; }
+                e.preventDefault();
+                showDetail(link.getAttribute("data-appeal-review-url"));
+            });
+
+            // Detal daxilində geri / ləğv → siyahıya qayıt.
+            detailView.addEventListener("click", function (e) {
+                var back = e.target && e.target.closest ? e.target.closest("[data-manage-detail-back], [data-review-cancel]") : null;
+                if (!back) { return; }
+                e.preventDefault();
+                showList();
+                reloadList();
+            });
+
+            // Qərar formu submit → AJAX (client validation appeals_review.js-də).
+            detailView.addEventListener("submit", function (e) {
+                var form = e.target && e.target.closest ? e.target.closest("[data-appeals-review-form]") : null;
+                if (!form) { return; }
+                if (e.defaultPrevented) { return; } // client validation bloklayıb
+                e.preventDefault();
+                var data = new FormData(form);
+                fetch(withParam(form.getAttribute("action") || window.location.href, "fragment=1"), {
+                    method: "POST",
+                    body: data,
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (d && d.ok) {
+                            // Siyahını arxa planda təzələ, amma müəllim qərar panelində
+                            // qalsın ki, geri sayğacı (5 dəq) və yenilənmiş statusu görsün.
+                            reloadList();
+                            pendingFlash = d.message || "";
+                            if (currentDetailUrl) { showDetail(currentDetailUrl); }
+                            else { showList(); }
+                        } else {
+                            clearFlash(detailView);
+                            detailView.insertBefore(makeAlert("danger", (d && d.error) || loadErr), detailView.firstChild);
+                            scrollTop();
+                        }
+                    })
+                    .catch(function () { window.location.href = form.getAttribute("action") || window.location.href; });
+            });
+        }
+
+        if (window.EMSReady) {
+            window.EMSReady(initManageSection);
+        } else {
+            initManageSection();
+        }
+    })();
+    </script>
+</section>

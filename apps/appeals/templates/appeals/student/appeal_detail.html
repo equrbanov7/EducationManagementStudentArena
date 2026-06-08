@@ -1,66 +1,14 @@
 {% extends "base.html" %}
+{% load static i18n %}
 
-{% block title %}Apellyasiya detalı — {{ appeal.exam.title }}{% endblock %}
+{% block title %}{% trans "Apellyasiya detalı" context "appeals.template" %} — {{ appeal.exam.title }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'appeals/css/appeals.css' %}?v=20260608-1">
+{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 920px;">
-
-    <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-            <h1 class="h4 mb-1">{{ appeal.exam.title }}</h1>
-            <div class="small text-muted">
-                Göndərilib: {{ appeal.created_at|date:"d.m.Y H:i" }}
-                {% if appeal.reviewed_at %} · Baxılıb: {{ appeal.reviewed_at|date:"d.m.Y H:i" }}{% endif %}
-            </div>
-        </div>
-        {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
-    </div>
-
-    {% if score_info and score_info.bonus_points > 0 %}
-    <div class="alert alert-success d-flex justify-content-between align-items-center">
-        <span>Apellyasiya nəticəsində balınız yeniləndi</span>
-        <strong>{{ score_info.effective_score }} / {{ score_info.max_score }} ({{ score_info.effective_percentage }}%)</strong>
-    </div>
-    {% endif %}
-
-    {% if appeal.reviewer_note %}
-    <div class="card mb-3"><div class="card-body">
-        <div class="small text-muted mb-1">Baxan şəxsin qeydi</div>
-        <div>{{ appeal.reviewer_note|linebreaksbr }}</div>
-    </div></div>
-    {% endif %}
-
-    {% for item in items %}
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="fw-semibold">{{ item.question.text|striptags|truncatechars:160 }}</div>
-                {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display %}
-            </div>
-
-            <div class="row small">
-                <div class="col-md-4 text-muted">Səbəb tipi</div>
-                <div class="col-md-8 mb-1">{{ item.get_appeal_type_display }}</div>
-
-                <div class="col-md-4 text-muted">Şərhiniz</div>
-                <div class="col-md-8 mb-1">{{ item.comment|linebreaksbr }}</div>
-
-                {% if item.reviewer_response %}
-                <div class="col-md-4 text-muted">Cavab</div>
-                <div class="col-md-8 mb-1">{{ item.reviewer_response|linebreaksbr }}</div>
-                {% endif %}
-
-                {% if item.score_adjustment and item.score_adjustment.delta_points %}
-                <div class="col-md-4 text-muted">Bal dəyişikliyi</div>
-                <div class="col-md-8 mb-1 text-success fw-semibold">+{{ item.score_adjustment.delta_points }}</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-
-    <a href="{% url 'appeals:my_appeals' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i>Siyahıya qayıt
-    </a>
+<div class="appeal-shell appeal-shell--narrow">
+    {% include "appeals/partials/_appeal_detail_body.html" with appeal_detail_back_url=back_url %}
 </div>
 {% endblock %}

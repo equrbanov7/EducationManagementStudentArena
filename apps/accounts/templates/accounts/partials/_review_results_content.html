@@ -106,6 +106,9 @@
                             <td>{{ item.group_name|default:"-" }}</td>
                             <td>
                                 <span class="pending-review-score">{{ item.score_display }}</span>
+                                {% if item.score_percent_display %}
+                                <span class="pending-review-score-pct">{{ item.score_percent_display }}</span>
+                                {% endif %}
                             </td>
                             <td>
                                 <span class="pending-review-evaluator">

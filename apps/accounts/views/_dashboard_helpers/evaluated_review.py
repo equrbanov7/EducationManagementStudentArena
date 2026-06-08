@@ -82,10 +82,24 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(exam__title__icontains=search_query)
                 | Q(exam__course__title__icontains=search_query)
             )
+        from apps.appeals.services import effective_test_score
+
         for attempt in attempts:
             course = attempt.exam.course
-            score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
             submitted_at = attempt.finished_at or attempt.started_at
+            # Test: apellyasiyadan SONRAKI effektiv balı bal olaraq göstər
+            # (X / maks) + faiz; yazılı/praktiki: müəllim balı.
+            if attempt.exam.exam_type == "test":
+                eff = effective_test_score(attempt)
+                score_display = "{} / {}".format(
+                    _format_score_display(eff["effective_score"]),
+                    _format_score_display(eff["max_score"]),
+                )
+                score_percent_display = "{}%".format(_format_score_display(eff["effective_percentage"]))
+            else:
+                score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
+                score_display = _format_score_display(score_value)
+                score_percent_display = ""
             items.append(
                 {
                     "type": "exam",
@@ -93,7 +107,8 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
                     "group_name": student_group_map.get(attempt.user_id, ""),
-                    "score_display": _format_score_display(score_value),
+                    "score_display": score_display,
+                    "score_percent_display": score_percent_display,
                     "evaluator_display": _user_display_name(attempt.exam.author),
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,

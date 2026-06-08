@@ -94,6 +94,10 @@
           data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"
           class="modern-exam-form">
         {% csrf_token %}
+        <input type="hidden"
+               name="marked_question_ids"
+               id="marked-question-ids-field"
+               value="{{ marked_question_ids_json|default:'[]' }}">
 
         <div class="exam-workspace">
             <aside class="question-sidebar" aria-label="{% trans 'Questions' context 'exams.template.take_exam' %}">
@@ -393,6 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const questionTransitionSkeleton = document.getElementById('questionTransitionSkeleton');
     const questionNavButtons = document.querySelectorAll('[data-question-nav]');
     const markButtons = document.querySelectorAll('[data-mark-question]');
+    const markedQuestionIdsField = document.getElementById('marked-question-ids-field');
 
     const qTimerContainer = document.getElementById('question-timer-container');
     const qTimerValue = document.getElementById('question-timer-value');
@@ -426,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const markedStorageKey = `exam_${examId}_attempt_${attemptId}_marked`;
     const timeWarningStorageKey = `exam_${examId}_attempt_${attemptId}_five_minute_warning`;
     const markedQuestionIds = new Set(loadMarkedQuestionIds());
+    syncMarkedQuestionInput();
     const examTimeWarning = window.ExamTimeWarning ? window.ExamTimeWarning.init({
         storageKey: timeWarningStorageKey,
         thresholdSeconds: 300,
@@ -569,8 +575,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentIndex < totalSlides - 1) {
             showSlide(currentIndex + 1);
         } else {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = "submit_action";
+            hiddenInput.value = "finish";
+            examForm.appendChild(hiddenInput);
+            syncMarkedQuestionInput();
             localStorage.removeItem(storageKey);
-            localStorage.removeItem(markedStorageKey);
             examForm.submit();
         }
         updateProgress();
@@ -730,14 +741,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadMarkedQuestionIds() {
         try {
-            const parsed = JSON.parse(localStorage.getItem(markedStorageKey) || "[]");
+            const storedValue = localStorage.getItem(markedStorageKey);
+            if (storedValue) {
+                const parsed = JSON.parse(storedValue);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(String);
+                }
+            }
+        } catch (error) {
+            // Fall back to the server-saved value below.
+        }
+
+        try {
+            const parsed = JSON.parse((markedQuestionIdsField && markedQuestionIdsField.value) || "[]");
             return Array.isArray(parsed) ? parsed.map(String) : [];
         } catch (error) {
             return [];
         }
     }
 
+    function syncMarkedQuestionInput() {
+        if (markedQuestionIdsField) {
+            markedQuestionIdsField.value = JSON.stringify(Array.from(markedQuestionIds));
+        }
+    }
+
     function persistMarkedQuestionIds() {
+        syncMarkedQuestionInput();
         try {
             localStorage.setItem(markedStorageKey, JSON.stringify(Array.from(markedQuestionIds)));
         } catch (error) {
@@ -756,7 +786,10 @@ document.addEventListener('DOMContentLoaded', function() {
             markedQuestionIds.add(normalizedId);
         }
         persistMarkedQuestionIds();
+        hasUnsavedChanges = true;
+        answerRevision += 1;
         updateProgress();
+        queueAutoSave(1000);
     }
 
     function updateMarkedButtons() {
@@ -1044,8 +1077,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 hiddenInput.value = "finish";
                 examForm.appendChild(hiddenInput);
 
+                syncMarkedQuestionInput();
                 localStorage.removeItem(storageKey);
-                localStorage.removeItem(markedStorageKey);
 
                 // Short delay so user sees the time-up message before redirect
                 setTimeout(function() {
@@ -1199,8 +1232,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildDraftFormData(action) {
+        syncMarkedQuestionInput();
         if (action !== "autosave") {
             const formData = new FormData(examForm);
+            if (markedQuestionIdsField) {
+                formData.set("marked_question_ids", markedQuestionIdsField.value);
+            }
             formData.append("submit_action", action);
             return formData;
         }
@@ -1212,6 +1249,9 @@ document.addEventListener('DOMContentLoaded', function() {
         appendFieldsByName(formData, "from_section");
         appendFieldsByName(formData, "assigned_type");
         formData.append("submit_action", action);
+        if (markedQuestionIdsField) {
+            formData.append("marked_question_ids", markedQuestionIdsField.value);
+        }
 
         dirtyQuestionIds.forEach(questionId => {
             formData.append("changed_questions[]", questionId);
@@ -1359,7 +1399,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Draft saxla
             const sentRevision = answerRevision;
+            syncMarkedQuestionInput();
             const formData = new FormData(examForm);
+            if (markedQuestionIdsField) {
+                formData.set("marked_question_ids", markedQuestionIdsField.value);
+            }
             formData.append("submit_action", "save_draft");
 
             fetch(window.location.href, {
@@ -1490,8 +1534,8 @@ document.addEventListener('DOMContentLoaded', function() {
         hiddenInput.value = 'finish';
         examForm.appendChild(hiddenInput);
 
+        syncMarkedQuestionInput();
         localStorage.removeItem(storageKey);
-        localStorage.removeItem(markedStorageKey);
         clearLocalDraft();
         examForm.submit();
     });

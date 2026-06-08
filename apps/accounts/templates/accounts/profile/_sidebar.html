@@ -263,9 +263,13 @@
         </li>
         {% if role_capabilities.can_view_my_appeals %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'appeals:my_appeals' %}" class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=my-appeals"
+               data-section="my-appeals"
+               data-title="{% trans 'Apellyasiyalarım' context 'appeals.template' %}"
+               data-source-url="{% url 'appeals:my_appeals' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-appeals' %}active{% endif %}">
                 <i class="fas fa-gavel sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Apellyasiyalarım</span>
+                <span class="sidebar-menu-text">{% trans "Apellyasiyalarım" context "appeals.template" %}</span>
             </a>
         </li>
         {% endif %}
@@ -349,9 +353,13 @@
 
         {% if role_capabilities.can_manage_appeals %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'appeals:manage_appeals' %}" class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=manage-appeals"
+               data-section="manage-appeals"
+               data-title="{% trans 'Apellyasiyalar' context 'appeals.template' %}"
+               data-source-url="{% url 'appeals:manage_appeals' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-appeals' %}active{% endif %}">
                 <i class="fas fa-gavel sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Apellyasiyalar</span>
+                <span class="sidebar-menu-text">{% trans "Apellyasiyalar" context "appeals.template" %}</span>
             </a>
         </li>
         {% endif %}

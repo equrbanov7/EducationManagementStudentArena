@@ -62,6 +62,12 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.attempt.field", "attempt_number"),
         help_text=pgettext_lazy("exams.model.attempt.help", "attempt_number"),
     )
+    marked_question_ids = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.attempt.field", "marked_question_ids"),
+        help_text=pgettext_lazy("exams.model.attempt.help", "marked_question_ids"),
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

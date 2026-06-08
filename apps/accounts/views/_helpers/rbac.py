@@ -304,6 +304,17 @@ def _role_capabilities(user, profile):
     if can_use_question_bank:
         allowed_sections.add("question-bank")
 
+    # "Apellyasiyalarım" — tələbə (və ya org-a bağlı olmayan istifadəçi) öz
+    # apellyasiyalarını dashboard daxilində (sağ content, AJAX) görür.
+    if can_view_my_appeals:
+        allowed_sections.add("my-appeals")
+
+    # "Apellyasiyalar" (idarəetmə) — müəllim/org-admin/superadmin dashboard
+    # daxilində (sağ content, AJAX) idarə edir. Faktiki data scope-u və qərar
+    # icazəsi view səviyyəsində (appeals.views) yenidən yoxlanılır.
+    if can_manage_appeals:
+        allowed_sections.add("manage-appeals")
+
     return {
         "role": role,
         "is_superadmin": is_superadmin,

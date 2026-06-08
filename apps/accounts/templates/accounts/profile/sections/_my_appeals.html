@@ -1,0 +1,101 @@
+{% load static i18n %}
+{% comment %}
+  "Apellyasiyalarım" profil bölməsi — dashboard sağ content hissəsində AJAX ilə
+  açılır (sidebar sabit qalır). Detal eyni panel daxilində swap olur; JS uğursuz
+  olarsa link öz standalone səhifəsinə keçir (progressive enhancement).
+{% endcomment %}
+<section class="profile-section-panel profile-section--my-appeals {% if active_section == 'my-appeals' %}is-active{% endif %}"
+         data-profile-section-panel="my-appeals"
+         data-source-url="{% url 'appeals:my_appeals' %}">
+    <div class="appeal-embedded">
+        <div data-appeal-list-view>
+            <header class="appeal-hero appeal-hero--icon">
+                <div class="appeal-hero__lead">
+                    <span class="appeal-hero__badge"><i class="fas fa-gavel"></i></span>
+                    <div>
+                        <span class="appeal-hero__eyebrow">{% trans "Apellyasiya tarixçəsi" context "appeals.template" %}</span>
+                        <h1>{% trans "Apellyasiyalarım" context "appeals.template" %}</h1>
+                        <p>{% trans "Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal dəyişikliklərini buradan izləyin." context "appeals.template" %}</p>
+                    </div>
+                </div>
+            </header>
+
+            {% include "appeals/partials/_my_appeals_body.html" %}
+        </div>
+
+        <div data-appeal-detail-view hidden></div>
+    </div>
+
+    <script nonce="{{ request.csp_nonce }}">
+    (function () {
+        function initAppealsSection() {
+            var panel = document.querySelector('[data-profile-section-panel="my-appeals"]');
+            if (!panel || panel.getAttribute("data-appeals-swap-bound") === "1") {
+                return;
+            }
+            panel.setAttribute("data-appeals-swap-bound", "1");
+
+            var listView = panel.querySelector("[data-appeal-list-view]");
+            var detailView = panel.querySelector("[data-appeal-detail-view]");
+            if (!listView || !detailView) {
+                return;
+            }
+
+            var backLabel = "{% filter escapejs %}{% trans 'Siyahıya qayıt' context 'appeals.template' %}{% endfilter %}";
+            var loadErr = "{% filter escapejs %}{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}{% endfilter %}";
+
+            function showList() {
+                detailView.hidden = true;
+                detailView.innerHTML = "";
+                listView.hidden = false;
+                if (panel.scrollIntoView) { panel.scrollIntoView({ behavior: "smooth", block: "start" }); }
+            }
+
+            function showDetail(url) {
+                listView.hidden = true;
+                detailView.hidden = false;
+                detailView.innerHTML = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
+                if (panel.scrollIntoView) { panel.scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+                var fetchUrl = url + (url.indexOf("?") === -1 ? "?" : "&") + "fragment=1";
+                fetch(fetchUrl, {
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (r) {
+                        if (!r.ok) { throw new Error("http_" + r.status); }
+                        return r.text();
+                    })
+                    .then(function (html) {
+                        var back = '<div class="appeal-detail-back"><button type="button" class="btn btn-outline-secondary btn-sm" data-appeal-detail-back><i class="fas fa-arrow-left me-2"></i>' + backLabel + "</button></div>";
+                        detailView.innerHTML = back + html;
+                    })
+                    .catch(function () {
+                        // Fail-soft: standalone səhifəyə keç.
+                        window.location.href = url;
+                    });
+            }
+
+            listView.addEventListener("click", function (e) {
+                var link = e.target && e.target.closest ? e.target.closest("[data-appeal-detail-url]") : null;
+                if (!link) { return; }
+                e.preventDefault();
+                showDetail(link.getAttribute("data-appeal-detail-url"));
+            });
+
+            detailView.addEventListener("click", function (e) {
+                var back = e.target && e.target.closest ? e.target.closest("[data-appeal-detail-back]") : null;
+                if (!back) { return; }
+                e.preventDefault();
+                showList();
+            });
+        }
+
+        if (window.EMSReady) {
+            window.EMSReady(initAppealsSection);
+        } else {
+            initAppealsSection();
+        }
+    })();
+    </script>
+</section>

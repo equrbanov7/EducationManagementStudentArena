@@ -35,7 +35,7 @@
                 <div class="stat-item main-score w-100 mb-4">
                     <span class="stat-label">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
                     <span class="stat-value text-primary">{{ test_result.percentage_display }}%</span>
-                    <span class="text-muted small d-block mt-1">Bal: {{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
+                    <span class="text-muted small d-block mt-1">{% trans "label_points" context "exams.template.student_exam_result" %}: {{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
                 </div>
 
                 <div class="test-stats-grid">
@@ -48,12 +48,16 @@
                         <span class="stat-value text-danger">{{ test_result.wrong_count }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Cavabsız</span>
+                        <span class="stat-label">{% trans "label_unanswered" context "exams.template.student_exam_result" %}</span>
                         <span class="stat-value text-warning">{{ test_result.unanswered_count }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Verilmiş sual</span>
+                        <span class="stat-label">{% trans "label_delivered_questions" context "exams.template.student_exam_result" %}</span>
                         <span class="stat-value text-primary">{{ test_result.delivered_count }}</span>
+                    </div>
+                    <div class="stat-item stat-item--marked">
+                        <span class="stat-label">{% trans "label_marked" context "exams.template.student_exam_result" %}</span>
+                        <span class="stat-value text-warning">{{ marked_question_count|default:0 }}</span>
                     </div>
                 </div>
 
@@ -77,6 +81,26 @@
         </div>
     </div>
 
+    <div class="result-action-panel">
+        <div class="result-action-panel__copy">
+            <span class="result-action-panel__eyebrow">{% trans "appeal_center" context "exams.template.student_exam_result" %}</span>
+            <strong>{% trans "appeal_center_title" context "exams.template.student_exam_result" %}</strong>
+            {% if not can_appeal %}
+            <small>{% trans "appeal_center_desc_closed" context "exams.template.student_exam_result" %}</small>
+            {% endif %}
+        </div>
+        <div class="result-action-panel__actions">
+            {% if can_appeal %}
+            <a href="{{ appeal_create_url }}" class="btn btn-warning">
+                <i class="fas fa-gavel me-2"></i>{% trans "action_create_appeal" context "exams.template.student_exam_result" %}
+            </a>
+            {% endif %}
+            <a href="{{ my_appeals_url }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list-ul me-2"></i>{% trans "action_my_appeals" context "exams.template.student_exam_result" %}
+            </a>
+        </div>
+    </div>
+
     <div class="section-divider"></div>
 
     <h3 class="section-title">{% trans "heading_question_result_analysis" context "exams.template.student_exam_result" %}</h3>
@@ -85,11 +109,24 @@
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
             {% with has_selection=answer_has_selection_by_qid|get_item:q.id %}
-            <div class="question-card">
+            {% with is_marked=marked_question_by_qid|get_item:q.id %}
+            <div class="question-card{% if is_marked %} question-card--marked{% endif %}">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
 
                     <div class="questionAndMedia">
+                        {% if is_marked %}
+                        <div class="marked-result-chip">
+                            <i class="fas fa-bookmark"></i>
+                            {% trans "marked_question_badge" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% endif %}
+                        {% if appeal_corrected_qids|get_item:q.id %}
+                        <div class="appeal-corrected-chip">
+                            <i class="fas fa-gavel"></i>
+                            {% trans "appeal_corrected_badge" context "exams.template.student_exam_result" %}
+                        </div>
+                        {% endif %}
                         <div class="q-text">
                             {{ q.text|linebreaks }}
                         </div>
@@ -310,23 +347,24 @@
             </div>
             {% endwith %}
             {% endwith %}
+            {% endwith %}
         {% endfor %}
     </div>
 
     {% if previous_attempts %}
     <div class="section-divider"></div>
-    <h3 class="section-title">Digər cəhdlər</h3>
-    <div class="summary-card">
+    <h3 class="section-title">{% trans "heading_other_attempts" context "exams.template.student_exam_result" %}</h3>
+    <div class="summary-card previous-attempts-card">
         <div class="summary-body pt-4">
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Tarix</th>
-                            <th>Status</th>
-                            <th>Nəticə</th>
-                            <th class="text-end">Əməliyyat</th>
+                            <th>{% trans "col_date" context "exams.template.student_exam_result" %}</th>
+                            <th>{% trans "col_status" context "exams.template.student_exam_result" %}</th>
+                            <th>{% trans "col_result" context "exams.template.student_exam_result" %}</th>
+                            <th class="text-end">{% trans "col_action" context "exams.template.student_exam_result" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -341,23 +379,23 @@
                                 {% elif previous_attempt.checked_by_teacher and previous_attempt.can_view_result %}
                                     {{ previous_attempt.teacher_score|default:"-" }}
                                 {% elif previous_attempt.result_hidden_by_teacher %}
-                                    <span class="text-muted">Gizlidir</span>
+                                    <span class="text-muted">{% trans "status_hidden" context "exams.template.student_exam_result" %}</span>
                                 {% elif previous_attempt.review_available_in_seconds > 0 %}
                                     <span class="text-muted small">
                                         <i class="far fa-clock me-1"></i>
                                         <span data-review-countdown="{{ previous_attempt.review_available_in_seconds }}">--:--:--</span>
                                     </span>
                                 {% else %}
-                                    <span class="text-muted">Yoxlanır</span>
+                                    <span class="text-muted">{% trans "status_checking" context "exams.template.student_exam_result" %}</span>
                                 {% endif %}
                             </td>
                             <td class="text-end">
                                 {% if previous_attempt.can_view_result %}
-                                <a href="{{ previous_attempt.result_url }}" class="btn btn-sm btn-outline-primary">Bax</a>
+                                <a href="{{ previous_attempt.result_url }}" class="btn btn-sm btn-outline-primary">{% trans "action_view" context "exams.template.student_exam_result" %}</a>
                                 {% elif previous_attempt.result_hidden_by_teacher %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gizlidir</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>{% trans "status_hidden" context "exams.template.student_exam_result" %}</button>
                                 {% else %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gözləyir</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>{% trans "status_waiting" context "exams.template.student_exam_result" %}</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -371,29 +409,21 @@
 
     {% if appeal_bonus_points and appeal_bonus_points > 0 and effective_score_info %}
     <div class="alert alert-success d-flex justify-content-between align-items-center mt-3">
-        <span><i class="fas fa-gavel me-2"></i>Apellyasiya nəticəsində balınız yeniləndi</span>
+        <span><i class="fas fa-gavel me-2"></i>{% trans "appeal_score_updated" context "exams.template.student_exam_result" %}</span>
         <strong>{{ effective_score_info.effective_score }} / {{ effective_score_info.max_score }} ({{ effective_score_info.effective_percentage }}%)</strong>
     </div>
     {% endif %}
 
-    <div class="action-footer">
-        <a href="{{ back_url }}" class="btn custom-blue-btn">
-            <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_exams" context "exams.template.student_exam_result" %}
-        </a>
+    <div class="action-footer" role="navigation" aria-label="{% trans 'result_actions' context 'exams.template.student_exam_result' %}">
+        <div class="action-footer__inner">
+            <a href="{{ back_url }}" class="btn custom-blue-btn">
+                <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_exams" context "exams.template.student_exam_result" %}
+            </a>
 
-        <a href="{{ history_url }}" class="btn custom-blue-btn">
-             Cavablarım ({{ previous_attempts_count }}) <i class="fas fa-history ms-2"></i>
-        </a>
-
-        {% if can_appeal %}
-        <a href="{{ appeal_create_url }}" class="btn btn-warning">
-            <i class="fas fa-gavel me-2"></i>Apellyasiya et
-        </a>
-        {% endif %}
-
-        <a href="{{ my_appeals_url }}" class="btn btn-outline-secondary">
-            <i class="fas fa-list-ul me-2"></i>Apellyasiyalarım
-        </a>
+            <a href="{{ history_url }}" class="btn custom-blue-btn">
+                {% trans "action_my_answers" context "exams.template.student_exam_result" %} ({{ previous_attempts_count }}) <i class="fas fa-history ms-2"></i>
+            </a>
+        </div>
     </div>
 
 </div> 
