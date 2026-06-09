@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -349,7 +349,7 @@ def user_profile(request):
             # Kart redizaynı üçün: sual sayı + apellyasiya sayı (annotate) və
             # aktiv dil variantları (prefetch). Yalnız göstərilən səhifəyə tətbiq
             # olunur — baza queryset toxunulmur.
-            from django.db.models import Count, Prefetch
+            from django.db.models import Prefetch
 
             from apps.exams.models import ExamLanguageVariant
 
@@ -369,8 +369,6 @@ def user_profile(request):
             my_exams_count = my_exams_qs.count()
 
     if active_section == "question-bank" and "question-bank" in allowed_sections:
-        from django.db.models import Count
-
         from apps.exams.constants import EXAM_LANGUAGE_CHOICES
         from apps.exams.models import QuestionBank
         from apps.exams.services.question_bank_attach import accessible_banks
