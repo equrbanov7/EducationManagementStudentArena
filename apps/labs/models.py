@@ -393,7 +393,7 @@ class LabAssignment(models.Model):
 
         # Yeni assignment üçün həmişə sual təyin et.
         # Mövcud assignment üçün yalnız hələ submission yoxdursa və assignment köhnəlibsə yenilə.
-        if created or assignment.assigned_questions.count() == 0:
+        if created or not assignment.assigned_questions.exists():
             assignment.assign_questions()
         elif assignment.needs_reassignment():
             assignment.assign_questions()
@@ -405,8 +405,10 @@ class LabAssignment(models.Model):
         Blok limitlərinə əsasən lab üçün potensial seçilə bilən sual sayını qaytarır.
         """
         total = 0
-        for block in self.lab.blocks.all().order_by("order"):
-            block_count = block.questions.count()
+        # annotate(Count): əvvəl hər blok üçün block.questions.count() ayrı sorğu
+        # idi (N+1) — indi blok siyahısı ilə birlikdə tək sorğuda.
+        for block in self.lab.blocks.annotate(_q_count=models.Count("questions")).order_by("order"):
+            block_count = block._q_count
             if block_count == 0:
                 continue
             if block.questions_to_pick > 0:
@@ -464,8 +466,6 @@ class LabAssignment(models.Model):
 
         # Sualları təyin et
         self.assigned_questions.set(all_questions)
-
-        print(f"✓ {self.student.username} üçün {len(all_questions)} sual təyin edildi")
 
 
 # ════════════════════════════════════════════════════════════════════════════

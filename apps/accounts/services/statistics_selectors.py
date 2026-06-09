@@ -441,7 +441,9 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
     # ── Group comparison ──────────────────────────────────────────
     groups_qs = StudentGroup.objects.none()
     if organization and _content_type_enabled(content_type, "exam"):
-        groups_qs = StudentGroup.objects.filter(organization=organization)
+        # prefetch_related("students"): loop içində grp.students.all() hər qrup
+        # üçün ayrı sorğu idi (N+1) — indi cache-dən.
+        groups_qs = StudentGroup.objects.filter(organization=organization).prefetch_related("students")
     group_comparison = []
     for grp in groups_qs[:50]:
         grp_attempts = ExamAttempt.objects.filter(
@@ -724,8 +726,14 @@ def get_org_admin_statistics(*, organization, filters=None):
         )
         teacher_scores[attempt["exam__author_id"]].append(score)
     teacher_overview = []
-    for tid in list(teacher_user_ids)[:20]:
-        t_user = User.objects.filter(id=tid).values("username", "first_name", "last_name").first()
+    _teacher_ids = list(teacher_user_ids)[:20]
+    # Əvvəl hər teacher üçün ayrıca User sorğusu idi (20-yə qədər N+1). İndi tək
+    # id__in sorğusu + dict lookup.
+    _users_by_id = {
+        u["id"]: u for u in User.objects.filter(id__in=_teacher_ids).values("id", "username", "first_name", "last_name")
+    }
+    for tid in _teacher_ids:
+        t_user = _users_by_id.get(tid)
         if t_user:
             teacher_overview.append(
                 {
@@ -870,43 +878,57 @@ def get_superadmin_statistics(*, filters=None):
         proj_agg = proj_qs.aggregate(total=Count("id"), graded=Count("id", filter=Q(status="graded")))
 
     # ── Org comparison ────────────────────────────────────────────
+    # Org comparison — əvvəl hər org üçün 6 ayrı sorğu idi (×60 org = ~360 sorğu, N+1).
+    # İndi organization_id üzrə qruplaşmış 4 aqreqat (member/teacher/student tək
+    # sorğuda filtered Count ilə; course/exam/attempt ayrıca qruplaşma).
+    org_list = list(scoped_orgs[:60])
+    org_ids = [o.id for o in org_list]
+
+    _member_by_org = {
+        row["organization_id"]: row
+        for row in (
+            Membership.objects.filter(organization_id__in=org_ids, is_active=True)
+            .values("organization_id")
+            .annotate(
+                members=Count("user", distinct=True),
+                teachers=Count("user", distinct=True, filter=Q(role__level__gte=55)),
+                students=Count("user", distinct=True, filter=Q(role__level__lte=30)),
+            )
+        )
+    }
+    _courses_by_org = dict(
+        Course.objects.filter(organization_id__in=org_ids)
+        .values("organization_id")
+        .annotate(c=Count("id"))
+        .values_list("organization_id", "c")
+    )
+    _exams_by_org = dict(
+        Exam.objects.filter(organization_id__in=org_ids)
+        .values("organization_id")
+        .annotate(c=Count("id"))
+        .values_list("organization_id", "c")
+    )
+    _attempts_by_org = dict(
+        ExamAttempt.objects.filter(exam__organization_id__in=org_ids)
+        .values("exam__organization_id")
+        .annotate(c=Count("id"))
+        .values_list("exam__organization_id", "c")
+    )
+
     org_comparison = []
-    for org in scoped_orgs[:60]:
-        o_members = Membership.objects.filter(organization=org, is_active=True).values("user").distinct().count()
-        o_teachers = (
-            Membership.objects.filter(
-                organization=org,
-                is_active=True,
-                role__level__gte=55,
-            )
-            .values("user")
-            .distinct()
-            .count()
-        )
-        o_students = (
-            Membership.objects.filter(
-                organization=org,
-                is_active=True,
-                role__level__lte=30,
-            )
-            .values("user")
-            .distinct()
-            .count()
-        )
-        o_courses = Course.objects.filter(organization=org).count()
-        o_exams = Exam.objects.filter(organization=org).count()
-        o_attempts = ExamAttempt.objects.filter(exam__organization=org).count()
+    for org in org_list:
+        m = _member_by_org.get(org.id) or {}
         org_comparison.append(
             {
                 "id": org.id,
                 "name": org.name,
                 "org_type": org.org_type,
-                "members": o_members,
-                "teachers": o_teachers,
-                "students": o_students,
-                "courses": o_courses,
-                "exams": o_exams,
-                "attempts": o_attempts,
+                "members": m.get("members", 0),
+                "teachers": m.get("teachers", 0),
+                "students": m.get("students", 0),
+                "courses": _courses_by_org.get(org.id, 0),
+                "exams": _exams_by_org.get(org.id, 0),
+                "attempts": _attempts_by_org.get(org.id, 0),
             }
         )
     org_comparison.sort(key=lambda row: (-row["attempts"], row["name"].lower()))

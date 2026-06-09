@@ -47,8 +47,6 @@ def lab_detail(request, pk):
                 .order_by("block__order", "question_number")
             )
 
-            print(f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir")
-
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
             if not can_student_access_lab(lab, request.user):
@@ -61,17 +59,12 @@ def lab_detail(request, pk):
                 "block__order", "question_number"
             )
 
-            print(f"[STUDENT] {request.user.username} - Assignment ID: {assignment.id}")
-            print(f"[STUDENT] Assigned questions count: {questions.count()}")
-
-            # Əgər hələ də sual yoxdursa, yenidən təyin et
-            if questions.count() == 0:
-                print("[WARNING] Sual tapılmadı, yenidən assign edilir...")
+            # Əgər hələ də sual yoxdursa, yenidən təyin et (exists() — count-dan ucuz).
+            if not questions.exists():
                 assignment.assign_questions()
                 questions = assignment.assigned_questions.select_related("block").order_by(
                     "block__order", "question_number"
                 )
-                print(f"[STUDENT] Yenidən assign: {questions.count()} sual")
 
             # Submission yoxlaması
             submissions = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")

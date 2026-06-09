@@ -13,7 +13,7 @@ from collections import Counter
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -149,9 +149,11 @@ def teacher_exam_statistics(request, slug):
     total_attempts = len(attempts_list)
     is_written = exam.exam_type == "written"
 
-    # For written exams: max possible score = sum of question points
+    # For written exams: max possible score = sum of question points.
+    # DB-side Sum — bütün sual obyektlərini Python-a yükləyib toplamaqdansa
+    # (all_questions order_by ilə 210-da onsuz da yenidən sorğulanır).
     all_questions = ExamQuestion.objects.filter(exam=exam)
-    max_possible_score = sum(q.points for q in all_questions) if is_written else 0
+    max_possible_score = (all_questions.aggregate(total=Sum("points"))["total"] or 0) if is_written else 0
 
     def _attempt_score(a):
         """Return a normalised percentage score for the attempt."""
@@ -213,17 +215,38 @@ def teacher_exam_statistics(request, slug):
 
     question_stats = []
     attempt_ids = [a.id for a in attempts_list] if attempts_list else []
-    for q in questions:
-        ans_qs = ExamAnswer.objects.filter(question=q, attempt__exam=exam)
-        if attempt_ids:
-            ans_qs = ans_qs.filter(attempt_id__in=attempt_ids)
-        total_a = ans_qs.count()
+    questions_list = list(questions)
+
+    # Per-question answer statistikası — əvvəl hər sual üçün 2 ayrı sorğu idi
+    # (N+1: 50 sual = ~100 sorğu). İndi question_id üzrə qruplaşmış TƏK aqreqat.
+    # attempt_id filtri orijinaldakı kimi yalnız filtrlənmiş attempt-lər olduqda
+    # tətbiq olunur (boşdursa bütün answer-lər — köhnə davranış qorunur).
+    _base_ans = ExamAnswer.objects.filter(attempt__exam=exam, question_id__in=[q.id for q in questions_list])
+    if attempt_ids:
+        _base_ans = _base_ans.filter(attempt_id__in=attempt_ids)
+
+    if is_written:
+        _agg = _base_ans.values("question_id").annotate(
+            total=Count("id"),
+            graded_count=Count("id", filter=Q(teacher_score__isnull=False)),
+            score_sum=Sum("teacher_score"),
+        )
+    else:
+        _agg = _base_ans.values("question_id").annotate(
+            total=Count("id"),
+            correct=Count("id", filter=Q(is_correct=True)),
+        )
+    _agg_by_q = {row["question_id"]: row for row in _agg}
+
+    for q in questions_list:
+        row = _agg_by_q.get(q.id) or {}
+        total_a = row.get("total", 0)
 
         if is_written:
             # Written: compute average teacher_score per question
-            graded = list(ans_qs.filter(teacher_score__isnull=False).values_list("teacher_score", flat=True))
-            graded_count = len(graded)
-            avg_q_score = round(sum(graded) / graded_count, 1) if graded_count else 0
+            graded_count = row.get("graded_count", 0)
+            score_sum = row.get("score_sum") or 0
+            avg_q_score = round(score_sum / graded_count, 1) if graded_count else 0
             score_pct = round(avg_q_score * 100 / q.points, 1) if q.points else 0
             question_stats.append(
                 {
@@ -239,7 +262,7 @@ def teacher_exam_statistics(request, slug):
                 }
             )
         else:
-            correct_a = ans_qs.filter(is_correct=True).count()
+            correct_a = row.get("correct", 0)
             incorrect_a = total_a - correct_a
             accuracy = round(correct_a * 100 / total_a, 1) if total_a else 0
             question_stats.append(
