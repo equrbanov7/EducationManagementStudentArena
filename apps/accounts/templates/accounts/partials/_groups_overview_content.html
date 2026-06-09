@@ -70,8 +70,8 @@
                         <div class="post-title">{{ group.name }}</div>
                         <div class="post-date">
                             {% trans "primary_teacher" context "profile.groups" %}: {{ group.teacher.username }}
-                            · {% trans "students" context "profile.groups" %}: {{ group.students.count }}
-                            · {% trans "teachers" context "profile.groups" %}: {{ group.teachers.count }}
+                            · {% trans "students" context "profile.groups" %}: {{ group.students.all|length }}
+                            · {% trans "teachers" context "profile.groups" %}: {{ group.teachers.all|length }}
                         </div>
                     </div>
 
@@ -160,7 +160,7 @@
                     <p class="mb-0 text-muted small">
                         {% trans "primary_teacher" context "profile.groups" %}: <strong>{{ selected_teacher_group.teacher.username }}</strong>
                         · {% trans "students" context "profile.groups" %}: {{ selected_group_students_count }}
-                        · {% trans "teachers" context "profile.groups" %}: {{ selected_teacher_group.teachers.count }}
+                        · {% trans "teachers" context "profile.groups" %}: {{ selected_teacher_group.teachers.all|length }}
                     </p>
                 </div>
                 <div class="d-flex gap-2 align-items-center flex-shrink-0">

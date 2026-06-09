@@ -146,7 +146,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ═══════════════════════════════════════════════════════════════════
         # 2. MÖVZULAR & RESURSLAR (Hamı görür)
         # ═══════════════════════════════════════════════════════════════════
-        context["topics"] = course.topics.all().order_by("order")
+        # prefetch_related("resources"): _topic_accordion.html hər topic üçün
+        # resources-i həm sayır (badge), həm iterate edir — prefetch olmasa hər
+        # ikisi topic başına ayrı sorğu idi (N+1).
+        context["topics"] = course.topics.prefetch_related("resources").order_by("order")
         context["resources"] = course.resources.all().order_by("-created_at")
 
         # ═══════════════════════════════════════════════════════════════════
@@ -270,21 +273,33 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ───────────────────────────────────────────────────────────────────
 
         if context["can_manage_course"]:
-            # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = without_disabled_practical_exams(
-                scoped_by_organization(
-                    Exam.objects.filter(course=course),
-                    self.request,
+            # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür.
+            # questions_total annotate: exam_section.html course_exams loop-unda
+            # hər imtahanın sual sayını göstərir — annotate olmasa N+1.
+            context["course_exams"] = (
+                without_disabled_practical_exams(
+                    scoped_by_organization(
+                        Exam.objects.filter(course=course),
+                        self.request,
+                    )
                 )
-            ).order_by("-created_at")
+                .annotate(questions_total=Count("questions", distinct=True))
+                .order_by("-created_at")
+            )
 
-            # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
-            context["teacher_exams"] = without_disabled_practical_exams(
-                scoped_by_organization(
-                    Exam.objects.filter(author=user).exclude(course=course),
-                    self.request,
+            # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün).
+            # questions_total annotate: _exam_modals.html teacher_exams loop-unda
+            # hər imtahan üçün sual sayını göstərir — annotate olmasa N+1.
+            context["teacher_exams"] = (
+                without_disabled_practical_exams(
+                    scoped_by_organization(
+                        Exam.objects.filter(author=user).exclude(course=course),
+                        self.request,
+                    )
                 )
-            ).order_by("-created_at")[:10]
+                .annotate(questions_total=Count("questions", distinct=True))
+                .order_by("-created_at")[:10]
+            )
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
@@ -294,7 +309,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         Exam.objects.filter(course=course, is_active=True),
                         self.request,
                     )
-                )
+                ).annotate(questions_total=Count("questions", distinct=True))
             )
 
             # Batch-fetch all this user's non-draft attempts for all exams in one query,

@@ -70,7 +70,7 @@
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 <small class="text-muted">
                                     <i class="fas fa-question-circle"></i>
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions.count %}
+                                    {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}
                                         label_question_count_short {{ question_count }}
                                     {% endblocktrans %}
                                 </small>
@@ -192,7 +192,7 @@
                                             label_question_count_short {{ question_count }}
                                         {% endblocktrans %}
                                     {% else %}
-                                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions.count %}
+                                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}
                                             label_question_count_short {{ question_count }}
                                         {% endblocktrans %}
                                     {% endif %}

@@ -41,7 +41,6 @@ from apps.notifications.services import (
     build_profile_notification_state,
     get_unread_count,
 )
-
 from core.cache import get_or_set_cached_profile_badge_counts
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts

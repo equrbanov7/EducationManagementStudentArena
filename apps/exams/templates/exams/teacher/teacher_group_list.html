@@ -47,13 +47,14 @@
               <div class="group-stats">
                 <span class="badge rounded-pill bg-light text-dark">
                   <i class="fas fa-user-graduate me-1"></i>
-                  {{ group.students.count }}
+                  {# prefetch_related("students") onsuz da yüklənib — .all|length cache-i işlədir, .count isə ayrı COUNT sorğusu atardı (N+1) #}
+                  {{ group.students.all|length }}
                 </span>
               </div>
               <div class="group-stats">
                 <span class="badge rounded-pill bg-light text-dark">
                   <i class="fas fa-chalkboard-teacher me-1"></i>
-                  {{ group.teachers.count|default:1 }}
+                  {{ group.teachers.all|length|default:1 }}
                 </span>
               </div>
 

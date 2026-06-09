@@ -75,6 +75,31 @@ def _set_rls_setting(name: str, value: str, *, local: bool | None = None) -> Non
         )
 
 
+def _set_rls_settings(items: list[tuple[str, str]], *, local: bool | None = None) -> None:
+    """Persist several RLS settings in a SINGLE database round-trip.
+
+    Semantically identical to calling :func:`_set_rls_setting` once per
+    ``(name, value)`` pair: PostgreSQL evaluates the ``set_config`` calls in the
+    SELECT target list and the resulting session/transaction state is the same
+    as sequential statements. The settings here address independent GUC keys, so
+    evaluation order is irrelevant. Used on the per-request hot path
+    (``OrganizationMiddleware``) to collapse 2–3 statements into one.
+
+    The scope (session vs ``SET LOCAL``) is resolved once and applied uniformly;
+    within a single request ``connection.in_atomic_block`` is constant, so this
+    matches what per-setting calls would have computed individually.
+    """
+    if not _is_postgresql() or not items:
+        return
+    is_local = _should_use_local(local)
+    select_list = ", ".join(["set_config(%s, %s, %s)"] * len(items))
+    params: list[Any] = []
+    for name, value in items:
+        params.extend([name, value, is_local])
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT {select_list}", params)
+
+
 def _get_rls_setting(name: str, *, default: str = "") -> str:
     """Read the current RLS setting value, falling back to *default* when unset."""
     if not _is_postgresql():
@@ -139,6 +164,31 @@ def set_rls_bypass(enabled: bool = True, *, local: bool | None = None) -> None:
     _set_rls_setting("app.bypass_rls", value, local=local)
 
 
+def apply_rls_request_context(*, user_id, org_id=None, bypass: bool = False, local: bool | None = None) -> None:
+    """Set the full per-request RLS context in a SINGLE round-trip.
+
+    Exactly equivalent to the sequence used by ``OrganizationMiddleware``:
+
+    * ``bypass=True``  → ``set_rls_user`` + ``set_rls_bypass(True)`` (tenant is
+      intentionally left untouched; the bypass flag makes policies allow all
+      rows, matching the superadmin path).
+    * ``bypass=False`` → ``set_rls_user`` + ``set_rls_bypass(False)`` +
+      ``set_rls_tenant(org_id)`` when *org_id* is given, otherwise
+      ``clear_rls_tenant()`` (the secure "no tenant" default that denies all
+      tenant-scoped rows).
+
+    Collapses 2–3 ``set_config`` statements into one to cut per-request
+    round-trips on the authenticated hot path.
+    """
+    items: list[tuple[str, str]] = [("app.current_user_id", str(user_id))]
+    if bypass:
+        items.append(("app.bypass_rls", _BYPASS_ON))
+    else:
+        items.append(("app.bypass_rls", _BYPASS_OFF))
+        items.append(("app.current_org_id", str(org_id) if org_id is not None else _NO_TENANT))
+    _set_rls_settings(items, local=local)
+
+
 def reset_rls_context(*, local: bool | None = None, only_if_connection_open: bool = False) -> None:
     """Reset both tenant and bypass settings to the secure default state.
 
@@ -150,9 +200,16 @@ def reset_rls_context(*, local: bool | None = None, only_if_connection_open: boo
         return
     if only_if_connection_open and not _has_open_connection():
         return
-    clear_rls_tenant(local=local)
-    clear_rls_user(local=local)
-    set_rls_bypass(False, local=local)
+    # Same three resets as clear_rls_tenant + clear_rls_user + set_rls_bypass(False),
+    # batched into one round-trip.
+    _set_rls_settings(
+        [
+            ("app.current_org_id", _NO_TENANT),
+            ("app.current_user_id", _NO_USER),
+            ("app.bypass_rls", _BYPASS_OFF),
+        ],
+        local=local,
+    )
 
 
 @contextmanager
