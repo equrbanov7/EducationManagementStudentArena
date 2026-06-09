@@ -1,5 +1,6 @@
 import http from "k6/http";
 import { check, fail, sleep } from "k6";
+import exec from "k6/execution";
 import {
   absoluteUrl,
   autosaveNormalAnswer,
@@ -12,6 +13,7 @@ import {
   parseCodingConfig,
   parseNormalQuestions,
   pickUser,
+  pickUserByIndex,
   sleepSeconds,
   submitNormalExam,
 } from "./lib/emsarena.js";
@@ -31,7 +33,11 @@ export default function () {
   const slug = __ENV.K6_TEST_EXAM_SLUG;
   if (!slug) fail("Set K6_TEST_EXAM_SLUG to a dedicated load-test exam slug.");
 
-  const loginResult = login(pickUser(), { clearCookies: true });
+  const user = boolEnv("STUDENT_FLOW_PICK_USER_BY_ITERATION", false)
+    ? pickUserByIndex(exec.scenario.iterationInTest)
+    : pickUser();
+
+  const loginResult = login(user, { clearCookies: true });
   check(loginResult.response, {
     "student login ok": () => loginResult.success,
   });

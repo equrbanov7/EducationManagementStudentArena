@@ -42,12 +42,10 @@ from apps.notifications.services import (
     get_unread_count,
 )
 
-from .._dashboard_helpers.cheap_counts import (
-    count_assigned_tasks,
-    count_my_results,
-    count_pending_answers,
-)
-from .._helpers import _role_capabilities
+from core.cache import get_or_set_cached_profile_badge_counts
+
+from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts
+from .._helpers import _get_active_organization, _role_capabilities
 
 logger = logging.getLogger(__name__)
 
@@ -261,11 +259,14 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
 def profile_badges_api(request: HttpRequest) -> JsonResponse:
     """
     Lightweight JSON endpoint returning sidebar badge counts the user is
-    allowed to see. Uses ``cheap_counts.py`` and pre-existing cheap aggregates
-    from ``user_profile``. No heavy collectors. No cache (invalidation is not
-    obviously safe).
+    allowed to see. The student/reviewer counts come from the SAME cached bundle
+    (``get_or_set_cached_profile_badge_counts`` → ``compute_profile_badge_counts``)
+    that ``user_profile`` uses, so page, section fragments and this API stay
+    consistent and the heavy COUNT/aggregate queries run at most once per
+    (user, org) per TTL window.
 
-    P3-extra — `@never_cache` qoyulub. Counts user/tenant-specifikdir.
+    P3-extra — `@never_cache` (HTTP) qalır; badge dəyərləri Redis-də ~45s
+    eventual-consistent saxlanılır (öz datası, kiçik staleness məqbul).
     """
     profile, _created = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
@@ -277,97 +278,41 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     in_app_unread = get_unread_count(user=request.user)
     payload["notifications_unread_count"] = notification_state.get("unread_count", 0) + in_app_unread
 
-    # Student-facing badges
-    if capabilities.get("can_view_student_assignments"):
-        payload["assigned_tasks_count"] = count_assigned_tasks(request, request.user)
-        payload["my_results_count"] = count_my_results(request, request.user)
-        payload["pending_answers_count"] = count_pending_answers(request, request.user)
+    # P3 — Student + reviewer badge sayğacları user_profile ilə EYNİ cached
+    # dəstdən gəlir (köhnə inline ~90-sətirlik dublikat aqreqasiya silindi: DRY +
+    # drift riski aradan qalxdı). Eyni (user, aktiv org) açarı paylaşıldığına görə
+    # tam profil səhifəsi, section fragment-ləri və bu API həmişə eyni rəqəmləri
+    # qaytarır (uyğunsuz "flicker" olmur). Qeyd: badge-lər ~45s eventual-consistent
+    # olur; ani yenilənmə lazım olduqda submit/qiymətləndirmə kodu
+    # core.cache.invalidate_profile_badge_counts_cache çağırmalıdır.
+    active_org = _get_active_organization(request)
 
-    # Teacher/reviewer badges — use the same aggregate pattern as user_profile
-    # without re-implementing it here to avoid drift. Defer to a tiny inline
-    # helper.
-    if capabilities.get("can_review_submissions"):
-        from django.db.models import Count, Q
-        from django.utils import timezone
-
-        from apps.assignments.models import Submission
+    def _compute_shared_badges() -> dict[str, int]:
         from apps.courses.models import Course
-        from apps.exams.models import Exam, ExamAttempt
-        from apps.labs.models import LabSubmission
-        from apps.projects.models import ProjectSubmission
+        from apps.exams.models import Exam
 
-        from .._helpers import (
-            REVIEW_EDIT_WINDOW,
-            _tenant_scoped_courses,
-            _tenant_scoped_exams,
+        from .._helpers import _tenant_scoped_courses, _tenant_scoped_exams
+
+        return compute_profile_badge_counts(
+            request,
+            request.user,
+            capabilities=capabilities,
+            my_exams_qs=_tenant_scoped_exams(request, Exam.objects.filter(author=request.user)),
+            teacher_courses=_tenant_scoped_courses(request, Course.objects.filter(owner=request.user)),
         )
 
-        teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
-        my_exams_qs = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
-        review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
-
-        exam_attempt_counts = ExamAttempt.objects.filter(
-            exam__in=my_exams_qs,
-            status__in=["submitted", "expired"],
-        ).aggregate(
-            pending=Count(
-                "id",
-                filter=(
-                    ~Q(exam__exam_type="test")
-                    & (Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
-                ),
-            ),
-            evaluated=Count(
-                "id",
-                filter=(
-                    Q(exam__exam_type="test")
-                    | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
-                    | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
-                ),
-            ),
-        )
-        submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-        project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-        lab_counts = LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-        payload["pending_review_count"] = (
-            (exam_attempt_counts.get("pending") or 0)
-            + (submission_counts.get("pending") or 0)
-            + (project_counts.get("pending") or 0)
-            + (lab_counts.get("pending") or 0)
-        )
-        payload["evaluated_review_count"] = (
-            (exam_attempt_counts.get("evaluated") or 0)
-            + (submission_counts.get("evaluated") or 0)
-            + (project_counts.get("evaluated") or 0)
-            + (lab_counts.get("evaluated") or 0)
-        )
+    shared_badges = get_or_set_cached_profile_badge_counts(
+        user_id=request.user.pk,
+        org_id=active_org.pk if active_org is not None else None,
+        compute=_compute_shared_badges,
+    )
+    if capabilities.get("can_view_student_assignments"):
+        payload["assigned_tasks_count"] = shared_badges.get("assigned_tasks", 0)
+        payload["my_results_count"] = shared_badges.get("my_results", 0)
+        payload["pending_answers_count"] = shared_badges.get("pending_answers", 0)
+    if capabilities.get("can_review_submissions"):
+        payload["pending_review_count"] = shared_badges.get("pending_review", 0)
+        payload["evaluated_review_count"] = shared_badges.get("evaluated_review", 0)
 
     # Post-approval badge (teachers/admins with that allowed section)
     if "pending-post-approvals" in capabilities.get("allowed_sections", set()):

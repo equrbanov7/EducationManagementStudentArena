@@ -281,3 +281,60 @@ def get_or_set_cached_statistics(*, role: str, scope_id, filters: dict | None, c
     except Exception:
         logger.warning("Redis unavailable; statistics cache not populated for %s", key)
     return payload
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Profile sidebar badge counts (P3)
+# ──────────────────────────────────────────────────────────────────────────────
+# The profile page (`/accounts/profile/`) rebuilds the sidebar badge counters on
+# every load *and* on every AJAX section swap. For a student that is ~13 COUNT(*)
+# queries (assigned tasks / results / pending answers); for a reviewer it adds 4
+# aggregate queries over the large attempt/submission tables. Under concurrent
+# dashboard load this path dominated the "normal" request latency (k6: normal
+# p95 ≈ 5.2 s). The numbers are the user's own data and tolerate small staleness,
+# so they are cached briefly per (user, active org). Keyed by org because the
+# underlying querysets are tenant-scoped to the active organization.
+
+PROFILE_BADGE_COUNTS_TTL = 45  # seconds — badges tolerate small staleness
+
+
+def _profile_badge_counts_key(user_id, org_id) -> str:
+    return f"{_PREFIX}:accounts:profile_badges:{user_id}:{org_id if org_id is not None else 'none'}"
+
+
+def get_or_set_cached_profile_badge_counts(*, user_id, org_id, compute) -> dict[str, int]:
+    """Return cached profile sidebar badge counts, computing + caching on a miss.
+
+    Args:
+        user_id: primary key of the user whose badges are being rendered.
+        org_id: active organization id (or ``None``); part of the key because
+            the badge querysets are tenant-scoped.
+        compute: zero-arg callable that runs the badge COUNT/aggregate queries
+            and returns a ``{badge_name: int}`` dict. Only called on a miss.
+
+    Degrades gracefully to a direct ``compute()`` call when Redis is down.
+    """
+    key = _profile_badge_counts_key(user_id, org_id)
+    cached = _safe_cache_get(key)
+    if cached is not None:
+        return cached
+    payload = compute()
+    try:
+        cache.set(key, payload, timeout=PROFILE_BADGE_COUNTS_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; profile badge counts cache not populated for %s", key)
+    return payload
+
+
+def invalidate_profile_badge_counts_cache(user_id, org_id=None) -> None:
+    """Drop a user's cached profile badge counts.
+
+    Pass *org_id* to clear a specific tenant scope; omit it to clear the
+    org-less ("none") scope. The short TTL is the primary freshness guarantee,
+    so explicit invalidation is optional — call it from grading/submission
+    mutations when near-instant badge updates matter.
+    """
+    try:
+        cache.delete(_profile_badge_counts_key(user_id, org_id))
+    except Exception:
+        logger.warning("Redis unavailable; could not invalidate profile badge counts for user %s", user_id)

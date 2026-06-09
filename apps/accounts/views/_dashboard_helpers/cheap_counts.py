@@ -17,7 +17,7 @@ heavy collectors. RLS behaviour is unchanged.
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
@@ -214,7 +214,111 @@ def count_pending_answers(request, user) -> int:
     return exams + courses + labs + independent
 
 
+def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, int]:
+    """Reviewer sidebar badges: (pending_review, evaluated_review).
+
+    P2.B logic — collapses 8 separate COUNT(*) calls into 4 aggregate queries
+    (one per content type, each returning pending + evaluated in a single pass).
+    Extracted verbatim from ``user_profile`` so the result can be cached.
+    """
+    review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
+
+    exam_attempt_counts = ExamAttempt.objects.filter(
+        exam__in=my_exams_qs,
+        status__in=["submitted", "expired"],
+    ).aggregate(
+        pending=Count(
+            "id",
+            filter=(
+                ~Q(exam__exam_type="test")
+                & (Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
+            ),
+        ),
+        evaluated=Count(
+            "id",
+            filter=(
+                Q(exam__exam_type="test")
+                | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+            ),
+        ),
+    )
+
+    submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
+        pending=Count(
+            "id",
+            filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
+        ),
+        evaluated=Count(
+            "id",
+            filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+        ),
+    )
+
+    project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
+        pending=Count(
+            "id",
+            filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),
+        ),
+        evaluated=Count(
+            "id",
+            filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+        ),
+    )
+
+    lab_counts = LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses).aggregate(
+        pending=Count(
+            "id",
+            filter=(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff)),
+        ),
+        evaluated=Count(
+            "id",
+            filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
+        ),
+    )
+
+    pending = (
+        (exam_attempt_counts.get("pending") or 0)
+        + (submission_counts.get("pending") or 0)
+        + (project_counts.get("pending") or 0)
+        + (lab_counts.get("pending") or 0)
+    )
+    evaluated = (
+        (exam_attempt_counts.get("evaluated") or 0)
+        + (submission_counts.get("evaluated") or 0)
+        + (project_counts.get("evaluated") or 0)
+        + (lab_counts.get("evaluated") or 0)
+    )
+    return pending, evaluated
+
+
+def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, teacher_courses) -> dict[str, int]:
+    """Compute the full set of profile sidebar badge counts for *user*.
+
+    Returns a flat ``{badge_name: int}`` dict. Only the badges the user's
+    capabilities permit are populated; missing keys default to 0 at the call
+    site. Designed to be wrapped by
+    ``core.cache.get_or_set_cached_profile_badge_counts`` so the whole bundle is
+    computed once per (user, org) and reused across loads / section swaps.
+    """
+    badges: dict[str, int] = {}
+    if capabilities.get("can_view_student_assignments"):
+        badges["assigned_tasks"] = count_assigned_tasks(request, user)
+        badges["my_results"] = count_my_results(request, user)
+        badges["pending_answers"] = count_pending_answers(request, user)
+    if capabilities.get("can_review_submissions"):
+        pending_review, evaluated_review = compute_review_badge_counts(
+            my_exams_qs=my_exams_qs,
+            teacher_courses=teacher_courses,
+        )
+        badges["pending_review"] = pending_review
+        badges["evaluated_review"] = evaluated_review
+    return badges
+
+
 __all__ = [
+    "compute_profile_badge_counts",
+    "compute_review_badge_counts",
     "count_assigned_tasks",
     "count_my_results",
     "count_pending_answers",

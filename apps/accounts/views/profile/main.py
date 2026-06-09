@@ -17,22 +17,19 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 
-from apps.assignments.models import Submission
 from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
-from apps.exams.models import Exam, ExamAttempt, StudentGroup
-from apps.labs.models import LabSubmission
+from apps.exams.models import Exam, StudentGroup
 from apps.notifications.models import StudentOrganizationRequestStatus
 from apps.notifications.services import (
     build_profile_notification_state,
     get_unread_count,
     get_user_notifications,
 )
-from apps.projects.models import ProjectSubmission
+from core.cache import get_or_set_cached_profile_badge_counts
 from core.rls import bypass_rls
 from core.tenancy import restore_request_organization_from_profile
 
@@ -46,9 +43,9 @@ from .._dashboard_helpers import (
     _collect_pending_answer_items,
     _collect_pending_review_items,
 )
+from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from .._helpers import (
     PROFILE_ROLE_LABELS,
-    REVIEW_EDIT_WINDOW,
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
@@ -285,6 +282,24 @@ def user_profile(request):
     enrolled_courses_qs = _assigned_courses_queryset(request, request.user).order_by("-created_at")
     my_exams_qs = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
 
+    # P3 — Sidebar badge sayğacları (student: assigned/results/pending; reviewer:
+    # pending/evaluated) hər profil yüklənməsində ~13-17 COUNT/aggregate sorğusu
+    # idi və konkurent yük altında "normal" latency-ni domino edirdi (k6 normal
+    # p95 ≈ 5.2s). Bunlar istifadəçinin öz datasıdır, kiçik staleness məqbuldur →
+    # per (user, aktiv org) qısa TTL ilə cache. Aktiv bölmənin sayğacı aşağıda
+    # təzə (heavy collector) dəyərlə üzərinə yazılır, beləcə açıq bölmə dəqiq qalır.
+    profile_badge_counts = get_or_set_cached_profile_badge_counts(
+        user_id=request.user.pk,
+        org_id=active_organization.pk if active_organization is not None else None,
+        compute=lambda: compute_profile_badge_counts(
+            request,
+            request.user,
+            capabilities=capabilities,
+            my_exams_qs=my_exams_qs,
+            teacher_courses=teacher_courses,
+        ),
+    )
+
     if capabilities["is_student"]:
         visible_courses_qs = enrolled_courses_qs
     else:
@@ -467,13 +482,8 @@ def user_profile(request):
         assigned_exams_count = assigned_exams_qs.count()
         assigned_courses_count = enrolled_courses_qs.count()
 
-        # P2.A — Sidebar badge-ləri ucuz aqreqatla hesabla (P1-də qalan minor regresiya).
-        # Hər biri 4-5 cüt COUNT(*); tam siyahıları yükləməkdən qat-qat ucuzdur.
-        from .._dashboard_helpers.cheap_counts import (
-            count_assigned_tasks,
-            count_my_results,
-            count_pending_answers,
-        )
+        # P3 — Sidebar badge-ləri yuxarıda bir dəfə cached olaraq hesablanıb
+        # (profile_badge_counts). Aktiv bölmə üçün aşağıda təzə dəyər götürülür.
 
         # Ağır siyahılar yalnız müvafiq aktiv bölmə üçün.
         if active_section == "assigned-exams":
@@ -485,9 +495,8 @@ def user_profile(request):
             assigned_tasks_count = assigned_task_counts.get("all", 0)
             assigned_tasks_search_query = (request.GET.get("assigned_search", "") or "").strip()
         else:
-            # Cheap aggregate (P2.A) — tam `_collect_assigned_tasks` məntiqi ilə uyğun
-            # üzv qaydaları, lakin heç bir formatting/ordering yoxdur.
-            assigned_tasks_count = count_assigned_tasks(request, request.user)
+            # P3 — sidebar badge cached dəyərdən (yuxarıda hesablanıb).
+            assigned_tasks_count = profile_badge_counts.get("assigned_tasks", 0)
 
         if active_section == "assigned-courses":
             assigned_courses_search_query = (request.GET.get("assigned_course_search", "") or "").strip()
@@ -515,8 +524,8 @@ def user_profile(request):
             )
             my_results_count = my_result_counts.get("all", 0)
         else:
-            # P2.A — sidebar badge üçün ucuz aqreqat.
-            my_results_count = count_my_results(request, request.user)
+            # P3 — sidebar badge cached dəyərdən.
+            my_results_count = profile_badge_counts.get("my_results", 0)
 
         if active_section == "pending-answers":
             (
@@ -531,85 +540,15 @@ def user_profile(request):
             )
             pending_answers_count = pending_answer_counts.get("all", 0)
         else:
-            # P2.A — sidebar badge üçün ucuz aqreqat.
-            pending_answers_count = count_pending_answers(request, request.user)
+            # P3 — sidebar badge cached dəyərdən.
+            pending_answers_count = profile_badge_counts.get("pending_answers", 0)
 
-    pending_review_count = 0
-    evaluated_review_count = 0
-    if capabilities["can_review_submissions"]:
-        from django.db.models import Count
-
-        review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
-
-        # P2.B — 8 ayrı COUNT-u 4 aqreqasiyaya endir.
-        # Hər model üçün eyni filtrlər iki Q ifadəsi ilə tək sorğuda hesablanır.
-
-        exam_attempt_counts = ExamAttempt.objects.filter(
-            exam__in=my_exams_qs,
-            status__in=["submitted", "expired"],
-        ).aggregate(
-            pending=Count(
-                "id",
-                filter=(
-                    ~Q(exam__exam_type="test")
-                    & (Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
-                ),
-            ),
-            evaluated=Count(
-                "id",
-                filter=(
-                    Q(exam__exam_type="test")
-                    | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
-                    | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
-                ),
-            ),
-        )
-
-        submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-
-        project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-
-        lab_counts = LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses).aggregate(
-            pending=Count(
-                "id",
-                filter=(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff)),
-            ),
-            evaluated=Count(
-                "id",
-                filter=Q(status="graded") & (Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff)),
-            ),
-        )
-
-        pending_review_count = (
-            (exam_attempt_counts.get("pending") or 0)
-            + (submission_counts.get("pending") or 0)
-            + (project_counts.get("pending") or 0)
-            + (lab_counts.get("pending") or 0)
-        )
-        evaluated_review_count = (
-            (exam_attempt_counts.get("evaluated") or 0)
-            + (submission_counts.get("evaluated") or 0)
-            + (project_counts.get("evaluated") or 0)
-            + (lab_counts.get("evaluated") or 0)
-        )
+    # P3 — reviewer badge sayğacları (pending/evaluated) yuxarıdakı cached dəstdən
+    # gəlir. 4 aggregate sorğusu artıq compute_review_badge_counts daxilindədir və
+    # yalnız cache miss-də (per user+org, qısa TTL) işləyir — beləcə hər profil
+    # yüklənməsində bu ağır blok hot path-dən çıxır.
+    pending_review_count = profile_badge_counts.get("pending_review", 0)
+    evaluated_review_count = profile_badge_counts.get("evaluated_review", 0)
 
     teacher_groups = []
     teacher_groups_count = 0
