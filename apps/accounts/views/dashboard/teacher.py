@@ -36,8 +36,11 @@ def teacher_dashboard(request):
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
 
-    # Get teacher's courses
-    my_courses = teacher_courses.filter(status="published")[:5]
+    # Get teacher's courses. Annotate the member count so the template badge
+    # ({{ course.memberships_total }}) doesn't fire one COUNT query per card (N+1).
+    my_courses = teacher_courses.filter(status="published").annotate(
+        memberships_total=Count("memberships", distinct=True)
+    )[:5]
 
     # Get pending submissions
     pending_submissions = Submission.objects.filter(
@@ -59,16 +62,18 @@ def teacher_dashboard(request):
     total_students = teacher_courses.aggregate(count=Count("memberships__user", distinct=True)).get("count", 0)
     pending_count = Submission.objects.filter(assignment__course__in=teacher_courses, status="submitted").count()
 
-    # Students at risk (failing grades or missing submissions)
-    at_risk_students = []
-    for course in teacher_courses:
-        # Find students with low grades or missing submissions
-        submissions = (
-            Submission.objects.filter(assignment__course=course, status="graded", grade__lt=50)
-            .values_list("user_id", flat=True)
-            .distinct()
+    # Students at risk (low grades). One query across all the teacher's courses
+    # instead of two queries per course (previously O(courses) round-trips).
+    at_risk_user_ids = (
+        Submission.objects.filter(
+            assignment__course__in=teacher_courses,
+            status="graded",
+            grade__lt=50,
         )
-        at_risk_students.extend(User.objects.filter(id__in=submissions).values("id", "username")[:3])
+        .values_list("user_id", flat=True)
+        .distinct()
+    )
+    at_risk_students = list(User.objects.filter(id__in=at_risk_user_ids).values("id", "username")[:5])
 
     context = {
         "my_courses": my_courses,

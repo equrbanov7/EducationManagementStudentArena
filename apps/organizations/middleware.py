@@ -19,9 +19,10 @@ Organization resolution order
 """
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.functional import SimpleLazyObject
 
 from apps.accounts.models import ProfileRole
-from core.rls import bypass_rls, clear_rls_tenant, reset_rls_context, set_rls_bypass, set_rls_tenant, set_rls_user
+from core.rls import apply_rls_request_context, bypass_rls, reset_rls_context
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .services import ensure_owner_membership, is_tenant_accessible_organization
@@ -192,11 +193,14 @@ class OrganizationMiddleware:
                 request._all_org_memberships = active_memberships
 
             else:
-                # Session org path: fetch all memberships for the org-switcher list
-                # only if the user belongs to more than one org.  Re-use the already
-                # fetched current-org memberships as a starting point; a second query
-                # is issued only when there are known multiple orgs (rare case).
-                request._all_org_memberships = self._fetch_active_memberships(request.user)
+                # Session org path: the full org-switcher list (memberships across
+                # every org) is consumed ONLY by the navbar context processor on
+                # full-page HTML renders. JSON/AJAX endpoints (badges API, section
+                # fragments' JSON, DRF, etc.) never read it. Defer the query behind
+                # SimpleLazyObject so it runs at most once, and only if something
+                # actually accesses ``request._all_org_memberships`` — removing a
+                # per-request membership query from every non-navbar response.
+                request._all_org_memberships = SimpleLazyObject(lambda: self._fetch_active_memberships(request.user))
 
             # ── Step 3: finalize permissions for the resolved org ─────────────
             if is_tenant_accessible_organization(request.organization):
@@ -232,18 +236,17 @@ class OrganizationMiddleware:
             # extensions) represent full cross-tenant administrative access.
             # Neither is a lesser privilege than the other; either flag grants the
             # RLS bypass for operations such as admin reports and management commands.
-            set_rls_user(request.user.pk)
+            # Batched into ONE round-trip (set_config × N in a single SELECT)
+            # instead of 2–3 separate statements. Behaviour is identical:
+            #  • superuser            → user + bypass ON
+            #  • org resolved         → user + bypass OFF + tenant=org
+            #  • no org (secure stop) → user + bypass OFF + tenant="" (deny all)
             is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-            if is_superuser:
-                set_rls_bypass(True)
-            elif request.organization is not None:
-                set_rls_bypass(False)
-                set_rls_tenant(request.organization.pk)
-            else:
-                # No active organisation — clear any leftover tenant context so
-                # that RLS denies all tenant-scoped rows by default.
-                set_rls_bypass(False)
-                clear_rls_tenant()
+            apply_rls_request_context(
+                user_id=request.user.pk,
+                org_id=request.organization.pk if request.organization is not None else None,
+                bypass=is_superuser,
+            )
 
             return self.get_response(request)
         finally:

@@ -38,7 +38,7 @@
                             <div>
                                 <strong>{{ exam.title }}</strong>
                                 <small class="text-muted d-block">
-                                    {{ exam.get_exam_type_display }} · {{ exam.questions.count }} {% trans "label_question_short" context "exams.partial.exam_modals" %}
+                                    {{ exam.get_exam_type_display }} · {{ exam.questions_total }} {% trans "label_question_short" context "exams.partial.exam_modals" %}
                                     {% if exam.course %}
                                         · <span class="text-warning">{{ exam.course.title }} {% trans "label_linked_to_course" context "exams.partial.exam_modals" %}</span>
                                     {% endif %}

@@ -49,7 +49,8 @@
                                     <div class="topic-meta">
                                         <span class="badge bg-light text-dark">
                                             <i class="fas fa-file-alt"></i>
-                                            {{ topic.resources.count }} {% trans "suffix_resources" context "courses.partial.topic_accordion" %}
+                                            {# prefetch_related("resources") view-da var — .all|length cache-i işlədir, .count əlavə sorğu atardı #}
+                                            {{ topic.resources.all|length }} {% trans "suffix_resources" context "courses.partial.topic_accordion" %}
                                         </span>
                                         <span class="text-muted small">
                                             <i class="fas fa-clock"></i>
