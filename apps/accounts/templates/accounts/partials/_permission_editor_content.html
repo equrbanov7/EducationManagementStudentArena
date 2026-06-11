@@ -276,6 +276,35 @@
                                     {% endif %}
                                 </button>
                             </form>
+
+                            {% if perm in selected_role.permissions %}
+                            {# Delegasiya: bu rol icazəni daha aşağı rollara paylaya bilsin #}
+                            <form method="post"
+                                  action="{% url 'accounts:permission_editor' %}"
+                                  class="permission-delegation-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="role_id" value="{{ selected_role.id }}">
+                                <input type="hidden" name="permission" value="{{ perm }}">
+                                {% if embedded_in_profile %}
+                                <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ selected_role.id }}">
+                                {% endif %}
+                                {% if perm in delegated_permissions %}
+                                <input type="hidden" name="action" value="revoke_delegation">
+                                <button type="submit"
+                                        class="btn btn-sm permission-action-btn permission-action-btn--remove"
+                                        title="Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al.">
+                                    <i class="fas fa-share-alt"></i> Delegasiyanı al
+                                </button>
+                                {% else %}
+                                <input type="hidden" name="action" value="grant_delegation">
+                                <button type="submit"
+                                        class="btn btn-sm permission-action-btn permission-action-btn--add"
+                                        title="Bu rola icazəni daha aşağı rollara paylamaq hüququ ver.">
+                                    <i class="fas fa-share-alt"></i> Delegasiya et
+                                </button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}

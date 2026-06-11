@@ -33,6 +33,51 @@ DEFAULT_ROLES = {
             "description": "Vice rector with broad administrative permissions",
         },
         {
+            # İmtahan mərkəzi — imtahan həyat dövrünü (yaratma, təyinat,
+            # monitorinq, nəticə, apellyasiya) idarə edir; üzv/struktur
+            # idarəetməsinə girişi YOXDUR (admin-alias exempt).
+            "name": "exam_center",
+            "display_name": "Exam Center",
+            "level": 85,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "org.view",
+                "unit.view",
+                "member.view",
+                "course.view",
+                "exam.*",
+                "grade.view",
+                "grade.publish",
+                "appeal.respond",
+                "appeal.decide",
+                "qa.*",
+                "analytics.view_all",
+                "audit.view",
+            ],
+            "description": "Exam center managing exam lifecycle, monitoring, results and appeals",
+        },
+        {
+            # HR — müəllim/əməkdaş idarəetməsi, vəzifə və fakültə/kafedra
+            # təyinatları. İmtahan/kurs idarəetməsinə girişi yoxdur.
+            "name": "hr",
+            "display_name": "HR",
+            "level": 65,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "org.view",
+                "unit.view",
+                "member.view",
+                "member.invite",
+                "member.edit",
+                "member.remove",
+                "role.view",
+                "role.assign",
+                "analytics.view_unit",
+                "audit.view",
+            ],
+            "description": "HR managing staff, positions and faculty/department assignments",
+        },
+        {
             "name": "dean",
             "display_name": "Dean",
             "level": 80,
@@ -101,6 +146,39 @@ DEFAULT_ROLES = {
                 "analytics.view_own",
             ],
             "description": "Teaching assistant with limited permissions",
+        },
+        {
+            # Tyutor — tələbə qruplarına akademik dəstək/kurasiya rolu.
+            # Öz scope_unit alt-ağacındakı tələbələri, kursları, imtahan
+            # cədvəlini və qrup statistikasını görür; imtahan yaratmır,
+            # qiymət vermir, üzv idarə etmir.
+            "name": "tutor",
+            "display_name": "Tutor",
+            "level": 40,
+            "scope_type": RoleScopeType.UNIT,
+            "permissions": [
+                "member.view",
+                "course.view",
+                "exam.view",
+                "analytics.view_unit",
+            ],
+            "description": "Tutor providing academic guidance to student groups within their unit",
+        },
+        {
+            # Baş tələbə — adi tələbə + öz qrupuna aid məhdud üzv siyahısı
+            # və qrup səviyyəli statistika.
+            "name": "lead_student",
+            "display_name": "Lead Student",
+            "level": 30,
+            "scope_type": RoleScopeType.UNIT,
+            "permissions": [
+                "course.view",
+                "exam.view",
+                "appeal.create",
+                "member.view",
+                "analytics.view_own",
+            ],
+            "description": "Lead student with limited group-level visibility",
         },
         {
             "name": "student",

@@ -368,6 +368,48 @@ def user_profile(request):
             # Yalnız sidebar/profile-info üçün ucuz sayğac.
             my_exams_count = my_exams_qs.count()
 
+    # ── Unit imtahanları (Faza 3) — dekan/kafedra müdürü üçün öz alt-ağacının
+    # imtahanlarına oxu-only baxış. Data scope-u organizations.scoping ilə.
+    unit_exams_page_obj = None
+    unit_exams_search_query = ""
+    unit_exams_total_count = 0
+    unit_exams_pagination_query = ""
+    if active_section == "unit-exams" and "unit-exams" in allowed_sections:
+        from apps.organizations.models import Membership as _UnitMembership
+        from apps.organizations.models import OrgUnit as _UnitExamOrgUnit
+        from apps.organizations.scoping import get_unit_scope as _ue_get_unit_scope
+
+        _ue_org = _get_active_organization(request)
+        if _ue_org is not None:
+            _ue_scope = _ue_get_unit_scope(request.user, _ue_org, request=request)
+            if _ue_scope.is_unit_scoped:
+                _ue_unit_ids = _UnitExamOrgUnit.objects.filter(organization=_ue_org).filter(_ue_scope.unit_subtree_q())
+                _ue_member_user_ids = _UnitMembership.objects.filter(
+                    organization=_ue_org,
+                    is_active=True,
+                    scope_unit__in=_ue_unit_ids.values("pk"),
+                ).values("user_id")
+                unit_exams_qs = (
+                    Exam.objects.filter(organization=_ue_org)
+                    .filter(Q(course__unit__in=_ue_unit_ids.values("pk")) | Q(author_id__in=_ue_member_user_ids))
+                    .select_related("author", "course")
+                    .annotate(attempts_total=Count("attempts", distinct=True))
+                    .order_by("-created_at")
+                )
+                unit_exams_search_query = (request.GET.get("unit_exam_q") or "").strip()[:120]
+                if unit_exams_search_query:
+                    unit_exams_qs = unit_exams_qs.filter(
+                        Q(title__icontains=unit_exams_search_query)
+                        | Q(author__username__icontains=unit_exams_search_query)
+                        | Q(course__title__icontains=unit_exams_search_query)
+                    )
+                unit_exams_total_count = unit_exams_qs.count()
+                unit_exams_page_obj = Paginator(unit_exams_qs, 10).get_page(request.GET.get("unit_exam_page"))
+                unit_exams_pagination_query = _query_string(
+                    section="unit-exams",
+                    unit_exam_q=unit_exams_search_query,
+                )
+
     if active_section == "question-bank" and "question-bank" in allowed_sections:
         from apps.exams.constants import EXAM_LANGUAGE_CHOICES
         from apps.exams.models import QuestionBank
@@ -1171,6 +1213,17 @@ def user_profile(request):
             permission_editor_section["roles"] = roles
             permission_editor_section["selected_role"] = selected_permission_role
 
+            # Delegasiya olunmuş icazələr (grant:<perm> girişlərinin suffix-ləri) —
+            # template-də "Delegasiya" toggle-ının vəziyyətini göstərmək üçün.
+            if selected_permission_role is not None:
+                from apps.organizations.permissions import is_grant_entry, strip_grant_prefix
+
+                permission_editor_section["delegated_permissions"] = {
+                    strip_grant_prefix(perm)
+                    for perm in (selected_permission_role.permissions or [])
+                    if is_grant_entry(perm)
+                }
+
     if "manage-roles" in allowed_sections and active_section == "manage-roles":
         manage_roles_search = request.GET.get("manage_roles_search", "")
         manage_roles_org = _get_active_organization(request)
@@ -1502,6 +1555,9 @@ def user_profile(request):
     # ── Statistics section context ────────────────────────────────────
     statistics_data = {}
     statistics_filters = {}
+    # Tyutor (və gələcəkdə digər unit-scoped, qeyri-admin rollar) üçün
+    # statistics template-i admin kart düzümünü istifadə etsin deyə flag.
+    statistics_unit_layout = False
     statistics_courses = []
     statistics_groups = []
     statistics_organizations = []
@@ -1573,11 +1629,28 @@ def user_profile(request):
 
         statistics_scope_org = selected_statistics_org or stat_org
 
+        # Unit scoping (Faza 2): dekan/kafedra müdürü statistikaları yalnız öz
+        # fakültə/kafedra alt-ağacı üzrə görür. Alt-ağac id-ləri bir dəfə
+        # hesablanır və həm filtr seçimlərinə, həm selector-a ötürülür.
+        statistics_scoped_unit_ids = None
+        if stat_org and not capabilities["is_superadmin"]:
+            from apps.organizations.models import OrgUnit as _StatOrgUnit
+            from apps.organizations.scoping import get_unit_scope as _get_unit_scope
+
+            _stat_unit_scope = _get_unit_scope(request.user, stat_org, request=request)
+            if _stat_unit_scope.is_unit_scoped:
+                statistics_scoped_unit_ids = list(
+                    _StatOrgUnit.objects.filter(organization=stat_org)
+                    .filter(_stat_unit_scope.unit_subtree_q())
+                    .values_list("pk", flat=True)
+                )
+
         # Populate filter options
         if statistics_scope_org and not capabilities["is_superadmin"]:
-            statistics_courses = list(
-                Course.objects.filter(organization=statistics_scope_org).order_by("title").values("id", "title")[:100]
-            )
+            statistics_course_qs = Course.objects.filter(organization=statistics_scope_org)
+            if statistics_scoped_unit_ids is not None:
+                statistics_course_qs = statistics_course_qs.filter(unit_id__in=statistics_scoped_unit_ids)
+            statistics_courses = list(statistics_course_qs.order_by("title").values("id", "title")[:100])
         elif capabilities["is_superadmin"]:
             statistics_organizations = list(
                 _StatisticsOrganization.objects.filter(is_active=True, status="active")
@@ -1610,18 +1683,49 @@ def user_profile(request):
             )
         elif capabilities["is_org_admin"]:
             if stat_org:
-                statistics_data = get_or_set_cached_statistics(
-                    role="org_admin",
-                    scope_id=stat_org.pk,
-                    filters=statistics_filters,
-                    compute=lambda: get_org_admin_statistics(organization=stat_org, filters=statistics_filters),
-                )
+                if statistics_scoped_unit_ids is not None:
+                    # Dekan/kafedra müdürü — unit-scoped statistika. Cache açarı
+                    # istifadəçinin alt-ağacına görə ayrılır ki, rektorun org-wide
+                    # nəticəsi ilə qarışmasın (data sızması olmasın).
+                    _scoped_ids = statistics_scoped_unit_ids
+                    statistics_data = get_or_set_cached_statistics(
+                        role="unit_manager",
+                        scope_id=f"{stat_org.pk}:{request.user.pk}",
+                        filters=statistics_filters,
+                        compute=lambda: get_org_admin_statistics(
+                            organization=stat_org,
+                            filters=statistics_filters,
+                            scoped_unit_ids=_scoped_ids,
+                        ),
+                    )
+                else:
+                    statistics_data = get_or_set_cached_statistics(
+                        role="org_admin",
+                        scope_id=stat_org.pk,
+                        filters=statistics_filters,
+                        compute=lambda: get_org_admin_statistics(organization=stat_org, filters=statistics_filters),
+                    )
         elif capabilities["is_teacher"]:
             statistics_data = get_or_set_cached_statistics(
                 role="teacher",
                 scope_id=request.user.pk,
                 filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
                 compute=lambda: get_teacher_statistics(request.user, organization=stat_org, filters=statistics_filters),
+            )
+        elif capabilities.get("is_tutor") and stat_org and statistics_scoped_unit_ids is not None:
+            # Tyutor — öz alt-ağacının qrup statistikası (unit_manager rejimi,
+            # öz cache açarı ilə).
+            statistics_unit_layout = True
+            _tutor_scoped_ids = statistics_scoped_unit_ids
+            statistics_data = get_or_set_cached_statistics(
+                role="unit_manager",
+                scope_id=f"{stat_org.pk}:{request.user.pk}",
+                filters=statistics_filters,
+                compute=lambda: get_org_admin_statistics(
+                    organization=stat_org,
+                    filters=statistics_filters,
+                    scoped_unit_ids=_tutor_scoped_ids,
+                ),
             )
         else:
             # Student / lead student / member
@@ -1740,6 +1844,7 @@ def user_profile(request):
         "question-bank": "Sual Bankı",
         "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
         "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
+        "unit-exams": "Bölmə imtahanları",
     }
 
     shortcut_sections = []
@@ -1806,6 +1911,10 @@ def user_profile(request):
         "question_bank_back_url": question_bank_back_url,
         "question_bank_language_choices": question_bank_language_choices,
         "question_bank_default_type_choices": question_bank_default_type_choices,
+        "unit_exams_page_obj": unit_exams_page_obj,
+        "unit_exams_search_query": unit_exams_search_query,
+        "unit_exams_total_count": unit_exams_total_count,
+        "unit_exams_pagination_query": unit_exams_pagination_query,
         "my_created_courses": my_created_courses,
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
@@ -1930,6 +2039,7 @@ def user_profile(request):
         "can_manage_blog": capabilities["can_manage_blog"],
         "can_view_student_assignments": capabilities["can_view_student_assignments"],
         "statistics_data": statistics_data,
+        "statistics_unit_layout": statistics_unit_layout,
         "statistics_filters": statistics_filters,
         "statistics_courses": statistics_courses,
         "statistics_groups": statistics_groups,

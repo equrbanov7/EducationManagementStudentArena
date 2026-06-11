@@ -82,13 +82,15 @@ def permission_editor(request):
         def _safe_redirect():
             return redirect(next_url or f"{request.path}?role={selected_role.id}")
 
-        if action in {"add", "remove"}:
+        if action in {"add", "remove", "grant_delegation", "revoke_delegation"}:
             selected_permission = request.POST.get("permission")
             if selected_permission not in all_permissions:
                 messages.error(
                     request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection")
                 )
                 return _safe_redirect()
+
+            delegation_entry = f"grant:{selected_permission}"
 
             if action == "add":
                 if (
@@ -103,14 +105,41 @@ def permission_editor(request):
                     )
                     return _safe_redirect()
                 role_permissions_set.add(selected_permission)
+                # Delegasiya bayrağı: rol bu icazəni daha aşağı rollara da paylaya bilsin.
+                if request.POST.get("with_delegation") == "1":
+                    role_permissions_set.add(delegation_entry)
                 result_message = pgettext_lazy("accounts.permission_editor.message", "permission_added") % {
                     "permission": selected_permission
                 }
-            else:
+            elif action == "remove":
                 role_permissions_set.discard(selected_permission)
+                # İcazə silinəndə delegasiya hüququ da silinir (orphan grant qalmasın).
+                role_permissions_set.discard(delegation_entry)
                 result_message = pgettext_lazy("accounts.permission_editor.message", "permission_removed") % {
                     "permission": selected_permission
                 }
+            elif action == "grant_delegation":
+                # Delegasiya hüququ vermək üçün aktor özü icazəyə (və ya onun
+                # delegasiyasına) sahib olmalıdır.
+                if (
+                    not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
+                    and not is_superadmin
+                ):
+                    messages.error(
+                        request,
+                        pgettext_lazy(
+                            "accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"
+                        ),
+                    )
+                    return _safe_redirect()
+                if selected_permission not in role_permissions_set:
+                    messages.error(request, "Delegasiya üçün əvvəlcə icazənin özü rola əlavə olunmalıdır.")
+                    return _safe_redirect()
+                role_permissions_set.add(delegation_entry)
+                result_message = f"'{selected_permission}' üçün delegasiya hüququ verildi."
+            else:  # revoke_delegation
+                role_permissions_set.discard(delegation_entry)
+                result_message = f"'{selected_permission}' üçün delegasiya hüququ geri alındı."
         elif action in {"bulk_add", "bulk_remove"}:
             selected_permissions = [perm for perm in request.POST.getlist("permissions") if perm]
             selected_permissions = list(dict.fromkeys(selected_permissions))

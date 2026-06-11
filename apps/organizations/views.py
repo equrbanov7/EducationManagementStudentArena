@@ -194,12 +194,37 @@ def organization_structure(request, slug):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
-    # Get all units in tree structure
-    units = organization.units.filter(parent=None).prefetch_related("children", "children__children").order_by("order")
+    # Unit scope: dekan/kafedra müdürü yalnız öz fakültə/kafedra alt-ağacını görür.
+    from .permissions import has_permission
+    from .scoping import get_unit_scope
+
+    scope = get_unit_scope(request.user, organization, request=request)
+
+    # Struktur səhifəsi idarəetmə səhifəsidir: yalnız org-wide idarəetmə scope-u
+    # və ya `unit.view` icazəsi olanlar (rektor/admin, dekan, kafedra müdürü,
+    # HR, imtahan mərkəzi) görə bilər. Adi tələbənin scope_unit-i olsa belə
+    # `unit.view` icazəsi olmadığı üçün bura düşmür.
+    if not (scope.is_org_wide or has_permission(list(getattr(request, "org_permissions", []) or []), "unit.view")):
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
+        return redirect("organizations:dashboard", slug=organization.slug)
+
+    if scope.is_unit_scoped:
+        # Scoped istifadəçi üçün ağacın kökü öz scope unit(lər)idir.
+        units = (
+            organization.units.filter(pk__in=scope.unit_ids)
+            .prefetch_related("children", "children__children")
+            .order_by("order")
+        )
+    else:
+        # Get all units in tree structure
+        units = (
+            organization.units.filter(parent=None).prefetch_related("children", "children__children").order_by("order")
+        )
 
     context = {
         "organization": organization,
         "units": units,
+        "unit_scope": scope,
     }
 
     return render(request, "organizations/structure.html", context)
@@ -214,12 +239,29 @@ def organization_members(request, slug):
 
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    if not _can_manage_organization(request.user, organization):
+    # Giriş qaydası:
+    # - idarəetmə levli (≥80, rektor/prorektor/org admin/dekan və s.) → icazəlidir
+    # - `member.view` icazəli org-scope rollar (HR, imtahan mərkəzi) → icazəlidir
+    # - `member.view` icazəli unit-scoped istifadəçilər → yalnız öz alt-ağacı
+    from .permissions import has_permission
+    from .scoping import get_unit_scope, scope_memberships_by_unit
+    from .services import get_user_org_role_level
+
+    scope = get_unit_scope(request.user, organization, request=request)
+    can_view_members = _can_manage_organization(request.user, organization) or (
+        has_permission(list(getattr(request, "org_permissions", []) or []), "member.view")
+        and (scope.is_unit_scoped or get_user_org_role_level(request.user, organization) >= 65)
+    )
+    if not can_view_members:
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Get members with filters
     members = organization.memberships.filter(is_active=True).select_related("user", "role", "scope_unit")
+
+    # Unit scope: dekan/kafedra müdürü yalnız öz alt-ağacına bağlı üzvləri görür.
+    if scope.is_unit_scoped:
+        members = scope_memberships_by_unit(members, scope, organization)
 
     # Filter by role
     role_filter = request.GET.get("role")

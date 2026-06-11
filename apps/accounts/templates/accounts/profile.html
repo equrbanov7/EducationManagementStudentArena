@@ -24,7 +24,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals,unit-exams"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -55,6 +55,8 @@
                 {% include "accounts/profile/sections/_my_exams.html" %}
             {% elif active_section == "question-bank" %}
                 {% include "accounts/profile/sections/_question_bank.html" %}
+            {% elif active_section == "unit-exams" %}
+                {% include "accounts/profile/sections/_unit_exams.html" %}
             {% elif active_section == "my-courses" %}
                 {% include "accounts/profile/sections/_my_courses.html" %}
             {% elif active_section == "courses" %}

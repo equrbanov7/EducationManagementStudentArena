@@ -70,9 +70,11 @@ ROLE_LEVELS = {
     "vice_rector": 95,
     "dean": 90,
     "vice_dean": 85,
+    "exam_center": 85,
     "department_head": 80,
     "professor": 75,
     "associate_professor": 70,
+    "tutor": 40,
     # School roles
     "director": 100,
     "vice_director": 95,

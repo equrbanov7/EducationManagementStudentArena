@@ -334,9 +334,11 @@
             </div>
         </div>
     {% endif %}
-    {# ===== Shared confirmation modal — panel DAXİLİNDƏ olmalıdır, əks halda
-       AJAX swap (yalnız [data-profile-section-panel] götürür) onu atır və
-       deaktiv/sil düymələri "ölü" qalır. ===== #}
+    {% comment %}
+    Shared confirmation modal — panel DAXİLİNDƏ olmalıdır, əks halda
+    AJAX swap (yalnız [data-profile-section-panel] götürür) onu atır və
+    deaktiv/sil düymələri "ölü" qalır.
+    {% endcomment %}
     <div id="postActionConfirmModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="postActionConfirmTitle">
         <div class="modal-content">
             <h3 id="postActionConfirmTitle" class="modal-title">Əminsiniz?</h3>

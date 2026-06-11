@@ -161,9 +161,11 @@
                                     <pre class="mt-2">{{ item.coding_submission.output|truncatechars:400 }}</pre>
                                 {% endif %}
                                 {% if item.coding_submission.error_message %}
-                                    {# Praktiki imtahanda runner stdin/DOM olmadığı üçün "runtime_error" verə
-                                       bilər, halbuki kod konseptual düzgündür. Müəllimi qorxudan qırmızı
-                                       traceback yerinə neytral, daraldıla bilən icra qeydi göstəririk. #}
+                                    {% comment %}
+                                    Praktiki imtahanda runner stdin/DOM olmadığı üçün "runtime_error" verə
+                                    bilər, halbuki kod konseptual düzgündür. Müəllimi qorxudan qırmızı
+                                    traceback yerinə neytral, daraldıla bilən icra qeydi göstəririk.
+                                    {% endcomment %}
                                     <details class="coding-exec-note" data-review-card-ignore>
                                         <summary>{% trans "label_execution_note" context "exams.template.teacher_check_attempt" %}</summary>
                                         <pre>{{ item.coding_submission.error_message|truncatechars:400 }}</pre>
