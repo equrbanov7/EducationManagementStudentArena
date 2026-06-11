@@ -317,3 +317,17 @@
         font-size: 1rem;
     }
 }
+
+/* Inline SVG göz ikonları (FontAwesome login-də yüklənmir — audit addım 3).
+   data-visible="true" → parol görünür → "gizlət" ikonu göstərilir. */
+.input-visibility-toggle .visibility-icon-hide {
+    display: none;
+}
+
+.input-visibility-toggle[data-visible="true"] .visibility-icon-show {
+    display: none;
+}
+
+.input-visibility-toggle[data-visible="true"] .visibility-icon-hide {
+    display: inline;
+}

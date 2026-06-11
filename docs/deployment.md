@@ -565,3 +565,86 @@ cached automatically:
 
 Cache entries are invalidated automatically by signals when the underlying
 data changes (e.g. `post_save` / `post_delete` on the `Post` model).
+
+---
+
+## 12. Postgres Automatic Backups (audit step 5)
+
+The `postgres-backup` service in `docker-compose.prod.yml`
+(`prodrigestivill/postgres-backup-local`) produces a compressed `pg_dump`
+on a schedule and rotates old dumps automatically.
+
+| Env var | Default | Meaning |
+|---------|---------|---------|
+| `POSTGRES_BACKUP_SCHEDULE` | `@daily` | Cron-style schedule |
+| `POSTGRES_BACKUP_KEEP_DAYS` | `7` | Daily dumps kept |
+| `POSTGRES_BACKUP_KEEP_WEEKS` | `4` | Weekly dumps kept |
+| `POSTGRES_BACKUP_KEEP_MONTHS` | `3` | Monthly dumps kept |
+
+Dumps are written to `./backups/postgres/` on the host
+(`daily/`, `weekly/`, `monthly/` subfolders, `.sql.gz`).
+
+### Off-site copy (REQUIRED)
+
+Local dumps do not survive a disk failure. Copy them off the server daily,
+e.g. with rclone to any S3/B2 bucket (host cron):
+
+```bash
+# /etc/cron.d/emsarena-backup-offsite
+30 3 * * * root rclone sync /opt/emsarena/backups/postgres remote:emsarena-db-backups --max-age 48h
+```
+
+### Restore procedure (tested!)
+
+```bash
+# 1. Stop app writers (keep postgres up)
+docker compose -f docker-compose.prod.yml stop app celery-worker celery-beat
+
+# 2. Restore (DROPS and recreates objects; use a scratch DB first if unsure)
+gunzip -c backups/postgres/daily/<dump-file>.sql.gz | \
+  docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+
+# 3. Restart the app
+docker compose -f docker-compose.prod.yml up -d app celery-worker celery-beat
+```
+
+Run a real restore test against a scratch database after the first deploy
+(acceptance criterion of audit step 5), e.g. restore into `emsarena_restore_test`
+and run `SELECT COUNT(*) FROM exams_examattempt;` to validate.
+
+---
+
+## 13. Origin lockdown — only Cloudflare may reach the origin (audit step 4)
+
+The application must not be reachable by its origin IP; otherwise CSRF/WAF
+protections at Cloudflare can be bypassed entirely.
+
+1. **Firewall**: allow 80/443 only from Cloudflare ranges
+   (https://www.cloudflare.com/ips/). Example with ufw:
+
+   ```bash
+   for ip in $(curl -s https://www.cloudflare.com/ips-v4) $(curl -s https://www.cloudflare.com/ips-v6); do
+     sudo ufw allow proto tcp from "$ip" to any port 80,443
+   done
+   sudo ufw deny 80/tcp && sudo ufw deny 443/tcp   # default-deny for everyone else
+   sudo ufw reload
+   ```
+   Refresh the list monthly (cron) — Cloudflare ranges change rarely but do change.
+
+2. **Authenticated Origin Pulls (recommended, additional layer)**:
+   Cloudflare dashboard → SSL/TLS → Origin Server → enable
+   *Authenticated Origin Pulls*; then in `docker/nginx/nginx.conf` add:
+
+   ```nginx
+   ssl_client_certificate /etc/nginx/certs/cloudflare-origin-pull-ca.pem;
+   ssl_verify_client on;
+   ```
+   (CA cert: https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/)
+
+3. **SSL mode**: Cloudflare → SSL/TLS → Overview must be **Full (strict)**,
+   never *Flexible*.
+
+4. **Verification (acceptance criterion)**: direct
+   `curl -m 5 https://<origin-ip>/ -k` from outside must time out or be
+   refused, while https://emsarena.com works through Cloudflare.
+

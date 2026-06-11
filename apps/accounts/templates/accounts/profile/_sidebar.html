@@ -39,11 +39,11 @@
             </a>
         </li>
         {% endif %}
-
+{% comment %} 
         {# `data-source-url`-də dedicated server-side view-ləri qoyuruq:
            - JS tərəfindən istifadə edilmir (hələ də `?section=` formu fəaldır)
            - testlərin reverse() ilə axtardığı URL-lər HTML-də mövcud olur
-           - no-JS user-lər üçün progresiv fallback potensialı təmin edir #}
+           - no-JS user-lər üçün progresiv fallback potensialı təmin edir #} {% endcomment %}
         {% if 'student-organization-request' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=student-organization-request"

@@ -54,7 +54,11 @@ class TestResultCalculation(TestCase):
         return ExamQuestionOption.objects.create(question=question, text=text, is_correct=is_correct)
 
     def _attempt(self):
-        return ExamAttempt.objects.create(user=self.student, exam=self.exam, status="submitted")
+        # uniq_attempt_number_per_user_exam constraint-i üçün ardıcıl nömrə.
+        next_number = ExamAttempt.objects.filter(user=self.student, exam=self.exam).count() + 1
+        return ExamAttempt.objects.create(
+            user=self.student, exam=self.exam, status="submitted", attempt_number=next_number
+        )
 
     def _answer(self, attempt, question, *, selected=None):
         answer = ExamAnswer.objects.create(attempt=attempt, question=question)

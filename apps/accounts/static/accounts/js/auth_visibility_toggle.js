@@ -5,7 +5,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var toggleButtons = document.querySelectorAll("[data-toggle-visibility]");
 
     function applyIcon(button, isVisible) {
-        var icon = button ? button.querySelector("i") : null;
+        if (!button) return;
+        // Inline SVG variant (lightweight auth pages without FontAwesome):
+        // CSS shows .visibility-icon-show / .visibility-icon-hide based on
+        // the button's data-visible attribute.
+        button.setAttribute("data-visible", isVisible ? "true" : "false");
+        // FontAwesome variant (pages that still load FA):
+        var icon = button.querySelector("i");
         if (!icon) return;
         icon.classList.toggle("fa-eye", !isVisible);
         icon.classList.toggle("fa-eye-slash", isVisible);

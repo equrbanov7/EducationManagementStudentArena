@@ -1,9 +1,11 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "title" context "accounts.register" %} | EMSArena{% endblock %}
  
 {% block extraCss %}
+    {# Register səhifəsi çoxlu FA ikonu işlədir — yalnız bu səhifədə yüklənir #}
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}?v=20260605-layout">
 {% endblock %}
 
@@ -611,6 +613,8 @@
 {% endblock %}
 
 {% block extraJs %}
+{# register_wizard dropdown-ları data-bs-toggle işlədir — bundle yalnız burada lazımdır #}
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'accounts/js/register_wizard.js' %}?v=20260605-org-choice-2"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}

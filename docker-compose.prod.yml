@@ -50,6 +50,34 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
+  # Postgres backup — daily pg_dump with local rotation (audit step 5).
+  # Dumps land in ./backups/postgres (mounted on the host).  Off-site copy
+  # (S3/B2/rsync) MUST be configured separately — see docs/deployment.md.
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local:16-alpine
+    container_name: emsarena-postgres-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_EXTRA_OPTS: "-Z6 --blobs"
+      SCHEDULE: ${POSTGRES_BACKUP_SCHEDULE:-@daily}
+      BACKUP_KEEP_DAYS: ${POSTGRES_BACKUP_KEEP_DAYS:-7}
+      BACKUP_KEEP_WEEKS: ${POSTGRES_BACKUP_KEEP_WEEKS:-4}
+      BACKUP_KEEP_MONTHS: ${POSTGRES_BACKUP_KEEP_MONTHS:-3}
+      HEALTHCHECK_PORT: 8080
+    volumes:
+      - ./backups/postgres:/backups
+    restart: unless-stopped
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
   # PgBouncer — PostgreSQL connection pooler
   # Keeps Daphne/Celery from opening unbounded backend connections to Postgres.
   # Session pooling is intentional because the app uses PostgreSQL session GUCs
