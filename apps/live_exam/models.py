@@ -193,3 +193,7 @@ class LiveAnswer(models.Model):
                 name="uniq_answer_per_player_question",
             )
         ]
+        indexes = [
+            # Reveal/distribution/progress queries all filter on (session, question).
+            models.Index(fields=["session", "question_id"], name="liveans_session_question_idx"),
+        ]

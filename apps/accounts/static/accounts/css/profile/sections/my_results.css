@@ -251,6 +251,18 @@
     color: var(--teal-primary);
 }
 
+/* Balın yanında faiz badge-i (test imtahanları) */
+.score-percent-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    white-space: nowrap;
+}
+
 .result-feedback-box {
     display: flex;
     gap: 0.75rem;

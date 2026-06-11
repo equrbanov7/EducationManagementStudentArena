@@ -133,9 +133,34 @@ def sync_test_attempt_counts(attempt, *, answers=None):
 
 
 def attach_test_result_summaries(attempts):
-    for attempt in attempts:
-        if getattr(getattr(attempt, "exam", None), "exam_type", None) == "test":
-            attempt.test_result = calculate_test_attempt_result(attempt)
+    """
+    Hər test attempt-inə `.test_result` əlavə edir — qəbul olunmuş apellyasiya
+    bonusları DAXİL (effektiv bal). Bonuslar bütün attempt-lər üçün tək
+    sorğu ilə yığılır (per-attempt sorğu yox).
+    """
+    test_attempts = [
+        attempt for attempt in attempts if getattr(getattr(attempt, "exam", None), "exam_type", None) == "test"
+    ]
+    if not test_attempts:
+        return attempts
+
+    bonus_by_attempt_id = {}
+    apply_bonus = None
+    try:
+        # Lazy import: exams servis qatını appeals-dən sərt asılı etməmək üçün.
+        from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
+
+        apply_bonus = apply_bonus_to_test_result
+        bonus_by_attempt_id = appeal_bonus_map([attempt.id for attempt in test_attempts])
+    except Exception:
+        bonus_by_attempt_id = {}
+
+    for attempt in test_attempts:
+        result = calculate_test_attempt_result(attempt)
+        bonus = bonus_by_attempt_id.get(attempt.id)
+        if bonus and apply_bonus is not None:
+            result = apply_bonus(result, bonus)
+        attempt.test_result = result
     return attempts
 
 

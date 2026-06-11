@@ -516,6 +516,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ---- CSRF helper-ləri ----
+    // Token DOM-dan yox, hər sorğuda cookie-dən təzə oxunur. Uzun imtahan
+    // sessiyasında (xüsusən yazılı) token rotasiya olunanda (başqa tabda
+    // re-login və s.) köhnə DOM tokeni 403 CSRF xətası verirdi.
+    function getCookie(name) {
+        const row = document.cookie.split("; ").find(c => c.startsWith(name + "="));
+        return row ? decodeURIComponent(row.split("=").slice(1).join("=")) : null;
+    }
+
+    function getCsrfToken() {
+        const cookieToken = getCookie("csrftoken");
+        if (cookieToken) {
+            return cookieToken;
+        }
+        const input = examForm.querySelector('input[name="csrfmiddlewaretoken"]');
+        return input ? input.value : "";
+    }
+
+    function refreshFormCsrfToken() {
+        const cookieToken = getCookie("csrftoken");
+        const input = examForm.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (cookieToken && input && input.value !== cookieToken) {
+            input.value = cookieToken;
+        }
+    }
+
     function formatTime(totalSeconds) {
         if (totalSeconds < 0) totalSeconds = 0;
         const minutes = Math.floor(totalSeconds / 60);
@@ -581,6 +607,8 @@ document.addEventListener('DOMContentLoaded', function() {
             hiddenInput.value = "finish";
             examForm.appendChild(hiddenInput);
             syncMarkedQuestionInput();
+            refreshFormCsrfToken();
+            persistLocalDraft();
             localStorage.removeItem(storageKey);
             examForm.submit();
         }
@@ -926,6 +954,33 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem(draftStorageKey);
     }
 
+    // Perf: hər keystroke-da bütün form DOM-unu skan edib JSON.stringify
+    // etməmək üçün local draft yazılması debounce olunur. beforeunload və
+    // fetch catch-lərində persistLocalDraft() birbaşa (sinxron) çağırılır.
+    let persistDraftTimer = null;
+    function schedulePersistLocalDraft(delayMs = 400) {
+        if (persistDraftTimer) {
+            return;
+        }
+        persistDraftTimer = setTimeout(() => {
+            persistDraftTimer = null;
+            persistLocalDraft();
+        }, delayMs);
+    }
+
+    // Perf: updateProgress bütün slide-ləri gəzir; yazı yazarkən hər
+    // keystroke-da işləməsin deyə qısa debounce.
+    let progressUpdateTimer = null;
+    function scheduleProgressUpdate(delayMs = 150) {
+        if (progressUpdateTimer) {
+            return;
+        }
+        progressUpdateTimer = setTimeout(() => {
+            progressUpdateTimer = null;
+            updateProgress();
+        }, delayMs);
+    }
+
     function restoreLocalDraft() {
         let draft = null;
 
@@ -1012,8 +1067,8 @@ document.addEventListener('DOMContentLoaded', function() {
         hasUnsavedChanges = true;
         answerRevision += 1;
         markQuestionDirty(questionId, Boolean(options.containsBinary));
-        persistLocalDraft();
-        updateProgress();
+        schedulePersistLocalDraft();
+        scheduleProgressUpdate();
         queueAutoSave(delayMs);
     }
 
@@ -1078,6 +1133,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 examForm.appendChild(hiddenInput);
 
                 syncMarkedQuestionInput();
+                refreshFormCsrfToken();
+                // Submit uğursuz olarsa (offline) cavablar bərpa oluna bilsin.
+                persistLocalDraft();
                 localStorage.removeItem(storageKey);
 
                 // Short delay so user sees the time-up message before redirect
@@ -1233,17 +1291,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function buildDraftFormData(action) {
         syncMarkedQuestionInput();
+        refreshFormCsrfToken();
         if (action !== "autosave") {
             const formData = new FormData(examForm);
             if (markedQuestionIdsField) {
                 formData.set("marked_question_ids", markedQuestionIdsField.value);
             }
+            formData.set("csrfmiddlewaretoken", getCsrfToken());
             formData.append("submit_action", action);
             return formData;
         }
 
         const formData = new FormData();
-        appendFieldsByName(formData, "csrfmiddlewaretoken");
+        formData.append("csrfmiddlewaretoken", getCsrfToken());
         appendFieldsByName(formData, "return_to");
         appendFieldsByName(formData, "next");
         appendFieldsByName(formData, "from_section");
@@ -1294,13 +1354,27 @@ document.addEventListener('DOMContentLoaded', function() {
         return fetch(window.location.href, {
             method: "POST",
             headers: {
-                "X-Requested-With": "XMLHttpRequest"
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCsrfToken()
             },
             body: formData
         })
         .then(res => {
             if (!res.ok) {
-                throw new Error("Draft save failed");
+                throw new Error(res.status === 403 ? "csrf_or_session" : "Draft save failed");
+            }
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                // JSON gözlənilirdi, HTML gəldi: attempt artıq bitib (nəticə
+                // səhifəsinə redirect) və ya sessiya bitib (login səhifəsi).
+                // Hər iki halda draft localStorage-da saxlanılır ki, cavablar
+                // itməsin; sonra brauzeri serverin göstərdiyi ünvana aparırıq.
+                persistLocalDraft();
+                if (res.redirected && res.url) {
+                    prepareExamFinishNavigation();
+                    window.location.href = res.url;
+                }
+                throw new Error("Unexpected non-JSON response");
             }
             return res.json();
         })
@@ -1399,17 +1473,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Draft saxla
             const sentRevision = answerRevision;
-            syncMarkedQuestionInput();
-            const formData = new FormData(examForm);
-            if (markedQuestionIdsField) {
-                formData.set("marked_question_ids", markedQuestionIdsField.value);
-            }
-            formData.append("submit_action", "save_draft");
+            const formData = buildDraftFormData("save_draft");
 
             fetch(window.location.href, {
                 method: "POST",
                 headers: {
-                    "X-Requested-With": "XMLHttpRequest"
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCsrfToken()
                 },
                 body: formData
             })
@@ -1465,6 +1535,19 @@ document.addEventListener('DOMContentLoaded', function() {
             flushAutoSave();
         }
     }, autoSaveDelayMs);
+
+    // Offline → online keçidində dərhal flush: internet kəsilərkən yazılan
+    // cavablar localStorage draft-da saxlanılır, bağlantı qayıdan kimi
+    // növbəti intervalı gözləmədən serverə göndərilir.
+    window.addEventListener('online', () => {
+        if (hasUnsavedChanges) {
+            flushAutoSave();
+        }
+    });
+    window.addEventListener('offline', () => {
+        // Bağlantı kəsilən anda əldə olanı sinxron yaz.
+        persistLocalDraft();
+    });
 
     let isFinishingExam = false;
 
@@ -1525,19 +1608,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmFinishBtn.addEventListener('click', () => {
-        prepareExamFinishNavigation();
+        // Bitirmə AJAX ilə gedir: uğursuz olarsa (internet kəsilməsi, 403 və s.)
+        // local draft TOXUNULMAZ qalır və tələbə yenidən cəhd edə bilir.
+        // (Əvvəlki axın draft-ı submit-dən ƏVVƏL silirdi — offline halda
+        // cavablar itirdi.)
         confirmFinishBtn.disabled = true;
-
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'submit_action';
-        hiddenInput.value = 'finish';
-        examForm.appendChild(hiddenInput);
-
         syncMarkedQuestionInput();
-        localStorage.removeItem(storageKey);
-        clearLocalDraft();
-        examForm.submit();
+
+        sendDraft("finish").catch(() => {
+            // sendDraft xəta bildirişini özü göstərir; draft localStorage-da
+            // qalır. Düyməni yenidən aktivləşdir ki, təkrar cəhd mümkün olsun.
+            confirmFinishBtn.disabled = false;
+        });
     });
 
     // Navigasiya düymələri
@@ -1621,7 +1703,7 @@ document.addEventListener('DOMContentLoaded', function() {
         lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
     };
     </script>
-    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260531-result-nav-guard"></script>
+    <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260611-fresh-csrf"></script>
     <script nonce="{{ request.csp_nonce }}">
     // Where to send the student when a teacher stops / auto-finishes the attempt.
     window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";

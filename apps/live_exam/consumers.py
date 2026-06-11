@@ -284,7 +284,9 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
         await self.send_json({"type": "answer_saved", **result["answer"]})
 
         # 4) progress -> host group only (players do not need this; host uses it for auto-reveal)
-        prog = await self._get_answer_progress(self.pin, result["question_id"])
+        # Reuse counts computed during scoring when available (saves 3 queries);
+        # the "already answered" branch falls back to a fresh count.
+        prog = result.get("progress") or await self._get_answer_progress(self.pin, result["question_id"])
         await self.channel_layer.group_send(
             f"live_{self.pin}_play_host",
             {

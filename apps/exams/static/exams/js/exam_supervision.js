@@ -1186,13 +1186,25 @@
                 .catch(function () {});
         },
 
+        // Tokeni hər sorğuda cookie-dən təzə oxu: uzun imtahanda token
+        // rotasiya olunarsa init-də verilmiş statik token 403 verir.
+        _freshCsrfToken: function () {
+            var row = document.cookie.split("; ").find(function (c) {
+                return c.indexOf("csrftoken=") === 0;
+            });
+            if (row) {
+                return decodeURIComponent(row.split("=").slice(1).join("="));
+            }
+            return this.csrfToken;
+        },
+
         _logEvent: function (eventType, metadata) {
             if (!this.logEndpoint) return;
             fetch(this.logEndpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": this.csrfToken,
+                    "X-CSRFToken": this._freshCsrfToken(),
                     "X-Requested-With": "XMLHttpRequest",
                 },
                 body: JSON.stringify({

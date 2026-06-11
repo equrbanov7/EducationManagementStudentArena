@@ -273,10 +273,17 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
 
     def mark_finished(self, status="submitted", extra_update_fields=None):
         self.status = status
-        self.finished_at = timezone.now()
+        finished_at = timezone.now()
+        # Gecikmiş bitirmə (lazy expire, sweep, tələbənin günlər sonra qayıtması)
+        # halında real bitmə vaxtı imtahan limitini keçə bilməz — əks halda
+        # müddət "30:41:56" kimi absurd görünür. Deadline ilə clamp edirik.
+        deadline = self.deadline_at
+        if deadline and finished_at > deadline:
+            finished_at = deadline
+        self.finished_at = finished_at
         if self.finished_at and self.started_at:
             delta = self.finished_at - self.started_at
-            self.duration_seconds = int(delta.total_seconds())
+            self.duration_seconds = max(int(delta.total_seconds()), 0)
         update_fields = ["status", "finished_at", "duration_seconds"]
         if extra_update_fields:
             update_fields.extend(extra_update_fields)

@@ -236,7 +236,7 @@ def live_answer_submit(request, pin):
             **(result.get("answer") or {}),
         }
 
-        progress = get_answer_progress(pin=pin, question_id=question_id)
+        progress = result.get("progress") or get_answer_progress(pin=pin, question_id=question_id)
         progress_payload = build_answer_progress_payload(
             question_id=question_id,
             answered_count=progress["answered_count"],

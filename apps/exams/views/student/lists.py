@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
@@ -13,6 +14,46 @@ from apps.exams.views.shared.tenant import tenant_scoped_exams
 from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
 
 VALID_EXAM_TYPE_FILTERS = {"test", "written", "coding"}
+
+# Hər səhifədə göstərilən imtahan sayı. Paginator sayı ilə real göstərilən
+# kart sayının üst-üstə düşməsi üçün bütün görünürlük filtrləri SQL
+# səviyyəsində (paginate-dən ƏVVƏL) tətbiq olunmalıdır.
+EXAMS_PER_PAGE = 3
+
+# attempts_left_for() ilə eyni status dəsti — limit hesabına yalnız
+# tamamlanmış cəhdlər daxildir.
+FINISHED_ATTEMPT_STATUSES = ("submitted", "expired", "graded")
+
+
+def _user_finished_attempt_count_sq(user):
+    """Per-exam subquery: user-in tamamlanmış (limitə sayılan) cəhd sayı."""
+    return (
+        ExamAttempt.objects.filter(
+            exam=OuterRef("pk"),
+            user=user,
+            status__in=FINISHED_ATTEMPT_STATUSES,
+        )
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt")
+    )
+
+
+def _exclude_attempt_exhausted(queryset):
+    """
+    Cəhd limiti bitmiş imtahanları SQL səviyyəsində çıxar.
+
+    Bu filtr paginate-dən ƏVVƏL tətbiq olunur ki, Paginator.count ilə
+    səhifədə real göstərilən kart sayı uyğun gəlsin (əvvəllər limit yoxlaması
+    paginate-dən sonra Python-da edilirdi və səhifələrdə 3 əvəzinə 1-2 kart
+    görünürdü). `max_attempts_per_user` 0/NULL → limitsiz (attempts_left_for
+    ilə eyni semantika).
+    """
+    return queryset.filter(
+        Q(max_attempts_per_user__isnull=True)
+        | Q(max_attempts_per_user=0)
+        | Q(finished_attempt_count__lt=F("max_attempts_per_user"))
+    )
 
 
 def _apply_exam_type_filter(queryset, filter_type):
@@ -74,7 +115,10 @@ def assigned_student_exam_list(request):
         )
         .distinct()
         .select_related("author", "organization", "course")
-        .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
+        .annotate(
+            user_attempt_count=Subquery(user_attempt_count_sq),
+            finished_attempt_count=Coalesce(Subquery(_user_finished_attempt_count_sq(user)), 0),
+        ),
     )
 
     # --- SEARCH (Axtarış) ---
@@ -86,21 +130,18 @@ def assigned_student_exam_list(request):
     filter_type = request.GET.get("type")
     exams_qs = _apply_exam_type_filter(exams_qs, filter_type)
 
+    # Cəhd limiti bitmiş imtahanlar SQL-də çıxarılır ki, pagination sayı
+    # ekrandakı kart sayı ilə üst-üstə düşsün.
+    exams_qs = _exclude_attempt_exhausted(exams_qs)
+
     # Sıralama
     exams_qs = exams_qs.order_by("-created_at")
 
-    # 2) P2.C — Paginasiya queryset səviyyəsində.
-    # Köhnə davranış: bütün queryset Python-a çəkilirdi, sonra paginate olunurdu.
-    # Yeni davranış: candidate qs üzərindən paginate edirik, sonra yalnız səhifədə
-    # olan exam-lar üçün ağır model metodlarını (can_user_see/can_user_start/
-    # attempts_left_for) çağırırıq. Bu sayda çağırış N=ümumi→N=səhifə_ölçüsü
-    # qədər azalır.
-    #
-    # Mühüm: total_count qiyməti candidate qs-ə əsaslanır, görünməyən imtahanlar
-    # (məs. attempts_left==0, can_user_see=False) total-a daxildir. UX aspektində
-    # bir-iki "boş" görünə bilər, lakin biznes loqika pozulmur — visibility
-    # yoxlamasından keçməyən exam-lar siyahıya əlavə edilmir.
-    paginator = Paginator(exams_qs, 2)
+    # 2) Paginasiya queryset səviyyəsində. Bütün görünürlük filtrləri artıq
+    # SQL-də tətbiq olunub, ona görə hər səhifədə (sonuncu istisna) tam
+    # EXAMS_PER_PAGE kart görünür. Ağır model metodları (can_user_see/
+    # can_user_start/attempts_left_for) yalnız səhifədəki exam-lar üçün çağırılır.
+    paginator = Paginator(exams_qs, EXAMS_PER_PAGE)
     page_number = request.GET.get("page")
     try:
         page_obj = paginator.page(page_number)
@@ -111,14 +152,14 @@ def assigned_student_exam_list(request):
 
     exam_items = []
     for exam in page_obj.object_list:
-        # bu user ümumiyyətlə bu imtahan kartını görməlidir?
+        # SECURITY GUARD: baza sorğusu yalnız icazəli imtahanları gətirir,
+        # bu yoxlama son sədd kimi qalır (normal halda heç vaxt işə düşmür).
         if not exam.can_user_see(user):
             continue
 
-        # cəhd limiti
+        # Yalnız göstərmək üçün hesablanır (lazy expiry daxil) — limit filtri
+        # artıq SQL-də tətbiq olunub, burada kart atılmır.
         left = exam.attempts_left_for(user)
-        if left is not None and left <= 0:
-            continue
 
         # kod tələb olunub-olunmamağı user-ə görə hesablayırıq
         can_without_code, _ = exam.can_user_start(user, code=None)
@@ -195,7 +236,10 @@ def student_exam_list(request):
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
         .distinct()
         .select_related("author", "organization", "course")
-        .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
+        .annotate(
+            user_attempt_count=Subquery(user_attempt_count_sq),
+            finished_attempt_count=Coalesce(Subquery(_user_finished_attempt_count_sq(user)), 0),
+        ),
     )
 
     # --- SEARCH ---
@@ -207,12 +251,16 @@ def student_exam_list(request):
     filter_type = request.GET.get("type")
     exams_qs = _apply_exam_type_filter(exams_qs, filter_type)
 
+    # Cəhd limiti bitmiş imtahanlar SQL-də çıxarılır ki, pagination sayı
+    # ekrandakı kart sayı ilə üst-üstə düşsün.
+    exams_qs = _exclude_attempt_exhausted(exams_qs)
+
     exams_qs = exams_qs.order_by("-created_at")
 
-    # P2.C — Paginasiya queryset səviyyəsində (eyni rasional, assigned versiyada
-    # olduğu kimi). Yalnız səhifədə olan exam-lar üçün ağır model metodları
-    # çağırılır. `is_after_end` filtri SQL səviyyəsində artıq tətbiq olunub.
-    paginator = Paginator(exams_qs, 2)
+    # Paginasiya queryset səviyyəsində (eyni rasional, assigned versiyada
+    # olduğu kimi). Bütün görünürlük filtrləri SQL-də tətbiq olunub — hər
+    # səhifədə (sonuncu istisna) tam EXAMS_PER_PAGE kart görünür.
+    paginator = Paginator(exams_qs, EXAMS_PER_PAGE)
     page_number = request.GET.get("page")
     try:
         page_obj = paginator.page(page_number)
@@ -223,16 +271,16 @@ def student_exam_list(request):
 
     exam_items = []
     for exam in page_obj.object_list:
-        # SAFETY: hər ehtimala qarşı (timezone / query bypass)
+        # SECURITY GUARD-lar: baza sorğusu bunları artıq SQL-də filtrləyib,
+        # bu yoxlamalar son sədd kimi qalır (normal halda işə düşmür).
         if exam.is_after_end():
             continue
 
         if not exam.can_user_see(user):
             continue
 
+        # Yalnız göstərmək üçün (lazy expiry daxil) — limit filtri SQL-dədir.
         left = exam.attempts_left_for(user)
-        if left is not None and left <= 0:
-            continue
 
         can_without_code, _ = exam.can_user_start(user, code=None)
         requires_code = bool(exam.access_code and not can_without_code)

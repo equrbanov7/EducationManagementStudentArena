@@ -17,6 +17,12 @@ from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_question_result
 from core.rls import bypass_rls
 
+# The client reports how fast it answered (`answer_ms`) for the speed bonus,
+# but the value is attacker-controlled. The server clamps it against its own
+# observed elapsed time, allowing only this much downward slack for network
+# latency, so a tampered client cannot claim a 0 ms answer late in the window.
+ANSWER_MS_LATENCY_ALLOWANCE_MS = 2500
+
 
 def score_multi_fraction(chosen_ids: list[int], correct_ids: list[int], *, mode: str = "strict") -> float:
     chosen = set(int(value) for value in (chosen_ids or []))
@@ -134,7 +140,13 @@ def _save_answer_and_score_impl(
     try:
         with bypass_rls():
             with transaction.atomic():
-                session = LiveSession.objects.select_for_update().get(pin=pin)
+                # NOTE: the session row is intentionally NOT locked here. Locking it
+                # serialized every answer submission in the session behind a single
+                # row lock (a big bottleneck for large classes). Per-player integrity
+                # is enforced by the player row lock + the unique
+                # (session, player, question) constraint, and the question→reveal
+                # transition uses an atomic conditional UPDATE below.
+                session = LiveSession.objects.get(pin=pin)
                 player = LivePlayer.objects.select_for_update().get(
                     id=player_id,
                     session=session,
@@ -192,15 +204,33 @@ def _save_answer_and_score_impl(
                 if not (answer_starts_at <= received_at <= session.question_ends_at):
                     return False, pgettext("live_exam.consumer.error", "submission_outside_active_window"), None, False
 
-                correct_ids = list(
-                    ExamQuestionOption.objects.filter(question_id=question_id, is_correct=True).values_list(
-                        "id", flat=True
-                    )
+                # Single query for all options: validates the submitted ids AND
+                # derives the correct set without a second round-trip.
+                option_rows = list(
+                    ExamQuestionOption.objects.filter(question_id=question_id).values_list("id", "is_correct")
                 )
+                valid_option_ids = {row[0] for row in option_rows}
+                correct_ids = [row[0] for row in option_rows if row[1]]
                 if not correct_ids:
                     return False, pgettext("live_exam.consumer.error", "no_correct_options"), None, False
 
+                # Reject ids that do not belong to this question: a legitimate
+                # client can only submit options it was shown, so anything else
+                # is a tampered payload (and would otherwise be persisted into
+                # choice_ids and skew the answer distribution).
+                if not option_ids or not set(int(value) for value in option_ids) <= valid_option_ids:
+                    return False, pgettext("live_exam.consumer.error", "bad_payload"), None, False
+
                 total_ms = int((session.question_ends_at - answer_starts_at).total_seconds() * 1000)
+
+                # Anti-cheat: the speed bonus uses the client-reported answer
+                # time, so enforce a server-side lower bound. A tampered client
+                # claiming "0 ms" late in the window is raised to the
+                # server-observed elapsed time minus a latency allowance.
+                # (No upper clamp — overstating answer_ms only lowers the score.)
+                server_elapsed_ms = max(0, int((received_at - answer_starts_at).total_seconds() * 1000))
+                answer_ms = max(int(answer_ms or 0), server_elapsed_ms - ANSWER_MS_LATENCY_ALLOWANCE_MS)
+
                 score = calculate_answer_score(
                     option_ids=option_ids,
                     correct_ids=correct_ids,
@@ -238,10 +268,17 @@ def _save_answer_and_score_impl(
                     and answered_count >= total_players
                     and session.state == LiveSession.STATE_QUESTION
                 ):
-                    session.state = LiveSession.STATE_REVEAL
-                    session.question_ends_at = received_at
-                    session.save(update_fields=["state", "question_ends_at"])
-                    reveal_question_id = question_id
+                    # Atomic conditional UPDATE replaces the old session row lock:
+                    # if two "last" answers race, exactly one wins the transition,
+                    # so the reveal is broadcast exactly once.
+                    updated = LiveSession.objects.filter(
+                        pk=session.pk,
+                        state=LiveSession.STATE_QUESTION,
+                    ).update(state=LiveSession.STATE_REVEAL, question_ends_at=received_at)
+                    if updated:
+                        session.state = LiveSession.STATE_REVEAL
+                        session.question_ends_at = received_at
+                        reveal_question_id = question_id
     except LiveSession.DoesNotExist:
         return False, pgettext("live_exam.consumer.error", "session_not_found"), None, False
     except LivePlayer.DoesNotExist:
@@ -267,6 +304,14 @@ def _save_answer_and_score_impl(
             },
             "question_id": question_id,
             "reveal_question_id": reveal_question_id,
+            # Counts were already computed inside the transaction — expose them so
+            # callers don't have to re-query the same numbers for the progress
+            # broadcast (saves 3 queries per answer).
+            "progress": {
+                "question_id": question_id,
+                "answered_count": answered_count,
+                "total_players": total_players,
+            },
         },
         answer,
         True,

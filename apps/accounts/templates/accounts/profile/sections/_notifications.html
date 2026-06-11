@@ -73,26 +73,53 @@
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <nav class="nav notif-filter-tabs" role="tablist">
                 <a class="notif-filter-tab {% if notif_filter == 'all' %}is-active{% endif %}"
-                   href="{{ profile_base_url }}?section=notifications&notif_filter=all{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=all{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
                     <i class="fas fa-list"></i>
                     <span>{% trans "filter_all" context "profile.notifications" %}</span>
                 </a>
                 <a class="notif-filter-tab {% if notif_filter == 'unread' %}is-active{% endif %}"
-                   href="{{ profile_base_url }}?section=notifications&notif_filter=unread{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=unread{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
                     <i class="fas fa-envelope"></i>
                     <span>{% trans "filter_unread" context "profile.notifications" %}</span>
                     {% if in_app_unread_count > 0 %}<span class="notif-filter-badge" data-profile-notif-filter-badge>{{ in_app_unread_count }}</span>{% endif %}
                 </a>
                 <a class="notif-filter-tab {% if notif_filter == 'read' %}is-active{% endif %}"
-                   href="{{ profile_base_url }}?section=notifications&notif_filter=read{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=read{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
                     <i class="fas fa-envelope-open"></i>
                     <span>{% trans "filter_read" context "profile.notifications" %}</span>
                 </a>
+
+                {# Tip filtri — standalone bildirişlər səhifəsindəki ilə eyni davranış #}
+                <div class="dropdown">
+                    <a class="notif-filter-tab dropdown-toggle {% if notif_type %}is-active{% endif %}"
+                       href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter"></i>
+                        <span>
+                            {% if notif_type %}
+                                {% for value, label in notif_notification_types %}{% if value == notif_type %}{{ label }}{% endif %}{% endfor %}
+                            {% else %}
+                                {% trans "Type" %}
+                            {% endif %}
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item {% if not notif_type %}active{% endif %}"
+                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{% trans "All types" %}</a>
+                        </li>
+                        {% for value, label in notif_notification_types %}
+                        <li>
+                            <a class="dropdown-item {% if notif_type == value %}active{% endif %}"
+                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_type={{ value }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{{ label }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </nav>
             {% if in_app_notifications_page.object_list %}
             <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
+                <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
                 <button type="submit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-check-double me-1"></i>{% trans "mark_all_read" context "profile.notifications" %}
                 </button>
@@ -107,6 +134,7 @@
               action="{{ profile_base_url }}">
             <input type="hidden" name="section" value="notifications">
             <input type="hidden" name="notif_filter" value="{{ notif_filter }}">
+            {% if notif_type %}<input type="hidden" name="notif_type" value="{{ notif_type }}">{% endif %}
             <div class="role-assignment-search-input-wrap">
                 <input type="text"
                        name="notif_search"
@@ -138,7 +166,7 @@
             </div>
             <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="profileNotifBulkDeleteForm" class="ms-2">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
+                <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
                 <div id="profileNotifBulkIds"></div>
                 <button type="submit" class="btn btn-sm btn-outline-danger" id="profileNotifBulkDeleteBtn" disabled>
                     <i class="fas fa-trash me-1"></i>{% trans "delete_selected" context "profile.notifications" %}
@@ -198,7 +226,7 @@
                     {% if not notification.is_read %}
                     <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
                         {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}&notif_page={{ in_app_notifications_page.number }}">
+                        <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
                         <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'mark_read' context 'profile.notifications' %}">
                             <i class="fas fa-envelope-open"></i>
                         </button>
@@ -206,7 +234,7 @@
                     {% endif %}
                     <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
                         {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}&notif_page={{ in_app_notifications_page.number }}">
+                        <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
                         <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'delete' context 'profile.notifications' %}">
                             <i class="fas fa-trash"></i>
                         </button>

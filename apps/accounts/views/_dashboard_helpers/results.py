@@ -55,8 +55,20 @@ def _collect_my_results(request, filter_type=None, search=None):
                 status__in=["submitted", "expired"],
             )
             .select_related("exam")
+            # Perf: test ballarının hesablanması üçün cavablar lazımdır —
+            # prefetch olmadan hər attempt 3-4 əlavə sorğu (N+1) yaradır.
+            .prefetch_related("answers__question__options", "answers__selected_options")
             .order_by("-started_at")
         )
+        attempts = list(attempts)
+        # Apellyasiya bonusları (tək sorğu) — qəbul olunmuş apellyasiyalar
+        # tələbənin görəcəyi balda dərhal əks olunsun.
+        try:
+            from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
+
+            _appeal_bonus_by_attempt = appeal_bonus_map([a.id for a in attempts])
+        except Exception:
+            _appeal_bonus_by_attempt, apply_bonus_to_test_result = {}, None
         for attempt in attempts:
             is_auto_test = attempt.exam.exam_type == "test"
             if (
@@ -67,11 +79,18 @@ def _collect_my_results(request, filter_type=None, search=None):
             ):
                 continue
 
+            # "Bal" qutusunda əsas dəyər BAL-dır (bal / maks bal); faiz ayrıca
+            # göstərilir (əvvəl test imtahanında faiz "Bal" kimi çıxırdı).
             score_value = attempt.teacher_score
+            score_percent_value = ""
             if score_value is None and is_auto_test:
-                test_result = calculate_test_attempt_result(attempt)
+                test_result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
+                _bonus = _appeal_bonus_by_attempt.get(attempt.id)
+                if _bonus and apply_bonus_to_test_result is not None:
+                    test_result = apply_bonus_to_test_result(test_result, _bonus)
                 if test_result.delivered_count > 0:
-                    score_value = test_result.percentage
+                    score_value = f"{test_result.score_display} / {test_result.max_score_display}"
+                    score_percent_value = f"{test_result.percentage_display}%"
 
             is_graded_visible = attempt.checked_by_teacher or score_value is not None
             items.append(
@@ -88,6 +107,7 @@ def _collect_my_results(request, filter_type=None, search=None):
                     ),
                     "status_raw": attempt.get_status_display(),
                     "score": score_value if is_graded_visible else None,
+                    "score_percent": score_percent_value if is_graded_visible else "",
                     "feedback": attempt.teacher_feedback if is_graded_visible else "",
                     "detail_url": reverse(
                         "exams:exam_result",
