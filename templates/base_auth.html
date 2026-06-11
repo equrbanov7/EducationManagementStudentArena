@@ -1,0 +1,64 @@
+{% load static i18n %}
+{% comment %}
+Lightweight base for auth pages (login, register, password reset, OTP).
+Audit step 3: auth pages must not pull the full app bundle (navbar, footer,
+AI assistant, bootstrap-select, pagination, skeleton, FontAwesome, route
+loading...).  Only Bootstrap core CSS, main.css and per-page assets load here.
+
+Notes:
+ - Block names match base.html (title/extraHead/extraCss/content/extraJs) so
+   templates can switch between the two bases without changes.
+ - Messages render as static dismissible-free alerts: no toast JS needed.
+ - The inline script below fixes the bfcache stale-CSRF-token problem: when
+   the browser restores the page from back/forward cache, the form still
+   holds the OLD csrfmiddlewaretoken while a new CSRF cookie may already be
+   set -> POST fails with 403.  Reloading on `pageshow(persisted)` re-renders
+   the form with a fresh token.  CSP: carries the per-request nonce.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}{% firstof seo_title "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" %}{% endblock %}</title>
+
+    {% include "partials/_seo_head.html" %}
+
+    {% block extraHead %}{% endblock %}
+
+    <!-- Bootstrap 5 (core grid/forms/alerts only; bundle JS intentionally NOT loaded) -->
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+    {% block extraCss %}{% endblock %}
+
+    <script nonce="{{ request.csp_nonce }}">
+        // bfcache fix: re-render the page (and its CSRF token) when restored
+        // from the back/forward cache, otherwise the stale token causes 403.
+        window.addEventListener("pageshow", function (e) {
+            if (e.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
+</head>
+
+<body class="auth-body">
+
+    {# Django messages — simple static alerts (no toast/auto-hide JS on auth pages) #}
+    {% if messages %}
+        <div class="container mt-3" role="status">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extraJs %}{% endblock %}
+</body>
+</html>

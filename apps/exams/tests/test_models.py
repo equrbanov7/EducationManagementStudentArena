@@ -422,6 +422,9 @@ class ExamAttemptTest(TestCase):
             exam=self.exam,
             correct_count=8,
             wrong_count=2,
+            # uniq_active_attempt_per_user_exam: eyni user+exam üçün yalnız bir
+            # in_progress ola bilər — bu attempt bitmiş kimi yaradılır.
+            status="submitted",
         )
         self.assertEqual(attempt.score_percent, 80.0)
 

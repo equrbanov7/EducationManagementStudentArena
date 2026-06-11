@@ -140,6 +140,21 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             models.Index(fields=["user", "exam", "status"]),
             models.Index(fields=["user", "exam", "-started_at"]),
         ]
+        constraints = [
+            # DB-level last line of defence against double-start races.
+            # The cache-based _exam_start_actor_lock degrades to "no lock"
+            # when Redis is unavailable; these constraints guarantee exam
+            # data integrity regardless of the cache state.
+            models.UniqueConstraint(
+                fields=["user", "exam"],
+                condition=models.Q(status="in_progress"),
+                name="uniq_active_attempt_per_user_exam",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "exam", "attempt_number"],
+                name="uniq_attempt_number_per_user_exam",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user.username} → {self.exam.title} (#{self.attempt_number})"

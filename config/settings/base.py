@@ -381,6 +381,12 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = "Lax"
 
+# Custom CSRF failure view: logs full diagnostic context (reason, Origin,
+# Referer, CF-Ray, cookie presence) and shows a user-friendly page instead of
+# Django's bare 403.  Used to pinpoint the source of production login 403s
+# (Django CSRF vs Cloudflare).
+CSRF_FAILURE_VIEW = "core.views.csrf_failure"
+
 # Language cookie: HttpOnly and SameSite to protect the i18n cookie
 # set by /i18n/setlang/.
 LANGUAGE_COOKIE_HTTPONLY = True

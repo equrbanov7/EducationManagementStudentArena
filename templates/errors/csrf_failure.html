@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Səhifə köhnəlib | EMSArena</title>
+    {% if is_login_path %}
+    {# Stale login form (bfcache / long-open tab): auto-redirect to a freshly #}
+    {# rendered login form with a new CSRF token. Meta refresh is CSP-safe.  #}
+    <meta http-equiv="refresh" content="4;url={{ login_url }}">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
+</head>
+<body class="error-page error-403">
+    <div class="error-page-shell">
+        <div class="error-orb error-orb-one"></div>
+        <div class="error-orb error-orb-two"></div>
+        <section class="error-card" aria-labelledby="error-title">
+            <div class="error-brand">
+                <span class="error-brand-mark"><i class="fas fa-rotate-right"></i></span>
+                <span>EMSArena</span>
+            </div>
+
+            <div class="error-grid">
+                <div class="error-copy">
+                    <div class="error-kicker">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        Səhifə köhnəlib
+                    </div>
+                    <h1 id="error-title" class="error-title">Təhlükəsizlik tokeni vaxtı keçib</h1>
+                    <p class="error-description">
+                        Bu səhifə uzun müddət açıq qaldığı və ya brauzer keşindən bərpa olunduğu üçün
+                        forma köhnəlib. Narahat olmayın — heç bir məlumat itməyib.
+                        {% if is_login_path %}
+                        Bir neçə saniyəyə təzə giriş səhifəsinə yönləndiriləcəksiniz.
+                        {% else %}
+                        Səhifəni yeniləyib əməliyyatı təkrar edin.
+                        {% endif %}
+                    </p>
+                    <div class="error-actions">
+                        <a href="{{ retry_url }}" class="error-btn error-btn-primary">
+                            <i class="fas fa-rotate-right"></i>
+                            {% if is_login_path %}Giriş səhifəsinə keç{% else %}Səhifəni yenilə{% endif %}
+                        </a>
+                        <a href="/" class="error-btn error-btn-secondary">
+                            <i class="fas fa-house"></i>
+                            Ana səhifəyə qayıt
+                        </a>
+                    </div>
+                    <p class="error-footer-note">
+                        Problem davam edərsə, brauzer kuki parametrlərinin aktiv olduğunu yoxlayın.
+                    </p>
+                </div>
+
+                <div class="error-visual" aria-hidden="true">
+                    <div class="error-code-panel">
+                        <div class="error-code-top">
+                            <span>Status</span>
+                            <span class="error-status-dot"></span>
+                        </div>
+                        <div>
+                            <div class="error-code">403</div>
+                            <div class="error-code-caption">Köhnəlmiş təhlükəsizlik tokeni — səhifə yenilənməlidir.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

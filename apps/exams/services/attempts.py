@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import caches
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -215,16 +215,60 @@ def can_user_start_new_attempt(exam, user):
     return True, "ok"
 
 
+def _next_attempt_number(exam, user) -> int:
+    last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
+    return (last_attempt.attempt_number + 1) if last_attempt else 1
+
+
+def _create_attempt_or_get_active(exam, user, **extra_fields):
+    """Create a new in_progress attempt; on a constraint race return the
+    existing active attempt instead of raising.
+
+    The DB constraints (uniq_active_attempt_per_user_exam,
+    uniq_attempt_number_per_user_exam) are the last line of defence when two
+    parallel start requests slip past the cache-based actor lock.  Returns a
+    tuple ``(attempt, created)``.
+    """
+    try:
+        with transaction.atomic():
+            return (
+                ExamAttempt.objects.create(
+                    user=user,
+                    exam=exam,
+                    attempt_number=_next_attempt_number(exam, user),
+                    status="in_progress",
+                    **extra_fields,
+                ),
+                True,
+            )
+    except IntegrityError:
+        existing = get_active_attempt_for_user(exam, user)
+        if existing is not None:
+            logger.info(
+                "Duplicate exam start blocked by DB constraint: user=%s exam=%s -> reusing attempt=%s",
+                user.pk,
+                exam.pk,
+                existing.pk,
+            )
+            return existing, False
+        # No active attempt: the collision was on attempt_number (a parallel
+        # request finished in between).  Recompute and retry once.
+        return (
+            ExamAttempt.objects.create(
+                user=user,
+                exam=exam,
+                attempt_number=_next_attempt_number(exam, user),
+                status="in_progress",
+                **extra_fields,
+            ),
+            True,
+        )
+
+
 @transaction.atomic
 def create_exam_attempt(exam, user):
-    last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
-    next_attempt_number = (last_attempt.attempt_number + 1) if last_attempt else 1
-    return ExamAttempt.objects.create(
-        user=user,
-        exam=exam,
-        attempt_number=next_attempt_number,
-        status="in_progress",
-    )
+    attempt, _created = _create_attempt_or_get_active(exam, user)
+    return attempt
 
 
 @transaction.atomic
@@ -351,17 +395,21 @@ def _start_or_resume_attempt(request, exam: Exam):
                 )
                 return redirect(attempt_limit_result_url)
 
-            last_attempt = exam.attempts.filter(user=user).order_by("-attempt_number").first()
-            next_attempt_number = last_attempt.attempt_number + 1 if last_attempt else 1
-
-            attempt = ExamAttempt.objects.create(
-                user=user,
-                exam=exam,
-                attempt_number=next_attempt_number,
-                status="in_progress",
+            attempt, created = _create_attempt_or_get_active(
+                exam,
+                user,
                 language=chosen_language,
                 language_variant=get_active_variant(exam, chosen_language) if chosen_language else None,
             )
+            if not created:
+                # A parallel request already created the attempt (DB constraint
+                # caught the race) — just resume it.
+                return redirect(
+                    _append_return_to(
+                        reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+                        return_to,
+                    )
+                )
 
             generate_random_questions_for_attempt(attempt)
     except ExamStartBusy:
@@ -376,7 +424,7 @@ def _start_or_resume_attempt(request, exam: Exam):
 
     messages.success(
         request,
-        pgettext("exams.service.attempt.message", "exam_started").format(attempt_number=next_attempt_number),
+        pgettext("exams.service.attempt.message", "exam_started").format(attempt_number=attempt.attempt_number),
     )
     return redirect(
         _append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to)

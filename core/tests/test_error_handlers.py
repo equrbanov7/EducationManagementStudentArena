@@ -223,3 +223,53 @@ class SecurityHeadersTest(TestCase):
         self.assertEqual(resp["Permissions-Policy"], "camera=(), geolocation=(), microphone=()")
         self.assertEqual(resp["Cross-Origin-Resource-Policy"], "same-origin")
         self.assertEqual(resp["Cross-Origin-Opener-Policy"], "same-origin")
+
+
+@override_settings(DEBUG=False)
+class CsrfFailureViewTests(TestCase):
+    """Tests for the custom CSRF failure view (CSRF_FAILURE_VIEW).
+
+    Audit step 1: every CSRF rejection must be logged with diagnostic context
+    and the user must see a friendly "page expired" screen instead of
+    Django's bare 403.
+    """
+
+    LOGIN_URL = "/accounts/login/"
+
+    def setUp(self):
+        self.csrf_client = Client(enforce_csrf_checks=True)
+
+    def test_csrf_failure_on_login_returns_friendly_403(self):
+        response = self.csrf_client.post(self.LOGIN_URL, {"username": "x", "password": "y"})
+        self.assertEqual(response.status_code, 403)
+        content = response.content.decode()
+        self.assertIn("Səhifə köhnəlib", content)
+        # Login path: auto-redirect to a fresh login form via meta refresh.
+        self.assertIn('http-equiv="refresh"', content)
+        self.assertIn(self.LOGIN_URL, content)
+        # No internals disclosed.
+        self.assertNotIn("Traceback", content)
+        self.assertNotIn("CSRF verification failed", content)
+
+    def test_csrf_failure_is_logged_with_diagnostic_context(self):
+        with self.assertLogs("core.csrf", level="WARNING") as captured:
+            self.csrf_client.post(
+                self.LOGIN_URL,
+                {"username": "x", "password": "y"},
+                HTTP_ORIGIN="https://evil.example",
+                HTTP_REFERER="https://emsarena.com/accounts/login/",
+            )
+        joined = "\n".join(captured.output)
+        self.assertIn("CSRF failure", joined)
+        self.assertIn("reason=", joined)
+        self.assertIn("path=/accounts/login/", joined)
+        self.assertIn("has_csrf_cookie=", joined)
+        self.assertIn("cf_ray=", joined)
+
+    def test_csrf_failure_on_non_login_path_has_no_auto_redirect(self):
+        response = self.csrf_client.post("/contact/", {"name": "x"})
+        # Regardless of the final status of /contact/, a CSRF-rejected POST
+        # must render the csrf_failure template without the login redirect.
+        if response.status_code == 403:
+            content = response.content.decode()
+            self.assertNotIn('http-equiv="refresh"', content)

@@ -750,9 +750,12 @@ class ExamSupervisionServicesTest(TestCase):
             resume_window_seconds=resume_window_seconds,
         )
 
-    def _locked_attempt(self, locked_minutes_ago, number=1):
+    def _locked_attempt(self, locked_minutes_ago, number=1, user=None):
+        # user parametri: uniq_active_attempt_per_user_exam constraint-i eyni
+        # user+exam üçün ikinci in_progress attempt-ə icazə vermir, ona görə
+        # paralel aktiv attempt-lər ayrı istifadəçilərlə qurulmalıdır.
         attempt = ExamAttempt.objects.create(
-            user=self.student,
+            user=user or self.student,
             exam=self.exam,
             attempt_number=number,
             status="in_progress",
@@ -1019,8 +1022,13 @@ class ExamSupervisionServicesTest(TestCase):
 
     def test_sweep_finishes_only_stale_locked_attempts(self):
         self._supervised_resumable_exam(resume_window_seconds=600)
+        other_student = User.objects.create_user(
+            username="supervision_student2",
+            email="supervision_student2@example.com",
+            password="pass123",
+        )
         stale = self._locked_attempt(locked_minutes_ago=20, number=1)
-        fresh = self._locked_attempt(locked_minutes_ago=2, number=2)
+        fresh = self._locked_attempt(locked_minutes_ago=2, number=1, user=other_student)
 
         expired = sweep_expired_resume_windows()
 

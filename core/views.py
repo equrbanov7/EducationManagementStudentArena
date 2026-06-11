@@ -166,6 +166,52 @@ def test_error(request):
 
 
 # ---------------------------------------------------------------------------
+# CSRF failure instrumentation
+# ---------------------------------------------------------------------------
+# Dedicated logger so CSRF failures are easy to filter in production logs
+# (Grafana/Loki query: logger="core.csrf").
+csrf_logger = logging.getLogger("core.csrf")
+
+
+def csrf_failure(request, reason=""):
+    """Custom CSRF failure view (CSRF_FAILURE_VIEW).
+
+    Purpose: distinguish real Django CSRF rejections from Cloudflare-level
+    403s.  Every CSRF failure is logged with full request context so the
+    root cause of login 403s can be confirmed from logs alone:
+      - if a 403 appears here -> Django CSRF (reason tells which check failed)
+      - if a 403 reaches the user but never appears in these logs or nginx
+        access logs -> it was produced by Cloudflare.
+    """
+    csrf_logger.warning(
+        "CSRF failure: reason=%r path=%s method=%s origin=%r referer=%r host=%r "
+        "secure=%s has_csrf_cookie=%s has_session_cookie=%s authenticated=%s cf_ray=%r",
+        reason,
+        request.path,
+        request.method,
+        request.headers.get("Origin"),
+        request.headers.get("Referer"),
+        request.headers.get("Host"),
+        request.is_secure(),
+        settings.CSRF_COOKIE_NAME in request.COOKIES,
+        settings.SESSION_COOKIE_NAME in request.COOKIES,
+        getattr(getattr(request, "user", None), "is_authenticated", False),
+        request.headers.get("CF-Ray"),
+    )
+
+    # On the login page the most common cause is a stale form (bfcache /
+    # long-open tab).  Redirecting to a freshly rendered login form with a
+    # new CSRF token lets the user retry immediately.
+    is_login_path = request.path.rstrip("/") == settings.LOGIN_URL.rstrip("/")
+    context = {
+        "is_login_path": is_login_path,
+        "login_url": settings.LOGIN_URL,
+        "retry_url": settings.LOGIN_URL if is_login_path else (request.path or "/"),
+    }
+    return render(request, "errors/csrf_failure.html", context, status=403)
+
+
+# ---------------------------------------------------------------------------
 # Custom error handlers
 # ---------------------------------------------------------------------------
 # These handlers prevent Django from exposing internal application details
