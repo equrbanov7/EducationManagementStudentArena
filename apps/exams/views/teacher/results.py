@@ -6,7 +6,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum
+from django.db.models import F, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -282,24 +282,94 @@ def _available_groups_for_exam(exam):
     return qs.distinct().order_by("name")
 
 
+def _attempt_time_limit_seconds(attempt):
+    """İmtahanın vaxt limiti (saniyə) — limit yoxdursa None."""
+    duration_minutes = getattr(attempt.exam, "total_duration_minutes", None)
+    if not duration_minutes:
+        return None
+    return int(duration_minutes) * 60
+
+
 def _attempt_effective_finish(attempt, *, now=None):
     """İmtahanı bitirməyən tələbə üçün effektiv bitmə vaxtı.
 
-    - Əgər finished_at varsa, onu qaytarır.
-    - Yoxsa: started_at + exam.total_duration_minutes (əgər müddət bitibsə).
+    - Əgər finished_at varsa və limiti aşmırsa, onu qaytarır.
+    - finished_at limitdən SONRADIRSA (gecikmiş lazy expire ilə yazılmış köhnə
+      sətirlər) → deadline göstərilir ("avto" tag ilə): tələbə real olaraq
+      yalnız limit qədər imtahanda ola bilərdi.
+    - finished_at yoxdursa: started_at + limit (əgər müddət bitibsə).
     - Müddət hələ bitməyibsə None.
     """
-    finished_at = getattr(attempt, "finished_at", None)
-    if finished_at:
-        return finished_at, False
     started_at = getattr(attempt, "started_at", None)
     duration_minutes = getattr(attempt.exam, "total_duration_minutes", None)
-    if not started_at or not duration_minutes:
-        return None, False
-    deadline = started_at + timedelta(minutes=int(duration_minutes))
-    if (now or timezone.now()) >= deadline:
+    deadline = None
+    if started_at and duration_minutes:
+        deadline = started_at + timedelta(minutes=int(duration_minutes))
+
+    finished_at = getattr(attempt, "finished_at", None)
+    if finished_at:
+        if deadline and finished_at > deadline:
+            return deadline, True
+        return finished_at, False
+    if deadline and (now or timezone.now()) >= deadline:
         return deadline, True
     return None, False
+
+
+def _attempt_effective_duration(attempt, effective_finish):
+    """Cədvəldə göstərilən müddət — imtahan limitini heç vaxt aşmır."""
+    effective_duration = attempt.duration_seconds
+    if effective_duration is None and effective_finish and attempt.started_at:
+        effective_duration = max(int((effective_finish - attempt.started_at).total_seconds()), 0)
+    if effective_duration is not None:
+        limit_seconds = _attempt_time_limit_seconds(attempt)
+        if limit_seconds and effective_duration > limit_seconds:
+            effective_duration = limit_seconds
+    return effective_duration
+
+
+def _appeal_bonus_map_for(attempts):
+    """Cəhdlər üçün apellyasiya bonus xəritəsi (tək sorğu). Lazy import — exams
+    view-larını appeals-dən sərt asılı etməmək üçün."""
+    try:
+        from apps.appeals.services import appeal_bonus_map
+
+        return appeal_bonus_map([att.id for att in attempts])
+    except Exception:
+        return {}
+
+
+def _apply_appeal_bonus(test_result, bonus):
+    """Apellyasiya bonusunu test nəticəsinə tətbiq edir (lazy import)."""
+    try:
+        from apps.appeals.services import apply_bonus_to_test_result
+
+        return apply_bonus_to_test_result(test_result, bonus)
+    except Exception:
+        return test_result
+
+
+def _expire_overdue_attempts(exam, *, now=None):
+    """Vaxt limiti keçmiş, amma hələ də 'davam edir'/'qaralama' görünən
+    cəhdləri toplu şəkildə expire edir (lazy maintenance).
+
+    Tələbə səhifəyə qayıtmayanda expire_if_time_limit_reached heç vaxt
+    işləmir və cəhd siyahıda əbədi "davam edir" qalırdı. Tək bulk UPDATE —
+    per-row save yoxdur.
+    """
+    duration_minutes = getattr(exam, "total_duration_minutes", None)
+    if not duration_minutes:
+        return 0
+    duration_minutes = int(duration_minutes)
+    cutoff = (now or timezone.now()) - timedelta(minutes=duration_minutes)
+    return exam.attempts.filter(
+        status__in=("in_progress", "draft"),
+        started_at__lt=cutoff,
+    ).update(
+        status="expired",
+        finished_at=F("started_at") + timedelta(minutes=duration_minutes),
+        duration_seconds=duration_minutes * 60,
+    )
 
 
 def _apply_results_filters(exam, request):
@@ -307,6 +377,10 @@ def _apply_results_filters(exam, request):
 
     Qaytarır: (attempts_qs, filter_state_dict)
     """
+    # Lazy expire: vaxtı keçmiş "davam edir" cəhdləri filter/siyahıdan ƏVVƏL
+    # expired-ə çevir ki, status həm cədvəldə, həm filterlərdə düzgün görünsün.
+    _expire_overdue_attempts(exam)
+
     attempts = exam.attempts.select_related("user", "exam").prefetch_related(
         "answers__question__options",
         "answers__selected_options",
@@ -524,6 +598,10 @@ def teacher_exam_results(request, slug):
     now = timezone.now()
     attempts_data = []
 
+    # Apellyasiya bonusları (səhifədəki cəhdlər üçün tək sorğu) — qəbul olunmuş
+    # apellyasiyalar müəllimin gördüyü Bal/Faiz sütunlarında da əks olunsun.
+    appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_page) if exam.exam_type == "test" else {}
+
     for att in attempts_page:
         anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
 
@@ -537,21 +615,23 @@ def teacher_exam_results(request, slug):
         )
         real_name = att.user.get_full_name() or att.user.username
         effective_finish, finish_inferred = _attempt_effective_finish(att, now=now)
-        effective_duration = att.duration_seconds
-        if effective_duration is None and effective_finish and att.started_at:
-            effective_duration = max(int((effective_finish - att.started_at).total_seconds()), 0)
+        effective_duration = _attempt_effective_duration(att, effective_finish)
 
         test_result = (
             calculate_test_attempt_result(att, answers=att.answers.all()) if exam.exam_type == "test" else None
         )
+        appeal_bonus = appeal_bonus_by_attempt.get(att.id) or 0
         if test_result is not None:
             delivered_count = test_result.delivered_count
+            if appeal_bonus:
+                test_result = _apply_appeal_bonus(test_result, appeal_bonus)
         else:
             delivered_count = att.correct_count + att.wrong_count
         attempts_data.append(
             {
                 "attempt": att,
                 "test_result": test_result,
+                "appeal_bonus": appeal_bonus,
                 "delivered_count": delivered_count,
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
@@ -570,17 +650,10 @@ def teacher_exam_results(request, slug):
             }
         )
 
-    # ═══════════════════════════════════════════════════════════════════
-    # Statistikalar (əvvəlki kimi)
-    # ═══════════════════════════════════════════════════════════════════
-    filtered_attempts = list(attempts)
-    fastest_attempts = sorted([a for a in filtered_attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[
-        :5
-    ]
-
-    questions = exam.questions.all()
-    hardest_questions = sorted(questions, key=lambda q: q.correct_ratio)[:5]
-
+    # Perf: əvvəl burada `list(attempts)` bütün filtrlənmiş cəhdləri (bütün
+    # cavab+option prefetch-ləri ilə) yaddaşa yükləyirdi və fastest_attempts/
+    # hardest_questions hesablanırdı — template-də heç istifadə olunmurdu.
+    # Silindi: səhifə yalnız 12 cəhdlik paginated dataset yükləyir.
     group_filter_value = str(group_id) if group_id else ""
     pagination_query = urlencode(
         {
@@ -653,8 +726,6 @@ def teacher_exam_results(request, slug):
             "attempts": page_obj.object_list,
             "attempts_data": attempts_data,
             "page_obj": page_obj,
-            "fastest_attempts": fastest_attempts,
-            "hardest_questions": hardest_questions,
             "selected_attempt": selected_attempt,
             "selected_answers": selected_answers,
             "profile_return_url": profile_return_url,
@@ -733,7 +804,7 @@ def export_exam_results_xlsx(request, slug):
     if is_written_or_coding:
         headers += ["Müəllim balı", "Yoxlanıb"]
     if is_test:
-        headers += ["Düzgün", "Səhv", "Cavabsız", "Verilmiş sual", "Bal", "Maks. bal", "Faiz"]
+        headers += ["Düzgün", "Səhv", "Cavabsız", "Verilmiş sual", "Bal", "Maks. bal", "Faiz", "Apel. bonus"]
     else:
         headers += ["Düzgün", "Səhv", "Verilmiş sual"]
 
@@ -751,6 +822,8 @@ def export_exam_results_xlsx(request, slug):
     #    attempt üçün ayrıca sorğu = N+1).
     available_group_ids = list(_available_groups_for_exam(exam).values_list("id", flat=True))
     _attempt_user_ids = {att.user_id for att in attempts_list}
+    # Apellyasiya bonusları (tək sorğu) — export-dakı Bal/Faiz effektiv olsun.
+    appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_list) if is_test else {}
     groups_by_user: dict[int, list[str]] = {}
     if available_group_ids and _attempt_user_ids:
         from apps.exams.models import StudentGroup
@@ -763,9 +836,7 @@ def export_exam_results_xlsx(request, slug):
             groups_by_user.setdefault(_uid, []).append(_gname)
     for row_idx, att in enumerate(attempts_list, start=2):
         effective_finish, _ = _attempt_effective_finish(att, now=now)
-        effective_duration = att.duration_seconds
-        if effective_duration is None and effective_finish and att.started_at:
-            effective_duration = max(int((effective_finish - att.started_at).total_seconds()), 0)
+        effective_duration = _attempt_effective_duration(att, effective_finish)
 
         # İştirakçı qruplardan user-in üzv olduqları — loop-dan əvvəl tək sorğu
         # ilə qurulmuş dict-dən (per-attempt sorğu yox).
@@ -799,6 +870,9 @@ def export_exam_results_xlsx(request, slug):
 
         if is_test:
             test_result = calculate_test_attempt_result(att, answers=att.answers.all())
+            appeal_bonus = appeal_bonus_by_attempt.get(att.id) or 0
+            if appeal_bonus:
+                test_result = _apply_appeal_bonus(test_result, appeal_bonus)
             row += [
                 test_result.correct_count,
                 test_result.wrong_count,
@@ -807,6 +881,7 @@ def export_exam_results_xlsx(request, slug):
                 float(test_result.score_display) if test_result.score_display else 0,
                 float(test_result.max_score_display) if test_result.max_score_display else 0,
                 float(test_result.percentage_display) if test_result.percentage_display else 0,
+                float(appeal_bonus) if appeal_bonus else 0,
             ]
         else:
             delivered = att.correct_count + att.wrong_count
@@ -826,7 +901,7 @@ def export_exam_results_xlsx(request, slug):
     if is_written_or_coding:
         widths += [14, 12]  # Müəllim balı, Yoxlanıb
     if is_test:
-        widths += [10, 10, 12, 16, 8, 12, 8]  # Düzgün, Səhv, Cavabsız, Verilmiş, Bal, Maks, Faiz
+        widths += [10, 10, 12, 16, 8, 12, 8, 12]  # Düzgün, Səhv, Cavabsız, Verilmiş, Bal, Maks, Faiz, Apel.
     else:
         widths += [10, 10, 14]  # Düzgün, Səhv, Verilmiş sual
     for idx, width in enumerate(widths, start=1):

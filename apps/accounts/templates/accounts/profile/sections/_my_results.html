@@ -85,6 +85,9 @@
                     <div class="result-score-box">
                         <span class="score-label">{% trans "score_label" context "profile.results" %}:</span>
                         <span class="score-value">{{ item.score }}</span>
+                        {% if item.score_percent %}
+                        <span class="score-percent-badge">{{ item.score_percent }}</span>
+                        {% endif %}
                     </div>
                     {% endif %}
                     

@@ -14,10 +14,13 @@ item üçün bal İKİ DƏFƏ artırıla bilmir.
 """
 
 import logging
+from dataclasses import replace as _dataclass_replace
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.appeals.constants import (
     APPEAL_ITEM_STATUS_ACCEPTED,
@@ -48,16 +51,19 @@ def appeal_score_state(attempt):
     }
 
 
-def effective_test_score(attempt):
+def effective_test_score(attempt, *, answers=None):
     """
     Test attempt-i üçün apellyasiya bonusları nəzərə alınmaqla effektiv bal.
 
     Qaytarır: dict(base, bonus_points, effective_score, max_score, effective_percentage).
     Faza 4 nəticə səhifəsi bunu istifadə edəcək.
+
+    `answers` verilərsə (prefetch olunmuş attempt.answers.all()), siyahı
+    görünüşlərində hər attempt üçün əlavə answer sorğuları yaranmır.
     """
     from apps.exams.services.result_calculation import calculate_test_attempt_result
 
-    base = calculate_test_attempt_result(attempt)
+    base = calculate_test_attempt_result(attempt, answers=answers)
     bonus = appeal_score_state(attempt)["bonus_points"]
 
     effective_score = base.score + bonus
@@ -78,6 +84,54 @@ def effective_test_score(attempt):
         "max_score": base.max_score,
         "effective_percentage": effective_percentage,
     }
+
+
+def appeal_bonus_map(attempt_ids):
+    """
+    attempt_id → aktiv (revert olunmamış) apellyasiya bonuslarının cəmi.
+
+    Siyahı görünüşləri (müəllim nəticə cədvəli, tələbə nəticələri, export) üçün
+    TƏK sorğu — hər attempt üçün ayrıca appeal_score_state çağırmaq əvəzinə.
+    """
+    ids = [pk for pk in attempt_ids if pk]
+    if not ids:
+        return {}
+    rows = (
+        ScoreAdjustment.objects.filter(attempt_id__in=ids, reverted=False)
+        .values("attempt_id")
+        .annotate(total=Sum("delta_points"))
+    )
+    return {row["attempt_id"]: row["total"] or Decimal("0") for row in rows}
+
+
+def apply_bonus_to_test_result(result, bonus):
+    """
+    Apellyasiya bonusu tətbiq edilmiş YENİ TestAttemptResult qaytarır:
+    bal maks. balla clamp olunur, faiz yenidən hesablanır. Bonus yoxdursa
+    (None/0/mənfi) nəticə dəyişmir.
+
+    Düzgün/səhv sayları dəyişmir — apellyasiya additiv bal düzəlişidir,
+    cavab açarı yox (bax: modul docstring).
+    """
+    if result is None:
+        return result
+    try:
+        bonus = Decimal(str(bonus if bonus is not None else 0))
+    except (InvalidOperation, TypeError, ValueError):
+        return result
+    if bonus <= 0:
+        return result
+
+    effective_score = result.score + bonus
+    if result.max_score and effective_score > result.max_score:
+        effective_score = result.max_score
+    if result.max_score and result.max_score > 0:
+        percentage = (effective_score * Decimal("100") / result.max_score).quantize(
+            Decimal("0.1"), rounding=ROUND_HALF_UP
+        )
+    else:
+        percentage = Decimal("0")
+    return _dataclass_replace(result, score=effective_score, percentage=percentage)
 
 
 # ---------------------------------------------------------------------------
@@ -334,6 +388,7 @@ def recompute_appeal_status(appeal, *, reviewer=None):
     has_accepted = any(s == APPEAL_ITEM_STATUS_ACCEPTED for s in statuses)
     has_rejected = any(s == APPEAL_ITEM_STATUS_REJECTED for s in statuses)
 
+    previous_status = appeal.status
     update_fields = ["status", "updated_at"]
     fully_resolved = False
 
@@ -357,12 +412,44 @@ def recompute_appeal_status(appeal, *, reviewer=None):
             appeal.reviewed_by = reviewer
             update_fields.append("reviewed_by")
     appeal.save(update_fields=update_fields)
+
+    # Tələbəyə bildiriş — yalnız status İLK DƏFƏ final vəziyyətə keçəndə
+    # (pending/under_review → accepted/rejected/partially_accepted). Müəllim
+    # 5 dəqiqəlik pəncərədə qərarı redaktə edəndə dublikat bildiriş yaranmır.
+    final_statuses = {APPEAL_STATUS_ACCEPTED, APPEAL_STATUS_REJECTED, APPEAL_STATUS_PARTIALLY_ACCEPTED}
+    if fully_resolved and previous_status not in final_statuses:
+        _notify_student_appeal_resolved(appeal)
     return appeal
+
+
+def _notify_student_appeal_resolved(appeal):
+    """Apellyasiya nəticələnəndə tələbəyə in-app bildiriş. Xəta flow-u pozmur."""
+    try:
+        from django.urls import reverse
+
+        from apps.notifications.services import create_notification
+
+        create_notification(
+            recipient=appeal.student,
+            title=pgettext("appeals.notification", "Apellyasiyanıza baxıldı"),
+            message=pgettext(
+                "appeals.notification",
+                '"{exam}" imtahanı üzrə apellyasiyanız nəticələndi. Nəticəyə baxın.',
+            ).format(exam=appeal.exam.title),
+            link=reverse("appeals:appeal_detail", kwargs={"appeal_id": appeal.id}),
+            notification_type="grade",
+            metadata={"appeal_id": appeal.id, "attempt_id": appeal.attempt_id, "exam_id": appeal.exam_id},
+            organization=appeal.organization,
+        )
+    except Exception:
+        logger.warning("Appeal resolved notification failed.", exc_info=True)
 
 
 __all__ = [
     "accept_appeal_item",
+    "appeal_bonus_map",
     "appeal_score_state",
+    "apply_bonus_to_test_result",
     "effective_test_score",
     "recompute_appeal_status",
     "reject_appeal_item",

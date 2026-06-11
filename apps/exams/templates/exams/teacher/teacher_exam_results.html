@@ -390,7 +390,12 @@
                                 <td class="ter-num ter-num--success">{{ item.test_result.correct_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.test_result.delivered_count }}</span></td>
                                 <td class="ter-num ter-num--danger">{{ item.test_result.wrong_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.test_result.delivered_count }}</span></td>
                                 <td class="ter-num">{{ item.test_result.unanswered_count }}</td>
-                                <td class="ter-num"><strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong></td>
+                                <td class="ter-num">
+                                    <strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong>
+                                    {% if item.appeal_bonus %}
+                                        <span class="ter-badge ter-badge--info" title="Apellyasiya ilə +{{ item.appeal_bonus|floatformat:"-2" }} bal əlavə olunub">+{{ item.appeal_bonus|floatformat:"-2" }}</span>
+                                    {% endif %}
+                                </td>
                                 <td class="ter-num ter-num--accent"><strong>{{ item.test_result.percentage_display }}%</strong></td>
                             {% else %}
                                 <td class="ter-num ter-num--success">{{ att.correct_count }}<span class="ter-num-sep">/</span><span class="ter-num-total">{{ item.delivered_count }}</span></td>

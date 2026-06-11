@@ -5031,7 +5031,7 @@ class ReviewResultsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("evaluated_review_items", response.context)
 
-    def test_review_results_formats_exam_score_without_percent_and_sorts_by_submission_date(self):
+    def test_review_results_formats_exam_score_with_percent_badge_and_sorts_by_submission_date(self):
         from datetime import timedelta
 
         from django.utils import timezone
@@ -5084,7 +5084,7 @@ class ReviewResultsViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "data-bootstrap-select", html=False)
-        self.assertNotContains(response, "88%", html=False)
+        # Müəllim balı olan attempt-də faiz badge-i göstərilmir.
         self.assertNotContains(response, "91%", html=False)
 
         exam_items = [
@@ -5093,8 +5093,11 @@ class ReviewResultsViewTest(TestCase):
             if item["type"] == "exam" and item["title"] in {"Older Reviewed Exam", "Newer Reviewed Exam"}
         ]
         self.assertEqual([item["title"] for item in exam_items], ["Older Reviewed Exam", "Newer Reviewed Exam"])
-        self.assertEqual(exam_items[0]["score_display"], "88")
+        # Nəticə sütununda əsas dəyər BAL-dır (bal / maks); faiz ayrıca badge-dədir.
+        self.assertEqual(exam_items[0]["score_display"], "22 / 25")
+        self.assertEqual(exam_items[0]["score_percent_display"], "88%")
         self.assertEqual(exam_items[1]["score_display"], "91")
+        self.assertEqual(exam_items[1]["score_percent_display"], "")
         self.assertEqual(exam_items[0]["evaluator_display"], "Review Teacher")
         self.assertContains(response, "Review Teacher")
         self.assertEqual(exam_items[0]["submitted_at"], older_attempt.finished_at)

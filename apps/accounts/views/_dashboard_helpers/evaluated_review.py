@@ -73,6 +73,10 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
             )
             .select_related("exam", "user", "exam__author", "exam__course")
+            # Perf: aşağıda effective_test_score hər test attempt üçün cavabları
+            # oxuyur — prefetch olmadan bu, siyahıdakı hər sətir üçün 3-4 əlavə
+            # sorğu (N+1) deməkdir.
+            .prefetch_related("answers__question__options", "answers__selected_options")
         )
         if search_query:
             attempts = attempts.filter(
@@ -82,21 +86,35 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(exam__title__icontains=search_query)
                 | Q(exam__course__title__icontains=search_query)
             )
-        from apps.appeals.services import effective_test_score
+        from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
+        from apps.exams.services.result_calculation import calculate_test_attempt_result
+
+        attempts = list(attempts)
+        # Apellyasiya bonusları tək sorğu ilə (əvvəl hər attempt üçün ayrıca
+        # effective_test_score → ScoreAdjustment sorğusu = N+1 idi).
+        appeal_bonus_by_attempt = appeal_bonus_map([a.id for a in attempts])
 
         for attempt in attempts:
             course = attempt.exam.course
             submitted_at = attempt.finished_at or attempt.started_at
             if attempt.exam.exam_type == "test":
-                eff = effective_test_score(attempt)
-                score_value = (
-                    attempt.teacher_score if attempt.teacher_score is not None else eff["effective_percentage"]
-                )
-                score_display = _format_score_display(score_value)
-                score_percent_display = ""
+                # "Nəticə" sütununda əsas dəyər BAL-dır (bal / maks bal);
+                # faiz ayrıca badge kimi göstərilir (əvvəl yalnız faiz çıxırdı).
+                if attempt.teacher_score is not None:
+                    score_display = _format_score_display(attempt.teacher_score)
+                    score_percent_display = ""
+                else:
+                    result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
+                    bonus = appeal_bonus_by_attempt.get(attempt.id)
+                    if bonus:
+                        result = apply_bonus_to_test_result(result, bonus)
+                    score_display = f"{result.score_display} / {result.max_score_display}"
+                    score_percent_display = f"{result.percentage_display}%"
             else:
-                score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
-                score_display = _format_score_display(score_value)
+                if attempt.teacher_score is not None:
+                    score_display = _format_score_display(attempt.teacher_score)
+                else:
+                    score_display = _format_score_display(attempt.score_percent)
                 score_percent_display = ""
             items.append(
                 {

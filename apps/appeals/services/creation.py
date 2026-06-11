@@ -102,7 +102,37 @@ def create_appeal(*, attempt, student, items, org_unit=None):
             for item in cleaned
         ]
     )
+    _notify_teacher_new_appeal(appeal, item_count=len(cleaned))
     return appeal
+
+
+def _notify_teacher_new_appeal(appeal, *, item_count):
+    """İmtahan müəllifinə yeni apellyasiya barədə in-app bildiriş. Xəta flow-u pozmur."""
+    try:
+        from django.urls import reverse
+
+        from apps.notifications.services import create_notification
+
+        teacher = appeal.exam.author
+        if teacher is None or teacher.pk == appeal.student_id:
+            return
+        student_display = appeal.student.get_full_name() or appeal.student.username
+        create_notification(
+            recipient=teacher,
+            title=pgettext("appeals.notification", "Yeni apellyasiya"),
+            message=pgettext(
+                "appeals.notification",
+                '{student} "{exam}" imtahanı üzrə {count} sual üçün apellyasiya göndərdi.',
+            ).format(student=student_display, exam=appeal.exam.title, count=item_count),
+            link=reverse("appeals:review_appeal", kwargs={"appeal_id": appeal.id}),
+            notification_type="exam",
+            metadata={"appeal_id": appeal.id, "attempt_id": appeal.attempt_id, "exam_id": appeal.exam_id},
+            organization=appeal.organization,
+        )
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).warning("New appeal notification failed.", exc_info=True)
 
 
 __all__ = ["create_appeal"]

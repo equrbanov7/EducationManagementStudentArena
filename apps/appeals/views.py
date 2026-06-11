@@ -465,12 +465,21 @@ def review_appeal(request, appeal_id):
             item.edit_minutes_left = 0
             item.edit_seconds_left = 0
         # Qəbul olunmuş item üçün verilmiş bal (input default-u).
+        # DİQQƏT: delta_points FƏRQDİR (verilən bal − əvvəlki töhfə), input isə
+        # "bu suala verilən bal"ı gözləyir — birbaşa delta göstərmək yanlış idi.
         try:
             adjustment = item.score_adjustment
         except ObjectDoesNotExist:
             adjustment = None
-        if item.current_decision == "accept" and adjustment and not adjustment.reverted and adjustment.delta_points:
-            item.awarded_value = adjustment.delta_points
+        if item.current_decision == "accept" and adjustment and not adjustment.reverted:
+            if is_test:
+                base_contribution = item.max_points if adjustment.previous_is_correct else 0
+                item.awarded_value = (adjustment.delta_points or 0) + base_contribution
+            elif item.answer_id and item.answer and item.answer.teacher_score is not None:
+                # Yazılı/praktiki: cari verilmiş bal birbaşa cavabda saxlanılır.
+                item.awarded_value = item.answer.teacher_score
+            else:
+                item.awarded_value = item.max_points
         else:
             item.awarded_value = item.max_points
         # Test: tələbənin seçdiyi variant id-ləri (variant analizi üçün).

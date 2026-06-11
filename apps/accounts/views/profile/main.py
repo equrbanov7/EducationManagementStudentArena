@@ -23,7 +23,7 @@ from django.utils.translation import pgettext_lazy
 from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, StudentGroup
-from apps.notifications.models import StudentOrganizationRequestStatus
+from apps.notifications.models import NotificationType, StudentOrganizationRequestStatus
 from apps.notifications.services import (
     build_profile_notification_state,
     get_unread_count,
@@ -1346,6 +1346,7 @@ def user_profile(request):
     # Sidebar yalnız `notifications_unread_count`-dan istifadə edir; tam siyahını
     # yalnız notifications bölməsi açıq olduqda hazırla.
     notif_filter = "all"
+    notif_type = ""
     notif_search_query = ""
     notif_pagination_query = ""
     in_app_notifications_page = None
@@ -1353,6 +1354,10 @@ def user_profile(request):
         notif_filter = request.GET.get("notif_filter", "all")
         if notif_filter not in ("all", "unread", "read"):
             notif_filter = "all"
+        # Tip filtri — yalnız mövcud NotificationType dəyərləri qəbul olunur.
+        notif_type = request.GET.get("notif_type", "")
+        if notif_type not in {t.value for t in NotificationType}:
+            notif_type = ""
         notif_search_query = _normalize_public_profile_query_value(
             request.GET.get("notif_search"),
             max_length=100,
@@ -1360,6 +1365,7 @@ def user_profile(request):
         in_app_notifications_qs = get_user_notifications(
             user=request.user,
             filter_by=notif_filter,
+            notification_type=notif_type,
             search_query=notif_search_query,
         )
         # recipient=user is the security boundary; bypass RLS so the profile inbox
@@ -1372,6 +1378,7 @@ def user_profile(request):
         notif_pagination_query = _query_string(
             section="notifications",
             notif_filter=notif_filter,
+            notif_type=notif_type,
             notif_search=notif_search_query,
         )
 
@@ -1881,6 +1888,8 @@ def user_profile(request):
         "in_app_unread_count": in_app_unread_count,
         "in_app_notifications_page": in_app_notifications_page,
         "notif_filter": notif_filter,
+        "notif_type": notif_type,
+        "notif_notification_types": NotificationType.choices,
         "notif_search_query": notif_search_query,
         "notif_pagination_query": notif_pagination_query,
         "pending_student_join_org_name": pending_student_join_org_name,

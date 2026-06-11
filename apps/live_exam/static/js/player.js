@@ -838,9 +838,17 @@ function renderResult(payload) {
         ? ordinal(personalResult.answer_rank)
         : tr("resultNoRank", "No rank");
     const points = hasAnswer ? Number(personalResult.awarded_points || 0) : 0;
-    const totalScore = hasAnswer && Number.isFinite(Number(personalResult.total_score))
+    // IMPORTANT: guard against null before Number() — Number(null) === 0 and is
+    // "finite", which used to zero every non-answering player's total score at
+    // reveal time. Server payloads remain the source of truth; when neither a
+    // personal result nor a pending score exists, keep the last known total.
+    const personalTotalScore = hasAnswer && personalResult.total_score != null
         ? Number(personalResult.total_score)
-        : (Number.isFinite(Number(state.pendingScore)) ? Number(state.pendingScore) : state.player.score);
+        : NaN;
+    const pendingScoreValue = state.pendingScore != null ? Number(state.pendingScore) : NaN;
+    const totalScore = Number.isFinite(personalTotalScore)
+        ? personalTotalScore
+        : (Number.isFinite(pendingScoreValue) ? pendingScoreValue : Number(state.player.score) || 0);
     const resultSignature = [
         getRevealKey(payload),
         hasAnswer ? 1 : 0,
@@ -1244,7 +1252,7 @@ function applyQuestionState(question, playerAnswer, previousTop) {
 
     if (playerAnswer) {
         state.currentAnswer = Object.assign({}, state.currentAnswer || {}, playerAnswer);
-        state.pendingScore = Number.isFinite(Number(playerAnswer.total_score))
+        state.pendingScore = playerAnswer.total_score != null && Number.isFinite(Number(playerAnswer.total_score))
             ? Number(playerAnswer.total_score)
             : state.pendingScore;
         state.waitingMessage = state.waitingMessage || pickWaitingMessage();
@@ -1272,7 +1280,7 @@ function applyRevealState(payload) {
     const personalResult = getPersonalResult(payload);
     if (personalResult) {
         state.currentAnswer = Object.assign({}, state.currentAnswer || {}, personalResult);
-        state.pendingScore = Number.isFinite(Number(personalResult.total_score))
+        state.pendingScore = personalResult.total_score != null && Number.isFinite(Number(personalResult.total_score))
             ? Number(personalResult.total_score)
             : state.pendingScore;
     }
@@ -1423,9 +1431,11 @@ function handleAnswerSaved(data) {
     }
     state.submitting = false;
     state.currentAnswer = Object.assign({}, state.currentAnswer || {}, data, {
-        total_score: data.total_score || data.score || state.pendingScore || state.player.score,
+        // `??` instead of `||`: a legitimate total of 0 must not fall through
+        // to stale values.
+        total_score: data.total_score ?? data.score ?? state.pendingScore ?? state.player.score,
     });
-    state.pendingScore = Number.isFinite(Number(state.currentAnswer.total_score))
+    state.pendingScore = state.currentAnswer.total_score != null && Number.isFinite(Number(state.currentAnswer.total_score))
         ? Number(state.currentAnswer.total_score)
         : state.pendingScore;
     state.waitingMessage = pickWaitingMessage();

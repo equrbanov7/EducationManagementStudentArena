@@ -8,7 +8,9 @@ from .permissions import (
 )
 from .scoring import (
     accept_appeal_item,
+    appeal_bonus_map,
     appeal_score_state,
+    apply_bonus_to_test_result,
     effective_test_score,
     recompute_appeal_status,
     reject_appeal_item,
@@ -26,8 +28,10 @@ __all__ = [
     "APPEAL_ELIGIBLE_ATTEMPT_STATUSES",
     "InvalidAppealTransition",
     "accept_appeal_item",
+    "appeal_bonus_map",
     "appeal_deadline",
     "appeal_score_state",
+    "apply_bonus_to_test_result",
     "assert_transition",
     "can_create_appeal",
     "can_decide_appeal",

@@ -157,11 +157,17 @@ def exam_result(request, slug, attempt_id):
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
     appeal_remaining_seconds = remaining_window_seconds(attempt)
     # Qəbul olunmuş apellyasiya bonusları nəticədə əks olunsun (test üçün).
-    effective_score_info = effective_test_score(attempt) if exam.exam_type == "test" else None
+    effective_score_info = effective_test_score(attempt, answers=answers) if exam.exam_type == "test" else None
     _appeal_state = appeal_score_state(attempt)
     appeal_bonus_points = _appeal_state["bonus_points"]
     # Hansı sualların balı apellyasiya ilə düzəlib (nəticədə işarələmək üçün).
     appeal_corrected_qids = {question_id: True for question_id in _appeal_state["credited_question_ids"]}
+    # Baş bal göstəricisi də EFFEKTİV balı göstərsin — bonus yalnız aşağıdakı
+    # qeyddə yox, əsas faiz/bal blokunda da əks olunmalıdır.
+    if test_result is not None and appeal_bonus_points:
+        from apps.appeals.services import apply_bonus_to_test_result
+
+        test_result = apply_bonus_to_test_result(test_result, appeal_bonus_points)
 
     return render(
         request,

@@ -9,7 +9,7 @@ import random
 from datetime import datetime
 from typing import Any
 
-from django.db.models import F, IntegerField, OuterRef, Subquery, Sum, Value
+from django.db.models import F, IntegerField, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.expressions import ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext
@@ -176,23 +176,27 @@ def serialize_player_question_result(
     if not player_id:
         return None
 
-    answers = list(
-        LiveAnswer.objects.filter(session=session, question_id=question_id)
+    answer = (
+        LiveAnswer.objects.filter(session=session, question_id=question_id, player_id=player_id)
         .select_related("player")
-        .order_by("answer_ms", "created_at", "id")
+        .first()
     )
-    if not answers:
-        return None
-
-    answer = next((item for item in answers if int(item.player_id) == int(player_id)), None)
     if answer is None:
         return None
 
-    answer_rank = 1
-    for index, item in enumerate(answers, start=1):
-        if item.id == answer.id:
-            answer_rank = index
-            break
+    # Speed rank = how many answers sort strictly before this one under the
+    # (answer_ms, created_at, id) ordering. A targeted COUNT replaces the old
+    # "fetch every answer in the round" approach (O(players) rows per call).
+    answer_rank = (
+        LiveAnswer.objects.filter(session=session, question_id=question_id)
+        .filter(
+            Q(answer_ms__lt=answer.answer_ms)
+            | Q(answer_ms=answer.answer_ms, created_at__lt=answer.created_at)
+            | Q(answer_ms=answer.answer_ms, created_at=answer.created_at, id__lt=answer.id)
+        )
+        .count()
+        + 1
+    )
 
     choice_ids = list(answer.choice_ids or [])
     if not choice_ids and answer.choice_id is not None:

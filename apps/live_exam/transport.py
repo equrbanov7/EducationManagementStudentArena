@@ -101,7 +101,12 @@ def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
         answer_ms = int(data.get("answer_ms") or 0)
 
         if isinstance(data.get("option_ids"), list):
-            option_ids = [int(value) for value in data.get("option_ids") if str(value).isdigit()]
+            raw_option_ids = data.get("option_ids")
+            # Bound attacker-controlled list size before any processing; no real
+            # question has anywhere near this many options.
+            if len(raw_option_ids) > 50:
+                return False, pgettext("live_exam.consumer.error", "bad_payload")
+            option_ids = [int(value) for value in raw_option_ids if str(value).isdigit()]
         else:
             option_ids = [int(data.get("option_id"))]
 
