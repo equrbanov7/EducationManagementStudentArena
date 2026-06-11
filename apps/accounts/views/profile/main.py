@@ -984,6 +984,48 @@ def user_profile(request):
         "post_next_url": "",
         "pending_count": 0,
     }
+    org_structure_section = {
+        "organization": active_organization,
+        "units": [],
+        "faculties": [],
+        "kafedras": [],
+        "faculty_count": 0,
+        "kafedra_count": 0,
+        "unit_total_count": 0,
+        "can_create_faculty": False,
+        "can_create_kafedra": False,
+        "faculty_parent_options": [],
+        "form_errors": {},
+        "form_values": {},
+        "notice": "",
+        "profile_base_url": reverse("accounts:profile"),
+        "embedded_in_profile": True,
+    }
+    org_members_section = {
+        "organization": active_organization,
+        "members": [],
+        "members_page_obj": None,
+        "roles": [],
+        "current_role": "",
+        "search_query": "",
+        "can_view": False,
+        "members_pagination_query": "section=org-members",
+        "profile_base_url": reverse("accounts:profile"),
+        "embedded_in_profile": True,
+    }
+    org_roles_section = {
+        "organization": active_organization,
+        "roles": [],
+        "can_view": False,
+        "profile_base_url": reverse("accounts:profile"),
+        "embedded_in_profile": True,
+    }
+    audit_log_section = {
+        "audit_logs": [],
+        "current_organization": active_organization,
+        "is_superadmin": capabilities["is_superadmin"],
+        "embedded_in_profile": True,
+    }
 
     management_org = None
     management_user_level = 0
@@ -1299,6 +1341,30 @@ def user_profile(request):
             section="manage-roles",
             manage_roles_search=manage_roles_search,
         )
+
+    if active_section == "org-structure" and "org-structure" in allowed_sections and active_organization is not None:
+        from apps.organizations.views import build_organization_structure_context
+
+        org_structure_section = build_organization_structure_context(request, active_organization)
+        org_structure_section["embedded_in_profile"] = True
+
+    if active_section == "org-members" and "org-members" in allowed_sections and active_organization is not None:
+        from apps.organizations.views import build_organization_members_context
+
+        org_members_section = build_organization_members_context(request, active_organization)
+        org_members_section["embedded_in_profile"] = True
+
+    if active_section == "org-roles" and "org-roles" in allowed_sections and active_organization is not None:
+        from apps.organizations.views import build_organization_roles_context
+
+        org_roles_section = build_organization_roles_context(request, active_organization)
+        org_roles_section["embedded_in_profile"] = True
+
+    if active_section == "audit-log" and "audit-log" in allowed_sections:
+        from apps.audit.views import build_audit_log_context
+
+        audit_log_section = build_audit_log_context(request)
+        audit_log_section["embedded_in_profile"] = True
 
     # Superadmin "pending org" badge sidebar üçündür — ucuz `Organization.objects... .count()`-i hər zaman saxla.
     if "superadmin-organizations" in allowed_sections and active_section != "superadmin-organizations":
@@ -1845,6 +1911,10 @@ def user_profile(request):
         "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
         "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
         "unit-exams": "Bölmə imtahanları",
+        "org-structure": "Fakültə və kafedralar",
+        "org-members": "Struktur üzvləri",
+        "org-roles": "Təşkilat rolları",
+        "audit-log": "Audit jurnalı",
     }
 
     shortcut_sections = []
@@ -1873,6 +1943,10 @@ def user_profile(request):
         "permission-editor": "accounts/profile/sections/_permission_editor.html",
         "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
         "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
+        "org-structure": "accounts/profile/sections/_org_structure.html",
+        "org-members": "accounts/profile/sections/_org_members.html",
+        "org-roles": "accounts/profile/sections/_org_roles.html",
+        "audit-log": "accounts/profile/sections/_audit_log.html",
     }
 
     context = {
@@ -2010,6 +2084,10 @@ def user_profile(request):
         "student_org_management_section": student_org_management_section,
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
+        "org_structure_section": org_structure_section,
+        "org_members_section": org_members_section,
+        "org_roles_section": org_roles_section,
+        "audit_log_section": audit_log_section,
         "superadmin_users_section": superadmin_users_section,
         "superadmin_ai_settings_section": superadmin_ai_settings_section,
         "superadmin_org_features_section": superadmin_org_features_section,

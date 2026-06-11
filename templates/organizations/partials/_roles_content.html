@@ -1,0 +1,42 @@
+{% load i18n %}
+{% with s=org_roles_section %}
+<div class="org-management org-management--roles">
+    {% if not s.organization %}
+        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+    {% else %}
+    <div class="org-management__header">
+        <div>
+            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
+            <h1>Təşkilat rolları</h1>
+            <p class="org-management__subtitle">Rollar və icazələr aktiv təşkilat çərçivəsində göstərilir.</p>
+        </div>
+    </div>
+
+    <div class="org-management__role-grid">
+        {% for role in s.roles %}
+            <article class="org-management__role-card">
+                <div class="org-management__role-head">
+                    <div>
+                        <h2>{{ role.display_name }}</h2>
+                        {% if role.description %}<p>{{ role.description }}</p>{% endif %}
+                    </div>
+                    <span class="org-management__level">{% trans "level_prefix" context "organizations.roles" %} {{ role.level }}</span>
+                </div>
+                {% if role.is_system %}
+                    <span class="org-management__system-badge">{% trans "system_role" context "organizations.roles" %}</span>
+                {% endif %}
+                <div class="org-management__permissions">
+                    {% for perm in role.permissions %}
+                        <span>{{ perm }}</span>
+                    {% empty %}
+                        <span class="org-management__muted">{% trans "no_permissions" context "organizations.roles" %}</span>
+                    {% endfor %}
+                </div>
+            </article>
+        {% empty %}
+            <div class="org-management__empty">{% trans "no_roles_found" context "organizations.roles" %}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

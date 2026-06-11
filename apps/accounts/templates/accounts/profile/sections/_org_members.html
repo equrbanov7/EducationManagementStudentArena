@@ -1,0 +1,4 @@
+<section class="profile-section-panel profile-section--org-members {% if active_section == 'org-members' %}is-active{% endif %}"
+         data-profile-section-panel="org-members">
+    {% include "organizations/partials/_members_content.html" with org_members_section=org_members_section %}
+</section>

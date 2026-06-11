@@ -41,6 +41,7 @@
     {% for appeal in appeal_list %}
     <a href="{% url 'appeals:appeal_detail' appeal.id %}"
        class="appeal-case-card"
+       data-no-route-loading
        data-appeal-detail-url="{% url 'appeals:appeal_detail' appeal.id %}">
         <div class="appeal-case-card__head">
             <div>

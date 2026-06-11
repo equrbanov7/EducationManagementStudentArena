@@ -81,6 +81,7 @@
                             class="btn btn-sm btn-outline-primary profile-group-open-btn jsOpenGroupDetailModal"
                             title="{% trans 'view_group_students' context 'profile.groups' %}"
                             data-group-id="{{ group.id }}"
+                            data-no-route-loading
                         >
                             <i class="fas fa-eye"></i>
                             <span>{% trans "view" context "profile.groups" %}</span>
@@ -286,11 +287,16 @@
 (function () {
     function initProfileGroupDetailModals() {
         if (typeof window.bootstrap === "undefined") { return; }
-        var detailModalEl = document.getElementById("profileGroupDetailModal");
-        var removeModalEl = document.getElementById("profileGroupRemoveStudentModal");
-        var removeBodyEl = document.getElementById("profileGroupRemoveStudentBody");
-        var removeFormEl = document.getElementById("profileGroupRemoveStudentForm");
-        var removeNextEl = document.getElementById("profileGroupRemoveStudentNext");
+        var activeGroupsPanel = document.querySelector('[data-profile-section-panel="groups"]');
+        var detailModalEl = activeGroupsPanel
+            ? activeGroupsPanel.querySelector("#profileGroupDetailModal")
+            : document.getElementById("profileGroupDetailModal");
+        var removeModalEl = activeGroupsPanel
+            ? activeGroupsPanel.querySelector("#profileGroupRemoveStudentModal")
+            : document.getElementById("profileGroupRemoveStudentModal");
+        var removeBodyEl = null;
+        var removeFormEl = null;
+        var removeNextEl = null;
         var removeConfirmText = "{% filter escapejs %}{% trans 'remove_student_confirm_body' context 'profile.groups' %}{% endfilter %}";
 
         if (detailModalEl) {
@@ -310,7 +316,16 @@
                 detailModalEl.addEventListener("hide.bs.modal", function () {
                     var closeUrl = detailModalEl.getAttribute("data-close-url");
                     if (closeUrl) {
-                        window.location.href = closeUrl;
+                        if (typeof window.EMSProfileLoadSection === "function") {
+                            window.EMSProfileLoadSection("groups", closeUrl, { updateUrl: true });
+                        } else {
+                            window.location.href = closeUrl;
+                        }
+                    }
+                });
+                detailModalEl.addEventListener("hidden.bs.modal", function () {
+                    if (detailModalEl.parentNode) {
+                        detailModalEl.parentNode.removeChild(detailModalEl);
                     }
                 });
             }
@@ -325,6 +340,9 @@
             if (removeModalEl.parentElement !== document.body) {
                 document.body.appendChild(removeModalEl);
             }
+            removeBodyEl = removeModalEl.querySelector("#profileGroupRemoveStudentBody");
+            removeFormEl = removeModalEl.querySelector("#profileGroupRemoveStudentForm");
+            removeNextEl = removeModalEl.querySelector("#profileGroupRemoveStudentNext");
             var removeModal = window.bootstrap.Modal.getOrCreateInstance(removeModalEl);
 
             window.EMSDelegate.on("click", ".jsOpenRemoveStudentFromGroup", function (event, btn) {

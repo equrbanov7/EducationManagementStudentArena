@@ -341,9 +341,30 @@ document.addEventListener("DOMContentLoaded", function () {
             && typeof window.fetch === "function";
     }
 
-    function buildSectionFragmentUrl(section) {
-        // Backend URL şablonunda `__SECTION__` yer-tutucusu var.
-        return sectionFragmentUrlTemplate.replace("__SECTION__", encodeURIComponent(section));
+    function copySourceQueryToTarget(sourceUrl, targetUrl, section) {
+        if (!sourceUrl) {
+            targetUrl.searchParams.set("section", section);
+            return targetUrl;
+        }
+        try {
+            var source = new URL(sourceUrl, window.location.origin);
+            source.searchParams.forEach(function (value, key) {
+                if (key !== "section") {
+                    targetUrl.searchParams.append(key, value);
+                }
+            });
+        } catch (e) { /* ignore */ }
+        targetUrl.searchParams.set("section", section);
+        return targetUrl;
+    }
+
+    function buildSectionFragmentUrl(section, sourceUrl) {
+        // Backend URL şablonunda `__SECTION__` yer-tutucusu var. Source URL-in
+        // query param-ləri (filter/pagination) fragment request-ə daşınır.
+        var fragmentPath = sectionFragmentUrlTemplate.replace("__SECTION__", encodeURIComponent(section));
+        var target = new URL(fragmentPath, window.location.origin);
+        copySourceQueryToTarget(sourceUrl, target, section);
+        return target.pathname + target.search;
     }
 
     function updateSidebarActiveState(section) {
@@ -357,13 +378,13 @@ document.addEventListener("DOMContentLoaded", function () {
         openSidebarMenuGroupForSection(section);
     }
 
-    function pushSectionUrl(section) {
+    function pushSectionUrl(section, sourceUrl) {
         if (!window.history || !window.history.pushState) {
             return;
         }
         try {
             var nextUrl = new URL(profileBaseUrl, window.location.origin);
-            nextUrl.searchParams.set("section", section);
+            copySourceQueryToTarget(sourceUrl, nextUrl, section);
             window.history.pushState({ section: section, ajax: true }, "", nextUrl.pathname + nextUrl.search);
         } catch (e) { /* ignore */ }
     }
@@ -389,6 +410,57 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (e) {
             return null;
         }
+    }
+
+    function replaceSectionHtml(section, html, options) {
+        options = options || {};
+        var node = extractSectionFromHtml(html, section);
+        if (!node) {
+            return false;
+        }
+        node.classList.add("is-active");
+        var oldPanels = sectionsHost.querySelectorAll("[data-profile-section-panel]");
+        oldPanels.forEach(function (p) {
+            if (p.parentNode) {
+                p.parentNode.removeChild(p);
+            }
+        });
+        sectionsHost.appendChild(node);
+
+        var responseDoc = (function () {
+            try {
+                return new window.DOMParser().parseFromString(html, "text/html");
+            } catch (e) { return null; }
+        })();
+        if (responseDoc) {
+            var responsePanels = responseDoc.querySelectorAll("[data-profile-section-panel]");
+            responsePanels.forEach(function (p) {
+                var key = p.getAttribute("data-profile-section-panel");
+                if (!key || key === section) { return; }
+                if (sectionsHost.querySelector('[data-profile-section-panel="' + key + '"]')) {
+                    return;
+                }
+                var ph = document.createElement("section");
+                ph.className = "profile-section-panel profile-section-placeholder";
+                ph.setAttribute("data-profile-section-panel", key);
+                ph.setAttribute("aria-hidden", "true");
+                ph.hidden = true;
+                sectionsHost.appendChild(ph);
+            });
+        }
+
+        try { executeInlineScripts(node); } catch (e) { /* ignore */ }
+        try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
+        updateSidebarActiveState(section);
+        if (options.updateUrl !== false) {
+            pushSectionUrl(section, options.sourceUrl);
+        }
+        sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
+        if (typeof isMobileViewport === "function" && isMobileViewport()) {
+            setSidebarCollapsed(true);
+        }
+        try { refreshBadges(); } catch (e) { /* ignore */ }
+        return true;
     }
 
     /**
@@ -555,7 +627,7 @@ document.addEventListener("DOMContentLoaded", function () {
             fetchOpts.signal = controller.signal;
         }
 
-        return fetch(buildSectionFragmentUrl(section), fetchOpts)
+        return fetch(buildSectionFragmentUrl(section, options.sourceUrl), fetchOpts)
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error("http_" + response.status);
@@ -566,68 +638,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!payload || payload.ok !== true || !payload.html) {
                     throw new Error("bad_payload");
                 }
-                var node = extractSectionFromHtml(payload.html, section);
-                if (!node) {
+                if (!replaceSectionHtml(section, payload.html, {
+                    updateUrl: options.updateUrl,
+                    sourceUrl: options.sourceUrl
+                })) {
                     throw new Error("section_not_in_response");
                 }
-                node.classList.add("is-active");
-                // ƏVVƏLCƏ host-dakı bütün REAL (placeholder olmayan) panel-ləri
-                // sil — əks halda əvvəlki bölmə DOM-da qalır və üst-üstə düşür.
-                // Eyni zamanda hədəf section-un placeholder-ini də sil ki,
-                // dublikat olmasın.
-                var oldPanels = sectionsHost.querySelectorAll("[data-profile-section-panel]");
-                oldPanels.forEach(function (p) {
-                    if (p.parentNode) {
-                        p.parentNode.removeChild(p);
-                    }
-                });
-                sectionsHost.appendChild(node);
-                // Digər allowed section-lar üçün placeholder-ləri yenidən qur ki,
-                // setActiveSection / DOM query-lər doğru işləsin.
-                var responseDoc = (function () {
-                    try {
-                        return new window.DOMParser().parseFromString(payload.html, "text/html");
-                    } catch (e) { return null; }
-                })();
-                if (responseDoc) {
-                    var responsePanels = responseDoc.querySelectorAll("[data-profile-section-panel]");
-                    responsePanels.forEach(function (p) {
-                        var key = p.getAttribute("data-profile-section-panel");
-                        if (!key || key === section) { return; }
-                        if (sectionsHost.querySelector('[data-profile-section-panel="' + key + '"]')) {
-                            return;
-                        }
-                        // Placeholder klonu (boş, hidden) — script-siz.
-                        var ph = document.createElement("section");
-                        ph.className = "profile-section-panel profile-section-placeholder";
-                        ph.setAttribute("data-profile-section-panel", key);
-                        ph.setAttribute("aria-hidden", "true");
-                        ph.hidden = true;
-                        sectionsHost.appendChild(ph);
-                    });
-                }
-                // Inline script-ləri DOM-a yenidən qoş ki, section-un öz JS-i
-                // (notif modal, statistika chart, və s.) işləsin.
-                try { executeInlineScripts(node); } catch (e) { /* ignore */ }
-                // Universal hook — external script-lərin re-bind etməsi üçün.
-                try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
-                // Sidebar/Title/URL yenilə
-                updateSidebarActiveState(section);
-                if (options.updateUrl !== false) {
-                    pushSectionUrl(section);
-                }
-                // sectionPanels referansını təzələ ki, gələcək setActiveSection-larda işləsin.
-                sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
-                // Mobile-də sidebar-ı bağla.
-                if (typeof isMobileViewport === "function" && isMobileViewport()) {
-                    setSidebarCollapsed(true);
-                }
-                // P3-extra — badge-ləri arxa planda yenilə. Səhv olarsa naviqasiya
-                // pozulmur (fail-soft); badge refresh məcburi deyil.
-                try { refreshBadges(); } catch (e) { /* ignore */ }
                 return true;
             })
             .catch(function (err) {
+                if (err && err.name === "AbortError") {
+                    return true;
+                }
                 // Fail soft — caller will full-page navigate.
                 return false;
             })
@@ -639,6 +661,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 return result;
             });
     }
+
+    window.EMSProfileLoadSection = function (section, sourceUrl, options) {
+        options = options || {};
+        options.sourceUrl = sourceUrl || options.sourceUrl || "";
+        if (typeof options.updateUrl === "undefined") {
+            options.updateUrl = true;
+        }
+        return tryAjaxLoadSection(section, options);
+    };
 
     function setActiveSection(section, updateUrl) {
         // P2 cleanup — Hədəf paneli olmadıqda mövcud "is-active"-i ləğv etmə,
@@ -1398,7 +1429,10 @@ document.addEventListener("DOMContentLoaded", function () {
             // Uğursuz olarsa fail-soft → təbii naviqasiya.
             if (isAjaxSafeSection(section)) {
                 event.preventDefault();
-                tryAjaxLoadSection(section, { updateUrl: true }).then(function (ok) {
+                tryAjaxLoadSection(section, {
+                    updateUrl: true,
+                    sourceUrl: link.getAttribute("href")
+                }).then(function (ok) {
                     if (!ok) {
                         // Fallback: tam səhifə naviqasiyası.
                         var nextUrl = new URL(profileBaseUrl, window.location.origin);
@@ -1419,6 +1453,154 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    document.addEventListener("click", function (event) {
+        if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        var trigger = event.target.closest("a[href]");
+        if (!trigger || trigger.getAttribute("data-force-navigation") === "true") {
+            return;
+        }
+        if (!trigger.closest("[data-profile-section-panel]") && !trigger.hasAttribute("data-profile-ajax-link")) {
+            return;
+        }
+
+        var linkUrl;
+        try {
+            linkUrl = new URL(trigger.getAttribute("href"), window.location.origin);
+        } catch (e) {
+            return;
+        }
+        var section = trigger.getAttribute("data-section") || linkUrl.searchParams.get("section");
+        if (!section || !isAjaxSafeSection(section)) {
+            return;
+        }
+
+        event.preventDefault();
+        tryAjaxLoadSection(section, {
+            updateUrl: true,
+            sourceUrl: linkUrl.pathname + linkUrl.search
+        }).then(function (ok) {
+            if (!ok) {
+                window.location.href = linkUrl.pathname + linkUrl.search;
+            }
+        });
+    });
+
+    document.addEventListener("submit", function (event) {
+        var form = event.target;
+        if (!form || !form.matches || !form.matches("form[data-profile-ajax-form]")) {
+            return;
+        }
+        var method = (form.getAttribute("method") || "get").toLowerCase();
+        if (method !== "get") {
+            return;
+        }
+        var formData = new FormData(form);
+        var section = form.getAttribute("data-section") || formData.get("section");
+        if (!section || !isAjaxSafeSection(section)) {
+            return;
+        }
+
+        event.preventDefault();
+        var actionUrl;
+        try {
+            actionUrl = new URL(form.getAttribute("action") || profileBaseUrl, window.location.origin);
+        } catch (e) {
+            actionUrl = new URL(profileBaseUrl, window.location.origin);
+        }
+        actionUrl.search = "";
+        formData.forEach(function (value, key) {
+            if (typeof File !== "undefined" && value instanceof File) {
+                return;
+            }
+            actionUrl.searchParams.set(key, value);
+        });
+        actionUrl.searchParams.set("section", section);
+
+        tryAjaxLoadSection(section, {
+            updateUrl: true,
+            sourceUrl: actionUrl.pathname + actionUrl.search
+        }).then(function (ok) {
+            if (!ok) {
+                window.location.href = actionUrl.pathname + actionUrl.search;
+            }
+        });
+    });
+
+    document.addEventListener("submit", function (event) {
+        var form = event.target;
+        if (!form || !form.matches || !form.matches("form[data-profile-ajax-post]")) {
+            return;
+        }
+        var section = form.getAttribute("data-section");
+        if (!section || !isAjaxSafeSection(section) || form.getAttribute("data-ajax-busy") === "1") {
+            return;
+        }
+
+        event.preventDefault();
+        form.setAttribute("data-ajax-busy", "1");
+        var submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+        submitButtons.forEach(function (button) {
+            button.disabled = true;
+        });
+
+        fetch(form.getAttribute("action"), {
+            method: (form.getAttribute("method") || "post").toUpperCase(),
+            body: new FormData(form),
+            credentials: "same-origin",
+            headers: {
+                "Accept": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+            .then(function (response) {
+                var contentType = response.headers.get("content-type") || "";
+                if (contentType.indexOf("application/json") !== -1) {
+                    return response.json().then(function (payload) {
+                        if (payload && payload.html && replaceSectionHtml(section, payload.html, {
+                            updateUrl: true,
+                            sourceUrl: profileBaseUrl + "?section=" + encodeURIComponent(section)
+                        })) {
+                            return true;
+                        }
+                        if (response.ok) {
+                            return tryAjaxLoadSection(section, {
+                                updateUrl: true,
+                                sourceUrl: profileBaseUrl + "?section=" + encodeURIComponent(section)
+                            });
+                        }
+                        throw new Error("bad_post_payload");
+                    });
+                }
+                if (response.redirected && response.url) {
+                    return tryAjaxLoadSection(section, { updateUrl: true, sourceUrl: response.url });
+                }
+                if (response.ok) {
+                    return tryAjaxLoadSection(section, {
+                        updateUrl: true,
+                        sourceUrl: profileBaseUrl + "?section=" + encodeURIComponent(section)
+                    });
+                }
+                throw new Error("post_http_" + response.status);
+            })
+            .then(function (ok) {
+                if (!ok) {
+                    HTMLFormElement.prototype.submit.call(form);
+                }
+            })
+            .catch(function () {
+                HTMLFormElement.prototype.submit.call(form);
+            })
+            .then(function () {
+                form.setAttribute("data-ajax-busy", "0");
+                submitButtons.forEach(function (button) {
+                    button.disabled = false;
+                });
+            });
+    });
+
     // P3 — Browser back/forward dəstəyi (yalnız AJAX ilə naviqasiya etdiyimiz state-lər üçün).
     window.addEventListener("popstate", function (event) {
         var state = event.state || {};
@@ -1436,7 +1618,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Tam reload kömək edir — köhnə davranışı saxla.
             return;
         }
-        tryAjaxLoadSection(section, { updateUrl: false }).then(function (ok) {
+        tryAjaxLoadSection(section, { updateUrl: false, sourceUrl: window.location.href }).then(function (ok) {
             if (!ok) {
                 window.location.reload();
             }

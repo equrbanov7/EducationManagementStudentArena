@@ -108,6 +108,7 @@
                 <td class="text-end">
                     <a href="{% url 'appeals:review_appeal' appeal.id %}"
                        class="btn btn-sm btn-primary"
+                       data-no-route-loading
                        data-appeal-review-url="{% url 'appeals:review_appeal' appeal.id %}">
                         <i class="fas fa-gavel me-1"></i>{% trans "Bax" context "appeals.template" %}
                     </a>

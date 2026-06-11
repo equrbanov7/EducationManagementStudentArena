@@ -332,6 +332,9 @@ def _role_capabilities(user, profile):
         # üzv siyahısı görür (data scoping organizations.scoping-də tətbiq olunur).
         allowed_sections.add("org-members")
 
+    if is_superadmin or is_org_admin:
+        allowed_sections.add("org-roles")
+
     # Dekan/kafedra müdürü: öz alt-ağacının imtahanlarına oxu-only baxış.
     if is_unit_manager:
         allowed_sections.add("unit-exams")
