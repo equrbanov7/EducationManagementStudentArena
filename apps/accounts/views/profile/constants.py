@@ -35,6 +35,10 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "student-organization-management",
     "permission-editor",
     "manage-roles",
+    "org-structure",
+    "org-members",
+    "org-roles",
+    "audit-log",
     "publish-notification",
     "statistics",
 }
@@ -52,6 +56,10 @@ PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
     "student-organization-management",
     "permission-editor",
     "manage-roles",
+    "org-structure",
+    "org-members",
+    "org-roles",
+    "audit-log",
     "publish-notification",
     "statistics",
 }

@@ -364,7 +364,7 @@
         </li>
         {% endif %}
 
-        {% if current_organization and 'org-structure' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
+        {% if current_organization and 'org-structure' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
         {% comment %}
         Universitet strukturu — rektor/admin bütün təşkilatı, dekan/kafedra müdürü
         yalnız öz alt-ağacını görür (backend-də unit scoping tətbiq olunur).
@@ -372,8 +372,11 @@
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Universitet idarəetməsi</span></li>
         {% if 'org-structure' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'organizations:structure' current_organization.slug %}"
-               class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=org-structure"
+               data-section="org-structure"
+               data-title="Fakültə və kafedralar"
+               data-source-url="{% url 'organizations:structure' current_organization.slug %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-structure' %}active{% endif %}">
                 <i class="fas fa-sitemap sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Fakültə və kafedralar</span>
             </a>
@@ -381,8 +384,11 @@
         {% endif %}
         {% if 'org-members' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'organizations:members' current_organization.slug %}"
-               class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=org-members"
+               data-section="org-members"
+               data-title="Struktur üzvləri"
+               data-source-url="{% url 'organizations:members' current_organization.slug %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-members' %}active{% endif %}">
                 <i class="fas fa-id-badge sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Struktur üzvləri</span>
             </a>
@@ -400,10 +406,13 @@
             </a>
         </li>
         {% endif %}
-        {% if can_manage_org and 'org-structure' in allowed_sections %}
+        {% if 'org-roles' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'organizations:roles' current_organization.slug %}"
-               class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=org-roles"
+               data-section="org-roles"
+               data-title="Təşkilat rolları"
+               data-source-url="{% url 'organizations:roles' current_organization.slug %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-roles' %}active{% endif %}">
                 <i class="fas fa-layer-group sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Təşkilat rolları</span>
             </a>
@@ -411,8 +420,11 @@
         {% endif %}
         {% if 'audit-log' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'audit:list' %}"
-               class="sidebar-menu-link">
+            <a href="{{ profile_base_url }}?section=audit-log"
+               data-section="audit-log"
+               data-title="Audit jurnalı"
+               data-source-url="{% url 'audit:list' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'audit-log' %}active{% endif %}">
                 <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">Audit jurnalı</span>
             </a>

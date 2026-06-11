@@ -1,54 +1,14 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "title" context "audit.list" %}{% endblock %}
 
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_management.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="mb-1">{% trans "heading" context "audit.list" %}</h1>
-      <p class="text-muted mb-0">
-        {% if current_organization %}
-          {{ current_organization.name }} — {% trans "subtitle_recent" context "audit.list" %}
-        {% elif is_superadmin %}
-          {% trans "subtitle_all_orgs" context "audit.list" %}
-        {% else %}
-          {% trans "subtitle_recent" context "audit.list" %}
-        {% endif %}
-      </p>
-    </div>
-  </div>
-
-  {% if audit_logs %}
-    <div class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th scope="col">{% trans "col_time" context "audit.list" %}</th>
-            <th scope="col">{% trans "col_user" context "audit.list" %}</th>
-            <th scope="col">{% trans "col_action" context "audit.list" %}</th>
-            <th scope="col">{% trans "col_resource" context "audit.list" %}</th>
-            <th scope="col">{% trans "col_organization" context "audit.list" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for log in audit_logs %}
-            <tr>
-              <td>{{ log.created_at }}</td>
-              <td>{% if log.user %}{{ log.user.username }}{% else %}{% trans "anonymous" context "audit.list" %}{% endif %}</td>
-              <td>{{ log.get_action_display|default:log.action }}</td>
-              <td>{{ log.get_resource_display }}</td>
-              <td>{% if log.organization %}{{ log.organization.name }}{% else %}-{% endif %}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div class="alert alert-light border">
-      {% trans "empty" context "audit.list" %}
-    </div>
-  {% endif %}
+    {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section %}
 </div>
 {% endblock %}

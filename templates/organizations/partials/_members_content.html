@@ -1,0 +1,87 @@
+{% load i18n %}
+{% with s=org_members_section %}
+<div class="org-management org-management--members">
+    {% if not s.organization %}
+        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+    {% else %}
+    <div class="org-management__header">
+        <div>
+            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
+            <h1>Struktur üzvləri</h1>
+            <p class="org-management__subtitle">Üzvlər aktiv təşkilat və unit scope-a görə süzülür.</p>
+        </div>
+    </div>
+
+    <form method="get"
+          action="{% if s.embedded_in_profile %}{{ s.profile_base_url }}{% else %}{% url 'organizations:members' s.organization.slug %}{% endif %}"
+          class="org-management__filters"
+          {% if s.embedded_in_profile %}data-profile-ajax-form="1" data-section="org-members"{% endif %}>
+        {% if s.embedded_in_profile %}<input type="hidden" name="section" value="org-members">{% endif %}
+        <label>
+            <span>{% trans "search_label" context "organizations.members" %}</span>
+            <input type="search"
+                   name="search"
+                   placeholder="{% trans 'search_placeholder' context 'organizations.members' %}"
+                   value="{{ s.search_query }}">
+        </label>
+        <label>
+            <span>{% trans "role_label" context "organizations.members" %}</span>
+            <select name="role">
+                <option value="">{% trans "all_roles" context "organizations.members" %}</option>
+                {% for role in s.roles %}
+                    <option value="{{ role.name }}" {% if s.current_role == role.name %}selected{% endif %}>
+                        {{ role.display_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="org-management__submit">{% trans "filter_button" context "organizations.members" %}</button>
+    </form>
+
+    <div class="org-management__table-wrap">
+        {% if s.members %}
+            <table class="org-management__table">
+                <thead>
+                    <tr>
+                        <th>{% trans "table_member" context "organizations.members" %}</th>
+                        <th>{% trans "table_role" context "organizations.members" %}</th>
+                        <th>{% trans "table_unit" context "organizations.members" %}</th>
+                        <th>{% trans "table_joined" context "organizations.members" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for membership in s.members %}
+                        <tr>
+                            <td>
+                                <div class="org-management__member">
+                                    <span class="org-management__avatar">{{ membership.user.username|first|upper }}</span>
+                                    <span>
+                                        <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
+                                        <small>{{ membership.user.email }}</small>
+                                    </span>
+                                </div>
+                            </td>
+                            <td><span class="org-management__badge">{{ membership.role.display_name }}</span></td>
+                            <td>
+                                {% if membership.scope_unit %}
+                                    {{ membership.scope_unit.name }}
+                                {% else %}
+                                    {% trans "all_units" context "organizations.members" %}
+                                {% endif %}
+                            </td>
+                            <td>{{ membership.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include "partials/_pagination.html" with page_obj=s.members_page_obj page_param="members_page" extra_query=s.members_pagination_query %}
+        {% else %}
+            <div class="org-management__empty">
+                <h3>{% trans "empty_title" context "organizations.members" %}</h3>
+                <p>{% trans "empty_subtitle" context "organizations.members" %}</p>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

@@ -1,0 +1,4 @@
+<section class="profile-section-panel profile-section--audit-log {% if active_section == 'audit-log' %}is-active{% endif %}"
+         data-profile-section-panel="audit-log">
+    {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section %}
+</section>

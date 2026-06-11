@@ -1,7 +1,7 @@
 {% load static i18n %}
 {% comment %}
   "Apellyasiyalar" (müəllim/reviewer) profil bölməsi — dashboard sağ content
-  hissəsində AJAX ilə açılır. Qərar (review) eyni panel daxilində swap olur və
+  hissəsində AJAX ilə açılır. Qərar (review) Bootstrap modalında açılır və
   AJAX ilə yadda saxlanılır; JS uğursuz olarsa standalone səhifəyə keçir.
 {% endcomment %}
 <section class="profile-section-panel profile-section--manage-appeals {% if active_section == 'manage-appeals' %}is-active{% endif %}"
@@ -26,7 +26,29 @@
             </div>
         </div>
 
-        <div data-manage-detail-view hidden></div>
+        <div class="modal fade appeal-modal appeal-modal--review"
+             id="manageAppealReviewModal"
+             tabindex="-1"
+             aria-labelledby="manageAppealReviewModalLabel"
+             aria-hidden="true"
+             data-manage-review-modal>
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable appeal-modal__dialog">
+                <div class="modal-content appeal-modal__content">
+                    <div class="modal-header appeal-modal__header">
+                        <h5 class="modal-title" id="manageAppealReviewModalLabel">
+                            {% trans "Apellyasiyaya bax" context "appeals.template" %}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
+                    </div>
+                    <div class="modal-body appeal-modal__body" data-manage-modal-body>
+                        <div class="appeal-skeleton">
+                            <div class="appeal-skeleton__row"></div>
+                            <div class="appeal-skeleton__row"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script nonce="{{ request.csp_nonce }}">
@@ -40,14 +62,16 @@
 
             var listView = panel.querySelector("[data-manage-list-view]");
             var bodyHost = panel.querySelector("[data-manage-body]");
-            var detailView = panel.querySelector("[data-manage-detail-view]");
+            var modalEl = panel.querySelector("[data-manage-review-modal]");
+            var modalBody = modalEl ? modalEl.querySelector("[data-manage-modal-body]") : null;
             var manageUrl = panel.getAttribute("data-manage-url");
-            if (!listView || !bodyHost || !detailView) { return; }
+            if (!listView || !bodyHost || !modalEl || !modalBody) { return; }
 
-            var backLabel = "{% filter escapejs %}{% trans 'Siyahıya qayıt' context 'appeals.template' %}{% endfilter %}";
             var loadErr = "{% filter escapejs %}{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}{% endfilter %}";
+            var loadingHtml = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
             var currentDetailUrl = null;
             var pendingFlash = null;
+            var modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal.getOrCreateInstance(modalEl) : null;
 
             function withParam(url, extra) {
                 return url + (url.indexOf("?") === -1 ? "?" : "&") + extra;
@@ -81,9 +105,9 @@
             }
 
             function showList() {
-                detailView.hidden = true;
-                detailView.innerHTML = "";
-                listView.hidden = false;
+                if (modal) {
+                    modal.hide();
+                }
                 scrollTop();
             }
 
@@ -104,33 +128,39 @@
             }
 
             function showDetail(url) {
+                if (!modal) {
+                    window.location.href = url;
+                    return;
+                }
                 currentDetailUrl = url;
-                listView.hidden = true;
-                detailView.hidden = false;
-                detailView.innerHTML = '<div class="appeal-skeleton"><div class="appeal-skeleton__row"></div><div class="appeal-skeleton__row"></div></div>';
-                scrollTop();
+                modalBody.innerHTML = loadingHtml;
+                modal.show();
                 fetch(withParam(url, "fragment=1"), {
                     credentials: "same-origin",
                     headers: { "X-Requested-With": "XMLHttpRequest" }
                 })
                     .then(function (r) { if (!r.ok) { throw new Error("http"); } return r.text(); })
                     .then(function (html) {
-                        var back = '<div class="appeal-detail-back"><button type="button" class="btn btn-outline-secondary btn-sm" data-manage-detail-back><i class="fas fa-arrow-left me-2"></i>' + backLabel + "</button></div>";
-                        detailView.innerHTML = back + html;
+                        modalBody.innerHTML = html;
                         // Yadda saxlamadan sonra uğur mesajını detalın başında göstər.
                         if (pendingFlash) {
-                            detailView.insertBefore(makeAlert("success", pendingFlash), detailView.firstChild);
+                            modalBody.insertBefore(makeAlert("success", pendingFlash), modalBody.firstChild);
                             pendingFlash = null;
                         }
                         // Bootstrap select-ləri yenidən qur (native deyil).
                         if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.init) {
-                            window.EMSBootstrapSelect.init(detailView);
+                            window.EMSBootstrapSelect.init(modalBody);
                         }
                         if (window.EMSAppealsReview && window.EMSAppealsReview.init) {
                             window.EMSAppealsReview.init();
                         }
+                        modalBody.scrollTop = 0;
                     })
-                    .catch(function () { window.location.href = url; });
+                    .catch(function () {
+                        clearFlash(modalBody);
+                        modalBody.innerHTML = "";
+                        modalBody.appendChild(makeAlert("danger", loadErr));
+                    });
             }
 
             // Siyahıdan "Bax" → detalı eyni paneldə aç.
@@ -141,8 +171,8 @@
                 showDetail(link.getAttribute("data-appeal-review-url"));
             });
 
-            // Detal daxilində geri / ləğv → siyahıya qayıt.
-            detailView.addEventListener("click", function (e) {
+            // Detal daxilində geri / ləğv → modalı bağla və siyahını yenilə.
+            modalBody.addEventListener("click", function (e) {
                 var back = e.target && e.target.closest ? e.target.closest("[data-manage-detail-back], [data-review-cancel]") : null;
                 if (!back) { return; }
                 e.preventDefault();
@@ -151,7 +181,7 @@
             });
 
             // Qərar formu submit → AJAX (client validation appeals_review.js-də).
-            detailView.addEventListener("submit", function (e) {
+            modalBody.addEventListener("submit", function (e) {
                 var form = e.target && e.target.closest ? e.target.closest("[data-appeals-review-form]") : null;
                 if (!form) { return; }
                 if (e.defaultPrevented) { return; } // client validation bloklayıb
@@ -173,12 +203,18 @@
                             if (currentDetailUrl) { showDetail(currentDetailUrl); }
                             else { showList(); }
                         } else {
-                            clearFlash(detailView);
-                            detailView.insertBefore(makeAlert("danger", (d && d.error) || loadErr), detailView.firstChild);
-                            scrollTop();
+                            clearFlash(modalBody);
+                            modalBody.insertBefore(makeAlert("danger", (d && d.error) || loadErr), modalBody.firstChild);
+                            modalBody.scrollTop = 0;
                         }
                     })
                     .catch(function () { window.location.href = form.getAttribute("action") || window.location.href; });
+            });
+
+            modalEl.addEventListener("hidden.bs.modal", function () {
+                modalBody.innerHTML = loadingHtml;
+                currentDetailUrl = null;
+                pendingFlash = null;
             });
         }
 

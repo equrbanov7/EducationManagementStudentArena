@@ -1,0 +1,49 @@
+{% load i18n %}
+{% with s=audit_log_section %}
+<div class="org-management org-management--audit">
+    <div class="org-management__header">
+        <div>
+            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
+            <h1>{% trans "heading" context "audit.list" %}</h1>
+            <p class="org-management__subtitle">
+                {% if s.current_organization %}
+                    {{ s.current_organization.name }} — {% trans "subtitle_recent" context "audit.list" %}
+                {% elif s.is_superadmin %}
+                    {% trans "subtitle_all_orgs" context "audit.list" %}
+                {% else %}
+                    {% trans "subtitle_recent" context "audit.list" %}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if s.audit_logs %}
+        <div class="org-management__table-wrap">
+            <table class="org-management__table">
+                <thead>
+                    <tr>
+                        <th>{% trans "col_time" context "audit.list" %}</th>
+                        <th>{% trans "col_user" context "audit.list" %}</th>
+                        <th>{% trans "col_action" context "audit.list" %}</th>
+                        <th>{% trans "col_resource" context "audit.list" %}</th>
+                        <th>{% trans "col_organization" context "audit.list" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in s.audit_logs %}
+                        <tr>
+                            <td>{{ log.created_at }}</td>
+                            <td>{% if log.user %}{{ log.user.username }}{% else %}{% trans "anonymous" context "audit.list" %}{% endif %}</td>
+                            <td>{{ log.get_action_display|default:log.action }}</td>
+                            <td>{{ log.get_resource_display }}</td>
+                            <td>{% if log.organization %}{{ log.organization.name }}{% else %}-{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="org-management__empty">{% trans "empty" context "audit.list" %}</div>
+    {% endif %}
+</div>
+{% endwith %}

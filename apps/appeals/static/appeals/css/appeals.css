@@ -680,6 +680,72 @@
     backdrop-filter: none;
 }
 
+/* Bootstrap modal daxilində apellyasiya detalı/review paneli */
+.appeal-modal {
+    --appeal-blue: #2563eb;
+    --appeal-blue-strong: #1d4ed8;
+    --appeal-blue-soft: #eff6ff;
+    --appeal-ink: #172033;
+    --appeal-muted: #64748b;
+    --appeal-border: #e2e8f0;
+    --appeal-surface: #ffffff;
+    --appeal-bg: #f6f8fc;
+    --appeal-amber: #f59e0b;
+    --appeal-amber-soft: #fffbeb;
+}
+
+.appeal-modal__dialog {
+    max-width: min(1120px, calc(100vw - 24px));
+}
+
+.appeal-modal__content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 26px 70px rgba(15, 23, 42, 0.24);
+}
+
+.appeal-modal__header {
+    border-bottom: 1px solid var(--appeal-border);
+    background: #f8fafc;
+    padding: 16px 20px;
+}
+
+.appeal-modal__header .modal-title {
+    color: var(--appeal-ink);
+    font-weight: 700;
+}
+
+.appeal-modal__body {
+    background: var(--appeal-bg);
+    padding: 20px;
+}
+
+.appeal-modal .appeal-hero {
+    margin-bottom: 16px;
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.appeal-modal .appeal-question-card,
+.appeal-modal .appeal-note-card,
+.appeal-modal .appeal-summary-tile {
+    background: #ffffff;
+}
+
+.appeal-modal .appeal-sticky-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 -10px 26px rgba(15, 23, 42, 0.1);
+    backdrop-filter: blur(16px);
+}
+
 /* =========================================================================
    Status badge rəngləri — vizual fərqlilik (pending/under_review/...)
    ========================================================================= */
@@ -1125,6 +1191,15 @@
 @media (max-width: 768px) {
     .appeal-shell {
         padding: 20px 12px 24px;
+    }
+
+    .appeal-modal__dialog {
+        max-width: calc(100vw - 12px);
+        margin: 6px auto;
+    }
+
+    .appeal-modal__body {
+        padding: 14px;
     }
 
     /* Manage cədvəli → mobil kart görünüşü */

@@ -1,0 +1,172 @@
+{% load i18n %}
+{% with s=org_structure_section %}
+<div class="org-management org-management--structure">
+    {% if not s.organization %}
+        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+    {% else %}
+    <div class="org-management__header">
+        <div>
+            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
+            <h1>Fakültə və kafedralar</h1>
+            <p class="org-management__subtitle">
+                Fakültələr və kafedralar ayrı idarə olunur. Kafedra yaradarkən aid olduğu fakültə seçilir.
+            </p>
+        </div>
+        <div class="org-management__metrics" aria-label="Struktur statistikası">
+            <span><strong>{{ s.faculty_count }}</strong> fakültə</span>
+            <span><strong>{{ s.kafedra_count }}</strong> kafedra</span>
+        </div>
+    </div>
+
+    {% if s.notice %}
+        <div class="org-management__notice org-management__notice--success">{{ s.notice }}</div>
+    {% endif %}
+    {% if s.form_errors.general %}
+        <div class="org-management__notice org-management__notice--error">{{ s.form_errors.general }}</div>
+    {% endif %}
+
+    <div class="org-management__create-grid">
+        <form method="post"
+              action="{% url 'organizations:structure' s.organization.slug %}"
+              class="org-management__form js-org-structure-create-form"
+              data-profile-ajax-post="1"
+              data-section="org-structure">
+            {% csrf_token %}
+            <input type="hidden" name="unit_kind" value="faculty">
+            <div class="org-management__form-head">
+                <h2>Yeni fakültə yarat</h2>
+                <span>Root struktur</span>
+            </div>
+            {% if not s.can_create_faculty %}
+                <p class="org-management__muted">Fakültə yaratmaq üçün bütün təşkilat scope-u və `unit.create` icazəsi lazımdır.</p>
+            {% endif %}
+            <label>
+                <span>Fakültə adı</span>
+                <input type="text"
+                       name="name"
+                       maxlength="255"
+                       value="{% if s.form_values.unit_kind == 'faculty' %}{{ s.form_values.name }}{% endif %}"
+                       placeholder="Məs: İnformasiya texnologiyaları fakültəsi"
+                       {% if not s.can_create_faculty %}disabled{% endif %}>
+            </label>
+            {% if s.form_values.unit_kind == "faculty" and s.form_errors.name %}
+                <div class="org-management__field-error">{{ s.form_errors.name }}</div>
+            {% endif %}
+            <label>
+                <span>Kod (opsional)</span>
+                <input type="text"
+                       name="code"
+                       maxlength="50"
+                       value="{% if s.form_values.unit_kind == 'faculty' %}{{ s.form_values.code }}{% endif %}"
+                       placeholder="Məs: ITF"
+                       {% if not s.can_create_faculty %}disabled{% endif %}>
+            </label>
+            <button type="submit" class="org-management__submit" {% if not s.can_create_faculty %}disabled{% endif %}>
+                Fakültə yarat
+            </button>
+        </form>
+
+        <form method="post"
+              action="{% url 'organizations:structure' s.organization.slug %}"
+              class="org-management__form js-org-structure-create-form"
+              data-profile-ajax-post="1"
+              data-section="org-structure">
+            {% csrf_token %}
+            <input type="hidden" name="unit_kind" value="kafedra">
+            <div class="org-management__form-head">
+                <h2>Yeni kafedra yarat</h2>
+                <span>Fakültəyə bağlı</span>
+            </div>
+            {% if not s.can_create_kafedra %}
+                <p class="org-management__muted">Kafedra yaratmaq üçün görünən fakültə və `unit.create` icazəsi lazımdır.</p>
+            {% endif %}
+            <label>
+                <span>Fakültə</span>
+                <select name="parent" {% if not s.can_create_kafedra %}disabled{% endif %}>
+                    <option value="">Fakültə seçin</option>
+                    {% for faculty in s.faculty_parent_options %}
+                        <option value="{{ faculty.id }}" {% if s.form_values.unit_kind == "kafedra" and s.form_values.parent == faculty.id|stringformat:"s" %}selected{% endif %}>{{ faculty.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% if s.form_values.unit_kind == "kafedra" and s.form_errors.parent %}
+                <div class="org-management__field-error">{{ s.form_errors.parent }}</div>
+            {% endif %}
+            <label>
+                <span>Kafedra adı</span>
+                <input type="text"
+                       name="name"
+                       maxlength="255"
+                       value="{% if s.form_values.unit_kind == 'kafedra' %}{{ s.form_values.name }}{% endif %}"
+                       placeholder="Məs: Kompüter elmləri kafedrası"
+                       {% if not s.can_create_kafedra %}disabled{% endif %}>
+            </label>
+            {% if s.form_values.unit_kind == "kafedra" and s.form_errors.name %}
+                <div class="org-management__field-error">{{ s.form_errors.name }}</div>
+            {% endif %}
+            <label>
+                <span>Kod (opsional)</span>
+                <input type="text"
+                       name="code"
+                       maxlength="50"
+                       value="{% if s.form_values.unit_kind == 'kafedra' %}{{ s.form_values.code }}{% endif %}"
+                       placeholder="Məs: CS"
+                       {% if not s.can_create_kafedra %}disabled{% endif %}>
+            </label>
+            <button type="submit" class="org-management__submit" {% if not s.can_create_kafedra %}disabled{% endif %}>
+                Kafedra yarat
+            </button>
+        </form>
+    </div>
+
+    <div class="org-management__columns">
+        <section class="org-management__column">
+            <div class="org-management__column-head">
+                <h2>Fakültələr</h2>
+                <span>{{ s.faculty_count }}</span>
+            </div>
+            {% if s.faculties %}
+                <div class="org-management__list">
+                    {% for faculty in s.faculties %}
+                        <article class="org-management__item">
+                            <div class="org-management__avatar">{{ faculty.name|first|upper }}</div>
+                            <div>
+                                <h3>{{ faculty.name }}</h3>
+                                <p>{% if faculty.code %}{{ faculty.code }}{% else %}Kod yoxdur{% endif %}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="org-management__empty">Hələ fakültə yaradılmayıb.</div>
+            {% endif %}
+        </section>
+
+        <section class="org-management__column">
+            <div class="org-management__column-head">
+                <h2>Kafedralar</h2>
+                <span>{{ s.kafedra_count }}</span>
+            </div>
+            {% if s.kafedras %}
+                <div class="org-management__list">
+                    {% for kafedra in s.kafedras %}
+                        <article class="org-management__item org-management__item--green">
+                            <div class="org-management__avatar">{{ kafedra.name|first|upper }}</div>
+                            <div>
+                                <h3>{{ kafedra.name }}</h3>
+                                <p>
+                                    {% if kafedra.parent %}{{ kafedra.parent.name }}{% else %}Fakültəsiz{% endif %}
+                                    {% if kafedra.code %} · {{ kafedra.code }}{% endif %}
+                                </p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="org-management__empty">Hələ kafedra yaradılmayıb.</div>
+            {% endif %}
+        </section>
+    </div>
+    {% endif %}
+</div>
+{% endwith %}

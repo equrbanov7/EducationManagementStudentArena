@@ -1,0 +1,350 @@
+.org-management {
+    color: #1f2937;
+}
+
+.org-management__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.org-management__eyebrow {
+    margin: 0 0 0.35rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.org-management__header h1 {
+    margin: 0;
+    color: #172033;
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.org-management__subtitle {
+    margin: 0.45rem 0 0;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.org-management__metrics {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.org-management__metrics span,
+.org-management__column-head span,
+.org-management__badge,
+.org-management__level,
+.org-management__system-badge {
+    border-radius: 999px;
+    background: #eef4ff;
+    color: #3152a3;
+    font-weight: 700;
+    padding: 0.4rem 0.7rem;
+}
+
+.org-management__metrics strong {
+    margin-right: 0.25rem;
+}
+
+.org-management__notice {
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+}
+
+.org-management__notice--success {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.org-management__notice--error,
+.org-management__field-error {
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.org-management__create-grid,
+.org-management__columns {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.org-management__create-grid {
+    margin-bottom: 1rem;
+}
+
+.org-management__form,
+.org-management__column,
+.org-management__role-card,
+.org-management__filters,
+.org-management__table-wrap {
+    border: 1px solid #e5edf8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.org-management__form {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1rem;
+}
+
+.org-management__form-head,
+.org-management__column-head,
+.org-management__role-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.org-management__form h2,
+.org-management__column h2,
+.org-management__role-card h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.org-management__form-head span {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.org-management__form label,
+.org-management__filters label {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    color: #475569;
+    font-weight: 700;
+}
+
+.org-management__form input,
+.org-management__form select,
+.org-management__filters input,
+.org-management__filters select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    min-height: 42px;
+    padding: 0.65rem 0.75rem;
+}
+
+.org-management__form input:disabled,
+.org-management__form select:disabled {
+    background: #f8fafc;
+    color: #94a3b8;
+}
+
+.org-management__submit {
+    border: 0;
+    border-radius: 8px;
+    background: #4f7df3;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 800;
+    min-height: 42px;
+    padding: 0.65rem 1rem;
+}
+
+.org-management__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.org-management__muted {
+    margin: 0;
+    color: #64748b;
+}
+
+.org-management__field-error {
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.org-management__column {
+    min-width: 0;
+    padding: 1rem;
+}
+
+.org-management__column-head {
+    margin-bottom: 0.85rem;
+}
+
+.org-management__list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.org-management__item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-radius: 8px;
+    background: #f8fbff;
+    padding: 0.8rem;
+}
+
+.org-management__item--green .org-management__avatar {
+    background: #059669;
+}
+
+.org-management__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #4f7df3;
+    color: #fff;
+    font-weight: 800;
+}
+
+.org-management__item h3,
+.org-management__item p {
+    margin: 0;
+}
+
+.org-management__item h3 {
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.org-management__item p,
+.org-management__member small,
+.org-management__role-card p {
+    color: #64748b;
+}
+
+.org-management__empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    color: #64748b;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.org-management__filters {
+    display: grid;
+    align-items: end;
+    gap: 0.9rem;
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) auto;
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+
+.org-management__table-wrap {
+    overflow-x: auto;
+}
+
+.org-management__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.org-management__table th,
+.org-management__table td {
+    border-bottom: 1px solid #e5edf8;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.org-management__table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.84rem;
+    text-transform: uppercase;
+}
+
+.org-management__table tr:last-child td {
+    border-bottom: 0;
+}
+
+.org-management__member {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.org-management__member span:last-child {
+    display: grid;
+}
+
+.org-management__role-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.org-management__role-card {
+    padding: 1rem;
+}
+
+.org-management__role-head {
+    margin-bottom: 0.7rem;
+}
+
+.org-management__role-head p {
+    margin: 0.35rem 0 0;
+}
+
+.org-management__permissions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.8rem;
+}
+
+.org-management__permissions span {
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 0.55rem;
+}
+
+.org-management .pagination-wrapper {
+    margin: 1rem;
+}
+
+@media (max-width: 900px) {
+    .org-management__header,
+    .org-management__form-head,
+    .org-management__column-head,
+    .org-management__role-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .org-management__metrics {
+        justify-content: flex-start;
+    }
+
+    .org-management__create-grid,
+    .org-management__columns,
+    .org-management__filters {
+        grid-template-columns: 1fr;
+    }
+}

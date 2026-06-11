@@ -14,6 +14,25 @@
   var deleteModalElement = panel.querySelector("#profileGroupDeleteModal");
   var form = panel.querySelector("#profileGroupForm");
 
+  if (window.EMSDelegate) {
+    window.EMSDelegate.on("click", ".jsOpenGroupDetailModal", function (event, link) {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      if (typeof window.EMSProfileLoadSection !== "function") {
+        return;
+      }
+
+      event.preventDefault();
+      var href = link.getAttribute("href") || "?section=groups";
+      window.EMSProfileLoadSection("groups", href, { updateUrl: true }).then(function (ok) {
+        if (!ok) {
+          window.location.href = href;
+        }
+      });
+    });
+  }
+
   if (!modalElement || !form || typeof window.bootstrap === "undefined") {
     return;
   }
