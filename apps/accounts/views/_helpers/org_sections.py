@@ -198,6 +198,24 @@ def _build_student_org_management_section(
         )
         return section
 
+    # Unit scoping (Faza 2): dekan/kafedra müdürü kimi UNIT-scope idarəçilər
+    # yalnız öz fakültə/kafedra alt-ağacına bağlı üzvləri görür. Alt-ağac unit
+    # id-ləri bir dəfə hesablanır (path-prefix, tək sorğu) və bütün
+    # siyahılara tətbiq olunur. Org-wide rollar (rektor/admin/HR) üçün dəyişiklik yoxdur.
+    from apps.organizations.scoping import get_unit_scope
+
+    unit_scope = get_unit_scope(request.user, organization, request=request)
+    scoped_unit_ids = None
+    if not is_superadmin and unit_scope.is_unit_scoped:
+        from apps.organizations.models import OrgUnit
+
+        scoped_unit_ids = list(
+            OrgUnit.objects.filter(organization=organization)
+            .filter(unit_scope.unit_subtree_q())
+            .values_list("pk", flat=True)
+        )
+    section["unit_scope_active"] = scoped_unit_ids is not None
+
     # Bypass RLS for all management queries.  The Membership and
     # StudentOrganizationRequest tables are RLS-protected in PostgreSQL.
     # Although the admin's current_org_id is set, cross-org subqueries
@@ -210,7 +228,7 @@ def _build_student_org_management_section(
 
     set_rls_bypass(True)
 
-    sent_pending_invites = list(
+    sent_pending_invites_qs = (
         Membership.objects.filter(
             organization=organization,
             is_active=False,
@@ -221,6 +239,10 @@ def _build_student_org_management_section(
         .select_related("user", "assigned_by", "role", "user__profile")
         .order_by("-updated_at", "user__username")
     )
+    if scoped_unit_ids is not None:
+        # Unit-scoped idarəçi yalnız öz alt-ağacına ünvanlanmış dəvətləri görür.
+        sent_pending_invites_qs = sent_pending_invites_qs.filter(scope_unit_id__in=scoped_unit_ids)
+    sent_pending_invites = list(sent_pending_invites_qs)
     pending_invite_user_ids = {invite.user_id for invite in sent_pending_invites}
     sent_student_invites = []
     sent_teacher_invites = []
@@ -334,6 +356,13 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    if scoped_unit_ids is not None:
+        # Dekan/kafedra müdürü yalnız öz alt-ağacına bağlı tələbələri görür.
+        students = students.filter(
+            user__memberships__organization=organization,
+            user__memberships__is_active=True,
+            user__memberships__scope_unit_id__in=scoped_unit_ids,
+        )
     section["students_total_count"] = students.count()
     if student_search:
         students = students.filter(
@@ -358,6 +387,10 @@ def _build_student_org_management_section(
         .select_related("user", "organization", "user__profile", "user__profile__organization")
         .order_by("-created_at", "user__username")
     )
+    if scoped_unit_ids is not None:
+        # Təşkilata qoşulma müraciətləri org-səviyyəli intake axınıdır —
+        # unit-scoped idarəçi (dekan/kafedra müdürü) bunları idarə etmir.
+        pending_requested_students = pending_requested_students.none()
     section["pending_requested_students_total_count"] = pending_requested_students.count()
     if pending_search:
         pending_requested_students = pending_requested_students.filter(
@@ -396,6 +429,10 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    if scoped_unit_ids is not None:
+        # Sərbəst (heç bir təşkilata bağlı olmayan) istifadəçilər org-səviyyəli
+        # intake siyahısıdır — unit-scoped idarəçiyə göstərilmir.
+        unassigned_students = unassigned_students.none()
     section["unassigned_students_total_count"] = unassigned_students.count()
     if unassigned_search:
         unassigned_students = unassigned_students.filter(
@@ -425,6 +462,8 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    if scoped_unit_ids is not None:
+        unassigned_teachers = unassigned_teachers.none()
     section["unassigned_teachers_total_count"] = unassigned_teachers.count()
     if teacher_staff_search:
         unassigned_teachers = unassigned_teachers.filter(
@@ -455,6 +494,8 @@ def _build_student_org_management_section(
         .distinct()
         .order_by("user__username")
     )
+    if scoped_unit_ids is not None:
+        unassigned_staff = unassigned_staff.none()
     section["unassigned_staff_total_count"] = unassigned_staff.count()
     if teacher_staff_search:
         unassigned_staff = unassigned_staff.filter(
@@ -496,6 +537,9 @@ def _build_student_org_management_section(
         .select_related("user", "user__profile")
         .order_by("-created_at", "user__username")
     )
+    if scoped_unit_ids is not None:
+        # Müəllim/əməkdaş qoşulma müraciətləri də org-səviyyəli intake-dir.
+        teacher_staff_pending_qs = teacher_staff_pending_qs.none()
     section["pending_teacher_requests_total_count"] = teacher_staff_pending_qs.filter(
         role_type=MembershipRequestRoleType.TEACHER
     ).count()
@@ -533,6 +577,9 @@ def _build_student_org_management_section(
         .select_related("user", "role", "user__profile")
         .order_by("user_id", "-is_primary", "-role__level", "role__display_name")
     )
+    if scoped_unit_ids is not None:
+        # Dekan/kafedra müdürü yalnız öz alt-ağacına bağlı müəllim/əməkdaşları görür.
+        active_member_qs = active_member_qs.filter(scope_unit_id__in=scoped_unit_ids)
 
     def _split_non_student_members(memberships):
         teacher_member_list = []

@@ -1,0 +1,103 @@
+{% load i18n %}
+{% comment %}
+Bölmə imtahanları (Faza 3) — dekan/kafedra müdürü üçün öz fakültə/kafedra
+alt-ağacındakı imtahanların oxu-only siyahısı. Data backend-də
+organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir.
+{% endcomment %}
+<section class="profile-section-panel profile-section--unit-exams {% if active_section == 'unit-exams' %}is-active{% endif %}"
+         data-profile-section-panel="unit-exams">
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-university"></i> Bölmə imtahanları
+            {% if unit_exams_total_count %}
+            <span class="sidebar-menu-badge">{{ unit_exams_total_count }}</span>
+            {% endif %}
+        </div>
+
+        <p class="settings-note">
+            <i class="fas fa-circle-info"></i>
+            Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).
+        </p>
+
+        <form method="get" action="{{ profile_base_url }}" class="d-flex gap-2 mb-3">
+            <input type="hidden" name="section" value="unit-exams">
+            <input type="search"
+                   name="unit_exam_q"
+                   class="form-control"
+                   value="{{ unit_exams_search_query }}"
+                   placeholder="İmtahan, müəllif və ya kurs axtar">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-search"></i> Axtar
+            </button>
+        </form>
+
+        {% if unit_exams_page_obj and unit_exams_page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>İmtahan</th>
+                        <th>Növ</th>
+                        <th>Müəllif</th>
+                        <th>Kurs</th>
+                        <th>Başlama</th>
+                        <th>Cəhdlər</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in unit_exams_page_obj.object_list %}
+                    <tr>
+                        <td>{{ exam.title }}</td>
+                        <td>{{ exam.get_exam_type_display }}</td>
+                        <td>{{ exam.author.get_full_name|default:exam.author.username }}</td>
+                        <td>{{ exam.course.title|default:"—" }}</td>
+                        <td>{% if exam.start_datetime %}{{ exam.start_datetime|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
+                        <td>{{ exam.attempts_total }}</td>
+                        <td>
+                            {% if exam.is_active %}
+                            <span class="role-badge admin">Aktiv</span>
+                            {% else %}
+                            <span class="role-badge student">Deaktiv</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if unit_exams_page_obj.paginator.num_pages > 1 %}
+        <nav class="pagination-wrap" aria-label="Səhifələmə">
+            <ul class="pagination">
+                {% if unit_exams_page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ profile_base_url }}?{{ unit_exams_pagination_query }}&unit_exam_page={{ unit_exams_page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">{{ unit_exams_page_obj.number }} / {{ unit_exams_page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if unit_exams_page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ profile_base_url }}?{{ unit_exams_pagination_query }}&unit_exam_page={{ unit_exams_page_obj.next_page_number }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <p>
+                {% if unit_exams_search_query %}
+                Axtarışa uyğun imtahan tapılmadı.
+                {% else %}
+                Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</section>

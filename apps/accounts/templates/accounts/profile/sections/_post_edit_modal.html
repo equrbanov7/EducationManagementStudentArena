@@ -1,12 +1,14 @@
 {% load i18n %}
-{# ===========================================================================
-   Paylaşılan post edit/delete/warning modalları.
-   posts VƏ pending-post-approvals bölmələri eyni `.js-edit-post` axınını
-   (user_profile.js) istifadə etdiyi üçün bu modallar hər iki bölmənin
-   `[data-profile-section-panel]` İÇİNDƏ include olunmalıdır — əks halda AJAX
-   swap onları gətirmir və `editTitle` null olur (TypeError).
-   Tələb olunan kontekst: post_category_root_options, post_category_subcategory_options.
-   =========================================================================== #}
+{% comment %}
+===========================================================================
+Paylaşılan post edit/delete/warning modalları.
+posts VƏ pending-post-approvals bölmələri eyni `.js-edit-post` axınını
+(user_profile.js) istifadə etdiyi üçün bu modallar hər iki bölmənin
+`[data-profile-section-panel]` İÇİNDƏ include olunmalıdır — əks halda AJAX
+swap onları gətirmir və `editTitle` null olur (TypeError).
+Tələb olunan kontekst: post_category_root_options, post_category_subcategory_options.
+===========================================================================
+{% endcomment %}
 <div id="editModal" class="modal-overlay profile-post-edit-modal">
     <div class="modal-content modal-large">
         <div class="modal-header">

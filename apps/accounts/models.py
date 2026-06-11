@@ -246,7 +246,14 @@ class ProfileRole:
         ASSISTANT_TEACHER: {ASSISTANT_TEACHER},
         "assistant": {ASSISTANT_TEACHER, "assistant"},
         "lab_assistant": {ASSISTANT_TEACHER, "lab_assistant"},
+        "exam_center": {"exam_center"},
+        "tutor": {"tutor"},
     }
+
+    # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.
+    # Bunların səlahiyyəti rol permission-ları ilə müəyyən olunur (məs. imtahan
+    # mərkəzi yalnız imtahan sahəsini idarə edir, üzv/struktur idarəetməsi yox).
+    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "hr"}
 
     ADMIN_EQUIVALENT_ROLE_NAMES = {
         ORG_ADMIN,
@@ -279,7 +286,9 @@ class ProfileRole:
         if is_org_owner:
             aliases.update({cls.ORG_OWNER, cls.ORG_ADMIN})
 
-        if normalized in cls.ADMIN_EQUIVALENT_ROLE_NAMES or level >= cls.LEVELS.get(cls.ORG_ADMIN, 80):
+        if normalized not in cls.ADMIN_ALIAS_EXEMPT_ROLE_NAMES and (
+            normalized in cls.ADMIN_EQUIVALENT_ROLE_NAMES or level >= cls.LEVELS.get(cls.ORG_ADMIN, 80)
+        ):
             aliases.add(cls.ORG_ADMIN)
 
         return aliases

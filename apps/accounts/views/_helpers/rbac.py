@@ -168,10 +168,20 @@ def _role_capabilities(user, profile):
     is_owner_of_active_org = bool(
         active_organization is not None and getattr(active_organization, "owner_id", None) == user.id
     )
-    is_org_admin = (
-        _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR})
-        or is_owner_of_active_org
-    )
+    # HR artıq org_admin-ə bərabər tutulmur — öz ayrıca səlahiyyət dəsti var
+    # (üzv/vəzifə idarəetməsi, imtahan-kurs idarəetməsi YOX).
+    is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
+    is_hr = _user_has_any_role(user, {ProfileRole.HR})
+    is_exam_center = _user_has_any_role(user, {"exam_center"})
+    is_lead_student = _user_has_any_role(user, {ProfileRole.LEAD_STUDENT})
+    # Tyutor — qrup kurasiyası: öz unit alt-ağacındakı tələbə/kurs/statistika
+    # görünüşü; imtahan-qiymətləndirmə-üzv idarəetməsi yoxdur.
+    is_tutor = _user_has_any_role(user, {"tutor"})
+    # Dekan / kafedra müdürü — unit-scoped idarəetmə rolları.
+    # (chair_head/section_head adları department_head-ə normallaşdırılır.)
+    is_dean = _user_has_any_role(user, {"dean", "vice_dean"})
+    is_department_head = _user_has_any_role(user, {"department_head"})
+    is_unit_manager = is_dean or is_department_head
     user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
 
     can_manage_org = is_superadmin or is_org_admin
@@ -263,6 +273,17 @@ def _role_capabilities(user, profile):
             if teacher_has_student_org_access:
                 allowed_sections.add("student-organization-management")
 
+        # İmtahan mərkəzi — imtahan həyat dövrü: yaratma, qruplar, sual bankı,
+        # apellyasiyalar, bildiriş dərci. Üzv/rol idarəetməsi YOXDUR.
+        if is_exam_center:
+            allowed_sections.update({"my-exams", "groups", "publish-notification"})
+
+        # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
+        if is_hr:
+            allowed_sections.update(
+                {"student-organization-management", "role-assignment", "manage-roles", "publish-notification"}
+            )
+
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
 
@@ -296,9 +317,35 @@ def _role_capabilities(user, profile):
     # İmtahan sistemi redizaynı (Faza 5) — yeni modulların sidebar görünürlüyü.
     # Faktiki icazə yoxlaması yenə də view səviyyəsində (appeals.services.permissions,
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.
-    can_use_question_bank = is_superadmin or is_teacher or is_org_admin
-    can_manage_appeals = is_superadmin or is_teacher or is_org_admin
-    can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_superadmin)
+    can_use_question_bank = is_superadmin or is_teacher or is_org_admin or is_exam_center
+    can_manage_appeals = is_superadmin or is_teacher or is_org_admin or is_exam_center
+    can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
+
+    # Universitet strukturu (fakültə/kafedra) idarəetmə linkləri:
+    # - rektor/prorektor/org admin → bütün təşkilat
+    # - dekan/kafedra müdürü → yalnız öz alt-ağacı (data scoping organizations.scoping-də)
+    # - HR → üzv siyahısı (vəzifə/unit təyinatları üçün)
+    if is_superadmin or is_org_admin or is_unit_manager:
+        allowed_sections.update({"org-structure", "org-members"})
+    elif is_hr or is_tutor or is_exam_center:
+        # HR/imtahan mərkəzi org-wide, tyutor isə yalnız öz alt-ağacı üzrə
+        # üzv siyahısı görür (data scoping organizations.scoping-də tətbiq olunur).
+        allowed_sections.add("org-members")
+
+    # Dekan/kafedra müdürü: öz alt-ağacının imtahanlarına oxu-only baxış.
+    if is_unit_manager:
+        allowed_sections.add("unit-exams")
+
+    # Audit jurnalı (Faza 3): `audit.view` icazəli rollar (rektor/prorektor "*",
+    # imtahan mərkəzi, HR) üçün link. Faktiki icazə audit.views-də yenidən yoxlanılır.
+    can_view_audit = is_superadmin or is_owner_of_active_org
+    if not can_view_audit and active_organization is not None:
+        from apps.organizations.permissions import has_permission as _audit_has_permission
+
+        _audit_actor_perms, _ = _collect_actor_permissions(user, active_organization)
+        can_view_audit = _audit_has_permission(list(_audit_actor_perms), "audit.view")
+    if can_view_audit:
+        allowed_sections.add("audit-log")
 
     # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
     if can_use_question_bank:
@@ -321,6 +368,14 @@ def _role_capabilities(user, profile):
         "is_student": is_student,
         "is_teacher": is_teacher,
         "is_org_admin": is_org_admin,
+        "is_hr": is_hr,
+        "is_exam_center": is_exam_center,
+        "is_lead_student": is_lead_student,
+        "is_tutor": is_tutor,
+        "is_dean": is_dean,
+        "is_department_head": is_department_head,
+        "is_unit_manager": is_unit_manager,
+        "can_view_audit": can_view_audit,
         "can_use_question_bank": can_use_question_bank,
         "can_manage_appeals": can_manage_appeals,
         "can_view_my_appeals": can_view_my_appeals,

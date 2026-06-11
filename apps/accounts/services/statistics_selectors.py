@@ -548,8 +548,15 @@ def get_teacher_statistics(user, *, organization=None, filters=None):
 # ---------------------------------------------------------------------------
 
 
-def get_org_admin_statistics(*, organization, filters=None):
-    """Organization-scoped analytics for org admins."""
+def get_org_admin_statistics(*, organization, filters=None, scoped_unit_ids=None):
+    """
+    Organization-scoped analytics for org admins.
+
+    ``scoped_unit_ids`` (Faza 2 — unit scoping): verilərsə (dekan / kafedra
+    müdürü), bütün göstəricilər yalnız həmin unit alt-ağacına aid datanı
+    əhatə edir — üzvlər ``Membership.scope_unit``, kurslar ``Course.unit``,
+    imtahanlar kurs unit-i və ya scoped müəllif üzərindən filtrlənir.
+    """
     from apps.assignments.models import Submission
     from apps.courses.models import Course, CourseMembership
     from apps.exams.models import Exam, ExamAttempt
@@ -562,15 +569,24 @@ def get_org_admin_statistics(*, organization, filters=None):
     date_to = _parse_date(filters.get("date_to"))
     course_id = filters.get("course")
     content_type = filters.get("content_type", "all")
+    is_unit_scoped = scoped_unit_ids is not None
 
     # ── Active members ────────────────────────────────────────────
     memberships = Membership.objects.filter(organization=organization, is_active=True)
+    if is_unit_scoped:
+        memberships = memberships.filter(scope_unit_id__in=scoped_unit_ids)
     total_members = memberships.values("user").distinct().count()
     teacher_count = memberships.filter(role__level__gte=55).values("user").distinct().count()
     student_count = memberships.filter(role__level__lte=30).values("user").distinct().count()
 
+    # Scoped istifadəçi id-ləri — imtahan müəllif filtri üçün subquery
+    # (materiallaşdırmadan, tək kombinə olunmuş sorğu).
+    scoped_member_user_ids = memberships.values("user_id") if is_unit_scoped else None
+
     # ── Courses ───────────────────────────────────────────────────
     courses = Course.objects.filter(organization=organization)
+    if is_unit_scoped:
+        courses = courses.filter(unit_id__in=scoped_unit_ids)
     if course_id:
         courses = courses.filter(id=course_id)
     total_courses = courses.count()
@@ -585,6 +601,9 @@ def get_org_admin_statistics(*, organization, filters=None):
     attempt_agg = {"total": 0, "submitted": 0, "checked": 0}
     if _content_type_enabled(content_type, "exam"):
         exams = Exam.objects.filter(organization=organization)
+        if is_unit_scoped:
+            # Kursu scoped unitə aid olan VƏ YA müəllifi scoped üzv olan imtahanlar.
+            exams = exams.filter(Q(course__unit_id__in=scoped_unit_ids) | Q(author_id__in=scoped_member_user_ids))
         if course_id:
             exams = exams.filter(course_id=course_id)
         total_exams = exams.count()
@@ -602,6 +621,8 @@ def get_org_admin_statistics(*, organization, filters=None):
     asn_agg = {"total": 0, "graded": 0, "late": 0}
     if _content_type_enabled(content_type, "assignment"):
         assignment_subs = Submission.objects.filter(assignment__course__organization=organization)
+        if is_unit_scoped:
+            assignment_subs = assignment_subs.filter(assignment__course__unit_id__in=scoped_unit_ids)
         if course_id:
             assignment_subs = assignment_subs.filter(assignment__course_id=course_id)
         assignment_subs = _apply_date_filter(assignment_subs, "submitted_at", date_from, date_to)
@@ -616,6 +637,8 @@ def get_org_admin_statistics(*, organization, filters=None):
     lab_agg = {"total": 0, "graded": 0}
     if _content_type_enabled(content_type, "lab"):
         lab_subs = LabSubmission.objects.filter(assignment__lab__course__organization=organization)
+        if is_unit_scoped:
+            lab_subs = lab_subs.filter(assignment__lab__course__unit_id__in=scoped_unit_ids)
         if course_id:
             lab_subs = lab_subs.filter(assignment__lab__course_id=course_id)
         lab_subs = _apply_date_filter(lab_subs, "submitted_at", date_from, date_to)
@@ -629,6 +652,8 @@ def get_org_admin_statistics(*, organization, filters=None):
     proj_agg = {"total": 0, "graded": 0}
     if _content_type_enabled(content_type, "project"):
         proj_subs = ProjectSubmission.objects.filter(project__course__organization=organization)
+        if is_unit_scoped:
+            proj_subs = proj_subs.filter(project__course__unit_id__in=scoped_unit_ids)
         if course_id:
             proj_subs = proj_subs.filter(project__course_id=course_id)
         proj_subs = _apply_date_filter(proj_subs, "submitted_at", date_from, date_to)
@@ -650,6 +675,8 @@ def get_org_admin_statistics(*, organization, filters=None):
 
     # ── Course rankings / drill-down ──────────────────────────────
     course_memberships = CourseMembership.objects.filter(course__organization=organization, role="student")
+    if is_unit_scoped:
+        course_memberships = course_memberships.filter(course__unit_id__in=scoped_unit_ids)
     if course_id:
         course_memberships = course_memberships.filter(course_id=course_id)
     course_student_counts = dict(

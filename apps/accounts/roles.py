@@ -230,6 +230,8 @@ User.add_to_class("is_org_owner", property(lambda self: _has_role(self, ProfileR
 User.add_to_class("is_org_admin", property(lambda self: _has_role(self, ProfileRole.ORG_ADMIN)))
 User.add_to_class("is_member", property(lambda self: _has_role(self, ProfileRole.MEMBER)))
 User.add_to_class("is_hr", property(lambda self: _has_role(self, ProfileRole.HR)))
+User.add_to_class("is_exam_center", property(lambda self: _has_role(self, "exam_center")))
+User.add_to_class("is_tutor", property(lambda self: _has_role(self, "tutor")))
 User.add_to_class("is_lead_student", property(lambda self: _has_role(self, ProfileRole.LEAD_STUDENT)))
 
 User.add_to_class("is_teacher_or_above", property(_is_teacher_or_above))

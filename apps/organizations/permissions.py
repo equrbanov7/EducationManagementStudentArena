@@ -181,9 +181,25 @@ def get_permissions_for_category(category: str) -> List[str]:
     return PERMISSION_CATEGORIES.get(category, [])
 
 
+# Delegasiya prefiksi: `grant:<permission>` — rol bu icazəni başqa (aşağı) rola
+# verə bilər, amma prefiks özü icazəni aktiv etmir. Yuxarı səlahiyyət sahibi
+# bununla aşağıya "bu icazəni sən də paylaya bilərsən" hüququ ötürür.
+GRANT_PREFIX = "grant:"
+
+
+def is_grant_entry(permission: str) -> bool:
+    return permission.startswith(GRANT_PREFIX)
+
+
+def strip_grant_prefix(permission: str) -> str:
+    return permission[len(GRANT_PREFIX) :].strip() if is_grant_entry(permission) else permission
+
+
 def validate_permissions(permissions: List[str]) -> bool:
     """
     Validate that all permissions in a list are valid.
+    `grant:<permission>` formalı delegasiya girişləri də qəbul olunur —
+    suffix adi icazə kimi validasiya edilir.
 
     Args:
         permissions: List of permission strings to validate
@@ -196,6 +212,9 @@ def validate_permissions(permissions: List[str]) -> bool:
 
     if "*" in permissions:
         return True
+
+    # Delegasiya girişlərinin suffix-ini adi icazə kimi yoxla.
+    permissions = [strip_grant_prefix(perm) for perm in permissions]
 
     all_valid_perms = set(get_all_permissions())
 

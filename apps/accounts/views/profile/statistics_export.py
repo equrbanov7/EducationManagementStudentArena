@@ -59,12 +59,33 @@ def statistics_export_csv(request):
             compute=lambda: get_superadmin_statistics(filters=filters),
         )
     elif capabilities["is_org_admin"] and org:
-        stats = get_or_set_cached_statistics(
-            role="org_admin",
-            scope_id=org.pk,
-            filters=filters,
-            compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
-        )
+        # Unit scoping (Faza 2): dekan/kafedra müdürü export-da da yalnız öz
+        # alt-ağacının datasını görür — dashboard ilə eyni cache açarı işlədilir.
+        from apps.organizations.models import OrgUnit
+        from apps.organizations.scoping import get_unit_scope
+
+        unit_scope = get_unit_scope(request.user, org, request=request)
+        if unit_scope.is_unit_scoped:
+            scoped_unit_ids = list(
+                OrgUnit.objects.filter(organization=org)
+                .filter(unit_scope.unit_subtree_q())
+                .values_list("pk", flat=True)
+            )
+            stats = get_or_set_cached_statistics(
+                role="unit_manager",
+                scope_id=f"{org.pk}:{request.user.pk}",
+                filters=filters,
+                compute=lambda: get_org_admin_statistics(
+                    organization=org, filters=filters, scoped_unit_ids=scoped_unit_ids
+                ),
+            )
+        else:
+            stats = get_or_set_cached_statistics(
+                role="org_admin",
+                scope_id=org.pk,
+                filters=filters,
+                compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
+            )
     elif capabilities["is_teacher"]:
         stats = get_or_set_cached_statistics(
             role="teacher",
@@ -73,12 +94,36 @@ def statistics_export_csv(request):
             compute=lambda: get_teacher_statistics(request.user, organization=org, filters=filters),
         )
     else:
-        stats = get_or_set_cached_statistics(
-            role="student",
-            scope_id=request.user.pk,
-            filters={**filters, "_org": getattr(org, "pk", None)},
-            compute=lambda: get_student_statistics(request.user, organization=org, filters=filters),
-        )
+        # Tyutor — öz alt-ağacının unit statistikası (dashboard ilə eyni cache).
+        tutor_scoped_ids = None
+        if capabilities.get("is_tutor") and org:
+            from apps.organizations.models import OrgUnit
+            from apps.organizations.scoping import get_unit_scope
+
+            unit_scope = get_unit_scope(request.user, org, request=request)
+            if unit_scope.is_unit_scoped:
+                tutor_scoped_ids = list(
+                    OrgUnit.objects.filter(organization=org)
+                    .filter(unit_scope.unit_subtree_q())
+                    .values_list("pk", flat=True)
+                )
+
+        if tutor_scoped_ids is not None:
+            stats = get_or_set_cached_statistics(
+                role="unit_manager",
+                scope_id=f"{org.pk}:{request.user.pk}",
+                filters=filters,
+                compute=lambda: get_org_admin_statistics(
+                    organization=org, filters=filters, scoped_unit_ids=tutor_scoped_ids
+                ),
+            )
+        else:
+            stats = get_or_set_cached_statistics(
+                role="student",
+                scope_id=request.user.pk,
+                filters={**filters, "_org": getattr(org, "pk", None)},
+                compute=lambda: get_student_statistics(request.user, organization=org, filters=filters),
+            )
 
     output = io.StringIO()
     writer = csv.writer(output)
