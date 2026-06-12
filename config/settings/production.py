@@ -101,6 +101,8 @@ from .base import (
     MEDIA_URL,
     MESSAGE_TAGS,
     METRICS_ALLOW_ANONYMOUS,
+    MICROSOFT_CLARITY_CONNECT_SRC,
+    MICROSOFT_CLARITY_PROJECT_ID,
     MIDDLEWARE,
     OBJECT_STORAGE_ENABLED,
     OTP_RESEND_RATE_LIMIT,
@@ -443,11 +445,13 @@ if sentry_dsn:
 # Content Security Policy (CSP) - Production overrides (stricter than base)
 # Extends the base django-csp 4.0 dict with stricter production directives.
 CONTENT_SECURITY_POLICY = deepcopy(CONTENT_SECURITY_POLICY)
+_production_connect_src = list(_csp_connect_sources(SITE_URL, LIVE_EXAM_PUBLIC_HOST))
+_production_connect_src.extend(MICROSOFT_CLARITY_CONNECT_SRC)
 CONTENT_SECURITY_POLICY["DIRECTIVES"].update(
     {
         "img-src": ["'self'", "data:", "blob:", "https:"],
         "media-src": ["'self'", "blob:", "https:"],
-        "connect-src": list(_csp_connect_sources(SITE_URL, LIVE_EXAM_PUBLIC_HOST)),
+        "connect-src": list(dict.fromkeys(_production_connect_src)),
         "frame-ancestors": ["'none'"],
         "base-uri": ["'self'"],
         "form-action": ["'self'"],

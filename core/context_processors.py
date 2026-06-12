@@ -161,5 +161,6 @@ def feature_flags(request):
     """Expose lightweight feature flags to templates."""
     return {
         "exam_supervision_enabled": bool(getattr(settings, "EXAM_SUPERVISION_ENABLED", True)),
+        "microsoft_clarity_project_id": getattr(settings, "MICROSOFT_CLARITY_PROJECT_ID", ""),
         "practical_exams_enabled": bool(getattr(settings, "PRACTICAL_EXAMS_ENABLED", True)),
     }
