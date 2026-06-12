@@ -3,22 +3,23 @@ import json
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class StudentOrganizationRequestStatus(models.TextChoices):
-    PENDING = "pending", "Pending"
-    APPROVED = "approved", "Approved"
-    REJECTED = "rejected", "Rejected"
-    CANCELLED = "cancelled", "Cancelled"
-    AUTO_CLOSED = "auto_closed", "Auto Closed"
+    PENDING = "pending", _("Pending")
+    APPROVED = "approved", _("Approved")
+    REJECTED = "rejected", _("Rejected")
+    CANCELLED = "cancelled", _("Cancelled")
+    AUTO_CLOSED = "auto_closed", _("Auto Closed")
 
 
 class MembershipRequestRoleType(models.TextChoices):
     """Discriminates student / teacher / staff join requests."""
 
-    STUDENT = "student", "Student"
-    TEACHER = "teacher", "Teacher"
-    STAFF = "staff", "Staff"
+    STUDENT = "student", _("Student")
+    TEACHER = "teacher", _("Teacher")
+    STAFF = "staff", _("Staff")
 
 
 class StudentOrganizationRequest(models.Model):
@@ -82,13 +83,13 @@ class StudentOrganizationRequest(models.Model):
 
 
 class NotificationType(models.TextChoices):
-    ASSIGNMENT = "assignment", "Assignment"
-    EXAM = "exam", "Exam"
-    GRADE = "grade", "Grade / Feedback"
-    SYSTEM = "system", "System / Admin"
-    COURSE = "course", "Course"
-    LIVE_EXAM = "live_exam", "Live Exam / Session"
-    APPROVAL = "approval", "Membership / Approval Request"
+    ASSIGNMENT = "assignment", _("Assignment")
+    EXAM = "exam", _("Exam")
+    GRADE = "grade", _("Grade / Feedback")
+    SYSTEM = "system", _("System / Admin")
+    COURSE = "course", _("Course")
+    LIVE_EXAM = "live_exam", _("Live Exam / Session")
+    APPROVAL = "approval", _("Membership / Approval Request")
 
 
 class InAppNotification(models.Model):

@@ -37,6 +37,11 @@ urlpatterns = [
         views.ai_generate_bank_questions,
         name="ai_generate_bank_questions",
     ),
+    path(
+        "question-bank/<int:bank_id>/export.docx",
+        views.question_bank_word_export,
+        name="question_bank_word_export",
+    ),
     path("question-bank/<int:bank_id>/questions/add/", views.bank_question_add, name="bank_question_add"),
     path(
         "question-bank/<int:bank_id>/questions/<int:question_id>/edit/",
@@ -121,6 +126,11 @@ urlpatterns = [
         name="ai_generate_question_bank",
     ),
     path("<slug:slug>/test-bank/", views.test_question_bank, name="test_question_bank"),
+    path(
+        "<slug:slug>/questions/export.docx",
+        views.exam_questions_word_export,
+        name="exam_questions_word_export",
+    ),
     path(
         "<slug:slug>/test-bank/template-download/",
         views.test_question_bank_template_download,

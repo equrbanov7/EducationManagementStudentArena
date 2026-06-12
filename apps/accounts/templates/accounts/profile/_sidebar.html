@@ -364,21 +364,34 @@
         </li>
         {% endif %}
 
-        {% if current_organization and 'org-structure' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
+        {% if current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
         {% comment %}
         Universitet strukturu — rektor/admin bütün təşkilatı, dekan/kafedra müdürü
         yalnız öz alt-ağacını görür (backend-də unit scoping tətbiq olunur).
+        Fakültələr və kafedralar ayrı bölmələrdə idarə olunur.
         {% endcomment %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Universitet idarəetməsi</span></li>
-        {% if 'org-structure' in allowed_sections %}
+        {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=org-structure"
-               data-section="org-structure"
-               data-title="Fakültə və kafedralar"
-               data-source-url="{% url 'organizations:structure' current_organization.slug %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-structure' %}active{% endif %}">
+            <a href="{{ profile_base_url }}?section=org-faculties"
+               data-section="org-faculties"
+               data-title="Fakültələr"
+               data-source-url="{% url 'organizations:structure_faculties' current_organization.slug %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-faculties' %}active{% endif %}">
+                <i class="fas fa-university sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Fakültələr</span>
+            </a>
+        </li>
+        {% endif %}
+        {% if 'org-kafedras' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=org-kafedras"
+               data-section="org-kafedras"
+               data-title="Kafedralar"
+               data-source-url="{% url 'organizations:structure_kafedras' current_organization.slug %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-kafedras' %}active{% endif %}">
                 <i class="fas fa-sitemap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Fakültə və kafedralar</span>
+                <span class="sidebar-menu-text">Kafedralar</span>
             </a>
         </li>
         {% endif %}
@@ -487,6 +500,18 @@
         </li>
         {% endif %}
 
+        {% if 'superadmin-org-inspector' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=superadmin-org-inspector"
+               data-section="superadmin-org-inspector"
+               data-title="Təşkilat məlumatları"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-org-inspector' %}active{% endif %}">
+                <i class="fas fa-search sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Təşkilat məlumatları</span>
+            </a>
+        </li>
+        {% endif %}
         {% if 'superadmin-organizations' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=superadmin-org-features"

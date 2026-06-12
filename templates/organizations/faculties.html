@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ organization.name }} - Fakültələr{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_management.css' %}?v=20260612-structure-split">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {% include "organizations/partials/_faculties_content.html" with org_faculties_section=org_faculties_section %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
+{% endblock %}

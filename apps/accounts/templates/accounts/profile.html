@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260612-org-ajax">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260612-structure-split">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}">
@@ -24,7 +24,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="profile-info"
      data-default-section-title="{% trans 'title' context 'profile.sidebar' %}"
-     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals,unit-exams,org-structure,org-members,org-roles,audit-log"
+     data-ajax-sections="profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -59,6 +59,10 @@
                 {% include "accounts/profile/sections/_unit_exams.html" %}
             {% elif active_section == "org-structure" %}
                 {% include "accounts/profile/sections/_org_structure.html" %}
+            {% elif active_section == "org-faculties" %}
+                {% include "accounts/profile/sections/_org_faculties.html" %}
+            {% elif active_section == "org-kafedras" %}
+                {% include "accounts/profile/sections/_org_kafedras.html" %}
             {% elif active_section == "org-members" %}
                 {% include "accounts/profile/sections/_org_members.html" %}
             {% elif active_section == "org-roles" %}
@@ -105,6 +109,8 @@
                 {% include "accounts/profile/sections/_category_management.html" %}
             {% elif active_section == "superadmin-org-features" %}
                 {% include "accounts/profile/sections/_superadmin_org_features.html" %}
+            {% elif active_section == "superadmin-org-inspector" %}
+                {% include "accounts/profile/sections/_superadmin_org_inspector.html" %}
             {% elif active_section == "superadmin-organizations" %}
                 {% include "accounts/profile/sections/_superadmin_organizations.html" %}
             {% elif active_section == "superadmin-users" %}
@@ -213,4 +219,5 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260608-1"></script>
+<script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
 {% endblock %}

@@ -329,6 +329,223 @@
     margin: 1rem;
 }
 
+/* ---------------------------------------------------------------------- */
+/* Fakültə / Kafedra ayrı səhifələri (toolbar, kartlar, modallar)          */
+/* ---------------------------------------------------------------------- */
+
+.org-management__toolbar {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.org-management__toolbar .org-management__filters {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+}
+
+.org-management__filters--inline {
+    grid-template-columns: minmax(200px, 1fr) minmax(170px, 230px) auto;
+}
+
+.org-management__filters--four {
+    grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px) minmax(150px, 200px) auto;
+}
+
+.org-management__create-btn {
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+    padding: 0.65rem 1.1rem;
+}
+
+.org-management__badge--green {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.org-management__badge i {
+    margin-right: 0.3rem;
+}
+
+.org-management__muted-cell {
+    color: #94a3b8;
+}
+
+.org-management__actions {
+    display: inline-flex;
+    gap: 0.4rem;
+}
+
+.org-management__actions-col {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.org-management__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dbe5f3;
+    border-radius: 8px;
+    background: #fff;
+    color: #3152a3;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.org-management__icon-btn:hover {
+    background: #eef4ff;
+}
+
+.org-management__icon-btn--danger {
+    color: #be123c;
+    border-color: #fecdd3;
+}
+
+.org-management__icon-btn--danger:hover {
+    background: #fff1f2;
+}
+
+.org-management__card-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.org-management__unit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    border: 1px solid #e5edf8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    padding: 1rem;
+    min-width: 0;
+}
+
+.org-management__unit-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.org-management__unit-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    font-size: 0.86rem;
+}
+
+.org-management__unit-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    border-top: 1px solid #eef2f9;
+    padding-top: 0.7rem;
+}
+
+.org-management__link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 0;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.88rem;
+    padding: 0.25rem 0;
+}
+
+.org-management__link-btn--primary {
+    color: #4f7df3;
+}
+
+.org-management__link-btn:hover {
+    text-decoration: underline;
+}
+
+.org-management__teacher-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.org-management__teacher-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    border-radius: 8px;
+    background: #f8fbff;
+    padding: 0.55rem 0.7rem;
+}
+
+.org-management__teacher-row form {
+    margin: 0;
+}
+
+.org-management__avatar--green {
+    background: #059669;
+}
+
+.org-management__avatar--small {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+}
+
+.org-management__modal .modal-title {
+    color: #172033;
+    font-weight: 800;
+}
+
+.org-management__modal .modal-body p {
+    margin: 0 0 0.6rem;
+}
+
+.org-management__form--modal {
+    padding: 1rem;
+}
+
+.org-management__form label em {
+    color: #be123c;
+    font-style: normal;
+}
+
+.org-management__submit--danger {
+    background: #e11d48;
+}
+
+.org-management__danger-text {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .org-management__toolbar {
+        flex-direction: column;
+    }
+
+    .org-management__filters--inline,
+    .org-management__filters--four {
+        grid-template-columns: 1fr;
+    }
+
+    .org-management__card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 900px) {
     .org-management__header,
     .org-management__form-head,

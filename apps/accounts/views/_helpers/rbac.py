@@ -225,6 +225,7 @@ def _role_capabilities(user, profile):
             "create-category",
             "category-management",
             "superadmin-org-features",
+            "superadmin-org-inspector",
             "superadmin-organizations",
             "superadmin-users",
             "superadmin-ai",
@@ -326,9 +327,14 @@ def _role_capabilities(user, profile):
     # - dekan/kafedra müdürü → yalnız öz alt-ağacı (data scoping organizations.scoping-də)
     # - HR → üzv siyahısı (vəzifə/unit təyinatları üçün)
     if is_superadmin or is_org_admin or is_unit_manager:
-        allowed_sections.update({"org-structure", "org-members"})
-    elif is_hr or is_tutor or is_exam_center:
-        # HR/imtahan mərkəzi org-wide, tyutor isə yalnız öz alt-ağacı üzrə
+        allowed_sections.update({"org-structure", "org-faculties", "org-kafedras", "org-members"})
+    elif is_hr:
+        # HR struktur səhifələrini görür: `member.edit` icazəsi ilə müəllimin
+        # kafedra təyinatını idarə edir; unit CRUD düymələri icazə flag-ları
+        # ilə gizlənir (unit.create/edit/delete HR-da yoxdur).
+        allowed_sections.update({"org-faculties", "org-kafedras", "org-members"})
+    elif is_tutor or is_exam_center:
+        # İmtahan mərkəzi org-wide, tyutor isə yalnız öz alt-ağacı üzrə
         # üzv siyahısı görür (data scoping organizations.scoping-də tətbiq olunur).
         allowed_sections.add("org-members")
 

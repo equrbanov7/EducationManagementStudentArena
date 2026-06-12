@@ -1,0 +1,163 @@
+{% load i18n %}
+{% comment %}
+Superadmin təşkilat baxışı — istənilən təşkilatı seçib imtahanlarına,
+nəticələrinə, sual banklarına və kurslarına read-only baxış.
+Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
+{% endcomment %}
+<section class="profile-section-panel profile-section--superadmin-org-inspector {% if active_section == 'superadmin-org-inspector' %}is-active{% endif %}"
+         data-profile-section-panel="superadmin-org-inspector">
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-search"></i> Təşkilat məlumatları
+        </div>
+
+        {% if not superadmin_org_inspector_section.is_allowed %}
+        <p class="settings-note"><i class="fas fa-circle-info"></i> Bu bölmə yalnız superadmin üçündür.</p>
+        {% else %}
+
+        <form method="get" action="{{ profile_base_url }}" class="d-flex flex-wrap gap-2 mb-3 align-items-end">
+            <input type="hidden" name="section" value="superadmin-org-inspector">
+            <div>
+                <label class="info-label" for="inspectOrgSearch">Təşkilat axtar</label>
+                <input type="search"
+                       id="inspectOrgSearch"
+                       name="inspect_org_search"
+                       class="form-control"
+                       value="{{ superadmin_org_inspector_section.org_search }}"
+                       placeholder="Ad və ya slug">
+            </div>
+            <div>
+                <label class="info-label" for="inspectOrgSelect">Təşkilat</label>
+                <select name="inspect_org" id="inspectOrgSelect" class="form-select">
+                    <option value="">— Təşkilat seçin —</option>
+                    {% for org in superadmin_org_inspector_section.organizations %}
+                    <option value="{{ org.id }}"
+                            {% if superadmin_org_inspector_section.selected_org and superadmin_org_inspector_section.selected_org.id == org.id %}selected{% endif %}>
+                        {{ org.name }} ({{ org.org_type }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter"></i> Bax
+            </button>
+        </form>
+
+        {% if superadmin_org_inspector_section.selected_org %}
+        {% with section_data=superadmin_org_inspector_section %}
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=exams"
+               class="btn btn-sm {% if section_data.active_tab == 'exams' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
+               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
+                İmtahanlar <span class="sidebar-menu-badge">{{ section_data.counts.exams }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=results"
+               class="btn btn-sm {% if section_data.active_tab == 'results' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
+               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
+                Nəticələr <span class="sidebar-menu-badge">{{ section_data.counts.results }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=banks"
+               class="btn btn-sm {% if section_data.active_tab == 'banks' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
+               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
+                Sual bankları <span class="sidebar-menu-badge">{{ section_data.counts.banks }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=courses"
+               class="btn btn-sm {% if section_data.active_tab == 'courses' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
+               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
+                Kurslar <span class="sidebar-menu-badge">{{ section_data.counts.courses }}</span>
+            </a>
+        </div>
+
+        {% if section_data.page_obj and section_data.page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    {% if section_data.active_tab == 'exams' %}
+                    <tr><th>İmtahan</th><th>Növ</th><th>Müəllif</th><th>Cəhdlər</th><th>Yaradılma</th><th>Status</th></tr>
+                    {% elif section_data.active_tab == 'results' %}
+                    <tr><th>Tələbə</th><th>İmtahan</th><th>Status</th><th>Düz / Səhv</th><th>Başlama</th></tr>
+                    {% elif section_data.active_tab == 'banks' %}
+                    <tr><th>Bank</th><th>Fənn</th><th>Sual sayı</th><th>Sahib</th><th>Yaradılma</th></tr>
+                    {% else %}
+                    <tr><th>Kurs</th><th>Müəllim</th><th>Üzvlər</th><th>Status</th><th>Yaradılma</th></tr>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% for row in section_data.page_obj.object_list %}
+                    {% if section_data.active_tab == 'exams' %}
+                    <tr>
+                        <td>{{ row.title }}</td>
+                        <td>{{ row.get_exam_type_display }}</td>
+                        <td>{{ row.author.get_full_name|default:row.author.username }}</td>
+                        <td>{{ row.attempts_total }}</td>
+                        <td>{{ row.created_at|date:"d.m.Y" }}</td>
+                        <td>{% if row.is_active %}<span class="role-badge admin">Aktiv</span>{% else %}<span class="role-badge student">Deaktiv</span>{% endif %}</td>
+                    </tr>
+                    {% elif section_data.active_tab == 'results' %}
+                    <tr>
+                        <td>{{ row.user.get_full_name|default:row.user.username }}</td>
+                        <td>{{ row.exam.title }}</td>
+                        <td>{{ row.get_status_display }}</td>
+                        <td>{{ row.correct_count|default:0 }} / {{ row.wrong_count|default:0 }}</td>
+                        <td>{% if row.started_at %}{{ row.started_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
+                    </tr>
+                    {% elif section_data.active_tab == 'banks' %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.subject|default:"—" }}</td>
+                        <td>{{ row.question_total }}</td>
+                        <td>{% if row.created_by %}{{ row.created_by.get_full_name|default:row.created_by.username }}{% else %}—{% endif %}</td>
+                        <td>{{ row.created_at|date:"d.m.Y" }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td>{{ row.title }}</td>
+                        <td>{{ row.owner.get_full_name|default:row.owner.username }}</td>
+                        <td>{{ row.members_total }}</td>
+                        <td>{{ row.get_status_display }}</td>
+                        <td>{{ row.created_at|date:"d.m.Y" }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if section_data.page_obj.paginator.num_pages > 1 %}
+        <nav class="pagination-wrap" aria-label="Səhifələmə">
+            <ul class="pagination">
+                {% if section_data.page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link js-profile-section-link"
+                       data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}"
+                       href="{{ profile_base_url }}?{{ section_data.pagination_query }}&inspect_page={{ section_data.page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">{{ section_data.page_obj.number }} / {{ section_data.page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if section_data.page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link js-profile-section-link"
+                       data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}"
+                       href="{{ profile_base_url }}?{{ section_data.pagination_query }}&inspect_page={{ section_data.page_obj.next_page_number }}">&raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>Bu tabda məlumat yoxdur.</p>
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% else %}
+        <p class="settings-note"><i class="fas fa-circle-info"></i> Başlamaq üçün yuxarıdan təşkilat seçin.</p>
+        {% endif %}
+
+        {% endif %}
+    </div>
+</section>

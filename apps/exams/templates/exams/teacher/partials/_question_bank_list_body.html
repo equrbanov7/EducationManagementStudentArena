@@ -106,8 +106,16 @@ Kontekst:
                aria-label="{{ bank.name }}"></a>
             <div class="qb-card__top">
                 <h3 class="qb-card__name">{{ bank.name }}</h3>
-                {% if bank.created_by_id == request.user.id %}
                 <div class="qb-card__icons">
+                    {% comment %}
+                    Word export — bankı görə bilən hər kəs üçün (read-only əməliyyat).
+                    Stretched-link üstündə qalması üçün ikon konteynerindədir.
+                    {% endcomment %}
+                    <a href="{% url 'exams:question_bank_word_export' bank.id %}"
+                       class="qb-icon-btn" title="{% trans 'Sualları Word kimi yüklə' %}">
+                        <i class="fas fa-file-word"></i>
+                    </a>
+                {% if bank.created_by_id == request.user.id %}
                     <button type="button" class="qb-icon-btn js-edit-bank" title="{% trans 'Redaktə et' %}"
                             data-update-url="{% url 'exams:question_bank_update' bank.id %}"
                             data-name="{{ bank.name|escape }}" data-subject="{{ bank.subject|escape }}"
@@ -119,8 +127,8 @@ Kontekst:
                             data-delete-url="{% url 'exams:question_bank_delete' bank.id %}" data-name="{{ bank.name|escape }}">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                </div>
                 {% endif %}
+                </div>
             </div>
             <div class="qb-card__meta">
                 {% if bank.subject %}<span>{{ bank.subject }}</span><span class="dot">·</span>{% endif %}

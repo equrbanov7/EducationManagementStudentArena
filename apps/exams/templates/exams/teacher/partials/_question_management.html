@@ -156,6 +156,17 @@ Kontekst (view-dən):
                         <i class="fas fa-file-excel"></i> {% trans "Hesabatı yüklə" context "exams.template.teacher_questions_bank" %}
                     </a>
                 {% endif %}
+
+                {% if qm_word_export_url %}
+                    {% comment %}
+                    Sualları Word kimi endir — format import parseri ilə uyğundur,
+                    fayl redaktədən sonra yenidən toplu yüklənə bilər. Aktiv dil
+                    filtri export-a da tətbiq olunur.
+                    {% endcomment %}
+                    <a class="qb-btn qb-btn-report" href="{{ qm_word_export_url }}{% if language_filter %}?language={{ language_filter }}{% endif %}">
+                        <i class="fas fa-file-word"></i> {% trans "Sualları Word kimi yüklə" context "exams.template.teacher_questions_bank" %}
+                    </a>
+                {% endif %}
             </form>
         </section>
 
