@@ -52,6 +52,22 @@ class SecurityConfigurationTest(TestCase):
         self.assertNotIn("'unsafe-inline'", directives["style-src"])
         self.assertEqual(directives.get("style-src-attr"), "'unsafe-inline'")
 
+    def test_clarity_loader_uses_nonce_and_csp_sources(self):
+        response = self.client.get(reverse("subscribe"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'src = "https://www.clarity.ms/tag/" + i;')
+        self.assertContains(response, '"x2xrg3vw2i"')
+        self.assertContains(response, '<script nonce="', html=False)
+
+        directives = self._parse_csp(response)
+        self.assertIn("https://www.clarity.ms", directives["script-src"])
+        self.assertIn("https://*.clarity.ms", directives["script-src"])
+        self.assertIn("https://*.clarity.ms", directives["connect-src"])
+        self.assertIn("https://c.bing.com", directives["connect-src"])
+        self.assertIn("https://*.clarity.ms", directives["img-src"])
+        self.assertIn("https://c.bing.com", directives["img-src"])
+
     def test_verify_code_csrf_failures_still_include_csp(self):
         client = self._csrf_client_with_pending_email()
 

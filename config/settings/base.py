@@ -544,6 +544,24 @@ CODING_PISTON_AUTH_TOKEN = os.getenv("CODING_PISTON_AUTH_TOKEN", "")
 CODING_RUN_RATE_LIMIT_PER_MINUTE = os.getenv("CODING_RUN_RATE_LIMIT_PER_MINUTE", "120")
 CODING_RUN_MAX_CONCURRENT_PER_USER = os.getenv("CODING_RUN_MAX_CONCURRENT_PER_USER", "2")
 
+# Microsoft Clarity analytics. The project id is public by design; keep it
+# overridable so staging/production can use different Clarity projects.
+MICROSOFT_CLARITY_PROJECT_ID = os.getenv("MICROSOFT_CLARITY_PROJECT_ID", "x2xrg3vw2i").strip()
+
+MICROSOFT_CLARITY_SCRIPT_SRC = (
+    "https://www.clarity.ms",
+    "https://*.clarity.ms",
+)
+MICROSOFT_CLARITY_CONNECT_SRC = (
+    "https://www.clarity.ms",
+    "https://*.clarity.ms",
+    "https://c.bing.com",
+)
+MICROSOFT_CLARITY_IMG_SRC = (
+    "https://*.clarity.ms",
+    "https://c.bing.com",
+)
+
 # Message tags for toast notifications
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",
@@ -575,6 +593,7 @@ CONTENT_SECURITY_POLICY = {
             SELF,
             "data:",
             "blob:",
+            *MICROSOFT_CLARITY_IMG_SRC,
         ],
         "media-src": [
             SELF,
@@ -583,6 +602,7 @@ CONTENT_SECURITY_POLICY = {
         "script-src": [
             SELF,
             NONCE,
+            *MICROSOFT_CLARITY_SCRIPT_SRC,
         ],
         "style-src": [
             SELF,
@@ -597,6 +617,7 @@ CONTENT_SECURITY_POLICY = {
             "ws://127.0.0.1:8000",
             "ws://localhost:8000",
             "ws://0.0.0.0:8000",
+            *MICROSOFT_CLARITY_CONNECT_SRC,
         ],
         "object-src": [NONE],
         "base-uri": [SELF],
