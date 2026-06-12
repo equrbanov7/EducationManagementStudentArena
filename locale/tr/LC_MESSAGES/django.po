@@ -30326,3 +30326,115 @@ msgstr "Grup"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Kararı yaklaşık %(n)s dakika içinde değiştirebilirsiniz."
+
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "Şu anda bu kullanıcının profilini görüntülüyorsunuz:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "Yalnızca görüntüleme"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Tam kontrol"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "Bu modda yalnızca görüntüleyebilirsiniz — değişiklik yapılamaz."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr "Bu modda kullanıcı adına tüm işlemleri yapabilirsiniz. Her işlem denetim günlüğüne kaydedilir."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Profilime dön"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Çık"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "Kullanıcı profilini görüntüle"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "Kullanıcı seçin"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Kurum seçin"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Ad, kullanıcı adı veya e-posta ara…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "Tüm roller"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Öğretmenler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Yöneticiler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Personel"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "Sonuç bulunamadı"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Yükleniyor…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Daha fazla göster"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "Arama sırasında bir hata oluştu"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Görüntüleme oturumu sona erdi — izin veya bağlam değişti."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "Yalnızca görüntüleme modundasınız — bu işleme izin verilmiyor."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr "Güvenlik nedeniyle bu işlem başka bir kullanıcının profilinde engellendi."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "Bu kullanıcının profilini görüntüleme izniniz yok."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr "%(name)s profilini görüntülüyorsunuz. Yalnızca görüntüleme modu — değişiklik yapamazsınız."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr "%(name)s profilini tam kontrol modunda görüntülüyorsunuz. Tüm işlemler denetim günlüğüne kaydedilir."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "Kendi profilinize geri döndünüz."
+

@@ -41,6 +41,11 @@
        `apps/courses/templates/courses/partials/_courses_assets_css.html`
        partial-ı vasitəsi ilə yüklənir (extraCss block daxilində). #} {% endcomment %}
 
+    {# "View as" UI yalnız səlahiyyətli/aktiv hallarda yüklənir (perf) #}
+    {% if view_as.active or view_as.can_use %}
+    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20260612-1">
+    {% endif %}
+
     {% block extraCss %}{% endblock %}
 </head>
 
@@ -55,6 +60,9 @@
 
     {# Navbar partial #}
     {% include "partials/_navbar.html" %}
+
+    {# "View as" — başqa istifadəçinin profilinə baxış banneri/çərçivəsi #}
+    {% include "partials/_view_as_banner.html" %}
 
     {# Django messages - Toast şəklində, sağ üstdə (navbar-dan aşağı) #}
     {% if messages %}
@@ -95,6 +103,9 @@
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260603-warning-click"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260604-modalskip"></script>
+    {% if view_as.can_use and not view_as.active %}
+    <script src="{% static 'js/view_as.js' %}?v=20260612-1"></script>
+    {% endif %}
 
    
 

@@ -94,11 +94,43 @@
 .main-score {
     width: 100%;
     margin-bottom: 0 !important;
+    position: relative;
 }
 .main-score .stat-value {
     font-size: 3rem;
     font-weight: 800;
     color: #3b82f6; /* Brand Blue */
+    line-height: 1;
+}
+
+.score-display-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 58px;
+}
+
+.score-points-value {
+    padding: 0 72px;
+}
+
+.score-percent-chip {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #2563eb;
+    font-size: 0.95rem;
+    font-weight: 800;
     line-height: 1;
 }
 
@@ -632,6 +664,13 @@
         max-width: 100%;
     }
     .main-score .stat-value { font-size: 2.45rem; }
+    .score-points-value { padding: 0 58px; }
+    .score-percent-chip {
+        right: 0;
+        min-width: 48px;
+        padding: 6px 9px;
+        font-size: 0.85rem;
+    }
     .test-stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px 14px;
@@ -694,6 +733,17 @@
     }
     .main-score .stat-value {
         font-size: 2rem;
+    }
+    .score-display-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .score-points-value {
+        padding: 0;
+    }
+    .score-percent-chip {
+        position: static;
+        transform: none;
     }
     .q-header {
         padding: 12px;

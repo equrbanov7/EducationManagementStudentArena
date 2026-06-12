@@ -21,6 +21,7 @@ from .main import user_profile
 from .public import public_user_profile
 from .sections_api import profile_badges_api, profile_section_fragment
 from .statistics_export import statistics_export_csv
+from .view_as import view_as_search, view_as_start, view_as_stop
 
 __all__ = [
     "user_profile",
@@ -30,4 +31,8 @@ __all__ = [
     # P3 — progressive enhancement endpoints
     "profile_section_fragment",
     "profile_badges_api",
+    # "View as" — istifadəçi profilinə baxış
+    "view_as_search",
+    "view_as_start",
+    "view_as_stop",
 ]

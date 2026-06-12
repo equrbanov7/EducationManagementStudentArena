@@ -10,4 +10,7 @@
         <i class="fas fa-chevron-right" aria-hidden="true"></i>
     </button>
     <h1 class="profile-title" id="profileSectionTitle">{{ active_section_title }}</h1>
+
+    {# "View as" seçim paneli — yalnız səlahiyyətli rollar üçün #}
+    {% include "accounts/profile/_view_as_panel.html" %}
 </div>

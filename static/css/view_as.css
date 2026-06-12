@@ -1,0 +1,286 @@
+/* =========================================================================
+   "View as" — başqa istifadəçinin profilinə baxış UI
+   Banner + viewport çərçivəsi + üzən pill + seçim paneli.
+   Rejim rəngləri: readonly → amber, full → bənövşəyi-qırmızı.
+   ========================================================================= */
+
+:root {
+    --view-as-readonly: #b45309;
+    --view-as-readonly-bg: linear-gradient(90deg, #fffbeb, #fef3c7);
+    --view-as-readonly-border: #f59e0b;
+    --view-as-full: #7c2d92;
+    --view-as-full-bg: linear-gradient(90deg, #fdf4ff, #fae8ff);
+    --view-as-full-border: #c026d3;
+}
+
+/* --- Viewport çərçivəsi (scroll zamanı da görünür) ----------------------- */
+.view-as-frame {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2000;
+}
+.view-as-frame--readonly { box-shadow: inset 0 0 0 4px var(--view-as-readonly-border); }
+.view-as-frame--full { box-shadow: inset 0 0 0 4px var(--view-as-full-border); }
+
+/* --- Yuxarı banner -------------------------------------------------------- */
+.view-as-banner {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.view-as-banner--readonly {
+    background: var(--view-as-readonly-bg);
+    border-bottom-color: var(--view-as-readonly-border);
+}
+.view-as-banner--full {
+    background: var(--view-as-full-bg);
+    border-bottom-color: var(--view-as-full-border);
+}
+.view-as-banner__inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 0.9rem;
+}
+.view-as-banner--readonly .view-as-banner__inner { color: var(--view-as-readonly); }
+.view-as-banner--full .view-as-banner__inner { color: var(--view-as-full); }
+
+.view-as-banner__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.view-as-banner__text strong { font-weight: 700; }
+.view-as-banner__chip {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #fff;
+    vertical-align: 1px;
+}
+.view-as-banner--readonly .view-as-banner__chip { background: var(--view-as-readonly-border); }
+.view-as-banner--full .view-as-banner__chip { background: var(--view-as-full-border); }
+
+.view-as-banner__warning {
+    flex: 1 1 280px;
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+.view-as-banner__exit-form { margin-left: auto; }
+.view-as-banner__exit {
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.view-as-banner--readonly .view-as-banner__exit { background: var(--view-as-readonly-border); }
+.view-as-banner--full .view-as-banner__exit { background: var(--view-as-full-border); }
+.view-as-banner__exit:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18); }
+
+/* --- Üzən pill (aşağıda, həmişə görünür) ---------------------------------- */
+.view-as-pill {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 2001;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px 8px 16px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    animation: viewAsPillIn 0.3s ease;
+}
+.view-as-pill--readonly { background: var(--view-as-readonly-border); }
+.view-as-pill--full { background: var(--view-as-full-border); }
+.view-as-pill form { margin: 0; display: inline-flex; }
+.view-as-pill__name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.view-as-pill__exit {
+    border: 0;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.92);
+}
+.view-as-pill--readonly .view-as-pill__exit { color: var(--view-as-readonly); }
+.view-as-pill--full .view-as-pill__exit { color: var(--view-as-full); }
+.view-as-pill__exit:hover { background: #fff; }
+
+@keyframes viewAsPillIn {
+    from { opacity: 0; transform: translate(-50%, 12px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* --- Seçim paneli (profil header) ----------------------------------------- */
+.view-as-launcher { position: relative; margin-left: auto; }
+
+.view-as-launcher__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #4338ca;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.view-as-launcher__toggle:hover {
+    color: #3730a3;
+    box-shadow: 0 3px 10px rgba(67, 56, 202, 0.18);
+    transform: translateY(-1px);
+}
+.view-as-launcher__caret { font-size: 0.7rem; transition: transform 0.15s ease; }
+.view-as-launcher__toggle[aria-expanded="true"] .view-as-launcher__caret { transform: rotate(180deg); }
+
+.view-as-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: min(380px, 92vw);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+    padding: 14px;
+    z-index: 1050;
+}
+.view-as-dropdown__header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.view-as-dropdown__field { margin-bottom: 10px; }
+.view-as-dropdown__field .form-label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+
+.view-as-dropdown__filters { display: flex; gap: 8px; }
+.view-as-dropdown__search { position: relative; flex: 1; }
+.view-as-dropdown__search .fa-search {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: #94a3b8;
+    pointer-events: none;
+}
+.view-as-dropdown__search input { padding-left: 28px; }
+.view-as-dropdown__role { max-width: 130px; }
+
+.view-as-dropdown__results {
+    max-height: 300px;
+    overflow-y: auto;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 4px;
+}
+.view-as-result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 6px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+.view-as-result:hover, .view-as-result:focus-visible { background: #f1f5f9; outline: none; }
+.view-as-result__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #e2e8f0;
+}
+.view-as-result__body { min-width: 0; flex: 1; }
+.view-as-result__name {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.view-as-result__meta {
+    font-size: 0.74rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.view-as-result__roles { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.view-as-result__role {
+    font-size: 0.64rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    white-space: nowrap;
+}
+.view-as-result__go { color: #94a3b8; font-size: 0.7rem; flex-shrink: 0; }
+
+.view-as-dropdown__status {
+    padding: 16px 8px;
+    text-align: center;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+.view-as-dropdown__more {
+    width: 100%;
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 7px;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+}
+.view-as-dropdown__more:hover { background: #f1f5f9; }
+
+@media (max-width: 576px) {
+    .view-as-banner__inner { font-size: 0.82rem; padding: 8px 12px; }
+    .view-as-banner__warning { display: none; }
+    .view-as-dropdown { position: fixed; left: 12px; right: 12px; width: auto; }
+    .view-as-pill__name { max-width: 110px; }
+}

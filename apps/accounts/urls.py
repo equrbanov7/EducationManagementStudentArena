@@ -65,6 +65,10 @@ urlpatterns = [
         name="profile_badges_api",
     ),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
+    # "View as" — səlahiyyətli rolların başqa istifadəçinin profilinə baxışı
+    path("view-as/search/", views.view_as_search, name="view_as_search"),
+    path("view-as/start/", views.view_as_start, name="view_as_start"),
+    path("view-as/stop/", views.view_as_stop, name="view_as_stop"),
     path("users/<str:username>/", views.public_user_profile, name="public_profile"),
     # Role management
     path("manage-roles/", views.manage_roles, name="manage_roles"),

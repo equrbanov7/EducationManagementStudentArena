@@ -30431,3 +30431,115 @@ msgstr "Группа"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Вы можете изменить решение примерно в течение %(n)s минут."
+
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "Вы просматриваете профиль этого пользователя:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "Только просмотр"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Полное управление"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "В этом режиме доступен только просмотр — изменения невозможны."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr "В этом режиме вы можете выполнять любые действия от имени пользователя. Каждое действие записывается в журнал аудита."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Вернуться в мой профиль"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Выйти"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "Просмотр профиля пользователя"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "Выберите пользователя"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Выберите организацию"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Поиск по имени, логину или email…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "Все роли"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Преподаватели"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Студенты"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Администраторы"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Сотрудники"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "Ничего не найдено"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Загрузка…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Показать ещё"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "Произошла ошибка при поиске"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Сеанс просмотра завершён — изменились права или контекст."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "Вы в режиме просмотра — это действие запрещено."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr "По соображениям безопасности это действие заблокировано в профиле другого пользователя."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "У вас нет прав для просмотра профиля этого пользователя."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr "Вы просматриваете профиль %(name)s. Режим просмотра — изменения недоступны."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr "Вы просматриваете профиль %(name)s в режиме полного управления. Все действия записываются в журнал аудита."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "Вы вернулись в свой профиль."
+

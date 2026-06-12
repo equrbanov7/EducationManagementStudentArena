@@ -1,0 +1,55 @@
+{% load i18n %}
+{% comment %}
+"View as" aktiv olduqda görünən qlobal indikatorlar:
+1. Səhifənin yuxarısında rəngli banner (rejim + hədəf + çıxış).
+2. Viewport ətrafında fixed rəngli çərçivə — scroll zamanı da görünür.
+3. Aşağıda üzən "pill" — hər an bir kliklə çıxış.
+Rənglər: readonly → amber, full → bənövşəyi-qırmızı.
+{% endcomment %}
+{% if view_as.active %}
+<div class="view-as-frame view-as-frame--{{ view_as.mode }}" aria-hidden="true"></div>
+
+<div class="view-as-banner view-as-banner--{{ view_as.mode }}" role="alert">
+    <div class="view-as-banner__inner">
+        <span class="view-as-banner__icon">
+            <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
+        </span>
+        <span class="view-as-banner__text">
+            {% trans 'viewing_user_profile' context 'accounts.view_as' %}
+            <strong>{{ view_as.target_name }}</strong>
+            <span class="view-as-banner__chip">
+                {% if view_as.mode == 'readonly' %}
+                    {% trans 'mode_readonly' context 'accounts.view_as' %}
+                {% else %}
+                    {% trans 'mode_full' context 'accounts.view_as' %}
+                {% endif %}
+            </span>
+        </span>
+        <span class="view-as-banner__warning">
+            {% if view_as.mode == 'readonly' %}
+                {% trans 'readonly_warning' context 'accounts.view_as' %}
+            {% else %}
+                {% trans 'full_warning' context 'accounts.view_as' %}
+            {% endif %}
+        </span>
+        <form method="post" action="{% url 'accounts:view_as_stop' %}" class="view-as-banner__exit-form">
+            {% csrf_token %}
+            <button type="submit" class="view-as-banner__exit">
+                <i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                {% trans 'exit_view_full' context 'accounts.view_as' %}
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="view-as-pill view-as-pill--{{ view_as.mode }}">
+    <i class="fas {% if view_as.mode == 'readonly' %}fa-eye{% else %}fa-user-shield{% endif %}" aria-hidden="true"></i>
+    <span class="view-as-pill__name">{{ view_as.target_name }}</span>
+    <form method="post" action="{% url 'accounts:view_as_stop' %}">
+        {% csrf_token %}
+        <button type="submit" class="view-as-pill__exit" title="{% trans 'exit_view_full' context 'accounts.view_as' %}">
+            {% trans 'exit_view' context 'accounts.view_as' %}
+        </button>
+    </form>
+</div>
+{% endif %}

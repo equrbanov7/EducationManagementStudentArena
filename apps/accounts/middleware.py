@@ -159,3 +159,151 @@ class SuspendedOrganizationMiddleware:
             request.org_pending_approval = False
 
         return self.get_response(request)
+
+
+class ViewAsMiddleware:
+    """
+    "View as" (istifadəçi profilinə baxış) middleware-i.
+
+    AuthenticationMiddleware-dən SONRA, OrganizationMiddleware-dən ƏVVƏL
+    işləməlidir: aktiv view-as sessiyası varsa ``request.user``-i hədəf
+    istifadəçi ilə əvəzləyir, beləcə org/RLS konteksti və bütün view-lar
+    hədəfin icazələri daxilində işləyir.
+
+    Request atributları (hər sorğuda mövcuddur):
+    - ``request.real_user``     — autentifikasiya olunmuş ƏSL istifadəçi
+    - ``request.is_view_as``    — aktiv view-as sessiyası varmı
+    - ``request.view_as_mode``  — "full" | "readonly" | None
+
+    Təhlükəsizlik:
+    - READONLY: bütün unsafe metodlar bloklanır (yalnız çıxış endpoint-i istisna).
+    - FULL: unsafe əməliyyatlar audit jurnalına yazılır; şifrə dəyişmə və
+      hesab silmə kimi həssas əməliyyatlar HƏR İKİ rejimdə bloklanır.
+    - Logout view-as sessiyasını bitirir (əsl istifadəçi sistemdən çıxmır).
+    """
+
+    SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
+    #: Hər iki rejimdə bloklanan həssas `profile_form` POST dəyərləri.
+    BLOCKED_PROFILE_FORMS = {"change-password", "update-avatar", "edit-profile"}
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self._exit_path = None
+        self._logout_path = None
+        self._delete_account_path = None
+
+    def _resolve_paths(self):
+        # URLConf yüklənəndən sonra bir dəfə cache-lənir.
+        if self._exit_path is None:
+            from django.urls import reverse
+
+            self._exit_path = reverse("accounts:view_as_stop")
+            self._logout_path = reverse("accounts:logout")
+            self._delete_account_path = reverse("accounts:delete_account")
+
+    @staticmethod
+    def _wants_json(request):
+        accept = (request.headers.get("Accept") or "").lower()
+        return request.headers.get("x-requested-with") == "XMLHttpRequest" or "application/json" in accept
+
+    def _reject(self, request, message_text):
+        from django.contrib import messages
+        from django.http import JsonResponse
+        from django.shortcuts import redirect
+        from django.urls import reverse
+
+        if self._wants_json(request):
+            return JsonResponse({"detail": message_text, "view_as_blocked": True}, status=403)
+        messages.warning(request, message_text)
+        referer = request.META.get("HTTP_REFERER") or ""
+        # Open-redirect qorunması: yalnız öz host-umuza qayıdırıq.
+        from django.utils.http import url_has_allowed_host_and_scheme
+
+        if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
+            return redirect(referer)
+        return redirect(reverse("accounts:profile"))
+
+    def __call__(self, request):
+        request.real_user = request.user
+        request.is_view_as = False
+        request.view_as_mode = None
+        request.view_as_target = None
+
+        if not getattr(request.user, "is_authenticated", False):
+            return self.get_response(request)
+
+        from django.utils.translation import pgettext
+
+        from .services.view_as import (
+            MODE_READONLY,
+            VIEW_AS_SESSION_KEY,
+            resolve_view_as_request,
+            stop_view_as,
+        )
+
+        if VIEW_AS_SESSION_KEY not in request.session:
+            return self.get_response(request)
+
+        self._resolve_paths()
+
+        # Logout → əvvəlcə view-as-i bitir, sonra normal davam (əsl istifadəçi çıxır).
+        if request.path == self._logout_path:
+            stop_view_as(request, reason="view_as_stopped_on_logout")
+            return self.get_response(request)
+
+        # Çıxış endpoint-i view-as aktiv ikən ƏSL istifadəçi ilə işləyir.
+        if request.path == self._exit_path:
+            return self.get_response(request)
+
+        target, mode = resolve_view_as_request(request)
+        if target is None:
+            from django.contrib import messages
+
+            messages.info(
+                request,
+                pgettext("accounts.view_as", "session_ended"),
+            )
+            return self.get_response(request)
+
+        if request.method not in self.SAFE_METHODS:
+            if mode == MODE_READONLY:
+                return self._reject(
+                    request,
+                    pgettext("accounts.view_as", "action_blocked_readonly"),
+                )
+
+            # FULL rejim: həssas əməliyyatlar yenə də bloklanır.
+            profile_form = (request.POST.get("profile_form") or "").strip()
+            if request.path == self._delete_account_path or profile_form in self.BLOCKED_PROFILE_FORMS:
+                return self._reject(
+                    request,
+                    pgettext("accounts.view_as", "action_blocked_sensitive"),
+                )
+
+            # FULL rejimdə hər unsafe əməliyyat audit-ə yazılır (əsl istifadəçi adından).
+            try:
+                from apps.audit.utils import log_action
+                from core.constants import AuditAction
+
+                log_action(
+                    action=AuditAction.UPDATE,
+                    user=request.real_user,
+                    organization=None,
+                    obj=target,
+                    reason="view_as_action",
+                    changes={
+                        "path": request.path[:255],
+                        "method": request.method,
+                        "profile_form": profile_form[:64],
+                    },
+                    request=request,
+                )
+            except Exception:  # noqa: BLE001 — audit xətası əməliyyatı bloklamamalıdır
+                logger.exception("view_as action audit log failed")
+
+        request.is_view_as = True
+        request.view_as_mode = mode
+        request.view_as_target = target
+        request.user = target
+
+        return self.get_response(request)
