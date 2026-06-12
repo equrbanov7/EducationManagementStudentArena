@@ -197,6 +197,113 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'id="statsOrgTable"', html=False)
         self.assertContains(response, "stats_org_page=2")
 
+    def test_student_statistics_filters_are_scoped_to_current_student(self):
+        from apps.courses.models import Course, CourseMembership
+        from apps.exams.models import StudentGroup
+
+        owner = User.objects.create_user("stats_scope_owner", "stats_scope_owner@example.com", "pass123")
+        organization = Organization.objects.create(
+            name="Student Statistics Scope Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        teacher = User.objects.create_user("stats_scope_teacher", "stats_scope_teacher@example.com", "pass123")
+        student = User.objects.create_user("stats_scope_student", "stats_scope_student@example.com", "pass123")
+        other_student = User.objects.create_user(
+            "stats_scope_other_student",
+            "stats_scope_other_student@example.com",
+            "pass123",
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+        _assign_user_to_org(other_student, organization, ProfileRole.STUDENT)
+
+        own_course = Course.objects.create(
+            owner=teacher,
+            organization=organization,
+            title="Own Course",
+            description="",
+            status="published",
+        )
+        other_course = Course.objects.create(
+            owner=teacher,
+            organization=organization,
+            title="Other Course",
+            description="",
+            status="published",
+        )
+        CourseMembership.objects.create(course=own_course, user=student, role="student")
+        CourseMembership.objects.create(course=other_course, user=other_student, role="student")
+
+        own_group = StudentGroup.objects.create(teacher=teacher, organization=organization, name="Own Group")
+        own_group.students.add(student)
+        other_group = StudentGroup.objects.create(teacher=teacher, organization=organization, name="Other Group")
+        other_group.students.add(other_student)
+
+        _login_with_org(self.client, student, organization)
+        response = self.client.get(
+            reverse("accounts:profile")
+            + f"?section=statistics&stat_course={other_course.id}&stat_group={other_group.id}&stat_organization={organization.id}"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["id"] for row in response.context["statistics_courses"]], [own_course.id])
+        self.assertEqual([row["id"] for row in response.context["statistics_groups"]], [own_group.id])
+        self.assertIsNone(response.context["statistics_filters"]["course"])
+        self.assertIsNone(response.context["statistics_filters"]["group"])
+        self.assertIsNone(response.context["statistics_filters"]["organization"])
+        self.assertNotContains(response, "Other Course")
+        self.assertNotContains(response, "Other Group")
+
+    def test_student_statistics_do_not_include_org_live_exam_aggregates(self):
+        from apps.courses.models import Course
+        from apps.exams.models import Exam
+        from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+
+        owner = User.objects.create_user("stats_live_owner", "stats_live_owner@example.com", "pass123")
+        organization = Organization.objects.create(
+            name="Student Live Statistics Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        teacher = User.objects.create_user("stats_live_teacher", "stats_live_teacher@example.com", "pass123")
+        student = User.objects.create_user("stats_live_student", "stats_live_student@example.com", "pass123")
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+
+        course = Course.objects.create(
+            owner=teacher,
+            organization=organization,
+            title="Live Course",
+            description="",
+            status="published",
+        )
+        exam = Exam.objects.create(
+            author=teacher,
+            organization=organization,
+            course=course,
+            title="Live Exam",
+            exam_type="test",
+            is_active=True,
+        )
+        session = LiveSession.objects.create(exam=exam, host_user=teacher, state=LiveSession.STATE_FINISHED)
+        player = LivePlayer.objects.create(session=session, nickname="Anonymous", client_id="anon-client")
+        LiveAnswer.objects.create(session=session, player=player, question_id=1, is_correct=True)
+
+        _login_with_org(self.client, student, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=statistics")
+
+        self.assertEqual(response.status_code, 200)
+        summary = response.context["statistics_data"]["summary"]
+        self.assertEqual(summary["live_total"], 0)
+        self.assertEqual(summary["live_correct"], 0)
+        self.assertEqual(summary["live_accuracy"], 0)
+        self.assertNotContains(response, "live_total_answers", html=False)
+
     def test_profile_edit_section(self):
         """Test that edit-profile section renders form with save button."""
         self.client.login(username="testuser", password="testpass123")

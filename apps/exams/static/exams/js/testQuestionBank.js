@@ -45,16 +45,15 @@ document.addEventListener("DOMContentLoaded", function () {
     function highlightFormatTag(extension) {
         const tags = document.querySelectorAll(".format-tag");
         tags.forEach(t => {
-          t.classList.remove("is-active", "is-pdf", "is-docx", "is-txt", "is-img");
+          t.classList.remove("is-active", "is-pdf", "is-txt", "is-img");
         });
-      
+
         const ext = (extension || "").toLowerCase();
         const active = document.querySelector(`.format-tag[data-ext="${ext}"]`);
         if (!active) return;
-      
+
         active.classList.add("is-active");
         if (ext === "pdf") active.classList.add("is-pdf");
-        if (ext === "docx") active.classList.add("is-docx");
         if (ext === "txt") active.classList.add("is-txt");
         if (["png", "jpg", "jpeg"].includes(ext)) active.classList.add("is-img");
       }
@@ -361,15 +360,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ====== Faylın client-side validation (UX cəhəti — server-side əsasdır) ======
-    // .docm/.exe və s. uzantıları client-side bloklayırıq və istifadəçiyə yumşaq mesaj.
-    const FORBIDDEN_EXT = ["docm", "dotm", "xlsm", "pptm", "bin", "exe", "scr", "js", "html", "htm"];
+    // Word (.docx/.doc) və macro/executable uzantıları client-side bloklayırıq.
+    const FORBIDDEN_EXT = ["docx", "doc", "docm", "dotm", "dotx", "rtf", "xlsm", "pptm", "bin", "exe", "scr", "js", "html", "htm", "zip"];
     const MAX_FILE_BYTES = 45 * 1024 * 1024; // 45MB — server limiti ilə uyğun
     function validateFileClientSide(input) {
       if (!input || !input.files || !input.files[0]) return true;
       const f = input.files[0];
       const ext = (f.name.split(".").pop() || "").toLowerCase();
       if (FORBIDDEN_EXT.includes(ext)) {
-        alert("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .docx / .pdf / .txt / .png / .jpg yükləyin.");
+        alert("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin.");
         input.value = "";
         clearFileState();
         return false;

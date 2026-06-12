@@ -43,7 +43,7 @@
 
     {# "View as" UI yalnız səlahiyyətli/aktiv hallarda yüklənir (perf) #}
     {% if view_as.active or view_as.can_use %}
-    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20260612-2">
+    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20260613-1">
     {% endif %}
 
     {% block extraCss %}{% endblock %}
@@ -104,7 +104,7 @@
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260604-modalskip"></script>
     {% if view_as.can_use and not view_as.active %}
-    <script src="{% static 'js/view_as.js' %}?v=20260612-2"></script>
+    <script src="{% static 'js/view_as.js' %}?v=20260613-1"></script>
     {% endif %}
 
    

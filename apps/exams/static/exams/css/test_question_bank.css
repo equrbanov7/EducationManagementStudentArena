@@ -1286,9 +1286,17 @@ body {
   
   /* tipə görə rəng */
   .format-tag.is-pdf{ color:#e74c3c; background:#fff5f5; }
-  .format-tag.is-docx{ color:#2b6cb0; background:#ebf8ff; }
   .format-tag.is-txt{ color:#2f855a; background:#f0fff4; }
   .format-tag.is-img{ color:#0f9f8f; background:#ecfdf5; }
+
+/* DOCX qadağası barədə qısa izah */
+.format-tags-hint{
+    margin: 8px 0 0;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-muted, #636e72);
+}
   
 
 /* Seçim Düymələri (Select All / Deselect) */

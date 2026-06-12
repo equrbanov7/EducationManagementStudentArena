@@ -2,14 +2,10 @@ import io
 import logging
 import os
 import re
-import zipfile
 from collections import defaultdict
 
 from django.conf import settings
 from django.utils.translation import pgettext
-
-from docx import Document
-from docx.enum.text import WD_COLOR_INDEX
 
 from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
 from apps.exams.services.utils import _norm
@@ -32,18 +28,11 @@ logger = logging.getLogger(__name__)
 # settings.EXAM_UPLOAD_MAX_BYTES ilə konfiqurasiya edilə bilər; default 45MB.
 MAX_UPLOAD_BYTES = getattr(settings, "EXAM_UPLOAD_MAX_BYTES", 45 * 1024 * 1024)
 
-# DOCX/ZIP "zip-bomb" qarşısı: hər hansı entry-nin uncompressed ölçüsü 50MB-dan çox olmamalıdır
-# və ümumi uncompressed ölçü 100MB-dan çox olmamalıdır.
-MAX_DOCX_ENTRY_UNCOMPRESSED = 50 * 1024 * 1024
-MAX_DOCX_TOTAL_UNCOMPRESSED = 100 * 1024 * 1024
-
 # Magic bytes (real signature) — uzantıya görə yox, faktiki məzmuna görə yoxlayırıq.
 FILE_SIGNATURES = {
     "pdf": [b"%PDF-"],
     "png": [b"\x89PNG\r\n\x1a\n"],
     "jpg": [b"\xff\xd8\xff"],
-    # DOCX/XLSX/PPTX hamısı ZIP-dir, "PK\x03\x04" və ya boş zip "PK\x05\x06"
-    "docx": [b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"],
 }
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
@@ -70,50 +59,6 @@ def _peek_magic_bytes(uploaded_file, length: int = 8) -> bytes:
 def _verify_magic_bytes(head: bytes, expected_key: str) -> bool:
     signatures = FILE_SIGNATURES.get(expected_key, [])
     return any(head.startswith(sig) for sig in signatures)
-
-
-def _docx_zip_bomb_safe(uploaded_file) -> None:
-    """
-    DOCX əslində ZIP arxividir. Pis niyyətli istifadəçi 1KB-lıq fayl yükləyə bilər
-    ki, açıldıqda 4GB olsun — bu yaddaşı tükətir. Burada hər entry-nin
-    bildirilmiş uncompressed ölçüsünü yoxlayırıq və ümumi limiti tətbiq edirik.
-    Eyni zamanda .docm (macro-enabled) və ya əmr icra edən content-i bloklayırıq.
-    """
-    try:
-        uploaded_file.seek(0)
-    except Exception:
-        pass
-
-    try:
-        with zipfile.ZipFile(uploaded_file) as zf:
-            total = 0
-            # blocked_entries = (
-            #     "vbaproject.bin",  # makro
-            #     "word/vbaproject.bin",
-            #     "macro",
-            #     ".bin",  # ümumi binary embedlər — diqqətli olmaq lazımdır
-            # )
-            for info in zf.infolist():
-                if info.file_size > MAX_DOCX_ENTRY_UNCOMPRESSED:
-                    raise ValueError(pgettext("exams.service.parsing.error", "file_zip_bomb"))
-                total += info.file_size
-                if total > MAX_DOCX_TOTAL_UNCOMPRESSED:
-                    raise ValueError(pgettext("exams.service.parsing.error", "file_zip_bomb"))
-
-                name_lower = info.filename.lower()
-                # VBA / makro mövcuddursa, rədd et
-                if "vbaproject.bin" in name_lower:
-                    raise ValueError(pgettext("exams.service.parsing.error", "file_has_macros"))
-                # Path traversal mühafizəsi
-                if name_lower.startswith("/") or ".." in name_lower.split("/"):
-                    raise ValueError(pgettext("exams.service.parsing.error", "file_unsafe_entry"))
-    except zipfile.BadZipFile:
-        raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
-    finally:
-        try:
-            uploaded_file.seek(0)
-        except Exception:
-            pass
 
 
 def _pdf_safety_check(uploaded_file) -> None:
@@ -145,7 +90,131 @@ def _pdf_safety_check(uploaded_file) -> None:
 
 
 END_QUESTION_RE = re.compile(r"^\s*END_QUESTION\s*$", re.IGNORECASE)
-JOINED_OPTION_BOUNDARY_RE = re.compile(r"(?<=[a-zəöüğışç])(?=[A-ZƏÖÜĞİŞÇ])")
+# Bitişik variant sərhədi: kiçik hərf → böyük hərf keçidi (az/en/tr/ru əlifbaları)
+JOINED_OPTION_BOUNDARY_RE = re.compile(r"(?<=[a-zəöüğışçа-яё])(?=[A-ZƏÖÜĞİŞÇА-ЯЁ])")
+
+# ---- Bullet (•) / işarə (√) formatlı sənədlər ------------------------------------
+# Bəzi PDF/Word ixracları variantları A–E etiketi ilə yox, bullet işarəsi ilə,
+# düz cavabı isə √ / ✓ işarəsi ilə verir (məs. universitet yekun test sənədləri):
+#   1. Sual mətni?
+#    • Yanlış variant
+#    √ Düz variant
+# Aşağıdakı çevirici belə sətrləri mövcud parserin tanıdığı "A) ..." / "*B) ..."
+# formasına salır — parser məntiqinə toxunulmur.
+_BULLET_CHARS = "•◦▪‣●○·"
+_CHECK_CHARS = "√✓✔☑✅"
+_BULLET_OPTION_LINE_RE = re.compile(rf"^\s*[{_BULLET_CHARS}]\s*(.+)$")
+_CHECK_OPTION_LINE_RE = re.compile(rf"^\s*[{_CHECK_CHARS}]\s*(.+)$")
+
+# ---- Kiril variant etiketləri (rus dilinə tərcümə olunmuş sənədlər) --------------
+# Tərcümə zamanı "A)" çox vaxt görünüşcə eyni olan kiril hərfinə çevrilir.
+# İki sxem mövcuddur:
+#   1) Ardıcıl rus əlifbası: А Б В Г Д  → A B C D E
+#   2) Latın oxşarı (lookalike): А В С Д Е → A B C D E
+# Sənəddə Б və ya Г varsa ardıcıl sxem, əks halda lookalike qəbul edilir.
+_CYRILLIC_SEQ_MAP = {"А": "A", "Б": "B", "В": "C", "Г": "D", "Д": "E"}
+_CYRILLIC_LOOKALIKE_MAP = {"А": "A", "В": "B", "С": "C", "Д": "D", "Е": "E"}
+_CYR_OPTION_LABEL_RE = re.compile(r"^(\s*\*?\s*)([АБВГДСЕабвгдсе])(\s*[\)\.])", re.MULTILINE)
+_CYR_ANSWERLINE_RE = re.compile(
+    r"^(\s*(?:cavab|duz\s*cavab|düz\s*cavab|correct|answer|ответ|правильный\s*ответ|cevap|doğru\s*cevap)\s*[:\-]\s*)"
+    r"([АБВГДСЕабвгдсе](?:\s*[,;/]\s*[АБВГДСЕабвгдсе])*)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _normalize_cyrillic_option_labels(text: str) -> str:
+    """Kiril variant etiketlərini (А Б В …) latın A–E etiketlərinə çevirir."""
+    if not text:
+        return text
+
+    used = {m.group(2).upper() for m in _CYR_OPTION_LABEL_RE.finditer(text)}
+    if not used:
+        return text
+
+    mapping = _CYRILLIC_SEQ_MAP if used & {"Б", "Г"} else _CYRILLIC_LOOKALIKE_MAP
+
+    def _label_repl(match):
+        latin = mapping.get(match.group(2).upper())
+        if latin is None:
+            return match.group(0)
+        return match.group(1) + latin + match.group(3)
+
+    def _answer_repl(match):
+        translated = "".join(mapping.get(ch.upper(), ch) if ch.upper() in mapping else ch for ch in match.group(2))
+        return match.group(1) + translated
+
+    text = _CYR_OPTION_LABEL_RE.sub(_label_repl, text)
+    return _CYR_ANSWERLINE_RE.sub(_answer_repl, text)
+
+
+# Tək qalmış sual nömrəsi sətri ("350." / "350)") — uzun suallarda PDF extraction
+# nömrəni ayrıca sətirdə saxlayır, mətn növbəti sətirdən başlayır.
+_BARE_QNO_RE = re.compile(r"^\s*(\d{1,4})\s*([\.\)])\s*$")
+
+
+def _merge_bare_question_numbers(text: str) -> str:
+    """
+    Tək sual nömrəsi sətrini növbəti mətn sətri ilə birləşdirir ki, QUESTION_RE
+    onu sual başlanğıcı kimi tanısın. Növbəti sətir variant/işarə sətridirsə
+    (sual mətni tamam yoxdursa) toxunulmur.
+    """
+    if not text:
+        return text
+
+    lines = text.splitlines()
+    out_lines: list[str] = []
+    i = 0
+    while i < len(lines):
+        m = _BARE_QNO_RE.match(lines[i])
+        if m:
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if (
+                j < len(lines)
+                and not OPTION_RE.match(lines[j])
+                and not _BARE_QNO_RE.match(lines[j])
+                and not _BULLET_OPTION_LINE_RE.match(lines[j])
+                and not _CHECK_OPTION_LINE_RE.match(lines[j])
+            ):
+                out_lines.append(f"{m.group(1)}{m.group(2)} {lines[j].strip()}")
+                i = j + 1
+                continue
+        out_lines.append(lines[i])
+        i += 1
+    return "\n".join(out_lines)
+
+
+def _convert_marker_options(text: str) -> str:
+    """
+    Bullet (•) variantlarını "A) ..." formasına, √-li sətrləri isə "*X) ..."
+    (düz cavab) formasına çevirir. Etiket sayğacı hər sual sətrində sıfırlanır.
+    Mövcud A–E etiketli sətrlərə toxunulmur; marker yoxdursa mətn olduğu kimi qalır.
+    """
+    if not text or not any(ch in text for ch in _BULLET_CHARS + _CHECK_CHARS):
+        return text
+
+    out_lines = []
+    label_idx = 0
+    for line in text.splitlines():
+        if QUESTION_RE.match(line):
+            label_idx = 0
+            out_lines.append(line)
+            continue
+
+        m_check = _CHECK_OPTION_LINE_RE.match(line)
+        m_bullet = None if m_check else _BULLET_OPTION_LINE_RE.match(line)
+        match = m_check or m_bullet
+        if match and label_idx < len(LABELS):
+            label = LABELS[label_idx]
+            label_idx += 1
+            prefix = "*" if m_check else ""
+            out_lines.append(f"{prefix}{label}) {match.group(1).strip()}")
+        else:
+            out_lines.append(line)
+
+    return "\n".join(out_lines)
+
 
 # PDF-dən çıxan mətni parser üçün uyğun formaya salır:
 
@@ -157,6 +226,7 @@ def normalize_pdf_extracted_text(text: str) -> str:
     - A–E variantlarının qabağına newline əlavə edir (… \nA) …)
     - "Cavab:" sətrini yeni sətrə keçirir
     - '*' işarəsi ilə variant arasında boşluğu düzəldir (*A) kimi)
+    - bullet (•) və işarə (√) markerlərini yeni sətirdən başladır
     """
     if not text:
         return ""
@@ -166,8 +236,8 @@ def normalize_pdf_extracted_text(text: str) -> str:
     # çoxlu boşluqları normallaşdır
     t = re.sub(r"[ \t]+", " ", t)
 
-    # "Cavab:" həmişə yeni sətirdən başlasın
-    t = re.sub(r"(?i)\s+(Cavab\s*:)", r"\n\1", t)
+    # "Cavab:" həmişə yeni sətirdən başlasın (az/en/ru/tr açar sözləri)
+    t = re.sub(r"(?i)\s+((?:cavab|correct|answer|ответ|cevap)\s*:)", r"\n\1", t)
 
     # "* A)" kimi çıxırsa "*A)" et
     t = re.sub(r"\*\s+([A-E])", r"*\1", t, flags=re.IGNORECASE)
@@ -178,6 +248,9 @@ def normalize_pdf_extracted_text(text: str) -> str:
 
     # Variantlar: " A)" / " *A)" / " B." və s -> yeni sətirdən başlasın
     t = re.sub(r"(?<!\n)\s+(\*?[A-E])\s*([\)\.])", r"\n\1\2", t, flags=re.IGNORECASE)
+
+    # Bullet/işarə markerləri (• variant, √ düz cavab) yeni sətirdən başlasın
+    t = re.sub(rf"(?<!\n)\s+([{_BULLET_CHARS}{_CHECK_CHARS}])\s*", r"\n\1 ", t)
 
     # 3+ boş sətiri 2-yə sal
     t = re.sub(r"\n{3,}", "\n\n", t)
@@ -192,7 +265,8 @@ def normalize_pdf_extracted_text(text: str) -> str:
 # əlavə edirik (OPTION_RE onsuz da "*A)" formatını düz cavab kimi tanıyır).
 # Bu yanaşma heç bir mövcud parser məntiqini və ya testini pozmur.
 
-_HIGHLIGHT_CORE_RE = re.compile(r"[^0-9a-zəğıöüçşı]+")
+# az/en/tr/ru hərfləri saxlanılır — rus mətnlərində highlight uyğunlaşması işləsin
+_HIGHLIGHT_CORE_RE = re.compile(r"[^0-9a-zəğıöüçşıа-яё]+")
 
 
 def _highlight_core(text: str) -> str:
@@ -242,16 +316,6 @@ def _mark_correct_option_lines(text: str, highlight_fragments: list[str]) -> str
                 line = re.sub(r"^(\s*)", r"\1*", line, count=1)
         out_lines.append(line)
     return "\n".join(out_lines)
-
-
-def _docx_paragraph_is_highlighted(paragraph) -> bool:
-    """DOCX paraqrafında ən azı bir run rənglə işarələnibsə True qaytarır."""
-    for run in paragraph.runs:
-        font = getattr(run, "font", None)
-        color = getattr(font, "highlight_color", None) if font is not None else None
-        if color is not None and color != WD_COLOR_INDEX.AUTO:
-            return True
-    return False
 
 
 def _extract_pdf_highlights(uploaded_file) -> list[str]:
@@ -612,16 +676,17 @@ def _ocr_page_text_with_highlights(page, textpage, zoom, detect_highlight, min_r
     return "\n".join(lines_out)
 
 
-# Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf, .png, .jpg
+# Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .pdf, .png, .jpg
 
 
 def extract_text_from_upload(uploaded_file) -> str:
     """
-    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf, .png, .jpg.
+    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .pdf, .png, .jpg.
+    DOCX/DOC qəsdən dəstəklənmir — makro/embed riski və qeyri-stabil parse
+    nəticələri səbəbindən sual importu üçün bağlıdır (ayrıca error mesajı verilir).
     Çoxsaylı təhlükəsizlik yoxlamaları ilə birlikdə:
       - Ölçü limiti (default 45MB, settings.EXAM_UPLOAD_MAX_BYTES)
       - Faktiki magic bytes (uzantı saxtalaşdırıla bilər)
-      - DOCX: makro (.docm/.vbaproject), ZIP-bomb və path-traversal yoxlanışı
       - PDF: aktiv kontent (JS/OpenAction/EmbeddedFile) yoxlanışı
     """
     name = (uploaded_file.name or "").lower()
@@ -630,8 +695,12 @@ def extract_text_from_upload(uploaded_file) -> str:
     # 1) Ölçü limiti
     _ensure_within_size_limit(uploaded_file, MAX_UPLOAD_BYTES)
 
-    # 2) macro-enabled uzantıları ilkin olaraq rədd edirik
-    blocked_extensions = (".docm", ".dotm", ".xlsm", ".pptm", ".bin", ".exe", ".scr", ".js", ".html", ".htm")
+    # 2) Word sənədləri artıq qəbul edilmir — istifadəçiyə aydın mesaj.
+    if ext in (".docx", ".doc", ".docm", ".dotm", ".dotx", ".rtf"):
+        raise ValueError(pgettext("exams.service.parsing.error", "file_docx_not_allowed"))
+
+    # 3) Digər təhlükəli uzantıları ilkin olaraq rədd edirik
+    blocked_extensions = (".xlsm", ".pptm", ".bin", ".exe", ".scr", ".js", ".html", ".htm", ".zip")
     if ext in blocked_extensions:
         raise ValueError(pgettext("exams.service.parsing.error", "file_has_macros"))
 
@@ -649,34 +718,6 @@ def extract_text_from_upload(uploaded_file) -> str:
         if not normalized.strip():
             raise ValueError(pgettext("exams.service.parsing.error", "pdf_no_text_layer"))
         return normalized
-
-    if ext == ".docx":
-        head = _peek_magic_bytes(uploaded_file, 8)
-        if not _verify_magic_bytes(head, "docx"):
-            # uzantı .docx-dir amma faktiki məzmun ZIP deyil — saxta fayl
-            raise ValueError(pgettext("exams.service.parsing.error", "file_signature_mismatch"))
-
-        # ZIP-bomb + makro yoxlaması (file-pointer-i bərpa edir)
-        _docx_zip_bomb_safe(uploaded_file)
-
-        try:
-            # docx.Document file-like də qəbul edir
-            doc = Document(uploaded_file)
-        except Exception as exc:
-            logger.warning("DOCX parse failed for upload %s: %s", name, exc)
-            raise ValueError(pgettext("exams.service.parsing.error", "file_corrupt"))
-
-        lines = []
-        highlight_fragments = []
-        for p in doc.paragraphs:
-            t = (p.text or "").strip()
-            if not t:
-                continue
-            lines.append(t)
-            # Rənglə işarələnmiş variant paraqrafını "düz cavab" namizədi kimi yığ
-            if _docx_paragraph_is_highlighted(p):
-                highlight_fragments.append(t)
-        return _mark_correct_option_lines("\n".join(lines), highlight_fragments)
 
     if ext == ".pdf":
         if PdfReader is None:
@@ -833,6 +874,7 @@ def _looks_like_question_prompt(line: str) -> bool:
     question_markers = (
         "?",
         ":",
+        # az
         "hansı",
         "hansıdır",
         "hansidir",
@@ -850,6 +892,22 @@ def _looks_like_question_prompt(line: str) -> bool:
         "istifade",
         "aşağıdakı",
         "asagidaki",
+        # en
+        "which",
+        "what",
+        "following",
+        # ru
+        "какой",
+        "какая",
+        "какое",
+        "которы",
+        "что такое",
+        "является",
+        "следующ",
+        # tr
+        "hangisi",
+        "aşağıdaki",
+        "nelerdir",
     )
     return any(marker in lower for marker in question_markers)
 
@@ -1088,6 +1146,12 @@ def parse_bulk_mcq(raw_text: str):
         }
       ]
     """
+    # Ön-emal: kiril etiketləri (rus tərcümələri), tək qalmış sual nömrələri
+    # və bullet/√ markerləri parserin tanıdığı "A) / *B)" formasına salınır.
+    raw_text = _normalize_cyrillic_option_labels(raw_text or "")
+    raw_text = _merge_bare_question_numbers(raw_text)
+    raw_text = _convert_marker_options(raw_text)
+
     if any(END_QUESTION_RE.match(line) for line in raw_text.splitlines()):
         questions = _parse_end_question_blocks(raw_text)
         if questions:

@@ -182,7 +182,6 @@ def _test_workbench_context(exam, navigation_query, *, selected_language=None):
         "wb_format": "test",
         "wb_show_report": True,
         "wb_templates": [
-            {"url": f"{download_base}?format=docx", "label": "DOCX", "kind": "docx"},
             {"url": f"{download_base}?format=txt", "label": "TXT", "kind": "txt"},
         ],
         "wb_save_label": pgettext("exams.template.test_question_bank", "action_save_selected"),
@@ -792,54 +791,13 @@ E) Heç biri
 @login_required
 def test_question_bank_template_download(request, slug):
     """
-    Müəllimə hazır sual bankı şablonu endirir.
-    Format: ?format=txt (default) və ya ?format=docx
+    Müəllimə hazır sual bankı şablonu endirir (yalnız TXT).
+    DOCX importu söndürüldüyü üçün DOCX şablonu da verilmir.
     """
     _ensure_teacher(request.user)
     # Slug yoxlaması — tenant izolyasiyası
     get_teacher_exam_or_404(request, slug=slug)
 
-    file_format = (request.GET.get("format") or "txt").lower().strip()
-
-    if file_format == "docx":
-        try:
-            from io import BytesIO
-
-            from django.http import HttpResponse
-
-            from docx import Document
-
-            doc = Document()
-            doc.add_heading("EMSArena — Test sual bankı şablonu", level=1)
-            intro = doc.add_paragraph()
-            intro.add_run(
-                "Hər sualın 4 və ya 5 variantı olmalıdır (A–E). "
-                "Düz cavabı 3 üsuldan biri ilə qeyd edə bilərsiniz:\n"
-                "1) Sual sonunda 'Cavab: B' yazın\n"
-                "2) Düz variantın əvvəlinə * qoyun (*B)\n"
-                "3) İşarə yoxdursa A standart olaraq düz sayılır\n"
-                "Çoxcavablı: 'Cavab: A,C'. Hər sualdan sonra boş sətir buraxın."
-            )
-            for line in _QUESTION_BANK_TEMPLATE_TXT.splitlines():
-                if line.startswith("#") or not line.strip():
-                    continue
-                doc.add_paragraph(line)
-
-            buf = BytesIO()
-            doc.save(buf)
-            buf.seek(0)
-            response = HttpResponse(
-                buf.read(),
-                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            )
-            response["Content-Disposition"] = 'attachment; filename="emsarena_test_template.docx"'
-            return response
-        except Exception:
-            logger.exception("Template DOCX generation failed for slug=%s", slug)
-            # DOCX alınmadısa TXT-ə düşürük
-            file_format = "txt"
-
-    # TXT default
     from django.http import HttpResponse
 
     response = HttpResponse(_QUESTION_BANK_TEMPLATE_TXT, content_type="text/plain; charset=utf-8")

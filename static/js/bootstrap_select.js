@@ -3,6 +3,61 @@
         return value === null || value === undefined ? "" : String(value);
     }
 
+    // Menü "position:absolute" ilə overflow:hidden/auto konteynerin (məs. modal
+    // body) içində kəsilir. Belə ancestor varsa menyunu fixed strategiya ilə
+    // viewport-a görə yerləşdiririk (aşağıda yer yoxdursa yuxarı açılır).
+    function hasClippingAncestor(element) {
+        var node = element.parentElement;
+        while (node && node !== document.body) {
+            var style = window.getComputedStyle(node);
+            var overflow = style.overflow + style.overflowY + style.overflowX;
+            if (/(auto|scroll|hidden|clip)/.test(overflow)) {
+                return true;
+            }
+            node = node.parentElement;
+        }
+        return false;
+    }
+
+    function positionMenuFixed(toggle, menu) {
+        var rect = toggle.getBoundingClientRect();
+        var viewportHeight = window.innerHeight;
+        var gap = 6;
+        var desiredMax = 320; // CSS max-height (20rem) ilə uyğun
+        var spaceBelow = viewportHeight - rect.bottom - gap - 8;
+        var spaceAbove = rect.top - gap - 8;
+        var openUp = spaceBelow < 180 && spaceAbove > spaceBelow;
+
+        menu.classList.add("is-fixed");
+        menu.style.position = "fixed";
+        menu.style.left = rect.left + "px";
+        menu.style.width = rect.width + "px";
+        menu.style.right = "auto";
+        menu.style.transform = "none";
+
+        if (openUp) {
+            menu.style.top = "auto";
+            menu.style.bottom = viewportHeight - rect.top + gap + "px";
+            menu.style.maxHeight = Math.max(120, Math.min(desiredMax, spaceAbove)) + "px";
+        } else {
+            menu.style.top = rect.bottom + gap + "px";
+            menu.style.bottom = "auto";
+            menu.style.maxHeight = Math.max(120, Math.min(desiredMax, spaceBelow)) + "px";
+        }
+    }
+
+    function resetMenuPosition(menu) {
+        menu.classList.remove("is-fixed");
+        menu.style.position = "";
+        menu.style.left = "";
+        menu.style.right = "";
+        menu.style.top = "";
+        menu.style.bottom = "";
+        menu.style.width = "";
+        menu.style.maxHeight = "";
+        menu.style.transform = "";
+    }
+
     function enhanceBootstrapSelect(select) {
         if (!select) {
             return null;
@@ -118,6 +173,41 @@
         }
 
         select.addEventListener("change", sync);
+
+        // Kəsilmə fix-i: clipping konteyner daxilindədirsə menyunu fixed aç.
+        var useFixedStrategy = null; // lazy hesablanır (ilk açılışda)
+
+        function closeDropdown() {
+            if (window.bootstrap && window.bootstrap.Dropdown) {
+                window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+            }
+        }
+
+        function onScrollWhileOpen(event) {
+            // Menyu daxili scroll-a icazə ver, kənardakı scroll-da bağla.
+            if (event.target instanceof Node && menu.contains(event.target)) {
+                return;
+            }
+            closeDropdown();
+        }
+
+        toggle.addEventListener("show.bs.dropdown", function () {
+            if (useFixedStrategy === null) {
+                useFixedStrategy = hasClippingAncestor(wrapper);
+            }
+            if (!useFixedStrategy) {
+                return;
+            }
+            positionMenuFixed(toggle, menu);
+            window.addEventListener("scroll", onScrollWhileOpen, true);
+            window.addEventListener("resize", closeDropdown);
+        });
+
+        toggle.addEventListener("hidden.bs.dropdown", function () {
+            window.removeEventListener("scroll", onScrollWhileOpen, true);
+            window.removeEventListener("resize", closeDropdown);
+            resetMenuPosition(menu);
+        });
 
         select._refreshBootstrapSelect = refresh;
         select._syncBootstrapSelect = sync;

@@ -524,36 +524,13 @@
   {# ── Student score breakdown bar (student only) ──────────────── #}
   {% if not role_capabilities.is_teacher and not role_capabilities.is_org_admin and not role_capabilities.is_superadmin and not statistics_unit_layout %}
   <div class="row g-3 mb-4">
-    <div class="col-12 col-lg-6">
+    <div class="col-12">
       <div class="card h-100">
         <div class="card-header">
           <h6 class="mb-0"><i class="fas fa-chart-bar me-1"></i> {% trans "chart_avg_by_content" context "profile.statistics" %}</h6>
         </div>
         <div class="card-body">
           <canvas id="statsContentBarChart" height="250"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-lg-6">
-      <div class="card h-100">
-        <div class="card-header">
-          <h6 class="mb-0"><i class="fas fa-gamepad me-1"></i> {% trans "card_live_exam" context "profile.statistics" %}</h6>
-        </div>
-        <div class="card-body text-center py-4">
-          <div class="d-flex justify-content-around">
-            <div>
-              <div class="fs-3 fw-bold text-primary">{{ statistics_data.summary.live_total }}</div>
-              <small class="text-muted">{% trans "live_total_answers" context "profile.statistics" %}</small>
-            </div>
-            <div>
-              <div class="fs-3 fw-bold text-success">{{ statistics_data.summary.live_correct }}</div>
-              <small class="text-muted">{% trans "live_correct" context "profile.statistics" %}</small>
-            </div>
-            <div>
-              <div class="fs-3 fw-bold text-warning">{{ statistics_data.summary.live_accuracy }}%</div>
-              <small class="text-muted">{% trans "live_accuracy" context "profile.statistics" %}</small>
-            </div>
-          </div>
         </div>
       </div>
     </div>
