@@ -5,6 +5,8 @@ Role labels, status titles, the task-notification metadata table and the
 pending-org-owner event key, shared across the service modules.
 """
 
+from django.utils.translation import pgettext_lazy
+
 from apps.notifications.models import (
     MembershipRequestRoleType,
     NotificationType,
@@ -20,51 +22,87 @@ MEMBERSHIP_REQUEST_ROLE_LABELS = {
 }
 
 MEMBERSHIP_REQUEST_STATUS_TITLES = {
-    StudentOrganizationRequestStatus.APPROVED: "Müraciətiniz təsdiqləndi",
-    StudentOrganizationRequestStatus.REJECTED: "Müraciətiniz rədd edildi",
-    StudentOrganizationRequestStatus.CANCELLED: "Müraciətiniz ləğv edildi",
-    StudentOrganizationRequestStatus.AUTO_CLOSED: "Müraciətiniz bağlandı",
+    StudentOrganizationRequestStatus.APPROVED: pgettext_lazy("notifications.event", "Your request was approved"),
+    StudentOrganizationRequestStatus.REJECTED: pgettext_lazy("notifications.event", "Your request was rejected"),
+    StudentOrganizationRequestStatus.CANCELLED: pgettext_lazy("notifications.event", "Your request was cancelled"),
+    StudentOrganizationRequestStatus.AUTO_CLOSED: pgettext_lazy("notifications.event", "Your request was closed"),
 }
 
 TASK_NOTIFICATION_META = {
     "assignment": {
-        "label": "sərbəst iş",
-        "assigned_title": "Yeni sərbəst iş təyin olundu: {title}",
-        "assigned_message": '{course} kursunda "{title}" işi sizə təyin olundu.',
-        "submission_title": "Yeni sərbəst iş cavabı: {student}",
-        "submission_message": '"{title}" işi üçün {student} cavab göndərdi.',
-        "graded_title": "Sərbəst iş nəticəniz hazırdır: {title}",
-        "graded_message": '"{title}" işi üçün müəllim rəy və ya bal əlavə etdi.',
+        "label": pgettext_lazy("notifications.event.task_kind", "assignment"),
+        "assigned_title": pgettext_lazy("notifications.event", "New assignment assigned: {title}"),
+        "assigned_message": pgettext_lazy(
+            "notifications.event",
+            '{course} course: "{title}" has been assigned to you.',
+        ),
+        "submission_title": pgettext_lazy("notifications.event", "New assignment submission: {student}"),
+        "submission_message": pgettext_lazy(
+            "notifications.event",
+            '{student} submitted an answer for "{title}".',
+        ),
+        "graded_title": pgettext_lazy("notifications.event", "Your assignment result is ready: {title}"),
+        "graded_message": pgettext_lazy(
+            "notifications.event",
+            'The teacher added feedback or a score for "{title}".',
+        ),
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "project": {
-        "label": "layihə",
-        "assigned_title": "Yeni layihə təyin olundu: {title}",
-        "assigned_message": '{course} kursunda "{title}" layihəsi sizə təyin olundu.',
-        "submission_title": "Yeni layihə cavabı: {student}",
-        "submission_message": '"{title}" layihəsi üçün {student} cavab göndərdi.',
-        "graded_title": "Layihə nəticəniz hazırdır: {title}",
-        "graded_message": '"{title}" layihəsi üçün müəllim rəy və ya bal əlavə etdi.',
+        "label": pgettext_lazy("notifications.event.task_kind", "project"),
+        "assigned_title": pgettext_lazy("notifications.event", "New project assigned: {title}"),
+        "assigned_message": pgettext_lazy(
+            "notifications.event",
+            '{course} course: "{title}" project has been assigned to you.',
+        ),
+        "submission_title": pgettext_lazy("notifications.event", "New project submission: {student}"),
+        "submission_message": pgettext_lazy(
+            "notifications.event",
+            '{student} submitted an answer for "{title}" project.',
+        ),
+        "graded_title": pgettext_lazy("notifications.event", "Your project result is ready: {title}"),
+        "graded_message": pgettext_lazy(
+            "notifications.event",
+            'The teacher added feedback or a score for "{title}" project.',
+        ),
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "lab": {
-        "label": "lab",
-        "assigned_title": "Yeni lab təyin olundu: {title}",
-        "assigned_message": '{course} kursunda "{title}" lab işi sizin üçün aktivdir.',
-        "submission_title": "Yeni lab göndərişi: {student}",
-        "submission_message": '"{title}" labı üçün {student} cavab göndərdi.',
-        "graded_title": "Lab nəticəniz hazırdır: {title}",
-        "graded_message": '"{title}" labı üçün müəllim rəy və ya bal əlavə etdi.',
+        "label": pgettext_lazy("notifications.event.task_kind", "lab"),
+        "assigned_title": pgettext_lazy("notifications.event", "New lab assigned: {title}"),
+        "assigned_message": pgettext_lazy(
+            "notifications.event",
+            '{course} course: "{title}" lab is active for you.',
+        ),
+        "submission_title": pgettext_lazy("notifications.event", "New lab submission: {student}"),
+        "submission_message": pgettext_lazy(
+            "notifications.event",
+            '{student} submitted an answer for "{title}" lab.',
+        ),
+        "graded_title": pgettext_lazy("notifications.event", "Your lab result is ready: {title}"),
+        "graded_message": pgettext_lazy(
+            "notifications.event",
+            'The teacher added feedback or a score for "{title}" lab.',
+        ),
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "exam": {
-        "label": "imtahan",
-        "assigned_title": "Yeni imtahan təyin olundu: {title}",
-        "assigned_message": '"{title}" imtahanı sizin üçün aktivdir.',
-        "submission_title": "Yeni imtahan cəhdi: {student}",
-        "submission_message": '"{title}" imtahanı üçün {student} cavabını göndərdi.',
-        "graded_title": "İmtahan nəticəniz yeniləndi: {title}",
-        "graded_message": '"{title}" imtahanı üçün müəllim rəy və ya bal əlavə etdi.',
+        "label": pgettext_lazy("notifications.event.task_kind", "exam"),
+        "assigned_title": pgettext_lazy("notifications.event", "New exam assigned: {title}"),
+        "assigned_message": pgettext_lazy(
+            "notifications.event",
+            '"{title}" exam is active for you.',
+        ),
+        "submission_title": pgettext_lazy("notifications.event", "New exam attempt: {student}"),
+        "submission_message": pgettext_lazy(
+            "notifications.event",
+            '{student} submitted an answer for "{title}" exam.',
+        ),
+        "graded_title": pgettext_lazy("notifications.event", "Your exam result was updated: {title}"),
+        "graded_message": pgettext_lazy(
+            "notifications.event",
+            'The teacher added feedback or a score for "{title}" exam.',
+        ),
         "notification_type": NotificationType.EXAM,
     },
 }

@@ -848,6 +848,48 @@ def test_question_bank_template_download(request, slug):
 
 
 @login_required
+def exam_questions_word_export(request, slug):
+    """
+    İmtahanın suallarını Word (.docx) faylı kimi export edir.
+
+    Yalnız imtahanın müəllimi (tenant-scoped) yükləyə bilər; tələbələrə
+    açıq deyil — düz cavablar faylda işarələnir. Format import parseri ilə
+    uyğundur (round-trip). ?language=az parametri ilə dil filtri mümkündür.
+    """
+    from urllib.parse import quote
+
+    from django.http import HttpResponse
+
+    from apps.exams.services.question_word_export import build_questions_docx, exam_questions_payload
+
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+
+    language = (request.GET.get("language") or "").strip().lower() or None
+    payload = exam_questions_payload(exam, language=language)
+    if not payload:
+        messages.warning(request, "Export üçün sual tapılmadı.")
+        return redirect("exams:test_question_bank", slug=exam.slug)
+
+    subtitle_parts = [f"Sual sayı: {len(payload)}"]
+    if language:
+        subtitle_parts.append(f"Dil: {language.upper()}")
+
+    buffer = build_questions_docx(
+        title=f"İmtahan sualları — {exam.title}",
+        subtitle=" · ".join(subtitle_parts),
+        questions=payload,
+    )
+    response = HttpResponse(
+        buffer.read(),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    safe_name = quote(f"{exam.title}_suallar.docx")
+    response["Content-Disposition"] = f"attachment; filename*=UTF-8''{safe_name}"
+    return response
+
+
+@login_required
 @require_POST
 def ai_generate_question_bank(request, slug):
     _ensure_teacher(request.user)

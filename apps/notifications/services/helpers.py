@@ -40,7 +40,7 @@ def _resolve_organization_id(organization, metadata: dict | None):
 
 def _assert_owner(notification: InAppNotification, user) -> None:
     if notification.recipient_id != user.pk:
-        raise PermissionError("You can only manage your own notifications.")
+        raise PermissionError(pgettext("notifications.error", "You can only manage your own notifications."))
 
 
 def _task_organization_id(task):
@@ -115,11 +115,13 @@ def _membership_request_notification_message(request_obj: StudentOrganizationReq
     role_label = get_membership_request_role_label(request_obj.role_type)
     full_name = (request_obj.user.get_full_name() or "").strip() or request_obj.user.username
     lines = [
-        f"Təşkilat: {request_obj.organization.name}",
-        f"Ad soyad: {full_name}",
-        f"Username: @{request_obj.user.username}",
-        f"Email: {request_obj.user.email}",
-        f"Müraciət növü: {role_label}",
+        pgettext("notifications.event", "Organization: {organization}").format(
+            organization=request_obj.organization.name
+        ),
+        pgettext("notifications.event", "Full name: {full_name}").format(full_name=full_name),
+        pgettext("notifications.event", "Username: @{username}").format(username=request_obj.user.username),
+        pgettext("notifications.event", "Email: {email}").format(email=request_obj.user.email),
+        pgettext("notifications.event", "Request type: {role_label}").format(role_label=role_label),
     ]
 
     if profile is not None:
@@ -129,16 +131,26 @@ def _membership_request_notification_message(request_obj: StudentOrganizationReq
         student_group_number = (getattr(profile, "student_group_number", "") or "").strip()
 
         if department:
-            lines.append(f"Kafedra / Departament: {department}")
+            lines.append(
+                pgettext("notifications.event", "Department / Faculty: {department}").format(department=department)
+            )
         if staff_position:
-            lines.append(f"Vəzifə: {staff_position}")
+            lines.append(pgettext("notifications.event", "Position: {position}").format(position=staff_position))
         if request_obj.role_type == MembershipRequestRoleType.STUDENT and student_specialization:
-            lines.append(f"İxtisas / Fakültə: {student_specialization}")
+            lines.append(
+                pgettext("notifications.event", "Specialization / Faculty: {specialization}").format(
+                    specialization=student_specialization
+                )
+            )
         if request_obj.role_type == MembershipRequestRoleType.STUDENT and student_group_number:
-            lines.append(f"Qrup / Sinif: {student_group_number}")
+            lines.append(
+                pgettext("notifications.event", "Group / Class: {group_number}").format(
+                    group_number=student_group_number
+                )
+            )
 
     if request_obj.message:
-        lines.append(f"Müraciət mesajı: {request_obj.message}")
+        lines.append(pgettext("notifications.event", "Request message: {message}").format(message=request_obj.message))
 
     return "\n".join(lines)
 

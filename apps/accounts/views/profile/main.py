@@ -145,11 +145,14 @@ def _get_publish_notification_targets(user, capabilities):
         )
         from apps.organizations.models import Organization
 
+        # QEYD: tərcümə çağırışları f-string İÇİNDƏ OLMAMALIDIR — xgettext
+        # (makemessages) onları görmür və tərcümələri obsolete edir.
+        org_prefix_label = _("target_org_prefix")
         for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
             targets.append(
                 {
                     "value": f"org_{org.pk}",
-                    "label": f'{_("target_org_prefix")}: {org.name}',
+                    "label": f"{org_prefix_label}: {org.name}",
                     "is_exclusive": False,
                 }
             )
@@ -166,6 +169,8 @@ def _get_publish_notification_targets(user, capabilities):
             .order_by("organization__name", "organization_id", "-role__level", "id")
         )
         seen_org_ids = set()
+        org_prefix_label = _("target_org_prefix")
+        all_members_label = _("target_org_all_members")
         for membership in org_memberships:
             if membership.organization_id in seen_org_ids:
                 continue
@@ -173,18 +178,19 @@ def _get_publish_notification_targets(user, capabilities):
             targets.append(
                 {
                     "value": f"org_{membership.organization_id}",
-                    "label": f'{_("target_org_prefix")}: {membership.organization.name} ({_("target_org_all_members")})',
+                    "label": f"{org_prefix_label}: {membership.organization.name} ({all_members_label})",
                     "is_exclusive": False,
                 }
             )
 
     if is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
+        group_prefix_label = _("target_group_prefix")
         for group in teacher_groups:
             targets.append(
                 {
                     "value": f"group_{group.pk}",
-                    "label": f'{_("target_group_prefix")}: {group.name}',
+                    "label": f"{group_prefix_label}: {group.name}",
                     "is_exclusive": False,
                 }
             )
@@ -1001,6 +1007,44 @@ def user_profile(request):
         "profile_base_url": reverse("accounts:profile"),
         "embedded_in_profile": True,
     }
+    _empty_structure_section_base = {
+        "organization": active_organization,
+        "can_view": False,
+        "search_query": "",
+        "sort_value": "name",
+        "head_candidates": [],
+        "can_create": False,
+        "can_edit": False,
+        "can_delete": False,
+        "can_assign_head": False,
+        "pagination_query": "",
+        "form_errors": {},
+        "form_values": {},
+        "notice": "",
+        "profile_base_url": reverse("accounts:profile"),
+        "embedded_in_profile": True,
+    }
+    org_faculties_section = {
+        **_empty_structure_section_base,
+        "faculties": [],
+        "faculties_page_obj": None,
+        "faculty_total_count": 0,
+        "kafedra_total_count": 0,
+        "filtered_count": 0,
+    }
+    org_kafedras_section = {
+        **_empty_structure_section_base,
+        "kafedras": [],
+        "kafedras_page_obj": None,
+        "kafedra_total_count": 0,
+        "faculty_total_count": 0,
+        "filtered_count": 0,
+        "faculty_filter": "",
+        "faculty_options": [],
+        "teacher_options": [],
+        "unassigned_teacher_count": 0,
+        "can_assign_teachers": False,
+    }
     org_members_section = {
         "organization": active_organization,
         "members": [],
@@ -1348,6 +1392,18 @@ def user_profile(request):
         org_structure_section = build_organization_structure_context(request, active_organization)
         org_structure_section["embedded_in_profile"] = True
 
+    if active_section == "org-faculties" and "org-faculties" in allowed_sections and active_organization is not None:
+        from apps.organizations.structure_views import build_organization_faculties_context
+
+        org_faculties_section = build_organization_faculties_context(request, active_organization)
+        org_faculties_section["embedded_in_profile"] = True
+
+    if active_section == "org-kafedras" and "org-kafedras" in allowed_sections and active_organization is not None:
+        from apps.organizations.structure_views import build_organization_kafedras_context
+
+        org_kafedras_section = build_organization_kafedras_context(request, active_organization)
+        org_kafedras_section["embedded_in_profile"] = True
+
     if active_section == "org-members" and "org-members" in allowed_sections and active_organization is not None:
         from apps.organizations.views import build_organization_members_context
 
@@ -1365,6 +1421,16 @@ def user_profile(request):
 
         audit_log_section = build_audit_log_context(request)
         audit_log_section["embedded_in_profile"] = True
+
+    # Superadmin təşkilat baxışı — istənilən təşkilatın imtahan/nəticə/bank/kurs
+    # siyahılarına read-only drill-down. Yalnız aktiv olduqda qurulur (performans).
+    superadmin_org_inspector_section = {}
+    if active_section == "superadmin-org-inspector" and "superadmin-org-inspector" in allowed_sections:
+        from .._helpers.superadmin_inspector import build_superadmin_org_inspector_section
+
+        superadmin_org_inspector_section = build_superadmin_org_inspector_section(
+            request, is_superadmin=capabilities["is_superadmin"]
+        )
 
     # Superadmin "pending org" badge sidebar üçündür — ucuz `Organization.objects... .count()`-i hər zaman saxla.
     if "superadmin-organizations" in allowed_sections and active_section != "superadmin-organizations":
@@ -1912,9 +1978,12 @@ def user_profile(request):
         "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
         "unit-exams": "Bölmə imtahanları",
         "org-structure": "Fakültə və kafedralar",
+        "org-faculties": "Fakültələr",
+        "org-kafedras": "Kafedralar",
         "org-members": "Struktur üzvləri",
         "org-roles": "Təşkilat rolları",
         "audit-log": "Audit jurnalı",
+        "superadmin-org-inspector": "Təşkilat məlumatları",
     }
 
     shortcut_sections = []
@@ -1944,6 +2013,8 @@ def user_profile(request):
         "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
         "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
         "org-structure": "accounts/profile/sections/_org_structure.html",
+        "org-faculties": "accounts/profile/sections/_org_faculties.html",
+        "org-kafedras": "accounts/profile/sections/_org_kafedras.html",
         "org-members": "accounts/profile/sections/_org_members.html",
         "org-roles": "accounts/profile/sections/_org_roles.html",
         "audit-log": "accounts/profile/sections/_audit_log.html",
@@ -2085,9 +2156,12 @@ def user_profile(request):
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
         "org_structure_section": org_structure_section,
+        "org_faculties_section": org_faculties_section,
+        "org_kafedras_section": org_kafedras_section,
         "org_members_section": org_members_section,
         "org_roles_section": org_roles_section,
         "audit_log_section": audit_log_section,
+        "superadmin_org_inspector_section": superadmin_org_inspector_section,
         "superadmin_users_section": superadmin_users_section,
         "superadmin_ai_settings_section": superadmin_ai_settings_section,
         "superadmin_org_features_section": superadmin_org_features_section,

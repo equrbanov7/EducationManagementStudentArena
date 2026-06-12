@@ -34,18 +34,25 @@ def format_duration(seconds):
         total = int(seconds)
     except (ValueError, TypeError):
         return ""
+    # QEYD: pgettext çağırışları f-string İÇİNDƏ OLMAMALIDIR — xgettext
+    # (makemessages) f-string daxilindəki çağırışları görmür və tərcümələri
+    # obsolete edir (bax: "27 unit_minutes" reqressiyası, 2026-06-12).
+    unit_hours = pgettext("exams.filter.duration", "unit_hours")
+    unit_minutes = pgettext("exams.filter.duration", "unit_minutes")
+    unit_seconds = pgettext("exams.filter.duration", "unit_seconds")
+
     if total <= 0:
-        return "0 " + pgettext("exams.filter.duration", "unit_seconds")
+        return "0 " + unit_seconds
     hours = total // 3600
     minutes = (total % 3600) // 60
     secs = total % 60
     parts = []
     if hours:
-        parts.append(f"{hours} {pgettext('exams.filter.duration', 'unit_hours')}")
+        parts.append(f"{hours} {unit_hours}")
     if minutes:
-        parts.append(f"{minutes} {pgettext('exams.filter.duration', 'unit_minutes')}")
+        parts.append(f"{minutes} {unit_minutes}")
     if secs > 0 or not parts:
-        parts.append(f"{secs} {pgettext('exams.filter.duration', 'unit_seconds')}")
+        parts.append(f"{secs} {unit_seconds}")
     return " ".join(parts)
 
 

@@ -36,6 +36,7 @@ from .teacher.languages import exam_language_manager
 from .teacher.question_bank import (
     ai_generate_question_bank,
     create_question_bank,
+    exam_questions_word_export,
     process_question_bank,
     test_question_bank,
     test_question_bank_template_download,
@@ -51,6 +52,7 @@ from .teacher.question_library import (
     question_bank_list,
     question_bank_template_download,
     question_bank_update,
+    question_bank_word_export,
 )
 from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .teacher.results import (
@@ -126,6 +128,8 @@ __all__ = [
     "question_bank_delete",
     "question_bank_bulk_add",
     "question_bank_template_download",
+    "question_bank_word_export",
+    "exam_questions_word_export",
     "ai_generate_bank_questions",
     "bank_question_add",
     "bank_question_edit",

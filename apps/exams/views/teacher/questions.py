@@ -402,6 +402,8 @@ def teacher_questions_bank(request, slug):
         "qm_show_delete_all": True,
         "qm_show_report": True,
         "qm_is_owner": False,
+        # Word export — imtahan suallarını import-uyğun .docx kimi endir.
+        "qm_word_export_url": reverse("exams:exam_questions_word_export", kwargs={"slug": exam.slug}),
     }
 
     return render(

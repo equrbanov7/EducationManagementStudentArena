@@ -132,7 +132,10 @@
                             <div class="org-management__avatar">{{ faculty.name|first|upper }}</div>
                             <div>
                                 <h3>{{ faculty.name }}</h3>
-                                <p>{% if faculty.code %}{{ faculty.code }}{% else %}Kod yoxdur{% endif %}</p>
+                                <p>
+                                    {% trans "faculty" context "organizations.unit_type" %}
+                                    {% if faculty.code %} · {{ faculty.code }}{% endif %}
+                                </p>
                             </div>
                         </article>
                     {% endfor %}
@@ -155,7 +158,9 @@
                             <div>
                                 <h3>{{ kafedra.name }}</h3>
                                 <p>
-                                    {% if kafedra.parent %}{{ kafedra.parent.name }}{% else %}Fakültəsiz{% endif %}
+                                    {% trans "chair" context "organizations.unit_type" %}
+                                    {% comment %} kafedralar .values() dict-ləridir — parent adı "parent__name" açarındadır {% endcomment %}
+                                    {% if kafedra.parent__name %} · {{ kafedra.parent__name }}{% else %} · Fakültəsiz{% endif %}
                                     {% if kafedra.code %} · {{ kafedra.code }}{% endif %}
                                 </p>
                             </div>

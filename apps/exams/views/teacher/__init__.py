@@ -19,6 +19,7 @@ from .groups import (
 from .question_bank import (
     ai_generate_question_bank,
     create_question_bank,
+    exam_questions_word_export,
     process_question_bank,
     test_question_bank,
     test_question_bank_template_download,
@@ -54,6 +55,7 @@ __all__ = [
     "process_question_bank",
     "test_question_bank",
     "test_question_bank_template_download",
+    "exam_questions_word_export",
     "ai_generate_question_bank",
     "teacher_exam_results",
     "delete_exam_attempts",

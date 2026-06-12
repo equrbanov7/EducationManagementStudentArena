@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.notifications.models import (
@@ -58,7 +59,7 @@ def notify_org_owner_pending_approval(*, organization) -> InAppNotification | No
         "organization_id": str(getattr(organization, "id", "")),
         "organization_name": getattr(organization, "name", ""),
         "status": "pending",
-        "link_label": "Bildirişləri aç",
+        "link_label": pgettext("notifications.event", "Open notifications"),
     }
     existing = (
         InAppNotification.objects.filter(
@@ -75,11 +76,14 @@ def notify_org_owner_pending_approval(*, organization) -> InAppNotification | No
 
     return create_notification(
         recipient=owner,
-        title=f"Təşkilat müraciəti baxışdadır: {organization.name}",
-        message=(
-            f'"{organization.name}" təşkilatınız yaradıldı və hazırda superadmin tərəfindən '
-            "təsdiq gözləyir. Təsdiqdən sonra idarəetmə bölmələri aktiv olacaq."
+        title=pgettext("notifications.event", "Organization request is under review: {organization}").format(
+            organization=organization.name
         ),
+        message=pgettext(
+            "notifications.event",
+            '"{organization}" has been created and is currently awaiting superadmin approval. '
+            "Management sections will become active after approval.",
+        ).format(organization=organization.name),
         link=f"{reverse('accounts:profile')}?{urlencode({'section': 'notifications'})}",
         notification_type=NotificationType.APPROVAL,
         metadata=metadata,
@@ -117,7 +121,9 @@ def notify_org_admins_of_new_request(*, request_obj: StudentOrganizationRequest)
 
     return create_notification_for_users(
         recipients=UserModel.objects.filter(pk__in=admin_user_ids, is_active=True).distinct(),
-        title=f"Yeni {role_label} müraciəti: {actor_name}",
+        title=pgettext("notifications.event", "New {role_label} request: {actor_name}").format(
+            role_label=role_label, actor_name=actor_name
+        ),
         message=_membership_request_notification_message(request_obj),
         link=_membership_request_management_link(request_obj),
         notification_type=NotificationType.APPROVAL,
@@ -126,7 +132,7 @@ def notify_org_admins_of_new_request(*, request_obj: StudentOrganizationRequest)
             "request_id": request_obj.id,
             "role_type": request_obj.role_type,
             "user_id": request_obj.user_id,
-            "link_label": "Müraciəti aç və cavablandır",
+            "link_label": pgettext("notifications.event", "Open request and respond"),
             "organization_name": request_obj.organization.name,
             "applicant_name": request_obj.user.get_full_name() or request_obj.user.username,
             "applicant_username": request_obj.user.username,
@@ -149,17 +155,30 @@ def notify_membership_request_resolution(*, request_obj: StudentOrganizationRequ
         return None
 
     role_label = get_membership_request_role_label(request_obj.role_type).lower()
-    status_title = MEMBERSHIP_REQUEST_STATUS_TITLES[request_obj.status]
+    status_title = str(MEMBERSHIP_REQUEST_STATUS_TITLES[request_obj.status])
     resolution_note = (request_obj.resolution_note or "").strip()
-    message = f"{request_obj.organization.name} təşkilatına {role_label} müraciətiniz üzrə cavab əlavə olundu."
+    message = pgettext(
+        "notifications.event",
+        "{organization} organization: a response was added to your {role_label} request.",
+    ).format(organization=request_obj.organization.name, role_label=role_label)
     if request_obj.status == StudentOrganizationRequestStatus.APPROVED:
-        message = f"{request_obj.organization.name} təşkilatına {role_label} müraciətiniz qəbul edildi."
+        message = pgettext(
+            "notifications.event",
+            "{organization} organization: your {role_label} request was approved.",
+        ).format(organization=request_obj.organization.name, role_label=role_label)
     elif request_obj.status == StudentOrganizationRequestStatus.REJECTED:
-        message = f"{request_obj.organization.name} təşkilatına {role_label} müraciətiniz rədd edildi."
+        message = pgettext(
+            "notifications.event",
+            "{organization} organization: your {role_label} request was rejected.",
+        ).format(organization=request_obj.organization.name, role_label=role_label)
     elif request_obj.status == StudentOrganizationRequestStatus.AUTO_CLOSED:
-        message = f"{request_obj.organization.name} təşkilatına {role_label} müraciətiniz avtomatik bağlandı."
+        message = pgettext(
+            "notifications.event",
+            "{organization} organization: your {role_label} request was closed automatically.",
+        ).format(organization=request_obj.organization.name, role_label=role_label)
     if resolution_note:
-        message = f"{message} Qeyd: {resolution_note}"
+        note_text = pgettext("notifications.event", "Note: {note}").format(note=resolution_note)
+        message = f"{message} {note_text}"
 
     return create_notification(
         recipient=request_obj.user,
@@ -183,18 +202,21 @@ def notify_member_removed_from_organization(
     Notify a user that they were removed from an organization by an admin.
     """
     actor_name = _display_name(removed_by) if removed_by is not None else ""
-    message = (
-        f"Siz {organization.name} təşkilatından uzaqlaşdırıldınız. "
-        'İstəsəniz profilinizdəki "Təşkilata qoşul" bölməsindən yenidən müraciət göndərə bilərsiniz.'
-    )
+    message = pgettext(
+        "notifications.event",
+        'You were removed from {organization}. You can submit a new request from the "Join organization" '
+        "section in your profile.",
+    ).format(organization=organization.name)
     if actor_name:
-        message = f"{message} Əməliyyatı icra edən: {actor_name}."
+        actor_text = pgettext("notifications.event", "Action performed by: {actor}.").format(actor=actor_name)
+        message = f"{message} {actor_text}"
     if reason:
-        message = f"{message} Səbəb: {reason.strip()}"
+        reason_text = pgettext("notifications.event", "Reason: {reason}").format(reason=reason.strip())
+        message = f"{message} {reason_text}"
 
     return create_notification(
         recipient=removed_user,
-        title="Təşkilatdan uzaqlaşdırıldınız",
+        title=pgettext("notifications.event", "You were removed from the organization"),
         message=message,
         link=f"{reverse('accounts:profile')}?{urlencode({'section': 'student-organization-request'})}",
         notification_type=NotificationType.SYSTEM,
@@ -202,7 +224,7 @@ def notify_member_removed_from_organization(
             "organization_id": getattr(organization, "id", None),
             "organization_name": getattr(organization, "name", ""),
             "removed_by_id": getattr(removed_by, "id", None),
-            "link_label": "Təşkilata qoşul bölməsini aç",
+            "link_label": pgettext("notifications.event", "Open Join organization section"),
             "removal_reason": reason.strip(),
         },
     )
@@ -215,17 +237,21 @@ def notify_user_invited_to_organization(
     Notify a user that they have been invited to join an organization.
     """
     actor_name = _display_name(invited_by) if invited_by is not None else ""
-    role_label = (role_label or "").strip() or "üzv"
-    message = (
-        f"{organization.name} təşkilatından sizə {role_label} kimi dəvət göndərildi. "
-        'Profildəki "Təşkilata qoşul" bölməsindən dəvəti qəbul edə bilərsiniz.'
-    )
+    role_label = (role_label or "").strip() or pgettext("membership_request.role", "Member").lower()
+    message = pgettext(
+        "notifications.event",
+        '{organization} sent you an invitation as {role_label}. You can accept the invitation from the "Join '
+        'organization" section in your profile.',
+    ).format(organization=organization.name, role_label=role_label)
     if actor_name:
-        message = f"{message} Dəvəti göndərən: {actor_name}."
+        invited_by_text = pgettext("notifications.event", "Invited by: {actor}.").format(actor=actor_name)
+        message = f"{message} {invited_by_text}"
 
     return create_notification(
         recipient=invited_user,
-        title=f"Yeni təşkilat dəvəti: {organization.name}",
+        title=pgettext("notifications.event", "New organization invitation: {organization}").format(
+            organization=organization.name
+        ),
         message=message,
         link=f"{reverse('accounts:profile')}?{urlencode({'section': 'student-organization-request'})}",
         notification_type=NotificationType.APPROVAL,
@@ -234,7 +260,7 @@ def notify_user_invited_to_organization(
             "organization_name": getattr(organization, "name", ""),
             "invited_by_id": getattr(invited_by, "id", None),
             "role_label": role_label,
-            "link_label": "Dəvəti aç və cavablandır",
+            "link_label": pgettext("notifications.event", "Open invitation and respond"),
         },
     )
 
@@ -254,13 +280,17 @@ def notify_course_membership_assigned(
     previous_group_name = (previous_group_name or "").strip()
 
     if created:
-        title = f"Yeni kurs təyin olundu: {course_title}"
-        message = f"Siz {course_title} kursuna əlavə olundunuz."
+        title = pgettext("notifications.event", "New course assigned: {course}").format(course=course_title)
+        message = pgettext("notifications.event", "You were added to {course} course.").format(course=course_title)
         if current_group_name:
-            message = f"{message} Qrup: {current_group_name}."
+            group_text = pgettext("notifications.event", "Group: {group}.").format(group=current_group_name)
+            message = f"{message} {group_text}"
     elif current_group_name and current_group_name != previous_group_name:
-        title = f"Kurs qrupu yeniləndi: {course_title}"
-        message = f"{course_title} kursunda qrupunuz {current_group_name} olaraq yeniləndi."
+        title = pgettext("notifications.event", "Course group updated: {course}").format(course=course_title)
+        message = pgettext(
+            "notifications.event",
+            "Your group in {course} course was updated to {group}.",
+        ).format(course=course_title, group=current_group_name)
     else:
         return None
 
@@ -291,8 +321,8 @@ def notify_group_assignment(*, group, student_ids=None, teacher_ids=None) -> lis
         notifications.extend(
             create_notification_for_users(
                 recipients=UserModel.objects.filter(pk__in=student_ids, is_active=True),
-                title=f"Qrupa əlavə olundunuz: {group.name}",
-                message=f"Siz {group.name} qrupuna əlavə olundunuz.",
+                title=pgettext("notifications.event", "You were added to a group: {group}").format(group=group.name),
+                message=pgettext("notifications.event", "You were added to {group} group.").format(group=group.name),
                 link=f"{reverse('accounts:profile')}?{urlencode({'section': 'profile-info'})}",
                 notification_type=NotificationType.COURSE,
                 metadata={"group_id": group.id, "organization_id": group.organization_id},
@@ -303,8 +333,11 @@ def notify_group_assignment(*, group, student_ids=None, teacher_ids=None) -> lis
         notifications.extend(
             create_notification_for_users(
                 recipients=UserModel.objects.filter(pk__in=teacher_ids, is_active=True),
-                title=f"Yeni qrup təyin olundu: {group.name}",
-                message=f"{group.name} qrupu sizə təyin olundu və artıq idarə edə bilərsiniz.",
+                title=pgettext("notifications.event", "New group assigned: {group}").format(group=group.name),
+                message=pgettext(
+                    "notifications.event",
+                    "{group} group was assigned to you and you can now manage it.",
+                ).format(group=group.name),
                 link=reverse("exams:teacher_group_list"),
                 notification_type=NotificationType.COURSE,
                 metadata={"group_id": group.id, "organization_id": group.organization_id},
@@ -328,8 +361,8 @@ def notify_task_assignment(*, task, user_ids, task_kind: str) -> list[InAppNotif
         return []
 
     course_title = getattr(getattr(task, "course", None), "title", "")
-    title = task_meta["assigned_title"].format(title=getattr(task, "title", ""))
-    message = task_meta["assigned_message"].format(
+    title = str(task_meta["assigned_title"]).format(title=getattr(task, "title", ""))
+    message = str(task_meta["assigned_message"]).format(
         title=getattr(task, "title", ""),
         course=course_title,
     )
@@ -388,8 +421,8 @@ def notify_teacher_about_submission(*, task, student, task_kind: str) -> InAppNo
 
     return create_notification(
         recipient=teacher,
-        title=task_meta["submission_title"].format(student=_display_name(student)),
-        message=task_meta["submission_message"].format(
+        title=str(task_meta["submission_title"]).format(student=_display_name(student)),
+        message=str(task_meta["submission_message"]).format(
             student=_display_name(student),
             title=getattr(task, "title", ""),
         ),
@@ -420,8 +453,8 @@ def notify_student_about_feedback(*, task, student, task_kind: str, extra_metada
 
     return create_notification(
         recipient=student,
-        title=task_meta["graded_title"].format(title=getattr(task, "title", "")),
-        message=task_meta["graded_message"].format(title=getattr(task, "title", "")),
+        title=str(task_meta["graded_title"]).format(title=getattr(task, "title", "")),
+        message=str(task_meta["graded_message"]).format(title=getattr(task, "title", "")),
         link=_task_result_link(task, task_kind, metadata),
         notification_type=NotificationType.GRADE,
         metadata=metadata,

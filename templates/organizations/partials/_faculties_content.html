@@ -1,0 +1,308 @@
+{% load i18n %}
+{% with s=org_faculties_section %}
+<div class="org-management org-management--faculties">
+    {% if not s.organization %}
+        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+    {% else %}
+    <div class="org-management__header">
+        <div>
+            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
+            <h1>Fakültələr</h1>
+            <p class="org-management__subtitle">
+                Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur.
+            </p>
+        </div>
+        <div class="org-management__metrics" aria-label="Fakültə statistikası">
+            <span><strong>{{ s.faculty_total_count }}</strong> fakültə</span>
+            <span><strong>{{ s.kafedra_total_count }}</strong> kafedra</span>
+        </div>
+    </div>
+
+    {% if s.notice %}
+        <div class="org-management__notice org-management__notice--success">{{ s.notice }}</div>
+    {% endif %}
+    {% if s.form_errors %}
+        <div class="org-management__notice org-management__notice--error">
+            {% for error in s.form_errors.values %}<div>{{ error }}</div>{% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="org-management__toolbar">
+        <form method="get"
+              action="{% if s.embedded_in_profile %}{{ s.profile_base_url }}{% else %}{% url 'organizations:structure_faculties' s.organization.slug %}{% endif %}"
+              class="org-management__filters org-management__filters--inline"
+              {% if s.embedded_in_profile %}data-profile-ajax-form="1" data-section="org-faculties"{% endif %}>
+            {% if s.embedded_in_profile %}<input type="hidden" name="section" value="org-faculties">{% endif %}
+            <label>
+                <span>Axtarış</span>
+                <input type="search"
+                       name="faculty_search"
+                       maxlength="120"
+                       placeholder="Ad və ya kod üzrə axtar"
+                       value="{{ s.search_query }}">
+            </label>
+            <label>
+                <span>Sıralama</span>
+                <div class="bootstrap-single-select">
+                    <select class="form-select bootstrap-single-select__native" name="faculty_sort" data-bootstrap-select>
+                        <option value="name" {% if s.sort_value == "name" %}selected{% endif %}>Ad (A–Z)</option>
+                        <option value="-name" {% if s.sort_value == "-name" %}selected{% endif %}>Ad (Z–A)</option>
+                        <option value="newest" {% if s.sort_value == "newest" %}selected{% endif %}>Ən yeni</option>
+                        <option value="oldest" {% if s.sort_value == "oldest" %}selected{% endif %}>Ən köhnə</option>
+                    </select>
+                </div>
+            </label>
+            <button type="submit" class="org-management__submit">Tətbiq et</button>
+        </form>
+        {% if s.can_create %}
+        <button type="button"
+                class="org-management__submit org-management__create-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#facultyCreateModal">
+            <i class="fas fa-plus"></i> Yeni fakültə
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="org-management__table-wrap">
+        {% if s.faculties.object_list %}
+            <table class="org-management__table">
+                <thead>
+                    <tr>
+                        <th>Fakültə</th>
+                        <th>Kod</th>
+                        <th>Kafedra</th>
+                        <th>Rəhbər (dekan)</th>
+                        <th>Yaradılıb</th>
+                        {% if s.can_edit or s.can_delete or s.can_assign_head %}<th class="org-management__actions-col">Əməliyyatlar</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty in s.faculties %}
+                        <tr>
+                            <td>
+                                <div class="org-management__member">
+                                    <span class="org-management__avatar">{{ faculty.name|first|upper }}</span>
+                                    <span>
+                                        <strong>{{ faculty.name }}</strong>
+                                        <small>{% trans "faculty" context "organizations.unit_type" %}</small>
+                                    </span>
+                                </div>
+                            </td>
+                            <td>{% if faculty.code %}<span class="org-management__badge">{{ faculty.code }}</span>{% else %}<span class="org-management__muted-cell">—</span>{% endif %}</td>
+                            <td><span class="org-management__badge org-management__badge--green">{{ faculty.kafedra_count }}</span></td>
+                            <td>
+                                {% if faculty.head %}
+                                    {{ faculty.head.get_full_name|default:faculty.head.username }}
+                                {% else %}
+                                    <span class="org-management__muted-cell">Təyin edilməyib</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ faculty.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+                            {% if s.can_edit or s.can_delete or s.can_assign_head %}
+                            <td>
+                                <div class="org-management__actions">
+                                    {% if s.can_assign_head %}
+                                    <button type="button"
+                                            class="org-management__icon-btn js-org-unit-head"
+                                            title="Rəhbər təyin et"
+                                            data-unit-id="{{ faculty.id }}"
+                                            data-unit-name="{{ faculty.name }}"
+                                            data-head-id="{{ faculty.head_id|default:'' }}"
+                                            data-modal-target="#facultyHeadModal">
+                                        <i class="fas fa-user-tie"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% if s.can_edit %}
+                                    <button type="button"
+                                            class="org-management__icon-btn js-org-unit-edit"
+                                            title="Redaktə et"
+                                            data-unit-id="{{ faculty.id }}"
+                                            data-unit-name="{{ faculty.name }}"
+                                            data-unit-code="{{ faculty.code }}"
+                                            data-modal-target="#facultyEditModal">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% if s.can_delete %}
+                                    <button type="button"
+                                            class="org-management__icon-btn org-management__icon-btn--danger js-org-unit-delete"
+                                            title="Sil"
+                                            data-unit-id="{{ faculty.id }}"
+                                            data-unit-name="{{ faculty.name }}"
+                                            data-modal-target="#facultyDeleteModal">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include "partials/_pagination.html" with page_obj=s.faculties_page_obj page_param="faculty_page" extra_query=s.pagination_query %}
+        {% elif s.search_query %}
+            <div class="org-management__empty">
+                <h3>Nəticə tapılmadı</h3>
+                <p>“{{ s.search_query }}” axtarışına uyğun fakültə yoxdur.</p>
+            </div>
+        {% else %}
+            <div class="org-management__empty">
+                <h3>Hələ fakültə yaradılmayıb</h3>
+                {% if s.can_create %}<p>“Yeni fakültə” düyməsi ilə ilk fakültəni yaradın.</p>{% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ---------------- Modallar ---------------- #}
+    {% if s.can_create %}
+    <div class="modal fade" id="facultyCreateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content org-management__modal">
+                <form method="post"
+                      action="{% url 'organizations:structure_faculties' s.organization.slug %}"
+                      data-org-modal-form="1"
+                      data-profile-ajax-post="1"
+                      data-section="org-faculties">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Yeni fakültə yarat</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                    </div>
+                    <div class="modal-body org-management__form org-management__form--modal">
+                        <label>
+                            <span>Fakültə adı <em>*</em></span>
+                            <input type="text" name="name" maxlength="255" required
+                                   placeholder="Məs: İnformasiya texnologiyaları fakültəsi"
+                                   value="{% if s.form_values.action == 'create' %}{{ s.form_values.name }}{% endif %}">
+                        </label>
+                        <label>
+                            <span>Kod (opsional)</span>
+                            <input type="text" name="code" maxlength="50" placeholder="Məs: ITF"
+                                   value="{% if s.form_values.action == 'create' %}{{ s.form_values.code }}{% endif %}">
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
+                        <button type="submit" class="org-management__submit">Fakültə yarat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if s.can_edit %}
+    <div class="modal fade" id="facultyEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content org-management__modal">
+                <form method="post"
+                      action="{% url 'organizations:structure_faculties' s.organization.slug %}"
+                      data-org-modal-form="1"
+                      data-profile-ajax-post="1"
+                      data-section="org-faculties">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Fakültəni redaktə et</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                    </div>
+                    <div class="modal-body org-management__form org-management__form--modal">
+                        <label>
+                            <span>Fakültə adı <em>*</em></span>
+                            <input type="text" name="name" maxlength="255" required data-org-field="name">
+                        </label>
+                        <label>
+                            <span>Kod (opsional)</span>
+                            <input type="text" name="code" maxlength="50" data-org-field="code">
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
+                        <button type="submit" class="org-management__submit">Yadda saxla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if s.can_assign_head %}
+    <div class="modal fade" id="facultyHeadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content org-management__modal">
+                <form method="post"
+                      action="{% url 'organizations:structure_faculties' s.organization.slug %}"
+                      data-org-modal-form="1"
+                      data-profile-ajax-post="1"
+                      data-section="org-faculties">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="assign_head">
+                    <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rəhbər (dekan) təyin et</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                    </div>
+                    <div class="modal-body org-management__form org-management__form--modal">
+                        <p class="org-management__muted">Fakültə: <strong data-org-field="unit_name"></strong></p>
+                        <label>
+                            <span>Rəhbər</span>
+                            <div class="bootstrap-single-select">
+                                <select class="form-select bootstrap-single-select__native" name="head_user" data-bootstrap-select data-org-field="head_user">
+                                    <option value="">Rəhbərsiz (təyinatı sil)</option>
+                                    {% for candidate in s.head_candidates %}
+                                        <option value="{{ candidate.user_id }}">{{ candidate.full_name }} — {{ candidate.role_label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
+                        <button type="submit" class="org-management__submit">Təyin et</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if s.can_delete %}
+    <div class="modal fade" id="facultyDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content org-management__modal">
+                <form method="post"
+                      action="{% url 'organizations:structure_faculties' s.organization.slug %}"
+                      data-org-modal-form="1"
+                      data-profile-ajax-post="1"
+                      data-section="org-faculties">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Fakültəni sil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="org-management__danger-text">
+                            <strong data-org-field="unit_name"></strong> fakültəsini silmək istədiyinizə əminsiniz?
+                        </p>
+                        <p class="org-management__muted">
+                            Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
+                        <button type="submit" class="org-management__submit org-management__submit--danger">Sil</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endwith %}
