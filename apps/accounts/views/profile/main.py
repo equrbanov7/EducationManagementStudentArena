@@ -1736,16 +1736,8 @@ def user_profile(request):
             "content_type": statistics_content_type,
             "organization": (request.GET.get("stat_organization") or "").strip() or None,
         }
-        statistics_has_active_filters = any(
-            [
-                statistics_filters["date_from"],
-                statistics_filters["date_to"],
-                statistics_filters["course"],
-                statistics_filters["group"],
-                statistics_filters["organization"],
-                statistics_filters["content_type"] != "all",
-            ]
-        )
+        if not capabilities["is_superadmin"]:
+            statistics_filters["organization"] = None
 
         selected_statistics_org = None
         if capabilities["is_superadmin"] and statistics_filters["organization"]:
@@ -1758,6 +1750,8 @@ def user_profile(request):
                 .only("id", "name")
                 .first()
             )
+            if selected_statistics_org is None:
+                statistics_filters["organization"] = None
 
         statistics_scope_org = selected_statistics_org or stat_org
 
@@ -1777,12 +1771,29 @@ def user_profile(request):
                     .values_list("pk", flat=True)
                 )
 
+        statistics_uses_personal_scope = not (
+            capabilities["is_superadmin"]
+            or capabilities["is_org_admin"]
+            or capabilities["is_teacher"]
+            or (capabilities.get("is_tutor") and stat_org and statistics_scoped_unit_ids is not None)
+        )
+
         # Populate filter options
         if statistics_scope_org and not capabilities["is_superadmin"]:
             statistics_course_qs = Course.objects.filter(organization=statistics_scope_org)
+            if statistics_uses_personal_scope:
+                statistics_course_qs = statistics_course_qs.filter(
+                    memberships__user=request.user,
+                    memberships__role="student",
+                )
+            elif capabilities["is_teacher"] and not capabilities["is_org_admin"]:
+                statistics_course_qs = statistics_course_qs.filter(owner=request.user)
             if statistics_scoped_unit_ids is not None:
                 statistics_course_qs = statistics_course_qs.filter(unit_id__in=statistics_scoped_unit_ids)
-            statistics_courses = list(statistics_course_qs.order_by("title").values("id", "title")[:100])
+            statistics_courses = list(statistics_course_qs.order_by("title").values("id", "title").distinct()[:100])
+            allowed_course_ids = {str(row["id"]) for row in statistics_courses}
+            if statistics_filters["course"] and statistics_filters["course"] not in allowed_course_ids:
+                statistics_filters["course"] = None
         elif capabilities["is_superadmin"]:
             statistics_organizations = list(
                 _StatisticsOrganization.objects.filter(is_active=True, status="active")
@@ -1797,9 +1808,26 @@ def user_profile(request):
         if statistics_scope_org:
             from apps.exams.models import StudentGroup as _SG
 
-            statistics_groups = list(
-                _SG.objects.filter(organization=statistics_scope_org).order_by("name").values("id", "name")[:100]
-            )
+            statistics_group_qs = _SG.objects.filter(organization=statistics_scope_org)
+            if statistics_uses_personal_scope:
+                statistics_group_qs = statistics_group_qs.filter(students=request.user)
+            elif capabilities["is_teacher"] and not capabilities["is_org_admin"] and not capabilities["is_superadmin"]:
+                statistics_group_qs = statistics_group_qs.filter(Q(teacher=request.user) | Q(teachers=request.user))
+            statistics_groups = list(statistics_group_qs.order_by("name").values("id", "name").distinct()[:100])
+            allowed_group_ids = {str(row["id"]) for row in statistics_groups}
+            if statistics_filters["group"] and statistics_filters["group"] not in allowed_group_ids:
+                statistics_filters["group"] = None
+
+        statistics_has_active_filters = any(
+            [
+                statistics_filters["date_from"],
+                statistics_filters["date_to"],
+                statistics_filters["course"],
+                statistics_filters["group"],
+                statistics_filters["organization"],
+                statistics_filters["content_type"] != "all",
+            ]
+        )
 
         # Dashboard statistics are expensive (~44 aggregate queries) but do not
         # need to be real-time, so each (role, scope, filters) result is cached

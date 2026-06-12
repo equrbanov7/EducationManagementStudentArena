@@ -181,26 +181,11 @@ def get_student_statistics(user, *, organization=None, filters=None):
 
     # ── Live exams ────────────────────────────────────────────────
     # LivePlayer does not have a user FK — players are semi-anonymous
-    # (identified by nickname + client_id). We cannot reliably tie live
-    # exam answers to a specific user, so we report aggregate stats
-    # for the organization only (not user-specific).
+    # (identified by nickname + client_id). Showing organization-level live
+    # answers in the student dashboard leaks data outside the current student,
+    # so student statistics intentionally keep these metrics empty.
     live_total = 0
     live_correct = 0
-    try:
-        from apps.live_exam.models import LiveAnswer
-
-        live_qs = LiveAnswer.objects.filter(session__state="finished")
-        if organization:
-            live_qs = live_qs.filter(session__exam__organization=organization)
-        live_qs = _apply_date_filter(live_qs, "session__created_at", date_from, date_to)
-        live_stats = live_qs.aggregate(
-            total=Count("id"),
-            correct=Count("id", filter=Q(is_correct=True)),
-        )
-        live_total = live_stats["total"] or 0
-        live_correct = live_stats["correct"] or 0
-    except Exception:
-        pass
 
     # ── Aggregate all scores ──────────────────────────────────────
     all_scores = []
@@ -1035,6 +1020,9 @@ Student:
     analysis is possible but not cross-content-type.
   - Comparison to class/group average: Possible for exams via StudentGroup
     but not uniformly across all content types.
+  - Live exam answer totals: Live players are semi-anonymous and are not
+    reliably linked to a user account, so student dashboards must not show
+    organization-level live aggregates.
   - Video watch time / attendance / login heatmaps: No model support.
 
 Teacher:

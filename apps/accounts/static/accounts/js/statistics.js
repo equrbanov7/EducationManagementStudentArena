@@ -258,13 +258,12 @@ document.addEventListener("DOMContentLoaded", function () {
         var balanceValues;
 
         if (role === "student") {
-            balanceLabels = ["Orta bal", "Keçid", "Yoxlanma", "Vaxtında", "Canlı dəqiqlik"];
+            balanceLabels = ["Orta bal", "Keçid", "Yoxlanma", "Vaxtında"];
             balanceValues = [
                 data.summary.avg_score || 0,
                 data.summary.pass_rate || 0,
                 pct((data.summary.total_items || 0) - (data.summary.pending_items || 0), data.summary.total_items || 0),
-                pct(data.summary.on_time_count || 0, (data.summary.on_time_count || 0) + (data.summary.late_count || 0)),
-                data.summary.live_accuracy || 0
+                pct(data.summary.on_time_count || 0, (data.summary.on_time_count || 0) + (data.summary.late_count || 0))
             ];
         } else {
             balanceLabels = ["İmtahan yoxlama", "Tapşırıq yoxlama", "Lab yoxlama", "Layihə yoxlama", "Təqdimetmə"];

@@ -520,11 +520,6 @@ def question_bank_bulk_add(request, bank_id):
         "wb_show_report": False,
         "wb_templates": [
             {
-                "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=docx",
-                "label": "DOCX",
-                "kind": "docx",
-            },
-            {
                 "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=txt",
                 "label": "TXT",
                 "kind": "txt",
@@ -613,32 +608,8 @@ def question_bank_template_download(request, bank_id):
 
     q_format = _normalize_format(bank.default_question_type)
     template_text = _BANK_TEMPLATE_WRITTEN_TXT if q_format == "written" else _BANK_TEMPLATE_TEST_TXT
-    file_format = (request.GET.get("format") or "txt").lower().strip()
 
-    if file_format == "docx":
-        try:
-            from io import BytesIO
-
-            from docx import Document
-
-            doc = Document()
-            doc.add_heading("EMSArena — Sual bankı şablonu", level=1)
-            for line in template_text.splitlines():
-                if line.startswith("#") or not line.strip():
-                    continue
-                doc.add_paragraph(line)
-            buf = BytesIO()
-            doc.save(buf)
-            buf.seek(0)
-            response = HttpResponse(
-                buf.read(),
-                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            )
-            response["Content-Disposition"] = 'attachment; filename="sual_sablonu.docx"'
-            return response
-        except Exception:  # noqa: BLE001 — docx yoxdursa TXT-ə düş
-            logger.exception("Bank DOCX template generation failed for bank %s", bank.pk)
-
+    # Yalnız TXT — DOCX importu söndürüldüyü üçün DOCX şablonu da verilmir.
     response = HttpResponse(template_text, content_type="text/plain; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="sual_sablonu.txt"'
     return response

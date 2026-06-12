@@ -16151,7 +16151,7 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr ""
+msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmez. Yalnızca PDF, TXT veya görsel (PNG/JPG) yükleyin."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16188,10 +16188,7 @@ msgstr "Etkin kiracı kuruluşunuzla uyumlu değil."
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr ""
-"Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de"
-" metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi "
-"düşük). Lütfen metin tabanlı bir PDF veya DOCX yükleyin."
+msgstr "Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi düşük). Lütfen metin tabanlı bir PDF yükleyin."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -16201,12 +16198,12 @@ msgstr "PDF okuma için 'pypdf' kurulu değil. `pip install pypdf` çalıştır�
 #: apps/exams/services/parsing.py:713
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_encrypted"
-msgstr ""
+msgstr "Şifreli PDF desteklenmez. Şifreyi kaldırıp yeniden yükleyin."
 
 #: apps/exams/services/parsing.py:739
 msgctxt "exams.service.parsing.error"
 msgid "unsupported_file_type"
-msgstr "Yalnızca .docx, .pdf, .txt kabul edilir."
+msgstr "Yalnızca .pdf, .txt, .png ve .jpg kabul edilir."
 
 #: apps/exams/services/parsing.py:988
 msgctxt "exams.service.parsing.warning"
@@ -30438,3 +30435,17 @@ msgctxt "accounts.view_as"
 msgid "stopped"
 msgstr "Kendi profilinize geri döndünüz."
 
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr "Word (.docx/.doc) dosyaları güvenlik nedeniyle kabul edilmez. Soruları PDF, TXT veya görsel (PNG/JPG) olarak yükleyin."
+
+msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
+msgstr "Word (.docx) dosyaları güvenlik nedeniyle kabul edilmez — PDF veya TXT kullanın."
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr "PDF'den gelen madde imi formatı da desteklenir"
+
+msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
+msgstr "Örnek 1 (Standart - A doğrudur):&#10;1. Data Science temel olarak neyle ilgilenir?&#10;A) Veri analizi ve karar verme&#10;B) Bilgisayar tamiri&#10;C) Oyun geliştirme&#10;D) İnternet kurulumu&#10;&#10;Örnek 2 (* ile işaretle):&#10;2. Python temel olarak nerede kullanılır?&#10;A) Araba tamiri&#10;*B) Web ve backend geliştirme&#10;C) Müzik icrası&#10;D) Yazıcı montajı&#10;&#10;Örnek 3 (Cevabı sonda yaz):&#10;3. HTML nedir?&#10;A) Programlama dili&#10;B) İşaretleme dili&#10;C) İşletim sistemi&#10;D) Antivirüs&#10;Cevap: B&#10;&#10;Örnek 4 (PDF/madde imi formatı — √ doğru cevabı işaretler):&#10;4. CI/CD neyi otomatikleştirir?&#10;• Belge yazımını&#10;√ Derleme ve dağıtım sürecini&#10;• Müşteri desteğini&#10;• Tasarım sürecini"

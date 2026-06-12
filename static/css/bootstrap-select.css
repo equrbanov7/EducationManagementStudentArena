@@ -104,6 +104,12 @@
     overflow-y: auto;
 }
 
+/* Clipping konteyner (modal body və s.) içində JS fixed strategiya ilə açılan menyu */
+.bootstrap-single-select__menu.is-fixed {
+    z-index: 2000; /* modal overlay-lərdən (1080) yuxarı */
+    margin-top: 0;
+}
+
 .bootstrap-single-select__option {
     display: flex;
     align-items: center;

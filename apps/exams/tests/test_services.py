@@ -1403,73 +1403,98 @@ class ExamParsingServicesTest(TestCase):
 
         ocr_image.assert_not_called()
 
-    # ---- Highlight (mark) → düz cavab -----------------------------------------
+    # ---- DOCX importu söndürülüb ------------------------------------------------
 
-    def _build_docx_bytes(self, rows):
-        """rows: list[(text, highlighted_bool)] → in-memory .docx bytes."""
-        import io
+    def test_extract_text_from_upload_rejects_docx(self):
+        uploaded = SimpleUploadedFile("q.docx", b"PK\x03\x04fake-zip")
+        with self.assertRaises(ValueError) as exc:
+            parsing.extract_text_from_upload(uploaded)
+        self.assertIn("docx", str(exc.exception).lower())
 
-        from docx import Document
-        from docx.enum.text import WD_COLOR_INDEX
+    def test_extract_text_from_upload_rejects_legacy_doc_and_rtf(self):
+        for name in ("old.doc", "rich.rtf", "macro.docm"):
+            with self.assertRaises(ValueError):
+                parsing.extract_text_from_upload(SimpleUploadedFile(name, b"whatever"))
 
-        doc = Document()
-        for text, highlighted in rows:
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(text)
-            if highlighted:
-                run.font.highlight_color = WD_COLOR_INDEX.YELLOW
-        buffer = io.BytesIO()
-        doc.save(buffer)
-        return buffer.getvalue()
+    # ---- Bullet (•) / işarə (√) formatı ----------------------------------------
 
-    def test_extract_text_from_upload_marks_highlighted_docx_option(self):
-        data = self._build_docx_bytes(
-            [
-                ("1) Massivlər üzərində hansı əməliyyat?", False),
-                ("A) hesabi/nisbət", False),
-                ("B) nisbət", False),
-                ("C) hesabi", False),
-                ("D) indeksləşmə", True),  # sarı ilə işarələnmiş = düz cavab
-                ("E) məntiqi", False),
-            ]
+    def test_parse_bulk_mcq_bullet_and_check_markers(self):
+        raw = (
+            "1. CI/CD nəyi avtomatlaşdırır?\n"
+            "• Sənəd yazılışını\n"
+            "√ Build və yerləşdirmə prosesini\n"
+            "• Müştəri dəstəyini\n"
+            "• Dizayn prosesini\n"
+            "• Satış prosesini\n"
         )
-        uploaded = SimpleUploadedFile("q.docx", data)
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["correct"], ["B"])
+        self.assertEqual(parsed[0]["options"]["A"], "Sənəd yazılışını")
+        self.assertEqual(parsed[0]["options"]["B"], "Build və yerləşdirmə prosesini")
+        self.assertEqual(len(parsed[0]["options"]), 5)
 
-        text = parsing.extract_text_from_upload(uploaded)
-        self.assertIn("*D) indeksləşmə", text)
-        self.assertNotIn("*A)", text)
-
-        parsed = parsing.parse_bulk_mcq(text)
-        self.assertEqual(parsed[0]["correct"], ["D"])
-        self.assertEqual(parsed[0]["answer_mode"], "single")
-
-    def test_extract_text_from_upload_docx_without_highlight_has_no_star(self):
-        data = self._build_docx_bytes(
-            [
-                ("1) Sual?", False),
-                ("A) bir", False),
-                ("B) iki", False),
-                ("C) üç", False),
-                ("D) dörd", False),
-            ]
+    def test_parse_bulk_mcq_bare_question_number_line_merged(self):
+        raw = (
+            "350.\n"
+            "Bir çox veb proqramlar üçün hansı prinsip\n"
+            "uyğundur?\n"
+            "• Minimum güzəşt prinsipi\n"
+            "√ Xidmətlərə etibar edilməməsi prinsipi\n"
+            "• Dərinlik müdafiə prinsipi\n"
+            "• Vəzifələrin bölünməsi prinsipi\n"
         )
-        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.docx", data))
-        self.assertNotIn("*", text)
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["q_no"], "350")
+        self.assertIn("Bir çox veb proqramlar", parsed[0]["text"])
+        self.assertEqual(parsed[0]["correct"], ["B"])
 
-    def test_extract_text_from_upload_marks_multiple_highlighted_docx_options(self):
-        data = self._build_docx_bytes(
-            [
-                ("1) Çoxseçimli sual?", False),
-                ("A) bir", True),
-                ("B) iki", False),
-                ("C) üç", True),
-                ("D) dörd", False),
-            ]
+    # ---- Kiril (rus) variant etiketləri -----------------------------------------
+
+    def test_parse_bulk_mcq_cyrillic_sequential_labels(self):
+        raw = (
+            "1. Что такое CI/CD?\n"
+            "А) вариант один\n"
+            "Б) вариант два\n"
+            "В) вариант три\n"
+            "Г) вариант четыре\n"
+            "Ответ: Б\n"
         )
-        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.docx", data))
-        parsed = parsing.parse_bulk_mcq(text)
-        self.assertEqual(parsed[0]["correct"], ["A", "C"])
-        self.assertEqual(parsed[0]["answer_mode"], "multiple")
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(list(parsed[0]["options"]), ["A", "B", "C", "D"])
+        self.assertEqual(parsed[0]["correct"], ["B"])
+
+    def test_parse_bulk_mcq_cyrillic_lookalike_labels(self):
+        raw = (
+            "1. Какой язык программирования?\n"
+            "А) Питон\n"
+            "В) Ворд\n"
+            "С) Эксель\n"
+            "Д) Хром\n"
+            "Е) Файрфокс\n"
+            "Ответ: А\n"
+        )
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(list(parsed[0]["options"]), ["A", "B", "C", "D", "E"])
+        self.assertEqual(parsed[0]["correct"], ["A"])
+
+    def test_parse_bulk_mcq_multilang_answer_lines(self):
+        raw = (
+            "1. Which is a language?\n"
+            "A) Word\nB) Python\nC) Excel\nD) Chrome\n"
+            "Answer: B\n"
+            "\n"
+            "2. Hangisi bir dildir?\n"
+            "A) Word\nB) Python\nC) Excel\nD) Chrome\n"
+            "Cevap: B\n"
+        )
+        parsed = parsing.parse_bulk_mcq(raw)
+        self.assertEqual(len(parsed), 2)
+        self.assertEqual(parsed[0]["correct"], ["B"])
+        self.assertEqual(parsed[1]["correct"], ["B"])
 
     def test_mark_correct_option_lines_label_match_no_false_positive(self):
         text = "1) Sual?\nA) hesabi nisbət\nB) nisbət\nC) hesabi\nD) indeks"

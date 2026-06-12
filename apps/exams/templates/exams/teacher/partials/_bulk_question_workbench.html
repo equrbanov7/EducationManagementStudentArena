@@ -151,7 +151,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
             <label class="ai-field ai-file-field" for="testAiSourceFile">
                 <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
+                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".pdf,.txt,.png,.jpg,.jpeg">
                 <span class="ai-file-picker">
                     <i class="fas fa-upload"></i>
                     <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
@@ -252,7 +252,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
                 <div class="upload-zone-wrapper">
                     <input class="file-input-hidden" type="file" name="upload_file" id="fileInput"
-                           accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" data-file-selected-callback="fileSelected">
+                           accept=".pdf,.txt,.png,.jpg,.jpeg" data-file-selected-callback="fileSelected">
                     <label for="fileInput" class="upload-zone" id="dropZone">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <strong>{% trans "upload_choose_file" context "exams.template.test_question_bank" %}</strong>
@@ -262,12 +262,12 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 </div>
 
                 <div class="format-tags" id="formatTags">
-                    <span class="format-tag" data-ext="docx">DOCX</span>
                     <span class="format-tag" data-ext="pdf">PDF</span>
                     <span class="format-tag" data-ext="txt">TXT</span>
                     <span class="format-tag" data-ext="png">PNG</span>
                     <span class="format-tag" data-ext="jpg">JPG</span>
                 </div>
+                <p class="format-tags-hint">{% trans "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin." %}</p>
 
                 {% if wb_templates %}
                 <div class="template-download">
@@ -322,6 +322,10 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                             <span class="rule-item" title="{% trans 'rule_title_multiple_choice' context 'exams.template.test_question_bank' %}">
                                 <span class="code">*A) *C)</span> {% trans "label_or" context "exams.template.test_question_bank" %} <span class="code">{% trans "rule_sample_answer_a_c" context "exams.template.test_question_bank" %}</span>
                             </span>
+                            <span class="separator">•</span>
+                            <span class="rule-item" title="{% trans 'PDF-dən gələn bullet formatı da dəstəklənir' context 'exams.template.test_question_bank' %}">
+                                <span class="code">√</span> &rarr; {% trans "label_correct" context "exams.template.test_question_bank" %}
+                            </span>
                         </div>
                     </div>
 
@@ -338,7 +342,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     {% endif %}
 
                     <textarea name="raw_text" class="custom-editor" id="testRawEditor" data-ai-question-target
-                        data-placeholder-test="{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B' %}"
+                        data-placeholder-test="{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini' %}"
                         data-placeholder-written="{% trans '1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin.' %}"
                         placeholder="{% if wb_format == 'written' %}1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.{% else %}Nümunə 1 (Standart - A düzgündür):
 1. Data Science əsasən nə ilə məşğul olur?
@@ -352,7 +356,14 @@ Nümunə 2 (* ilə işarələ):
 A) Avtomobil təmiri
 *B) Veb və backend inkişafı
 C) Musiqi ifası
-D) Printer yığılması{% endif %}">{{ raw_text }}</textarea>
+D) Printer yığılması
+
+Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):
+3. CI/CD nəyi avtomatlaşdırır?
+• Sənəd yazılışını
+√ Build və yerləşdirmə prosesini
+• Müştəri dəstəyini
+• Dizayn prosesini{% endif %}">{{ raw_text }}</textarea>
                 </div>
             </main>
         </form>

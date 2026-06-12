@@ -16235,7 +16235,7 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr ""
+msgstr "Этот тип файла не принимается по соображениям безопасности. Загружайте только PDF, TXT или изображения (PNG/JPG)."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16272,10 +16272,7 @@ msgstr "Активный клиент несовместим с вашей ор�
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr ""
-"PDF состоит из отсканированных изображений без текстового слоя, и OCR не "
-"смог извлечь текст (на сервере может отсутствовать Tesseract/aze или низкое "
-"качество скана). Загрузите PDF или DOCX с текстовым слоем."
+msgstr "PDF состоит из отсканированных изображений без текстового слоя, и OCR не смог извлечь текст (на сервере может отсутствовать Tesseract/aze или низкое качество скана). Загрузите PDF с текстовым слоем."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -16285,12 +16282,12 @@ msgstr "Для чтения PDF не установлен 'pypdf'. Выполн�
 #: apps/exams/services/parsing.py:713
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_encrypted"
-msgstr ""
+msgstr "Зашифрованные PDF не поддерживаются. Снимите пароль и загрузите файл снова."
 
 #: apps/exams/services/parsing.py:739
 msgctxt "exams.service.parsing.error"
 msgid "unsupported_file_type"
-msgstr "Поддерживаются только .docx, .pdf и .txt."
+msgstr "Поддерживаются только .pdf, .txt, .png и .jpg."
 
 #: apps/exams/services/parsing.py:988
 msgctxt "exams.service.parsing.warning"
@@ -30543,3 +30540,17 @@ msgctxt "accounts.view_as"
 msgid "stopped"
 msgstr "Вы вернулись в свой профиль."
 
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr "Файлы Word (.docx/.doc) не принимаются по соображениям безопасности. Загрузите вопросы в формате PDF, TXT или изображения (PNG/JPG)."
+
+msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
+msgstr "Файлы Word (.docx) не принимаются по соображениям безопасности — используйте PDF или TXT."
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr "Формат с буллетами из PDF также поддерживается"
+
+msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
+msgstr "Пример 1 (стандарт — A правильный):&#10;1. Чем в основном занимается Data Science?&#10;A) Анализ данных и принятие решений&#10;B) Ремонт компьютеров&#10;C) Разработка игр&#10;D) Настройка интернета&#10;&#10;Пример 2 (отметьте символом *):&#10;2. Где в основном используется Python?&#10;A) Ремонт автомобилей&#10;*B) Веб и backend-разработка&#10;C) Исполнение музыки&#10;D) Сборка принтеров&#10;&#10;Пример 3 (ответ в конце):&#10;3. Что такое HTML?&#10;A) Язык программирования&#10;B) Язык разметки&#10;C) Операционная система&#10;D) Антивирус&#10;Ответ: B&#10;&#10;Пример 4 (формат PDF/буллеты — √ отмечает правильный ответ):&#10;4. Что автоматизирует CI/CD?&#10;• Написание документации&#10;√ Процесс сборки и развёртывания&#10;• Поддержку клиентов&#10;• Процесс дизайна"

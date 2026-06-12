@@ -165,49 +165,76 @@
 .view-as-dropdown {
     position: absolute;
     right: 0;
-    top: calc(100% + 8px);
-    width: min(380px, 92vw);
+    top: calc(100% + 10px);
+    width: min(560px, calc(100vw - 32px));
     background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
-    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+    padding: 18px;
     z-index: 1050;
 }
 .view-as-dropdown__header {
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 700;
     color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.08em;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
-.view-as-dropdown__field { margin-bottom: 10px; }
+.view-as-dropdown__field { margin-bottom: 14px; }
 .view-as-dropdown__field .form-label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
 
-.view-as-dropdown__filters { display: flex; gap: 8px; }
-.view-as-dropdown__search { position: relative; flex: 1; }
+.view-as-dropdown__filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(168px, 190px);
+    gap: 12px;
+    align-items: stretch;
+}
+.view-as-dropdown__search {
+    position: relative;
+    min-width: 0;
+}
 .view-as-dropdown__search .fa-search {
     position: absolute;
-    left: 10px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.75rem;
-    color: #94a3b8;
+    font-size: 0.82rem;
+    color: #64748b;
     pointer-events: none;
 }
-.view-as-dropdown__search input { padding-left: 28px; }
-.view-as-dropdown__role { max-width: 150px; flex-shrink: 0; }
+.view-as-dropdown__search input {
+    width: 100%;
+    min-height: 46px;
+    padding-left: 40px;
+    border-color: #cbd5e1;
+    border-radius: 13px;
+    font-size: 0.92rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+.view-as-dropdown__search input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
+}
+.view-as-dropdown__role {
+    min-width: 0;
+}
 
 /* Panel daxilindəki bootstrap-single-select toggle-ları kompakt görünsün */
 .view-as-dropdown .bootstrap-single-select__toggle {
-    font-size: 0.82rem;
-    padding-top: 0.32rem;
-    padding-bottom: 0.32rem;
+    min-height: 46px;
+    padding: 0.55rem 0.85rem;
+    border-color: #cbd5e1;
+    border-radius: 13px;
+    font-size: 0.9rem;
     width: 100%;
+}
+.view-as-dropdown .bootstrap-single-select__label-text {
+    max-width: 100%;
 }
 .view-as-dropdown .bootstrap-single-select__menu {
     max-height: 240px;
@@ -219,22 +246,27 @@
     max-height: 300px;
     overflow-y: auto;
     border-top: 1px solid #f1f5f9;
-    margin-top: 4px;
+    margin-top: 2px;
+    padding-top: 6px;
 }
 .view-as-result {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 6px;
-    border: 0;
-    border-radius: 10px;
+    gap: 12px;
+    padding: 10px 8px;
+    border: 1px solid transparent;
+    border-radius: 12px;
     background: transparent;
     text-align: left;
     cursor: pointer;
-    transition: background 0.12s ease;
+    transition: background 0.12s ease, border-color 0.12s ease;
 }
-.view-as-result:hover, .view-as-result:focus-visible { background: #f1f5f9; outline: none; }
+.view-as-result:hover, .view-as-result:focus-visible {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    outline: none;
+}
 
 /* Avatar: şəkil varsa <img>, yoxdursa/sınıqsa rəngli inisial dairəsi */
 .view-as-result__avatar-wrap {
@@ -303,7 +335,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.view-as-result__roles { display: flex; gap: 4px; flex-shrink: 0; }
+.view-as-result__roles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    flex: 0 1 45%;
+    min-width: 0;
+}
 .view-as-result__role {
     font-size: 0.62rem;
     font-weight: 700;
@@ -341,6 +380,13 @@
 @media (max-width: 576px) {
     .view-as-banner__inner { font-size: 0.82rem; padding: 8px 12px; }
     .view-as-banner__warning { display: none; }
-    .view-as-dropdown { position: fixed; left: 12px; right: 12px; width: auto; }
+    .view-as-dropdown {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        width: auto;
+        padding: 14px;
+    }
+    .view-as-dropdown__filters { grid-template-columns: 1fr; }
     .view-as-pill__name { max-width: 110px; }
 }

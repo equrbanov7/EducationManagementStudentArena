@@ -16058,9 +16058,7 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr ""
-"Makro daxil olan fayllar (.docm/.xlsm və ya VBA daxili) qəbul edilmir. "
-"Yalnız təmiz .docx yükləyin."
+msgstr "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız PDF, TXT və ya şəkil (PNG/JPG) yükləyin."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16093,10 +16091,7 @@ msgstr ""
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr ""
-"PDF skan edilmiş şəkillərdən ibarətdir və oxunaqlı mətn qatı yoxdur. OCR ilə"
-" də mətn çıxarmaq mümkün olmadı (server-də Tesseract/aze quraşdırılmayıb və "
-"ya şəkil keyfiyyəti aşağıdır). Mətn əsaslı PDF və ya DOCX yükləyin."
+msgstr "PDF skan edilmiş şəkillərdən ibarətdir və oxunaqlı mətn qatı yoxdur. OCR ilə də mətn çıxarmaq mümkün olmadı (server-də Tesseract/aze quraşdırılmayıb və ya şəkil keyfiyyəti aşağıdır). Mətn əsaslı PDF yükləyin."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -16111,7 +16106,7 @@ msgstr "Şifrli PDF dəstəklənmir. Şifrəni aradan götürüb yenidən yükl�
 #: apps/exams/services/parsing.py:739
 msgctxt "exams.service.parsing.error"
 msgid "unsupported_file_type"
-msgstr "Yalnız .docx, .pdf, .txt qəbul olunur."
+msgstr "Yalnız .pdf, .txt, .png və .jpg qəbul olunur."
 
 #: apps/exams/services/parsing.py:988
 msgctxt "exams.service.parsing.warning"
@@ -30424,3 +30419,17 @@ msgctxt "accounts.view_as"
 msgid "stopped"
 msgstr "Öz profilinizə qayıtdınız."
 
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr "Word (.docx/.doc) faylları təhlükəsizlik səbəbi ilə qəbul edilmir. Sualları PDF, TXT və ya şəkil (PNG/JPG) formatında yükləyin."
+
+msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
+msgstr ""
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr ""
+
+msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
+msgstr ""
