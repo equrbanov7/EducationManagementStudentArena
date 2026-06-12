@@ -30312,3 +30312,115 @@ msgstr "Qrup"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
+
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "Siz hazırda bu istifadəçinin profilinə baxırsınız:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "Yalnız baxış"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Tam idarəetmə"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "Bu rejimdə yalnız baxa bilərsiniz — heç bir dəyişiklik etmək mümkün deyil."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr "Bu rejimdə istifadəçinin adından bütün əməliyyatları edə bilərsiniz. Hər əməliyyat audit jurnalına yazılır."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Öz profilimə qayıt"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Çıx"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "İstifadəçi profilinə bax"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "İstifadəçi seçin"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Təşkilat seçin"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Ad, istifadəçi adı və ya e-poçt axtar…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "Bütün rollar"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Müəllimlər"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Tələbələr"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Adminlər"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Əməkdaşlar"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "Nəticə tapılmadı"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Daha çox göstər"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "Axtarış zamanı xəta baş verdi"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Baxış sessiyası bitdi — icazə və ya kontekst dəyişdi."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "Yalnız baxış rejimindəsiniz — bu əməliyyata icazə yoxdur."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr "Təhlükəsizlik səbəbindən bu əməliyyat başqa istifadəçinin profilində bloklanıb."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "Bu istifadəçinin profilinə baxmaq üçün icazəniz yoxdur."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr "%(name)s profilinə baxırsınız. Yalnız baxış rejimi — dəyişiklik edə bilməzsiniz."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr "%(name)s profilinə tam idarəetmə rejimində baxırsınız. Bütün əməliyyatlar audit jurnalına yazılır."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "Öz profilinizə qayıtdınız."
+

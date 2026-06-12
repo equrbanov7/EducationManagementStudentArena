@@ -59,6 +59,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "apps.accounts.middleware.PostLoginRedirectGuardMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "View as" — OrganizationMiddleware-dən ƏVVƏL: user swap-dan sonra
+    # org/RLS konteksti hədəf istifadəçinin üzvlüyü üzərində qurulur.
+    "apps.accounts.middleware.ViewAsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
     "apps.accounts.middleware.SuspendedOrganizationMiddleware",
 ]
@@ -78,6 +81,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.blog.context_processors.blog_navigation_context",
                 "apps.organizations.context_processors.organization_context",
+                "apps.accounts.context_processors.view_as_context",
                 "core.context_processors.seo_context",
                 "core.context_processors.feature_flags",
             ],

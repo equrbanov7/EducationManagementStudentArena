@@ -34,8 +34,10 @@
                 
                 <div class="stat-item main-score w-100 mb-4">
                     <span class="stat-label">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
-                    <span class="stat-value text-primary">{{ test_result.percentage_display }}%</span>
-                    <span class="text-muted small d-block mt-1">{% trans "label_points" context "exams.template.student_exam_result" %}: {{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
+                    <div class="score-display-row">
+                        <span class="stat-value text-primary score-points-value">{{ test_result.score_display }} / {{ test_result.max_score_display }}</span>
+                        <span class="score-percent-chip">{{ test_result.percentage_display }}%</span>
+                    </div>
                 </div>
 
                 <div class="test-stats-grid">

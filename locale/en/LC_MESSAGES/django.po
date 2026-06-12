@@ -30688,3 +30688,115 @@ msgstr "Group"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "You can change the decision within about %(n)s minutes."
+
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "You are currently viewing this user's profile:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "View only"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Full control"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "In this mode you can only view — no changes are possible."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr "In this mode you can perform any action on behalf of the user. Every action is written to the audit log."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Back to my profile"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Exit"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "View user profile"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "Select a user"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Select organization"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Search by name, username or email…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "All roles"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Teachers"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Students"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Admins"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Staff"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "No results found"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Loading…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Show more"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "An error occurred during search"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Viewing session ended — permission or context changed."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "You are in view-only mode — this action is not allowed."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr "For security reasons this action is blocked on another user's profile."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "You do not have permission to view this user's profile."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr "You are viewing %(name)s's profile. View-only mode — you cannot make changes."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr "You are viewing %(name)s's profile in full-control mode. All actions are written to the audit log."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "You are back on your own profile."
+

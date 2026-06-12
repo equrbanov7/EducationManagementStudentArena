@@ -75,6 +75,9 @@ from .profile import (
     public_user_profile,
     statistics_export_csv,
     user_profile,
+    view_as_search,
+    view_as_start,
+    view_as_stop,
 )
 
 # Role management views
@@ -111,6 +114,10 @@ __all__ = [
     "statistics_export_csv",
     "profile_section_fragment",
     "profile_badges_api",
+    # "View as" — istifadəçi profilinə baxış
+    "view_as_search",
+    "view_as_start",
+    "view_as_stop",
     # Dashboard
     "dashboard",
     "teacher_dashboard",
