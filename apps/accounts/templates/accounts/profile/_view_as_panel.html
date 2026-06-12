@@ -33,9 +33,13 @@ Superadmin əvvəlcə təşkilat seçir; org admin/sahibi/tyutor və s. birbaşa
             <label class="form-label" for="viewAsOrgSelect">
                 {% trans 'select_organization' context 'accounts.view_as' %}
             </label>
-            <select class="form-select form-select-sm" id="viewAsOrgSelect">
-                <option value="">{% trans 'select_organization' context 'accounts.view_as' %}…</option>
-            </select>
+            <div class="bootstrap-single-select">
+                <select id="viewAsOrgSelect"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="">{% trans 'select_organization' context 'accounts.view_as' %}…</option>
+                </select>
+            </div>
         </div>
         {% endif %}
 
@@ -46,13 +50,17 @@ Superadmin əvvəlcə təşkilat seçir; org admin/sahibi/tyutor və s. birbaşa
                        placeholder="{% trans 'search_user_placeholder' context 'accounts.view_as' %}"
                        autocomplete="off">
             </div>
-            <select class="form-select form-select-sm view-as-dropdown__role" id="viewAsRoleFilter">
-                <option value="">{% trans 'role_filter_all' context 'accounts.view_as' %}</option>
-                <option value="teacher">{% trans 'role_filter_teacher' context 'accounts.view_as' %}</option>
-                <option value="student">{% trans 'role_filter_student' context 'accounts.view_as' %}</option>
-                <option value="admin">{% trans 'role_filter_admin' context 'accounts.view_as' %}</option>
-                <option value="staff">{% trans 'role_filter_staff' context 'accounts.view_as' %}</option>
-            </select>
+            <div class="bootstrap-single-select view-as-dropdown__role">
+                <select id="viewAsRoleFilter"
+                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                        data-bootstrap-select>
+                    <option value="">{% trans 'role_filter_all' context 'accounts.view_as' %}</option>
+                    <option value="teacher">{% trans 'role_filter_teacher' context 'accounts.view_as' %}</option>
+                    <option value="student">{% trans 'role_filter_student' context 'accounts.view_as' %}</option>
+                    <option value="admin">{% trans 'role_filter_admin' context 'accounts.view_as' %}</option>
+                    <option value="staff">{% trans 'role_filter_staff' context 'accounts.view_as' %}</option>
+                </select>
+            </div>
         </div>
 
         <div class="view-as-dropdown__results" id="viewAsResults" role="listbox" aria-busy="false"></div>

@@ -220,7 +220,11 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
             memberships__role__name__in=_expand_role_aliases(role_names),
         )
 
-    return users.order_by("first_name", "last_name", "username", "id")
+    # Perf: siyahı üçün yalnız lazım olan sütunlar (serializer başqa heç nəyə
+    # toxunmur → deferred-field əlavə sorğusu yaranmır).
+    return users.only("id", "username", "first_name", "last_name", "email").order_by(
+        "first_name", "last_name", "username", "id"
+    )
 
 
 def _expand_role_aliases(normalized_names):

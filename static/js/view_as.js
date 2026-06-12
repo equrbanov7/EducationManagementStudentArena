@@ -45,6 +45,49 @@
         return launcher.getAttribute("data-is-superadmin") === "1";
     }
 
+    /**
+     * Avatar yoxdursa inisial dairəsi: ad-dan deterministik rəng (hue) +
+     * 1-2 hərf. Şəkilsiz istifadəçilər üçün sınıq <img> ikonunu və avatar
+     * endpoint-inə boş HTTP sorğularını aradan qaldırır.
+     */
+    function initialsOf(name) {
+        var parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return "?";
+        var first = parts[0].charAt(0);
+        var second = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
+        return (first + second).toUpperCase();
+    }
+
+    function hueOf(text) {
+        var hash = 0;
+        var value = String(text || "");
+        for (var i = 0; i < value.length; i++) {
+            hash = (hash * 31 + value.charCodeAt(i)) % 360;
+        }
+        return hash;
+    }
+
+    function avatarHtml(item) {
+        if (item.avatar_url) {
+            // QEYD: inline onerror YOXDUR (CSP) — sınıq şəkillər aşağıdakı
+            // capture-phase "error" listener-i ilə inisiala çevrilir.
+            return (
+                '<span class="view-as-result__avatar-wrap">' +
+                '<img class="view-as-result__avatar" src="' + escapeHtml(item.avatar_url) +
+                '" alt="" loading="lazy">' +
+                '<span class="view-as-result__initials" style="--va-hue:' + hueOf(item.username) + '">' +
+                escapeHtml(initialsOf(item.name)) + "</span>" +
+                "</span>"
+            );
+        }
+        return (
+            '<span class="view-as-result__avatar-wrap is-fallback">' +
+            '<span class="view-as-result__initials" style="--va-hue:' + hueOf(item.username) + '">' +
+            escapeHtml(initialsOf(item.name)) + "</span>" +
+            "</span>"
+        );
+    }
+
     function renderResults(launcher, items, append) {
         var box = el("viewAsResults");
         if (!box) return;
@@ -60,13 +103,16 @@
                 '<button type="button" class="view-as-result" role="option" data-user-id="' +
                 escapeHtml(item.id) +
                 '">' +
-                '<img class="view-as-result__avatar" src="' + escapeHtml(item.avatar_url) + '" alt="" loading="lazy">' +
+                avatarHtml(item) +
                 '<span class="view-as-result__body">' +
+                '<span class="view-as-result__top">' +
                 '<span class="view-as-result__name">' + escapeHtml(item.name) + "</span>" +
-                '<span class="view-as-result__meta">@' + escapeHtml(item.username) +
-                (item.email ? " · " + escapeHtml(item.email) : "") + "</span>" +
-                "</span>" +
                 '<span class="view-as-result__roles">' + roles + "</span>" +
+                "</span>" +
+                '<span class="view-as-result__meta">@' + escapeHtml(item.username) +
+                (item.email ? '<span class="view-as-result__email"> · ' + escapeHtml(item.email) + "</span>" : "") +
+                "</span>" +
+                "</span>" +
                 '<i class="fas fa-chevron-right view-as-result__go" aria-hidden="true"></i>' +
                 "</button>";
         });
@@ -161,6 +207,10 @@
                     orgSelect.appendChild(option);
                 });
                 orgSelect.dataset.loaded = "1";
+                // Dinamik option-lardan sonra bootstrap-select menyusunu yenilə.
+                if (window.EMSBootstrapSelect) {
+                    window.EMSBootstrapSelect.refresh(orgSelect);
+                }
             })
             .catch(function () {
                 /* orq siyahısı yüklənməsə select boş qalır — kritik deyil */
@@ -188,6 +238,21 @@
             if (searchInput) searchInput.focus();
         }
     }
+
+    // Sınıq avatar → inisial fallback. "error" hadisəsi bubble etmir,
+    // ona görə capture-phase listener (CSP-safe, inline onerror əvəzinə).
+    document.addEventListener(
+        "error",
+        function (event) {
+            var img = event.target;
+            if (img && img.classList && img.classList.contains("view-as-result__avatar")) {
+                var wrap = img.parentNode;
+                if (wrap) wrap.classList.add("is-fallback");
+                img.remove();
+            }
+        },
+        true
+    );
 
     window.EMSDelegate.on("click", "#viewAsToggle", function () {
         toggleDropdown();

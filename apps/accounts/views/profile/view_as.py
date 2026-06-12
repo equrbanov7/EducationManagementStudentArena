@@ -54,11 +54,21 @@ def _resolve_search_organization(request):
 
 
 def _serialize_users(page_users, organization):
-    """Səhifədəki istifadəçilər üçün rol etiketlərini TƏK sorğu ilə yığ (N+1 yox)."""
+    """
+    Səhifədəki istifadəçilər üçün rol etiketləri + avatar mövcudluğu —
+    cəmi 2 əlavə sorğu (N+1 yox).
+
+    Perf: ``avatar_url`` yalnız avatarı OLAN istifadəçilər üçün göndərilir;
+    əks halda frontend inisial dairəsi çəkir və avatar endpoint-inə
+    nəticə başına boş HTTP sorğusu (auth + 2 DB hit + 404) getmir.
+    """
     from apps.organizations.models import Membership
+
+    from ...models import UserProfile
 
     user_ids = [user.pk for user in page_users]
     role_map = {}
+    users_with_avatar = set()
     if user_ids:
         memberships = (
             Membership.objects.filter(organization=organization, user_id__in=user_ids, is_active=True)
@@ -74,6 +84,10 @@ def _serialize_users(page_users, organization):
             if label not in role_map[membership.user_id]:
                 role_map[membership.user_id].append(label)
 
+        users_with_avatar = set(
+            UserProfile.objects.filter(user_id__in=user_ids).exclude(avatar="").values_list("user_id", flat=True)
+        )
+
     results = []
     for user in page_users:
         full_name = (f"{user.first_name} {user.last_name}").strip() or user.username
@@ -83,8 +97,10 @@ def _serialize_users(page_users, organization):
                 "name": full_name,
                 "username": user.username,
                 "email": user.email,
-                "roles": role_map.get(user.pk, [])[:3],
-                "avatar_url": reverse("accounts:profile_avatar", args=[user.pk]),
+                "roles": role_map.get(user.pk, [])[:2],
+                "avatar_url": (
+                    reverse("accounts:profile_avatar", args=[user.pk]) if user.pk in users_with_avatar else None
+                ),
             }
         )
     return results
