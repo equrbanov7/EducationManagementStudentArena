@@ -71,7 +71,9 @@ jobs:
               echo "✅ Stack qalxdı (cəhd $i)."
               exit 0
             fi
-            echo "⚠️ Cəhd $i uğursuz oldu (yəqin Docker Hub rate-limit/nasazlıq)."
+            echo "⚠️ Cəhd $i uğursuz oldu. Stack sökülməzdən əvvəl container status/logları:"
+            docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml ps || true
+            docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml logs --no-color app celery_worker nginx pgbouncer postgres redis || true
             docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml down -v --remove-orphans || true
             if [ "$i" -lt "$ATTEMPTS" ]; then
               SLEEP=$((i * 15))
