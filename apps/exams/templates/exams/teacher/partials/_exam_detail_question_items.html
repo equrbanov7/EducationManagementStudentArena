@@ -1,0 +1,40 @@
+{% load i18n %}
+
+{% for q in questions %}
+<li class="question-item">
+    <div class="question-content">
+        <span class="question-order">{{ q.order }}.</span>
+        <p class="question-text">{{ q.text }}</p>
+
+        {% if exam.exam_type == "test" %}
+            <ul class="options-list">
+                {% for opt in q.options.all %}
+                    <li class="option-item {% if opt.is_correct %}correct{% endif %}">
+                        <span class="option-indicator">
+                            {% if opt.is_correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}
+                        </span>
+                        <span class="option-text">{{ opt.text }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="question-actions">
+        <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+           class="action-btn outline-btn-sm js-open-question-form-modal"
+           data-question-modal-mode="edit"
+           data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+            <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
+        </a>
+
+        <a href="{% url 'exams:delete_exam_question' exam.slug q.id %}"
+           class="action-btn danger-btn-sm js-open-delete-confirm-modal"
+           data-delete-action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
+           data-delete-message="{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}"
+           data-delete-target="{{ q.text|truncatechars:140 }}">
+            <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+        </a>
+    </div>
+</li>
+{% endfor %}

@@ -3,9 +3,12 @@
 from .exams import (
     createAndEditExamView,
     delete_exam,
+    duplicate_exam,
     teacher_exam_detail,
+    teacher_exam_detail_questions_page,
     teacher_exam_list,
     toggle_exam_active,
+    toggle_exam_archive,
     toggle_exam_results_visibility,
 )
 from .groups import (
@@ -44,9 +47,12 @@ __all__ = [
     "teacher_exam_list",
     "createAndEditExamView",
     "teacher_exam_detail",
+    "teacher_exam_detail_questions_page",
     "toggle_exam_active",
+    "toggle_exam_archive",
     "toggle_exam_results_visibility",
     "delete_exam",
+    "duplicate_exam",
     "add_exam_question",
     "edit_exam_question",
     "delete_exam_question",

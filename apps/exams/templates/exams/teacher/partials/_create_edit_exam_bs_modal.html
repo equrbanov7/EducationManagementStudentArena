@@ -1,21 +1,25 @@
 {% load i18n %}
 
-<div class="modal fade exam-create-edit-modal" id="examCreateEditModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade exam-create-edit-modal exam-wizard-modal" id="examCreateEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="examCreateEditModalTitle">
-                    {% trans "heading_create_exam" context "exams.template.create_exam_modal" %}
-                </h5>
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}"></button>
-            </div>
-
-            <div class="modal-body" id="examCreateEditModalBody">
+            <div class="modal-body p-0" id="examCreateEditModalBody">
                 <div class="create-exam-modal-loading">
                     {% trans "loading_form" context "exams.template.create_exam_modal" %}
+                </div>
+            </div>
+
+            {# Yadda saxlanmamış dəyişiklik təsdiqi (modal-content üzərində overlay) #}
+            <div class="ew-confirm" data-ew-confirm hidden>
+                <div class="ew-confirm-box" role="alertdialog" aria-modal="true">
+                    <span class="ew-confirm-ic"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+                    <h4>{% trans "unsaved_title" context "exams.wizard" %}</h4>
+                    <p>{% trans "unsaved_body" context "exams.wizard" %}</p>
+                    <div class="ew-confirm-actions">
+                        <button type="button" class="ew-btn ew-btn--ghost" data-ew-confirm-cancel>{% trans "unsaved_cancel" context "exams.wizard" %}</button>
+                        <button type="button" class="ew-btn ew-btn--ghost ew-confirm-discardbtn" data-ew-confirm-discard>{% trans "unsaved_discard" context "exams.wizard" %}</button>
+                        <button type="button" class="ew-btn ew-btn--primary" data-ew-confirm-save>{% trans "unsaved_save" context "exams.wizard" %}</button>
+                    </div>
                 </div>
             </div>
         </div>

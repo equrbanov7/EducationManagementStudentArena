@@ -30,6 +30,14 @@
             return '<div class="create-exam-modal-error">' + errorText + "</div>";
         }
 
+        function getSavingMarkup() {
+            return '<span class="ew-spin" aria-hidden="true"></span> ' + (i18n.saving || "Saxlanılır…");
+        }
+
+        function getSavedMarkup() {
+            return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> ' + (i18n.saved || "Yadda saxlanıldı");
+        }
+
         function buildModalUrl(rawUrl) {
             try {
                 var parsed = new URL(rawUrl, window.location.origin);
@@ -559,6 +567,12 @@
                 initGroupUserSync(form, groupSelector, userSelector);
             }
 
+            // 4-addımlı sehrbaz: naviqasiya + addım validasiyası + (server 400-dan
+            // sonra) aydın xəta xülasəsi və ilk xətalı addıma keçid.
+            if (window.EMSExamWizard && typeof window.EMSExamWizard.init === "function") {
+                window.EMSExamWizard.init(form);
+            }
+
             form.addEventListener("submit", async function (event) {
                 event.preventDefault();
 
@@ -568,10 +582,13 @@
 
                 submitInFlight = true;
                 var submitToken = modalLoadToken;
+                var succeeded = false;
 
                 var submitBtn = form.querySelector('button[type="submit"]');
+                var submitOriginalHtml = submitBtn ? submitBtn.innerHTML : "";
                 if (submitBtn) {
                     submitBtn.disabled = true;
+                    submitBtn.innerHTML = getSavingMarkup();
                 }
 
                 try {
@@ -588,8 +605,15 @@
                     if (response.ok && contentType.indexOf("application/json") !== -1) {
                         var payload = await response.json();
                         if (payload.success) {
-                            bsModal.hide();
-                            window.location.reload();
+                            succeeded = true;
+                            form.dataset.ewDirty = ""; // saxlanıldı — çıxışda soruşma
+                            if (submitBtn) {
+                                submitBtn.innerHTML = getSavedMarkup();
+                            }
+                            setTimeout(function () {
+                                bsModal.hide();
+                                window.location.reload();
+                            }, 550);
                             return;
                         }
                     }
@@ -603,6 +627,10 @@
                         if (jsonPayload.html) {
                             modalBody.innerHTML = jsonPayload.html;
                             bindModalForm();
+                            var reform = modalBody.querySelector("#createExamModalForm");
+                            if (reform) {
+                                reform.dataset.ewDirty = "1"; // istifadəçi dəyişikliyi var
+                            }
                             return;
                         }
                     }
@@ -620,11 +648,20 @@
                     modalBody.innerHTML = getErrorMarkup();
                 } finally {
                     submitInFlight = false;
-                    if (submitBtn) {
+                    if (submitBtn && !succeeded) {
                         submitBtn.disabled = false;
+                        submitBtn.innerHTML = submitOriginalHtml;
                     }
                 }
             });
+
+            // Dirty tracking — çıxışda yadda saxlanmamış dəyişiklik xəbərdarlığı.
+            // Sintetik init hadisələri artıq keçib (bu listener ən sonda bağlanır).
+            var markDirty = function () {
+                form.dataset.ewDirty = "1";
+            };
+            form.addEventListener("input", markDirty);
+            form.addEventListener("change", markDirty);
         }
 
         async function openExamModal(rawUrl, mode) {
@@ -704,8 +741,66 @@
             openExamModal(targetUrl, mode);
         });
 
+        // ── Yadda saxlanmamış dəyişiklik təsdiqi ──────────────────────────
+        var confirmEl = modalElement.querySelector("[data-ew-confirm]");
+        function hideUnsavedConfirm() {
+            if (confirmEl) {
+                confirmEl.hidden = true;
+            }
+        }
+        if (confirmEl) {
+            var cancelBtn = confirmEl.querySelector("[data-ew-confirm-cancel]");
+            var saveBtn = confirmEl.querySelector("[data-ew-confirm-save]");
+            var discardBtn = confirmEl.querySelector("[data-ew-confirm-discard]");
+            if (cancelBtn) {
+                cancelBtn.addEventListener("click", hideUnsavedConfirm);
+            }
+            if (saveBtn) {
+                saveBtn.addEventListener("click", function () {
+                    hideUnsavedConfirm();
+                    var form = modalBody.querySelector("#createExamModalForm");
+                    if (!form) {
+                        return;
+                    }
+                    if (form.requestSubmit) {
+                        form.requestSubmit();
+                    } else {
+                        var sb = form.querySelector('button[type="submit"]');
+                        if (sb) sb.click();
+                    }
+                });
+            }
+            if (discardBtn) {
+                discardBtn.addEventListener("click", function () {
+                    hideUnsavedConfirm();
+                    modalElement.dataset.examDiscard = "1";
+                    bsModal.hide();
+                });
+            }
+        }
+
+        // Bağlanmağı tut: dirty olarsa təsdiq göstər (hide-ı ləğv et).
+        modalElement.addEventListener("hide.bs.modal", function (event) {
+            if (modalElement.dataset.examDiscard === "1") {
+                modalElement.dataset.examDiscard = "";
+                return;
+            }
+            if (submitInFlight) {
+                return;
+            }
+            var form = modalBody.querySelector("#createExamModalForm");
+            if (form && form.dataset.ewDirty === "1") {
+                event.preventDefault();
+                if (confirmEl) {
+                    confirmEl.hidden = false;
+                }
+            }
+        });
+
         modalElement.addEventListener("hidden.bs.modal", function () {
             submitInFlight = false;
+            hideUnsavedConfirm();
+            modalElement.dataset.examDiscard = "";
             resetModalBody();
         });
 

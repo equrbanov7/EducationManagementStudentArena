@@ -6,6 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260616-1">
     <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
 {% endblock %}
 
@@ -71,8 +72,14 @@
                 {% if exam.is_active %}
                     <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
                        class="live-start-btn"
-                       target="_blank"
-                       rel="noopener noreferrer">
+                       data-live-start-trigger
+                       {% if active_live_session %}
+                           data-has-active-session="1"
+                           data-live-return-url="{{ active_live_continue_url }}"
+                           data-live-new-url="{{ active_live_new_url }}"
+                           data-live-pin="{{ active_live_session.pin }}"
+                           data-live-created="{{ active_live_session.created_at|date:'d.m.Y H:i' }}"
+                       {% endif %}>
                         🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
                     </a>
                 {% else %}
@@ -203,6 +210,20 @@
                         {% endif %}
                     </form>
 
+                    <form method="post" action="{% url 'exams:toggle_exam_archive' exam.slug %}" class="inline-action-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        {% if exam.is_archived %}
+                            <button type="submit" class="action-btn unarchive-btn">
+                                <i class="fas fa-box-open"></i> {% trans "action_unarchive" context "exams.dashboard" %}
+                            </button>
+                        {% else %}
+                            <button type="submit" class="action-btn archive-btn">
+                                <i class="fas fa-box-archive"></i> {% trans "action_archive" context "exams.dashboard" %}
+                            </button>
+                        {% endif %}
+                    </form>
+
                     <a href="{% url 'exams:edit_exam' exam.slug %}"
                        class="action-btn outline-btn js-open-exam-form-modal"
                        data-exam-modal-mode="edit"
@@ -221,52 +242,30 @@
             </section>
 
             {# --- Mövcud Suallar Hissəsi --- #}
-            <section class="questions-section">
-                <h2 class="section-title">{% trans "heading_existing_questions" context "exams.template.teacher_exam_detail" %}</h2>
-                {% if questions %}
-                    <ol class="question-list">
-                        {% for q in questions %}
-                        <li class="question-item">
-                            <div class="question-content">
-                                <span class="question-order">{{ q.order }}.</span>
-                                <p class="question-text">{{ q.text }}</p>
-
-                                {% if exam.exam_type == "test" %}
-                                    <ul class="options-list">
-                                        {% for opt in q.options.all %}
-                                            <li class="option-item {% if opt.is_correct %}correct{% endif %}">
-                                                <span class="option-indicator">
-                                                    {% if opt.is_correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}
-                                                </span>
-                                                <span class="option-text">{{ opt.text }}</span>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-                            </div>
-
-                            <div class="question-actions">
-                                <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
-                                   class="action-btn outline-btn-sm js-open-question-form-modal"
-                                   data-question-modal-mode="edit"
-                                   data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
-                                    <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
-                                </a>
-
-                                <a href="{% url 'exams:delete_exam_question' exam.slug q.id %}"
-                                   class="action-btn danger-btn-sm js-open-delete-confirm-modal"
-                                   data-delete-action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
-                                   data-delete-message="{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}"
-                                   data-delete-target="{{ q.text|truncatechars:140 }}">
-                                    <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
-                                </a>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ol>
-                {% else %}
-                    <div class="empty-state-questions">
-                        <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
+	            <section class="questions-section">
+	                <h2 class="section-title">{% trans "heading_existing_questions" context "exams.template.teacher_exam_detail" %}</h2>
+	                {% if questions %}
+	                    <ol class="question-list" data-question-list>
+	                        {% include "exams/teacher/partials/_exam_detail_question_items.html" with questions=questions exam=exam exam_navigation_query=exam_navigation_query %}
+	                    </ol>
+	                    {% if questions_has_more %}
+	                        <div class="question-lazy-loader"
+	                             data-question-lazy
+	                             data-load-url="{% url 'exams:teacher_exam_detail_questions_page' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+	                             data-next-offset="{{ questions_next_offset }}"
+	                             data-page-size="{{ questions_page_size }}">
+	                            <button type="button" class="question-lazy-button" data-question-lazy-trigger>
+	                                {% trans "load_more" %}
+	                            </button>
+	                            <span class="question-lazy-status" data-question-lazy-status hidden>
+	                                <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+	                                {% trans "Yüklənir..." %}
+	                            </span>
+	                        </div>
+	                    {% endif %}
+	                {% else %}
+	                    <div class="empty-state-questions">
+	                        <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
                         <p>{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
                         <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn primary-btn-sm js-open-question-form-modal"
@@ -309,6 +308,39 @@
         </div>
     </div>
 </div>
+
+<div class="live-session-modal" data-live-session-modal hidden role="dialog" aria-modal="true" aria-labelledby="liveSessionModalTitle">
+    <button type="button" class="live-session-modal__backdrop" data-live-session-close aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}"></button>
+    <section class="live-session-modal__panel">
+        <button type="button" class="live-session-modal__close" data-live-session-close aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="live-session-modal__icon">
+            <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
+        </div>
+        <p class="live-session-modal__eyebrow">{% trans "live_resume_modal_eyebrow" context "exams.template.teacher_exam_detail" %}</p>
+        <h2 id="liveSessionModalTitle">{% trans "live_resume_modal_title" context "exams.template.teacher_exam_detail" %}</h2>
+        <p class="live-session-modal__text">{% trans "live_resume_modal_body" context "exams.template.teacher_exam_detail" %}</p>
+        <dl class="live-session-modal__meta">
+            <div>
+                <dt>{% trans "live_resume_modal_pin" context "exams.template.teacher_exam_detail" %}</dt>
+                <dd data-live-session-pin>-</dd>
+            </div>
+            <div>
+                <dt>{% trans "live_resume_modal_started" context "exams.template.teacher_exam_detail" %}</dt>
+                <dd data-live-session-created>-</dd>
+            </div>
+        </dl>
+        <div class="live-session-modal__actions">
+            <button type="button" class="live-session-modal__btn live-session-modal__btn--ghost" data-live-session-new>
+                {% trans "live_resume_modal_new" context "exams.template.teacher_exam_detail" %}
+            </button>
+            <button type="button" class="live-session-modal__btn live-session-modal__btn--primary" data-live-session-return>
+                {% trans "live_resume_modal_return" context "exams.template.teacher_exam_detail" %}
+            </button>
+        </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block extraJs %}
@@ -317,7 +349,14 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
     createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
     editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}",
+    saving: "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
+    saved: "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
+};
+window.EXAM_WIZARD_I18N = {
+    step: "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
+    errorsTitle: "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
+    titleRequired: "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
 };
 window.TEACHER_EXAM_DETAIL_I18N = {
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
@@ -365,5 +404,6 @@ window.MODAL_SUPERVISION_TPL_INFO = {
 };
 </script>
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
-<script src="{% static 'exams/js/teacher_exam_detail.js' %}?v=20260607-unified-question-modal"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260615-4"></script>
+<script src="{% static 'exams/js/teacher_exam_detail.js' %}?v=20260616-question-lazy"></script>
 {% endblock %}

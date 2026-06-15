@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+  Silmə təsdiqi (Bootstrap modal) + arxiv/dublikat üçün təkrar-istifadəli gizli
+  CSRF POST formu. JS action-ları konkret imtahanın URL-inə yönləndirir.
+{% endcomment %}
+<div class="modal fade tx-confirm-modal" id="examDeleteModal" tabindex="-1" aria-hidden="true" data-tx-delete-modal>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <span class="tx-confirm-ic"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+          {% trans "delete_modal_title" context "exams.dashboard" %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{% trans "delete_modal_body" context "exams.dashboard" %}</p>
+        <p class="tx-confirm-name" data-tx-delete-name></p>
+        <div class="tx-confirm-warn">
+          <i class="fas fa-circle-info" aria-hidden="true"></i>
+          {% trans "delete_modal_warn" context "exams.dashboard" %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="tx-btn tx-btn--ghost" data-bs-dismiss="modal">
+          {% trans "action_cancel" context "exams.template.create_exam_modal_form" %}
+        </button>
+        <form method="post" action="" data-tx-delete-form>
+          {% csrf_token %}
+          <button type="submit" class="tx-btn tx-btn--danger">
+            <i class="fas fa-trash" aria-hidden="true"></i> {% trans "delete_modal_confirm" context "exams.dashboard" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form method="post" action="" data-tx-action-form class="d-none" aria-hidden="true">{% csrf_token %}</form>

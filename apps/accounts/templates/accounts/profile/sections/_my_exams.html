@@ -1,154 +1,106 @@
 {% load i18n %}
 {% if can_view_owned_learning %}
-<section class="profile-section-panel profile-section--my-exams {% if active_section == 'my-exams' %}is-active{% endif %}" data-profile-section-panel="my-exams">
-    <div class="section-card">
-        
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-file-signature text-primary"></i>
-                    <span>{% trans "title" context "profile.my_exams" %}</span>
-                    <span class="count-badge">{{ my_exams_count }}</span>
-                </div>
-            </div>
-            
-            <a href="{% url 'exams:create_exam' %}"
-               class="btn-create-new js-open-create-exam"
-               data-create-exam-url="{% url 'exams:create_exam' %}">
-                <i class="fas fa-plus"></i> {% trans "new_exam" context "profile.my_exams" %}
-            </a>
-        </div>
+{% comment %}
+  Müəllim paneli — "İmtahanlarım".
+  Status üzrə qruplaşdırılmış imtahanlar + KPI zolağı + kateqoriya çipləri.
+  Bütün vizual tokenlər servisdən/constants-dan gəlir; davranış (filtr, kebab,
+  silmə təsdiqi, arxiv/dublikat) my_exams_dashboard.js-də (AJAX-safe).
+{% endcomment %}
+<section class="profile-section-panel profile-section--my-exams {% if active_section == 'my-exams' %}is-active{% endif %}"
+         data-profile-section-panel="my-exams"
+         data-my-exams-root>
 
-        {# ====== SEARCH & FILTER TOOLBAR ====== #}
-        <form method="get" class="my-exams-toolbar" data-my-exams-toolbar>
-            <input type="hidden" name="section" value="my-exams">
-            <div class="my-exams-search-box">
-                <i class="fas fa-search my-exams-search-icon"></i>
-                <input type="text"
-                       name="exam_q"
-                       class="form-control my-exams-search-input"
-                       placeholder="{% trans 'search_placeholder' context 'profile.my_exams' %}"
-                       value="{{ my_exams_search_query|default:'' }}">
-            </div>
+  <div class="tx-shell">
+    <header class="tx-head tx-head--compact">
+      <div class="tx-head-main">
+        <p class="tx-sub">
+          <b>{{ my_exams_count }}</b> {% trans "subtitle_exams" context "exams.dashboard" %}
+          {% if my_exams_dashboard %}
+            · <b>{{ my_exams_dashboard.status_counts.active }}</b> {% trans "subtitle_active" context "exams.dashboard" %}
+          {% endif %}
+        </p>
+      </div>
+      <div class="tx-head-actions">
+        <button type="button"
+                class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                data-exam-modal-mode="create"
+                data-exam-modal-url="{% url 'exams:create_exam' %}">
+          <i class="fas fa-plus" aria-hidden="true"></i> {% trans "new_exam" context "profile.my_exams" %}
+        </button>
+      </div>
+    </header>
 
-            <div class="my-exams-filter-box">
-                <div class="bootstrap-single-select">
-                    <select name="exam_type"
-                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select
-                            data-submit-on-change>
-                        <option value="">{% trans "filter_all_types" context "profile.my_exams" %}</option>
-                        <option value="test" {% if my_exams_filter_type == 'test' %}selected{% endif %}>
-                            {% trans "filter_test" context "profile.my_exams" %}
-                        </option>
-                        <option value="written" {% if my_exams_filter_type == 'written' %}selected{% endif %}>
-                            {% trans "filter_written" context "profile.my_exams" %}
-                        </option>
-                        <option value="coding" {% if my_exams_filter_type == 'coding' %}selected{% endif %}>
-                            {% trans "filter_practical" context "profile.my_exams" %}
-                        </option>
-                    </select>
-                </div>
-            </div>
+    {% include "accounts/profile/sections/partials/_my_exams_kpis.html" %}
+    {% include "accounts/profile/sections/partials/_my_exams_toolbar.html" %}
 
-            <button type="submit" class="btn btn-primary my-exams-search-btn">
-                <i class="fas fa-search"></i>
-            </button>
-
-            {% if my_exams_search_query or my_exams_filter_type %}
-                <a href="{{ profile_base_url }}?section=my-exams" class="btn btn-outline-secondary my-exams-reset-btn">
-                    <i class="fas fa-times"></i>
-                </a>
-            {% endif %}
-        </form>
-
-        {% if my_exams %}
-        {% trans "exam" context "profile.my_exams" as profile_exam_default %}
-        <div class="exam-cards-grid">
-            {% for exam in my_exams %}
-            <div class="exam-card-cell">
-                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}" class="modern-exam-card">
-                    <div class="exam-card-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="exam-card-content">
-                        <h4 class="exam-card-title">{{ exam.title }}</h4>
-                        <div class="exam-card-meta">
-                            <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d M Y" }}</span>
-                            <span class="meta-divider">•</span>
-                            <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:profile_exam_default }}</span>
-                        </div>
-                        <div class="exam-card-badges">
-                            {% if exam.is_active %}
-                                <span class="ec-badge ec-badge--active">{% trans "active_status" context "profile.my_exams" %}</span>
-                            {% else %}
-                                <span class="ec-badge ec-badge--inactive">{% trans "inactive_status" context "profile.my_exams" %}</span>
-                            {% endif %}
-                            <span class="ec-badge ec-badge--info"><i class="fas fa-list-ol"></i> {{ exam.card_question_count }}</span>
-                            {% if exam.card_appeal_count %}
-                                <span class="ec-badge ec-badge--warn"><i class="fas fa-gavel"></i> {{ exam.card_appeal_count }}</span>
-                            {% endif %}
-                            {% for variant in exam.active_language_variants %}
-                                <span class="ec-badge ec-badge--lang">{{ variant.language|upper }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="exam-card-action">
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
-                </a>
-                <div class="exam-card-actions">
-                    <a href="{% url 'exams:edit_exam' exam.slug %}"
-                       class="ec-action ec-action--primary js-open-exam-form-modal"
-                       data-exam-modal-mode="edit"
-                       data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
-                        <i class="fas fa-edit"></i> {% trans "action_edit" context "profile.my_exams" %}
-                    </a>
-                    <a href="{% url 'exams:exam_language_manager' exam.slug %}" class="ec-action"><i class="fas fa-language"></i> {% trans "action_languages" context "profile.my_exams" %}</a>
-                    <a href="{% url 'exams:exam_bank_picker' exam.slug %}" class="ec-action"><i class="fas fa-layer-group"></i> {% trans "action_question_bank" context "profile.my_exams" %}</a>
-                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="ec-action"><i class="fas fa-chart-bar"></i> {% trans "action_results" context "profile.my_exams" %}</a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        {# ====== PAGINATION ====== #}
-        {% if my_exams.has_other_pages %}
-            {% with eq=my_exams_search_query|urlencode et=my_exams_filter_type|urlencode %}
-                {% if eq and et %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq|add:"&exam_type="|add:et %}
-                {% elif eq %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_q="|add:eq %}
-                {% elif et %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams&exam_type="|add:et %}
-                {% else %}
-                    {% include "partials/_pagination.html" with page_obj=my_exams page_param="exam_page" extra_query="section=my-exams" %}
-                {% endif %}
-            {% endwith %}
-        {% endif %}
-
-        {% else %}
-        <div class="modern-empty-state">
-            <div class="empty-icon-wrapper">
-                <i class="fas fa-file-medical"></i>
-            </div>
-            {% if my_exams_search_query or my_exams_filter_type %}
-                <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
-                <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
-                <a href="{{ profile_base_url }}?section=my-exams" class="btn-create-new mt-3">
-                    <i class="fas fa-times"></i> {% trans "clear_filters" context "profile.my_exams" %}
-                </a>
-            {% else %}
-                <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
-                <p>{% trans "empty_description" context "profile.my_exams" %}</p>
-                <button type="button" class="btn-create-new mt-3 js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
-                    <i class="fas fa-plus"></i> {% trans "create_first_exam" context "profile.my_exams" %}
-                </button>
-            {% endif %}
-        </div>
-        {% endif %}
-        
+    {% if my_exams_dashboard and my_exams_dashboard.category_filters %}
+    <div class="tx-catfilter" data-tx-catfilter>
+      <span class="tx-cat-label">{% trans "filter_category" context "exams.dashboard" %}</span>
+      <div class="tx-cat-chips">
+        <button type="button" class="tx-cat-chip is-on" data-cat="all">
+          {% trans "filter_all" context "exams.dashboard" %}
+          <span class="tx-cat-n">{{ my_exams_count }}</span>
+        </button>
+        {% for cat in my_exams_dashboard.category_filters %}
+        <button type="button" class="tx-cat-chip" data-cat="{{ cat.key }}"
+                style="--cat-color:{{ cat.color }};--cat-soft:{{ cat.soft }};--cat-deep:{{ cat.deep }};">
+          <span class="tx-cat-dot" style="background:{{ cat.color }};"></span>
+          {{ cat.label }}
+          <span class="tx-cat-n">{{ cat.count }}</span>
+        </button>
+        {% endfor %}
+      </div>
     </div>
-  
+    {% endif %}
+
+    {% if my_exams %}
+      <div data-tx-sections>
+        {% for group in my_exams_dashboard.status_groups %}
+          {% include "accounts/profile/sections/partials/_my_exams_section.html" with group=group %}
+        {% endfor %}
+      </div>
+
+      {# Axtarış zamanı qısa skeleton (debounce) — UX üçün #}
+      <div class="tx-skeleton" data-tx-skeleton hidden aria-hidden="true">
+        {% for i in "123456" %}
+        <div class="tx-skel-card">
+          <div class="tx-skel-tile"></div>
+          <div class="tx-skel-line tx-w80"></div>
+          <div class="tx-skel-line tx-w60"></div>
+          <div class="tx-skel-line tx-w40"></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {# Klient-filtr heç nə tapmayanda (status/kateqoriya/axtarış) görünür #}
+      <div class="tx-empty tx-empty--filtered" data-tx-noresult hidden>
+        <div class="tx-empty-ic"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></div>
+        <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
+        <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
+      </div>
+    {% else %}
+      <div class="tx-empty">
+        <div class="tx-empty-ic"><i class="fas fa-file-circle-plus" aria-hidden="true"></i></div>
+        {% if my_exams_search_query or my_exams_filter_type %}
+          <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
+          <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
+          <a href="{{ profile_base_url }}?section=my-exams" class="tx-btn tx-btn--ghost">
+            <i class="fas fa-times" aria-hidden="true"></i> {% trans "clear_filters" context "profile.my_exams" %}
+          </a>
+        {% else %}
+          <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
+          <p>{% trans "empty_description" context "profile.my_exams" %}</p>
+          <button type="button"
+                  class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                  data-exam-modal-mode="create"
+                  data-exam-modal-url="{% url 'exams:create_exam' %}">
+            <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_exam" context "profile.my_exams" %}
+          </button>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% include "accounts/profile/sections/partials/_delete_exam_modal.html" %}
 </section>
 {% endif %}

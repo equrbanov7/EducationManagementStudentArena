@@ -1040,6 +1040,75 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
 
+    def test_teacher_exam_detail_includes_archive_toggle(self):
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Arxivlə")
+        self.assertContains(response, reverse("exams:toggle_exam_archive", args=[self.exam_visible.slug]))
+
+        self.exam_visible.is_archived = True
+        self.exam_visible.save(update_fields=["is_archived"])
+
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+        self.assertContains(response, "Arxivdən çıxar")
+
+    def test_teacher_can_archive_from_detail_and_stay_on_detail(self):
+        detail_url = reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug])
+        response = self.client.post(
+            reverse("exams:toggle_exam_archive", args=[self.exam_visible.slug]),
+            {"next": detail_url},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, detail_url)
+        self.exam_visible.refresh_from_db()
+        self.assertTrue(self.exam_visible.is_archived)
+
+    def test_teacher_exam_detail_initially_renders_first_question_batch(self):
+        for order in range(2, 26):
+            ExamQuestion.objects.create(
+                exam=self.exam_visible,
+                text=f"Lazy detail question {order}",
+                order=order,
+                points=1,
+            )
+
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["questions"]), 20)
+        self.assertContains(response, "Lazy detail question 20")
+        self.assertNotContains(response, "Lazy detail question 21")
+        self.assertContains(
+            response,
+            reverse("exams:teacher_exam_detail_questions_page", args=[self.exam_visible.slug]),
+        )
+        self.assertContains(response, 'data-next-offset="20"', html=False)
+
+    def test_teacher_exam_detail_questions_page_returns_next_batch(self):
+        for order in range(2, 26):
+            ExamQuestion.objects.create(
+                exam=self.exam_visible,
+                text=f"Lazy detail question {order}",
+                order=order,
+                points=1,
+            )
+
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail_questions_page", args=[self.exam_visible.slug]),
+            {"offset": 20, "limit": 20},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload["has_more"])
+        self.assertEqual(payload["next_offset"], 25)
+        self.assertIn("Lazy detail question 21", payload["html"])
+        self.assertIn("Lazy detail question 25", payload["html"])
+        self.assertNotIn("Lazy detail question 20", payload["html"])
+
     def test_teacher_can_toggle_exam_results_visibility(self):
         response = self.client.post(
             reverse("exams:toggle_exam_results_visibility", args=[self.exam_visible.slug]),
@@ -2169,6 +2238,24 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, 'value="coding" selected', html=False)
         self.assertContains(response, coding_exam.title)
         self.assertNotContains(response, written_exam.title)
+
+    def test_student_exam_card_shows_category_and_mechanic_badges(self):
+        final_test_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Final Test Badge Exam",
+            exam_type="test",
+            exam_type_extended="final",
+            is_active=True,
+            is_public=True,
+        )
+        ExamQuestion.objects.create(exam=final_test_exam, text="Final test badge question", order=1, points=1)
+
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": final_test_exam.title})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, final_test_exam.title)
+        self.assertContains(response, '<span class="ex-badge" data-type="final">', html=False)
+        self.assertContains(response, '<span class="ex-badge ex-badge--mechanic" data-type="test">', html=False)
 
     def test_student_exam_views_restore_profile_org_context_when_session_org_is_missing(self):
         session = self.client.session

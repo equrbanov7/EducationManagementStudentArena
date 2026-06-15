@@ -1,0 +1,55 @@
+{% load i18n exams_ui %}
+{% comment %}
+  Axtarış + növ filtri (seqment, dizayn) + görünüş keçidi — hamısı klient-tərəf
+  instant (server-reload yox). Gizli native <select name="exam_type"> dərin link
+  və mövcud server filtrini (deep-link) saxlayır; növ düymələri onu sinxron edir.
+{% endcomment %}
+{% exam_type_meta 'test' as m_test %}
+{% exam_type_meta 'written' as m_written %}
+{% exam_type_meta 'coding' as m_coding %}
+<form method="get" class="tx-toolbar" data-tx-toolbar>
+  <input type="hidden" name="section" value="my-exams">
+
+  <div class="tx-search">
+    <i class="fas fa-search tx-search-ic" aria-hidden="true"></i>
+    <input type="text"
+           name="exam_q"
+           class="tx-search-input"
+           data-tx-search
+           placeholder="{% trans 'search_placeholder' context 'profile.my_exams' %}"
+           value="{{ my_exams_search_query|default:'' }}"
+           autocomplete="off">
+  </div>
+
+  <div class="tx-typeseg" data-tx-typeseg role="group" aria-label="{% trans 'filter_all_types' context 'profile.my_exams' %}">
+    <button type="button" class="tx-typeseg-btn{% if not my_exams_filter_type %} is-on{% endif %}" data-type="all">
+      {% trans "filter_all_types" context "profile.my_exams" %}
+    </button>
+    <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'test' %} is-on{% endif %}" data-type="test">
+      <span class="tx-tdot" style="background:{{ m_test.color }};"></span> {% trans "filter_test" context "profile.my_exams" %}
+    </button>
+    <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'written' %} is-on{% endif %}" data-type="written">
+      <span class="tx-tdot" style="background:{{ m_written.color }};"></span> {% trans "filter_written" context "profile.my_exams" %}
+    </button>
+    <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'coding' %} is-on{% endif %}" data-type="coding">
+      <span class="tx-tdot" style="background:{{ m_coding.color }};"></span> {% trans "filter_practical" context "profile.my_exams" %}
+    </button>
+  </div>
+
+  {# Gizli native select — deep-link + server filtri + xarakterizasiya testi #}
+  <select name="exam_type" class="d-none" data-tx-type-native tabindex="-1" aria-hidden="true">
+    <option value="" {% if not my_exams_filter_type %}selected{% endif %}>{% trans "filter_all_types" context "profile.my_exams" %}</option>
+    <option value="test" {% if my_exams_filter_type == 'test' %}selected{% endif %}>{% trans "filter_test" context "profile.my_exams" %}</option>
+    <option value="written" {% if my_exams_filter_type == 'written' %}selected{% endif %}>{% trans "filter_written" context "profile.my_exams" %}</option>
+    <option value="coding" {% if my_exams_filter_type == 'coding' %}selected{% endif %}>{% trans "filter_practical" context "profile.my_exams" %}</option>
+  </select>
+
+  <div class="tx-viewtoggle" data-tx-viewtoggle>
+    <button type="button" class="is-on" data-view="grid" aria-label="{% trans 'view_grid' context 'exams.dashboard' %}">
+      <i class="fas fa-table-cells-large" aria-hidden="true"></i>
+    </button>
+    <button type="button" data-view="list" aria-label="{% trans 'view_list' context 'exams.dashboard' %}">
+      <i class="fas fa-list" aria-hidden="true"></i>
+    </button>
+  </div>
+</form>

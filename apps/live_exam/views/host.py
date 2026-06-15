@@ -33,6 +33,7 @@ from apps.live_exam.domain.session import (
     set_question_phase_override,
 )
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.services import finish_session
 from apps.live_exam.session_settings import (
     allowed_max_participants_for_user,
     get_session_settings,
@@ -91,6 +92,12 @@ def _ensure_host_org_permission(request, exam_organization) -> None:
 # Host / Session
 # ════════════════════════════════════════════════════════════════════════════
 
+LIVE_ACTIVE_STATES = (
+    LiveSession.STATE_LOBBY,
+    LiveSession.STATE_QUESTION,
+    LiveSession.STATE_REVEAL,
+)
+
 
 @login_required
 def live_create_session_by_slug(request, slug):
@@ -109,6 +116,38 @@ def live_create_session_by_slug(request, slug):
     if not exam.is_active:
         messages.warning(request, pgettext("live_exam.view.message", "exam_must_be_active_before_live"))
         return redirect(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
+
+    force_new_session = str(request.GET.get("force_new") or "").strip().lower() in {"1", "true", "yes", "on"}
+    probe_only = str(request.GET.get("probe") or "").strip().lower() in {"1", "true", "yes", "on"}
+    active_sessions = LiveSession.objects.filter(
+        exam=exam,
+        host_user=request.user,
+        state__in=LIVE_ACTIVE_STATES,
+    ).order_by("-created_at", "-id")
+    active_session = active_sessions.first()
+
+    if probe_only:
+        if active_session:
+            presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": active_session.pin})
+            new_url = f"{reverse('liveExam:create_session_slug', kwargs={'slug': exam.slug})}?force_new=1"
+            return JsonResponse(
+                {
+                    "active": True,
+                    "pin": active_session.pin,
+                    "created": timezone.localtime(active_session.created_at).strftime("%d.%m.%Y %H:%M"),
+                    "return_url": f"{presentation_url}?controls=1",
+                    "new_url": new_url,
+                }
+            )
+        return JsonResponse({"active": False})
+
+    if active_session and not force_new_session:
+        presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": active_session.pin})
+        return redirect(f"{presentation_url}?controls=1")
+
+    if force_new_session:
+        for old_session in active_sessions:
+            finish_session(old_session)
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
     log_action(

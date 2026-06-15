@@ -5,182 +5,429 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
-    {# Paginasiya CSS-ni buraya əlavə etdik #}
-     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    {% trans "default_page_title" context "exams.template.student_exam_list" as default_page_title %}
-    <h1>{{ page_title|default:default_page_title }}</h1>
+<div class="ems-exams">
+  <main class="ex-wrap">
 
-
-    <form method="get" class="exam-toolbar">
-        <div class="search-box">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text"
-                   name="q"
-                   class="form-control"
-                   placeholder="{% trans 'placeholder_search_exam_or_teacher' context 'exams.template.student_exam_list' %}"
-                   value="{{ request.GET.q|default:'' }}">
+    {# ───────────────────────── header ───────────────────────── #}
+    <header class="ex-head">
+        <div>
+            <div class="ex-eyebrow">{% trans "eyebrow" context "exams.template.student_exam_list" %}</div>
+            {% trans "default_page_title" context "exams.template.student_exam_list" as default_page_title %}
+            <h1 class="ex-title">{{ page_title|default:default_page_title }}</h1>
+            <div class="ex-sub">
+                <span><b>{{ total_count }}</b> {% trans "subtitle_exam_unit" context "exams.template.student_exam_list" %}</span>
+                {% if live_count %}
+                    <span class="dot"></span>
+                    <span class="ex-live-count"><span class="pulse"></span> <b>{{ live_count }}</b>&nbsp;{% trans "subtitle_live_active" context "exams.template.student_exam_list" %}</span>
+                {% endif %}
+                {% if organization %}
+                    <span class="dot"></span>
+                    <span>{{ organization.name }}</span>
+                {% endif %}
+            </div>
         </div>
-    
-        <div class="filter-box">
-            <div class="bootstrap-single-select">
-                <select name="type"
+        <div class="ex-viewtoggle" data-view-toggle>
+            <button type="button" data-view="list" title="{% trans 'view_list' context 'exams.template.student_exam_list' %}" aria-label="{% trans 'view_list' context 'exams.template.student_exam_list' %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/></svg>
+            </button>
+            <button type="button" data-view="grid" title="{% trans 'view_grid' context 'exams.template.student_exam_list' %}" aria-label="{% trans 'view_grid' context 'exams.template.student_exam_list' %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+            </button>
+        </div>
+    </header>
+
+    {# ───────────────────────── live banner ───────────────────────── #}
+    {% if live_count %}
+    <section class="ex-live-banner">
+        <div class="ex-lb-left">
+            <div class="ex-lb-kicker"><span class="pulse"></span> {% trans "live_kicker" context "exams.template.student_exam_list" %} · {{ live_count }} {% trans "live_sessions_active" context "exams.template.student_exam_list" %}</div>
+            <h2 class="ex-lb-title">{% trans "live_banner_title" context "exams.template.student_exam_list" %}</h2>
+            <p class="ex-lb-desc">{% trans "live_banner_desc" context "exams.template.student_exam_list" %}</p>
+            <div class="ex-lb-chips">
+                <span class="ex-lb-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg> {% trans "live_chip_fast" context "exams.template.student_exam_list" %}</span>
+                <span class="ex-lb-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg> {% trans "live_chip_devices" context "exams.template.student_exam_list" %}</span>
+                <span class="ex-lb-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg> {% trans "live_chip_leaderboard" context "exams.template.student_exam_list" %}</span>
+            </div>
+        </div>
+        <form class="ex-pin-card" method="get" action="{% url 'liveExam:pin_entry' %}">
+            <div class="ex-pin-label">{% trans "live_pin_label" context "exams.template.student_exam_list" %}</div>
+            <div class="ex-pin-row">
+                <input class="ex-pin-input" name="pin" maxlength="10" autocomplete="off" inputmode="latin"
+                       placeholder="{% trans 'live_pin_placeholder' context 'exams.template.student_exam_list' %}">
+                <button type="submit" class="ex-pin-go">{% trans "live_pin_join" context "exams.template.student_exam_list" %}
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </div>
+            <div class="ex-pin-hint">{% trans "live_pin_hint" context "exams.template.student_exam_list" %}</div>
+        </form>
+    </section>
+    {% endif %}
+
+    {# ───────────────────────── toolbar (search + sort) ───────────────────────── #}
+    <form method="get" class="ex-toolbar exam-toolbar" role="search">
+        {% if active_type %}<input type="hidden" name="type" value="{{ active_type }}">{% endif %}
+        <div class="ex-search">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="text" name="q" value="{{ search_query }}"
+                   placeholder="{% trans 'placeholder_search_exam_or_teacher' context 'exams.template.student_exam_list' %}">
+        </div>
+        <div class="ex-sort">
+            <span class="ex-sort-label">{% trans "sort_label" context "exams.template.student_exam_list" %}:</span>
+            <div class="bootstrap-single-select ex-sort-select">
+                <select name="sort"
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                         data-bootstrap-select
-                        data-submit-on-change>
-                    <option value="">{% trans "filter_all_types" context "exams.template.student_exam_list" %}</option>
-                    <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
-                        {% trans "filter_test" context "exams.template.student_exam_list" %}
-                    </option>
-                    <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
-                        {% trans "filter_written" context "exams.template.student_exam_list" %}
-                    </option>
-                    <option value="coding" {% if request.GET.type == 'coding' %}selected{% endif %}>
-                        {% trans "filter_practical" context "exams.template.student_exam_list" %}
-                    </option>
+                        data-ex-sort
+                        aria-label="{% trans 'sort_label' context 'exams.template.student_exam_list' %}">
+                    <option value="soon" {% if active_sort == 'soon' %}selected{% endif %}>{% trans "sort_soon" context "exams.template.student_exam_list" %}</option>
+                    <option value="new" {% if active_sort == 'new' %}selected{% endif %}>{% trans "sort_new" context "exams.template.student_exam_list" %}</option>
+                    <option value="duration" {% if active_sort == 'duration' %}selected{% endif %}>{% trans "sort_duration" context "exams.template.student_exam_list" %}</option>
                 </select>
             </div>
         </div>
-    
-        <button type="submit" class="btn btn-primary search-btn">{% trans "action_search" context "exams.template.student_exam_list" %}</button>
-    
-        {% if request.GET.q or request.GET.type %}
-            <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-secondary">
-                {% trans "action_reset" context "exams.template.student_exam_list" %}
-            </a>
-        
-        
-        
-        {% endif %}
     </form>
-    
-    {# ================= PANELİN SONU ================= #}
 
+    {# ───────────────────────── type tabs ───────────────────────── #}
+    <nav class="ex-tabs" aria-label="{% trans 'tabs_aria' context 'exams.template.student_exam_list' %}">
+        {% for tab in type_tabs %}
+            <a class="ex-tab{% if tab.key == active_type or tab.key == 'all' and not active_type %} on{% endif %}"
+               data-type="{{ tab.key }}"
+               data-exam-filter-link
+               href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}{% if active_sort and active_sort != 'soon' %}sort={{ active_sort }}&{% endif %}{% if tab.key != 'all' %}type={{ tab.key }}{% endif %}">
+                {% if tab.key == 'live' %}<span class="pulse"></span>{% else %}<span class="tdot"></span>{% endif %}
+                {{ tab.label }}
+                <span class="tcount">{{ tab.count }}</span>
+            </a>
+        {% endfor %}
+    </nav>
 
-    {# ================= SİYAHI HİSSƏSİ ================= #}
+    {# ───────────────────────── exam list ───────────────────────── #}
     {% if exam_items %}
-        <ul class="list-group">
-            {% for item in exam_items %}
-                {% with exam=item.exam left=item.left %}
-                {{ item.language_options|json_script:item.language_options_id }}
-                <li class="list-group-item">
-                    {# Sol tərəf: Məlumatlar #}
-                    <div class="exam-info">
-                        <strong>{{ exam.title }}</strong>
-                        <div class="exam-meta">
-                            <span><i class="fas fa-tag"></i> {{ exam.get_exam_type_display }}</span>
-                            <span><i class="fas fa-user"></i> {{ exam.author.username }}</span>
-                            <span><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d.m.Y H:i" }}</span>
+        <div class="ex-list-wrap" data-exam-results>
+            <div class="ex-loading-skeleton" data-exam-skeleton aria-hidden="true">
+                {% for _ in "1234"|make_list %}
+                    <article class="ex-card ex-skeleton-card">
+                        <div class="ex-card-top">
+                            <span class="skeleton skeleton-tag"></span>
+                            <span class="skeleton skeleton-pill"></span>
                         </div>
-
-                        <div class="exam-details mt-2">
-                            {% if exam.total_duration_minutes %}
-                                <small class="me-3">
-                                    <i class="far fa-clock"></i>
-                                    {% blocktrans trimmed context "exams.template.student_exam_list" with minutes=exam.total_duration_minutes %}
-                                        label_duration_minutes_short {{ minutes }}
-                                    {% endblocktrans %}
-                                </small>
+                        <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                        <span class="skeleton skeleton-line skeleton-line--sm"></span>
+                        <div class="ex-skeleton-meta">
+                            <span class="skeleton skeleton-pill"></span>
+                            <span class="skeleton skeleton-pill"></span>
+                            <span class="skeleton skeleton-pill"></span>
+                        </div>
+                        <div class="ex-skeleton-foot">
+                            <span class="skeleton skeleton-line"></span>
+                            <span class="skeleton skeleton-line"></span>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+            <div class="ex-list grid" data-exam-list>
+                {% for item in exam_items %}
+                    {% with exam=item.exam %}
+                    {{ item.language_options|json_script:item.language_options_id }}
+                    <article class="ex-card{% if item.is_live %} live{% endif %}" data-type="{{ item.display_type }}">
+                    <div class="ex-card-top">
+                        <div class="ex-badge-row">
+                            <span class="ex-badge" data-type="{{ item.display_type }}">
+                                {% if item.is_live %}<span class="pulse"></span>{% else %}<span class="bdot"></span>{% endif %}
+                                {{ item.type_label }}
+                            </span>
+                            {% if item.category_type and item.category_type != item.display_type %}
+                                <span class="ex-badge ex-badge--category" data-type="{{ item.category_type }}">
+                                    <span class="bdot"></span>
+                                    {{ item.category_label }}
+                                </span>
                             {% endif %}
-                            
-                            {% if item.access_label %}
-                                <small class="{% if item.requires_code %}status-red{% endif %}">
-                                    {% if item.requires_code %}<i class="fas fa-lock me-1"></i>{% endif %}
-                                    {{ item.access_label }}
-                                </small>
+                            {% if item.mechanic_type != item.display_type and item.mechanic_type != item.category_type %}
+                                <span class="ex-badge ex-badge--mechanic" data-type="{{ item.mechanic_type }}">
+                                    <span class="bdot"></span>
+                                    {{ item.mechanic_label }}
+                                </span>
                             {% endif %}
                         </div>
+                        {% if item.is_live %}
+                            <span class="ex-status live">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 5.5a3.5 3.5 0 0 1 0 6.8M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>
+                                {{ item.live.players }} {% trans "card_players" context "exams.template.student_exam_list" %}
+                            </span>
+                        {% elif exam.is_before_start %}
+                            <span class="ex-status soon">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+                                {{ exam.start_datetime|date:"d.m H:i" }}
+                            </span>
+                        {% elif item.left %}
+                            <span class="ex-status limit">{% trans "label_attempt_left" context "exams.template.student_exam_list" %}: {{ item.left }}</span>
+                        {% else %}
+                            <span class="ex-status limit">{% trans "label_attempts_unlimited" context "exams.template.student_exam_list" %}</span>
+                        {% endif %}
                     </div>
 
-                    {# Sağ tərəf: Düymələr #}
-                    <div class="exam-actions">
-                        {% if left %}
-                            <span class="badge bg-secondary mb-2 d-inline-block">
-                                {% trans "label_attempt_left" context "exams.template.student_exam_list" %}: {{ left }}
+                    <h3 class="ex-card-title">{{ exam.title }}</h3>
+                    {% if exam.course %}<div class="ex-card-course">{{ exam.course.title }}</div>{% endif %}
+
+                    <div class="ex-meta">
+                        <span class="ex-teacher"><span class="tav">{{ exam.author.username|slice:":2"|upper }}</span> <b>{{ exam.author.username }}</b></span>
+                        <span class="m">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+                            {% if exam.start_datetime %}{{ exam.start_datetime|date:"d.m.Y H:i" }}{% else %}{{ exam.created_at|date:"d.m.Y H:i" }}{% endif %}
+                        </span>
+                        {% if exam.total_duration_minutes %}
+                            <span class="m">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                                {{ exam.total_duration_minutes }} {% trans "card_min_unit" context "exams.template.student_exam_list" %}
                             </span>
-                        {% else %}
-                            <span class="badge bg-secondary mb-2 d-inline-block">
-                                {% trans "label_attempts_unlimited" context "exams.template.student_exam_list" %}
+                        {% elif item.is_live %}
+                            <span class="m rt">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+                                {% trans "card_realtime" context "exams.template.student_exam_list" %}
                             </span>
                         {% endif %}
-
-                        {% if item.attempt_count > 0 %}
-                            <a href="{{ item.history_url }}" class="btn btn-outline-secondary customBtn mb-2">
-                                Cavablarım ({{ item.attempt_count }})
-                            </a>
+                        {% if exam.random_question_count %}
+                            <span class="m">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1.4.9-1.4 1.7v.5"/><path d="M12 17h.01"/></svg>
+                                {{ exam.random_question_count }} {% trans "card_question_unit" context "exams.template.student_exam_list" %}
+                            </span>
                         {% endif %}
+                    </div>
 
-                        {# Hər iki halda əvvəl info modalı açılır #}
+                    <div class="ex-card-foot">
                         {% if item.requires_code %}
-                            <button type="button"
-                                    class="btn btn-outline-primary customBtn"
-                                    data-open-exam-start-modal
-                                    data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
-                                    data-exam-slug="{{ exam.slug }}"
-                                    data-exam-title="{{ exam.title }}"
-                                    data-exam-type="{{ exam.get_exam_type_display }}"
-                                    data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                    data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                    data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
-                                    data-exam-access="{{ item.access_label }}"
-                                    data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
-                                    data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
-                                    data-language-options-id="{{ item.language_options_id }}"
-                                    data-default-language="{{ item.default_language }}"
-                                    data-requires-code="1">
-                                {% trans "action_start_exam" context "exams.template.student_exam_list" %}
-                            </button>
+                            <span class="ex-lock locked">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+                                {{ item.access_label }}
+                            </span>
                         {% else %}
-                            <a href="{% url 'exams:start_exam' exam.slug %}"
-                               class="btn btn-primary customBtn"
-                               data-open-exam-start-modal
-                               data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
-                               data-exam-slug="{{ exam.slug }}"
-                               data-exam-title="{{ exam.title }}"
-                               data-exam-type="{{ exam.get_exam_type_display }}"
-                               data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                               data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                               data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
-                               data-exam-access="{{ item.access_label }}"
-                               data-exam-attempts="{% if left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
-                               data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
-                               data-language-options-id="{{ item.language_options_id }}"
-                               data-default-language="{{ item.default_language }}"
-                               data-requires-code="0">
-                                {% trans "action_start_exam" context "exams.template.student_exam_list" %}
-                            </a>
+                            <span class="ex-lock open">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>
+                                {{ item.access_label }}
+                            </span>
                         {% endif %}
-                    </div>
-                </li>
-                {% endwith %}
-            {% endfor %}
-        </ul>
 
-        {# ================= PAGINATION (SƏHİFƏLƏMƏ) ================= #}
-        {# _pagination.html faylını bura daxil edirik #}
-      
+                        <div class="ex-actions">
+                            {% if item.attempt_count > 0 %}
+                                <a class="ex-btn ghost" href="{{ item.history_url }}">{% trans "action_my_answers" context "exams.template.student_exam_list" %} ({{ item.attempt_count }})</a>
+                            {% endif %}
+
+                            {% if item.is_live %}
+                                <button type="button"
+                                        class="ex-btn join"
+                                        data-open-live-pin-modal
+                                        data-live-pin="{{ item.live.pin }}"
+                                        data-live-title="{{ exam.title }}"
+                                        data-live-teacher="{{ exam.author.username }}"
+                                        data-live-join-url="{% url 'liveExam:join_page' pin=item.live.pin %}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z"/></svg>
+                                    {% trans "action_join_session" context "exams.template.student_exam_list" %}
+                                </button>
+                            {% elif item.requires_code %}
+                                <button type="button"
+                                        class="ex-btn primary"
+                                        data-open-exam-start-modal
+                                        data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                        data-exam-slug="{{ exam.slug }}"
+                                        data-exam-title="{{ exam.title }}"
+                                        data-exam-type="{{ exam.get_exam_type_display }}"
+                                        data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                        data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                        data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                                        data-exam-access="{{ item.access_label }}"
+                                        data-exam-attempts="{% if item.left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ item.left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
+                                        data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                        data-language-options-id="{{ item.language_options_id }}"
+                                        data-default-language="{{ item.default_language }}"
+                                        data-requires-code="1">
+                                    {% trans "action_start_exam" context "exams.template.student_exam_list" %}
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                                </button>
+                            {% else %}
+                                <a href="{% url 'exams:start_exam' exam.slug %}"
+                                   class="ex-btn primary"
+                                   data-open-exam-start-modal
+                                   data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                   data-exam-slug="{{ exam.slug }}"
+                                   data-exam-title="{{ exam.title }}"
+                                   data-exam-type="{{ exam.get_exam_type_display }}"
+                                   data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                   data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                   data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                                   data-exam-access="{{ item.access_label }}"
+                                   data-exam-attempts="{% if item.left %}{% trans 'label_attempt_left' context 'exams.template.student_exam_list' %}: {{ item.left }}{% else %}{% trans 'label_attempts_unlimited' context 'exams.template.student_exam_list' %}{% endif %}"
+                                   data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                   data-language-options-id="{{ item.language_options_id }}"
+                                   data-default-language="{{ item.default_language }}"
+                                   data-requires-code="0">
+                                    {% trans "action_start_exam" context "exams.template.student_exam_list" %}
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    </article>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+
         {% include "partials/_pagination.html" %}
 
     {% else %}
-        {# ================= BOŞ VƏZİYYƏT (Heç nə tapılmadı) ================= #}
-        <div class="empty-state-box">
-            <i class="far fa-folder-open empty-icon"></i>
-            <p>{% trans "empty_no_exam_found" context "exams.template.student_exam_list" %}</p>
-            {% if request.GET.q or request.GET.type %}
-                <a href="{% url 'exams:student_exam_list' %}"
-                class="btn btn-sm btn-outline-primary mt-2">
-                    {% trans "action_show_all_exams" context "exams.template.student_exam_list" %}
-                </a>
-            
-        {% endif %}
-        
+        <div class="ex-empty">
+            <div class="ic">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </div>
+            <h3>{% trans "empty_title" context "exams.template.student_exam_list" %}</h3>
+            <p>{% trans "empty_desc" context "exams.template.student_exam_list" %}</p>
+            {% if search_query or active_type %}
+                <a class="ex-btn ghost" href="{{ request.path }}">{% trans "action_show_all_exams" context "exams.template.student_exam_list" %}</a>
+            {% endif %}
         </div>
     {% endif %}
+
+  </main>
 </div>
 
+<script nonce="{{ request.csp_nonce }}">
+    document.addEventListener("DOMContentLoaded", function () {
+        // ── Görünüş keçidi (siyahı / şəbəkə) — localStorage-da yadda saxlanılır.
+        const list = document.querySelector("[data-exam-list]");
+        const results = document.querySelector("[data-exam-results]");
+        const toggle = document.querySelector("[data-view-toggle]");
+        const toolbarForm = document.querySelector(".exam-toolbar");
+        const VIEW_KEY = "ems-exam-view-v2";
+        let submitAfterLoading = false;
+
+        function showExamLoading() {
+            if (results) {
+                results.classList.add("is-loading");
+            }
+        }
+
+        function navigateWithLoading(url) {
+            showExamLoading();
+            window.requestAnimationFrame(function () {
+                window.location.href = url;
+            });
+        }
+
+        function applyView(view) {
+            if (list) {
+                list.classList.toggle("grid", view === "grid");
+            }
+            if (toggle) {
+                toggle.querySelectorAll("button[data-view]").forEach(function (btn) {
+                    btn.classList.toggle("on", btn.dataset.view === view);
+                });
+            }
+        }
+
+        let savedView = "grid";
+        try { savedView = localStorage.getItem(VIEW_KEY) || "grid"; } catch (e) {}
+        applyView(savedView === "grid" ? "grid" : "list");
+
+        if (toggle) {
+            toggle.addEventListener("click", function (event) {
+                const btn = event.target.closest("button[data-view]");
+                if (!btn) { return; }
+                applyView(btn.dataset.view);
+                try { localStorage.setItem(VIEW_KEY, btn.dataset.view); } catch (e) {}
+            });
+        }
+
+        document.querySelectorAll("[data-exam-filter-link]").forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+                event.preventDefault();
+                navigateWithLoading(link.href);
+            });
+        });
+
+        if (toolbarForm) {
+            toolbarForm.addEventListener("submit", function (event) {
+                if (submitAfterLoading) {
+                    return;
+                }
+                event.preventDefault();
+                showExamLoading();
+                submitAfterLoading = true;
+                window.requestAnimationFrame(function () {
+                    toolbarForm.submit();
+                });
+            });
+        }
+
+        window.addEventListener("pageshow", function () {
+            if (results) {
+                results.classList.remove("is-loading");
+            }
+            submitAfterLoading = false;
+        });
+
+        // ── Sıralama dəyişəndə formanı avtomatik göndər (səhifə nömrəsini sıfırlamaqla).
+        const sortSelect = document.querySelector("[data-ex-sort]");
+        if (sortSelect && sortSelect.form) {
+            sortSelect.addEventListener("change", function () {
+                showExamLoading();
+                if (sortSelect.form.requestSubmit) {
+                    sortSelect.form.requestSubmit();
+                } else {
+                    sortSelect.form.submit();
+                }
+            });
+        }
+    });
+</script>
+<div class="ex-live-pin-modal" data-live-pin-modal hidden role="dialog" aria-modal="true" aria-labelledby="livePinModalTitle">
+    <button type="button" class="ex-live-pin-modal__backdrop" data-live-pin-close aria-label="{% trans 'modal_aria_close' context 'exams.partial.exam_section' %}"></button>
+    <section class="ex-live-pin-modal__panel">
+        <button type="button" class="ex-live-pin-modal__close" data-live-pin-close aria-label="{% trans 'modal_aria_close' context 'exams.partial.exam_section' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="ex-live-pin-modal__hero">
+            <span class="ex-live-pin-modal__icon">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+            </span>
+            <div>
+                <p class="ex-live-pin-modal__eyebrow">EMSArena Live</p>
+                <h2 id="livePinModalTitle">{% trans "live_card_pin_modal_title" context "exams.template.student_exam_list" %}</h2>
+            </div>
+        </div>
+        <p class="ex-live-pin-modal__desc">{% trans "live_card_pin_modal_desc" context "exams.template.student_exam_list" %}</p>
+        <div class="ex-live-pin-modal__exam">
+            <span>{% trans "live_card_pin_modal_exam" context "exams.template.student_exam_list" %}</span>
+            <strong data-live-pin-exam-title>-</strong>
+            <small data-live-pin-exam-teacher></small>
+        </div>
+        <form class="ex-live-pin-modal__form" data-live-pin-form novalidate>
+            <label for="livePinModalInput">{% trans "live_pin_label" context "exams.template.student_exam_list" %}</label>
+            <input id="livePinModalInput"
+                   class="ex-live-pin-modal__input"
+                   data-live-pin-input
+                   maxlength="10"
+                   autocomplete="off"
+                   inputmode="latin"
+                   placeholder="{% trans 'live_pin_placeholder' context 'exams.template.student_exam_list' %}">
+            <div class="ex-live-pin-modal__error" data-live-pin-error hidden></div>
+            <div class="ex-live-pin-modal__actions">
+                <button type="button" class="ex-live-pin-modal__secondary" data-live-pin-close>
+                    {% trans "modal_action_cancel" context "exams.partial.exam_section" %}
+                </button>
+                <button type="submit" class="ex-live-pin-modal__primary">
+                    {% trans "live_pin_join" context "exams.template.student_exam_list" %}
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
 <div class="modal fade exam-start-modal" id="examStartModal" tabindex="-1" aria-labelledby="examStartModalExamName" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered exam-start-modal__dialog">
         <div class="modal-content exam-start-modal__content">
@@ -312,6 +559,8 @@
 {% trans "modal_action_confirm_code" context "exams.partial.exam_section" as modal_action_confirm_code %}
 {% trans "access_code_required" context "exams.model.access" as modal_access_code_required_error %}
 {% trans "exam_start_failed" context "exams.view.access.message" as modal_access_code_generic_error %}
+{% trans "live_card_pin_required_error" context "exams.template.student_exam_list" as live_card_pin_required_error %}
+{% trans "live_card_pin_mismatch_error" context "exams.template.student_exam_list" as live_card_pin_mismatch_error %}
 <script nonce="{{ request.csp_nonce }}">
     const I18N_STUDENT_EXAM_LIST = {
         modalAccessCodeTitle: "{{ modal_access_code_title|escapejs }}",
@@ -321,7 +570,9 @@
         modalActionStart: "{{ modal_action_start|escapejs }}",
         modalActionConfirmCode: "{{ modal_action_confirm_code|escapejs }}",
         modalAccessCodeRequiredError: "{{ modal_access_code_required_error|escapejs }}",
-        modalAccessCodeGenericError: "{{ modal_access_code_generic_error|escapejs }}"
+        modalAccessCodeGenericError: "{{ modal_access_code_generic_error|escapejs }}",
+        livePinRequiredError: "{{ live_card_pin_required_error|escapejs }}",
+        livePinMismatchError: "{{ live_card_pin_mismatch_error|escapejs }}"
     };
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -345,11 +596,19 @@
         const languageBlock = document.getElementById("examStartLanguageBlock");
         const languageSelect = document.getElementById("examStartLanguageSelect");
         const actionBtn = document.getElementById("examStartModalActionBtn");
+        const livePinModal = document.querySelector("[data-live-pin-modal]");
+        const livePinForm = livePinModal ? livePinModal.querySelector("[data-live-pin-form]") : null;
+        const livePinInput = livePinModal ? livePinModal.querySelector("[data-live-pin-input]") : null;
+        const livePinError = livePinModal ? livePinModal.querySelector("[data-live-pin-error]") : null;
+        const livePinTitle = livePinModal ? livePinModal.querySelector("[data-live-pin-exam-title]") : null;
+        const livePinTeacher = livePinModal ? livePinModal.querySelector("[data-live-pin-exam-teacher]") : null;
 
         let startUrl = "";
         let requiresCode = false;
         let codeSubmitInFlight = false;
         let selectedLanguage = "";
+        let expectedLivePin = "";
+        let liveJoinUrl = "";
 
         function setCodeError(message) {
             if (codeInput) {
@@ -433,6 +692,60 @@
             }
         }
 
+        function normalizeLivePin(value) {
+            return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+        }
+
+        function setLivePinError(message) {
+            if (livePinInput) {
+                livePinInput.classList.toggle("is-invalid", Boolean(message));
+            }
+            if (livePinError) {
+                livePinError.textContent = message || "";
+                livePinError.hidden = !message;
+            }
+        }
+
+        function openLivePinModal(trigger) {
+            if (!livePinModal) {
+                return;
+            }
+
+            expectedLivePin = normalizeLivePin(trigger.getAttribute("data-live-pin"));
+            liveJoinUrl = trigger.getAttribute("data-live-join-url") || "";
+
+            if (livePinTitle) {
+                livePinTitle.textContent = trigger.getAttribute("data-live-title") || "-";
+            }
+            if (livePinTeacher) {
+                const teacher = trigger.getAttribute("data-live-teacher") || "";
+                livePinTeacher.textContent = teacher ? teacher : "";
+                livePinTeacher.hidden = !teacher;
+            }
+            if (livePinInput) {
+                livePinInput.value = "";
+            }
+            setLivePinError("");
+            livePinModal.hidden = false;
+            document.body.classList.add("ex-live-pin-modal-open");
+            window.setTimeout(function() {
+                if (livePinInput) {
+                    livePinInput.focus();
+                }
+            }, 80);
+        }
+
+        function closeLivePinModal() {
+            if (!livePinModal) {
+                return;
+            }
+            livePinModal.hidden = true;
+            document.body.classList.remove("ex-live-pin-modal-open");
+            expectedLivePin = "";
+            liveJoinUrl = "";
+            setLivePinError("");
+        }
+
         function configureLanguageChoice(trigger) {
             const options = getLanguageOptions(trigger);
             const defaultLanguage = trigger.getAttribute("data-default-language") || "";
@@ -502,6 +815,13 @@
         }
 
         document.addEventListener("click", function(event) {
+            const liveJoinTrigger = event.target.closest("[data-open-live-pin-modal]");
+            if (liveJoinTrigger) {
+                event.preventDefault();
+                openLivePinModal(liveJoinTrigger);
+                return;
+            }
+
             const trigger = event.target.closest("[data-open-exam-start-modal]");
             if (!trigger || !modalInstance) {
                 return;
@@ -576,6 +896,47 @@
             codeInput.addEventListener("input", function() {
                 this.value = this.value.replace(/[^0-9]/g, "");
                 setCodeError("");
+            });
+        }
+
+        if (livePinInput) {
+            livePinInput.addEventListener("input", function() {
+                this.value = normalizeLivePin(this.value);
+                setLivePinError("");
+            });
+        }
+
+        if (livePinModal) {
+            livePinModal.addEventListener("click", function(event) {
+                if (event.target.closest("[data-live-pin-close]")) {
+                    event.preventDefault();
+                    closeLivePinModal();
+                }
+            });
+            document.addEventListener("keydown", function(event) {
+                if (!livePinModal.hidden && event.key === "Escape") {
+                    closeLivePinModal();
+                }
+            });
+        }
+
+        if (livePinForm) {
+            livePinForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                const enteredPin = normalizeLivePin(livePinInput ? livePinInput.value : "");
+                if (!enteredPin) {
+                    setLivePinError(I18N_STUDENT_EXAM_LIST.livePinRequiredError);
+                    if (livePinInput) livePinInput.focus();
+                    return;
+                }
+                if (enteredPin !== expectedLivePin) {
+                    setLivePinError(I18N_STUDENT_EXAM_LIST.livePinMismatchError);
+                    if (livePinInput) livePinInput.focus();
+                    return;
+                }
+                if (liveJoinUrl) {
+                    window.location.href = liveJoinUrl;
+                }
             });
         }
 

@@ -10705,7 +10705,7 @@ msgstr "Populyar etiketlər"
 #: apps/blog/templates/partials/_paint_answer.html:18
 msgctxt "blog.partial.paint_answer"
 msgid "switch_text"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/blog/templates/partials/_paint_answer.html:23
 msgctxt "blog.partial.paint_answer"
@@ -13369,7 +13369,7 @@ msgstr "Nümunə çıxış"
 #| msgid "time_limit_seconds"
 msgctxt "exams.model.coding_question.field"
 msgid "time_limit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/coding.py:72
 #, fuzzy
@@ -13377,7 +13377,7 @@ msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
 #| msgid "time_limit_minutes"
 msgctxt "exams.model.coding_question.field"
 msgid "memory_limit_mb"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/coding.py:76
 #, fuzzy
@@ -13789,12 +13789,12 @@ msgstr "Praktiki imtahan"
 #: apps/exams/domain/exam_definition.py:21
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "quiz"
-msgstr "Kviz"
+msgstr "Sınaq"
 
 #: apps/exams/domain/exam_definition.py:22
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "midterm"
-msgstr "Aralıq imtahan"
+msgstr "Kollekvium"
 
 #: apps/exams/domain/exam_definition.py:23
 msgctxt "exams.model.exam.choice.exam_type_extended"
@@ -13809,7 +13809,7 @@ msgstr "Yerləşdirmə"
 #: apps/exams/domain/exam_definition.py:25
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "practice"
-msgstr "Aktiv"
+msgstr "Məşq"
 
 #: apps/exams/domain/exam_definition.py:28
 msgctxt "exams.model.exam.choice.mode"
@@ -14114,12 +14114,12 @@ msgstr "Sıra"
 #: apps/exams/domain/exam_definition.py:269
 msgctxt "exams.model.question_block.field"
 msgid "time_limit_minutes"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/exam_definition.py:272
 msgctxt "exams.model.question_block.help"
 msgid "time_limit_minutes"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/exam_definition.py:278
 #, fuzzy
@@ -14563,22 +14563,22 @@ msgstr "Cavab rejimi"
 #: apps/exams/domain/question_bank.py:273
 msgctxt "exams.model.question.field"
 msgid "time_limit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/question_bank.py:276
 msgctxt "exams.model.question.help"
 msgid "time_limit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/question_bank.py:282
 msgctxt "exams.model.question.field"
 msgid "image"
-msgstr "Sual şəkli (optional)"
+msgstr "Sual şəkli (istəyə görə)"
 
 #: apps/exams/domain/question_bank.py:285
 msgctxt "exams.model.question.field"
 msgid "video"
-msgstr "Sual videosu (optional)"
+msgstr "Sual videosu (istəyə görə)"
 
 #: apps/exams/domain/question_bank.py:296
 msgctxt "exams.model.question.help"
@@ -14977,7 +14977,7 @@ msgstr "Güzəşt müddəti bitdi"
 #| msgid "time_limit_seconds"
 msgctxt "supervision.config.field"
 msgid "resume_window_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/supervision.py:80
 #, fuzzy
@@ -14985,7 +14985,7 @@ msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
 #| msgid "time_limit_seconds"
 msgctxt "supervision.config.help"
 msgid "resume_window_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/domain/supervision.py:84
 #, fuzzy
@@ -15534,7 +15534,7 @@ msgstr "Nümunə çıxış"
 #| msgid "time_limit_seconds"
 msgctxt "exams.form.coding.label"
 msgid "time_limit"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/forms/coding.py:155 apps/exams/forms/exam.py:73
 #, fuzzy
@@ -15703,7 +15703,7 @@ msgstr "Ümumi müddət (dəqiqə)"
 #: apps/exams/forms/exam.py:272
 msgctxt "exams.form.exam.label"
 msgid "default_question_time_seconds"
-msgstr "Hər sual üçün default vaxt (saniyə)"
+msgstr "Hər sual üçün standart vaxt (saniyə)"
 
 #: apps/exams/forms/exam.py:273
 #: apps/exams/templates/exams/teacher/create_question_bank.html:651
@@ -15758,7 +15758,7 @@ msgstr "Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 1
 #: apps/exams/forms/exam.py:499
 msgctxt "exams.form.exam.error"
 msgid "enable_paint_written_only"
-msgstr "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər."
+msgstr "Rəsm cavabı yalnız yazılı və praktiki imtahanlarda aktiv edilə bilər."
 
 #: apps/exams/forms/exam.py:507
 msgctxt "exams.form.exam.error"
@@ -15879,7 +15879,7 @@ msgstr "4-cü variant"
 #: apps/exams/forms/question.py:111
 msgctxt "exams.form.question.placeholder"
 msgid "time_limit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Məs: 60 (saniyə). Boş qalsa standart istifadə olunur."
 
 #: apps/exams/forms/question.py:132
 msgctxt "exams.form.question.label"
@@ -16058,7 +16058,9 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız PDF, TXT və ya şəkil (PNG/JPG) yükləyin."
+msgstr ""
+"Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız PDF, TXT və ya "
+"şəkil (PNG/JPG) yükləyin."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16091,7 +16093,10 @@ msgstr ""
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr "PDF skan edilmiş şəkillərdən ibarətdir və oxunaqlı mətn qatı yoxdur. OCR ilə də mətn çıxarmaq mümkün olmadı (server-də Tesseract/aze quraşdırılmayıb və ya şəkil keyfiyyəti aşağıdır). Mətn əsaslı PDF yükləyin."
+msgstr ""
+"PDF skan edilmiş şəkillərdən ibarətdir və oxunaqlı mətn qatı yoxdur. OCR ilə"
+" də mətn çıxarmaq mümkün olmadı (server-də Tesseract/aze quraşdırılmayıb və "
+"ya şəkil keyfiyyəti aşağıdır). Mətn əsaslı PDF yükləyin."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -16221,7 +16226,7 @@ msgstr "İmtahan yarat"
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
 msgid "label_paint_answer"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:26
 msgctxt "exams.partial.paint_answer"
@@ -16468,7 +16473,7 @@ msgstr "Sizin cavabınız"
 #: apps/exams/templates/exams/student/exam_result.html:243
 msgctxt "exams.template.student_exam_result"
 msgid "message_paint_answer_provided"
-msgstr "Paint cavabı təqdim edilib"
+msgstr "Rəsm cavabı təqdim edilib"
 
 #: apps/exams/templates/exams/student/exam_result.html:259
 msgctxt "exams.template.student_exam_result"
@@ -16478,12 +16483,12 @@ msgstr "Yüklənmiş fayllar"
 #: apps/exams/templates/exams/student/exam_result.html:301
 msgctxt "exams.template.student_exam_result"
 msgid "label_paint_answer"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/exams/templates/exams/student/exam_result.html:308
 msgctxt "exams.template.student_exam_result"
 msgid "alt_paint_answer"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/exams/templates/exams/student/exam_result.html:323
 msgctxt "exams.template.student_exam_result"
@@ -17649,8 +17654,8 @@ msgstr "Bu bölmədə rəsm cavabını aktiv et"
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
 msgstr ""
-"Bu seçim bölmədəki suallar üçün paint-i default aktiv edir. Hər hansı sualda"
-" ayrıca söndürsəniz, həmin sualda paint görünməyəcək."
+"Bu seçim bölmədəki suallar üçün rəsm cavabını əvvəlcədən aktiv edir. Hər "
+"hansı sualda ayrıca söndürsəniz, həmin sualda rəsm cavabı görünməyəcək."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:734
 #: apps/exams/templates/exams/teacher/create_question_bank.html:839
@@ -19196,7 +19201,7 @@ msgstr "Bağla"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:151
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
-msgstr "Yazılı imtahanda Paint cavabı aktiv olsun"
+msgstr "Yazılı imtahanda rəsm cavabı aktiv olsun"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:159
 msgctxt "exams.template.create_exam_modal_form"
@@ -19239,7 +19244,7 @@ msgstr "Fərdi icazəli istifadəçilər"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:193
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_name_or_username"
-msgstr "Username or email"
+msgstr "İstifadəçi adı və ya e-poçt"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:209
 msgctxt "exams.template.create_exam_modal_form"
@@ -19249,7 +19254,7 @@ msgstr "İmtahan Nəzarəti"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:210
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_section_help"
-msgstr "Anti-cheating və imtahan nəzarəti parametrləri"
+msgstr "Köçürməyə qarşı imtahan nəzarəti parametrləri"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:219
 msgctxt "exams.template.create_exam_modal_form"
@@ -19264,22 +19269,22 @@ msgstr "Nəzarət Şablonu"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:229
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_custom"
-msgstr "Xüsusi (Custom)"
+msgstr "Xüsusi"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:230
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_light"
-msgstr "Yüngül (Light)"
+msgstr "Yüngül"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:231
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_medium"
-msgstr "Orta (Medium)"
+msgstr "Orta"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:232
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_strict"
-msgstr "Ciddi (Strict)"
+msgstr "Ciddi"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:250
 msgctxt "exams.template.create_exam_modal_form"
@@ -19865,7 +19870,7 @@ msgstr "Sual mütləq seçdiyiniz bölməyə əlavə olunacaq."
 msgctxt "exams.template.add_exam_question"
 msgid "help_time_limit_seconds"
 msgstr ""
-"Məsələn: 60 saniyə. Boş qalarsa imtahanın default vaxtı istifadə olunacaq."
+"Məsələn: 60 saniyə. Boş qalarsa imtahanın standart vaxtı istifadə olunacaq."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:254
 msgctxt "exams.template.add_exam_question"
@@ -20883,7 +20888,7 @@ msgstr "Yüklənmiş fayllar"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:377
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_answered_with_paint"
-msgstr "Paint ilə cavablandırılıb"
+msgstr "Rəsm cavabı ilə cavablandırılıb"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:264
 msgctxt "exams.template.teacher_check_attempt"
@@ -20893,7 +20898,7 @@ msgstr "Cavab"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:271
 msgctxt "exams.template.teacher_check_attempt"
 msgid "alt_paint"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:284
 msgctxt "exams.template.teacher_check_attempt"
@@ -22234,7 +22239,7 @@ msgstr "Əlavə edilmiş fayllar"
 #| msgid "label_paint_answer"
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_paint_answer"
-msgstr "Paint cavabı"
+msgstr "Rəsm cavabı"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:314
 msgctxt "exams.template.teacher_view_attempt"
@@ -28137,6 +28142,730 @@ msgstr "bütün üzvlər"
 msgid "target_group_prefix"
 msgstr "Qrup"
 
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "Siz hazırda bu istifadəçinin profilinə baxırsınız:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "Yalnız baxış"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Tam idarəetmə"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr ""
+"Bu rejimdə yalnız baxa bilərsiniz — heç bir dəyişiklik etmək mümkün deyil."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr ""
+"Bu rejimdə istifadəçinin adından bütün əməliyyatları edə bilərsiniz. Hər "
+"əməliyyat audit jurnalına yazılır."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Öz profilimə qayıt"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Çıx"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "İstifadəçi profilinə bax"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "İstifadəçi seçin"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Təşkilat seçin"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Ad, istifadəçi adı və ya e-poçt axtar…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "Bütün rollar"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Müəllimlər"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Tələbələr"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Adminlər"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Əməkdaşlar"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "Nəticə tapılmadı"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Daha çox göstər"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "Axtarış zamanı xəta baş verdi"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Baxış sessiyası bitdi — icazə və ya kontekst dəyişdi."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "Yalnız baxış rejimindəsiniz — bu əməliyyata icazə yoxdur."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr ""
+"Təhlükəsizlik səbəbindən bu əməliyyat başqa istifadəçinin profilində "
+"bloklanıb."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "Bu istifadəçinin profilinə baxmaq üçün icazəniz yoxdur."
+
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr ""
+"%(name)s profilinə baxırsınız. Yalnız baxış rejimi — dəyişiklik edə "
+"bilməzsiniz."
+
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr ""
+"%(name)s profilinə tam idarəetmə rejimində baxırsınız. Bütün əməliyyatlar "
+"audit jurnalına yazılır."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "Öz profilinizə qayıtdınız."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr ""
+"Word (.docx/.doc) faylları təhlükəsizlik səbəbi ilə qəbul edilmir. Sualları "
+"PDF, TXT və ya şəkil (PNG/JPG) formatında yükləyin."
+
+msgid ""
+"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT"
+" istifadə edin."
+msgstr ""
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr ""
+
+msgid ""
+"Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
+"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
+"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
+"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
+"yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) "
+"Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) "
+"Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz "
+"cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ "
+"Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn "
+"prosesini"
+msgstr ""
+
+msgctxt "exams.template.student_exam_list"
+msgid "eyebrow"
+msgstr "İMTAHANLAR"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_exam_unit"
+msgstr "imtahan"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_live_active"
+msgstr "canlı indi aktiv"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_list"
+msgstr "Siyahı"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_grid"
+msgstr "Şəbəkə"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_label"
+msgstr "Sırala"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_soon"
+msgstr "Tezliklə başlayan"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_new"
+msgstr "Ən yeni"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_duration"
+msgstr "Müddətə görə"
+
+msgctxt "exams.template.student_exam_list"
+msgid "tabs_aria"
+msgstr "İmtahan növləri"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_kicker"
+msgstr "EMSARENA LIVE"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_sessions_active"
+msgstr "sessiya aktiv"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_title"
+msgstr "Canlı imtahana qoşul — bir PIN, eyni anda hamı."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_desc"
+msgstr ""
+"Müəllimin ekranındakı PIN-i daxil et, adını seç və real vaxtda yarış. "
+"Nəticələr və lider lövhəsi anında görünür."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_fast"
+msgstr "Saniyələrdə qoşul"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_devices"
+msgstr "Telefon, planşet, kompüter"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_leaderboard"
+msgstr "Canlı lider lövhəsi"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_label"
+msgstr "OYUN PIN-İ"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_placeholder"
+msgstr "məs. 3A8K2B94"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_join"
+msgstr "Qoşul"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_hint"
+msgstr "PIN-i ekranda göründüyü kimi daxil et. Növbəti addımda ad seçəcəksən."
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_players"
+msgstr "nəfər"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_realtime"
+msgstr "Real vaxt"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_question_unit"
+msgstr "sual"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_min_unit"
+msgstr "dəq"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_my_answers"
+msgstr "Cavablarım"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_join_session"
+msgstr "Sessiyaya qoşul"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_title"
+msgstr "Nəticə tapılmadı"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_desc"
+msgstr "Bu kateqoriyada imtahan yoxdur. Filtri dəyiş və ya axtarışı təmizlə."
+
+msgctxt "exams.type.label"
+msgid "all"
+msgstr "Hamısı"
+
+msgctxt "exams.type.label"
+msgid "live"
+msgstr "Canlı"
+
+msgctxt "exams.type.label"
+msgid "final"
+msgstr "Final"
+
+msgctxt "exams.type.label"
+msgid "midterm"
+msgstr "Kollekvium"
+
+msgctxt "exams.type.label"
+msgid "quiz"
+msgstr "Sınaq"
+
+msgctxt "exams.type.label"
+msgid "placement"
+msgstr "Yerləşdirmə"
+
+msgctxt "exams.type.label"
+msgid "practice"
+msgstr "Məşq"
+
+msgctxt "exams.type.label"
+msgid "written"
+msgstr "Yazılı"
+
+msgctxt "exams.type.label"
+msgid "test"
+msgstr "Test"
+
+msgctxt "exams.type.label"
+msgid "coding"
+msgstr "Praktiki"
+
+msgctxt "exams.form.exam.label"
+msgid "exam_type_extended"
+msgstr "Kateqoriya (Final / Kollekvium / Sınaq)"
+
+msgctxt "exams.form.exam.placeholder"
+msgid "exam_type_extended_none"
+msgstr "Kateqoriya yoxdur"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "exam_type_extended_help"
+msgstr "Yalnız lazım olduqda seç: Sınaq, Kollekvium və ya Final."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_title"
+msgstr "PIN kodu ilə qoşul"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_desc"
+msgstr ""
+"Kartdan canlı imtahana qoşulmaq üçün müəllimin ekranda göstərdiyi PIN kodu "
+"yaz."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_exam"
+msgstr "Canlı imtahan"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_required_error"
+msgstr "PIN kodunu yaz."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_mismatch_error"
+msgstr "PIN uyğun deyil. Müəllimin ekranda göstərdiyi kodu yaz."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "modal_close"
+msgstr "Bağla"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_eyebrow"
+msgstr "Davam edən canlı sessiya"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_title"
+msgstr "Bu imtahan üçün aktiv sessiya var"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_body"
+msgstr ""
+"Əvvəlki tab bağlanıbsa, həmin sessiyaya qayıda bilərsən. Yeni sessiya "
+"başlatsan, köhnə aktiv sessiya avtomatik sonlanacaq."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_pin"
+msgstr "PIN"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_started"
+msgstr "Başlama vaxtı"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_new"
+msgstr "Yeni sessiya başlat"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_return"
+msgstr "Sessiyaya qayıt"
+
+msgctxt "exams.dashboard"
+msgid "subtitle_exams"
+msgstr "imtahan"
+
+msgctxt "exams.dashboard"
+msgid "subtitle_active"
+msgstr "aktiv"
+
+msgctxt "exams.dashboard"
+msgid "filter_category"
+msgstr "Kateqoriya"
+
+msgctxt "exams.dashboard"
+msgid "filter_all"
+msgstr "Hamısı"
+
+msgctxt "exams.dashboard"
+msgid "filter_search"
+msgstr "Axtar"
+
+msgctxt "exams.dashboard"
+msgid "view_grid"
+msgstr "Şəbəkə görünüşü"
+
+msgctxt "exams.dashboard"
+msgid "view_list"
+msgstr "Siyahı görünüşü"
+
+msgctxt "exams.dashboard"
+msgid "meta_questions"
+msgstr "sual"
+
+msgctxt "exams.dashboard"
+msgid "meta_minutes"
+msgstr "dəq"
+
+msgctxt "exams.dashboard"
+msgid "meta_attempts"
+msgstr "cəhd"
+
+msgctxt "exams.dashboard"
+msgid "meta_unlimited"
+msgstr "Limitsiz"
+
+msgctxt "exams.dashboard"
+msgid "code_open"
+msgstr "Hamı üçün açıq"
+
+msgctxt "exams.dashboard"
+msgid "more_actions"
+msgstr "Daha çox"
+
+msgctxt "exams.dashboard"
+msgid "menu_manage"
+msgstr "İdarəetmə"
+
+msgctxt "exams.dashboard"
+msgid "action_share_code"
+msgstr "Paylaş / Kod"
+
+msgctxt "exams.dashboard"
+msgid "action_duplicate"
+msgstr "Dublikat et"
+
+msgctxt "exams.dashboard"
+msgid "action_archive"
+msgstr "Arxivlə"
+
+msgctxt "exams.dashboard"
+msgid "action_unarchive"
+msgstr "Arxivdən çıxar"
+
+msgctxt "exams.dashboard"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_title"
+msgstr "İmtahanı sil"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_body"
+msgstr "Bu imtahanı silmək istədiyinizə əminsiniz?"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_warn"
+msgstr ""
+"Bu əməliyyat geri qaytarıla bilməz. İmtahan üzrə bütün cəhdlər və nəticələr "
+"də silinəcək."
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_confirm"
+msgstr "Bəli, sil"
+
+msgctxt "exams.dashboard"
+msgid "code_copied"
+msgstr "Kod kopyalandı"
+
+msgctxt "exams.dashboard"
+msgid "kpi_group_label"
+msgstr "Status üzrə filtr"
+
+msgctxt "exams.dashboard.status"
+msgid "label_active"
+msgstr "Aktiv"
+
+msgctxt "exams.dashboard.status"
+msgid "label_scheduled"
+msgstr "Planlaşdırılmış"
+
+msgctxt "exams.dashboard.status"
+msgid "label_draft"
+msgstr "Qaralama"
+
+msgctxt "exams.dashboard.status"
+msgid "label_archived"
+msgstr "Arxiv"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_active"
+msgstr "İndi tələbələrə açıqdır"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_scheduled"
+msgstr "Başlama vaxtı gözlənilir"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_draft"
+msgstr "Hələ dərc edilməyib"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_archived"
+msgstr "Bağlanıb, nəticələr saxlanır"
+
+msgctxt "exams.wizard"
+msgid "rail_kicker"
+msgstr "EMSARENA · MÜƏLLİM"
+
+msgctxt "exams.wizard"
+msgid "step_basics"
+msgstr "Əsaslar"
+
+msgctxt "exams.wizard"
+msgid "step_basics_sub"
+msgstr "Ad, növ, kateqoriya"
+
+msgctxt "exams.wizard"
+msgid "step_timing"
+msgstr "Vaxt və suallar"
+
+msgctxt "exams.wizard"
+msgid "step_timing_sub"
+msgstr "Tarix, müddət, sual sayı"
+
+msgctxt "exams.wizard"
+msgid "step_access"
+msgstr "Giriş"
+
+msgctxt "exams.wizard"
+msgid "step_access_sub"
+msgstr "Status, kim girə bilər"
+
+msgctxt "exams.wizard"
+msgid "step_proctor"
+msgstr "Nəzarət"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_sub"
+msgstr "Köçürməyə qarşı nəzarət (istəyə görə)"
+
+msgctxt "exams.wizard"
+msgid "rail_hint"
+msgstr ""
+"Yalnız ad mütləqdir. Qalan sahələri sonra Redaktədən də doldura bilərsiniz."
+
+msgctxt "exams.wizard"
+msgid "step_basics_title"
+msgstr "İmtahanın əsasları"
+
+msgctxt "exams.wizard"
+msgid "step_basics_desc"
+msgstr ""
+"İmtahana ad verin və hansı növ olduğunu seçin. Bu, tələbələrin imtahan "
+"kartında görəcəyi məlumatdır."
+
+msgctxt "exams.wizard"
+msgid "step_timing_title"
+msgstr "Vaxt və suallar"
+
+msgctxt "exams.wizard"
+msgid "step_timing_desc"
+msgstr ""
+"İmtahanın nə vaxt keçiriləcəyini, müddətini və hər tələbəyə neçə sual "
+"düşəcəyini təyin edin."
+
+msgctxt "exams.wizard"
+msgid "step_access_title"
+msgstr "Giriş və status"
+
+msgctxt "exams.wizard"
+msgid "step_access_desc"
+msgstr ""
+"İmtahanın tələbələrə görünüb-görünməyəcəyini və kimlərin daxil ola "
+"biləcəyini idarə edin."
+
+msgctxt "exams.wizard"
+msgid "step_proctor_title"
+msgstr "İmtahan nəzarəti"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_desc"
+msgstr ""
+"Köçürməyə qarşı nəzarət tədbirləri. Bu addım istəyə görədir — söndürülsə "
+"imtahan adi rejimdə keçirilir."
+
+msgctxt "exams.wizard"
+msgid "proctor_unavailable"
+msgstr "Nəzarət rejimi bu imtahan üçün əlçatan deyil."
+
+msgctxt "exams.wizard"
+msgid "nav_back"
+msgstr "Geri"
+
+msgctxt "exams.wizard"
+msgid "nav_next"
+msgstr "Növbəti"
+
+msgctxt "exams.wizard"
+msgid "nav_step"
+msgstr "Addım"
+
+msgctxt "exams.wizard"
+msgid "errors_title"
+msgstr "Zəhmət olmasa aşağıdakı xətaları düzəldin:"
+
+msgctxt "exams.wizard"
+msgid "title_required"
+msgstr "İmtahan adı mütləqdir."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_archived"
+msgstr "İmtahan arxivləndi."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_unarchived"
+msgstr "İmtahan arxivdən çıxarıldı."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated"
+msgstr "İmtahan dublikat edildi — qaralamalara əlavə olundu."
+
+msgctxt "exams.model.exam.field"
+msgid "is_archived"
+msgstr "Arxivlənib"
+
+msgctxt "exams.model.exam.field"
+msgid "archived_at"
+msgstr "Arxivlənmə tarixi"
+
+msgctxt "exams.model.exam.help"
+msgid "is_archived"
+msgstr "İşarələnsə, imtahan arxivə keçir (nəticələr saxlanır)."
+
+msgctxt "exams.model.exam.help"
+msgid "archived_at"
+msgstr "İmtahanın arxivləndiyi tarix."
+
+msgctxt "exams.wizard"
+msgid "code_generate"
+msgstr "Yarat"
+
+msgctxt "exams.wizard"
+msgid "code_hint"
+msgstr "6 rəqəm. Boş qalsa imtahan hamı üçün açıq olur."
+
+msgctxt "exams.wizard"
+msgid "section_schedule"
+msgstr "Cədvəl"
+
+msgctxt "exams.wizard"
+msgid "section_distribution"
+msgstr "Sual paylanması"
+
+msgctxt "exams.wizard"
+msgid "section_measures"
+msgstr "Tədbirlər"
+
+msgctxt "exams.wizard"
+msgid "desc_is_active"
+msgstr ""
+"Açıq olduqda tələbələr imtahanı siyahıda görəcək. Söndürsəniz qaralama kimi "
+"saxlanır."
+
+msgctxt "exams.wizard"
+msgid "desc_is_public"
+msgstr "Açıq olarsa kod tələb olunmur və bütün tələbələr daxil ola bilər."
+
+msgctxt "exams.wizard"
+msgid "desc_paint"
+msgstr "Yazılı imtahanda tələbələr cavabı çəkə bilər (sxem, formul, diaqram)."
+
+msgctxt "exams.wizard"
+msgid "desc_supervision"
+msgstr "Tam ekran, tab nəzarəti və digər köçürməyə qarşı tədbirlər."
+
+msgctxt "exams.wizard"
+msgid "type_desc_test"
+msgstr "Çoxseçimli suallar, avtomatik qiymətləndirmə."
+
+msgctxt "exams.wizard"
+msgid "type_desc_written"
+msgstr "Açıq cavab, esse və ya çəkilmiş cavab — əl ilə yoxlanılır."
+
+msgctxt "exams.wizard"
+msgid "type_desc_coding"
+msgstr "Kod və ya tapşırıq əsaslı icra imtahanı."
+
+msgctxt "exams.dashboard"
+msgid "show_more"
+msgstr "Daha çox göstər"
+
+msgctxt "exams.wizard"
+msgid "unsaved_title"
+msgstr "Yadda saxlanmamış dəyişikliklər"
+
+msgctxt "exams.wizard"
+msgid "unsaved_body"
+msgstr ""
+"Dəyişiklikləriniz yadda saxlanılmayıb. Çıxmazdan əvvəl yadda saxlamaq "
+"istəyirsiniz?"
+
+msgctxt "exams.wizard"
+msgid "unsaved_save"
+msgstr "Yadda saxla"
+
+msgctxt "exams.wizard"
+msgid "unsaved_discard"
+msgstr "Saxlama, çıx"
+
+msgctxt "exams.wizard"
+msgid "unsaved_cancel"
+msgstr "Geri qayıt"
+
+msgctxt "exams.wizard"
+msgid "saving"
+msgstr "Saxlanılır…"
+
+msgctxt "exams.wizard"
+msgid "saved"
+msgstr "Yadda saxlanıldı"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."
@@ -30307,129 +31036,3 @@ msgstr "Qrup"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
-
-# --- "View as" (istifadəçi profilinə baxış) ---
-msgctxt "accounts.view_as"
-msgid "viewing_user_profile"
-msgstr "Siz hazırda bu istifadəçinin profilinə baxırsınız:"
-
-msgctxt "accounts.view_as"
-msgid "mode_readonly"
-msgstr "Yalnız baxış"
-
-msgctxt "accounts.view_as"
-msgid "mode_full"
-msgstr "Tam idarəetmə"
-
-msgctxt "accounts.view_as"
-msgid "readonly_warning"
-msgstr "Bu rejimdə yalnız baxa bilərsiniz — heç bir dəyişiklik etmək mümkün deyil."
-
-msgctxt "accounts.view_as"
-msgid "full_warning"
-msgstr "Bu rejimdə istifadəçinin adından bütün əməliyyatları edə bilərsiniz. Hər əməliyyat audit jurnalına yazılır."
-
-msgctxt "accounts.view_as"
-msgid "exit_view_full"
-msgstr "Öz profilimə qayıt"
-
-msgctxt "accounts.view_as"
-msgid "exit_view"
-msgstr "Çıx"
-
-msgctxt "accounts.view_as"
-msgid "open_panel"
-msgstr "İstifadəçi profilinə bax"
-
-msgctxt "accounts.view_as"
-msgid "panel_title"
-msgstr "İstifadəçi seçin"
-
-msgctxt "accounts.view_as"
-msgid "select_organization"
-msgstr "Təşkilat seçin"
-
-msgctxt "accounts.view_as"
-msgid "search_user_placeholder"
-msgstr "Ad, istifadəçi adı və ya e-poçt axtar…"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_all"
-msgstr "Bütün rollar"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_teacher"
-msgstr "Müəllimlər"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_student"
-msgstr "Tələbələr"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_admin"
-msgstr "Adminlər"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_staff"
-msgstr "Əməkdaşlar"
-
-msgctxt "accounts.view_as"
-msgid "no_results"
-msgstr "Nəticə tapılmadı"
-
-msgctxt "accounts.view_as"
-msgid "loading"
-msgstr "Yüklənir…"
-
-msgctxt "accounts.view_as"
-msgid "load_more"
-msgstr "Daha çox göstər"
-
-msgctxt "accounts.view_as"
-msgid "search_error"
-msgstr "Axtarış zamanı xəta baş verdi"
-
-msgctxt "accounts.view_as"
-msgid "session_ended"
-msgstr "Baxış sessiyası bitdi — icazə və ya kontekst dəyişdi."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_readonly"
-msgstr "Yalnız baxış rejimindəsiniz — bu əməliyyata icazə yoxdur."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_sensitive"
-msgstr "Təhlükəsizlik səbəbindən bu əməliyyat başqa istifadəçinin profilində bloklanıb."
-
-msgctxt "accounts.view_as"
-msgid "not_allowed"
-msgstr "Bu istifadəçinin profilinə baxmaq üçün icazəniz yoxdur."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_readonly"
-msgstr "%(name)s profilinə baxırsınız. Yalnız baxış rejimi — dəyişiklik edə bilməzsiniz."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_full"
-msgstr "%(name)s profilinə tam idarəetmə rejimində baxırsınız. Bütün əməliyyatlar audit jurnalına yazılır."
-
-msgctxt "accounts.view_as"
-msgid "stopped"
-msgstr "Öz profilinizə qayıtdınız."
-
-
-msgctxt "exams.service.parsing.error"
-msgid "file_docx_not_allowed"
-msgstr "Word (.docx/.doc) faylları təhlükəsizlik səbəbi ilə qəbul edilmir. Sualları PDF, TXT və ya şəkil (PNG/JPG) formatında yükləyin."
-
-msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
-msgstr ""
-
-msgctxt "exams.template.test_question_bank"
-msgid "PDF-dən gələn bullet formatı da dəstəklənir"
-msgstr ""
-
-msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
-msgstr ""

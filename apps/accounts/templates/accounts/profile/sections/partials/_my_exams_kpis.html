@@ -1,0 +1,18 @@
+{% load i18n %}
+{% if my_exams_dashboard %}
+<div class="tx-kpis" data-tx-kpis role="group" aria-label="{% trans 'kpi_group_label' context 'exams.dashboard' %}">
+  {% for kpi in my_exams_dashboard.status_kpis %}
+  <button type="button"
+          class="tx-kpi"
+          data-tx-kpi
+          data-status="{{ kpi.key }}"
+          aria-pressed="false"
+          style="--kpi-color:{{ kpi.color }};--kpi-soft:{{ kpi.soft }};--kpi-deep:{{ kpi.deep }};">
+    <span class="tx-kpi-bar"></span>
+    <span class="tx-kpi-num">{{ kpi.count }}</span>
+    <span class="tx-kpi-label"><span class="tx-kpi-dot"></span> {{ kpi.label }}</span>
+    <span class="tx-kpi-hint">{{ kpi.hint }}</span>
+  </button>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,293 @@
+/* ===========================================================================
+   EMSArena — Yeni imtahan sehrbazı (4-addımlı modal chrome).
+   Dizayn: Claude Design "EMSArena Müəllim Paneli" — rail + pane wizard.
+   Sahə daxili stillər exam_create_edit_modal.css-də qalır; bu fayl yalnız
+   sehrbaz karkasını (rail, addımlar, pane, footer) verir.
+   =========================================================================== */
+
+.exam-wizard-modal .modal-content {
+  --ew-ink: #0B1437; --ew-accent: #2C5BFF; --ew-accent-deep: #1E40AF; --ew-accent-soft: #EEF2FF;
+  --ew-teal: #14B8A6; --ew-border: #E5E8F0; --ew-border-soft: #EFF1F5;
+  --ew-text: #1F2937; --ew-muted: #6B7280; --ew-subtle: #9CA3AF; --ew-surface: #fff;
+  --ew-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  border: none;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(11, 20, 55, 0.28);
+}
+.exam-wizard-modal .modal-body.p-0 { padding: 0; }
+
+.exam-wizard {
+  --ew-ink: #0B1437; --ew-accent: #2C5BFF; --ew-accent-deep: #1E40AF; --ew-accent-soft: #EEF2FF;
+  --ew-teal: #14B8A6; --ew-border: #E5E8F0; --ew-border-soft: #EFF1F5;
+  --ew-text: #1F2937; --ew-muted: #6B7280; --ew-subtle: #9CA3AF; --ew-surface: #fff;
+  --ew-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  display: grid;
+  grid-template-columns: 256px 1fr;
+  height: min(680px, 86vh);
+  background: var(--ew-surface);
+}
+
+/* ── left rail ── */
+.exam-wizard .ew-rail {
+  background: linear-gradient(180deg, #0B1437, #111B45 60%, #16205A);
+  color: #fff; padding: 26px 22px; display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.exam-wizard .ew-rail::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 20px 20px; opacity: .5; pointer-events: none;
+}
+.exam-wizard .ew-rail-head { position: relative; margin-bottom: 24px; }
+.exam-wizard .ew-rail-kicker { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: rgba(255, 255, 255, .55); }
+.exam-wizard .ew-rail-title { font-family: var(--ew-serif); font-weight: 500; font-size: 22px; letter-spacing: -.01em; margin: 8px 0 0; line-height: 1.12; }
+.exam-wizard .ew-steps { position: relative; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.exam-wizard .ew-step {
+  display: flex; align-items: center; gap: 13px; padding: 11px 12px; border-radius: 12px;
+  text-align: left; transition: .15s; color: rgba(255, 255, 255, .62);
+  background: none; border: none; cursor: pointer; width: 100%; font-family: inherit;
+}
+.exam-wizard .ew-step:hover:not(.is-active) { background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .85); }
+.exam-wizard .ew-step.is-active { background: rgba(255, 255, 255, .12); color: #fff; }
+.exam-wizard .ew-step.is-done { color: rgba(255, 255, 255, .85); }
+.exam-wizard .ew-sn {
+  width: 28px; height: 28px; border-radius: 9px; border: 1.5px solid rgba(255, 255, 255, .25);
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; transition: .15s;
+}
+.exam-wizard .ew-step.is-active .ew-sn { background: #fff; color: var(--ew-ink); border-color: #fff; }
+.exam-wizard .ew-step.is-done .ew-sn { background: var(--ew-teal); border-color: var(--ew-teal); color: #fff; }
+.exam-wizard .ew-stx { min-width: 0; display: flex; flex-direction: column; }
+.exam-wizard .ew-st { font-size: 14px; font-weight: 600; }
+.exam-wizard .ew-ss { font-size: 11.5px; opacity: .7; margin-top: 1px; }
+.exam-wizard .ew-rail-foot {
+  position: relative; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, .12);
+  font-size: 12px; color: rgba(255, 255, 255, .55); line-height: 1.5; display: flex; gap: 9px;
+}
+.exam-wizard .ew-rail-foot i { flex-shrink: 0; margin-top: 2px; color: var(--ew-teal); }
+
+/* ── right pane ── */
+.exam-wizard .ew-pane { display: flex; flex-direction: column; min-width: 0; }
+.exam-wizard .ew-mstep { display: none; }
+.exam-wizard .ew-pane-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  padding: 22px 26px 14px; border-bottom: 1px solid var(--ew-border-soft);
+}
+.exam-wizard .ew-pane-head-tx h3 { font-size: 19px; font-weight: 700; letter-spacing: -.015em; color: var(--ew-ink); margin: 0; }
+.exam-wizard .ew-pane-head-tx p { font-size: 13px; color: var(--ew-muted); margin: 5px 0 0; line-height: 1.45; max-width: 460px; }
+.exam-wizard .ew-x { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--ew-subtle); background: none; border: none; cursor: pointer; transition: .14s; flex-shrink: 0; }
+.exam-wizard .ew-x:hover { background: #F6F7FB; color: var(--ew-ink); }
+
+/* ── error summary (server 400) ── */
+.exam-wizard .ew-errsummary { margin: 14px 26px 0; background: #FEECEC; border: 1px solid #F5C2C2; border-radius: 13px; padding: 12px 15px; }
+.exam-wizard .ew-errsummary-head { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; color: #B91C1C; }
+.exam-wizard .ew-errsummary ul { margin: 8px 0 0; padding-left: 30px; font-size: 12.5px; color: #92272D; line-height: 1.5; }
+.exam-wizard .ew-errsummary a { color: #B91C1C; text-decoration: underline; cursor: pointer; }
+
+/* ── body + panels ── */
+.exam-wizard .ew-pane-body { flex: 1; overflow-y: auto; padding: 20px 26px; scrollbar-width: thin; }
+.exam-wizard .ew-pane-body::-webkit-scrollbar { width: 8px; }
+.exam-wizard .ew-pane-body::-webkit-scrollbar-thumb { background: var(--ew-border); border-radius: 8px; }
+.exam-wizard .ew-nonfield { margin-bottom: 14px; }
+.exam-wizard .ew-panel { display: none; }
+.exam-wizard .ew-panel.is-active { display: block; animation: ewFade .18s ease; }
+@keyframes ewFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* invalid field highlight after server round-trip */
+.exam-wizard .form-group.is-invalid .field-error,
+.exam-wizard .field-error { color: #DC2626; font-size: 12px; margin-top: 6px; }
+.exam-wizard .form-group.is-invalid input,
+.exam-wizard .form-group.is-invalid textarea,
+.exam-wizard .form-group.is-invalid select { border-color: #DC2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, .12) !important; }
+
+/* callout (proctor unavailable) */
+.exam-wizard .ew-callout { display: flex; gap: 12px; padding: 14px 16px; border-radius: 13px; background: #FEF6E7; border: 1px solid #FCE9C2; color: #92400E; font-size: 13px; line-height: 1.5; }
+.exam-wizard .ew-callout i { flex-shrink: 0; margin-top: 2px; }
+
+/* ── footer ── */
+.exam-wizard .ew-pane-foot { display: flex; align-items: center; gap: 12px; padding: 14px 26px; border-top: 1px solid var(--ew-border-soft); background: var(--ew-surface); }
+.exam-wizard .ew-prog { font-size: 12.5px; color: var(--ew-subtle); font-weight: 600; }
+.exam-wizard .ew-foot-right { margin-left: auto; display: flex; gap: 10px; }
+.exam-wizard .ew-btn,
+.exam-wizard-modal .ew-confirm .ew-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px;
+  padding: 0 18px; border: 1px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: .15s; font-family: inherit; white-space: nowrap; text-decoration: none;
+}
+.exam-wizard .ew-btn--ghost,
+.exam-wizard-modal .ew-confirm .ew-btn--ghost { background: var(--ew-surface); color: var(--ew-ink); border-color: var(--ew-border); }
+.exam-wizard .ew-btn--ghost:hover,
+.exam-wizard-modal .ew-confirm .ew-btn--ghost:hover { border-color: var(--ew-subtle); background: #F6F7FB; }
+.exam-wizard .ew-btn--primary,
+.exam-wizard-modal .ew-confirm .ew-btn--primary { background: var(--ew-accent); color: #fff; box-shadow: 0 8px 18px rgba(44, 91, 255, .24); }
+.exam-wizard .ew-btn--primary:hover,
+.exam-wizard-modal .ew-confirm .ew-btn--primary:hover { background: var(--ew-accent-deep); }
+.exam-wizard .ew-btn[disabled],
+.exam-wizard-modal .ew-confirm .ew-btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   INNER FORM — sahələri dizayna uyğunlaşdırır (sahə adları/ID-ləri dəyişmir,
+   yalnız görünüş). Toggle switch-lər, checkbox kartları, bölmə başlıqları.
+   ════════════════════════════════════════════════════════════════════════ */
+.exam-wizard .ew-panel .form-group { margin-bottom: 18px; }
+.exam-wizard .ew-panel .form-group:last-child { margin-bottom: 0; }
+.exam-wizard .ew-panel .create-exam-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.exam-wizard .ew-panel .create-exam-form-grid > .form-group { margin-bottom: 0; }
+.exam-wizard .ew-panel .form-group-full { grid-column: 1 / -1; }
+
+.exam-wizard .ew-panel label,
+.exam-wizard .ew-panel .create-exam-searchable-label {
+  display: block; font-size: 13px; font-weight: 600; color: var(--ew-ink); margin-bottom: 8px;
+}
+.exam-wizard .ew-panel .form-text { display: block; font-size: 12px; color: var(--ew-subtle); margin-top: 7px; line-height: 1.45; }
+
+/* text / number / datetime / textarea / raw selects */
+.exam-wizard .ew-panel .form-control,
+.exam-wizard .ew-panel select.form-select:not(.bootstrap-single-select__native) {
+  width: 100%; min-height: 46px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--ew-border); background: #fff; font-size: 14.5px; color: var(--ew-text);
+  outline: none; transition: .15s; box-shadow: none;
+}
+.exam-wizard .ew-panel textarea.form-control { min-height: 84px; padding: 12px 14px; line-height: 1.55; resize: vertical; }
+.exam-wizard .ew-panel .form-control:focus,
+.exam-wizard .ew-panel select.form-select:not(.bootstrap-single-select__native):focus {
+  border-color: var(--ew-accent); box-shadow: 0 0 0 4px var(--ew-accent-soft);
+}
+.exam-wizard .ew-panel .form-control::placeholder { color: #AAB2C0; }
+.exam-wizard .ew-panel input[name="access_code"] { letter-spacing: .28em; font-weight: 700; font-size: 16px; }
+.exam-wizard .ew-panel input[name="access_code"]::placeholder { letter-spacing: .28em; }
+
+/* exam type selector → selectable cards (design) */
+.exam-wizard .ew-panel .ew-typesel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+.exam-wizard .ew-typesel .btn-check { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.exam-wizard .ew-panel .ew-typecard {
+  position: relative; display: block; margin: 0; padding: 15px 14px; cursor: pointer;
+  border: 1.5px solid var(--ew-border); border-radius: 14px; background: #fff; transition: .16s;
+}
+.exam-wizard .ew-panel .ew-typecard:hover { border-color: var(--ew-subtle); }
+.exam-wizard .ew-typesel .btn-check:checked + .ew-typecard { border-color: var(--tc); background: var(--tc-soft); box-shadow: 0 0 0 3px var(--tc-soft); }
+.exam-wizard .ew-typesel .btn-check:focus-visible + .ew-typecard { box-shadow: 0 0 0 4px var(--ew-accent-soft); }
+.exam-wizard .ew-tc-ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 11px; font-size: 15px; }
+.exam-wizard .ew-tc-name { display: block; font-size: 14.5px; font-weight: 700; color: var(--ew-ink); }
+.exam-wizard .ew-tc-desc { display: block; font-size: 11.5px; color: var(--ew-muted); margin-top: 4px; line-height: 1.4; font-weight: 400; }
+.exam-wizard .ew-tc-check { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--tc); display: grid; place-items: center; opacity: 0; transform: scale(.6); transition: .16s; }
+.exam-wizard .ew-typesel .btn-check:checked + .ew-typecard .ew-tc-check { opacity: 1; transform: none; }
+
+/* code + generate button row */
+.exam-wizard .ew-code-row { display: flex; gap: 8px; }
+.exam-wizard .ew-code-row .form-control { flex: 1; min-width: 0; }
+.exam-wizard .ew-gencode {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; height: 46px; padding: 0 15px;
+  border-radius: 12px; border: 1px solid var(--ew-border); background: #F6F7FB; color: var(--ew-ink);
+  font-size: 13.5px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap;
+}
+.exam-wizard .ew-gencode:hover { background: #ECEFF6; border-color: var(--ew-subtle); }
+
+/* section dividers */
+.exam-wizard .ew-fsec { display: flex; align-items: center; gap: 10px; margin: 4px 0 2px; }
+.exam-wizard .ew-fsec .ew-fs-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; font-size: 13px; }
+.exam-wizard .ew-fsec h4 { font-size: 13.5px; font-weight: 700; color: var(--ew-ink); margin: 0; }
+.exam-wizard .ew-fsec .ew-fs-rule { flex: 1; height: 1px; background: var(--ew-border-soft); }
+.exam-wizard .create-exam-modal-section-title { margin: 4px 0 0; }
+.exam-wizard .create-exam-modal-section-title h4 { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; color: var(--ew-ink); margin: 0; }
+.exam-wizard .create-exam-modal-section-title p { font-size: 12.5px; color: var(--ew-muted); margin: 5px 0 0; line-height: 1.45; }
+
+/* boolean → toggle switch row */
+.exam-wizard .modal-check-label {
+  display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; margin: 0;
+  border: 1px solid var(--ew-border); border-radius: 14px; cursor: pointer; transition: .15s;
+}
+.exam-wizard .modal-check-label:has(input[type="checkbox"]:checked) { border-color: var(--ew-accent); background: var(--ew-accent-soft); }
+.exam-wizard .modal-check-label.is-disabled { opacity: .5; pointer-events: none; }
+.exam-wizard .modal-check-label .modal-check-label-text { flex: 1; order: 1; font-size: 14px; font-weight: 600; color: var(--ew-ink); }
+.exam-wizard .modal-check-label .ew-switch-desc { display: block; font-size: 12px; font-weight: 400; color: var(--ew-muted); margin-top: 4px; line-height: 1.45; }
+.exam-wizard .modal-check-label input[type="checkbox"],
+.exam-wizard .modal-check-label input.form-check-input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; order: 2; flex-shrink: 0; margin: 2px 0 0; float: none;
+  width: 44px; height: 26px; border-radius: 999px; background: #CBD2DE; border: none; background-image: none;
+  position: relative; cursor: pointer; transition: .18s;
+}
+.exam-wizard .modal-check-label input[type="checkbox"]::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: .18s;
+}
+.exam-wizard .modal-check-label input[type="checkbox"]:checked { background: var(--ew-accent); }
+.exam-wizard .modal-check-label input[type="checkbox"]:checked::after { transform: translateX(18px); }
+
+/* proctoring measures → checkbox cards */
+.exam-wizard .ew-checks-label { display: block; font-size: 13px; font-weight: 600; color: var(--ew-ink); margin: 4px 0 9px; }
+.exam-wizard .ew-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 18px; }
+.exam-wizard .ew-checks .form-group { margin: 0; }
+.exam-wizard .ew-checks .modal-check-label { align-items: center; gap: 11px; padding: 12px 13px; border-radius: 11px; }
+.exam-wizard .ew-checks .modal-check-label .modal-check-label-text { order: 1; font-size: 13.5px; }
+.exam-wizard .ew-checks .modal-check-label input[type="checkbox"] {
+  order: 0; width: 20px; height: 20px; border-radius: 6px; background: #fff; border: 1.5px solid var(--ew-subtle); margin: 0;
+}
+.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]::after {
+  top: 1px; left: 6px; width: 6px; height: 11px; border-radius: 0; background: transparent;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); box-shadow: none; opacity: 0;
+}
+.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]:checked { background: var(--ew-accent); border-color: var(--ew-accent); }
+.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]:checked::after { transform: rotate(45deg); opacity: 1; }
+
+/* grace/max + action/recovery 2-col */
+.exam-wizard .ew-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.exam-wizard .ew-grid2 .form-group { margin: 0; }
+
+/* bootstrap-single-select fits the design width inside panels */
+.exam-wizard .ew-panel .bootstrap-single-select { width: 100%; }
+
+/* nəzarət ayarları daxili grid tək sütun (şablon + tədbirlər + parametrlər
+   şaquli düzülür; tədbirlər öz 2-sütunlu .ew-checks grid-ində qalır) */
+.exam-wizard #modalSupervisionSettings .create-exam-form-grid { grid-template-columns: 1fr; gap: 18px; }
+
+/* saxlanılır spinner (submit düyməsi) */
+.ew-spin { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; animation: ewSpin .7s linear infinite; vertical-align: -2px; }
+@keyframes ewSpin { to { transform: rotate(360deg); } }
+
+/* yadda saxlanmamış dəyişiklik təsdiqi (overlay) */
+.exam-wizard-modal .modal-content { position: relative; }
+.ew-confirm { position: absolute; inset: 0; z-index: 20; background: rgba(11,20,55,.5); display: grid; place-items: center; padding: 24px; }
+.ew-confirm-box { background: #fff; border-radius: 18px; padding: 26px 26px 22px; max-width: 430px; text-align: center; box-shadow: 0 24px 60px rgba(11,20,55,.3); animation: ewFade .18s ease; }
+.ew-confirm-ic { width: 48px; height: 48px; border-radius: 14px; background: #FEF6E7; color: #B45309; display: grid; place-items: center; font-size: 20px; margin: 0 auto 14px; }
+.ew-confirm-box h4 { font-size: 18px; font-weight: 700; color: var(--ew-ink); margin: 0 0 8px; }
+.ew-confirm-box p { font-size: 13.5px; color: var(--ew-muted); margin: 0 0 20px; line-height: 1.5; }
+.ew-confirm-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ew-confirm-actions .ew-btn { min-width: 118px; }
+.ew-confirm-discardbtn { color: #DC2626 !important; border-color: #F5C2C2 !important; }
+.ew-confirm-discardbtn:hover { background: #FEECEC !important; }
+
+/* ── responsive: rail → top progress, full-screen on phones ── */
+@media (max-width: 860px) {
+  .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); }
+  .exam-wizard .ew-rail { display: none; }
+  .exam-wizard .ew-mstep { display: flex; align-items: center; gap: 7px; padding: 14px 20px 0; }
+  .exam-wizard .ew-msdot { flex: 1; height: 5px; border-radius: 999px; background: var(--ew-border); transition: .2s; }
+  .exam-wizard .ew-msdot.is-done { background: var(--ew-teal); }
+  .exam-wizard .ew-msdot.is-on { background: var(--ew-accent); }
+  .exam-wizard .ew-pane-head { padding: 14px 20px 12px; }
+  .exam-wizard .ew-pane-body { padding: 16px 20px; }
+  .exam-wizard .ew-errsummary { margin: 12px 20px 0; }
+  .exam-wizard .ew-pane-foot { padding: 12px 20px; flex-wrap: wrap; }
+  .exam-wizard .ew-prog { width: 100%; order: -1; }
+  /* inner grids stack on mobile */
+  .exam-wizard .ew-panel .create-exam-form-grid,
+  .exam-wizard .ew-panel .ew-typesel,
+  .exam-wizard .ew-checks,
+  .exam-wizard .ew-grid2 { grid-template-columns: 1fr; }
+  .exam-wizard .ew-panel .create-exam-access-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 575.98px) {
+  .exam-wizard .ew-code-row { flex-direction: column; }
+  .exam-wizard .ew-gencode { height: 44px; justify-content: center; }
+  .exam-wizard .ew-pane-foot .ew-foot-right { width: 100%; }
+  .exam-wizard .ew-pane-foot .ew-foot-right .ew-btn { flex: 1; }
+}
+@media (max-width: 575.98px) {
+  .exam-wizard-modal .modal-dialog { margin: 0; max-width: 100%; height: 100%; }
+  .exam-wizard-modal .modal-content { border-radius: 0; height: 100%; }
+  .exam-wizard { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-wizard .ew-panel.is-active { animation: none; }
+}
