@@ -68,12 +68,12 @@ jobs:
           echo "::group::🛡️ Safety Check"
           safety check -r requirements/base.txt --full-report || true
           echo "::endgroup::"
-          echo "::group::🔐 Pip Audit (CRITICAL only — blocks merge)"
+          echo "::group::🔐 Pip Audit (known vulnerable dependencies — blocks merge)"
           pip-audit -r requirements/base.txt --desc on || {
             echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
             exit 1
           }
-          echo "✅ No critical dependency vulnerabilities found."
+          echo "✅ No known vulnerable dependencies found."
           echo "::endgroup::"
 
       # ── Bandit — Python static security linter ────────────────────────

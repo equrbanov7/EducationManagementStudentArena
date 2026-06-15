@@ -2235,7 +2235,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:student_exam_list"), {"type": "coding"})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'value="coding" selected', html=False)
+        self.assertRegex(response.content.decode(), r'<a class="ex-tab on"[^>]*data-type="coding"')
         self.assertContains(response, coding_exam.title)
         self.assertNotContains(response, written_exam.title)
 

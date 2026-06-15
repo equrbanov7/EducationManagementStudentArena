@@ -54,13 +54,13 @@ autobahn==25.12.2
 Automat==25.4.16
 cffi==2.0.0
 constantly==23.10.4
-cryptography==46.0.7
+cryptography==49.0.0
 hyperlink==21.0.0
 Incremental==24.11.0
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==2.23
-pyOpenSSL==26.0.0
+pyOpenSSL==26.3.0
 service-identity==24.2.0
 Twisted==26.4.0
 txaio==25.12.2
