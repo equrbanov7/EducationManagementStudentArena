@@ -16151,7 +16151,9 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmez. Yalnızca PDF, TXT veya görsel (PNG/JPG) yükleyin."
+msgstr ""
+"Bu dosya türü güvenlik nedeniyle kabul edilmez. Yalnızca PDF, TXT veya "
+"görsel (PNG/JPG) yükleyin."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16188,7 +16190,10 @@ msgstr "Etkin kiracı kuruluşunuzla uyumlu değil."
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr "Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi düşük). Lütfen metin tabanlı bir PDF yükleyin."
+msgstr ""
+"Bu PDF yalnızca taranmış görüntülerden oluşuyor ve metin katmanı yok; OCR de"
+" metin çıkaramadı (sunucuda Tesseract/aze olmayabilir veya tarama kalitesi "
+"düşük). Lütfen metin tabanlı bir PDF yükleyin."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -28239,6 +28244,687 @@ msgstr "tüm üyeler"
 msgid "target_group_prefix"
 msgstr "Grup"
 
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "Şu anda bu kullanıcının profilini görüntülüyorsunuz:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "Yalnızca görüntüleme"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Tam kontrol"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "Bu modda yalnızca görüntüleyebilirsiniz — değişiklik yapılamaz."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr ""
+"Bu modda kullanıcı adına tüm işlemleri yapabilirsiniz. Her işlem denetim "
+"günlüğüne kaydedilir."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Profilime dön"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Çık"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "Kullanıcı profilini görüntüle"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "Kullanıcı seçin"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Kurum seçin"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Ad, kullanıcı adı veya e-posta ara…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "Tüm roller"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Öğretmenler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Yöneticiler"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Personel"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "Sonuç bulunamadı"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Yükleniyor…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Daha fazla göster"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "Arama sırasında bir hata oluştu"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Görüntüleme oturumu sona erdi — izin veya bağlam değişti."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "Yalnızca görüntüleme modundasınız — bu işleme izin verilmiyor."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr ""
+"Güvenlik nedeniyle bu işlem başka bir kullanıcının profilinde engellendi."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "Bu kullanıcının profilini görüntüleme izniniz yok."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr ""
+"%(name)s profilini görüntülüyorsunuz. Yalnızca görüntüleme modu — değişiklik"
+" yapamazsınız."
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr ""
+"%(name)s profilini tam kontrol modunda görüntülüyorsunuz. Tüm işlemler "
+"denetim günlüğüne kaydedilir."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "Kendi profilinize geri döndünüz."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr ""
+"Word (.docx/.doc) dosyaları güvenlik nedeniyle kabul edilmez. Soruları PDF, "
+"TXT veya görsel (PNG/JPG) olarak yükleyin."
+
+msgid ""
+"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT"
+" istifadə edin."
+msgstr ""
+"Word (.docx) dosyaları güvenlik nedeniyle kabul edilmez — PDF veya TXT "
+"kullanın."
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr "PDF'den gelen madde imi formatı da desteklenir"
+
+msgid ""
+"Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
+"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
+"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
+"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
+"yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) "
+"Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) "
+"Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz "
+"cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ "
+"Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn "
+"prosesini"
+msgstr ""
+"Örnek 1 (Standart - A doğrudur):&#10;1. Data Science temel olarak neyle "
+"ilgilenir?&#10;A) Veri analizi ve karar verme&#10;B) Bilgisayar "
+"tamiri&#10;C) Oyun geliştirme&#10;D) İnternet kurulumu&#10;&#10;Örnek 2 (* "
+"ile işaretle):&#10;2. Python temel olarak nerede kullanılır?&#10;A) Araba "
+"tamiri&#10;*B) Web ve backend geliştirme&#10;C) Müzik icrası&#10;D) Yazıcı "
+"montajı&#10;&#10;Örnek 3 (Cevabı sonda yaz):&#10;3. HTML nedir?&#10;A) "
+"Programlama dili&#10;B) İşaretleme dili&#10;C) İşletim sistemi&#10;D) "
+"Antivirüs&#10;Cevap: B&#10;&#10;Örnek 4 (PDF/madde imi formatı — √ doğru "
+"cevabı işaretler):&#10;4. CI/CD neyi otomatikleştirir?&#10;• Belge "
+"yazımını&#10;√ Derleme ve dağıtım sürecini&#10;• Müşteri desteğini&#10;• "
+"Tasarım sürecini"
+
+msgctxt "exams.template.student_exam_list"
+msgid "eyebrow"
+msgstr "SINAVLAR"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_exam_unit"
+msgstr "sınav"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_live_active"
+msgstr "şu an canlı"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_list"
+msgstr "Liste"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_grid"
+msgstr "Izgara"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_label"
+msgstr "Sırala"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_soon"
+msgstr "Yakında başlayan"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_new"
+msgstr "En yeni"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_duration"
+msgstr "Süreye göre"
+
+msgctxt "exams.template.student_exam_list"
+msgid "tabs_aria"
+msgstr "Sınav türleri"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_kicker"
+msgstr "EMSARENA LIVE"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_sessions_active"
+msgstr "oturum aktif"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_title"
+msgstr "Canlı sınava katıl — tek PIN, herkes aynı anda."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_desc"
+msgstr ""
+"Öğretmenin ekranındaki PIN'i gir, adını seç ve gerçek zamanlı yarış. "
+"Sonuçlar ve lider tablosu anında görünür."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_fast"
+msgstr "Saniyeler içinde katıl"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_devices"
+msgstr "Telefon, tablet, bilgisayar"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_leaderboard"
+msgstr "Canlı lider tablosu"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_label"
+msgstr "OYUN PIN'İ"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_placeholder"
+msgstr "örn. 3A8K2B94"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_join"
+msgstr "Katıl"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_hint"
+msgstr "PIN'i ekranda göründüğü gibi gir. Sonraki adımda ad seçeceksin."
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_players"
+msgstr "kişi"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_realtime"
+msgstr "Gerçek zaman"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_question_unit"
+msgstr "soru"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_min_unit"
+msgstr "dk"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_my_answers"
+msgstr "Cevaplarım"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_join_session"
+msgstr "Oturuma katıl"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_title"
+msgstr "Sonuç bulunamadı"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_desc"
+msgstr "Bu kategoride sınav yok. Filtreyi değiştir veya aramayı temizle."
+
+msgctxt "exams.type.label"
+msgid "all"
+msgstr "Tümü"
+
+msgctxt "exams.type.label"
+msgid "live"
+msgstr "Canlı"
+
+msgctxt "exams.type.label"
+msgid "final"
+msgstr "Final"
+
+msgctxt "exams.type.label"
+msgid "midterm"
+msgstr "Vize"
+
+msgctxt "exams.type.label"
+msgid "quiz"
+msgstr "Quiz"
+
+msgctxt "exams.type.label"
+msgid "placement"
+msgstr "Yerleştirme"
+
+msgctxt "exams.type.label"
+msgid "practice"
+msgstr "Alıştırma"
+
+msgctxt "exams.type.label"
+msgid "written"
+msgstr "Yazılı"
+
+msgctxt "exams.type.label"
+msgid "test"
+msgstr "Test"
+
+msgctxt "exams.type.label"
+msgid "coding"
+msgstr "Pratik"
+
+msgctxt "exams.form.exam.label"
+msgid "exam_type_extended"
+msgstr "Kategori (Final / Vize / Quiz)"
+
+msgctxt "exams.form.exam.placeholder"
+msgid "exam_type_extended_none"
+msgstr "Kategori yok"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "exam_type_extended_help"
+msgstr "Sınavın akademik kategorisi (isteğe bağlı)."
+
+msgctxt "exams.dashboard"
+msgid "subtitle_exams"
+msgstr "sınav"
+
+msgctxt "exams.dashboard"
+msgid "subtitle_active"
+msgstr "aktif"
+
+msgctxt "exams.dashboard"
+msgid "filter_category"
+msgstr "Kategori"
+
+msgctxt "exams.dashboard"
+msgid "filter_all"
+msgstr "Tümü"
+
+msgctxt "exams.dashboard"
+msgid "filter_search"
+msgstr "Ara"
+
+msgctxt "exams.dashboard"
+msgid "view_grid"
+msgstr "Izgara görünümü"
+
+msgctxt "exams.dashboard"
+msgid "view_list"
+msgstr "Liste görünümü"
+
+msgctxt "exams.dashboard"
+msgid "meta_questions"
+msgstr "soru"
+
+msgctxt "exams.dashboard"
+msgid "meta_minutes"
+msgstr "dk"
+
+msgctxt "exams.dashboard"
+msgid "meta_attempts"
+msgstr "deneme"
+
+msgctxt "exams.dashboard"
+msgid "meta_unlimited"
+msgstr "Sınırsız"
+
+msgctxt "exams.dashboard"
+msgid "code_open"
+msgstr "Herkese açık"
+
+msgctxt "exams.dashboard"
+msgid "more_actions"
+msgstr "Daha fazla"
+
+msgctxt "exams.dashboard"
+msgid "menu_manage"
+msgstr "Yönetim"
+
+msgctxt "exams.dashboard"
+msgid "action_share_code"
+msgstr "Paylaş / Kod"
+
+msgctxt "exams.dashboard"
+msgid "action_duplicate"
+msgstr "Çoğalt"
+
+msgctxt "exams.dashboard"
+msgid "action_archive"
+msgstr "Arşivle"
+
+msgctxt "exams.dashboard"
+msgid "action_unarchive"
+msgstr "Arşivden çıkar"
+
+msgctxt "exams.dashboard"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_title"
+msgstr "Sınavı sil"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_body"
+msgstr "Bu sınavı silmek istediğinize emin misiniz?"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_warn"
+msgstr ""
+"Bu işlem geri alınamaz. Bu sınava ait tüm denemeler ve sonuçlar da "
+"silinecek."
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_confirm"
+msgstr "Evet, sil"
+
+msgctxt "exams.dashboard"
+msgid "code_copied"
+msgstr "Kod kopyalandı"
+
+msgctxt "exams.dashboard"
+msgid "kpi_group_label"
+msgstr "Duruma göre filtre"
+
+msgctxt "exams.dashboard.status"
+msgid "label_active"
+msgstr "Aktif"
+
+msgctxt "exams.dashboard.status"
+msgid "label_scheduled"
+msgstr "Planlanmış"
+
+msgctxt "exams.dashboard.status"
+msgid "label_draft"
+msgstr "Taslak"
+
+msgctxt "exams.dashboard.status"
+msgid "label_archived"
+msgstr "Arşiv"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_active"
+msgstr "Şu anda öğrencilere açık"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_scheduled"
+msgstr "Başlaması bekleniyor"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_draft"
+msgstr "Henüz yayımlanmadı"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_archived"
+msgstr "Kapalı, sonuçlar saklanıyor"
+
+msgctxt "exams.wizard"
+msgid "rail_kicker"
+msgstr "EMSARENA · ÖĞRETMEN"
+
+msgctxt "exams.wizard"
+msgid "step_basics"
+msgstr "Temel"
+
+msgctxt "exams.wizard"
+msgid "step_basics_sub"
+msgstr "Ad, tür, kategori"
+
+msgctxt "exams.wizard"
+msgid "step_timing"
+msgstr "Zaman & Sorular"
+
+msgctxt "exams.wizard"
+msgid "step_timing_sub"
+msgstr "Tarih, süre, sayı"
+
+msgctxt "exams.wizard"
+msgid "step_access"
+msgstr "Erişim"
+
+msgctxt "exams.wizard"
+msgid "step_access_sub"
+msgstr "Durum, kim girebilir"
+
+msgctxt "exams.wizard"
+msgid "step_proctor"
+msgstr "Gözetim"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_sub"
+msgstr "Hile önleme (ops.)"
+
+msgctxt "exams.wizard"
+msgid "rail_hint"
+msgstr ""
+"Yalnızca ad zorunludur. Diğer alanları daha sonra Düzenle'den "
+"doldurabilirsiniz."
+
+msgctxt "exams.wizard"
+msgid "step_basics_title"
+msgstr "Sınav temelleri"
+
+msgctxt "exams.wizard"
+msgid "step_basics_desc"
+msgstr ""
+"Sınava bir ad verin ve türünü seçin. Bu, öğrencilerin sınav kartında "
+"göreceği bilgidir."
+
+msgctxt "exams.wizard"
+msgid "step_timing_title"
+msgstr "Zaman ve sorular"
+
+msgctxt "exams.wizard"
+msgid "step_timing_desc"
+msgstr ""
+"Sınavın ne zaman yapılacağını, süresini ve her öğrenciye kaç soru düşeceğini"
+" belirleyin."
+
+msgctxt "exams.wizard"
+msgid "step_access_title"
+msgstr "Erişim ve durum"
+
+msgctxt "exams.wizard"
+msgid "step_access_desc"
+msgstr ""
+"Sınavın öğrencilere görünüp görünmeyeceğini ve kimlerin girebileceğini "
+"yönetin."
+
+msgctxt "exams.wizard"
+msgid "step_proctor_title"
+msgstr "Sınav gözetimi"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_desc"
+msgstr ""
+"Hile önleme önlemleri. Bu adım isteğe bağlıdır — kapalıysa sınav normal "
+"modda yapılır."
+
+msgctxt "exams.wizard"
+msgid "proctor_unavailable"
+msgstr "Gözetim bu sınav için kullanılamıyor."
+
+msgctxt "exams.wizard"
+msgid "nav_back"
+msgstr "Geri"
+
+msgctxt "exams.wizard"
+msgid "nav_next"
+msgstr "İleri"
+
+msgctxt "exams.wizard"
+msgid "nav_step"
+msgstr "Adım"
+
+msgctxt "exams.wizard"
+msgid "errors_title"
+msgstr "Lütfen aşağıdaki hataları düzeltin:"
+
+msgctxt "exams.wizard"
+msgid "title_required"
+msgstr "Sınav adı zorunludur."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_archived"
+msgstr "Sınav arşivlendi."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_unarchived"
+msgstr "Sınav arşivden çıkarıldı."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated"
+msgstr "Sınav çoğaltıldı — taslaklara eklendi."
+
+msgctxt "exams.model.exam.field"
+msgid "is_archived"
+msgstr "Arşivlendi"
+
+msgctxt "exams.model.exam.field"
+msgid "archived_at"
+msgstr "Arşivlenme tarihi"
+
+msgctxt "exams.model.exam.help"
+msgid "is_archived"
+msgstr "İşaretlenirse sınav arşive taşınır (sonuçlar saklanır)."
+
+msgctxt "exams.model.exam.help"
+msgid "archived_at"
+msgstr "Sınavın arşivlendiği tarih."
+
+msgctxt "exams.wizard"
+msgid "code_generate"
+msgstr "Oluştur"
+
+msgctxt "exams.wizard"
+msgid "code_hint"
+msgstr "6 rakam. Boş bırakılırsa sınav herkese açık olur."
+
+msgctxt "exams.wizard"
+msgid "section_schedule"
+msgstr "Takvim"
+
+msgctxt "exams.wizard"
+msgid "section_distribution"
+msgstr "Soru dağılımı"
+
+msgctxt "exams.wizard"
+msgid "section_measures"
+msgstr "Önlemler"
+
+msgctxt "exams.wizard"
+msgid "desc_is_active"
+msgstr ""
+"Açıkken öğrenciler sınavı listede görür. Kapalıysa taslak olarak saklanır."
+
+msgctxt "exams.wizard"
+msgid "desc_is_public"
+msgstr "Açıksa kod gerekmez ve tüm öğrenciler girebilir."
+
+msgctxt "exams.wizard"
+msgid "desc_paint"
+msgstr ""
+"Yazılı sınavlarda öğrenciler cevabı çizebilir (şema, formül, diyagram)."
+
+msgctxt "exams.wizard"
+msgid "desc_supervision"
+msgstr "Tam ekran, sekme denetimi ve diğer hile önleme önlemleri."
+
+msgctxt "exams.wizard"
+msgid "type_desc_test"
+msgstr "Çoktan seçmeli sorular, otomatik değerlendirme."
+
+msgctxt "exams.wizard"
+msgid "type_desc_written"
+msgstr "Açık cevap, deneme veya Paint — elle değerlendirilir."
+
+msgctxt "exams.wizard"
+msgid "type_desc_coding"
+msgstr "Kod veya görev tabanlı uygulamalı sınav."
+
+msgctxt "exams.dashboard"
+msgid "show_more"
+msgstr "Daha fazla göster"
+
+msgctxt "exams.wizard"
+msgid "unsaved_title"
+msgstr "Kaydedilmemiş değişiklikler"
+
+msgctxt "exams.wizard"
+msgid "unsaved_body"
+msgstr ""
+"Değişiklikleriniz kaydedilmedi. Çıkmadan önce kaydetmek ister misiniz?"
+
+msgctxt "exams.wizard"
+msgid "unsaved_save"
+msgstr "Kaydet"
+
+msgctxt "exams.wizard"
+msgid "unsaved_discard"
+msgstr "Kaydetme, çık"
+
+msgctxt "exams.wizard"
+msgid "unsaved_cancel"
+msgstr "Düzenlemeye devam"
+
+msgctxt "exams.wizard"
+msgid "saving"
+msgstr "Kaydediliyor…"
+
+msgctxt "exams.wizard"
+msgid "saved"
+msgstr "Kaydedildi"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."
@@ -30323,129 +31009,3 @@ msgstr "Grup"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Kararı yaklaşık %(n)s dakika içinde değiştirebilirsiniz."
-
-# --- "View as" (istifadəçi profilinə baxış) ---
-msgctxt "accounts.view_as"
-msgid "viewing_user_profile"
-msgstr "Şu anda bu kullanıcının profilini görüntülüyorsunuz:"
-
-msgctxt "accounts.view_as"
-msgid "mode_readonly"
-msgstr "Yalnızca görüntüleme"
-
-msgctxt "accounts.view_as"
-msgid "mode_full"
-msgstr "Tam kontrol"
-
-msgctxt "accounts.view_as"
-msgid "readonly_warning"
-msgstr "Bu modda yalnızca görüntüleyebilirsiniz — değişiklik yapılamaz."
-
-msgctxt "accounts.view_as"
-msgid "full_warning"
-msgstr "Bu modda kullanıcı adına tüm işlemleri yapabilirsiniz. Her işlem denetim günlüğüne kaydedilir."
-
-msgctxt "accounts.view_as"
-msgid "exit_view_full"
-msgstr "Profilime dön"
-
-msgctxt "accounts.view_as"
-msgid "exit_view"
-msgstr "Çık"
-
-msgctxt "accounts.view_as"
-msgid "open_panel"
-msgstr "Kullanıcı profilini görüntüle"
-
-msgctxt "accounts.view_as"
-msgid "panel_title"
-msgstr "Kullanıcı seçin"
-
-msgctxt "accounts.view_as"
-msgid "select_organization"
-msgstr "Kurum seçin"
-
-msgctxt "accounts.view_as"
-msgid "search_user_placeholder"
-msgstr "Ad, kullanıcı adı veya e-posta ara…"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_all"
-msgstr "Tüm roller"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_teacher"
-msgstr "Öğretmenler"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_student"
-msgstr "Öğrenciler"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_admin"
-msgstr "Yöneticiler"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_staff"
-msgstr "Personel"
-
-msgctxt "accounts.view_as"
-msgid "no_results"
-msgstr "Sonuç bulunamadı"
-
-msgctxt "accounts.view_as"
-msgid "loading"
-msgstr "Yükleniyor…"
-
-msgctxt "accounts.view_as"
-msgid "load_more"
-msgstr "Daha fazla göster"
-
-msgctxt "accounts.view_as"
-msgid "search_error"
-msgstr "Arama sırasında bir hata oluştu"
-
-msgctxt "accounts.view_as"
-msgid "session_ended"
-msgstr "Görüntüleme oturumu sona erdi — izin veya bağlam değişti."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_readonly"
-msgstr "Yalnızca görüntüleme modundasınız — bu işleme izin verilmiyor."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_sensitive"
-msgstr "Güvenlik nedeniyle bu işlem başka bir kullanıcının profilinde engellendi."
-
-msgctxt "accounts.view_as"
-msgid "not_allowed"
-msgstr "Bu kullanıcının profilini görüntüleme izniniz yok."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_readonly"
-msgstr "%(name)s profilini görüntülüyorsunuz. Yalnızca görüntüleme modu — değişiklik yapamazsınız."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_full"
-msgstr "%(name)s profilini tam kontrol modunda görüntülüyorsunuz. Tüm işlemler denetim günlüğüne kaydedilir."
-
-msgctxt "accounts.view_as"
-msgid "stopped"
-msgstr "Kendi profilinize geri döndünüz."
-
-
-msgctxt "exams.service.parsing.error"
-msgid "file_docx_not_allowed"
-msgstr "Word (.docx/.doc) dosyaları güvenlik nedeniyle kabul edilmez. Soruları PDF, TXT veya görsel (PNG/JPG) olarak yükleyin."
-
-msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
-msgstr "Word (.docx) dosyaları güvenlik nedeniyle kabul edilmez — PDF veya TXT kullanın."
-
-msgctxt "exams.template.test_question_bank"
-msgid "PDF-dən gələn bullet formatı da dəstəklənir"
-msgstr "PDF'den gelen madde imi formatı da desteklenir"
-
-msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
-msgstr "Örnek 1 (Standart - A doğrudur):&#10;1. Data Science temel olarak neyle ilgilenir?&#10;A) Veri analizi ve karar verme&#10;B) Bilgisayar tamiri&#10;C) Oyun geliştirme&#10;D) İnternet kurulumu&#10;&#10;Örnek 2 (* ile işaretle):&#10;2. Python temel olarak nerede kullanılır?&#10;A) Araba tamiri&#10;*B) Web ve backend geliştirme&#10;C) Müzik icrası&#10;D) Yazıcı montajı&#10;&#10;Örnek 3 (Cevabı sonda yaz):&#10;3. HTML nedir?&#10;A) Programlama dili&#10;B) İşaretleme dili&#10;C) İşletim sistemi&#10;D) Antivirüs&#10;Cevap: B&#10;&#10;Örnek 4 (PDF/madde imi formatı — √ doğru cevabı işaretler):&#10;4. CI/CD neyi otomatikleştirir?&#10;• Belge yazımını&#10;√ Derleme ve dağıtım sürecini&#10;• Müşteri desteğini&#10;• Tasarım sürecini"

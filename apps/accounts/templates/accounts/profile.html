@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260612-structure-split">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260616-2">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260616-1">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-profile-link">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals.css' %}?v=20260612-modal">
@@ -201,7 +202,17 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
     createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
     editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}",
+    saving: "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
+    saved: "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
+};
+window.MY_EXAMS_I18N = {
+    codeCopied: "{% filter escapejs %}{% trans 'code_copied' context 'exams.dashboard' %}{% endfilter %}"
+};
+window.EXAM_WIZARD_I18N = {
+    step: "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
+    errorsTitle: "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
+    titleRequired: "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
 };
 </script>
 <script src="{% static 'accounts/js/profile.js' %}?v=20260612-org-ajax"></script>
@@ -217,6 +228,8 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
 <script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260612-detail-ajax"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260615-4"></script>
+<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260616-3"></script>
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260608-1"></script>
 <script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>

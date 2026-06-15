@@ -6,6 +6,13 @@ from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.translation import pgettext_lazy
 
+from apps.exams.constants import (
+    EXAM_STATUS_ACTIVE,
+    EXAM_STATUS_ARCHIVED,
+    EXAM_STATUS_DRAFT,
+    EXAM_STATUS_SCHEDULED,
+)
+
 from .access_policy import ExamAccessPolicyMixin
 
 User = get_user_model()
@@ -184,6 +191,21 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         default=False,
         help_text=pgettext_lazy("exams.model.exam.help", "enable_paint"),
     )
+    # Müəllim imtahanı arxivləyə bilər: nəticələr saxlanır, amma siyahıda
+    # "Arxiv" bölməsinə keçir və tələbələrə təqdim olunmur (is_active ayrıca
+    # idarə olunur). Soft-state — silmə deyil, geri qaytarıla bilər.
+    is_archived = models.BooleanField(
+        pgettext_lazy("exams.model.exam.field", "is_archived"),
+        default=False,
+        db_index=True,
+        help_text=pgettext_lazy("exams.model.exam.help", "is_archived"),
+    )
+    archived_at = models.DateTimeField(
+        pgettext_lazy("exams.model.exam.field", "archived_at"),
+        blank=True,
+        null=True,
+        help_text=pgettext_lazy("exams.model.exam.help", "archived_at"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.exam.meta", "singular")
@@ -207,6 +229,8 @@ class Exam(ExamAccessPolicyMixin, models.Model):
             models.Index(fields=["course", "-created_at"], name="exam_course_created_idx"),
             # "My exams" (teacher) — exams authored by a given user.
             models.Index(fields=["author", "-created_at"], name="exam_author_created_idx"),
+            # "My exams" arxiv qruplaşdırması — müəllimin aktiv/arxiv imtahanları.
+            models.Index(fields=["author", "is_archived", "-created_at"], name="exam_author_archived_idx"),
         ]
 
     def __str__(self):
@@ -239,6 +263,27 @@ class Exam(ExamAccessPolicyMixin, models.Model):
 
     def is_currently_active(self) -> bool:
         return not self.is_before_start() and not self.is_after_end()
+
+    @property
+    def lifecycle_status(self) -> str:
+        """
+        Müəllim panelində qruplaşdırma üçün hesablanmış status:
+
+        * ``archived``  — müəllim arxivləyib (``is_archived``).
+        * ``draft``     — hələ dərc edilməyib (``is_active`` = False).
+        * ``scheduled`` — aktiv, amma başlama vaxtından əvvəl.
+        * ``active``    — aktiv və indi tələbələrə açıqdır.
+
+        Mənbə yeganədir: şablonlar, KPI sayğacları və filtrlər hamısı bu
+        propertydən istifadə edir ki, status məntiqi bir yerdə qalsın.
+        """
+        if self.is_archived:
+            return EXAM_STATUS_ARCHIVED
+        if not self.is_active:
+            return EXAM_STATUS_DRAFT
+        if self.is_before_start():
+            return EXAM_STATUS_SCHEDULED
+        return EXAM_STATUS_ACTIVE
 
     def attempts_left_for(self, user: User) -> int | None:
         if not self.max_attempts_per_user:

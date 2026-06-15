@@ -5,6 +5,256 @@
     window._TEACHER_EXAM_DETAIL_INIT = true;
 
     document.addEventListener("DOMContentLoaded", function () {
+        (function initLiveSessionResumeModal() {
+            var modal = document.querySelector("[data-live-session-modal]");
+            if (!modal) {
+                return;
+            }
+
+            var returnBtn = modal.querySelector("[data-live-session-return]");
+            var newBtn = modal.querySelector("[data-live-session-new]");
+            var pinEl = modal.querySelector("[data-live-session-pin]");
+            var createdEl = modal.querySelector("[data-live-session-created]");
+            var activeTrigger = null;
+            var probeInFlight = false;
+
+            function openModal(trigger) {
+                activeTrigger = trigger;
+                if (pinEl) {
+                    pinEl.textContent = trigger.getAttribute("data-live-pin") || "-";
+                }
+                if (createdEl) {
+                    createdEl.textContent = trigger.getAttribute("data-live-created") || "-";
+                }
+                modal.hidden = false;
+                document.body.classList.add("live-session-modal-open");
+                window.setTimeout(function () {
+                    if (returnBtn) {
+                        returnBtn.focus();
+                    }
+                }, 40);
+            }
+
+            function closeModal() {
+                modal.hidden = true;
+                document.body.classList.remove("live-session-modal-open");
+            }
+
+            function withQueryParam(rawUrl, name, value) {
+                try {
+                    var parsed = new URL(rawUrl, window.location.origin);
+                    parsed.searchParams.set(name, value);
+                    return parsed.pathname + parsed.search + parsed.hash;
+                } catch (error) {
+                    return rawUrl + (rawUrl.indexOf("?") === -1 ? "?" : "&") + name + "=" + encodeURIComponent(value);
+                }
+            }
+
+            function navigateToStart(trigger) {
+                var targetUrl = trigger ? trigger.getAttribute("href") : "";
+                if (targetUrl) {
+                    window.location.href = targetUrl;
+                }
+            }
+
+            function hydrateTriggerFromPayload(trigger, payload) {
+                if (!trigger || !payload) {
+                    return;
+                }
+                trigger.setAttribute("data-has-active-session", "1");
+                trigger.setAttribute("data-live-return-url", payload.return_url || "");
+                trigger.setAttribute("data-live-new-url", payload.new_url || "");
+                trigger.setAttribute("data-live-pin", payload.pin || "");
+                trigger.setAttribute("data-live-created", payload.created || "");
+            }
+
+            async function probeLiveSession(trigger) {
+                var href = trigger.getAttribute("href") || "";
+                if (!href) {
+                    return null;
+                }
+
+                var response = await fetch(withQueryParam(href, "probe", "1"), {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "application/json"
+                    }
+                });
+                if (!response.ok) {
+                    return null;
+                }
+                return response.json();
+            }
+
+            document.addEventListener("click", async function (event) {
+                var trigger = event.target.closest("[data-live-start-trigger]");
+                if (!trigger) {
+                    return;
+                }
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+                event.preventDefault();
+
+                if (trigger.getAttribute("data-has-active-session") === "1") {
+                    openModal(trigger);
+                    return;
+                }
+
+                if (probeInFlight) {
+                    return;
+                }
+                probeInFlight = true;
+                trigger.setAttribute("aria-busy", "true");
+
+                try {
+                    var payload = await probeLiveSession(trigger);
+                    if (payload && payload.active) {
+                        hydrateTriggerFromPayload(trigger, payload);
+                        openModal(trigger);
+                        return;
+                    }
+                    navigateToStart(trigger);
+                } catch (error) {
+                    navigateToStart(trigger);
+                } finally {
+                    probeInFlight = false;
+                    trigger.removeAttribute("aria-busy");
+                }
+            });
+
+            modal.addEventListener("click", function (event) {
+                if (event.target.closest("[data-live-session-close]")) {
+                    event.preventDefault();
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (modal.hidden || event.key !== "Escape") {
+                    return;
+                }
+                closeModal();
+            });
+
+            if (returnBtn) {
+                returnBtn.addEventListener("click", function () {
+                    var targetUrl = activeTrigger ? activeTrigger.getAttribute("data-live-return-url") : "";
+                    if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                });
+            }
+
+            if (newBtn) {
+                newBtn.addEventListener("click", function () {
+                    var targetUrl = activeTrigger ? activeTrigger.getAttribute("data-live-new-url") : "";
+                    if (!targetUrl && activeTrigger) {
+                        targetUrl = activeTrigger.getAttribute("href") || "";
+                    }
+                    if (targetUrl) {
+                        window.location.href = targetUrl;
+                    }
+                });
+            }
+        })();
+
+        (function initQuestionLazyLoading() {
+            var loader = document.querySelector("[data-question-lazy]");
+            var list = document.querySelector("[data-question-list]");
+            if (!loader || !list) {
+                return;
+            }
+
+            var trigger = loader.querySelector("[data-question-lazy-trigger]");
+            var status = loader.querySelector("[data-question-lazy-status]");
+            var root = loader.closest(".questions-section");
+            var isLoading = false;
+            var observer = null;
+
+            function setLoading(loading) {
+                isLoading = loading;
+                loader.setAttribute("aria-busy", loading ? "true" : "false");
+                if (trigger) {
+                    trigger.disabled = loading;
+                    trigger.hidden = loading;
+                }
+                if (status) {
+                    status.hidden = !loading;
+                }
+            }
+
+            function buildPageUrl() {
+                var rawUrl = loader.getAttribute("data-load-url") || "";
+                var url = new URL(rawUrl, window.location.origin);
+                url.searchParams.set("offset", loader.getAttribute("data-next-offset") || "0");
+                url.searchParams.set("limit", loader.getAttribute("data-page-size") || "20");
+                return url.pathname + url.search;
+            }
+
+            function finish(hasMore, nextOffset) {
+                if (!hasMore) {
+                    if (observer) {
+                        observer.disconnect();
+                    }
+                    loader.remove();
+                    return;
+                }
+                loader.setAttribute(
+                    "data-next-offset",
+                    String(nextOffset || loader.getAttribute("data-next-offset") || "0")
+                );
+                setLoading(false);
+            }
+
+            async function loadMoreQuestions() {
+                if (isLoading || !document.body.contains(loader)) {
+                    return;
+                }
+                setLoading(true);
+                try {
+                    var response = await fetch(buildPageUrl(), {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Accept": "application/json"
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error("request_failed");
+                    }
+                    var payload = await response.json();
+                    if (payload.html) {
+                        list.insertAdjacentHTML("beforeend", payload.html);
+                    }
+                    finish(Boolean(payload.has_more), payload.next_offset);
+                } catch (error) {
+                    setLoading(false);
+                }
+            }
+
+            if (trigger) {
+                trigger.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    loadMoreQuestions();
+                });
+            }
+
+            if ("IntersectionObserver" in window) {
+                observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            loadMoreQuestions();
+                        }
+                    });
+                }, {
+                    root: root || null,
+                    rootMargin: "120px 0px 120px 0px",
+                    threshold: 0.01
+                });
+                observer.observe(loader);
+            }
+        })();
+
         if (typeof bootstrap === "undefined") {
             return;
         }

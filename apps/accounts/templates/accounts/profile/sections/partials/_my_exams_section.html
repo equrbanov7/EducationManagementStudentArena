@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %} Status bölməsi (qatlanan). Arxiv default qatlanmış başlayır. {% endcomment %}
+<section class="tx-section{% if group.key == 'archived' %} is-collapsed{% endif %}"
+         data-tx-section
+         data-status="{{ group.key }}">
+  <div class="tx-section-head" data-tx-section-toggle role="button" tabindex="0"
+       aria-expanded="{% if group.key == 'archived' %}false{% else %}true{% endif %}">
+    <span class="tx-section-dot" style="background:{{ group.color }};"></span>
+    <h2 class="tx-section-title">{{ group.label }}</h2>
+    <span class="tx-section-count" style="background:{{ group.soft }};color:{{ group.deep }};">{{ group.count }}</span>
+    <span class="tx-section-hint">{{ group.hint }}</span>
+    <span class="tx-section-rule"></span>
+    <span class="tx-section-chev" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+  </div>
+  <div class="tx-cards" data-tx-cards>
+    {% for exam in group.exams %}
+      {% include "accounts/profile/sections/partials/_my_exams_card.html" with exam=exam status_label=group.label %}
+    {% endfor %}
+  </div>
+  <button type="button" class="tx-showmore" data-tx-showmore hidden>
+    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+    {% trans "show_more" context "exams.dashboard" %} (<span data-tx-more-count></span>)
+  </button>
+</section>

@@ -161,6 +161,11 @@ urlpatterns = [
         views.delete_exam_question,
         name="delete_exam_question",
     ),
+    path(
+        "<slug:slug>/questions/page/",
+        views.teacher_exam_detail_questions_page,
+        name="teacher_exam_detail_questions_page",
+    ),
     # ==========================
     # SLUG - Teacher Exam Ops
     # ==========================
@@ -192,6 +197,8 @@ urlpatterns = [
     ),
     path("<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
+    path("<slug:slug>/archive/", views.toggle_exam_archive, name="toggle_exam_archive"),
+    path("<slug:slug>/duplicate/", views.duplicate_exam, name="duplicate_exam"),
     # ==========================
     # SUPERVISION API & MONITORING
     # ==========================

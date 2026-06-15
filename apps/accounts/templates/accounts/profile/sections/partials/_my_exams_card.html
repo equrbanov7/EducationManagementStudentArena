@@ -1,0 +1,116 @@
+{% load i18n exams_ui %}
+{% exam_type_meta exam.exam_type as tmeta %}
+{% exam_status_meta exam.lifecycle_status as smeta %}
+<article class="tx-card"
+         data-exam-card
+         data-card-href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}"
+         data-status="{{ exam.lifecycle_status }}"
+         data-type="{{ exam.exam_type }}"
+         data-category="{{ exam.exam_type_extended|default:'' }}"
+         data-name="{{ exam.title|lower }} {{ exam.description|lower }}"
+         style="--type-color:{{ tmeta.color }};--type-soft:{{ tmeta.soft }};--type-deep:{{ tmeta.deep }};">
+
+  <span class="tx-type-tile" style="background:{{ tmeta.soft }};color:{{ tmeta.deep }};">
+    <i class="fas {{ tmeta.icon }}" aria-hidden="true"></i>
+  </span>
+  <span class="tx-status-pill" style="background:{{ smeta.soft }};color:{{ smeta.deep }};">
+    <span class="tx-pd" style="background:{{ smeta.color }};"></span> {{ status_label }}
+  </span>
+
+  <a class="tx-card-link"
+     href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}">
+    <h3 class="tx-card-title">{{ exam.title }}</h3>
+    {% if exam.description %}<p class="tx-card-desc">{{ exam.description }}</p>{% endif %}
+  </a>
+
+  <div class="tx-card-tags">
+    <span class="tx-tag tx-tag--type" style="background:{{ tmeta.soft }};color:{{ tmeta.deep }};">
+      <i class="fas {{ tmeta.icon }}" aria-hidden="true"></i> {{ exam.get_exam_type_display }}
+    </span>
+    {% if exam.exam_type_extended %}
+      <span class="tx-tag">{{ exam.get_exam_type_extended_display }}</span>
+    {% endif %}
+    {% for variant in exam.active_language_variants %}
+      <span class="tx-tag tx-tag--lang">{{ variant.language|upper }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="tx-card-meta">
+    <span class="tx-m">
+      <i class="far fa-calendar" aria-hidden="true"></i>
+      {% if exam.start_datetime %}{{ exam.start_datetime|date:"d M Y" }}{% else %}{{ exam.created_at|date:"d M Y" }}{% endif %}
+    </span>
+    <span class="tx-m"><i class="fas fa-list-ol" aria-hidden="true"></i> <b>{{ exam.card_question_count }}</b> {% trans "meta_questions" context "exams.dashboard" %}</span>
+    {% if exam.total_duration_minutes %}
+      <span class="tx-m"><i class="far fa-clock" aria-hidden="true"></i> {{ exam.total_duration_minutes }} {% trans "meta_minutes" context "exams.dashboard" %}</span>
+    {% endif %}
+    <span class="tx-m">
+      <i class="fas fa-rotate-right" aria-hidden="true"></i>
+      {% if exam.max_attempts_per_user %}{{ exam.max_attempts_per_user }} {% trans "meta_attempts" context "exams.dashboard" %}{% else %}{% trans "meta_unlimited" context "exams.dashboard" %}{% endif %}
+    </span>
+    {% if exam.card_appeal_count %}
+      <span class="tx-m tx-m--warn"><i class="fas fa-gavel" aria-hidden="true"></i> {{ exam.card_appeal_count }}</span>
+    {% endif %}
+  </div>
+
+  <div class="tx-card-foot">
+    {% if exam.access_code %}
+      <span class="tx-codechip"><i class="fas fa-key" aria-hidden="true"></i> {{ exam.access_code }}</span>
+    {% else %}
+      <span class="tx-codechip tx-codechip--open"><i class="fas fa-globe" aria-hidden="true"></i> {% trans "code_open" context "exams.dashboard" %}</span>
+    {% endif %}
+
+    <div class="tx-foot-actions">
+      <a class="tx-iconbtn"
+         href="{% url 'exams:teacher_exam_results' exam.slug %}"
+         title="{% trans 'action_results' context 'profile.my_exams' %}"
+         aria-label="{% trans 'action_results' context 'profile.my_exams' %}">
+        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+      </a>
+      <button type="button"
+              class="tx-btn tx-btn--ghost tx-btn--sm js-open-exam-form-modal"
+              data-exam-modal-mode="edit"
+              data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
+        <i class="fas fa-edit" aria-hidden="true"></i> {% trans "action_edit" context "profile.my_exams" %}
+      </button>
+
+      <div class="tx-menu-wrap" data-tx-menu>
+        <button type="button" class="tx-iconbtn" data-tx-menu-toggle
+                aria-haspopup="true" aria-expanded="false"
+                title="{% trans 'more_actions' context 'exams.dashboard' %}"
+                aria-label="{% trans 'more_actions' context 'exams.dashboard' %}">
+          <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
+        </button>
+        <div class="tx-menu" role="menu">
+          <div class="tx-menu-label">{% trans "menu_manage" context "exams.dashboard" %}</div>
+          <a class="tx-menu-item" role="menuitem" href="{% url 'exams:exam_language_manager' exam.slug %}">
+            <i class="fas fa-language" aria-hidden="true"></i> {% trans "action_languages" context "profile.my_exams" %}
+          </a>
+          <a class="tx-menu-item" role="menuitem" href="{% url 'exams:exam_bank_picker' exam.slug %}">
+            <i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "action_question_bank" context "profile.my_exams" %}
+          </a>
+          {% if exam.access_code %}
+          <button type="button" class="tx-menu-item js-tx-copy-code" role="menuitem" data-code="{{ exam.access_code }}">
+            <i class="fas fa-share-nodes" aria-hidden="true"></i> {% trans "action_share_code" context "exams.dashboard" %}
+          </button>
+          {% endif %}
+          <div class="tx-menu-sep"></div>
+          <button type="button" class="tx-menu-item js-tx-post-action" role="menuitem"
+                  data-action-url="{% url 'exams:duplicate_exam' exam.slug %}">
+            <i class="fas fa-copy" aria-hidden="true"></i> {% trans "action_duplicate" context "exams.dashboard" %}
+          </button>
+          <button type="button" class="tx-menu-item js-tx-post-action" role="menuitem"
+                  data-action-url="{% url 'exams:toggle_exam_archive' exam.slug %}">
+            <i class="fas fa-box-archive" aria-hidden="true"></i>
+            {% if exam.is_archived %}{% trans "action_unarchive" context "exams.dashboard" %}{% else %}{% trans "action_archive" context "exams.dashboard" %}{% endif %}
+          </button>
+          <button type="button" class="tx-menu-item tx-menu-item--danger js-tx-delete" role="menuitem"
+                  data-delete-url="{% url 'exams:delete_exam' exam.slug %}"
+                  data-exam-name="{{ exam.title }}">
+            <i class="fas fa-trash" aria-hidden="true"></i> {% trans "action_delete" context "exams.dashboard" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>

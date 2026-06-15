@@ -45,3 +45,52 @@ ANSWERLINE_RE = re.compile(
     r"\s*[:\-]\s*([A-E](?:\s*[,;/]\s*[A-E])*)\s*$",
     re.IGNORECASE,
 )
+
+# ===========================================================================
+# Müəllim paneli — imtahan "həyat dövrü" (lifecycle) statusları
+# ---------------------------------------------------------------------------
+# Hesablanmış status (DB-də saxlanmır, `Exam.lifecycle_status` ilə törədilir).
+# Bu keylər həm modeldə, həm KPI sayğaclarında, həm də şablon filtrlərində
+# istifadə olunur — status məntiqi tək mənbədən idarə olunsun.
+# ===========================================================================
+EXAM_STATUS_ACTIVE = "active"
+EXAM_STATUS_SCHEDULED = "scheduled"
+EXAM_STATUS_DRAFT = "draft"
+EXAM_STATUS_ARCHIVED = "archived"
+
+# Müəllim panelində bölmələrin göstərilmə sırası.
+EXAM_STATUS_ORDER = (
+    EXAM_STATUS_ACTIVE,
+    EXAM_STATUS_SCHEDULED,
+    EXAM_STATUS_DRAFT,
+    EXAM_STATUS_ARCHIVED,
+)
+
+# Status üçün vizual tokenlər (rəng, yumşaq fon, dərin mətn, FontAwesome ikon).
+# Mətnlər (label/hint) şablonda tərcümə olunur — burada yalnız brend rəngləri.
+EXAM_STATUS_META = {
+    EXAM_STATUS_ACTIVE: {"color": "#16A34A", "soft": "#DCFCE7", "deep": "#15803D", "icon": "fa-bolt"},
+    EXAM_STATUS_SCHEDULED: {"color": "#2C5BFF", "soft": "#EEF2FF", "deep": "#1E40AF", "icon": "fa-clock"},
+    EXAM_STATUS_DRAFT: {"color": "#64748B", "soft": "#F1F4F9", "deep": "#475569", "icon": "fa-pen-ruler"},
+    EXAM_STATUS_ARCHIVED: {"color": "#B45309", "soft": "#FEF3C7", "deep": "#92400E", "icon": "fa-box-archive"},
+}
+
+# İmtahan növü (Exam.exam_type) üçün vizual tokenlər + ikon.
+EXAM_TYPE_META = {
+    "test": {"color": "#0284C7", "soft": "#E0F2FE", "deep": "#075985", "icon": "fa-list-ul"},
+    "written": {"color": "#BE3455", "soft": "#FCE7EE", "deep": "#9F1239", "icon": "fa-pen-fancy"},
+    "coding": {"color": "#7C3AED", "soft": "#F2ECFE", "deep": "#5B21B6", "icon": "fa-code"},
+}
+
+# Kateqoriya (Exam.exam_type_extended) üçün vizual tokenlər.
+# Dashboard çipləri yalnız əsas 3-ü göstərir; qalanları kartda öz rəngi ilə çıxır.
+EXAM_CATEGORY_META = {
+    "final": {"color": "#BE3455", "soft": "#FCE7EE", "deep": "#9F1239"},
+    "midterm": {"color": "#2C5BFF", "soft": "#EEF2FF", "deep": "#1E40AF"},
+    "quiz": {"color": "#0F766E", "soft": "#E6FBF7", "deep": "#0B544E"},
+    "placement": {"color": "#B45309", "soft": "#FEF3C7", "deep": "#92400E"},
+    "practice": {"color": "#0891B2", "soft": "#E0F7FB", "deep": "#155E63"},
+}
+
+# Dashboard-da çip kimi göstərilən kateqoriyalar (dizaynla eyni: Final/Midterm/Quiz).
+EXAM_CATEGORY_FILTER_ORDER = ("final", "midterm", "quiz")

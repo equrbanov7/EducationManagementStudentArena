@@ -6,6 +6,7 @@ from django import forms
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.features import (
@@ -138,6 +139,7 @@ class ExamForm(forms.ModelForm):
             "title",
             "description",
             "exam_type",
+            "exam_type_extended",
             "is_active",
             "start_datetime",
             "end_datetime",
@@ -170,6 +172,12 @@ class ExamForm(forms.ModelForm):
             "exam_type": forms.Select(
                 attrs={
                     "class": "form-select",
+                }
+            ),
+            "exam_type_extended": forms.Select(
+                attrs={
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
                 }
             ),
             "is_active": forms.CheckboxInput(
@@ -261,6 +269,7 @@ class ExamForm(forms.ModelForm):
             "title": pgettext_lazy("exams.form.exam.label", "title"),
             "description": pgettext_lazy("exams.form.exam.label", "description"),
             "exam_type": pgettext_lazy("exams.form.exam.label", "exam_type"),
+            "exam_type_extended": pgettext_lazy("exams.form.exam.label", "exam_type_extended"),
             "is_active": pgettext_lazy("exams.form.exam.label", "is_active"),
             "start_datetime": pgettext_lazy("exams.form.exam.label", "start_datetime"),
             "end_datetime": pgettext_lazy("exams.form.exam.label", "end_datetime"),
@@ -311,6 +320,27 @@ class ExamForm(forms.ModelForm):
         if not self.practical_exams_enabled and submitted_exam_type != PRACTICAL_EXAM_TYPE:
             self.fields["exam_type"].choices = selectable_exam_type_choices(self.fields["exam_type"].choices)
 
+        # İmtahan kateqoriyası (Final/Kollekvium/Sınaq) — opsionaldır. Boş seçim
+        # üçün oxunaqlı etiket veririk ki, həm create, həm də edit-də düzgün
+        # önseçilsin (model sahəsi blank=True/null=True olduğu üçün required deyil).
+        if "exam_type_extended" in self.fields:
+            self.fields["exam_type_extended"].required = False
+            common_category_values = {"quiz", "midterm", "final"}
+            current_category_value = (
+                self.initial.get("exam_type_extended")
+                or getattr(getattr(self, "instance", None), "exam_type_extended", "")
+                or ""
+            )
+            extended_choices = [
+                choice
+                for choice in self.fields["exam_type_extended"].choices
+                if choice[0] in common_category_values
+                or (current_category_value and choice[0] == current_category_value)
+            ]
+            self.fields["exam_type_extended"].choices = [
+                ("", pgettext_lazy("exams.form.exam.placeholder", "exam_type_extended_none"))
+            ] + extended_choices
+
         if allow_organization_selection:
             from apps.organizations.models import Organization
 
@@ -334,7 +364,7 @@ class ExamForm(forms.ModelForm):
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["random_question_count"].required = False
         self.fields["random_question_count"].help_text = (
-            "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa default 10-dur. "
+            "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa standart 10 qəbul olunur. "
             "Test, yazılı və praktiki imtahanlara aiddir."
         )
         self.fields["fair_question_distribution_enabled"].help_text = (
@@ -487,6 +517,24 @@ class ExamForm(forms.ModelForm):
 
     def clean_ai_difficulty_balance_enabled(self):
         return self._clean_enabled_toggle("ai_difficulty_balance_enabled", default=False)
+
+    @staticmethod
+    def _ensure_local_aware(value):
+        """
+        `datetime-local` input naive gəlir. İstifadəçinin seçdiyi saat onun yerli
+        vaxtıdır (TIME_ZONE = Asia/Baku) — onu açıq şəkildə cari zona ilə aware
+        edirik ki, DB sürücüsü naive dəyəri UTC kimi saxlayıb 4 saat sürüşmə
+        yaratmasın. Aware gəlibsə, toxunmuruq.
+        """
+        if value and timezone.is_naive(value):
+            return timezone.make_aware(value, timezone.get_current_timezone())
+        return value
+
+    def clean_start_datetime(self):
+        return self._ensure_local_aware(self.cleaned_data.get("start_datetime"))
+
+    def clean_end_datetime(self):
+        return self._ensure_local_aware(self.cleaned_data.get("end_datetime"))
 
     def clean(self):
         cleaned_data = super().clean()

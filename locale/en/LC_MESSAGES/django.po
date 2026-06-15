@@ -14036,7 +14036,7 @@ msgstr "Placement"
 #: apps/exams/domain/exam_definition.py:25
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "practice"
-msgstr "Active"
+msgstr "Practice"
 
 #: apps/exams/domain/exam_definition.py:28
 msgctxt "exams.model.exam.choice.mode"
@@ -16280,7 +16280,9 @@ msgstr ""
 #: apps/exams/services/parsing.py:106 apps/exams/services/parsing.py:636
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
-msgstr "This file type is not accepted for security reasons. Upload only PDF, TXT or image (PNG/JPG) files."
+msgstr ""
+"This file type is not accepted for security reasons. Upload only PDF, TXT or"
+" image (PNG/JPG) files."
 
 #: apps/exams/services/parsing.py:109
 msgctxt "exams.service.parsing.error"
@@ -16317,7 +16319,10 @@ msgstr "The active tenant is not compatible with your organization."
 #: apps/exams/tests/test_services.py:1568
 msgctxt "exams.service.parsing.error"
 msgid "pdf_no_text_layer"
-msgstr "This PDF contains only scanned images with no text layer, and OCR could not extract any text (Tesseract/aze may be missing on the server or the scan quality is low). Please upload a text-based PDF."
+msgstr ""
+"This PDF contains only scanned images with no text layer, and OCR could not "
+"extract any text (Tesseract/aze may be missing on the server or the scan "
+"quality is low). Please upload a text-based PDF."
 
 #: apps/exams/services/parsing.py:683
 msgctxt "exams.service.parsing.error"
@@ -16327,7 +16332,8 @@ msgstr "'pypdf' is not installed for PDF reading. Run `pip install pypdf`."
 #: apps/exams/services/parsing.py:713
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_encrypted"
-msgstr "Encrypted PDFs are not supported. Remove the password and upload again."
+msgstr ""
+"Encrypted PDFs are not supported. Remove the password and upload again."
 
 #: apps/exams/services/parsing.py:739
 msgctxt "exams.service.parsing.error"
@@ -28348,6 +28354,739 @@ msgstr "all members"
 msgid "target_group_prefix"
 msgstr "Group"
 
+# --- "View as" (istifadəçi profilinə baxış) ---
+msgctxt "accounts.view_as"
+msgid "viewing_user_profile"
+msgstr "You are currently viewing this user's profile:"
+
+msgctxt "accounts.view_as"
+msgid "mode_readonly"
+msgstr "View only"
+
+msgctxt "accounts.view_as"
+msgid "mode_full"
+msgstr "Full control"
+
+msgctxt "accounts.view_as"
+msgid "readonly_warning"
+msgstr "In this mode you can only view — no changes are possible."
+
+msgctxt "accounts.view_as"
+msgid "full_warning"
+msgstr ""
+"In this mode you can perform any action on behalf of the user. Every action "
+"is written to the audit log."
+
+msgctxt "accounts.view_as"
+msgid "exit_view_full"
+msgstr "Back to my profile"
+
+msgctxt "accounts.view_as"
+msgid "exit_view"
+msgstr "Exit"
+
+msgctxt "accounts.view_as"
+msgid "open_panel"
+msgstr "View user profile"
+
+msgctxt "accounts.view_as"
+msgid "panel_title"
+msgstr "Select a user"
+
+msgctxt "accounts.view_as"
+msgid "select_organization"
+msgstr "Select organization"
+
+msgctxt "accounts.view_as"
+msgid "search_user_placeholder"
+msgstr "Search by name, username or email…"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_all"
+msgstr "All roles"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_teacher"
+msgstr "Teachers"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_student"
+msgstr "Students"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_admin"
+msgstr "Admins"
+
+msgctxt "accounts.view_as"
+msgid "role_filter_staff"
+msgstr "Staff"
+
+msgctxt "accounts.view_as"
+msgid "no_results"
+msgstr "No results found"
+
+msgctxt "accounts.view_as"
+msgid "loading"
+msgstr "Loading…"
+
+msgctxt "accounts.view_as"
+msgid "load_more"
+msgstr "Show more"
+
+msgctxt "accounts.view_as"
+msgid "search_error"
+msgstr "An error occurred during search"
+
+msgctxt "accounts.view_as"
+msgid "session_ended"
+msgstr "Viewing session ended — permission or context changed."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_readonly"
+msgstr "You are in view-only mode — this action is not allowed."
+
+msgctxt "accounts.view_as"
+msgid "action_blocked_sensitive"
+msgstr ""
+"For security reasons this action is blocked on another user's profile."
+
+msgctxt "accounts.view_as"
+msgid "not_allowed"
+msgstr "You do not have permission to view this user's profile."
+
+msgctxt "accounts.view_as"
+msgid "started_readonly"
+msgstr ""
+"You are viewing %(name)s's profile. View-only mode — you cannot make "
+"changes."
+
+msgctxt "accounts.view_as"
+msgid "started_full"
+msgstr ""
+"You are viewing %(name)s's profile in full-control mode. All actions are "
+"written to the audit log."
+
+msgctxt "accounts.view_as"
+msgid "stopped"
+msgstr "You are back on your own profile."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_not_allowed"
+msgstr ""
+"Word (.docx/.doc) files are not accepted for security reasons. Upload "
+"questions as PDF, TXT or image (PNG/JPG) files."
+
+msgid ""
+"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT"
+" istifadə edin."
+msgstr ""
+"Word (.docx) files are not accepted for security reasons — use PDF or TXT "
+"instead."
+
+msgctxt "exams.template.test_question_bank"
+msgid "PDF-dən gələn bullet formatı da dəstəklənir"
+msgstr "Bullet format from PDFs is also supported"
+
+msgid ""
+"Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
+"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
+"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
+"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
+"yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) "
+"Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) "
+"Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz "
+"cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ "
+"Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn "
+"prosesini"
+msgstr ""
+"Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly "
+"deal with?&#10;A) Data analysis and decision making&#10;B) Computer "
+"repair&#10;C) Game development&#10;D) Setting up the "
+"internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly "
+"used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing "
+"music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the "
+"end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup "
+"language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: "
+"B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct "
+"answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ "
+"Build and deployment process&#10;• Customer support&#10;• Design process"
+
+msgctxt "exams.template.student_exam_list"
+msgid "eyebrow"
+msgstr "EXAMS"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_exam_unit"
+msgstr "exams"
+
+msgctxt "exams.template.student_exam_list"
+msgid "subtitle_live_active"
+msgstr "live now"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_list"
+msgstr "List"
+
+msgctxt "exams.template.student_exam_list"
+msgid "view_grid"
+msgstr "Grid"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_label"
+msgstr "Sort"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_soon"
+msgstr "Starting soon"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_new"
+msgstr "Newest"
+
+msgctxt "exams.template.student_exam_list"
+msgid "sort_duration"
+msgstr "By duration"
+
+msgctxt "exams.template.student_exam_list"
+msgid "tabs_aria"
+msgstr "Exam types"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_kicker"
+msgstr "EMSARENA LIVE"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_sessions_active"
+msgstr "sessions live"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_title"
+msgstr "Join the live exam — one PIN, everyone at once."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_banner_desc"
+msgstr ""
+"Enter the PIN shown on the teacher's screen, pick your name and compete in "
+"real time. Results and the leaderboard appear instantly."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_fast"
+msgstr "Join in seconds"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_devices"
+msgstr "Phone, tablet, computer"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_chip_leaderboard"
+msgstr "Live leaderboard"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_label"
+msgstr "GAME PIN"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_placeholder"
+msgstr "e.g. 3A8K2B94"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_join"
+msgstr "Join"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_pin_hint"
+msgstr ""
+"Enter the PIN exactly as shown on screen. You'll pick a name in the next "
+"step."
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_players"
+msgstr "players"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_realtime"
+msgstr "Real time"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_question_unit"
+msgstr "questions"
+
+msgctxt "exams.template.student_exam_list"
+msgid "card_min_unit"
+msgstr "min"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_my_answers"
+msgstr "My answers"
+
+msgctxt "exams.template.student_exam_list"
+msgid "action_join_session"
+msgstr "Join session"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_title"
+msgstr "No results found"
+
+msgctxt "exams.template.student_exam_list"
+msgid "empty_desc"
+msgstr "No exams in this category. Change the filter or clear the search."
+
+msgctxt "exams.type.label"
+msgid "all"
+msgstr "All"
+
+msgctxt "exams.type.label"
+msgid "live"
+msgstr "Live"
+
+msgctxt "exams.type.label"
+msgid "final"
+msgstr "Final"
+
+msgctxt "exams.type.label"
+msgid "midterm"
+msgstr "Midterm"
+
+msgctxt "exams.type.label"
+msgid "quiz"
+msgstr "Quiz"
+
+msgctxt "exams.type.label"
+msgid "placement"
+msgstr "Placement"
+
+msgctxt "exams.type.label"
+msgid "practice"
+msgstr "Practice"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_title"
+msgstr "Join with PIN"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_desc"
+msgstr ""
+"To join this live exam from the card, enter the PIN shown on the teacher's "
+"screen."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_modal_exam"
+msgstr "Live exam"
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_required_error"
+msgstr "Enter the PIN code."
+
+msgctxt "exams.template.student_exam_list"
+msgid "live_card_pin_mismatch_error"
+msgstr "PIN does not match. Enter the code shown on the teacher's screen."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "modal_close"
+msgstr "Close"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_eyebrow"
+msgstr "Live session in progress"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_title"
+msgstr "This exam already has an active session"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_body"
+msgstr ""
+"If the previous tab was closed, you can return to that session. Starting a "
+"new session will automatically finish the old active session."
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_pin"
+msgstr "PIN"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_started"
+msgstr "Started"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_new"
+msgstr "Start new session"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "live_resume_modal_return"
+msgstr "Return to session"
+
+msgctxt "exams.type.label"
+msgid "written"
+msgstr "Written"
+
+msgctxt "exams.type.label"
+msgid "test"
+msgstr "Test"
+
+msgctxt "exams.type.label"
+msgid "coding"
+msgstr "Practical"
+
+msgctxt "exams.form.exam.label"
+msgid "exam_type_extended"
+msgstr "Category (Final / Midterm / Quiz)"
+
+msgctxt "exams.form.exam.placeholder"
+msgid "exam_type_extended_none"
+msgstr "No category"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "exam_type_extended_help"
+msgstr "Choose only when needed: Quiz, Midterm, or Final."
+
+msgctxt "exams.dashboard"
+msgid "subtitle_exams"
+msgstr "exams"
+
+msgctxt "exams.dashboard"
+msgid "subtitle_active"
+msgstr "active"
+
+msgctxt "exams.dashboard"
+msgid "filter_category"
+msgstr "Category"
+
+msgctxt "exams.dashboard"
+msgid "filter_all"
+msgstr "All"
+
+msgctxt "exams.dashboard"
+msgid "filter_search"
+msgstr "Search"
+
+msgctxt "exams.dashboard"
+msgid "view_grid"
+msgstr "Grid view"
+
+msgctxt "exams.dashboard"
+msgid "view_list"
+msgstr "List view"
+
+msgctxt "exams.dashboard"
+msgid "meta_questions"
+msgstr "questions"
+
+msgctxt "exams.dashboard"
+msgid "meta_minutes"
+msgstr "min"
+
+msgctxt "exams.dashboard"
+msgid "meta_attempts"
+msgstr "attempts"
+
+msgctxt "exams.dashboard"
+msgid "meta_unlimited"
+msgstr "Unlimited"
+
+msgctxt "exams.dashboard"
+msgid "code_open"
+msgstr "Open to all"
+
+msgctxt "exams.dashboard"
+msgid "more_actions"
+msgstr "More"
+
+msgctxt "exams.dashboard"
+msgid "menu_manage"
+msgstr "Manage"
+
+msgctxt "exams.dashboard"
+msgid "action_share_code"
+msgstr "Share / Code"
+
+msgctxt "exams.dashboard"
+msgid "action_duplicate"
+msgstr "Duplicate"
+
+msgctxt "exams.dashboard"
+msgid "action_archive"
+msgstr "Archive"
+
+msgctxt "exams.dashboard"
+msgid "action_unarchive"
+msgstr "Unarchive"
+
+msgctxt "exams.dashboard"
+msgid "action_delete"
+msgstr "Delete"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_title"
+msgstr "Delete exam"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_body"
+msgstr "Are you sure you want to delete this exam?"
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_warn"
+msgstr ""
+"This action cannot be undone. All attempts and results for this exam will "
+"also be deleted."
+
+msgctxt "exams.dashboard"
+msgid "delete_modal_confirm"
+msgstr "Yes, delete"
+
+msgctxt "exams.dashboard"
+msgid "code_copied"
+msgstr "Code copied"
+
+msgctxt "exams.dashboard"
+msgid "kpi_group_label"
+msgstr "Filter by status"
+
+msgctxt "exams.dashboard.status"
+msgid "label_active"
+msgstr "Active"
+
+msgctxt "exams.dashboard.status"
+msgid "label_scheduled"
+msgstr "Scheduled"
+
+msgctxt "exams.dashboard.status"
+msgid "label_draft"
+msgstr "Draft"
+
+msgctxt "exams.dashboard.status"
+msgid "label_archived"
+msgstr "Archived"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_active"
+msgstr "Open to students now"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_scheduled"
+msgstr "Waiting to start"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_draft"
+msgstr "Not published yet"
+
+msgctxt "exams.dashboard.status"
+msgid "hint_archived"
+msgstr "Closed, results kept"
+
+msgctxt "exams.wizard"
+msgid "rail_kicker"
+msgstr "EMSARENA · TEACHER"
+
+msgctxt "exams.wizard"
+msgid "step_basics"
+msgstr "Basics"
+
+msgctxt "exams.wizard"
+msgid "step_basics_sub"
+msgstr "Name, type, category"
+
+msgctxt "exams.wizard"
+msgid "step_timing"
+msgstr "Timing & Questions"
+
+msgctxt "exams.wizard"
+msgid "step_timing_sub"
+msgstr "Dates, duration, count"
+
+msgctxt "exams.wizard"
+msgid "step_access"
+msgstr "Access"
+
+msgctxt "exams.wizard"
+msgid "step_access_sub"
+msgstr "Status, who can enter"
+
+msgctxt "exams.wizard"
+msgid "step_proctor"
+msgstr "Proctoring"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_sub"
+msgstr "Anti-cheating (optional)"
+
+msgctxt "exams.wizard"
+msgid "rail_hint"
+msgstr "Only the name is required. You can fill the rest later via Edit."
+
+msgctxt "exams.wizard"
+msgid "step_basics_title"
+msgstr "Exam basics"
+
+msgctxt "exams.wizard"
+msgid "step_basics_desc"
+msgstr ""
+"Give the exam a name and choose its type. This is what students see on the "
+"exam card."
+
+msgctxt "exams.wizard"
+msgid "step_timing_title"
+msgstr "Timing and questions"
+
+msgctxt "exams.wizard"
+msgid "step_timing_desc"
+msgstr ""
+"Set when the exam runs, its duration and how many questions each student "
+"gets."
+
+msgctxt "exams.wizard"
+msgid "step_access_title"
+msgstr "Access and status"
+
+msgctxt "exams.wizard"
+msgid "step_access_desc"
+msgstr "Control whether the exam is visible to students and who can enter."
+
+msgctxt "exams.wizard"
+msgid "step_proctor_title"
+msgstr "Exam proctoring"
+
+msgctxt "exams.wizard"
+msgid "step_proctor_desc"
+msgstr ""
+"Anti-cheating measures. This step is optional — if off, the exam runs in "
+"normal mode."
+
+msgctxt "exams.wizard"
+msgid "proctor_unavailable"
+msgstr "Proctoring is not available for this exam."
+
+msgctxt "exams.wizard"
+msgid "nav_back"
+msgstr "Back"
+
+msgctxt "exams.wizard"
+msgid "nav_next"
+msgstr "Next"
+
+msgctxt "exams.wizard"
+msgid "nav_step"
+msgstr "Step"
+
+msgctxt "exams.wizard"
+msgid "errors_title"
+msgstr "Please fix the errors below:"
+
+msgctxt "exams.wizard"
+msgid "title_required"
+msgstr "Exam name is required."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_archived"
+msgstr "Exam archived."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_unarchived"
+msgstr "Exam unarchived."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated"
+msgstr "Exam duplicated — added to drafts."
+
+msgctxt "exams.model.exam.field"
+msgid "is_archived"
+msgstr "Archived"
+
+msgctxt "exams.model.exam.field"
+msgid "archived_at"
+msgstr "Archived at"
+
+msgctxt "exams.model.exam.help"
+msgid "is_archived"
+msgstr "If set, the exam moves to the archive (results are kept)."
+
+msgctxt "exams.model.exam.help"
+msgid "archived_at"
+msgstr "When the exam was archived."
+
+msgctxt "exams.wizard"
+msgid "code_generate"
+msgstr "Generate"
+
+msgctxt "exams.wizard"
+msgid "code_hint"
+msgstr "6 digits. If empty, the exam is open to everyone."
+
+msgctxt "exams.wizard"
+msgid "section_schedule"
+msgstr "Schedule"
+
+msgctxt "exams.wizard"
+msgid "section_distribution"
+msgstr "Question distribution"
+
+msgctxt "exams.wizard"
+msgid "section_measures"
+msgstr "Measures"
+
+msgctxt "exams.wizard"
+msgid "desc_is_active"
+msgstr ""
+"When on, students see the exam in the list. If off, it is kept as a draft."
+
+msgctxt "exams.wizard"
+msgid "desc_is_public"
+msgstr "If open, no code is required and all students can enter."
+
+msgctxt "exams.wizard"
+msgid "desc_paint"
+msgstr ""
+"In written exams, students can draw their answer (schemes, formulas, "
+"diagrams)."
+
+msgctxt "exams.wizard"
+msgid "desc_supervision"
+msgstr "Full screen, tab monitoring and other anti-cheating measures."
+
+msgctxt "exams.wizard"
+msgid "type_desc_test"
+msgstr "Multiple-choice questions, automatic grading."
+
+msgctxt "exams.wizard"
+msgid "type_desc_written"
+msgstr "Open answer, essay or Paint — graded manually."
+
+msgctxt "exams.wizard"
+msgid "type_desc_coding"
+msgstr "Code or task-based practical exam."
+
+msgctxt "exams.dashboard"
+msgid "show_more"
+msgstr "Show more"
+
+msgctxt "exams.wizard"
+msgid "unsaved_title"
+msgstr "Unsaved changes"
+
+msgctxt "exams.wizard"
+msgid "unsaved_body"
+msgstr "Your changes are not saved. Do you want to save before leaving?"
+
+msgctxt "exams.wizard"
+msgid "unsaved_save"
+msgstr "Save"
+
+msgctxt "exams.wizard"
+msgid "unsaved_discard"
+msgstr "Discard & leave"
+
+msgctxt "exams.wizard"
+msgid "unsaved_cancel"
+msgstr "Keep editing"
+
+msgctxt "exams.wizard"
+msgid "saving"
+msgstr "Saving…"
+
+msgctxt "exams.wizard"
+msgid "saved"
+msgstr "Saved"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Student role cannot be selected manually."
@@ -30685,129 +31424,3 @@ msgstr "Group"
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "You can change the decision within about %(n)s minutes."
-
-# --- "View as" (istifadəçi profilinə baxış) ---
-msgctxt "accounts.view_as"
-msgid "viewing_user_profile"
-msgstr "You are currently viewing this user's profile:"
-
-msgctxt "accounts.view_as"
-msgid "mode_readonly"
-msgstr "View only"
-
-msgctxt "accounts.view_as"
-msgid "mode_full"
-msgstr "Full control"
-
-msgctxt "accounts.view_as"
-msgid "readonly_warning"
-msgstr "In this mode you can only view — no changes are possible."
-
-msgctxt "accounts.view_as"
-msgid "full_warning"
-msgstr "In this mode you can perform any action on behalf of the user. Every action is written to the audit log."
-
-msgctxt "accounts.view_as"
-msgid "exit_view_full"
-msgstr "Back to my profile"
-
-msgctxt "accounts.view_as"
-msgid "exit_view"
-msgstr "Exit"
-
-msgctxt "accounts.view_as"
-msgid "open_panel"
-msgstr "View user profile"
-
-msgctxt "accounts.view_as"
-msgid "panel_title"
-msgstr "Select a user"
-
-msgctxt "accounts.view_as"
-msgid "select_organization"
-msgstr "Select organization"
-
-msgctxt "accounts.view_as"
-msgid "search_user_placeholder"
-msgstr "Search by name, username or email…"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_all"
-msgstr "All roles"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_teacher"
-msgstr "Teachers"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_student"
-msgstr "Students"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_admin"
-msgstr "Admins"
-
-msgctxt "accounts.view_as"
-msgid "role_filter_staff"
-msgstr "Staff"
-
-msgctxt "accounts.view_as"
-msgid "no_results"
-msgstr "No results found"
-
-msgctxt "accounts.view_as"
-msgid "loading"
-msgstr "Loading…"
-
-msgctxt "accounts.view_as"
-msgid "load_more"
-msgstr "Show more"
-
-msgctxt "accounts.view_as"
-msgid "search_error"
-msgstr "An error occurred during search"
-
-msgctxt "accounts.view_as"
-msgid "session_ended"
-msgstr "Viewing session ended — permission or context changed."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_readonly"
-msgstr "You are in view-only mode — this action is not allowed."
-
-msgctxt "accounts.view_as"
-msgid "action_blocked_sensitive"
-msgstr "For security reasons this action is blocked on another user's profile."
-
-msgctxt "accounts.view_as"
-msgid "not_allowed"
-msgstr "You do not have permission to view this user's profile."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_readonly"
-msgstr "You are viewing %(name)s's profile. View-only mode — you cannot make changes."
-
-#, python-format
-msgctxt "accounts.view_as"
-msgid "started_full"
-msgstr "You are viewing %(name)s's profile in full-control mode. All actions are written to the audit log."
-
-msgctxt "accounts.view_as"
-msgid "stopped"
-msgstr "You are back on your own profile."
-
-
-msgctxt "exams.service.parsing.error"
-msgid "file_docx_not_allowed"
-msgstr "Word (.docx/.doc) files are not accepted for security reasons. Upload questions as PDF, TXT or image (PNG/JPG) files."
-
-msgid "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin."
-msgstr "Word (.docx) files are not accepted for security reasons — use PDF or TXT instead."
-
-msgctxt "exams.template.test_question_bank"
-msgid "PDF-dən gələn bullet formatı da dəstəklənir"
-msgstr "Bullet format from PDFs is also supported"
-
-msgid "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
-msgstr "Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly deal with?&#10;A) Data analysis and decision making&#10;B) Computer repair&#10;C) Game development&#10;D) Setting up the internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ Build and deployment process&#10;• Customer support&#10;• Design process"

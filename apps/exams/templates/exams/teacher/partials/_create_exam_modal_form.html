@@ -1,342 +1,493 @@
 {% load i18n %}
-
-<form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate>
+{% comment %}
+  Yeni imtahan sehrbazı (4 addım). Sahə adları/ID-ləri DƏYİŞMİR — mövcud
+  exam_create_edit_modal.js (tip seçici, giriş/nəzarət toggle, axtarışlı select,
+  Bootstrap select) olduğu kimi işləyir. Addım naviqasiyası + addım-əsaslı
+  validasiya + aydın xəta xülasəsi exam_wizard.js-dədir.
+{% endcomment %}
+<form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate data-exam-wizard data-editing="{% if is_editing %}1{% else %}0{% endif %}">
     {% csrf_token %}
     <input type="hidden" name="modal" value="1">
     {% if linked_course %}
         <input type="hidden" name="course_id" value="{{ linked_course.id }}">
     {% endif %}
-
-    {% if form.non_field_errors %}
-        <div class="create-exam-form-errors">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
     {{ group_student_map|json_script:"createExamGroupStudentMap" }}
 
-    <div class="create-exam-form-grid">
-        {% if form.organization %}
-            <div class="form-group form-group-full">
-                {{ form.organization.label_tag }}
-                {{ form.organization }}
-                {% if form.organization.errors %}<div class="field-error">{{ form.organization.errors.0 }}</div>{% endif %}
+    <div class="exam-wizard">
+        {# ───────────────────────── LEFT RAIL ───────────────────────── #}
+        <aside class="ew-rail">
+            <div class="ew-rail-head">
+                <div class="ew-rail-kicker">{% trans "rail_kicker" context "exams.wizard" %}</div>
+                <h2 class="ew-rail-title">
+                    {% if is_editing %}{% trans "heading_edit_exam" context "exams.template.create_edit_exam" %}{% else %}{% trans "heading_create_exam" context "exams.template.create_edit_exam" %}{% endif %}
+                </h2>
             </div>
-        {% endif %}
+            <div class="ew-steps" data-ew-steps>
+                <button type="button" class="ew-step is-active" data-ew-step-nav="0">
+                    <span class="ew-sn">1</span>
+                    <span class="ew-stx"><span class="ew-st">{% trans "step_basics" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_basics_sub" context "exams.wizard" %}</span></span>
+                </button>
+                <button type="button" class="ew-step" data-ew-step-nav="1">
+                    <span class="ew-sn">2</span>
+                    <span class="ew-stx"><span class="ew-st">{% trans "step_timing" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_timing_sub" context "exams.wizard" %}</span></span>
+                </button>
+                <button type="button" class="ew-step" data-ew-step-nav="2">
+                    <span class="ew-sn">3</span>
+                    <span class="ew-stx"><span class="ew-st">{% trans "step_access" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_access_sub" context "exams.wizard" %}</span></span>
+                </button>
+                <button type="button" class="ew-step" data-ew-step-nav="3">
+                    <span class="ew-sn">4</span>
+                    <span class="ew-stx"><span class="ew-st">{% trans "step_proctor" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_proctor_sub" context "exams.wizard" %}</span></span>
+                </button>
+            </div>
+            <div class="ew-rail-foot">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{% trans "rail_hint" context "exams.wizard" %}</span>
+            </div>
+        </aside>
 
-        <div class="form-group form-group-full">
-            {{ form.title.label_tag }}
-            {{ form.title }}
-            {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
-        </div>
+        {# ───────────────────────── RIGHT PANE ───────────────────────── #}
+        <div class="ew-pane">
+            <div class="ew-mstep" data-ew-mstep aria-hidden="true">
+                <span class="ew-msdot is-on"></span><span class="ew-msdot"></span><span class="ew-msdot"></span><span class="ew-msdot"></span>
+            </div>
 
-        <div class="form-group form-group-full">
-            {{ form.description.label_tag }}
-            {{ form.description }}
-            {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
-        </div>
+            <div class="ew-pane-head">
+                <div class="ew-pane-head-tx">
+                    <h3 data-ew-title>{% trans "step_basics_title" context "exams.wizard" %}</h3>
+                    <p data-ew-desc>{% trans "step_basics_desc" context "exams.wizard" %}</p>
+                </div>
+                <button type="button" class="ew-x" data-bs-dismiss="modal" aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
 
-        <div class="form-group">
-            {{ form.exam_type.label_tag }}
-            {% with selected_exam_type=form.exam_type.value|default:"test" %}
-                <div class="create-exam-type-picker" data-create-exam-type-picker>
-                    <div class="btn-group w-100 create-exam-type-toggle" role="group" aria-label="{{ form.exam_type.label }}">
-                        {% for value, label in form.exam_type.field.choices %}
-                            <input type="radio"
-                                   class="btn-check js-create-exam-type-option"
-                                   name="create_exam_type_ui"
-                                   id="createExamTypeOption_{{ forloop.counter }}"
-                                   autocomplete="off"
-                                   value="{{ value }}"
-                                   {% if selected_exam_type == value %}checked{% endif %}>
-                            <label class="btn btn-outline-primary create-exam-type-btn" for="createExamTypeOption_{{ forloop.counter }}">
-                                {% if value == "test" %}
-                                    <i class="fas fa-list-ul" aria-hidden="true"></i>
-                                {% elif value == "coding" %}
-                                    <i class="fas fa-code" aria-hidden="true"></i>
-                                {% else %}
-                                    <i class="fas fa-pen-fancy" aria-hidden="true"></i>
-                                {% endif %}
-                                <span>{{ label|capfirst }}</span>
+            {# Aydın xəta xülasəsi — server 400 qaytaranda exam_wizard.js doldurur #}
+            <div class="ew-errsummary" data-ew-errors hidden role="alert">
+                <div class="ew-errsummary-head"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> <span data-ew-errcount></span></div>
+                <ul data-ew-errlist></ul>
+            </div>
+
+            <div class="ew-pane-body">
+                {% if form.non_field_errors %}
+                    <div class="create-exam-form-errors ew-nonfield">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                {# ===================== STEP 1 — ƏSASLAR ===================== #}
+                <section class="ew-panel is-active" data-ew-panel="0"
+                         data-ew-step-title="{% trans 'step_basics_title' context 'exams.wizard' %}"
+                         data-ew-step-desc="{% trans 'step_basics_desc' context 'exams.wizard' %}">
+                    <div class="create-exam-form-grid">
+                        {% if form.organization %}
+                            <div class="form-group form-group-full">
+                                {{ form.organization.label_tag }}
+                                {{ form.organization }}
+                                {% if form.organization.errors %}<div class="field-error">{{ form.organization.errors.0 }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group form-group-full">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.exam_type.label_tag }}
+                            {% with selected_exam_type=form.exam_type.value|default:"test" %}
+                                <div class="create-exam-type-picker ew-typesel" data-create-exam-type-picker>
+                                    {% for value, label in form.exam_type.field.choices %}
+                                        <input type="radio"
+                                               class="btn-check js-create-exam-type-option"
+                                               name="create_exam_type_ui"
+                                               id="createExamTypeOption_{{ forloop.counter }}"
+                                               autocomplete="off"
+                                               value="{{ value }}"
+                                               {% if selected_exam_type == value %}checked{% endif %}>
+                                        <label class="ew-typecard" for="createExamTypeOption_{{ forloop.counter }}"
+                                               {% if value == "test" %}style="--tc:#0284C7;--tc-soft:#E0F2FE;"{% elif value == "coding" %}style="--tc:#7C3AED;--tc-soft:#F2ECFE;"{% else %}style="--tc:#BE3455;--tc-soft:#FCE7EE;"{% endif %}>
+                                            <span class="ew-tc-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                                            {% if value == "test" %}
+                                                <span class="ew-tc-ic" style="background:#E0F2FE;color:#075985;"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-name">{{ label|capfirst }}</span>
+                                                <span class="ew-tc-desc">{% trans "type_desc_test" context "exams.wizard" %}</span>
+                                            {% elif value == "coding" %}
+                                                <span class="ew-tc-ic" style="background:#F2ECFE;color:#5B21B6;"><i class="fas fa-code" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-name">{{ label|capfirst }}</span>
+                                                <span class="ew-tc-desc">{% trans "type_desc_coding" context "exams.wizard" %}</span>
+                                            {% else %}
+                                                <span class="ew-tc-ic" style="background:#FCE7EE;color:#9F1239;"><i class="fas fa-pen-fancy" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-name">{{ label|capfirst }}</span>
+                                                <span class="ew-tc-desc">{% trans "type_desc_written" context "exams.wizard" %}</span>
+                                            {% endif %}
+                                        </label>
+                                    {% endfor %}
+                                    <div class="d-none">
+                                        {{ form.exam_type }}
+                                    </div>
+                                </div>
+                            {% endwith %}
+                            {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.exam_type_extended.label_tag }}
+                            <div class="bootstrap-single-select">
+                                {{ form.exam_type_extended }}
+                            </div>
+                            <small class="form-text text-muted">{% trans "exam_type_extended_help" context "exams.template.create_exam_modal_form" %}</small>
+                            {% if form.exam_type_extended.errors %}<div class="field-error">{{ form.exam_type_extended.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                {# ===================== STEP 2 — VAXT & SUALLAR ===================== #}
+                <section class="ew-panel" data-ew-panel="1"
+                         data-ew-step-title="{% trans 'step_timing_title' context 'exams.wizard' %}"
+                         data-ew-step-desc="{% trans 'step_timing_desc' context 'exams.wizard' %}">
+                    <div class="create-exam-form-grid">
+                        <div class="form-group">
+                            {{ form.access_code.label_tag }}
+                            <div class="ew-code-row">
+                                {{ form.access_code }}
+                                <button type="button" class="ew-gencode" data-ew-gencode>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
+                                    {% trans "code_generate" context "exams.wizard" %}
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">{% trans "code_hint" context "exams.wizard" %}</small>
+                            {% if form.access_code.errors %}<div class="field-error">{{ form.access_code.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group" data-random-question-group data-test-random-question-group>
+                            {{ form.random_question_count.label_tag }}
+                            {{ form.random_question_count }}
+                            {% if form.random_question_count.help_text %}
+                                <small class="form-text text-muted">{{ form.random_question_count.help_text }}</small>
+                            {% endif %}
+                            {% if form.random_question_count.errors %}<div class="field-error">{{ form.random_question_count.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <div class="ew-fsec">
+                                <span class="ew-fs-ic" style="background:#EEF2FF;color:#1E40AF;"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
+                                <h4>{% trans "section_schedule" context "exams.wizard" %}</h4>
+                                <span class="ew-fs-rule"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.start_datetime.label_tag }}
+                            {{ form.start_datetime }}
+                            {% if form.start_datetime.errors %}<div class="field-error">{{ form.start_datetime.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.end_datetime.label_tag }}
+                            {{ form.end_datetime }}
+                            {% if form.end_datetime.errors %}<div class="field-error">{{ form.end_datetime.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.total_duration_minutes.label_tag }}
+                            {{ form.total_duration_minutes }}
+                            {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.default_question_time_seconds.label_tag }}
+                            {{ form.default_question_time_seconds }}
+                            {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <div class="ew-fsec">
+                                <span class="ew-fs-ic" style="background:#F2ECFE;color:#5B21B6;"><i class="fas fa-layer-group" aria-hidden="true"></i></span>
+                                <h4>{% trans "section_distribution" context "exams.wizard" %}</h4>
+                                <span class="ew-fs-rule"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-group-full" data-random-fairness-group>
+                            <input type="hidden" name="{{ form.fair_question_distribution_enabled.html_name }}" value="false">
+                            <label class="modal-check-label">
+                                {{ form.fair_question_distribution_enabled }}
+                                <span class="modal-check-label-text">{{ form.fair_question_distribution_enabled.label }}
+                                    {% if form.fair_question_distribution_enabled.help_text %}<span class="ew-switch-desc">{{ form.fair_question_distribution_enabled.help_text }}</span>{% endif %}
+                                </span>
                             </label>
-                        {% endfor %}
-                    </div>
-                    <div class="d-none">
-                        {{ form.exam_type }}
-                    </div>
-                </div>
-            {% endwith %}
-            {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
-        </div>
+                            {% if form.fair_question_distribution_enabled.errors %}<div class="field-error">{{ form.fair_question_distribution_enabled.errors.0 }}</div>{% endif %}
+                        </div>
 
-        <div class="form-group">
-            {{ form.access_code.label_tag }}
-            {{ form.access_code }}
-            {% if form.access_code.errors %}<div class="field-error">{{ form.access_code.errors.0 }}</div>{% endif %}
-        </div>
+                        <div class="form-group form-group-full" data-ai-difficulty-balance-group>
+                            <input type="hidden" name="{{ form.ai_difficulty_balance_enabled.html_name }}" value="false">
+                            <label class="modal-check-label">
+                                {{ form.ai_difficulty_balance_enabled }}
+                                <span class="modal-check-label-text">{{ form.ai_difficulty_balance_enabled.label }}
+                                    {% if form.ai_difficulty_balance_enabled.help_text %}<span class="ew-switch-desc">{{ form.ai_difficulty_balance_enabled.help_text }}</span>{% endif %}
+                                </span>
+                            </label>
+                            {% if form.ai_difficulty_balance_enabled.errors %}<div class="field-error">{{ form.ai_difficulty_balance_enabled.errors.0 }}</div>{% endif %}
+                        </div>
 
-        <div class="form-group">
-            {{ form.start_datetime.label_tag }}
-            {{ form.start_datetime }}
-            {% if form.start_datetime.errors %}<div class="field-error">{{ form.start_datetime.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group">
-            {{ form.end_datetime.label_tag }}
-            {{ form.end_datetime }}
-            {% if form.end_datetime.errors %}<div class="field-error">{{ form.end_datetime.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group">
-            {{ form.total_duration_minutes.label_tag }}
-            {{ form.total_duration_minutes }}
-            {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group">
-            {{ form.default_question_time_seconds.label_tag }}
-            {{ form.default_question_time_seconds }}
-            {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group form-group-full" data-random-question-group data-test-random-question-group>
-            {{ form.random_question_count.label_tag }}
-            {{ form.random_question_count }}
-            {% if form.random_question_count.help_text %}
-                <small class="form-text text-muted">{{ form.random_question_count.help_text }}</small>
-            {% endif %}
-            {% if form.random_question_count.errors %}<div class="field-error">{{ form.random_question_count.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group form-group-full" data-random-fairness-group>
-            <input type="hidden" name="{{ form.fair_question_distribution_enabled.html_name }}" value="false">
-            <label class="modal-check-label">
-                {{ form.fair_question_distribution_enabled }}
-                <span class="modal-check-label-text">{{ form.fair_question_distribution_enabled.label }}</span>
-            </label>
-            {% if form.fair_question_distribution_enabled.help_text %}
-                <small class="form-text text-muted">{{ form.fair_question_distribution_enabled.help_text }}</small>
-            {% endif %}
-            {% if form.fair_question_distribution_enabled.errors %}<div class="field-error">{{ form.fair_question_distribution_enabled.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group form-group-full" data-ai-difficulty-balance-group>
-            <input type="hidden" name="{{ form.ai_difficulty_balance_enabled.html_name }}" value="false">
-            <label class="modal-check-label">
-                {{ form.ai_difficulty_balance_enabled }}
-                <span class="modal-check-label-text">{{ form.ai_difficulty_balance_enabled.label }}</span>
-            </label>
-            {% if form.ai_difficulty_balance_enabled.help_text %}
-                <small class="form-text text-muted">{{ form.ai_difficulty_balance_enabled.help_text }}</small>
-            {% endif %}
-            {% if form.ai_difficulty_balance_enabled.errors %}<div class="field-error">{{ form.ai_difficulty_balance_enabled.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group">
-            {{ form.max_attempts_per_user.label_tag }}
-            {{ form.max_attempts_per_user }}
-            {% if form.max_attempts_per_user.errors %}<div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group">
-            <label class="modal-check-label modal-check-label--active">
-                {{ form.is_active }}
-                <span class="modal-check-label-text">{{ form.is_active.label }}</span>
-            </label>
-            {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group" data-exam-paint-group>
-            <label class="modal-check-label modal-check-label--paint">
-                {{ form.enable_paint }}
-                <span class="modal-check-label-text">{% trans "enable_paint" context "exams.template.create_exam_modal_form" %}</span>
-            </label>
-            {% if form.enable_paint.errors %}<div class="field-error">{{ form.enable_paint.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group form-group-full">
-            <label class="modal-check-label modal-check-label--public">
-                {{ form.is_public }}
-                <span class="modal-check-label-text">{% trans "is_public" context "exams.template.create_exam_modal_form" %}</span>
-            </label>
-            {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="form-group form-group-full">
-            <div class="create-exam-modal-section-title">
-                <h4><i class="fas fa-users" style="color:#198754;"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
-                <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
-            </div>
-        </div>
-
-        <div id="createExamAccessRestrictions" class="form-group form-group-full create-exam-access-block">
-            <div class="create-exam-access-grid">
-                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups">
-                    <label class="create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
-                    <div class="create-exam-search-wrap">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}">
-                    </div>
-                    <div id="createExamGroupsList" class="create-exam-search-list"></div>
-                    <div class="create-exam-selection-counter">
-                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
-                    </div>
-                    <div class="d-none">
-                        {{ form.allowed_groups }}
-                    </div>
-                    {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
-                </div>
-
-                <div class="create-exam-searchable-select" data-target-select-name="allowed_users">
-                    <label class="create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
-                    <div class="create-exam-search-wrap">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}">
-                    </div>
-                    <div id="createExamUsersList" class="create-exam-search-list"></div>
-                    <div class="create-exam-selection-counter">
-                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamUsersCount">0</span>
-                    </div>
-                    <div class="d-none">
-                        {{ form.allowed_users }}
-                    </div>
-                    {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
-        </div>
-        {% if form.exam_supervision_enabled %}
-        <div class="form-group form-group-full">
-            <div class="create-exam-modal-section-title">
-                <h4><i class="fas fa-shield-alt" style="color:#dc3545;"></i> {% trans "supervision_section_title" context "exams.template.create_exam_modal_form" %}</h4>
-                <p>{% trans "supervision_section_help" context "exams.template.create_exam_modal_form" %}</p>
-            </div>
-        </div>
-
-        <div class="form-group form-group-full">
-            <label class="modal-check-label modal-check-label--supervision">
-                <input type="checkbox" name="supervision_enabled" id="modalSupervisionEnabled"
-                       class="form-check-input"
-                       {% if supervision_config and supervision_config.enabled %}checked{% endif %}>
-                <span class="modal-check-label-text">{% trans "supervision_enable_label" context "exams.template.create_exam_modal_form" %}</span>
-            </label>
-        </div>
-
-        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
-            <div class="create-exam-form-grid">
-                <div class="form-group">
-                    <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select name="supervision_template" id="modalSupervisionTemplate" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                            <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_exam_modal_form" %}</option>
-                            <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_exam_modal_form" %}</option>
-                        </select>
-                    </div>
-                </div>
-
-                {# Template info panel #}
-                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
-                    <h4 id="modalSupervisionTemplateInfoTitle" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
-                    <p id="modalSupervisionTemplateInfoDesc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
-                    <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
-                </div>
-
-                <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_force_fullscreen"
-                                   class="form-check-input"
-                                   {% if not supervision_config or supervision_config.force_fullscreen %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_force_fullscreen" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_detect_tab_switch"
-                                   class="form-check-input"
-                                   {% if not supervision_config or supervision_config.detect_tab_switch %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_detect_tab_switch" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_block_copy_paste"
-                                   class="form-check-input"
-                                   {% if not supervision_config or supervision_config.block_copy_paste %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_block_copy_paste" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_disable_right_click"
-                                   class="form-check-input"
-                                   {% if not supervision_config or supervision_config.disable_right_click %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_disable_right_click" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_disable_text_selection"
-                                   class="form-check-input"
-                                   {% if supervision_config and supervision_config.disable_text_selection %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_disable_text_selection" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="modal-check-label">
-                            <input type="checkbox" name="supervision_restrict_shortcuts"
-                                   class="form-check-input"
-                                   {% if not supervision_config or supervision_config.restrict_keyboard_shortcuts %}checked{% endif %}>
-                            <span class="modal-check-label-text">{% trans "supervision_restrict_shortcuts" context "exams.template.create_exam_modal_form" %}</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="modalSupervisionGracePeriod">{% trans "supervision_grace_period_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <input type="number" name="supervision_grace_period"
-                               id="modalSupervisionGracePeriod" class="form-control"
-                               min="5" max="60"
-                               value="{{ supervision_config.grace_period_seconds|default:15 }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="modalSupervisionMaxViolations">{% trans "supervision_max_violations_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <input type="number" name="supervision_max_violations"
-                               id="modalSupervisionMaxViolations" class="form-control"
-                               min="1" max="20"
-                               value="{{ supervision_config.max_fullscreen_violations|default:3 }}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <div class="bootstrap-single-select">
-                            <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                                <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
-                                <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_exam_modal_form" %}</option>
-                                <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_exam_modal_form" %}</option>
-                                <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_exam_modal_form" %}</option>
-                            </select>
+                        <div class="form-group">
+                            {{ form.max_attempts_per_user.label_tag }}
+                            {{ form.max_attempts_per_user }}
+                            {% if form.max_attempts_per_user.errors %}<div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
+                </section>
 
-                    <div class="form-group">
-                        <label for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
-                        <div class="bootstrap-single-select">
-                            <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                                <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
-                                <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_exam_modal_form" %}</option>
-                                <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_exam_modal_form" %}</option>
-                            </select>
+                {# ===================== STEP 3 — GİRİŞ ===================== #}
+                <section class="ew-panel" data-ew-panel="2"
+                         data-ew-step-title="{% trans 'step_access_title' context 'exams.wizard' %}"
+                         data-ew-step-desc="{% trans 'step_access_desc' context 'exams.wizard' %}">
+                    <div class="create-exam-form-grid">
+                        <div class="form-group form-group-full">
+                            <label class="modal-check-label modal-check-label--active">
+                                {{ form.is_active }}
+                                <span class="modal-check-label-text">{{ form.is_active.label }}
+                                    <span class="ew-switch-desc">{% trans "desc_is_active" context "exams.wizard" %}</span>
+                                </span>
+                            </label>
+                            {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label class="modal-check-label modal-check-label--public">
+                                {{ form.is_public }}
+                                <span class="modal-check-label-text">{% trans "is_public" context "exams.template.create_exam_modal_form" %}
+                                    <span class="ew-switch-desc">{% trans "desc_is_public" context "exams.wizard" %}</span>
+                                </span>
+                            </label>
+                            {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full" data-exam-paint-group>
+                            <label class="modal-check-label modal-check-label--paint">
+                                {{ form.enable_paint }}
+                                <span class="modal-check-label-text">{% trans "enable_paint" context "exams.template.create_exam_modal_form" %}
+                                    <span class="ew-switch-desc">{% trans "desc_paint" context "exams.wizard" %}</span>
+                                </span>
+                            </label>
+                            {% if form.enable_paint.errors %}<div class="field-error">{{ form.enable_paint.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <div class="create-exam-modal-section-title">
+                                <h4><i class="fas fa-users" style="color:#198754;"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
+                                <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
+                            </div>
+                        </div>
+
+                        <div id="createExamAccessRestrictions" class="form-group form-group-full create-exam-access-block">
+                            <div class="create-exam-access-grid">
+                                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups">
+                                    <label class="create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
+                                    <div class="create-exam-search-wrap">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}">
+                                    </div>
+                                    <div id="createExamGroupsList" class="create-exam-search-list"></div>
+                                    <div class="create-exam-selection-counter">
+                                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
+                                    </div>
+                                    <div class="d-none">
+                                        {{ form.allowed_groups }}
+                                    </div>
+                                    {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <div class="create-exam-searchable-select" data-target-select-name="allowed_users">
+                                    <label class="create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
+                                    <div class="create-exam-search-wrap">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}">
+                                    </div>
+                                    <div id="createExamUsersList" class="create-exam-search-list"></div>
+                                    <div class="create-exam-selection-counter">
+                                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamUsersCount">0</span>
+                                    </div>
+                                    <div class="d-none">
+                                        {{ form.allowed_users }}
+                                    </div>
+                                    {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </section>
+
+                {# ===================== STEP 4 — NƏZARƏT ===================== #}
+                <section class="ew-panel" data-ew-panel="3"
+                         data-ew-step-title="{% trans 'step_proctor_title' context 'exams.wizard' %}"
+                         data-ew-step-desc="{% trans 'step_proctor_desc' context 'exams.wizard' %}">
+                    {% if form.exam_supervision_enabled %}
+                    <div class="create-exam-form-grid">
+                        <div class="form-group form-group-full">
+                            <label class="modal-check-label modal-check-label--supervision">
+                                <input type="checkbox" name="supervision_enabled" id="modalSupervisionEnabled"
+                                       class="form-check-input"
+                                       {% if supervision_config and supervision_config.enabled %}checked{% endif %}>
+                                <span class="modal-check-label-text">{% trans "supervision_enable_label" context "exams.template.create_exam_modal_form" %}
+                                    <span class="ew-switch-desc">{% trans "desc_supervision" context "exams.wizard" %}</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
+                            <div class="create-exam-form-grid">
+                                <div class="form-group">
+                                    <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
+                                    <div class="bootstrap-single-select">
+                                        <select name="supervision_template" id="modalSupervisionTemplate" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                            <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
+                                            <option value="light" {% if supervision_config and supervision_config.template == 'light' %}selected{% endif %}>{% trans "supervision_template_light" context "exams.template.create_exam_modal_form" %}</option>
+                                            <option value="medium" {% if supervision_config and supervision_config.template == 'medium' %}selected{% endif %}>{% trans "supervision_template_medium" context "exams.template.create_exam_modal_form" %}</option>
+                                            <option value="strict" {% if supervision_config and supervision_config.template == 'strict' %}selected{% endif %}>{% trans "supervision_template_strict" context "exams.template.create_exam_modal_form" %}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
+                                    <h4 id="modalSupervisionTemplateInfoTitle" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
+                                    <p id="modalSupervisionTemplateInfoDesc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
+                                    <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
+                                </div>
+
+                                <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
+                                    <label class="ew-checks-label">{% trans "section_measures" context "exams.wizard" %}</label>
+                                    <div class="ew-checks">
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_force_fullscreen"
+                                                   class="form-check-input"
+                                                   {% if not supervision_config or supervision_config.force_fullscreen %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_force_fullscreen" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_detect_tab_switch"
+                                                   class="form-check-input"
+                                                   {% if not supervision_config or supervision_config.detect_tab_switch %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_detect_tab_switch" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_block_copy_paste"
+                                                   class="form-check-input"
+                                                   {% if not supervision_config or supervision_config.block_copy_paste %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_block_copy_paste" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_disable_right_click"
+                                                   class="form-check-input"
+                                                   {% if not supervision_config or supervision_config.disable_right_click %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_disable_right_click" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_disable_text_selection"
+                                                   class="form-check-input"
+                                                   {% if supervision_config and supervision_config.disable_text_selection %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_disable_text_selection" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="modal-check-label">
+                                            <input type="checkbox" name="supervision_restrict_shortcuts"
+                                                   class="form-check-input"
+                                                   {% if not supervision_config or supervision_config.restrict_keyboard_shortcuts %}checked{% endif %}>
+                                            <span class="modal-check-label-text">{% trans "supervision_restrict_shortcuts" context "exams.template.create_exam_modal_form" %}</span>
+                                        </label>
+                                    </div>
+                                    </div>{# /.ew-checks #}
+
+                                    <div class="ew-grid2">
+                                    <div class="form-group">
+                                        <label for="modalSupervisionGracePeriod">{% trans "supervision_grace_period_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <input type="number" name="supervision_grace_period"
+                                               id="modalSupervisionGracePeriod" class="form-control"
+                                               min="5" max="60"
+                                               value="{{ supervision_config.grace_period_seconds|default:15 }}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalSupervisionMaxViolations">{% trans "supervision_max_violations_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <input type="number" name="supervision_max_violations"
+                                               id="modalSupervisionMaxViolations" class="form-control"
+                                               min="1" max="20"
+                                               value="{{ supervision_config.max_fullscreen_violations|default:3 }}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <div class="bootstrap-single-select">
+                                            <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                                <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
+                                                <option value="lock_exam" {% if not supervision_config or supervision_config.violation_action == 'lock_exam' %}selected{% endif %}>{% trans "supervision_action_lock_exam" context "exams.template.create_exam_modal_form" %}</option>
+                                                <option value="remove_student" {% if supervision_config and supervision_config.violation_action == 'remove_student' %}selected{% endif %}>{% trans "supervision_action_remove_student" context "exams.template.create_exam_modal_form" %}</option>
+                                                <option value="mark_suspicious" {% if supervision_config and supervision_config.violation_action == 'mark_suspicious' %}selected{% endif %}>{% trans "supervision_action_mark_suspicious" context "exams.template.create_exam_modal_form" %}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <div class="bootstrap-single-select">
+                                            <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+                                                <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                                <option value="one_extra_chance" {% if supervision_config and supervision_config.recovery_policy == 'one_extra_chance' %}selected{% endif %}>{% trans "supervision_recovery_one_extra_chance" context "exams.template.create_exam_modal_form" %}</option>
+                                                <option value="teacher_controlled" {% if not supervision_config or supervision_config.recovery_policy == 'teacher_controlled' %}selected{% endif %}>{% trans "supervision_recovery_teacher_controlled" context "exams.template.create_exam_modal_form" %}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    </div>{# /.ew-grid2 #}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="ew-callout ew-callout--warn">
+                        <i class="fas fa-shield-halved" aria-hidden="true"></i>
+                        <span>{% trans "proctor_unavailable" context "exams.wizard" %}</span>
+                    </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            {# ───────────────────────── FOOTER ───────────────────────── #}
+            <div class="ew-pane-foot">
+                <button type="button" class="ew-btn ew-btn--ghost" data-ew-back hidden>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    {% trans "nav_back" context "exams.wizard" %}
+                </button>
+                <button type="button" class="ew-btn ew-btn--ghost js-close-create-exam" data-ew-cancel>
+                    {% trans "action_cancel" context "exams.template.create_exam_modal_form" %}
+                </button>
+                <span class="ew-prog" data-ew-prog>{% trans "nav_step" context "exams.wizard" %} 1 / 4</span>
+                <div class="ew-foot-right">
+                    <button type="button" class="ew-btn ew-btn--primary" data-ew-next>
+                        {% trans "nav_next" context "exams.wizard" %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    </button>
+                    <button type="submit" class="ew-btn ew-btn--primary modal-confirm-btn" data-ew-submit hidden>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        {% if is_editing %}{% trans "action_save" context "exams.template.create_exam_modal_form" %}{% else %}{% trans "action_create" context "exams.template.create_exam_modal_form" %}{% endif %}
+                    </button>
                 </div>
             </div>
         </div>
-        {% endif %}
-    </div>
-
-    <div class="modal-buttons create-exam-modal-actions">
-        <button type="button" class="modal-cancel-btn js-close-create-exam">{% trans "action_cancel" context "exams.template.create_exam_modal_form" %}</button>
-        <button type="submit" class="modal-confirm-btn">{% if is_editing %}{% trans "action_save" context "exams.template.create_exam_modal_form" %}{% else %}{% trans "action_create" context "exams.template.create_exam_modal_form" %}{% endif %}</button>
     </div>
 </form>

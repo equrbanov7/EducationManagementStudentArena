@@ -323,7 +323,8 @@ def user_profile(request):
     my_exams_count = 0
     my_exams_search_query = ""
     my_exams_filter_type = ""
-    my_exams_page_obj = None
+    my_exams_list = []
+    my_exams_dashboard = None
     question_bank_banks = []
     question_bank_page_obj = None
     question_bank_search_query = ""
@@ -351,13 +352,15 @@ def user_profile(request):
             if my_exams_filter_type:
                 my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
 
-            my_exams_count = my_exams_qs.count()
             # Kart redizaynı üçün: sual sayı + apellyasiya sayı (annotate) və
-            # aktiv dil variantları (prefetch). Yalnız göstərilən səhifəyə tətbiq
-            # olunur — baza queryset toxunulmur.
+            # aktiv dil variantları (prefetch). Müəllim paneli imtahanları status
+            # üzrə qruplaşdırdığı üçün səhifələmə yoxdur — müəllifin bütün
+            # imtahanları bir sorğuda yüklənir (annotate/prefetch ilə N+1 önlənir),
+            # qruplaşma və KPI sayğacları servisdə Python tərəfdə hesablanır.
             from django.db.models import Prefetch
 
             from apps.exams.models import ExamLanguageVariant
+            from apps.exams.services.teacher_dashboard import build_teacher_exam_dashboard
 
             my_exams_display_qs = my_exams_qs.annotate(
                 card_question_count=Count("questions", filter=Q(questions__is_active=True), distinct=True),
@@ -369,7 +372,9 @@ def user_profile(request):
                     to_attr="active_language_variants",
                 )
             )
-            my_exams_page_obj = Paginator(my_exams_display_qs, 6).get_page(request.GET.get("exam_page"))
+            my_exams_list = list(my_exams_display_qs)
+            my_exams_count = len(my_exams_list)
+            my_exams_dashboard = build_teacher_exam_dashboard(my_exams_list)
         else:
             # Yalnız sidebar/profile-info üçün ucuz sayğac.
             my_exams_count = my_exams_qs.count()
@@ -2072,7 +2077,8 @@ def user_profile(request):
         "posting_blocked_reason": posting_blocked_reason,
         "my_courses": my_courses,
         "courses_count": courses_count,
-        "my_exams": my_exams_page_obj,
+        "my_exams": my_exams_list,
+        "my_exams_dashboard": my_exams_dashboard,
         "my_exams_count": my_exams_count,
         "my_exams_search_query": my_exams_search_query,
         "my_exams_filter_type": my_exams_filter_type,

@@ -9,13 +9,14 @@ from django.template.loader import render_to_string
 from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from apps.courses.models import CourseMembership
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from apps.live_exam.models import LiveSession
 from apps.organizations.models import Organization
 from core.helpers import _tenant_scoped_courses
 from core.permissions import is_superadmin_user, request_has_permission
@@ -131,6 +132,46 @@ def _restore_superadmin_profile_organization(request):
 
 def _organization_selection_queryset():
     return Organization.objects.filter(is_active=True, status="active").order_by("name")
+
+
+LIVE_ACTIVE_STATES = (
+    LiveSession.STATE_LOBBY,
+    LiveSession.STATE_QUESTION,
+    LiveSession.STATE_REVEAL,
+)
+
+DETAIL_QUESTION_PAGE_SIZE = 20
+DETAIL_QUESTION_MAX_PAGE_SIZE = 50
+
+
+def _exam_detail_question_queryset(exam):
+    return exam.questions.prefetch_related("options").order_by("order", "id")
+
+
+def _positive_int(value, *, default, maximum=None):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    if parsed < 0:
+        return default
+    if maximum is not None:
+        return min(parsed, maximum)
+    return parsed
+
+
+def _get_exam_detail_question_page(exam, *, offset=0, limit=DETAIL_QUESTION_PAGE_SIZE):
+    offset = _positive_int(offset, default=0)
+    limit = _positive_int(limit, default=DETAIL_QUESTION_PAGE_SIZE, maximum=DETAIL_QUESTION_MAX_PAGE_SIZE)
+    limit = max(1, limit)
+    fetched = list(_exam_detail_question_queryset(exam)[offset : offset + limit + 1])
+    questions = fetched[:limit]
+    return {
+        "questions": questions,
+        "has_more": len(fetched) > limit,
+        "next_offset": offset + len(questions),
+        "page_size": limit,
+    }
 
 
 def _resolve_selected_superadmin_organization(request):
@@ -451,20 +492,71 @@ def teacher_exam_detail(request, slug):
         return _organization_selection_redirect(request)
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
-    questions = exam.questions.all().order_by("order")
+    question_page = _get_exam_detail_question_page(exam)
     profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
     exam_back_label = pgettext("exams.template.teacher_exam_detail", "action_back")
+    active_live_session = (
+        LiveSession.objects.filter(exam=exam, host_user=request.user, state__in=LIVE_ACTIVE_STATES)
+        .order_by("-created_at", "-id")
+        .first()
+    )
+    active_live_continue_url = ""
+    active_live_new_url = ""
+    if active_live_session:
+        active_live_continue_url = (
+            f"{reverse('liveExam:host_presentation', kwargs={'pin': active_live_session.pin})}?controls=1"
+        )
+        active_live_new_url = f"{reverse('liveExam:create_session_slug', kwargs={'slug': exam.slug})}?force_new=1"
 
     return render(
         request,
         "exams/teacher/teacher_exam_detail.html",
         {
             "exam": exam,
-            "questions": questions,
+            "questions": question_page["questions"],
+            "questions_has_more": question_page["has_more"],
+            "questions_next_offset": question_page["next_offset"],
+            "questions_page_size": question_page["page_size"],
+            "questions_total_count": exam.questions.count(),
             "profile_return_url": profile_return_url,
             "exam_navigation_query": nav_query,
             "exam_back_label": exam_back_label,
+            "active_live_session": active_live_session,
+            "active_live_continue_url": active_live_continue_url,
+            "active_live_new_url": active_live_new_url,
         },
+    )
+
+
+@login_required
+@require_GET
+def teacher_exam_detail_questions_page(request, slug):
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+    question_page = _get_exam_detail_question_page(
+        exam,
+        offset=request.GET.get("offset"),
+        limit=request.GET.get("limit"),
+    )
+    _, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
+    html = render_to_string(
+        "exams/teacher/partials/_exam_detail_question_items.html",
+        {
+            "exam": exam,
+            "questions": question_page["questions"],
+            "exam_navigation_query": nav_query,
+        },
+        request=request,
+    )
+    return JsonResponse(
+        {
+            "html": html,
+            "has_more": question_page["has_more"],
+            "next_offset": question_page["next_offset"],
+        }
     )
 
 
@@ -566,3 +658,91 @@ def delete_exam(request, slug):
         return redirect(_teacher_profile_my_exams_url())
 
     return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})
+
+
+@login_required
+@require_POST
+def toggle_exam_archive(request, slug):
+    """
+    İmtahanı arxivlə / arxivdən çıxar — soft state (silmə deyil).
+
+    Nəticələr saxlanır; imtahan müəllim panelində "Arxiv" bölməsinə keçir.
+    Yalnız POST — təsdiq UI tərəfində verilir.
+    """
+    from django.utils import timezone
+
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
+    exam = _get_editable_exam_or_404(request, slug)
+    if exam.author_id != request.user.id:
+        _ensure_exam_permission(request, "exam.edit")
+
+    exam.is_archived = not exam.is_archived
+    exam.archived_at = timezone.now() if exam.is_archived else None
+    exam.save(update_fields=["is_archived", "archived_at"])
+
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=exam.organization,
+        obj=exam,
+        new_values={"is_archived": str(exam.is_archived)},
+        reason="exam_archived" if exam.is_archived else "exam_unarchived",
+        request=request,
+    )
+    try:
+        from core.cache import invalidate_exam_metadata_cache
+
+        invalidate_exam_metadata_cache(exam.pk)
+    except Exception:
+        pass
+
+    messages.success(
+        request,
+        (
+            pgettext_lazy("exams.view.exams.message", "exam_archived")
+            if exam.is_archived
+            else pgettext_lazy("exams.view.exams.message", "exam_unarchived")
+        ),
+    )
+    redirect_url = _safe_same_origin_redirect_path(request, request.POST.get("next") or request.GET.get("next"))
+    return redirect(redirect_url or _teacher_profile_my_exams_url())
+
+
+@login_required
+@require_POST
+def duplicate_exam(request, slug):
+    """
+    İmtahanı qaralama kimi dublikat et: parametrlər + giriş icazələri + nəzarət
+    konfiqurasiyası kopyalanır (suallar yox). Yalnız POST.
+    """
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
+    _ensure_exam_permission(request, "exam.create")
+    exam = _get_editable_exam_or_404(request, slug)
+
+    from apps.exams.services.duplication import duplicate_exam as duplicate_exam_service
+
+    copy = duplicate_exam_service(exam=exam, user=request.user)
+
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.CREATE,
+        user=request.user,
+        organization=copy.organization,
+        obj=copy,
+        new_values={"title": copy.title, "duplicated_from": exam.slug},
+        reason="exam_duplicated",
+        request=request,
+    )
+    messages.success(request, pgettext_lazy("exams.view.exams.message", "exam_duplicated"))
+    return redirect(_teacher_profile_my_exams_url())
