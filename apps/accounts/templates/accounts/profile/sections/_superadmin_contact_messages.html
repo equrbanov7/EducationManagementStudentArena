@@ -198,6 +198,200 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
         })();
         </script>
 
+    {% elif trial_selected_request %}
+        <div class="contact-msg-detail">
+            <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
+               class="contact-back-link">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                {% trans "Back to inbox" %}
+            </a>
+
+            <div class="contact-msg-card contact-msg-card--trial">
+                <div class="contact-msg-header">
+                    <h3>
+                        {{ trial_selected_request.full_name }}
+                        <span class="contact-pill contact-pill--trial">{% trans "Trial exam request" %}</span>
+                        {% if trial_selected_request.reply_delivery_status == "sent" %}
+                            <span class="contact-pill contact-pill--ok">✓ {% trans "Sent" %}</span>
+                        {% elif trial_selected_request.reply_delivery_status == "pending" %}
+                            <span class="contact-pill contact-pill--pending">{% trans "Sending" %}</span>
+                        {% elif trial_selected_request.reply_delivery_status == "failed" %}
+                            <span class="contact-pill contact-pill--failed">{% trans "Failed" %}</span>
+                        {% elif trial_selected_request.reply_delivery_status == "recorded" %}
+                            <span class="contact-pill contact-pill--recorded">{% trans "Saved" %}</span>
+                        {% else %}
+                            <span class="contact-pill contact-pill--new">{% trans "New" %}</span>
+                        {% endif %}
+                    </h3>
+                    <p class="contact-msg-meta">
+                        <a href="mailto:{{ trial_selected_request.email }}">{{ trial_selected_request.email }}</a>
+                        · {{ trial_selected_request.subject_name }}
+                        · {{ trial_selected_request.created_at|date:"d.m.Y H:i" }}
+                    </p>
+                </div>
+
+                <div class="contact-msg-file-panel">
+                    <div>
+                        <p class="contact-msg-card__label">{% trans "Uploaded PDF" %}</p>
+                        <strong>{{ trial_selected_request.original_filename|default:"Suallar PDF" }}</strong>
+                    </div>
+                    {% if trial_selected_request.questions_file %}
+                    <a class="contact-btn contact-btn--file"
+                       href="{{ trial_selected_request.questions_file.url }}"
+                       target="_blank"
+                       rel="noopener">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        {% trans "Download PDF" %}
+                    </a>
+                    {% endif %}
+                </div>
+
+                <p class="contact-msg-card__label">{% trans "Student note" %}</p>
+                <div class="contact-msg-body">{{ trial_selected_request.note|default:"-" }}</div>
+            </div>
+
+            {% if trial_selected_request.reply_delivery_status == "failed" %}
+            <div class="contact-delivery-alert contact-delivery-alert--failed">
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Email was not delivered." %}</strong>
+                    {% if trial_selected_request.reply_delivery_error %}
+                    <span>{{ trial_selected_request.reply_delivery_error }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif trial_selected_request.reply_delivery_status == "pending" %}
+            <div class="contact-delivery-alert contact-delivery-alert--pending">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Email delivery is still pending." %}</strong>
+                    <span>{% trans "Refresh shortly to see the final status." %}</span>
+                </div>
+            </div>
+            {% elif trial_selected_request.reply_delivery_status == "recorded" %}
+            <div class="contact-delivery-alert contact-delivery-alert--recorded">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <div>
+                    <strong>{% trans "Reply is saved, but delivery was not confirmed." %}</strong>
+                    <span>{% trans "Send it again to get a fresh delivery status." %}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post"
+                  action="{{ profile_base_url }}?section=superadmin-contact-messages&trial_id={{ trial_selected_request.pk }}"
+                  class="contact-reply-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="trial_reply">
+                <input type="hidden" name="trial_id" value="{{ trial_selected_request.pk }}">
+
+                <div class="contact-form-row">
+                    <label for="id_trial_reply_from">{% trans "Send from" %}</label>
+                    <input type="hidden"
+                           name="reply_from"
+                           id="id_trial_reply_from"
+                           value="info"
+                           required
+                           data-contact-reply-from-input>
+                    <div class="dropdown language-switcher language-switcher--reply contact-mail-switcher"
+                         data-contact-reply-from>
+                        <button type="button"
+                                class="language-switcher__trigger dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                data-bs-display="static"
+                                aria-haspopup="listbox"
+                                aria-expanded="false">
+                            <span class="language-switcher__label">{% trans "Mailbox" %}</span>
+                            <span class="language-switcher__value" data-contact-reply-from-label>info@emsarena.com</span>
+                            <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
+                        </button>
+                        <div class="language-switcher__menu dropdown-menu"
+                             role="listbox"
+                             aria-label="{% trans 'Send from' %}">
+                            <button type="button"
+                                    class="language-switcher__option dropdown-item is-active"
+                                    role="option"
+                                    aria-selected="true"
+                                    data-contact-reply-from-option
+                                    data-value="info"
+                                    data-label="info@emsarena.com">
+                                <span class="language-switcher__option-code">INFO</span>
+                                <span class="language-switcher__option-label">info@emsarena.com</span>
+                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+                            </button>
+                            <button type="button"
+                                    class="language-switcher__option dropdown-item"
+                                    role="option"
+                                    aria-selected="false"
+                                    data-contact-reply-from-option
+                                    data-value="support"
+                                    data-label="support@emsarena.com">
+                                <span class="language-switcher__option-code">SUP</span>
+                                <span class="language-switcher__option-label">support@emsarena.com</span>
+                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-row">
+                    <label for="id_trial_reply_body">{% trans "Confirmation" %}</label>
+                    <textarea name="reply_body" id="id_trial_reply_body"
+                              rows="8" minlength="10" maxlength="10000" required
+                              placeholder="{% trans 'Write your reply...' %}">{{ trial_selected_request.reply_body|default:default_trial_reply }}</textarea>
+                    <small>{% trans "This marks the request as added and emails the student." %}</small>
+                </div>
+
+                <div class="contact-form-actions">
+                    <button type="submit" class="contact-btn contact-btn--primary">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        {% trans "Send confirmation" %}
+                    </button>
+                    <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
+                       class="contact-btn contact-btn--ghost">{% trans "Cancel" %}</a>
+                </div>
+            </form>
+
+            {% if trial_selected_request.reply_body %}
+            <div class="contact-msg-card contact-msg-card--previous-reply">
+                <h4>{% trans "Last reply attempt" %}</h4>
+                <p class="contact-msg-meta">
+                    {% trans "From" %}: {{ trial_selected_request.get_reply_from_display }}
+                    · {{ trial_selected_request.reply_sent_by|default:"-" }}
+                    {% if trial_selected_request.reply_sent_at %}
+                    · {{ trial_selected_request.reply_sent_at|date:"d.m.Y H:i" }}
+                    {% endif %}
+                </p>
+                <div class="contact-msg-body">{{ trial_selected_request.reply_body }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <script nonce="{{ request.csp_nonce }}">
+        (function () {
+            'use strict';
+            document.querySelectorAll('[data-contact-reply-from]').forEach(function (picker) {
+                var row = picker.closest('.contact-form-row');
+                var input = row ? row.querySelector('[data-contact-reply-from-input]') : null;
+                var label = picker.querySelector('[data-contact-reply-from-label]');
+                if (!input || !label) {
+                    return;
+                }
+                picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (option) {
+                    option.addEventListener('click', function () {
+                        input.value = option.getAttribute('data-value') || '';
+                        label.textContent = option.getAttribute('data-label') || option.textContent.trim();
+                        picker.querySelectorAll('[data-contact-reply-from-option]').forEach(function (item) {
+                            var isActive = item === option;
+                            item.classList.toggle('is-active', isActive);
+                            item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                        });
+                    });
+                });
+            });
+        })();
+        </script>
+
     {# ---------- List view ---------- #}
     {% else %}
         <div class="contact-msg-toolbar">
@@ -218,38 +412,44 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
             <form method="get" class="contact-msg-search">
                 <input type="hidden" name="section" value="superadmin-contact-messages">
                 <input type="search" name="q" value="{{ contact_search_query }}"
-                       placeholder="{% trans 'Search name, email, message...' %}">
+                       placeholder="{% trans 'Search name, email, message, file...' %}">
                 <button type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
             </form>
         </div>
 
         {% if contact_messages_list %}
         <ul class="contact-msg-list">
-            {% for m in contact_messages_list %}
-            <li class="contact-msg-item {% if m.reply_delivery_status == 'failed' %}contact-msg-item--failed{% elif m.reply_delivery_status == 'pending' %}contact-msg-item--pending{% elif m.reply_delivery_status == 'recorded' %}contact-msg-item--recorded{% elif not m.is_handled %}contact-msg-item--unread{% endif %}">
-                <a href="{{ profile_base_url }}?section=superadmin-contact-messages&message_id={{ m.pk }}"
+            {% for item in contact_messages_list %}
+            <li class="contact-msg-item {% if item.kind == 'trial' %}contact-msg-item--trial{% endif %} {% if item.status == 'failed' %}contact-msg-item--failed{% elif item.status == 'pending' %}contact-msg-item--pending{% elif item.status == 'recorded' %}contact-msg-item--recorded{% elif item.status == 'new' %}contact-msg-item--unread{% endif %}">
+                <a href="{{ profile_base_url }}?section=superadmin-contact-messages&{% if item.kind == 'trial' %}trial_id{% else %}message_id{% endif %}={{ item.pk }}"
                    class="contact-msg-link">
                     <div class="contact-msg-row-main">
                         <span class="contact-msg-sender">
-                            <strong>{{ m.name }}</strong>
-                            <span class="contact-msg-email">{{ m.email }}</span>
+                            <strong>{{ item.name }}</strong>
+                            <span class="contact-msg-email">{{ item.email }}</span>
                         </span>
-                        {% if m.reply_delivery_status == "sent" %}
+                        {% if item.kind == "trial" %}
+                            <span class="contact-pill contact-pill--trial">{% trans "Trial" %}</span>
+                        {% endif %}
+                        {% if item.status == "sent" %}
                             <span class="contact-pill contact-pill--ok">✓ {% trans "Sent" %}</span>
-                        {% elif m.reply_delivery_status == "pending" %}
+                        {% elif item.status == "pending" %}
                             <span class="contact-pill contact-pill--pending">{% trans "Sending" %}</span>
-                        {% elif m.reply_delivery_status == "failed" %}
+                        {% elif item.status == "failed" %}
                             <span class="contact-pill contact-pill--failed">{% trans "Failed" %}</span>
-                        {% elif m.reply_delivery_status == "recorded" %}
+                        {% elif item.status == "recorded" %}
                             <span class="contact-pill contact-pill--recorded">{% trans "Saved" %}</span>
                         {% else %}
                             <span class="contact-pill contact-pill--new">{% trans "New" %}</span>
                         {% endif %}
-                        <span class="contact-msg-date">{{ m.created_at|date:"d.m.Y H:i" }}</span>
+                        <span class="contact-msg-date">{{ item.created_at|date:"d.m.Y H:i" }}</span>
                     </div>
                     <div class="contact-msg-row-sub">
-                        <span class="contact-msg-subject">{{ m.get_subject_display }}</span>
-                        <span class="contact-msg-snippet">{{ m.message|truncatechars:90 }}</span>
+                        <span class="contact-msg-subject">
+                            {% if item.has_attachment %}<i class="fas fa-paperclip" aria-hidden="true"></i>{% endif %}
+                            {{ item.subject }}
+                        </span>
+                        <span class="contact-msg-snippet">{{ item.snippet|truncatechars:90 }}</span>
                     </div>
                 </a>
             </li>

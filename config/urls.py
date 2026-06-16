@@ -49,6 +49,9 @@ urlpatterns = [
     path("blog/", include("apps.blog.legacy_urls")),
     # Public contact page (registered before catch-all blog urls so /contact/ resolves first)
     path("", include("apps.contact.urls")),
+    # Trial-exam ("sınaq imtahanı") request — login-required student form.
+    # Registered before the catch-all blog urls so /trial-exam/ resolves first.
+    path("", include(("apps.trial_exams.urls", "trial_exams"), namespace="trial_exams")),
     path("", include("apps.blog.urls")),
     path("", include("apps.live_exam.urls")),
     path("courses/", include("apps.courses.urls")),

@@ -114,6 +114,11 @@
     color: #475569;
 }
 
+.contact-pill--trial {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
 .contact-msg-search {
     display: flex;
     min-width: min(100%, 380px);
@@ -188,6 +193,10 @@
     border-left-color: #94a3b8;
 }
 
+.contact-msg-item--trial {
+    border-left-color: #7c3aed;
+}
+
 .contact-msg-link {
     display: block;
     padding: 16px 18px;
@@ -197,7 +206,7 @@
 
 .contact-msg-row-main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
     align-items: center;
     gap: 12px;
     margin-bottom: 8px;
@@ -304,6 +313,10 @@
     border-left: 4px solid var(--contact-blue);
 }
 
+.contact-msg-card--trial {
+    border-left: 4px solid #7c3aed;
+}
+
 .contact-msg-card h4 {
     margin: 0 0 8px;
     color: var(--contact-ink);
@@ -351,6 +364,23 @@
     color: #334155;
     line-height: 1.65;
     white-space: pre-wrap;
+}
+
+.contact-msg-file-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 14px 0 16px;
+    padding: 14px 16px;
+    border: 1px solid #ddd6fe;
+    border-radius: 10px;
+    background: #f5f3ff;
+    color: var(--contact-ink);
+}
+
+.contact-msg-file-panel p {
+    margin-bottom: 4px;
 }
 
 .contact-delivery-alert {
@@ -541,9 +571,20 @@
     background: #eff6ff;
 }
 
+.contact-btn--file {
+    flex: 0 0 auto;
+    border-color: #c4b5fd;
+    background: #ffffff;
+    color: #5b21b6;
+}
+
+.contact-btn--file:hover {
+    background: #ede9fe;
+}
+
 @media (max-width: 900px) {
     .contact-msg-row-main {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
     }
 
     .contact-msg-date {
@@ -591,6 +632,11 @@
     .contact-reply-form,
     .contact-delivery-alert {
         padding: 16px;
+    }
+
+    .contact-msg-file-panel {
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .contact-btn {

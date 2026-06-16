@@ -63,6 +63,7 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "exam_paints/",
     "labs/",
     "question_media/",
+    "trial_exams/",
 )
 
 # Minimum role level considered "teacher-level" for access to sensitive files
@@ -298,6 +299,23 @@ def _check_avatar_access(user, path: str) -> bool:  # noqa: ARG001
     return True
 
 
+def _check_trial_exam_access(user, path: str) -> bool:
+    """
+    Verify access to ``trial_exams/`` uploaded question PDFs.
+
+    Only the student who submitted the request may download their own file.
+    Staff/superusers are already granted earlier in
+    ``_check_private_media_access`` (they review submissions via the admin).
+    """
+    try:
+        from apps.trial_exams.models import TrialExamRequest
+
+        req = TrialExamRequest.objects.only("user_id").get(questions_file=path)
+        return req.user_id is not None and req.user_id == user.id
+    except TrialExamRequest.DoesNotExist:
+        return False
+
+
 # ---------------------------------------------------------------------------
 # Access-checker registry
 # ---------------------------------------------------------------------------
@@ -318,6 +336,7 @@ _ACCESS_CHECKERS: dict[str, object] = {
     "labs/": _check_lab_file_access,
     "course_resources/": _check_course_resource_access,
     "question_media/": _check_question_media_access,
+    "trial_exams/": _check_trial_exam_access,
 }
 
 

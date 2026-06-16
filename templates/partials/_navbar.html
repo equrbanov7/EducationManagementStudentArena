@@ -44,6 +44,31 @@
                         {% trans "exams" context "nav" %}
                     </a>
                 </li>
+                <li class="blog-header__nav-item">
+                    <a href="{% url 'liveExam:pin_entry' %}"
+                       {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
+                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'liveExam' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "live_exam" context "nav" %}
+                    </a>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li class="blog-header__nav-item">
+                    <a href="{% url 'trial_exams:request' %}"
+                       {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
+                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'trial_exams' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "trial_exam" context "nav" %}
+                    </a>
+                </li>
+                {% endif %}
+                {% if request.user.is_teacher_or_above %}
+                <li class="blog-header__nav-item">
+                    <a href="{% url 'exams:teacher_exam_list' %}"
+                       title="{% trans 'create_live_exam_hint' context 'nav' %}"
+                       class="blog-header__nav-link">
+                        {% trans "create_live_exam" context "nav" %}
+                    </a>
+                </li>
+                {% endif %}
                {% comment %} It is temporary deactivate {% endcomment %}
                 {% comment %} <li class="blog-header__nav-item">
                     <a href="{{ subscribe_url }}"
@@ -159,6 +184,29 @@
             {% trans "exams" context "nav" %}
         </a>
     </li>
+    <li class="blog-header__nav-item">
+        <a href="{% url 'liveExam:pin_entry' %}"
+           {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
+           class="blog-header__nav-link {% if request.resolver_match.namespace == 'liveExam' %}blog-header__nav-link--active{% endif %}">
+            {% trans "live_exam" context "nav" %}
+        </a>
+    </li>
+    {% if request.user.is_authenticated %}
+    <li class="blog-header__nav-item">
+        <a href="{% url 'trial_exams:request' %}"
+           {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
+           class="blog-header__nav-link {% if request.resolver_match.namespace == 'trial_exams' %}blog-header__nav-link--active{% endif %}">
+            {% trans "trial_exam" context "nav" %}
+        </a>
+    </li>
+    {% endif %}
+    {% if request.user.is_teacher_or_above %}
+    <li class="blog-header__nav-item">
+        <a href="{% url 'exams:teacher_exam_list' %}" class="blog-header__nav-link">
+            {% trans "create_live_exam" context "nav" %}
+        </a>
+    </li>
+    {% endif %}
 
     {% if request.user.is_authenticated %}
         <li class="blog-header__nav-item">

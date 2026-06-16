@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
+    <link rel="stylesheet" href="{% static 'trial_exams/css/trial_exam.css' %}?v=20260616">
+    {# No-JS fallback: never trap the user behind a skeleton. #}
+    <noscript>
+        <style>
+            [data-trial-root] [data-trial-skeleton] { display: none !important; }
+            [data-trial-root] [data-trial-content] { display: block !important; }
+        </style>
+    </noscript>
+{% endblock %}
+
+{% block content %}
+<div class="trial" data-trial-root data-loading="1">
+
+    {# ====================== HERO ====================== #}
+    <section class="trial__hero">
+        <div class="trial__hero-inner">
+            <span class="trial__eyebrow">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                {% trans "Pulsuz · Limitsiz" %}
+            </span>
+            <h1 class="trial__title">{% trans "Özün üçün sınaq imtahanı yarat" %}</h1>
+            <p class="trial__lead">
+                {% trans "Suallarını PDF formatında yüklə — komandamız onları gün ərzində sistemə əlavə etsin. Sonra istədiyin qədər təkrar həll et. Tamamilə pulsuz və limitsiz." %}
+            </p>
+
+            <ul class="trial__badges" aria-hidden="false">
+                <li class="trial__badge"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Pulsuz" %}</li>
+                <li class="trial__badge"><i class="fas fa-infinity" aria-hidden="true"></i> {% trans "Limitsiz təkrar" %}</li>
+                <li class="trial__badge"><i class="fas fa-clock" aria-hidden="true"></i> {% trans "Gün ərzində hazır" %}</li>
+            </ul>
+        </div>
+    </section>
+
+    {# ====================== HOW IT WORKS ====================== #}
+    <section class="trial__steps" aria-label="{% trans 'Necə işləyir' %}">
+        <ol class="trial__steps-list">
+            <li class="trial__step">
+                <span class="trial__step-num">1</span>
+                <div class="trial__step-tx">
+                    <h3>{% trans "Məlumatlarını yaz" %}</h3>
+                    <p>{% trans "Ad, soyad, email və fənnin adını daxil et." %}</p>
+                </div>
+            </li>
+            <li class="trial__step">
+                <span class="trial__step-num">2</span>
+                <div class="trial__step-tx">
+                    <h3>{% trans "Sualları PDF yüklə" %}</h3>
+                    <p>{% trans "Sual faylını sürüşdür və ya seçmək üçün klikləyin." %}</p>
+                </div>
+            </li>
+            <li class="trial__step">
+                <span class="trial__step-num">3</span>
+                <div class="trial__step-tx">
+                    <h3>{% trans "Gözlə və başla" %}</h3>
+                    <p>{% trans "Suallar gün ərzində əlavə olunacaq, email alacaqsan." %}</p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    {# ====================== FORM CARD ====================== #}
+    <section class="trial__form-section">
+        <div class="trial__card">
+
+            {# ---- Skeleton (shown until JS marks the page ready) ---- #}
+            <div class="trial__skeleton" data-trial-skeleton aria-hidden="true">
+                <span class="skeleton skeleton-line" style="width:45%;height:22px;"></span>
+                <span class="skeleton skeleton-line" style="width:80%;margin-top:14px;"></span>
+                <span class="skeleton skeleton-line" style="width:100%;height:46px;margin-top:22px;border-radius:12px;"></span>
+                <span class="skeleton skeleton-line" style="width:100%;height:46px;margin-top:14px;border-radius:12px;"></span>
+                <span class="skeleton skeleton-line" style="width:100%;height:46px;margin-top:14px;border-radius:12px;"></span>
+                <span class="skeleton skeleton-line" style="width:100%;height:120px;margin-top:14px;border-radius:16px;"></span>
+                <span class="skeleton skeleton-line" style="width:100%;height:50px;margin-top:20px;border-radius:12px;"></span>
+            </div>
+
+            {# ---- Real content ---- #}
+            <div class="trial__content" data-trial-content>
+                {% if submitted %}
+                    <div class="trial__success" role="status" aria-live="polite">
+                        <span class="trial__success-icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
+                        <h2>{% trans "Sorğun qəbul edildi!" %}</h2>
+                        <p>{% trans "Suallar gün ərzində sistemə əlavə olunacaq. Hazır olduqda email ilə xəbər verəcəyik." %}</p>
+                        <div class="trial__success-actions">
+                            <a href="{% url 'trial_exams:request' %}" class="trial__btn trial__btn--ghost">
+                                <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni sınaq imtahanı" %}
+                            </a>
+                            <a href="{% url 'exams:student_exam_list' %}" class="trial__btn trial__btn--primary">
+                                <i class="fas fa-list-check" aria-hidden="true"></i> {% trans "İmtahanlarıma keç" %}
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <h2 class="trial__card-title">{% trans "Sınaq imtahanı sorğusu" %}</h2>
+                    <p class="trial__card-sub">{% trans "Bütün məlumatlar konfidensial saxlanılır." %}</p>
+
+                    <form method="post"
+                          action="{% url 'trial_exams:request' %}"
+                          enctype="multipart/form-data"
+                          novalidate
+                          class="trial-form"
+                          data-trial-form>
+                        {% csrf_token %}
+
+                        {# Honeypot — visually & semantically hidden from real users #}
+                        <div class="trial-form__honeypot" aria-hidden="true">
+                            <label for="id_website">Website</label>
+                            {{ form.website }}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="trial__alert trial__alert--error" role="alert">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="trial-form__row">
+                            <div class="trial-form__field">
+                                <label for="{{ form.full_name.id_for_label }}" class="trial-form__label">
+                                    {% trans "Ad Soyad" %} <span class="trial-form__req">*</span>
+                                </label>
+                                {{ form.full_name }}
+                                {% if form.full_name.errors %}<small class="trial-form__error">{{ form.full_name.errors.0 }}</small>{% endif %}
+                            </div>
+                            <div class="trial-form__field">
+                                <label for="{{ form.email.id_for_label }}" class="trial-form__label">
+                                    {% trans "Email" %} <span class="trial-form__req">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<small class="trial-form__error">{{ form.email.errors.0 }}</small>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="trial-form__field">
+                            <label for="{{ form.subject_name.id_for_label }}" class="trial-form__label">
+                                {% trans "Fənnin adı" %} <span class="trial-form__req">*</span>
+                            </label>
+                            {{ form.subject_name }}
+                            {% if form.subject_name.errors %}<small class="trial-form__error">{{ form.subject_name.errors.0 }}</small>{% endif %}
+                        </div>
+
+                        {# ---- DROPZONE: the key UX element ---- #}
+                        <div class="trial-form__field">
+                            <label class="trial-form__label">
+                                {% trans "Suallar (PDF)" %} <span class="trial-form__req">*</span>
+                            </label>
+
+                            {# <label> wraps the input → clicking anywhere opens the file dialog.
+                               No `for` attribute: the implicit association avoids a double-open. #}
+                            <label class="trial-drop" data-trial-drop>
+                                <div class="trial-drop__inner" data-trial-drop-empty>
+                                    <span class="trial-drop__icon"><i class="fas fa-file-arrow-up" aria-hidden="true"></i></span>
+                                    <span class="trial-drop__title">{% trans "PDF faylını bura sürüşdür" %}</span>
+                                    <span class="trial-drop__or">{% trans "və ya seçmək üçün klikləyin" %}</span>
+                                    <span class="trial-drop__hint">{% trans "Yalnız PDF · maksimum 25 MB" %}</span>
+                                </div>
+
+                                <div class="trial-drop__file" data-trial-drop-file hidden>
+                                    <span class="trial-drop__file-icon"><i class="fas fa-file-pdf" aria-hidden="true"></i></span>
+                                    <span class="trial-drop__file-meta">
+                                        <span class="trial-drop__file-name" data-trial-file-name></span>
+                                        <span class="trial-drop__file-size" data-trial-file-size></span>
+                                    </span>
+                                    <button type="button" class="trial-drop__remove" data-trial-file-remove aria-label="{% trans 'Faylı sil' %}">
+                                        <i class="fas fa-xmark" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+
+                                {{ form.questions_file }}
+                            </label>
+                            {% if form.questions_file.errors %}<small class="trial-form__error">{{ form.questions_file.errors.0 }}</small>{% endif %}
+                            <small class="trial-form__error" data-trial-file-error hidden></small>
+                        </div>
+
+                        <div class="trial-form__field">
+                            <label for="{{ form.note.id_for_label }}" class="trial-form__label">
+                                {% trans "Qeyd" %} <span class="trial-form__optional">({% trans "könüllü" %})</span>
+                            </label>
+                            {{ form.note }}
+                            {% if form.note.errors %}<small class="trial-form__error">{{ form.note.errors.0 }}</small>{% endif %}
+                        </div>
+
+                        <p class="trial-form__notice">
+                            <i class="fas fa-circle-info" aria-hidden="true"></i>
+                            {% trans "Submit etdikdən sonra suallar gün ərzində sistemə əlavə olunacaq və email ilə xəbər verəcəyik." %}
+                        </p>
+
+                        <button type="submit" class="trial__btn trial__btn--primary trial__btn--full" data-trial-submit>
+                            <span class="trial__btn-label">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Sorğunu göndər" %}
+                            </span>
+                            <span class="trial__btn-spinner" hidden>
+                                <span class="trial__spinner" aria-hidden="true"></span> {% trans "Göndərilir..." %}
+                            </span>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'trial_exams/js/trial_exam.js' %}?v=20260616" defer></script>
+{% endblock %}

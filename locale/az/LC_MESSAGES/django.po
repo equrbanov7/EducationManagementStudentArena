@@ -28866,6 +28866,29 @@ msgctxt "exams.wizard"
 msgid "saved"
 msgstr "Yadda saxlanıldı"
 
+msgctxt "nav"
+msgid "live_exam"
+msgstr "Canlı imtahan"
+
+msgctxt "nav"
+msgid "trial_exam"
+msgstr "Sınaq imtahanı"
+
+msgctxt "nav"
+msgid "create_live_exam"
+msgstr "Canlı imtahan yarat"
+
+msgctxt "nav"
+msgid "create_live_exam_hint"
+msgstr ""
+"İmtahan yaradıb detalına girib oradan canlı imtahan başlada bilərsiniz"
+
+msgctxt "exams.wizard"
+msgid "tip_live_after_create"
+msgstr ""
+"İmtahanı yaratdıqdan sonra detalına daxil olub oradan canlı (Kahoot tipli) "
+"imtahan başlada bilərsiniz."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."
