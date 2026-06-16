@@ -11271,11 +11271,11 @@ msgstr "Другое"
 
 #: apps/contact/models.py:31
 msgid "info@emsarena.com"
-msgstr ""
+msgstr "info@emsarena.com"
 
 #: apps/contact/models.py:32
 msgid "support@emsarena.com"
-msgstr ""
+msgstr "support@emsarena.com"
 
 #: apps/contact/models.py:41
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:139
@@ -29023,6 +29023,293 @@ msgstr "Сохранение…"
 msgctxt "exams.wizard"
 msgid "saved"
 msgstr "Сохранено"
+
+msgctxt "nav"
+msgid "live_exam"
+msgstr "Живой экзамен"
+
+msgctxt "nav"
+msgid "trial_exam"
+msgstr "Пробный экзамен"
+
+msgctxt "nav"
+msgid "create_live_exam"
+msgstr "Создать живой экзамен"
+
+msgctxt "nav"
+msgid "create_live_exam_hint"
+msgstr ""
+"После создания экзамена откройте его страницу, чтобы запустить живой экзамен"
+
+msgctxt "exams.wizard"
+msgid "tip_live_after_create"
+msgstr ""
+"После создания экзамена откройте его страницу, чтобы запустить живой (в "
+"стиле Kahoot) экзамен."
+
+msgid "Ad, soyad, email və fənnin adını daxil et."
+msgstr "Укажите имя, email и название предмета."
+
+msgid "Aşağıdakı məlumatı oxuyun."
+msgstr "Ознакомьтесь с информацией ниже."
+
+msgid "Bütün məlumatlar konfidensial saxlanılır."
+msgstr "Все данные хранятся конфиденциально."
+
+msgid "Cavablandı"
+msgstr "Отвечено"
+
+msgid "EMSArena – Sınaq imtahanınız hazırdır"
+msgstr "EMSArena – Ваш пробный экзамен готов"
+
+msgid "EMSArena – Yeni sınaq imtahanı sorğusu"
+msgstr "EMSArena – Новый запрос на пробный экзамен"
+
+msgid "Fayl"
+msgstr "Файл"
+
+msgid "Fənnin adı"
+msgstr "Название предмета"
+
+msgid "Göndərdikdə sorğu “sistemə əlavə olundu” statusuna keçəcək."
+msgstr "После отправки запрос получит статус «добавлено в систему»."
+
+msgid "Göndərdiyiniz suallar sistemə əlavə olundu"
+msgstr "Отправленные вами вопросы добавлены в систему"
+
+msgid "Göndərilir..."
+msgstr "Отправляется..."
+
+msgid "Gözlə və başla"
+msgstr "Дождитесь и начните"
+
+msgid "Gün ərzində hazır"
+msgstr "Готово в течение дня"
+
+msgid "Hesabınıza daxil olub “İmtahanlar” bölməsindən başlaya bilərsiniz."
+msgstr "Войдите в аккаунт и начните в разделе «Экзамены»."
+
+msgid "Limitsiz təkrar"
+msgstr "Неограниченные попытки"
+
+msgid "Məlumatlarını yaz"
+msgstr "Введите данные"
+
+msgid "PDF faylını bura sürüşdür"
+msgstr "Перетащите PDF-файл сюда"
+
+msgid "Pulsuz"
+msgstr "Бесплатно"
+
+msgid "Pulsuz · Limitsiz"
+msgstr "Бесплатно · Без лимита"
+
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgid "Sorğun qəbul edildi!"
+msgstr "Ваш запрос принят!"
+
+msgid "Sorğunu göndər"
+msgstr "Отправить запрос"
+
+msgid "Sorğuya bax və faylı yüklə"
+msgstr "Открыть запрос и скачать файл"
+
+msgid "Sual faylını sürüşdür və ya seçmək üçün klikləyin."
+msgstr "Перетащите файл с вопросами или нажмите, чтобы выбрать."
+
+msgid "Suallar (PDF)"
+msgstr "Вопросы (PDF)"
+
+msgid "Suallar PDF"
+msgstr "Вопросы PDF"
+
+msgid ""
+"Suallar gün ərzində sistemə əlavə olunacaq. Hazır olduqda email ilə xəbər "
+"verəcəyik."
+msgstr ""
+"Вопросы будут добавлены в течение дня. Мы сообщим по email, когда всё будет "
+"готово."
+
+msgid "Suallar gün ərzində əlavə olunacaq, email alacaqsan."
+msgstr "Вопросы добавят в течение дня, вы получите письмо."
+
+msgid "Suallar əlavə olundu — tələbəyə təsdiq göndər"
+msgstr "Вопросы добавлены — отправьте подтверждение студенту"
+
+msgid "Suallar əlavə olunduqda təsdiq göndər"
+msgstr "Отправить подтверждение после добавления вопросов"
+
+msgid "Sualları PDF yüklə"
+msgstr "Загрузите вопросы в PDF"
+
+msgid ""
+"Suallarını PDF formatında yüklə — komandamız onları gün ərzində sistemə "
+"əlavə etsin. Sonra istədiyin qədər təkrar həll et. Tamamilə pulsuz və "
+"limitsiz."
+msgstr ""
+"Загрузите свои вопросы в PDF — наша команда добавит их в систему в течение "
+"дня. Затем решайте сколько угодно раз. Полностью бесплатно и без "
+"ограничений."
+
+msgid ""
+"Submit etdikdən sonra suallar gün ərzində sistemə əlavə olunacaq və email "
+"ilə xəbər verəcəyik."
+msgstr ""
+"После отправки вопросы будут добавлены в систему в течение дня, и мы "
+"уведомим вас по email."
+
+msgid "Sınaq imtahanı sorğusu"
+msgstr "Запрос на пробный экзамен"
+
+msgid "Sınaq imtahanınız hazırdır"
+msgstr "Ваш пробный экзамен готов"
+
+msgid "Tələbə bu ünvandan təsdiq gəldiyini görəcək."
+msgstr "Студент увидит, что подтверждение пришло с этого адреса."
+
+msgid ""
+"Tələbə pulsuz sınaq imtahanı üçün sual faylı göndərdi. Fayl saxlanıldı və "
+"admin panelindən baxa bilərsiniz."
+msgstr ""
+"Студент отправил файл с вопросами для бесплатного пробного экзамена. Файл "
+"сохранён, его можно просмотреть в админ-панели."
+
+msgid "Təsdiqi göndər"
+msgstr "Отправить подтверждение"
+
+msgid "Yalnız PDF · maksimum 25 MB"
+msgstr "Только PDF · максимум 25 МБ"
+
+msgid "Yeni sınaq imtahanı"
+msgstr "Новый пробный экзамен"
+
+msgid "Yeni sınaq imtahanı sorğusu"
+msgstr "Новый запрос на пробный экзамен"
+
+msgid "könüllü"
+msgstr "необязательно"
+
+msgid "və ya seçmək üçün klikləyin"
+msgstr "или нажмите, чтобы выбрать"
+
+msgid "Özün üçün sınaq imtahanı yarat"
+msgstr "Создайте пробный экзамен для себя"
+
+msgid ""
+"İmtahan tamamilə pulsuz və limitsizdir — istədiyiniz qədər təkrar verə "
+"bilərsiniz."
+msgstr ""
+"Экзамен полностью бесплатный и без ограничений — проходите сколько угодно "
+"раз."
+
+msgid "İmtahanlarıma keç"
+msgstr "Перейти к моим экзаменам"
+
+msgid "Necə işləyir"
+msgstr "Как это работает"
+
+msgid "Bu gün üçün sorğu limitinə çatdınız. Sabah yenidən cəhd edin."
+msgstr "Вы достигли дневного лимита запросов. Повторите попытку завтра."
+
+msgid "EMSArena — Sınaq imtahanınız hazırdır: %(subject)s"
+msgstr "EMSArena — Ваш пробный экзамен готов: %(subject)s"
+
+msgid "Faylı aç"
+msgstr "Открыть файл"
+
+msgid "Fənnin adı ən azı 2 simvol olmalıdır."
+msgstr "Название предмета должно содержать не менее 2 символов."
+
+msgid "Fənnin adında link ola bilməz."
+msgstr "Название предмета не может содержать ссылки."
+
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgid "Hazırlanır"
+msgstr "Готовится"
+
+msgid "Məsələn: Riyaziyyat, İngilis dili, Tarix..."
+msgstr "Например: математика, английский, история..."
+
+msgid "Orijinal fayl adı"
+msgstr "Исходное имя файла"
+
+msgid ""
+"Pulsuz və limitsiz sınaq imtahanı yarat: suallarını PDF formatında yüklə, "
+"komandamız gün ərzində sistemə əlavə etsin."
+msgstr ""
+"Создайте бесплатный безлимитный пробный экзамен: загрузите вопросы в PDF, и "
+"наша команда добавит их в систему в течение дня."
+
+msgid "Rədd edildi"
+msgstr "Отклонено"
+
+msgid ""
+"Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
+"yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və"
+" limitsiz şəkildə verə bilərsiniz. Uğurlar!"
+msgstr ""
+"Здравствуйте! На основе отправленных вами вопросов в EMSArena создан ваш "
+"пробный экзамен. Войдите в аккаунт и проходите его бесплатно и без "
+"ограничений в разделе «Экзамены». Удачи!"
+
+msgid "Sistemə əlavə olundu"
+msgstr "Добавлено в систему"
+
+msgid "Sorğunuz qəbul edildi! Suallar gün ərzində sistemə əlavə olunacaq."
+msgstr "Ваш запрос принят! Вопросы будут добавлены в течение дня."
+
+msgid "Sorğunuzu qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
+msgstr "Не удалось принять ваш запрос. Повторите попытку позже."
+
+msgid "Sınaq imtahanı"
+msgstr "Пробный экзамен"
+
+msgid "Sınaq imtahanı sorğuları"
+msgstr "Запросы на пробный экзамен"
+
+msgid "Sınaq imtahanı – EMSArena"
+msgstr "Пробный экзамен – EMSArena"
+
+msgid "Tələbəyə cavab"
+msgstr "Ответ студенту"
+
+msgid "Tələbəyə göndəriləcək təsdiq. Sadə mətn olaraq görünəcək."
+msgstr "Подтверждение для студента. Отображается как обычный текст."
+
+msgid "Təsdiq göndərilir və sorğu “sistemə əlavə olundu” kimi işarələndi."
+msgstr "Подтверждение отправляется, запрос отмечен как «добавлено в систему»."
+
+msgid "Zəhmət olmasa sualları PDF formatında yükləyin."
+msgstr "Пожалуйста, загрузите вопросы в формате PDF."
+
+msgid "[EMSArena Sınaq] %(subject)s — %(name)s"
+msgstr "[EMSArena Пробный] %(subject)s — %(name)s"
+
+msgid "Çox sayda sorğu göndərilib. Zəhmət olmasa bir az gözləyin."
+msgstr "Отправлено слишком много запросов. Подождите немного."
+
+msgid "İstifadəçi"
+msgstr "Пользователь"
+
+msgid "Əlavə qeyd (könüllü): sual sayı, çətinlik, istək..."
+msgstr ""
+"Доп. примечание (необязательно): число вопросов, сложность, пожелания..."
+
+msgid "✉ Suallar əlavə olundu — təsdiq göndər"
+msgstr "✉ Вопросы добавлены — отправить подтверждение"
+
+msgid "✓ Göndərildi — yenidən göndər"
+msgstr "✓ Отправлено — отправить снова"
+
+msgid "✓ Əlavə olundu"
+msgstr "✓ Добавлено"
+
+msgid "%(name)s “%(subject)s” fənni üçün sual faylı göndərdi."
+msgstr "%(name)s отправил(а) файл с вопросами по предмету «%(subject)s»."
 
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"

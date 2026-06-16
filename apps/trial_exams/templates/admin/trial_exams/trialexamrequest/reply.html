@@ -1,0 +1,154 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.reply-wrap { max-width: 920px; margin: 24px auto; }
+.reply-card { background: #fff; border-radius: 16px; padding: 28px;
+              box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+              border: 1px solid rgba(15,23,42,0.08); margin-bottom: 18px; }
+.reply-card h2 { margin-top: 0; font-size: 18px; }
+.reply-meta { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px;
+              font-size: 14px; color: #475569; }
+.reply-meta strong { color: #0f172a; }
+.file-btn { display: inline-block; background: #0f766e; color: #fff;
+            padding: 8px 16px; border-radius: 8px; text-decoration: none;
+            font-weight: 600; font-size: 13px; margin-top: 12px; }
+.reply-form label { display: block; font-weight: 600; margin-bottom: 6px;
+                    font-size: 14px; color: #0f172a; }
+.reply-form textarea, .reply-form select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; font-size: 14px; font-family: inherit;
+    box-sizing: border-box; background: #f8fafc; }
+.reply-form textarea:focus, .reply-form select:focus {
+    outline: none; border-color: #1e40af; background: #fff;
+    box-shadow: 0 0 0 4px rgba(30,64,175,0.12); }
+.reply-form .help { font-size: 12px; color: #64748b; margin-top: 4px; }
+.reply-form .errorlist { color: #b91c1c; font-size: 13px; padding: 0; list-style: none; }
+.reply-actions { display: flex; gap: 12px; margin-top: 18px; }
+.btn-primary { background: linear-gradient(135deg,#1e40af,#0f766e,#10b981);
+               color: #fff; border: none; padding: 12px 28px; border-radius: 10px;
+               font-weight: 700; cursor: pointer; font-size: 14px;
+               box-shadow: 0 8px 20px rgba(15,118,110,0.25); }
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-ghost { background: #fff; color: #1e40af; border: 1.5px solid #1e40af;
+             padding: 12px 24px; border-radius: 10px; font-weight: 600;
+             text-decoration: none; display: inline-flex; align-items: center; }
+.reply-status-pill { display: inline-block; padding: 4px 12px; border-radius: 999px;
+                font-weight: 600; font-size: 12px; margin-left: 8px; }
+.reply-status-pill--sent { background: #dcfce7; color: #166534; }
+.reply-status-pill--pending { background: #dbeafe; color: #1d4ed8; }
+.reply-status-pill--failed { background: #fee2e2; color: #991b1b; }
+.reply-error { margin-top: 12px; color: #991b1b; background: #fef2f2;
+               border: 1px solid #fecaca; padding: 10px 12px;
+               border-radius: 8px; font-size: 13px; }
+.original-msg { background: #f8fafc; border-left: 4px solid #0f766e;
+                padding: 14px 18px; border-radius: 8px; white-space: pre-wrap;
+                line-height: 1.6; color: #334155; margin-top: 12px; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> &rsaquo;
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a> &rsaquo;
+    <a href="{% url 'admin:trial_exams_trialexamrequest_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> &rsaquo;
+    <a href="{% url 'admin:trial_exams_trialexamrequest_change' trial_request.pk %}">{{ trial_request.full_name }}</a> &rsaquo;
+    {% trans 'Cavablandır' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="reply-wrap">
+
+    <div class="reply-card">
+        <h2>
+            {% trans "Sınaq imtahanı sorğusu" %}
+            {% if trial_request.reply_delivery_status == "sent" %}
+                <span class="reply-status-pill reply-status-pill--sent">✓ {% trans "Cavablandı" %}: {{ trial_request.reply_sent_at|date:"d.m.Y H:i" }}</span>
+            {% elif trial_request.reply_delivery_status == "pending" %}
+                <span class="reply-status-pill reply-status-pill--pending">{% trans "Göndərilir" %}</span>
+            {% elif trial_request.reply_delivery_status == "failed" %}
+                <span class="reply-status-pill reply-status-pill--failed">{% trans "Göndərilmədi" %}</span>
+            {% endif %}
+        </h2>
+        <div class="reply-meta">
+            <strong>{% trans "Ad Soyad" %}:</strong>   <span>{{ trial_request.full_name }}</span>
+            <strong>{% trans "Email" %}:</strong>      <span>{{ trial_request.email }}</span>
+            <strong>{% trans "Fənnin adı" %}:</strong> <span>{{ trial_request.subject_name }}</span>
+            <strong>{% trans "Tarix" %}:</strong>      <span>{{ trial_request.created_at|date:"d.m.Y H:i" }}</span>
+            <strong>{% trans "Status" %}:</strong>     <span>{{ trial_request.get_status_display }}</span>
+        </div>
+        {% if trial_request.note %}
+        <div class="original-msg">{{ trial_request.note }}</div>
+        {% endif %}
+        {% if trial_request.questions_file %}
+        {% trans "Suallar PDF" as default_fname %}
+        <a class="file-btn" href="{{ trial_request.questions_file.url }}" target="_blank" rel="noopener">
+            ⬇ {{ trial_request.original_filename|default:default_fname }}
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="reply-card">
+        <h2>{% trans "Suallar əlavə olundu — tələbəyə təsdiq göndər" %}</h2>
+        <p class="help" style="margin-top:-6px;">
+            {% trans "Göndərdikdə sorğu “sistemə əlavə olundu” statusuna keçəcək." %}
+        </p>
+
+        <form method="post" class="reply-form" novalidate>
+            {% csrf_token %}
+
+            <div style="margin-bottom:16px;">
+                <label for="{{ form.reply_from.id_for_label }}">{{ form.reply_from.label }}</label>
+                {{ form.reply_from }}
+                {{ form.reply_from.errors }}
+                <p class="help">{% trans "Tələbə bu ünvandan təsdiq gəldiyini görəcək." %}</p>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label for="{{ form.reply_body.id_for_label }}">{{ form.reply_body.label }}</label>
+                {{ form.reply_body }}
+                {{ form.reply_body.errors }}
+                <p class="help">{{ form.reply_body.help_text }}</p>
+            </div>
+
+            <div class="reply-actions">
+                <button type="submit" class="btn-primary">✉ {% trans "Təsdiqi göndər" %}</button>
+                <a href="{% url 'admin:trial_exams_trialexamrequest_change' trial_request.pk %}" class="btn-ghost">
+                    {% trans "Ləğv et" %}
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {% if trial_request.reply_body %}
+    <div class="reply-card">
+        <h2>
+            {% trans "Son cavab cəhdi" %}
+            {% if trial_request.reply_delivery_status == "sent" %}
+                <span class="reply-status-pill reply-status-pill--sent">{% trans "Göndərildi" %}</span>
+            {% elif trial_request.reply_delivery_status == "pending" %}
+                <span class="reply-status-pill reply-status-pill--pending">{% trans "Göndərilir" %}</span>
+            {% elif trial_request.reply_delivery_status == "failed" %}
+                <span class="reply-status-pill reply-status-pill--failed">{% trans "Göndərilmədi" %}</span>
+            {% endif %}
+        </h2>
+        <div class="reply-meta">
+            <strong>{% trans "Göndərən" %}:</strong> <span>{{ trial_request.reply_sent_by|default:"-" }} ({{ trial_request.get_reply_from_display }})</span>
+            {% if trial_request.reply_sent_at %}
+            <strong>{% trans "Tarix" %}:</strong>    <span>{{ trial_request.reply_sent_at|date:"d.m.Y H:i" }}</span>
+            {% endif %}
+        </div>
+        {% if trial_request.reply_delivery_error %}
+        <div class="reply-error">{{ trial_request.reply_delivery_error }}</div>
+        {% endif %}
+        <div class="original-msg" style="border-left-color:#1e40af;">{{ trial_request.reply_body }}</div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% load i18n %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "EMSArena – Yeni sınaq imtahanı sorğusu" %}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color:#0f172a;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f8fafc; padding:32px 16px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px; background-color:#ffffff; border-radius:16px; box-shadow:0 12px 32px rgba(15,23,42,0.08); overflow:hidden;">
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%); padding:28px 32px; color:#ffffff;">
+                            <p style="margin:0; font-size:13px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.85;">EMSArena</p>
+                            <h1 style="margin:6px 0 0; font-size:22px; font-weight:800;">{% trans "Yeni sınaq imtahanı sorğusu" %}</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:32px;">
+                            <p style="margin:0 0 18px; color:#475569; line-height:1.6;">
+                                {% trans "Tələbə pulsuz sınaq imtahanı üçün sual faylı göndərdi. Fayl saxlanıldı və admin panelindən baxa bilərsiniz." %}
+                            </p>
+
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse; margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; width:150px; color:#475569; font-weight:600;">{% trans "Ad Soyad" %}:</td>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#0f172a;">{{ request_obj.full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#475569; font-weight:600;">{% trans "Email" %}:</td>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0;"><a href="mailto:{{ request_obj.email }}" style="color:#1e40af; text-decoration:none;">{{ request_obj.email }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#475569; font-weight:600;">{% trans "Fənnin adı" %}:</td>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#0f172a;">{{ request_obj.subject_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#475569; font-weight:600;">{% trans "Fayl" %}:</td>
+                                    <td style="padding:10px 0; border-bottom:1px solid #e2e8f0; color:#0f172a;">
+                                        {% if file_download_url %}
+                                            <a href="{{ file_download_url }}" style="color:#1e40af; text-decoration:none; font-weight:600;">{{ request_obj.original_filename|default:"PDF fayl" }}</a>
+                                        {% else %}
+                                            {{ request_obj.original_filename|default:"—" }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:10px 0; color:#475569; font-weight:600;">{% trans "Tarix" %}:</td>
+                                    <td style="padding:10px 0;">{{ request_obj.created_at|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                            </table>
+
+                            {% if request_obj.note %}
+                            <h3 style="margin:0 0 10px; font-size:15px; font-weight:700; color:#0f172a;">{% trans "Qeyd" %}:</h3>
+                            <div style="background-color:#f8fafc; border-left:4px solid #0f766e; padding:16px 18px; border-radius:8px; color:#334155; line-height:1.65; white-space:pre-wrap;">{{ request_obj.note }}</div>
+                            {% endif %}
+
+                            {% if profile_detail_url %}
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:28px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ profile_detail_url }}"
+                                           style="display:inline-block;background:linear-gradient(135deg,#1e40af 0%,#0f766e 55%,#10b981 100%);color:#ffffff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(15,118,110,0.3);">
+                                            {% trans "Sorğuya bax və faylı yüklə" %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top:12px;">
+                                        {% if file_download_url %}
+                                            <a href="{{ file_download_url }}" style="color:#0f766e;text-decoration:none;font-size:13px;font-weight:700;">
+                                                {% trans "PDF-i birbaşa yüklə" %}
+                                            </a>
+                                            <span style="color:#cbd5e1; padding:0 8px;">•</span>
+                                        {% endif %}
+                                        <a href="{{ reply_url }}" style="color:#1e40af;text-decoration:none;font-size:13px;">
+                                            {% trans "Suallar əlavə olunduqda təsdiq göndər" %} &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#f1f5f9; padding:18px 32px; text-align:center; color:#64748b; font-size:12px;">
+                            © {{ request_obj.created_at|date:"Y" }} EMSArena · {% trans "Avtomatik göndərilmiş bildiriş" %}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "daphne",
     "apps.exams",
     "apps.appeals.apps.AppealsConfig",
+    "apps.trial_exams.apps.TrialExamsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -500,6 +501,12 @@ SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL", "info@emsarena.com")
 CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL", "support@emsarena.com")
 CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL", "info@emsarena.com")
+
+# Trial-exam ("sınaq imtahanı") request submissions are emailed here.
+# Falls back to CONTACT_NOTIFY_EMAIL when unset. Max upload size (MB) caps
+# the uploaded questions PDF.
+TRIAL_NOTIFY_EMAIL = os.getenv("TRIAL_NOTIFY_EMAIL", "") or CONTACT_NOTIFY_EMAIL
+TRIAL_EXAM_MAX_UPLOAD_MB = int(os.getenv("TRIAL_EXAM_MAX_UPLOAD_MB", "25"))
 
 # Brevo (formerly Sendinblue) HTTP API key. Used as a fallback when SMTP
 # fails (e.g., ISP blocks port 587). Generated in Brevo dashboard:

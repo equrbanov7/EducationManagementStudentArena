@@ -338,9 +338,11 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
         payload["superadmin_pending_org_count"] = Organization.objects.filter(status="pending").count()
         if "superadmin-contact-messages" in capabilities.get("allowed_sections", set()):
             from apps.contact.models import ContactMessage
+            from apps.trial_exams.models import TrialExamRequest
 
             payload["contact_unhandled_count"] = min(
-                ContactMessage.objects.filter(is_handled=False).count(),
+                ContactMessage.objects.filter(is_handled=False).count()
+                + TrialExamRequest.objects.filter(is_handled=False).count(),
                 99,
             )
 
