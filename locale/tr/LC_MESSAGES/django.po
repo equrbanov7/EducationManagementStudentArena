@@ -29209,6 +29209,35 @@ msgstr "✓ Eklendi"
 msgid "%(name)s “%(subject)s” fənni üçün sual faylı göndərdi."
 msgstr "%(name)s “%(subject)s” dersi için soru dosyası gönderdi."
 
+# --- EMSArena navbar redesign (2026-06-17) ---
+msgctxt "nav"
+msgid "my_exams"
+msgstr "Sınavlarım"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Oluştur"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Öğrenciler için anında canlı sınav başlatın"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Deneme sınavı talebi"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Deneme sınavı yapmak için başvurun"
+
+msgctxt "nav"
+msgid "join"
+msgstr "Katıl"
+
+msgctxt "nav"
+msgid "join_live_exam_desc"
+msgstr "PIN ile canlı sınava katıl"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."
@@ -31293,25 +31322,3 @@ msgstr "%(name)s “%(subject)s” dersi için soru dosyası gönderdi."
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Kararı yaklaşık %(n)s dakika içinde değiştirebilirsiniz."
-
-# --- EMSArena navbar redesign (2026-06-17) ---
-
-msgctxt "nav"
-msgid "my_exams"
-msgstr "Sınavlarım"
-
-msgctxt "nav"
-msgid "create"
-msgstr "Oluştur"
-
-msgctxt "nav"
-msgid "create_live_exam_desc"
-msgstr "Öğrenciler için anında canlı sınav başlatın"
-
-msgctxt "nav"
-msgid "trial_exam_request"
-msgstr "Deneme sınavı talebi"
-
-msgctxt "nav"
-msgid "trial_exam_request_desc"
-msgstr "Deneme sınavı yapmak için başvurun"

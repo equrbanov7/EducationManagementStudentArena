@@ -28889,6 +28889,35 @@ msgstr ""
 "İmtahanı yaratdıqdan sonra detalına daxil olub oradan canlı (Kahoot tipli) "
 "imtahan başlada bilərsiniz."
 
+# --- EMSArena navbar redesign (2026-06-17) ---
+msgctxt "nav"
+msgid "my_exams"
+msgstr "İmtahanlarım"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Yarat"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Tələbələr üçün dərhal canlı imtahan başlat"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Sınaq imtahanı müraciəti"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Sınaq imtahanı keçirmək üçün müraciət et"
+
+msgctxt "nav"
+msgid "join"
+msgstr "Qoşul"
+
+msgctxt "nav"
+msgid "join_live_exam_desc"
+msgstr "PIN ilə canlı imtahana daxil ol"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."
@@ -31059,25 +31088,3 @@ msgstr ""
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
-
-# --- EMSArena navbar redesign (2026-06-17) ---
-
-msgctxt "nav"
-msgid "my_exams"
-msgstr "İmtahanlarım"
-
-msgctxt "nav"
-msgid "create"
-msgstr "Yarat"
-
-msgctxt "nav"
-msgid "create_live_exam_desc"
-msgstr "Tələbələr üçün dərhal canlı imtahan başlat"
-
-msgctxt "nav"
-msgid "trial_exam_request"
-msgstr "Sınaq imtahanı müraciəti"
-
-msgctxt "nav"
-msgid "trial_exam_request_desc"
-msgstr "Sınaq imtahanı keçirmək üçün müraciət et"

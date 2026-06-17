@@ -29311,6 +29311,35 @@ msgstr "✓ Добавлено"
 msgid "%(name)s “%(subject)s” fənni üçün sual faylı göndərdi."
 msgstr "%(name)s отправил(а) файл с вопросами по предмету «%(subject)s»."
 
+# --- EMSArena navbar redesign (2026-06-17) ---
+msgctxt "nav"
+msgid "my_exams"
+msgstr "Мои экзамены"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Создать"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Мгновенно запустите живой экзамен для студентов"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Заявка на пробный экзамен"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Подайте заявку на проведение пробного экзамена"
+
+msgctxt "nav"
+msgid "join"
+msgstr "Войти"
+
+msgctxt "nav"
+msgid "join_live_exam_desc"
+msgstr "Войдите в живой экзамен по PIN-коду"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Роль студента нельзя выбирать вручную."
@@ -31402,25 +31431,3 @@ msgstr "%(name)s отправил(а) файл с вопросами по пре
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Вы можете изменить решение примерно в течение %(n)s минут."
-
-# --- EMSArena navbar redesign (2026-06-17) ---
-
-msgctxt "nav"
-msgid "my_exams"
-msgstr "Мои экзамены"
-
-msgctxt "nav"
-msgid "create"
-msgstr "Создать"
-
-msgctxt "nav"
-msgid "create_live_exam_desc"
-msgstr "Мгновенно запустите живой экзамен для студентов"
-
-msgctxt "nav"
-msgid "trial_exam_request"
-msgstr "Заявка на пробный экзамен"
-
-msgctxt "nav"
-msgid "trial_exam_request_desc"
-msgstr "Подайте заявку на проведение пробного экзамена"
