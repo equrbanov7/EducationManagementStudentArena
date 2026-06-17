@@ -152,7 +152,7 @@ pip install -r requirements.txt
 isort --profile black .
 
 # 2. Sonra Black
-black .
+black . 
 
 
 # 3. Yoxla - heç bir dəyişiklik olmamalı
