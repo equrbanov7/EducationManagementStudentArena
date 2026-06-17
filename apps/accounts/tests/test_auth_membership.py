@@ -73,6 +73,19 @@ class LoginViewTest(TestCase):
         # Should redirect to profile or home page
         self.assertIn(response.status_code, [200, 302])
 
+    def test_login_preserves_exact_password_whitespace(self):
+        password = "  MobileExactPass123!  "
+        User.objects.create_user("spacepass", "spacepass@example.com", password)
+
+        response = self.client.post(
+            self.login_url,
+            {"username": " spacepass@example.com ", "password": password},
+            follow=True,
+        )
+
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.username, "spacepass")
+
     def test_login_with_invalid_credentials(self):
         """Test that login with invalid credentials shows error."""
         response = self.client.post(

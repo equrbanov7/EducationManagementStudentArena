@@ -615,7 +615,7 @@
 {% block extraJs %}
 {# register_wizard dropdown-ları data-bs-toggle işlədir — bundle yalnız burada lazımdır #}
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260605-org-choice-2"></script>
+<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260617-wizard-nav-1"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script nonce="{{ request.csp_nonce }}">

@@ -18,6 +18,10 @@ class EmailOrUsernameBackend(ModelBackend):
         if username is None or password is None:
             return None
 
+        username = str(username).strip()
+        if not username:
+            return None
+
         user_model = get_user_model()
         lookup = Q(username__iexact=username) | Q(email__iexact=username)
         user = user_model._default_manager.filter(lookup).first()

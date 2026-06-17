@@ -280,7 +280,15 @@
     .ems-exams .ex-actions { flex-direction: column-reverse; }
     .ems-exams .ex-actions .ex-btn { width: 100%; }
     .ems-exams .ex-wrap { padding: 24px 14px 72px; }
-    .ems-exams .ex-live-banner { padding: 24px 22px; }
+    .ems-exams .ex-live-banner { padding: 24px 22px; max-width: 100%; }
+}
+
+/* Çox dar ekranlarda (kiçik telefonlar) PIN sahəsi və düymə yan-yana
+   sığmaya bilir — alt-alta düzürük ki, kart ekrana tam yerləşsin. */
+@media (max-width: 480px) {
+    .ems-exams .ex-pin-row { flex-direction: column; gap: 12px; }
+    .ems-exams .ex-pin-input { width: 100%; }
+    .ems-exams .ex-pin-go { width: 100%; justify-content: center; padding: 14px 22px; }
 }
 
 /* ============================================================================

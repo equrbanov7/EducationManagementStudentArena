@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     initMobileNav();
-    initUserMenu();
+    initHeaderDropdowns();
     initStickyNavScrollState();
 });
 
@@ -77,30 +77,77 @@ function initMobileNav() {
     });
 }
 
-function initUserMenu() {
-    const userToggle = document.querySelector('.blog-header__user-toggle');
-    const userMenu = document.querySelector('.blog-header__user-menu');
+/**
+ * Generic toggle handling for the header's click-to-open dropdowns
+ * (user menu + "Yarat" quick-create). One open at a time; closes on
+ * outside-click and Escape. Kept dependency-free and idempotent.
+ */
+function initHeaderDropdowns() {
+    const configs = [
+        {
+            toggle: '.blog-header__user-toggle',
+            menu: '.blog-header__user-menu',
+            openClass: 'blog-header__user-menu--open',
+        },
+        {
+            toggle: '.blog-header__create-toggle',
+            menu: '.blog-header__create-menu',
+            openClass: 'blog-header__create-menu--open',
+        },
+    ];
 
-    if (!userToggle || !userMenu) {
+    const dropdowns = configs
+        .map(function (cfg) {
+            return {
+                toggle: document.querySelector(cfg.toggle),
+                menu: document.querySelector(cfg.menu),
+                openClass: cfg.openClass,
+            };
+        })
+        .filter(function (d) { return d.toggle && d.menu; });
+
+    if (!dropdowns.length) {
         return;
     }
 
-    userToggle.addEventListener('click', function (event) {
-        event.stopPropagation();
-        const isOpen = userMenu.classList.contains('blog-header__user-menu--open');
-        if (isOpen) {
-            userMenu.classList.remove('blog-header__user-menu--open');
-            userToggle.setAttribute('aria-expanded', 'false');
-            return;
+    function close(d) {
+        if (d.menu.classList.contains(d.openClass)) {
+            d.menu.classList.remove(d.openClass);
+            d.toggle.setAttribute('aria-expanded', 'false');
         }
-        userMenu.classList.add('blog-header__user-menu--open');
-        userToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeAll(except) {
+        dropdowns.forEach(function (d) {
+            if (d !== except) {
+                close(d);
+            }
+        });
+    }
+
+    dropdowns.forEach(function (d) {
+        d.toggle.addEventListener('click', function (event) {
+            event.stopPropagation();
+            const isOpen = d.menu.classList.contains(d.openClass);
+            closeAll(d);
+            if (isOpen) {
+                close(d);
+            } else {
+                d.menu.classList.add(d.openClass);
+                d.toggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Keep the menu open when interacting inside it; links/forms still work.
+        d.menu.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
     });
 
-    document.addEventListener('click', function () {
-        if (userMenu.classList.contains('blog-header__user-menu--open')) {
-            userMenu.classList.remove('blog-header__user-menu--open');
-            userToggle.setAttribute('aria-expanded', 'false');
+    document.addEventListener('click', function () { closeAll(null); });
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeAll(null);
         }
     });
 }

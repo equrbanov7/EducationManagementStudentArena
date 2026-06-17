@@ -7,36 +7,32 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.utils.translation import gettext_lazy as _
 
 
+def _password_attrs(placeholder, autocomplete):
+    return {
+        "class": "form-control",
+        "placeholder": placeholder,
+        "autocomplete": autocomplete,
+        "autocapitalize": "none",
+        "autocorrect": "off",
+        "spellcheck": "false",
+    }
+
+
 class CustomPasswordChangeForm(PasswordChangeForm):
     """Styled password change form for the profile cabinet."""
 
     old_password = forms.CharField(
         label=_("Mövcud şifrə"),
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": _("Mövcud şifrə"),
-                "autocomplete": "current-password",
-            }
-        ),
+        strip=False,
+        widget=forms.PasswordInput(attrs=_password_attrs(_("Mövcud şifrə"), "current-password")),
     )
     new_password1 = forms.CharField(
         label=_("Yeni şifrə"),
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": _("Yeni şifrə"),
-                "autocomplete": "new-password",
-            }
-        ),
+        strip=False,
+        widget=forms.PasswordInput(attrs=_password_attrs(_("Yeni şifrə"), "new-password")),
     )
     new_password2 = forms.CharField(
         label=_("Yeni şifrəni təkrarla"),
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": _("Yeni şifrəni təkrarla"),
-                "autocomplete": "new-password",
-            }
-        ),
+        strip=False,
+        widget=forms.PasswordInput(attrs=_password_attrs(_("Yeni şifrəni təkrarla"), "new-password")),
     )

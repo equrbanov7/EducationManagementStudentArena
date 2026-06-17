@@ -240,6 +240,7 @@ def send_otp_email(
         logger.info("OTP email sent synchronously to %s for purpose %s", normalized_email, purpose)
         return code
     except Exception:
+        _otp_record.delete()
         logger.exception("OTP email delivery failed for %s", normalized_email)
         raise
 

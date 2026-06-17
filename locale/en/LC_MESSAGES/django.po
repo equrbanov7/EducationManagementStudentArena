@@ -31711,3 +31711,25 @@ msgstr "%(name)s sent a question file for “%(subject)s”."
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "You can change the decision within about %(n)s minutes."
+
+# --- EMSArena navbar redesign (2026-06-17) ---
+
+msgctxt "nav"
+msgid "my_exams"
+msgstr "My Exams"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Create"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Start a live exam for students instantly"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Trial exam request"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Apply to run a trial exam"

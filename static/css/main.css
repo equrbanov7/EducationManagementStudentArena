@@ -15,6 +15,7 @@
     }
     html{
         scroll-behavior: smooth;
+        overflow-x: hidden;
     }
 
     body {
@@ -26,7 +27,12 @@
         flex-direction: column;
         min-height: 100vh;
         scroll-behavior: smooth;
-       
+        /* Hər hansı tək elementin (uzun istifadəçi adı, geniş kart və s.)
+           bütün səhifəni üfüqi sürüşdürməsinin qarşısını alır.
+           position: sticky header html-ə nəzərən işlədiyi üçün təsirlənmir. */
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100%;
     }
 
     a {

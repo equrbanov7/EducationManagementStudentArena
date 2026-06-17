@@ -3,9 +3,21 @@
 {% url 'about' as about_url %}
 {% url 'contact' as contact_url %}
 {% url 'subscribe' as subscribe_url %}
+
+{% comment %}
+    Global header / navbar.
+    - Logo is the project's own brand asset (static/brand/logo-horizontal.png).
+    - Top-level links are kept lean; teacher "create" actions live in the
+      "+ Yarat" quick-create dropdown so the bar stays clean on every role.
+    - Link/visibility logic is role-aware (RBAC): teachers see the create menu,
+      students keep their join/trial entry points, guests get login/signup.
+{% endcomment %}
+
 <header class="blog-header">
     <div class="blog-header__container">
         <nav class="blog-header__nav" aria-label="{% trans 'main_nav_aria' context 'nav' %}">
+
+            {# --- Logo (own brand asset) --- #}
             <a href="{{ home_url }}" class="blog-header__logo" aria-label="EMSArena ana səhifə">
                 <img src="{% static 'brand/logo-horizontal.png' %}"
                      alt="EMSArena"
@@ -15,7 +27,18 @@
                      decoding="async">
             </a>
 
+            {# --- Desktop primary navigation --- #}
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
+                {% if request.user.is_authenticated %}
+                <li class="blog-header__nav-item">
+                    <a href="{% if request.user.is_teacher_or_above %}{% url 'exams:teacher_exam_list' %}{% else %}{% url 'exams:student_exam_list' %}{% endif %}"
+                       {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
+                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "my_exams" context "nav" %}
+                    </a>
+                </li>
+                {% endif %}
+
                 <li class="blog-header__nav-item">
                     <a href="{{ home_url }}"
                        {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
@@ -37,13 +60,9 @@
                         {% trans "contact" context "nav" %}
                     </a>
                 </li>
-                <li class="blog-header__nav-item">
-                    <a href="{% url 'exams:student_exam_list' %}"
-                       {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
-                       class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "exams" context "nav" %}
-                    </a>
-                </li>
+
+                {% comment %} Non-teachers keep direct access to live-join and trial requests. {% endcomment %}
+                {% if not request.user.is_teacher_or_above %}
                 <li class="blog-header__nav-item">
                     <a href="{% url 'liveExam:pin_entry' %}"
                        {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
@@ -60,25 +79,47 @@
                     </a>
                 </li>
                 {% endif %}
-                {% if request.user.is_teacher_or_above %}
-                <li class="blog-header__nav-item">
-                    <a href="{% url 'exams:teacher_exam_list' %}"
-                       title="{% trans 'create_live_exam_hint' context 'nav' %}"
-                       class="blog-header__nav-link">
-                        {% trans "create_live_exam" context "nav" %}
-                    </a>
-                </li>
                 {% endif %}
-               {% comment %} It is temporary deactivate {% endcomment %}
-                {% comment %} <li class="blog-header__nav-item">
-                    <a href="{{ subscribe_url }}"
-                       class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "subscribe" context "nav" %}
-                    </a>
-                </li> {% endcomment %}
             </ul>
 
+            {# --- Right-side actions --- #}
             <div class="blog-header__auth">
+
+                {% if request.user.is_teacher_or_above %}
+                {# Quick-create dropdown (teachers and above only) #}
+                <div class="blog-header__create">
+                    <button type="button"
+                            class="blog-header__create-toggle"
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                        <i class="fas fa-plus blog-header__create-plus" aria-hidden="true"></i>
+                        <span class="blog-header__create-label">{% trans "create" context "nav" %}</span>
+                        <i class="fas fa-chevron-down blog-header__create-caret" aria-hidden="true"></i>
+                    </button>
+
+                    <div class="blog-header__create-menu" role="menu">
+                        <a href="{% url 'exams:create_exam' %}" class="blog-header__create-item" role="menuitem">
+                            <span class="blog-header__create-item-icon blog-header__create-item-icon--live" aria-hidden="true">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="blog-header__create-item-text">
+                                <span class="blog-header__create-item-title">{% trans "create_live_exam" context "nav" %}</span>
+                                <span class="blog-header__create-item-desc">{% trans "create_live_exam_desc" context "nav" %}</span>
+                            </span>
+                        </a>
+                        <a href="{% url 'trial_exams:request' %}" class="blog-header__create-item" role="menuitem">
+                            <span class="blog-header__create-item-icon blog-header__create-item-icon--trial" aria-hidden="true">
+                                <i class="fas fa-clipboard-list"></i>
+                            </span>
+                            <span class="blog-header__create-item-text">
+                                <span class="blog-header__create-item-title">{% trans "trial_exam_request" context "nav" %}</span>
+                                <span class="blog-header__create-item-desc">{% trans "trial_exam_request_desc" context "nav" %}</span>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% include "partials/_language_switcher.html" with switcher_variant="navbar" %}
 
                 {% if request.user.is_authenticated %}
@@ -109,26 +150,60 @@
                             <span class="blog-header__user-name">
                                 {{ request.user.username }}
                             </span>
-                            <span class="blog-header__user-caret">▾</span>
+                            <i class="fas fa-chevron-down blog-header__user-caret" aria-hidden="true"></i>
                         </button>
 
                         <div class="blog-header__user-menu">
+                            <div class="blog-header__user-head">
+                                {% with nav_profile=request.user.profile %}
+                                <span class="blog-header__user-head-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
+                                    {% if nav_profile and nav_profile.avatar %}
+                                        <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
+                                             alt="{{ request.user.username }}"
+                                             class="blog-header__user-avatar-image"
+                                             data-fallback-target=".blog-header__user-head-initials">
+                                        <span class="blog-header__user-head-initials d-none">
+                                            {{ request.user.first_name|first|default:request.user.username|first|upper }}
+                                        </span>
+                                    {% else %}
+                                        <span class="blog-header__user-head-initials">
+                                            {{ request.user.first_name|first|default:request.user.username|first|upper }}
+                                        </span>
+                                    {% endif %}
+                                </span>
+                                {% endwith %}
+                                <span class="blog-header__user-head-text">
+                                    <span class="blog-header__user-head-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                                    {% if current_organization %}
+                                        <span class="blog-header__user-head-org">{{ current_organization.name }}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="blog-header__user-menu-sep" role="presentation"></div>
+
                             <a href="{% url 'accounts:profile' %}"
                                class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' %}blog-header__user-menu-item--active{% endif %}">
-                                {% trans "my_profile" context "nav" %}
+                                <i class="fas fa-user blog-header__user-menu-icon" aria-hidden="true"></i>
+                                <span>{% trans "my_profile" context "nav" %}</span>
                             </a>
                             <a href="{% url 'accounts:profile' %}?section=notifications"
                                class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'notifications' %}blog-header__user-menu-item--active{% endif %}">
+                                <i class="fas fa-bell blog-header__user-menu-icon" aria-hidden="true"></i>
+                                <span>{% trans "notifications" context "nav" %}</span>
                                 {% user_unread_notification_count request.user as notif_count %}
-                                {% trans "notifications" context "nav" %}
                                 {% if notif_count %}
-                                    <span class="badge bg-danger ms-1" style="font-size:0.7rem">{{ notif_count }}</span>
+                                    <span class="blog-header__user-menu-badge">{{ notif_count }}</span>
                                 {% endif %}
                             </a>
-                            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0;display:contents">
+
+                            <div class="blog-header__user-menu-sep" role="presentation"></div>
+
+                            <form method="post" action="{% url 'accounts:logout' %}" class="blog-header__user-menu-form">
                                 {% csrf_token %}
-                                <button type="submit" class="blog-header__user-menu-item">
-                                    {% trans "logout" context "nav" %}
+                                <button type="submit" class="blog-header__user-menu-item blog-header__user-menu-item--danger">
+                                    <i class="fas fa-sign-out-alt blog-header__user-menu-icon" aria-hidden="true"></i>
+                                    <span>{% trans "logout" context "nav" %}</span>
                                 </button>
                             </form>
                         </div>
@@ -154,65 +229,115 @@
     </div>
 </header>
 
+{# --- Mobile drawer --- #}
 <div class="mobile-nav-overlay"></div>
-<ul class="blog-header__nav-list mobile-nav-panel" aria-label="{% trans 'mobile_nav_aria' context 'nav' %}">
-    <li class="blog-header__nav-item">
-        <a href="{{ home_url }}"
-           {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
-            {% trans "home" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
-        <a href="{{ about_url }}"
-           {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
-            {% trans "about" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
-        <a href="{{ contact_url }}"
-           {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
-            {% trans "contact" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
-        <a href="{% url 'exams:student_exam_list' %}"
-           {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
-           class="blog-header__nav-link blog-header__nav-link--exams {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
-            {% trans "exams" context "nav" %}
-        </a>
-    </li>
-    <li class="blog-header__nav-item">
-        <a href="{% url 'liveExam:pin_entry' %}"
-           {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
-           class="blog-header__nav-link {% if request.resolver_match.namespace == 'liveExam' %}blog-header__nav-link--active{% endif %}">
-            {% trans "live_exam" context "nav" %}
-        </a>
-    </li>
-    {% if request.user.is_authenticated %}
-    <li class="blog-header__nav-item">
-        <a href="{% url 'trial_exams:request' %}"
-           {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
-           class="blog-header__nav-link {% if request.resolver_match.namespace == 'trial_exams' %}blog-header__nav-link--active{% endif %}">
-            {% trans "trial_exam" context "nav" %}
-        </a>
-    </li>
-    {% endif %}
-    {% if request.user.is_teacher_or_above %}
-    <li class="blog-header__nav-item">
-        <a href="{% url 'exams:teacher_exam_list' %}" class="blog-header__nav-link">
-            {% trans "create_live_exam" context "nav" %}
-        </a>
-    </li>
-    {% endif %}
+<nav class="mobile-nav-panel" aria-label="{% trans 'mobile_nav_aria' context 'nav' %}">
 
     {% if request.user.is_authenticated %}
+    <div class="mobile-nav-panel__head">
+        {% with nav_profile=request.user.profile %}
+        <span class="blog-header__user-head-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
+            {% if nav_profile and nav_profile.avatar %}
+                <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
+                     alt="{{ request.user.username }}" class="blog-header__user-avatar-image">
+            {% else %}
+                <span class="blog-header__user-head-initials">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
+            {% endif %}
+        </span>
+        {% endwith %}
+        <span class="blog-header__user-head-text">
+            <span class="blog-header__user-head-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+            {% if current_organization %}<span class="blog-header__user-head-org">{{ current_organization.name }}</span>{% endif %}
+        </span>
+    </div>
+    {% endif %}
+
+    <ul class="mobile-nav-panel__list">
+        {% if request.user.is_authenticated %}
+        <li class="blog-header__nav-item">
+            <a href="{% if request.user.is_teacher_or_above %}{% url 'exams:teacher_exam_list' %}{% else %}{% url 'exams:student_exam_list' %}{% endif %}"
+               {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                <span>{% trans "my_exams" context "nav" %}</span>
+            </a>
+        </li>
+        {% endif %}
+        <li class="blog-header__nav-item">
+            <a href="{{ home_url }}"
+               {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-house" aria-hidden="true"></i>
+                <span>{% trans "home" context "nav" %}</span>
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{{ about_url }}"
+               {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{% trans "about" context "nav" %}</span>
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{{ contact_url }}"
+               {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.url_name == 'contact' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-envelope" aria-hidden="true"></i>
+                <span>{% trans "contact" context "nav" %}</span>
+            </a>
+        </li>
+
+        {% if request.user.is_teacher_or_above %}
+        <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'exams:create_exam' %}" class="blog-header__nav-link blog-header__nav-link--create">
+                <i class="fas fa-bolt" aria-hidden="true"></i>
+                <span>{% trans "create_live_exam" context "nav" %}</span>
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'trial_exams:request' %}" class="blog-header__nav-link blog-header__nav-link--create">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                <span>{% trans "trial_exam_request" context "nav" %}</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="blog-header__nav-item">
+            <a href="{% url 'liveExam:pin_entry' %}"
+               {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'liveExam' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-tower-broadcast" aria-hidden="true"></i>
+                <span>{% trans "live_exam" context "nav" %}</span>
+            </a>
+        </li>
+        {% if request.user.is_authenticated %}
+        <li class="blog-header__nav-item">
+            <a href="{% url 'trial_exams:request' %}"
+               {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'trial_exams' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                <span>{% trans "trial_exam" context "nav" %}</span>
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
             <a href="{% url 'accounts:profile' %}"
                class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' %}blog-header__nav-link--active{% endif %}">
-                {% trans "my_profile" context "nav" %} ({{ request.user.username }})
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>{% trans "my_profile" context "nav" %}</span>
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'accounts:profile' %}?section=notifications" class="blog-header__nav-link">
+                <i class="fas fa-bell" aria-hidden="true"></i>
+                <span>{% trans "notifications" context "nav" %}</span>
+                {% user_unread_notification_count request.user as notif_count %}
+                {% if notif_count %}<span class="blog-header__user-menu-badge">{{ notif_count }}</span>{% endif %}
             </a>
         </li>
         <li class="blog-header__nav-item">
@@ -224,21 +349,23 @@
                 </button>
             </form>
         </li>
-    {% else %}
+        {% else %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
             <a href="{% url 'accounts:login' %}" class="blog-header__nav-link">
-                {% trans "login" context "nav" %}
+                <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                <span>{% trans "login" context "nav" %}</span>
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:register' %}" class="blog-header__nav-link">
-                {% trans "signup" context "nav" %}
+            <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
+                <span>{% trans "signup" context "nav" %}</span>
             </a>
         </li>
-    {% endif %}
+        {% endif %}
 
-    <li class="blog-header__nav-item blog-header__nav-item--language">
-        {% include "partials/_language_switcher.html" with switcher_variant="mobile" %}
-    </li>
-</ul>
+        <li class="blog-header__nav-item blog-header__nav-item--language">
+            {% include "partials/_language_switcher.html" with switcher_variant="mobile" %}
+        </li>
+    </ul>
+</nav>

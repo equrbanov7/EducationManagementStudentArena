@@ -73,6 +73,23 @@ class OTPApiViewTest(TestCase):
         self.assertTrue(response.json()["authenticated"])
         self.assertEqual(str(self.client.session.get("_auth_user_id")), str(self.user.pk))
 
+    def test_verify_signup_otp_requires_active_pending_registration(self):
+        otp = EmailOTP.objects.create(
+            email="orphan-signup@example.com",
+            code="123456",
+            purpose=EmailOTP.Purpose.SIGNUP,
+        )
+
+        response = self.client.post(
+            reverse("accounts:verify_otp_api"),
+            data={"email": "orphan-signup@example.com", "otp": "123456", "purpose": EmailOTP.Purpose.SIGNUP},
+        )
+
+        otp.refresh_from_db()
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(otp.is_used)
+        self.assertFalse(otp.is_verified)
+
     def test_resend_otp_endpoint_enforces_cooldown(self):
         self.client.post(
             reverse("accounts:send_otp_api"), data={"email": self.user.email, "purpose": EmailOTP.Purpose.LOGIN}

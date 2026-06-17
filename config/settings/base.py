@@ -248,6 +248,22 @@ EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED = _env_bool_setting("EXAM_AUTOSAVE_BINARY_U
 EXAM_ANSWER_FILE_MAX_SIZE_MB = _env_int_setting("EXAM_ANSWER_FILE_MAX_SIZE_MB", 5, minimum=1)
 EXAM_ANSWER_MAX_FILES_PER_QUESTION = _env_int_setting("EXAM_ANSWER_MAX_FILES_PER_QUESTION", 3, minimum=1)
 EXAM_PAINT_MAX_BASE64_CHARS = _env_int_setting("EXAM_PAINT_MAX_BASE64_CHARS", 1_500_000, minimum=100_000)
+
+# --- HTTP form body limits (Django request parsing) -------------------------
+# When a student finishes a WRITTEN exam the whole form is re-submitted, so the
+# request carries one text field per question PLUS the canvas/paint answers,
+# which travel as base64 *text* fields (`paint_data_<qid>`), not as file uploads.
+# Django sums every non-file field against DATA_UPLOAD_MAX_MEMORY_SIZE (default
+# 2.5MB) and counts the fields against DATA_UPLOAD_MAX_NUMBER_FIELDS (default
+# 1000). A single drawn answer can be ~1.5MB, so heavy/large exams silently trip
+# RequestDataTooBig / TooManyFieldsSent → HTTP 400 raised during request parsing.
+# That 400 is logged only to the `django.security` logger (no app traceback),
+# which is why the server "looks fine" while some students cannot submit.
+# File uploads stream to disk and do NOT count here; only text + paint do. We
+# keep the ceiling under nginx `client_max_body_size` (64M) so oversized bodies
+# still get a clean Django 400 instead of an opaque proxy 413.
+DATA_UPLOAD_MAX_MEMORY_SIZE = _env_int_setting("DATA_UPLOAD_MAX_MEMORY_SIZE_MB", 50, minimum=3) * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FIELDS = _env_int_setting("DATA_UPLOAD_MAX_NUMBER_FIELDS", 10_000, minimum=1_000)
 EXAM_START_GLOBAL_CONCURRENCY = _env_int_setting("EXAM_START_GLOBAL_CONCURRENCY", 12, minimum=0)
 EXAM_START_PER_EXAM_CONCURRENCY = _env_int_setting("EXAM_START_PER_EXAM_CONCURRENCY", 6, minimum=0)
 EXAM_START_WAIT_TIMEOUT_SECONDS = _env_float_setting("EXAM_START_WAIT_TIMEOUT_SECONDS", 30.0, minimum=0.0)
