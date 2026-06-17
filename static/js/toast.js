@@ -1,91 +1,117 @@
 /**
- * Toast auto-hide functionality.
- * Auto-dismisses alert messages after the specified timeout.
+ * Global flash toast behavior.
+ * Handles auto-hide and close buttons without relying on Bootstrap's data API.
  */
-function initAutoHideMessages(root) {
-    var scope = root || document;
-    var selector = '.toast-container .alert[data-auto-hide], [data-profile-flash-message]';
+(function () {
+    "use strict";
 
-    scope.querySelectorAll(selector).forEach(function (messageEl) {
-        if (messageEl.dataset.autoHideReady === '1') {
+    var TOAST_SELECTOR = ".toast-container [data-auto-hide], .toast-container .alert[data-auto-hide]";
+
+    function dismissToast(messageEl) {
+        if (!messageEl || !messageEl.parentNode || messageEl.dataset.dismissing === "1") {
             return;
         }
 
-        messageEl.dataset.autoHideReady = '1';
+        messageEl.dataset.dismissing = "1";
+        messageEl.classList.add("fade-out");
 
-        var hideTime = parseInt(messageEl.dataset.autoHide, 10) || 5000;
-        var dismiss = function () {
-            if (!messageEl || !messageEl.parentNode || messageEl.dataset.dismissing === '1') {
-                return;
+        window.setTimeout(function () {
+            if (messageEl.parentNode) {
+                messageEl.remove();
             }
-
-            messageEl.dataset.dismissing = '1';
-
-            if (messageEl.matches('.toast-container .alert')) {
-                messageEl.classList.add('fade-out');
-                window.setTimeout(function () {
-                    if (messageEl.parentNode) {
-                        messageEl.remove();
-                    }
-                }, 300);
-                return;
-            }
-
-            messageEl.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-            messageEl.style.opacity = '0';
-            messageEl.style.transform = 'translateY(-6px)';
-            window.setTimeout(function () {
-                if (messageEl.parentNode) {
-                    messageEl.remove();
-                }
-            }, 200);
-        };
-
-        window.setTimeout(dismiss, hideTime);
-        messageEl.addEventListener('click', dismiss);
-        messageEl.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                dismiss();
-            }
-        });
-    });
-}
-
-function watchAutoHideMessages() {
-    if (!document.body || typeof MutationObserver !== 'function') {
-        return;
+        }, 240);
     }
 
-    var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            mutation.addedNodes.forEach(function (node) {
-                if (!node || node.nodeType !== Node.ELEMENT_NODE) {
-                    return;
-                }
+    function initAutoHideMessages(root) {
+        var scope = root || document;
 
-                if (node.matches && node.matches('.toast-container .alert[data-auto-hide], [data-profile-flash-message]')) {
-                    initAutoHideMessages(node.parentNode || document);
-                    return;
-                }
+        scope.querySelectorAll(TOAST_SELECTOR).forEach(function (messageEl) {
+            if (messageEl.dataset.autoHideReady === "1") {
+                return;
+            }
 
-                if (node.querySelectorAll) {
-                    initAutoHideMessages(node);
-                }
+            messageEl.dataset.autoHideReady = "1";
+
+            var hideTime = parseInt(messageEl.dataset.autoHide, 10);
+            if (!Number.isFinite(hideTime) || hideTime <= 0) {
+                hideTime = 5000;
+            }
+
+            window.setTimeout(function () {
+                dismissToast(messageEl);
+            }, hideTime);
+        });
+    }
+
+    function watchAutoHideMessages() {
+        if (!document.body || typeof MutationObserver !== "function") {
+            return;
+        }
+
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+                        return;
+                    }
+
+                    if (node.matches && node.matches(TOAST_SELECTOR)) {
+                        initAutoHideMessages(node.parentNode || document);
+                        return;
+                    }
+
+                    if (node.querySelectorAll) {
+                        initAutoHideMessages(node);
+                    }
+                });
             });
         });
-    });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-}
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 
-function bootAutoHideMessages() {
-    initAutoHideMessages(document);
-    watchAutoHideMessages();
-}
+    function bindDismissButtons() {
+        document.addEventListener(
+            "click",
+            function (event) {
+                var closeButton = event.target.closest("[data-toast-dismiss]");
+                if (!closeButton) {
+                    return;
+                }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootAutoHideMessages);
-} else {
-    bootAutoHideMessages();
-}
+                var toast = closeButton.closest(".toast-container .alert, [data-toast-item]");
+                if (!toast) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                dismissToast(toast);
+            },
+            true
+        );
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            var latestToast = document.querySelector(".toast-container [data-toast-item]:last-child");
+            if (latestToast) {
+                dismissToast(latestToast);
+            }
+        });
+    }
+
+    function bootAutoHideMessages() {
+        initAutoHideMessages(document);
+        watchAutoHideMessages();
+        bindDismissButtons();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootAutoHideMessages);
+    } else {
+        bootAutoHideMessages();
+    }
+})();

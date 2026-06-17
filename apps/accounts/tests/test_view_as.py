@@ -178,6 +178,8 @@ class ViewAsFlowTests(ViewAsTestBase):
         self.assertTrue(view_as["active"])
         self.assertEqual(view_as["mode"], MODE_FULL)
         self.assertEqual(view_as["real_user"].pk, self.admin.pk)
+        self.assertContains(response, "data-toast-item")
+        self.assertNotContains(response, "data-profile-flash-message")
 
     def test_readonly_blocks_unsafe_methods(self):
         self._login(self.tutor)

@@ -935,13 +935,22 @@ button.blog-header__user-menu-item{
 }
 
 .mobile-nav-panel .blog-header__nav-link--create {
-    color: #1d4ed8;
-    background: rgba(37, 99, 235, 0.08);
+    color: var(--text-dark, #1f2937);
+    background: #f3f6fd;
+    border: 1px solid rgba(37, 99, 235, 0.1);
     font-weight: 600;
+    box-shadow: none;
 }
 
 .mobile-nav-panel .blog-header__nav-link--create i {
-    color: #1d4ed8;
+    color: #2563eb;
+}
+
+.mobile-nav-panel .blog-header__nav-link--create.blog-header__nav-link--active {
+    color: var(--primary-color, #2563eb);
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.24);
+    box-shadow: inset 3px 0 0 var(--primary-color, #2563eb);
 }
 
 .mobile-nav-panel .blog-header__nav-link--logout i {

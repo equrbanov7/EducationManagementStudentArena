@@ -29,16 +29,6 @@
 
             {# --- Desktop primary navigation --- #}
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
-                {% if request.user.is_authenticated %}
-                <li class="blog-header__nav-item">
-                    <a href="{% if request.user.is_teacher_or_above %}{% url 'exams:teacher_exam_list' %}{% else %}{% url 'exams:student_exam_list' %}{% endif %}"
-                       {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
-                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "my_exams" context "nav" %}
-                    </a>
-                </li>
-                {% endif %}
-
                 <li class="blog-header__nav-item">
                     <a href="{{ home_url }}"
                        {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
@@ -60,6 +50,15 @@
                         {% trans "contact" context "nav" %}
                     </a>
                 </li>
+                {% if request.user.is_authenticated %}
+                <li class="blog-header__nav-item">
+                    <a href="{% url 'exams:student_exam_list' %}"
+                       {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
+                       class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
+                        {% trans "exams" context "nav" %}
+                    </a>
+                </li>
+                {% endif %}
 
                 {% comment %} Non-teachers keep direct access to live-join and trial requests. {% endcomment %}
                 {% if not request.user.is_teacher_or_above %}
@@ -253,16 +252,6 @@
     {% endif %}
 
     <ul class="mobile-nav-panel__list">
-        {% if request.user.is_authenticated %}
-        <li class="blog-header__nav-item">
-            <a href="{% if request.user.is_teacher_or_above %}{% url 'exams:teacher_exam_list' %}{% else %}{% url 'exams:student_exam_list' %}{% endif %}"
-               {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
-               class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
-                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
-                <span>{% trans "my_exams" context "nav" %}</span>
-            </a>
-        </li>
-        {% endif %}
         <li class="blog-header__nav-item">
             <a href="{{ home_url }}"
                {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
@@ -287,17 +276,31 @@
                 <span>{% trans "contact" context "nav" %}</span>
             </a>
         </li>
+        {% if request.user.is_authenticated %}
+        <li class="blog-header__nav-item">
+            <a href="{% url 'exams:student_exam_list' %}"
+               {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                <span>{% trans "exams" context "nav" %}</span>
+            </a>
+        </li>
+        {% endif %}
 
         {% if request.user.is_teacher_or_above %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'exams:create_exam' %}" class="blog-header__nav-link blog-header__nav-link--create">
+            <a href="{% url 'exams:create_exam' %}"
+               {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name == 'create_exam' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link blog-header__nav-link--create {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name == 'create_exam' %}blog-header__nav-link--active{% endif %}">
                 <i class="fas fa-bolt" aria-hidden="true"></i>
                 <span>{% trans "create_live_exam" context "nav" %}</span>
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'trial_exams:request' %}" class="blog-header__nav-link blog-header__nav-link--create">
+            <a href="{% url 'trial_exams:request' %}"
+               {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link blog-header__nav-link--create {% if request.resolver_match.namespace == 'trial_exams' %}blog-header__nav-link--active{% endif %}">
                 <i class="fas fa-clipboard-list" aria-hidden="true"></i>
                 <span>{% trans "trial_exam_request" context "nav" %}</span>
             </a>
@@ -327,13 +330,16 @@
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
             <a href="{% url 'accounts:profile' %}"
-               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' %}blog-header__nav-link--active{% endif %}">
+               {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' and active_main_nav != 'exams' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' and active_main_nav != 'exams' %}blog-header__nav-link--active{% endif %}">
                 <i class="fas fa-user" aria-hidden="true"></i>
                 <span>{% trans "my_profile" context "nav" %}</span>
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:profile' %}?section=notifications" class="blog-header__nav-link">
+            <a href="{% url 'accounts:profile' %}?section=notifications"
+               {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'notifications' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'notifications' %}blog-header__nav-link--active{% endif %}">
                 <i class="fas fa-bell" aria-hidden="true"></i>
                 <span>{% trans "notifications" context "nav" %}</span>
                 {% user_unread_notification_count request.user as notif_count %}

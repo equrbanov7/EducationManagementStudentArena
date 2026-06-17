@@ -83,6 +83,12 @@ def _exclude_attempt_exhausted(queryset):
     )
 
 
+def _exclude_expired_exams(queryset):
+    """Vaxtı bitmiş imtahanları siyahı və tab saylarından çıxar."""
+    now = timezone.now()
+    return queryset.filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))
+
+
 def _apply_exam_type_filter(queryset, filter_type):
     """
     Tip tabına görə süzgəc.
@@ -332,15 +338,17 @@ def _render_exam_list(request, *, base_queryset, page_title, current_url_name):
     if search_query:
         exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
 
-    # Tab sayları tip filtrindən ƏVVƏL hesablanır (axtarış tətbiq olunduqdan sonra).
+    # Real görünürlük filtrləri saylardan ƏVVƏL tətbiq olunur ki, tab sayı
+    # kliklənəndə boş səhifəyə aparmasın (məs. cəhd limiti bitmiş imtahan).
+    exams_qs = _exclude_expired_exams(exams_qs)
+    exams_qs = _exclude_attempt_exhausted(exams_qs)
+
+    # Tab sayları tip filtrindən ƏVVƏL hesablanır (axtarış + görünürlükdən sonra).
     type_counts = _build_type_counts(exams_qs)
 
     # --- FILTER (tip tabı) ---
     filter_type = (request.GET.get("type") or "").strip()
     exams_qs = _apply_exam_type_filter(exams_qs, filter_type)
-
-    # Cəhd limiti bitmiş imtahanlar SQL-də çıxarılır.
-    exams_qs = _exclude_attempt_exhausted(exams_qs)
 
     # --- SORT ---
     sort = _normalize_sort(request.GET.get("sort"))
