@@ -207,6 +207,17 @@ class AccountsRegisterOTPFlowTest(TestCase):
         session = self.client.session
         self.assertNotIn("pending_verify_email", session)
 
+    def test_otp_email_failure_clears_pending_registration_and_unsent_otp(self):
+        """A failed delivery must not leave stale signup cache or an unusable OTP."""
+        with patch("apps.accounts.services.auth._send_otp_message", side_effect=Exception("SMTP error")):
+            self.client.post(
+                self.register_url,
+                _registration_payload("failedcleanup", "failedcleanup@example.com"),
+            )
+
+        self.assertIsNone(get_pending_registration("failedcleanup@example.com"))
+        self.assertFalse(EmailOTP.objects.filter(email="failedcleanup@example.com").exists())
+
     def test_retry_after_failed_otp_succeeds(self):
         """A user can successfully re-register after a prior failed OTP delivery."""
         # First attempt: email fails, user should not exist
@@ -301,3 +312,7 @@ class SendVerificationOTPServiceTest(TestCase):
         with patch("apps.accounts.services.auth._send_otp_message", side_effect=RuntimeError("backend unavailable")):
             with self.assertRaises(RuntimeError):
                 send_verification_otp(self.user)
+
+        self.assertFalse(
+            EmailOTP.objects.filter(user=self.user, email=self.user.email, purpose=EmailOTP.Purpose.SIGNUP).exists()
+        )

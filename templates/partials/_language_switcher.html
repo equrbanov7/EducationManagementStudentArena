@@ -8,7 +8,7 @@
             data-bs-display="static"
             aria-haspopup="listbox"
             aria-expanded="false">
-        {% if switcher_kind == "floating" %}
+        {% if switcher_kind == "floating" or switcher_kind == "navbar" %}
         <span class="language-switcher__icon" aria-hidden="true"><i class="fas fa-globe"></i></span>
         {% else %}
         <span class="language-switcher__label">{% trans "label" context "language" %}</span>

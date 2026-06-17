@@ -72,6 +72,7 @@
     display: none; /* Default olaraq gizli saxlayırıq */
     width: 32px;
     height: 32px;
+    flex-shrink: 0; /* Uzun istifadəçi adı olsa belə burger heç vaxt sıxılmasın */
     border: none;
     background: transparent;
     padding: 0;
@@ -219,6 +220,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0; /* Daxili elementlər sıxıla bilsin (uzun ad overflow yaratmasın) */
 }
 
 .blog-header__auth .language-switcher {
@@ -240,12 +242,15 @@
 /* User dropdown */
 .blog-header__user {
     position: relative;
+    min-width: 0; /* Flex daxilində sıxılma icazəsi */
 }
 
 .blog-header__user-toggle {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -295,11 +300,23 @@
 .blog-header__user-name {
     font-size: 0.95rem;
     font-weight: 500;
+    /* Çox uzun adlar layout-u sındırmasın — kəsib "..." göstər. */
+    min-width: 0;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .blog-header__user-caret {
-    font-size: 0.8rem;
-    opacity: 0.7;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.blog-header__user-toggle[aria-expanded="true"] .blog-header__user-caret {
+    transform: rotate(180deg);
+    color: var(--primary-color, #2563eb);
 }
 
 /* Açılan menyu */
@@ -530,6 +547,16 @@ button.blog-header__user-menu-item{
     .blog-header__auth > .language-switcher {
         display: none;
     }
+    /* Create actions live in the mobile drawer, so hide the desktop dropdown. */
+    .blog-header__create {
+        display: none;
+    }
+    /* Mobil-də uzun istifadəçi adı burgeri ekrandan kənara itələyirdi.
+       Profil/çıxış onsuz da burger menyusunda var; başlıqda yalnız avatar
+       (+ caret) saxlayırıq ki, burger həmişə görünsün. */
+    .blog-header__user-name {
+        display: none;
+    }
     /* Mobil menyu paneli və overlay JavaScript tərəfindən idarə olunacaq */
 }
 
@@ -539,6 +566,9 @@ button.blog-header__user-menu-item{
     }
     .blog-header__nav-list--desktop {
         display: flex;
+    }
+    .blog-header__create {
+        display: inline-flex;
     }
 
     .blog-header__auth {
@@ -557,10 +587,382 @@ button.blog-header__user-menu-item{
     .blog-header,
     .blog-header__nav-list--desktop .blog-header__nav-item a,
     .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams,
+    .blog-header__create-toggle,
+    .blog-header__create-menu,
+    .blog-header__create-item,
+    .blog-header__user-caret,
     .mobile-nav-panel,
     .mobile-nav-overlay,
     .blog-header__nav-link--active::after {
         transition: none !important;
         animation: none !important;
+    }
+}
+
+/* ==========================================================================
+   MODERN HEADER ENHANCEMENTS
+   "+ Yarat" quick-create dropdown, compact language pill, rich user menu.
+   ========================================================================== */
+
+/* --- "+ Yarat" quick-create dropdown --- */
+.blog-header__create {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.blog-header__create-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    background: var(--primary-color, #2563eb);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.18) inset,
+        0 8px 18px -8px rgba(37, 99, 235, 0.55);
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.blog-header__create-toggle:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.22) inset,
+        0 12px 24px -8px rgba(29, 78, 216, 0.6);
+}
+
+.blog-header__create-toggle:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
+.blog-header__create-plus {
+    font-size: 0.8rem;
+}
+
+.blog-header__create-caret {
+    font-size: 0.66rem;
+    opacity: 0.9;
+    transition: transform 0.18s ease;
+}
+
+.blog-header__create-toggle[aria-expanded="true"] .blog-header__create-caret {
+    transform: rotate(180deg);
+}
+
+.blog-header__create-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 20px 44px -12px rgba(15, 23, 42, 0.28);
+    padding: 8px;
+    display: none;
+    z-index: 210;
+    transform-origin: top right;
+    animation: createMenuIn 0.16s ease;
+}
+
+.blog-header__create-menu--open {
+    display: block;
+}
+
+@keyframes createMenuIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.blog-header__create-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+}
+
+.blog-header__create-item + .blog-header__create-item {
+    margin-top: 2px;
+}
+
+.blog-header__create-item:hover {
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.blog-header__create-item:focus-visible {
+    outline: none;
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.blog-header__create-item-icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+}
+
+.blog-header__create-item-icon--live {
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+}
+
+.blog-header__create-item-icon--trial {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+
+.blog-header__create-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.blog-header__create-item-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.blog-header__create-item-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+/* --- Language switcher: compact navbar pill (globe + code) --- */
+.blog-header__auth .language-switcher--navbar {
+    min-width: 0;
+}
+
+.blog-header__auth .language-switcher--navbar .language-switcher__trigger {
+    height: 40px;
+    gap: 8px;
+    padding: 0 12px 0 8px;
+    border-radius: 12px;
+}
+
+.blog-header__auth .language-switcher--navbar .language-switcher__icon {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+}
+
+.blog-header__auth .language-switcher--navbar .language-switcher__value {
+    color: #334155;
+}
+
+.blog-header__auth .language-switcher--navbar .language-switcher__caret {
+    margin-left: 0;
+}
+
+/* --- Enhanced user menu --- */
+.blog-header__user-toggle {
+    height: 40px;
+}
+
+.blog-header__user-menu {
+    top: calc(100% + 10px);
+    min-width: 244px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 20px 44px -12px rgba(15, 23, 42, 0.28);
+    padding: 8px;
+    transform-origin: top right;
+    animation: createMenuIn 0.16s ease;
+}
+
+.blog-header__user-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px 12px;
+}
+
+.blog-header__user-head-avatar {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--primary-color, #2563eb);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.blog-header__user-head-initials {
+    line-height: 1;
+}
+
+.blog-header__user-head-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.blog-header__user-head-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+
+.blog-header__user-head-org {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+
+.blog-header__user-menu-sep {
+    height: 1px;
+    background: rgba(15, 23, 42, 0.08);
+    margin: 4px 4px;
+}
+
+.blog-header__user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.blog-header__user-menu-icon {
+    width: 18px;
+    text-align: center;
+    font-size: 0.92rem;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.blog-header__user-menu-item--active .blog-header__user-menu-icon {
+    color: var(--primary-color, #2563eb);
+}
+
+.blog-header__user-menu-badge {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.blog-header__user-menu-form {
+    margin: 0;
+    padding: 0;
+}
+
+.blog-header__user-menu-item--danger {
+    color: #dc2626;
+}
+
+.blog-header__user-menu-item--danger .blog-header__user-menu-icon {
+    color: #dc2626;
+}
+
+.blog-header__user-menu-item--danger:hover {
+    background: rgba(220, 38, 38, 0.08);
+}
+
+/* --- Mobile drawer: profile head + icon links --- */
+.mobile-nav-panel__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 24px 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.mobile-nav-panel__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-nav-panel .blog-header__nav-link i {
+    width: 22px;
+    text-align: center;
+    font-size: 1rem;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.mobile-nav-panel .blog-header__nav-link--active i {
+    color: var(--primary-color, #2563eb);
+}
+
+.mobile-nav-panel .blog-header__nav-link--create {
+    color: #1d4ed8;
+    background: rgba(37, 99, 235, 0.08);
+    font-weight: 600;
+}
+
+.mobile-nav-panel .blog-header__nav-link--create i {
+    color: #1d4ed8;
+}
+
+.mobile-nav-panel .blog-header__nav-link--logout i {
+    color: #b91c1c;
+}
+
+.mobile-nav-panel .blog-header__nav-item--divider {
+    height: 1px;
+    background: #eef2f7;
+    padding: 0;
+    margin: 8px 20px;
+    border: none;
+}
+
+/* --- Tablet: keep the create button compact (icon + caret only) --- */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .blog-header__create-toggle {
+        padding: 0 12px;
+        gap: 6px;
+    }
+    .blog-header__create-label {
+        display: none;
     }
 }

@@ -386,6 +386,7 @@ def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
+            pending_registration = None
             try:
                 pending_registration = store_pending_registration(form.cleaned_data)
                 send_otp_email(
@@ -413,6 +414,8 @@ def register_view(request):
                 return response
             except Exception:
                 logger.exception("Registration failed during pending signup OTP delivery")
+                if pending_registration:
+                    clear_pending_registration(pending_registration["email"])
                 messages.error(
                     request,
                     pgettext_lazy("accounts.auth.message", "registration_email_send_failed"),
@@ -750,6 +753,13 @@ def verify_otp_api_view(request):
     code = str(payload.get("otp", "")).strip()
     user = User.objects.filter(email__iexact=email).first()
     pending_registration = get_pending_registration(email)
+
+    if purpose == EmailOTP.Purpose.SIGNUP:
+        if user is None and not pending_registration:
+            return _json_error("Bu email üçün aktiv qeydiyyat tapılmadı.", status=404)
+        if user is not None and user.is_active:
+            return _json_error("Bu email artıq təsdiqlənib.", status=409)
+
     verification = verify_email_otp(
         email=email,
         code=code,

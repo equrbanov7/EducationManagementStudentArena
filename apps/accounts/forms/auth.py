@@ -79,19 +79,29 @@ class RegisterForm(forms.ModelForm):
 
     password = forms.CharField(
         label=pgettext_lazy("accounts.form.register.label", "password"),
+        strip=False,
         widget=forms.PasswordInput(
             attrs={
                 "placeholder": pgettext_lazy("accounts.form.register.placeholder", "password"),
                 "class": "form-control",
+                "autocomplete": "new-password",
+                "autocapitalize": "none",
+                "autocorrect": "off",
+                "spellcheck": "false",
             }
         ),
     )
     password2 = forms.CharField(
         label=pgettext_lazy("accounts.form.register.label", "password_confirm"),
+        strip=False,
         widget=forms.PasswordInput(
             attrs={
                 "placeholder": pgettext_lazy("accounts.form.register.placeholder", "password_confirm"),
                 "class": "form-control",
+                "autocomplete": "new-password",
+                "autocapitalize": "none",
+                "autocorrect": "off",
+                "spellcheck": "false",
             }
         ),
     )
@@ -630,10 +640,15 @@ class CustomLoginForm(AuthenticationForm):
     )
     password = forms.CharField(
         label=pgettext_lazy("accounts.form.login.label", "password"),
+        strip=False,
         widget=forms.PasswordInput(
             attrs={
                 "class": "form-control",
                 "placeholder": pgettext_lazy("accounts.form.login.placeholder", "password"),
+                "autocomplete": "current-password",
+                "autocapitalize": "none",
+                "autocorrect": "off",
+                "spellcheck": "false",
             }
         ),
     )

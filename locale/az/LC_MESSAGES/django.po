@@ -31059,3 +31059,25 @@ msgstr ""
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
+
+# --- EMSArena navbar redesign (2026-06-17) ---
+
+msgctxt "nav"
+msgid "my_exams"
+msgstr "İmtahanlarım"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Yarat"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Tələbələr üçün dərhal canlı imtahan başlat"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Sınaq imtahanı müraciəti"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Sınaq imtahanı keçirmək üçün müraciət et"

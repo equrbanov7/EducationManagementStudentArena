@@ -5,6 +5,7 @@ Extracted from test_views.py to keep individual test modules focused.
 """
 
 from datetime import timedelta
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -87,6 +88,14 @@ class RegisterViewTest(TestCase):
         self.assertContains(response, 'data-wizard-back="2"', count=1, html=False)
         self.assertContains(response, 'data-wizard-back="3"', count=1, html=False)
         self.assertContains(response, "Hazırda heç bir təşkilata aid deyiləm")
+
+    def test_register_wizard_js_binds_next_and_back_buttons(self):
+        source = Path("apps/accounts/static/accounts/js/register_wizard.js").read_text(encoding="utf-8")
+
+        self.assertIn('querySelectorAll("[data-wizard-next]")', source)
+        self.assertIn('querySelectorAll("[data-wizard-back]")', source)
+        self.assertIn("wizardNext(nextStep", source)
+        self.assertIn("wizardBack(previousStep", source)
 
     def test_register_creates_user_and_profile(self):
         """Registration should stay pending until OTP verification completes."""

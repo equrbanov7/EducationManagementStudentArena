@@ -31402,3 +31402,25 @@ msgstr "%(name)s отправил(а) файл с вопросами по пре
 #~ msgctxt "appeals.template"
 #~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
 #~ msgstr "Вы можете изменить решение примерно в течение %(n)s минут."
+
+# --- EMSArena navbar redesign (2026-06-17) ---
+
+msgctxt "nav"
+msgid "my_exams"
+msgstr "Мои экзамены"
+
+msgctxt "nav"
+msgid "create"
+msgstr "Создать"
+
+msgctxt "nav"
+msgid "create_live_exam_desc"
+msgstr "Мгновенно запустите живой экзамен для студентов"
+
+msgctxt "nav"
+msgid "trial_exam_request"
+msgstr "Заявка на пробный экзамен"
+
+msgctxt "nav"
+msgid "trial_exam_request_desc"
+msgstr "Подайте заявку на проведение пробного экзамена"

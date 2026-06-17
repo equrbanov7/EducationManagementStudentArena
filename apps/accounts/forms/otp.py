@@ -22,6 +22,9 @@ def _password_reset_password_attrs(placeholder):
         "class": "form-control",
         "placeholder": placeholder,
         "autocomplete": "new-password",
+        "autocapitalize": "none",
+        "autocorrect": "off",
+        "spellcheck": "false",
     }
 
 
@@ -48,6 +51,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
     )
     new_password1 = forms.CharField(
         label=pgettext_lazy("accounts.form.password_reset_otp.label", "new_password"),
+        strip=False,
         widget=forms.PasswordInput(
             attrs=_password_reset_password_attrs(
                 pgettext_lazy("accounts.form.password_reset_otp.placeholder", "new_password")
@@ -56,6 +60,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
     )
     new_password2 = forms.CharField(
         label=pgettext_lazy("accounts.form.password_reset_otp.label", "new_password_confirm"),
+        strip=False,
         widget=forms.PasswordInput(
             attrs=_password_reset_password_attrs(
                 pgettext_lazy("accounts.form.password_reset_otp.placeholder", "new_password_confirm")

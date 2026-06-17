@@ -1399,6 +1399,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    document.querySelectorAll("[data-wizard-next]").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (button.disabled || button.getAttribute("aria-disabled") === "true") return;
+
+            var nextStep = button.getAttribute("data-wizard-next");
+            wizardNext(nextStep, "next");
+        });
+    });
+
+    document.querySelectorAll("[data-wizard-back]").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (button.disabled || button.getAttribute("aria-disabled") === "true") return;
+
+            var previousStep = button.getAttribute("data-wizard-back");
+            wizardBack(previousStep);
+        });
+    });
+
     document.addEventListener("click", function (event) {
         if (!organizationSearchInput || !organizationSearchList) return;
         if (!isJoinMode(currentSelection().mode)) return;
