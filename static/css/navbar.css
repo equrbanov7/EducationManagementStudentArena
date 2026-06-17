@@ -748,6 +748,13 @@ button.blog-header__user-menu-item{
     line-height: 1.35;
 }
 
+/* Student quick-actions dropdown reuses the create styles verbatim so it
+   matches the teacher "+ Yarat" button exactly. Only the leading glyph
+   (bolt instead of plus) differs, sized to sit on the same baseline. */
+.blog-header__create--student .blog-header__create-plus {
+    font-size: 0.85rem;
+}
+
 /* --- Language switcher: compact navbar pill (globe + code) --- */
 .blog-header__auth .language-switcher--navbar {
     min-width: 0;
