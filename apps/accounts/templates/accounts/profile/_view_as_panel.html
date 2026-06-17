@@ -22,10 +22,20 @@ Superadmin əvvəlcə təşkilat seçir; org admin/sahibi/tyutor və s. birbaşa
         <i class="fas fa-chevron-down view-as-launcher__caret" aria-hidden="true"></i>
     </button>
 
+    <div class="view-as-dropdown-backdrop" id="viewAsBackdrop" hidden aria-hidden="true"></div>
+
     <div class="view-as-dropdown" id="viewAsDropdown" hidden>
         <div class="view-as-dropdown__header">
-            <i class="fas fa-user-magnifying-glass" aria-hidden="true"></i>
-            {% trans 'panel_title' context 'accounts.view_as' %}
+            <span class="view-as-dropdown__title">
+                <i class="fas fa-user-magnifying-glass" aria-hidden="true"></i>
+                {% trans 'panel_title' context 'accounts.view_as' %}
+            </span>
+            <button type="button"
+                    class="view-as-dropdown__close"
+                    id="viewAsClose"
+                    aria-label="{% trans 'Bağla' %}">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
         </div>
 
         {% if view_as.is_superadmin %}

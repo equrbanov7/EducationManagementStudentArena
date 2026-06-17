@@ -2204,6 +2204,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_assigned_exam.title)
+        self.assertNotContains(response, 'class="ex-eyebrow"')
 
         response = self.client.get(reverse("exams:student_exam_list"), {"q": self.unassigned_public_exam.title})
         self.assertEqual(response.status_code, 200)
@@ -2238,6 +2239,31 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertRegex(response.content.decode(), r'<a class="ex-tab on"[^>]*data-type="coding"')
         self.assertContains(response, coding_exam.title)
         self.assertNotContains(response, written_exam.title)
+
+    def test_student_exam_type_counts_exclude_attempt_exhausted_exams(self):
+        exhausted_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Exhausted Filter Count Exam",
+            exam_type="test",
+            is_active=True,
+            is_public=True,
+            max_attempts_per_user=1,
+        )
+        ExamQuestion.objects.create(exam=exhausted_exam, text="Exhausted count question", order=1, points=1)
+        ExamAttempt.objects.create(
+            user=self.student,
+            exam=exhausted_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("exams:student_exam_list"), {"q": exhausted_exam.title})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["type_counts"]["total"], 0)
+        self.assertEqual(response.context["type_counts"]["test"], 0)
+        self.assertNotContains(response, f'data-exam-slug="{exhausted_exam.slug}"')
+        self.assertContains(response, "Nəticə tapılmadı")
 
     def test_student_exam_card_shows_category_and_mechanic_badges(self):
         final_test_exam = Exam.objects.create(

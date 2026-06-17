@@ -117,12 +117,22 @@
         applyClamp(root);
     }
 
-    // Hər bölmədə ilk 6 kartı göstər, qalanları "Daha çox" düyməsi ilə aç.
+    // Hər bölmədə ilk 6 kartı göstər; "Daha çox" hər klikdə ən çox 8 kart artırır.
     // Performans: artıq kartlar display:none — render olunmur, yalnız DOM-dadır.
-    var SECTION_LIMIT = 6;
+    var SECTION_INITIAL_LIMIT = 6;
+    var SECTION_LOAD_STEP = 8;
+
+    function getSectionVisibleLimit(section) {
+        var value = Number(section.dataset.txVisibleLimit || SECTION_INITIAL_LIMIT);
+        if (!Number.isFinite(value) || value < SECTION_INITIAL_LIMIT) {
+            return SECTION_INITIAL_LIMIT;
+        }
+        return value;
+    }
+
     function applyClamp(root) {
         root.querySelectorAll("[data-tx-section]").forEach(function (section) {
-            var expanded = section.dataset.txExpanded === "1";
+            var visibleLimit = getSectionVisibleLimit(section);
             var shown = 0;
             var clamped = 0;
             section.querySelectorAll("[data-exam-card]").forEach(function (card) {
@@ -130,7 +140,7 @@
                     card.classList.remove("is-clamped");
                     return;
                 }
-                var doClamp = !expanded && shown >= SECTION_LIMIT;
+                var doClamp = shown >= visibleLimit;
                 card.classList.toggle("is-clamped", doClamp);
                 if (doClamp) {
                     clamped++;
@@ -143,7 +153,7 @@
                 btn.hidden = clamped === 0;
                 var countEl = section.querySelector("[data-tx-more-count]");
                 if (countEl) {
-                    countEl.textContent = String(clamped);
+                    countEl.textContent = String(Math.min(clamped, SECTION_LOAD_STEP));
                 }
             }
         });
@@ -335,7 +345,7 @@
             if (!section || !root) {
                 return;
             }
-            section.dataset.txExpanded = "1";
+            section.dataset.txVisibleLimit = String(getSectionVisibleLimit(section) + SECTION_LOAD_STEP);
             applyClamp(root);
         });
 
