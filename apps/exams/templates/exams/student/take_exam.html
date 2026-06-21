@@ -218,7 +218,7 @@
                                                data-question-id="{{ q.id }}"
                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                         <span class="option-letter circle-mark">{{ opt.label }}</span>
-                                        <span class="opt-text">{{ opt.text }}</span>
+                                        <span class="opt-text">{{ opt.text }}{% if opt.image %}<img src="{{ opt.image }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
                                     </label>
                                 {% endfor %}
                             </div>
@@ -233,7 +233,7 @@
                                                 data-question-id="{{ q.id }}"
                                                 {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                             <span class="option-letter box-mark">{{ opt.label }}</span>
-                                            <span class="opt-text">{{ opt.text }}</span>
+                                            <span class="opt-text">{{ opt.text }}{% if opt.image %}<img src="{{ opt.image }}" alt="" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
                                         </label>
                                     {% endfor %}
                                 </div>

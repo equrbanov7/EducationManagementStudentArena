@@ -40,6 +40,7 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
+from apps.exams.services.import_media import attach_math_images, clear_stash, stash_math_images
 from apps.exams.services.parsing import extract_text_from_upload
 from apps.exams.services.question_bank_attach import (
     _question_fingerprint,
@@ -443,6 +444,7 @@ def question_bank_bulk_add(request, bank_id):
     )
     selected_language = (request.POST.get("language") or bank.language or DEFAULT_EXAM_LANGUAGE).strip().lower()
 
+    math_token = (request.POST.get("math_token") or "").strip()
     if request.method == "POST":
         action = (request.POST.get("action") or "preview").strip()
         if action in ("preview", "save"):
@@ -451,6 +453,11 @@ def question_bank_bulk_add(request, bank_id):
             if uploaded:
                 try:
                     raw_text = extract_text_from_upload(uploaded)
+                    # Düstur/şəkil regionlarını müvəqqəti yığ (save addımında bağlanacaq).
+                    new_token = stash_math_images(uploaded)
+                    if new_token:
+                        clear_stash(math_token)  # köhnə yığını təmizlə
+                        math_token = new_token
                 except Exception as exc:  # noqa: BLE001
                     messages.error(
                         request, pgettext("exams.view.bank.message", "Fayl oxunmadı: {error}").format(error=exc)
@@ -478,7 +485,9 @@ def question_bank_bulk_add(request, bank_id):
                     q_format=q_format,
                     points_payload=parse_points_payload(request.POST),
                     created_by=request.user,
+                    math_token=math_token,
                 )
+                clear_stash(math_token)
                 messages.success(
                     request,
                     pgettext("exams.view.bank.message", "{count} sual banka əlavə olundu.").format(count=created_count),
@@ -526,19 +535,23 @@ def question_bank_bulk_add(request, bank_id):
             },
         ],
         "wb_save_label": pgettext("exams.template.question_bank_detail", "Seçilmişləri banka əlavə et"),
+        # Düstur/şəkil yığını üçün token — gizli sahə kimi save addımına ötürülür.
+        "math_token": math_token,
     }
     return render(request, "exams/teacher/question_bank_bulk_add.html", context)
 
 
-def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_payload, created_by):
+def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_payload, created_by, math_token=""):
     rows = []
     option_payloads = []
+    q_numbers = []  # hər yaradılan sualın çap nömrəsi (düstur şəkillərini bağlamaq üçün)
     for index, question in enumerate(parsed, start=1):
         if index not in selected:
             continue
         text = (question.get("text") or "").strip()
         if not text:
             continue
+        q_no = str(question.get("q_no") or index)
         raw_points = str(points_payload.get(str(index)) or "").strip()
         points = int(raw_points) if raw_points.isdigit() and int(raw_points) > 0 else 1
 
@@ -557,6 +570,7 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
                 )
             )
             option_payloads.append(None)
+            q_numbers.append(q_no)
         else:
             options = question.get("options") or {}
             if any(label not in options for label in ("A", "B", "C", "D")):
@@ -575,6 +589,7 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
                 )
             )
             option_payloads.append((options, set(question.get("correct") or [])))
+            q_numbers.append(q_no)
 
     if not rows:
         return 0
@@ -594,6 +609,11 @@ def _save_bank_questions(*, bank, parsed, selected, language, q_format, points_p
                     )
         if option_rows:
             BankQuestionOption.objects.bulk_create(option_rows, batch_size=500)
+
+        # Düstur/şəkil regionlarını sual+variantlara bağla (varsa).
+        if math_token:
+            for bank_question, q_no in zip(created, q_numbers):
+                attach_math_images(math_token, q_no, bank_question)
     return len(created)
 
 

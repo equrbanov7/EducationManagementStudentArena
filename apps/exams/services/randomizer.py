@@ -54,6 +54,8 @@ def build_shuffled_options(attempt_id, question):
                 "id": opt.id,
                 "label": LABELS[i] if i < len(LABELS) else "",
                 "text": opt.text,
+                # Düstur/şəkil variantı (PDF idxalından) — varsa URL, yoxdursa None.
+                "image": opt.image.url if getattr(opt, "image", None) else None,
             }
         )
     return packed

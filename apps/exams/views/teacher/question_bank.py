@@ -32,6 +32,7 @@ from apps.exams.services.bulk_workbench import (
     parse_selected_indices,
 )
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
+from apps.exams.services.import_media import attach_math_images, clear_stash, stash_math_images
 from apps.exams.services.language_variants import active_variants, ensure_default_variant
 from apps.exams.services.parsing import END_QUESTION_RE, extract_text_from_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
@@ -1099,6 +1100,7 @@ def test_question_bank(request, slug):
     raw_text = ""
     parsed = []
     selected = set()
+    math_token = ""
 
     warning_count = 0
     duplicate_count = 0
@@ -1173,10 +1175,16 @@ def test_question_bank(request, slug):
     raw_text = request.POST.get("raw_text", "")
 
     # 2) fayl varsa onu oxu (paste varsa fallback kimi qalır)
+    math_token = (request.POST.get("math_token") or "").strip()
     uploaded = request.FILES.get("upload_file")
     if uploaded:
         try:
             raw_text = extract_text_from_upload(uploaded)
+            # Düstur/şəkil regionlarını müvəqqəti yığ (save addımında bağlanacaq).
+            new_token = stash_math_images(uploaded)
+            if new_token:
+                clear_stash(math_token)
+                math_token = new_token
         except Exception as e:
             # burada fallback: textarea-dakı raw_text qalsın
             messages.error(
@@ -1274,6 +1282,7 @@ def test_question_bank(request, slug):
 
             question_rows = []
             option_payloads = []
+            q_numbers = []  # düstur şəkillərini bağlamaq üçün çap nömrələri
 
             for idx, q in enumerate(parsed, start=1):
                 if idx not in selected:
@@ -1302,6 +1311,7 @@ def test_question_bank(request, slug):
                     )
                 )
                 option_payloads.append((q["options"], set(q["correct"])))
+                q_numbers.append(str(q.get("q_no") or idx))
                 start_order += 1
 
             created_questions = ExamQuestion.objects.bulk_create(question_rows, batch_size=100)
@@ -1322,6 +1332,14 @@ def test_question_bank(request, slug):
 
             if option_rows:
                 ExamQuestionOption.objects.bulk_create(option_rows, batch_size=500)
+
+            # Düstur/şəkil regionlarını sual+variantlara bağla (varsa).
+            if math_token:
+                for eq, q_no in zip(created_questions, q_numbers):
+                    attach_math_images(math_token, q_no, eq)
+
+        if math_token:
+            clear_stash(math_token)
 
         messages.success(
             request,
@@ -1350,6 +1368,7 @@ def test_question_bank(request, slug):
             "raw_text": raw_text,
             "parsed": parsed,
             "selected": selected,
+            "math_token": math_token,
             "warning_count": warning_count,
             "duplicate_count": duplicate_count,
             "error_count": error_count,

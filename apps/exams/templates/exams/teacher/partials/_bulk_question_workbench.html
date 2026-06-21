@@ -201,6 +201,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
         <form method="post" enctype="multipart/form-data" class="split-layout" {% if wb_show_settings %}data-sync-bank-settings{% endif %}>
             {% csrf_token %}
             <input type="hidden" name="action" value="preview"/>
+            <input type="hidden" name="math_token" value="{{ math_token }}">
             {% if navigation_from_section %}<input type="hidden" name="from_section" value="{{ navigation_from_section }}">{% endif %}
             {% if navigation_return_to %}<input type="hidden" name="return_to" value="{{ navigation_return_to }}">{% endif %}
             {% if wb_show_settings %}
@@ -474,6 +475,8 @@ Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):
             <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
             <input type="hidden" name="selected_indices" id="selectedIndicesInput" value="">
             <input type="hidden" name="points_payload" id="pointsPayloadInput" value="">
+            {# Düstur/şəkil yığını token-i: preview-da yaranır, save-də şəkilləri bağlamaq üçün ötürülür #}
+            <input type="hidden" name="math_token" value="{{ math_token }}">
 
             <div class="question-list" id="questionList">
                 {% for q in parsed %}
