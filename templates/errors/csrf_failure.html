@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Səhifə köhnəlib | EMSArena</title>
-    {% if is_login_path %}
-    {# Stale login form (bfcache / long-open tab): auto-redirect to a freshly #}
-    {# rendered login form with a new CSRF token. Meta refresh is CSP-safe.  #}
-    <meta http-equiv="refresh" content="4;url={{ login_url }}">
+    {% if auto_redirect %}
+    {# Stale auth form (bfcache / long-open tab): auto-redirect to a freshly #}
+    {# rendered form with a new CSRF token. Meta refresh is CSP-safe.       #}
+    <meta http-equiv="refresh" content="4;url={{ retry_url }}">
     {% endif %}
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
@@ -33,8 +33,8 @@
                     <p class="error-description">
                         Bu səhifə uzun müddət açıq qaldığı və ya brauzer keşindən bərpa olunduğu üçün
                         forma köhnəlib. Narahat olmayın — heç bir məlumat itməyib.
-                        {% if is_login_path %}
-                        Bir neçə saniyəyə təzə giriş səhifəsinə yönləndiriləcəksiniz.
+                        {% if auto_redirect %}
+                        Bir neçə saniyəyə təzə səhifəyə yönləndiriləcəksiniz.
                         {% else %}
                         Səhifəni yeniləyib əməliyyatı təkrar edin.
                         {% endif %}
@@ -42,7 +42,7 @@
                     <div class="error-actions">
                         <a href="{{ retry_url }}" class="error-btn error-btn-primary">
                             <i class="fas fa-rotate-right"></i>
-                            {% if is_login_path %}Giriş səhifəsinə keç{% else %}Səhifəni yenilə{% endif %}
+                            {{ retry_label }}
                         </a>
                         <a href="/" class="error-btn error-btn-secondary">
                             <i class="fas fa-house"></i>

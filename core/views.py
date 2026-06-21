@@ -199,14 +199,43 @@ def csrf_failure(request, reason=""):
         request.headers.get("CF-Ray"),
     )
 
-    # On the login page the most common cause is a stale form (bfcache /
-    # long-open tab).  Redirecting to a freshly rendered login form with a
-    # new CSRF token lets the user retry immediately.
-    is_login_path = request.path.rstrip("/") == settings.LOGIN_URL.rstrip("/")
+    # Auth forms are the most common stale-CSRF targets (bfcache / long-open
+    # tabs).  Send the user to a freshly rendered GET form with a new CSRF
+    # token; for signup, the wizard can restore its local draft.
+    normalized_path = request.path.rstrip("/")
+    login_path = settings.LOGIN_URL.rstrip("/")
+    register_path = "/accounts/register"
+    verify_code_path = "/accounts/verify-code"
+
+    is_login_path = normalized_path == login_path
+    is_register_path = normalized_path == register_path
+    is_verify_code_path = normalized_path in {verify_code_path, "/accounts/resend-code"}
+
+    retry_url = request.path or "/"
+    retry_label = "Səhifəni yenilə"
+    auto_redirect = False
+
+    if is_login_path:
+        retry_url = settings.LOGIN_URL
+        retry_label = "Giriş səhifəsinə keç"
+        auto_redirect = True
+    elif is_register_path:
+        retry_url = "/accounts/register/?signup_restore=1"
+        retry_label = "Qeydiyyata qayıt"
+        auto_redirect = True
+    elif is_verify_code_path:
+        retry_url = "/accounts/verify-code/"
+        retry_label = "Təsdiq səhifəsinə qayıt"
+        auto_redirect = True
+
     context = {
         "is_login_path": is_login_path,
         "login_url": settings.LOGIN_URL,
-        "retry_url": settings.LOGIN_URL if is_login_path else (request.path or "/"),
+        "is_register_path": is_register_path,
+        "is_verify_code_path": is_verify_code_path,
+        "auto_redirect": auto_redirect,
+        "retry_url": retry_url,
+        "retry_label": retry_label,
     }
     return render(request, "errors/csrf_failure.html", context, status=403)
 

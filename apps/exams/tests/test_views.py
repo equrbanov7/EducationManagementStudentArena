@@ -2466,6 +2466,63 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(attempt.status, "expired")
         self.assertIsNotNone(attempt.finished_at)
 
+    def test_take_exam_finished_attempt_ajax_finish_returns_result_json(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+            finished_at=timezone.now(),
+        )
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]),
+            {"submit_action": "finish"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertTrue(payload["finished"])
+        self.assertTrue(payload["already_finished"])
+        self.assertEqual(
+            payload["redirect_url"],
+            reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]),
+        )
+
+    def test_take_exam_finished_attempt_ajax_autosave_returns_result_json(self):
+        question = self.course_assigned_exam.questions.first()
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+            finished_at=timezone.now(),
+        )
+        if question:
+            ExamAnswer.objects.create(attempt=attempt, question=question, text_answer="Already submitted")
+
+        response = self.client.post(
+            reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]),
+            {
+                "submit_action": "autosave",
+                "changed_questions[]": [str(question.id)] if question else [],
+                f"q_{question.id}" if question else "q_0": "Late autosave",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertTrue(payload["finished"])
+        self.assertTrue(payload["already_finished"])
+        self.assertEqual(
+            payload["redirect_url"],
+            reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]),
+        )
+
     def test_take_exam_uses_deadline_based_timer_logic_for_background_tabs(self):
         self.course_assigned_exam.total_duration_minutes = 30
         self.course_assigned_exam.default_question_time_seconds = 45

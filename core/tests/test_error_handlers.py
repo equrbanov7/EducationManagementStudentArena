@@ -251,6 +251,24 @@ class CsrfFailureViewTests(TestCase):
         self.assertNotIn("Traceback", content)
         self.assertNotIn("CSRF verification failed", content)
 
+    def test_csrf_failure_on_register_links_to_fresh_signup_form(self):
+        response = self.csrf_client.post("/accounts/register/", {"email": "x@example.com"})
+
+        self.assertEqual(response.status_code, 403)
+        content = response.content.decode()
+        self.assertIn('http-equiv="refresh"', content)
+        self.assertIn("/accounts/register/?signup_restore=1", content)
+        self.assertIn("Qeydiyyata qayıt", content)
+
+    def test_csrf_failure_on_verify_code_links_to_fresh_otp_form(self):
+        response = self.csrf_client.post("/accounts/verify-code/", {"code": "123456"})
+
+        self.assertEqual(response.status_code, 403)
+        content = response.content.decode()
+        self.assertIn('http-equiv="refresh"', content)
+        self.assertIn("/accounts/verify-code/", content)
+        self.assertIn("Təsdiq səhifəsinə qayıt", content)
+
     def test_csrf_failure_is_logged_with_diagnostic_context(self):
         with self.assertLogs("core.csrf", level="WARNING") as captured:
             self.csrf_client.post(

@@ -315,6 +315,27 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function getCookie(name) {
+        var prefix = name + "=";
+        var parts = document.cookie ? document.cookie.split(";") : [];
+        for (var i = 0; i < parts.length; i += 1) {
+            var cookie = parts[i].trim();
+            if (cookie.indexOf(prefix) === 0) {
+                return decodeURIComponent(cookie.slice(prefix.length));
+            }
+        }
+        return "";
+    }
+
+    function syncFreshCsrfToken() {
+        if (!registerForm) return;
+        var cookieToken = getCookie("csrftoken");
+        var tokenInput = registerForm.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (cookieToken && tokenInput) {
+            tokenInput.value = cookieToken;
+        }
+    }
+
     function migrateLegacySignupDraft() {
         var draftStorage = getDraftStorage();
         var legacyDraftStorage = getLegacyDraftStorage();
@@ -1447,6 +1468,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.bootstrap.Modal.getOrCreateInstance(privacyModalElement).hide();
             }
             privacyCheckbox.focus();
+        });
+    }
+
+    if (registerForm) {
+        registerForm.addEventListener("submit", function () {
+            syncFreshCsrfToken();
+            saveSignupDraft();
         });
     }
 

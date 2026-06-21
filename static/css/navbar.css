@@ -809,7 +809,6 @@ button.blog-header__user-menu-item{
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: var(--primary-color, #2563eb);
     color: #fff;
     display: inline-flex;
     align-items: center;
