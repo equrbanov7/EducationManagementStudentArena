@@ -532,7 +532,6 @@ def take_exam(request, slug, attempt_id):
 
     # Server tərəfli Vaxt Hesablaması
     remaining_seconds = None
-    is_time_up = False
     if exam.total_duration_minutes and attempt.started_at:
         now = timezone.now()
         finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
