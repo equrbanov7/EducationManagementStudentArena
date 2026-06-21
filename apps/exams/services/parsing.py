@@ -8,6 +8,8 @@ from django.conf import settings
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
+from apps.exams.services.pdf_math import Q_SEQUENCE_GAP as _Q_SEQ_GAP
+from apps.exams.services.pdf_math import extract_correct_labels, remap_symbol_pua
 from apps.exams.services.utils import _norm
 
 try:
@@ -222,6 +224,7 @@ def _convert_marker_options(text: str) -> str:
 def normalize_pdf_extracted_text(text: str) -> str:
     """
     PDF-dən çıxan mətni parser üçün uyğun formaya salır:
+    - Symbol fontunun PUA glyph-lərini əsl Unicode-a çevirir (düstur mətni)
     - sual nömrələrinin qabağına boş sətir əlavə edir (… \n\n12) …)
     - A–E variantlarının qabağına newline əlavə edir (… \nA) …)
     - "Cavab:" sətrini yeni sətrə keçirir
@@ -231,7 +234,9 @@ def normalize_pdf_extracted_text(text: str) -> str:
     if not text:
         return ""
 
-    t = text.replace("\r", "\n")
+    # Mathcad/MathType düsturlarının Symbol-font glyph-lərini bərpa et:
+    # "rowsm" → "rows(m)". Adi mətnə təsir etmir.
+    t = remap_symbol_pua(text).replace("\r", "\n")
 
     # çoxlu boşluqları normallaşdır
     t = re.sub(r"[ \t]+", " ", t)
@@ -313,6 +318,43 @@ def _mark_correct_option_lines(text: str, highlight_fragments: list[str]) -> str
             opt_label = m.group(2).upper()
             opt_core = _highlight_core(m.group(3))
             if any(_fragment_matches_option(fl, fc, opt_label, opt_core) for fl, fc in parsed):
+                line = re.sub(r"^(\s*)", r"\1*", line, count=1)
+        out_lines.append(line)
+    return "\n".join(out_lines)
+
+
+def _mark_correct_options_by_position(text: str, correct_map: dict) -> str:
+    """
+    MÖVQE əsaslı highlight nəticəsini (``{q_no: {labels}}``) tətbiq edir:
+    hər sualın yalnız işarələnmiş variant(lar)ının əvvəlinə "*" qoyur.
+
+    Sual nömrəsini izləyir və açar (çap olunmuş sual nömrəsi) ilə correct_map-ı
+    uyğunlaşdırır. İzləmə MƏHDUD-ARALIQLI monotondur: real sual nömrəsi ardıcıl
+    artır (n = max_q+1), ona görə yalnız ``max_q < n <= max_q + _Q_SEQ_GAP``
+    qəbul edilir. Bu, düstur mətnindəki iri rəqəmlərin (məs. "...81") saxta sual
+    ankeri yaratmasının qarşısını alır — əks halda izləmə tullanıb ilişir və
+    suallar işarələnmir. Map boşdursa mətn olduğu kimi qaytarılır.
+    """
+    if not correct_map:
+        return text
+
+    out_lines = []
+    current_q = None
+    max_q = 0
+    for line in text.splitlines():
+        q_match = QUESTION_RE.match(line)
+        if q_match:
+            n = int(q_match.group(1))
+            if max_q < n <= max_q + _Q_SEQ_GAP:
+                max_q = n
+                current_q = str(n)
+            out_lines.append(line)
+            continue
+
+        m = OPTION_RE.match(line)
+        if m and not m.group(1) and current_q is not None:  # işarələnməmiş variant sətri
+            label = m.group(2).upper()
+            if label in correct_map.get(current_q, ()):  # type: ignore[arg-type]
                 line = re.sub(r"^(\s*)", r"\1*", line, count=1)
         out_lines.append(line)
     return "\n".join(out_lines)
@@ -773,9 +815,11 @@ def extract_text_from_upload(uploaded_file) -> str:
                 # OCR deaktivdir) — istifadəçiyə aydın səbəb göstəririk.
                 raise ValueError(pgettext("exams.service.parsing.error", "pdf_no_text_layer"))
 
-        # PDF highlight annotation-ları ilə mark olunmuş variantı "*" ilə işarələ
-        highlight_fragments = _extract_pdf_highlights(uploaded_file)
-        return _mark_correct_option_lines(normalized, highlight_fragments)
+        # PDF highlight (sarı işarələmə) ilə mark olunmuş variantı "*" ilə işarələ.
+        # MÖVQE əsaslı: hər highlight öz sualına+variantına bağlanır (köhnə qlobal
+        # etiket uyğunluğu bütün variantları yanlış işarələyirdi).
+        correct_map = extract_correct_labels(uploaded_file)
+        return _mark_correct_options_by_position(normalized, correct_map)
 
     raise ValueError(pgettext("exams.service.parsing.error", "unsupported_file_type"))
 

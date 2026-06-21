@@ -602,6 +602,10 @@ body {
     margin-top: 50px;
 }
 
+.question-list {
+    padding-bottom: 110px;
+}
+
 .q-card {
     background: white;
     margin-bottom: 15px;
@@ -1238,15 +1242,24 @@ body {
 
 /* Sticky Footer */
 .sticky-footer {
-    position: sticky;
-    bottom: 20px;
-    background: rgba(255,255,255,0.9);
+    position: fixed;
+    left: 50%;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    z-index: 35;
+    width: min(1300px, calc(100vw - 40px));
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.92);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 20px;
     text-align: right;
     border-radius: 12px;
     box-shadow: 0 -10px 20px rgba(0,0,0,0.05);
-    margin-top: 30px;
+    margin: 0;
+}
+
+.bulk-page-wrapper:has(.sticky-footer) {
+    padding-bottom: 150px;
 }
 
 .save-btn {
@@ -1258,6 +1271,23 @@ body {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .sticky-footer {
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        width: calc(100vw - 24px);
+        padding: 12px;
+    }
+
+    .save-btn {
+        width: 100%;
+        padding: 13px 18px;
+    }
+
+    .bulk-page-wrapper:has(.sticky-footer) {
+        padding-bottom: 120px;
+    }
 }
 
 

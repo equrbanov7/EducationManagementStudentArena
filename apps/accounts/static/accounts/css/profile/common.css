@@ -93,3 +93,129 @@
 .table tr:hover {
     background: var(--bg-page);
 }
+
+.section-header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header-flex > .section-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0 !important;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.title-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.title-left > i {
+    font-size: 1.05rem;
+}
+
+.title-left > span:not(.count-badge) {
+    min-width: 0;
+}
+
+.count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.btn-create-new {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.78rem 1.1rem;
+    border-radius: 0.85rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.btn-create-new:hover,
+.btn-create-new:focus {
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+}
+
+.modern-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 3.25rem 1.5rem;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px dashed #dbe3ef;
+    border-radius: var(--radius-lg);
+}
+
+.empty-icon-wrapper {
+    width: 4.5rem;
+    height: 4.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-radius: 1.25rem;
+    font-size: 2rem;
+}
+
+.modern-empty-state h3 {
+    margin: 0 0 0.5rem;
+    color: var(--text-main);
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.modern-empty-state p {
+    max-width: 34rem;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+    .section-header-flex {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .btn-create-new {
+        width: 100%;
+    }
+
+    .modern-empty-state {
+        min-height: 200px;
+        padding: 2.5rem 1rem;
+    }
+}

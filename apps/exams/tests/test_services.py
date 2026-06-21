@@ -1541,6 +1541,47 @@ class ExamParsingServicesTest(TestCase):
         parsed = parsing.parse_bulk_mcq(text)
         self.assertEqual(parsed[0]["correct"], ["D"])
 
+    @skipUnless(parsing.fitz is not None, "PyMuPDF (fitz) quraşdırılmayıb")
+    def test_highlight_is_scoped_per_question_no_cross_contamination(self):
+        """
+        REQRESSİYA: əvvəllər highlight YALNIZ etiketə görə qlobal uyğunlaşdırılırdı,
+        ona görə sənəddə bir yerdə "A)" düzgün olanda HƏR sualın A-sı işarələnirdi
+        (parser default "A"-ya düşürdü). İndi mövqe əsaslıdır: Q1-də A, Q2-də C
+        işarələnəndə Q2-yə A, Q1-ə C sızmamalıdır.
+        """
+        fitz = parsing.fitz
+        doc = fitz.open()
+        page = doc.new_page()
+        rows = [
+            "1. Birinci sual?",
+            "A) duzgun bir",
+            "B) yanlis bir",
+            "C) yanlis iki",
+            "D) yanlis uc",
+            "2. Ikinci sual?",
+            "A) yanlis dord",
+            "B) yanlis bes",
+            "C) duzgun iki",
+            "D) yanlis alti",
+        ]
+        y = 72
+        for line in rows:
+            page.insert_text((72, y), line, fontsize=12)
+            y += 22
+        for rect in page.search_for("A) duzgun bir"):
+            page.add_highlight_annot(rect)
+        for rect in page.search_for("C) duzgun iki"):
+            page.add_highlight_annot(rect)
+        data = doc.tobytes()
+        doc.close()
+
+        text = parsing.extract_text_from_upload(SimpleUploadedFile("q.pdf", data))
+        parsed = parsing.parse_bulk_mcq(text)
+        self.assertEqual(parsed[0]["correct"], ["A"])
+        self.assertEqual(parsed[1]["correct"], ["C"])
+        # Q2 A işarələnməyib (qlobal sızma olmayıb)
+        self.assertNotIn("*A) yanlis dord", text)
+
     # ---- Skan edilmiş (şəkil əsaslı) PDF + OCR --------------------------------
 
     @staticmethod

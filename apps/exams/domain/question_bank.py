@@ -24,6 +24,24 @@ def bank_question_media_path(instance, filename):
 bank_question_media_path.__module__ = "apps.exams.models"
 
 
+def option_media_path(instance, filename):
+    """İmtahan sualı variantının düstur şəkli üçün yol."""
+    exam_id = getattr(instance.question, "exam_id", None)
+    return f"question_media/exam_{exam_id}/opt_{instance.id or 'new'}/{filename}"
+
+
+option_media_path.__module__ = "apps.exams.models"
+
+
+def bank_option_media_path(instance, filename):
+    """Kitabxana sualı variantının düstur şəkli üçün yol."""
+    bank_id = getattr(instance.question, "bank_id", None)
+    return f"bank_media/bank_{bank_id}/opt_{instance.id or 'new'}/{filename}"
+
+
+bank_option_media_path.__module__ = "apps.exams.models"
+
+
 def validate_video_size(f):
     max_mb = 30
     if f.size > max_mb * 1024 * 1024:
@@ -410,6 +428,14 @@ class ExamQuestionOption(models.Model):
     text = models.TextField(
         verbose_name=pgettext_lazy("exams.model.question_option.field", "text"),
     )
+    # Düstur/şəkil variantları üçün: PDF idxalında 2D riyazi region (matris,
+    # kəsr, kök) bu sahəyə PNG kimi yazılır. Mətnlə birlikdə göstərilir.
+    image = models.ImageField(
+        upload_to=option_media_path,
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.question_option.field", "image"),
+    )
     is_correct = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.question_option.field", "is_correct"),
@@ -551,6 +577,13 @@ class BankQuestionOption(models.Model):
     text = models.TextField(
         verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "text"),
     )
+    # Düstur/şəkil variantları üçün (bax: ExamQuestionOption.image).
+    image = models.ImageField(
+        upload_to=bank_option_media_path,
+        blank=True,
+        null=True,
+        verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "image"),
+    )
     is_correct = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.bank_question_option.field", "is_correct"),
@@ -571,7 +604,9 @@ __all__ = [
     "ExamQuestion",
     "ExamQuestionOption",
     "QuestionBank",
+    "bank_option_media_path",
     "bank_question_media_path",
+    "option_media_path",
     "question_media_path",
     "validate_video_size",
 ]

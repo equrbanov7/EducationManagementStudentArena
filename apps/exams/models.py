@@ -18,7 +18,9 @@ from apps.exams.domain.question_bank import (
     ExamQuestion,
     ExamQuestionOption,
     QuestionBank,
+    bank_option_media_path,
     bank_question_media_path,
+    option_media_path,
     question_media_path,
     validate_video_size,
 )
@@ -45,7 +47,9 @@ __all__ = [
     "QuestionBlock",
     "StudentGroup",
     "SupervisionIncident",
+    "bank_option_media_path",
     "bank_question_media_path",
+    "option_media_path",
     "question_media_path",
     "validate_video_size",
 ]
