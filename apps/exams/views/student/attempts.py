@@ -316,17 +316,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
     is_ajax = _is_ajax_request(request)
 
     with transaction.atomic():
-        attempt = (
-            ExamAttempt.objects.select_for_update()
-            .select_related(
-                "exam",
-                "exam__author",
-                "exam__course",
-                "exam__organization",
-                "user",
-            )
-            .get(id=attempt.id, user=request.user)
-        )
+        attempt = ExamAttempt.objects.select_for_update().select_related("exam").get(id=attempt.id, user=request.user)
         exam = attempt.exam
 
         if attempt.is_finished:
