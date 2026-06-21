@@ -1329,6 +1329,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draft / autosave – AJAX
     function sendDraft(action = "autosave", options = {}) {
+        if (action === "autosave" && finishRequestInFlight) {
+            return Promise.resolve(null);
+        }
+
         if (action === "autosave" && !hasUnsavedChanges) {
             return Promise.resolve(null);
         }
@@ -1550,9 +1554,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     let isFinishingExam = false;
+    let finishRequestInFlight = false;
 
     function prepareExamFinishNavigation() {
         isFinishingExam = true;
+        finishRequestInFlight = false;
         hasUnsavedChanges = false;
         window.EXAM_SUPERVISION_NAVIGATING = true;
         if (window.ExamSupervision && typeof window.ExamSupervision.destroy === "function") {
@@ -1613,11 +1619,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // (Əvvəlki axın draft-ı submit-dən ƏVVƏL silirdi — offline halda
         // cavablar itirdi.)
         confirmFinishBtn.disabled = true;
+        finishRequestInFlight = true;
         syncMarkedQuestionInput();
 
         sendDraft("finish").catch(() => {
             // sendDraft xəta bildirişini özü göstərir; draft localStorage-da
             // qalır. Düyməni yenidən aktivləşdir ki, təkrar cəhd mümkün olsun.
+            finishRequestInFlight = false;
             confirmFinishBtn.disabled = false;
         });
     });

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -51,6 +52,38 @@ def _attempt_answers_queryset(attempt, *, question_ids=None):
     if question_ids is not None:
         qs = qs.filter(question_id__in=list(question_ids))
     return qs
+
+
+def _is_ajax_request(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _finished_attempt_response(request, attempt, *, return_to):
+    redirect_url = build_exam_result_url(attempt, return_to=return_to)
+    if _is_ajax_request(request):
+        return JsonResponse(
+            {
+                "success": True,
+                "finished": True,
+                "already_finished": True,
+                "redirect_url": redirect_url,
+            }
+        )
+    return redirect(redirect_url)
+
+
+def _posted_autosave_question_ids(request, *, action):
+    if action != "autosave":
+        return None
+
+    raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
+    parsed_ids = set()
+    for raw_id in raw_ids:
+        try:
+            parsed_ids.add(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+    return parsed_ids
 
 
 def _selected_option_ids_from_request(request, question):
@@ -278,6 +311,135 @@ def start_exam(request, slug):
     return _start_or_resume_attempt(request, exam)
 
 
+def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
+    action = (request.POST.get("submit_action") or "").strip()
+    is_ajax = _is_ajax_request(request)
+
+    with transaction.atomic():
+        attempt = (
+            ExamAttempt.objects.select_for_update()
+            .select_related(
+                "exam",
+                "exam__author",
+                "exam__course",
+                "exam__organization",
+                "user",
+            )
+            .get(id=attempt.id, user=request.user)
+        )
+        exam = attempt.exam
+
+        if attempt.is_finished:
+            return _finished_attempt_response(request, attempt, return_to=return_to)
+
+        # Re-check the deadline while holding the attempt row lock. This keeps
+        # final submit, autosave, and timer-expiry paths from racing each other.
+        if exam.total_duration_minutes and attempt.started_at:
+            finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
+            is_time_up = timezone.now() >= finish_time
+
+        autosave_question_ids_for_fetch = _posted_autosave_question_ids(request, action=action)
+        answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+
+        if not answers:
+            if not attempt.answers.exists():
+                generate_random_questions_for_attempt(attempt)
+            answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+
+        if not answers and autosave_question_ids_for_fetch is None:
+            if is_ajax:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "error": pgettext("exams.view.access.message", "exam_start_failed"),
+                    },
+                    status=400,
+                )
+            message_key = (
+                "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
+            )
+            messages.error(request, pgettext("exams.view.access.message", message_key))
+            return redirect(_resolve_exam_failure_redirect(request))
+
+        questions = [a.question for a in answers]
+        answers_by_qid = {
+            a.question_id: {
+                "answer": a,
+                "selected_option_ids": {option.id for option in a.selected_options.all()},
+            }
+            for a in answers
+        }
+
+        _save_marked_question_ids_from_request(request, attempt)
+
+        autosave_changed_question_ids = _posted_autosave_question_ids(request, action=action)
+
+        for q in questions:
+            if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
+                continue
+
+            answer_data = answers_by_qid.get(q.id) or {}
+            ans = answer_data.get("answer")
+            if ans is None:
+                ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+                answer_data = {"answer": ans, "selected_option_ids": set()}
+
+            if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+                _save_test_answer_if_changed(
+                    ans,
+                    q,
+                    _selected_option_ids_from_request(request, q),
+                    answer_data.get("selected_option_ids", set()),
+                )
+            else:
+                try:
+                    _save_written_answer_if_changed(
+                        request,
+                        ans,
+                        q,
+                        allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
+                    )
+                except ValidationError as exc:
+                    if is_ajax:
+                        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+                    messages.error(request, exc.messages[0])
+                    return redirect(
+                        append_return_to(
+                            reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+                            return_to,
+                        )
+                    )
+
+        if exam.exam_type == "test" and (action != "autosave" or is_time_up):
+            attempt.recalculate_score()
+
+        if action == "finish" or is_time_up:
+            status = "expired" if is_time_up else "submitted"
+            attempt.mark_finished(status=status)
+            if is_ajax:
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "finished": True,
+                        "redirect_url": build_exam_result_url(attempt, return_to=return_to),
+                    }
+                )
+            return redirect(build_exam_result_url(attempt, return_to=return_to))
+
+        if action == "save_draft" and attempt.status != "draft":
+            attempt.status = "draft"
+            attempt.save(update_fields=["status"])
+
+        if is_ajax:
+            return JsonResponse({"success": True, "finished": False})
+
+        return redirect(
+            append_return_to(
+                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to
+            )
+        )
+
+
 @login_required
 def take_exam(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
@@ -314,7 +476,7 @@ def take_exam(request, slug, attempt_id):
     if supervision_feature_enabled:
         attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
-        return redirect(build_exam_result_url(attempt, return_to=return_to))
+        return _finished_attempt_response(request, attempt, return_to=return_to)
 
     # Student is actually back in the exam → clear the pending "resumed" state
     # so the periodic sweep does not auto-finish an active student.
@@ -322,6 +484,9 @@ def take_exam(request, slug, attempt_id):
         from apps.exams.services.supervision import mark_student_returned
 
         mark_student_returned(attempt)
+
+    if request.method == "POST" and exam.exam_type != "coding":
+        return _handle_take_exam_post(request, attempt=attempt, return_to=return_to, is_time_up=False)
 
     # P2.E — Autosave fast-path: yalnız dəyişən sual(lar) üçün cavabları yüklə.
     # POST + action=="autosave" + changed_questions[] dolu olduqda full answer-set
@@ -374,7 +539,6 @@ def take_exam(request, slug, attempt_id):
         diff = finish_time - now
         total_seconds = diff.total_seconds()
         if total_seconds <= 0:
-            is_time_up = True
             remaining_seconds = 0
         else:
             remaining_seconds = int(total_seconds)
@@ -402,90 +566,6 @@ def take_exam(request, slug, attempt_id):
             "answer": a,
             "selected_option_ids": {option.id for option in a.selected_options.all()},
         }
-
-    if request.method == "POST":
-        action = (request.POST.get("submit_action") or "").strip()
-        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
-        _save_marked_question_ids_from_request(request, attempt)
-        autosave_changed_question_ids = None
-        raw_changed_question_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist(
-            "changed_questions"
-        )
-        if action == "autosave":
-            autosave_changed_question_ids = set()
-            for raw_question_id in raw_changed_question_ids:
-                try:
-                    autosave_changed_question_ids.add(int(raw_question_id))
-                except (TypeError, ValueError):
-                    continue
-
-        for q in questions:
-            if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
-                continue
-
-            answer_data = answers_by_qid.get(q.id) or {}
-            ans = answer_data.get("answer")
-            if ans is None:
-                ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
-                answer_data = {"answer": ans, "selected_option_ids": set()}
-
-            if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-                _save_test_answer_if_changed(
-                    ans,
-                    q,
-                    _selected_option_ids_from_request(request, q),
-                    answer_data.get("selected_option_ids", set()),
-                )
-
-            else:  # Yazılı sual
-                try:
-                    _save_written_answer_if_changed(
-                        request,
-                        ans,
-                        q,
-                        allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
-                    )
-                except ValidationError as exc:
-                    if is_ajax:
-                        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-                    messages.error(request, exc.messages[0])
-                    return redirect(
-                        append_return_to(
-                            reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
-                            return_to,
-                        )
-                    )
-
-        if exam.exam_type == "test" and (action != "autosave" or is_time_up):
-            attempt.recalculate_score()
-
-        # ✅ Finish və ya time up
-        if action == "finish" or is_time_up:
-            status = "expired" if is_time_up else "submitted"
-            attempt.mark_finished(status=status)
-            if is_ajax:
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "finished": True,
-                        "redirect_url": build_exam_result_url(attempt, return_to=return_to),
-                    }
-                )
-            return redirect(build_exam_result_url(attempt, return_to=return_to))
-
-        if action == "save_draft" and attempt.status != "draft":
-            attempt.status = "draft"
-            attempt.save(update_fields=["status"])
-
-        if is_ajax:
-            return JsonResponse({"success": True, "finished": False})
-
-        # ✅ Normal POST (AJAX deyilsə) - səhifəni yenilə
-        return redirect(
-            append_return_to(
-                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to
-            )
-        )
 
     # GET sorğusu
     # Load supervision status
