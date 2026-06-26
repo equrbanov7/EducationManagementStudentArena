@@ -452,7 +452,7 @@ To run with WebSocket support:
 
 ```bash
 # Start Daphne (ASGI server)
-daphne -b 0.0.0.0 -p 8000 emsarena.asgi:application
+DJANGO_SETTINGS_MODULE=config.settings.local daphne -b 0.0.0.0 -p 8000 config.asgi:application
 ```
 
 ---
@@ -507,7 +507,7 @@ gunicorn emsarena.wsgi:application --bind 0.0.0.0:8000 --workers 4
 #### **Using Daphne (with WebSockets):**
 
 ```bash
-daphne -b 0.0.0.0 -p 8000 emsarena.asgi:application
+DJANGO_SETTINGS_MODULE=config.settings.production daphne -b 0.0.0.0 -p 8000 config.asgi:application
 ```
 
 ---
