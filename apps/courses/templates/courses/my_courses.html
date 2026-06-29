@@ -6,6 +6,7 @@
 
 {% block extraCss %}
 {% include "courses/partials/_courses_assets_css.html" %}
+<link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
 <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
 <style nonce="{{ request.csp_nonce }}">
   .my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
@@ -223,5 +224,6 @@
 
 {% block extraJs %}
 {% include "courses/partials/_courses_assets_js.html" %}
+<script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}"></script>
 {% endblock %}

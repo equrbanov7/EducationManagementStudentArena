@@ -28918,6 +28918,46 @@ msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "PIN ilə canlı imtahana daxil ol"
 
+msgctxt "courses.create_page"
+msgid "optional"
+msgstr "İstəyə bağlı"
+
+msgctxt "courses.create_page"
+msgid "breadcrumb_my_courses"
+msgstr "Kurslarım"
+
+msgctxt "courses.create_page"
+msgid "subtitle_create"
+msgstr ""
+"Kurs üçün ad, təsvir və örtük şəkli daxil edin. Mövzu və resursları sonra "
+"dashboard-dan əlavə edəcəksiniz."
+
+msgctxt "courses.create_page"
+msgid "cover_drop_title"
+msgstr "Şəkli bura sürüklə və ya"
+
+msgctxt "courses.create_page"
+msgid "action_remove_image"
+msgstr "Şəkli sil"
+
+msgctxt "courses.create_page"
+msgid "help_created_as_draft"
+msgstr ""
+"Kurs ilkin olaraq Qaralama kimi yaradılır. Yaratdıqdan sonra dashboard-dan "
+"onu yayımlaya bilərsiniz."
+
+msgctxt "courses.dashboard"
+msgid "ai_generate"
+msgstr "AI ilə yarat"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_title"
+msgstr "AI ilə kurs qur"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_sub"
+msgstr "Köməkçidən sillabus, resurs və tapşırıq təklifləri al."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."

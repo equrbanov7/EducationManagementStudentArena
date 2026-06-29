@@ -401,13 +401,65 @@
             console.error('resourceFormModal tapılmadı!');
             return;
         }
+
+        const applyTopicContext = function() {
+            const topicSelect = document.getElementById('resourceTopic');
+            if (topicSelect) topicSelect.value = topicId;
+
+            const topicName = document.getElementById('resourceModalTopicName');
+            if (topicName) topicName.textContent = ` - ${topicTitle}`;
+        };
     
-        const topicSelect = document.getElementById('resourceTopic');
-        if (topicSelect) topicSelect.value = topicId;
-    
-        const topicName = document.getElementById('resourceModalTopicName');
-        if (topicName) topicName.textContent = ` - ${topicTitle}`;
-    
+        modalEl.addEventListener('shown.bs.modal', applyTopicContext, { once: true });
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+        if (modalEl.classList.contains('show')) {
+            applyTopicContext();
+        }
     }
+
+    document.addEventListener('click', function(event) {
+        const editTopicButton = event.target.closest('[data-edit-topic-id]');
+        if (editTopicButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof window.editTopic === 'function') {
+                window.editTopic(
+                    editTopicButton.dataset.editTopicId,
+                    editTopicButton.dataset.editTopicTitle || '',
+                    editTopicButton.dataset.editTopicDescription || ''
+                );
+            }
+            return;
+        }
+
+        const deleteTopicButton = event.target.closest('[data-delete-topic-course-id][data-delete-topic-id]');
+        if (deleteTopicButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            deleteTopic(deleteTopicButton.dataset.deleteTopicCourseId, deleteTopicButton.dataset.deleteTopicId);
+            return;
+        }
+
+        const deleteResourceButton = event.target.closest('[data-delete-resource-course-id][data-delete-resource-id]');
+        if (deleteResourceButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            deleteResource(
+                deleteResourceButton.dataset.deleteResourceCourseId,
+                deleteResourceButton.dataset.deleteResourceId
+            );
+            return;
+        }
+
+        const openResourceButton = event.target.closest('[data-open-resource-modal-topic-id]');
+        if (openResourceButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            openResourceModal(
+                openResourceButton.dataset.openResourceModalTopicId,
+                openResourceButton.dataset.openResourceModalTitle || ''
+            );
+        }
+    }, true);
 </script>

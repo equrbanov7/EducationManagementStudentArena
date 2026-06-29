@@ -1,0 +1,268 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs yaratma (Create Course) redizaynı
+   Mənbə: Claude Design handoff "EMSArena Kurs Paneli".
+
+   Bütün stillər `.ems-cc` wrapper-inə SCOPE edilib ki, qlobal Bootstrap
+   səhifələrinə sızmasın. Eyni siniflər həm tam səhifədə, həm də AJAX modalında
+   işləyir (DRY). Django widget-ləri `.form-control` ilə render olunduğu üçün
+   forms.py-a toxunmadan həmin elementləri dizayn primitivlərinə uyğunlaşdırırıq.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Inter + Fraunces — CSP: style-src googleapis, font-src gstatic (icazəlidir) */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── design tokens (wrapper-ə scope) ── */
+.ems-cc {
+    --ink:        #0B1437;
+    --accent:     #2C5BFF;
+    --accent-deep:#1E40AF;
+    --accent-soft:#EEF2FF;
+    --amber:      #F59E0B;
+    --paper:      #F6F7FB;
+    --surface:    #FFFFFF;
+    --border:     #E5E8F0;
+    --border-soft:#EFF1F5;
+    --text:       #1F2937;
+    --muted:      #6B7280;
+    --subtle:     #9CA3AF;
+    --danger:     #DC2626;
+    --danger-soft:#FEECEC;
+    --green:      #16A34A;
+    --green-soft: #DCFCE7;
+
+    --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --sans:  'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    --sh-sm: 0 1px 2px rgba(11,20,55,.05);
+    --sh-md: 0 10px 26px rgba(11,20,55,.08);
+    --sh-lg: 0 24px 60px rgba(11,20,55,.18);
+
+    font-family: var(--sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.ems-cc *, .ems-cc *::before, .ems-cc *::after { box-sizing: border-box; }
+
+/* ───────────────────────── tam-səhifə layout ───────────────────────── */
+.ems-cc-page {
+    background: var(--paper);
+    min-height: 100%;
+    padding: 36px 20px 96px;
+}
+.ems-cc-shell { max-width: 760px; margin: 0 auto; }
+
+/* breadcrumb / geri */
+.ems-cc-crumb {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    margin-bottom: 18px;
+}
+.ems-cc-crumb .back {
+    width: 34px; height: 34px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: grid; place-items: center; color: var(--muted); transition: .15s;
+}
+.ems-cc-crumb .back:hover { color: var(--ink); border-color: var(--subtle); background: var(--paper); }
+.ems-cc-crumb .sep { color: var(--subtle); }
+.ems-cc-crumb .cur { color: var(--ink); }
+
+/* hero başlıq */
+.ems-cc-hero { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.ems-cc-hero-ic {
+    width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
+    display: grid; place-items: center; color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    box-shadow: 0 10px 24px rgba(44,91,255,.28);
+}
+.ems-cc-hero h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(28px, 4vw, 40px); letter-spacing: -.025em;
+    line-height: 1.05; color: var(--ink); margin: 4px 0 0;
+}
+.ems-cc-hero .sub { margin-top: 11px; font-size: 14.5px; color: var(--muted); line-height: 1.5; max-width: 520px; }
+
+/* əsas kart */
+.ems-cc-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 22px; box-shadow: var(--sh-md); overflow: hidden;
+}
+.ems-cc-card-body { padding: 28px 30px; }
+
+/* ───────────────────────── form primitivləri ───────────────────────── */
+.ems-cc .field { margin-bottom: 20px; }
+.ems-cc .field:last-child { margin-bottom: 0; }
+
+.ems-cc .flabel {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px;
+}
+.ems-cc .flabel .req { color: var(--danger); }
+.ems-cc .flabel .opt {
+    font-size: 11px; font-weight: 600; color: var(--subtle);
+    background: var(--paper); padding: 2px 7px; border-radius: 6px;
+}
+.ems-cc .fhint { font-size: 12px; color: var(--subtle); margin-top: 7px; line-height: 1.45; }
+
+/* Django `.form-control`/`.form-select` → dizayn input görünüşü (scope-lu) */
+.ems-cc .form-control,
+.ems-cc .form-select,
+.ems-cc .ipt,
+.ems-cc .sel,
+.ems-cc .txa {
+    width: 100%; min-height: 46px; padding: 0 14px;
+    border-radius: 12px; border: 1px solid var(--border); background: var(--surface);
+    font-family: var(--sans); font-size: 14.5px; color: var(--text);
+    outline: none; transition: border-color .15s, box-shadow .15s; box-shadow: none;
+}
+.ems-cc textarea.form-control,
+.ems-cc .txa {
+    min-height: 110px; padding: 12px 14px; height: auto; resize: vertical; line-height: 1.55;
+}
+.ems-cc .form-control:focus,
+.ems-cc .form-select:focus,
+.ems-cc .ipt:focus,
+.ems-cc .sel:focus,
+.ems-cc .txa:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.ems-cc .form-control::placeholder,
+.ems-cc .txa::placeholder,
+.ems-cc .ipt::placeholder { color: #AAB2C0; }
+
+/* select (organization) — dizayn ox ikonu */
+.ems-cc select.form-control,
+.ems-cc .sel {
+    appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+}
+
+/* başlıq sayğacı */
+.ems-cc .field-counter {
+    float: right; font-size: 11.5px; font-weight: 600; color: var(--subtle);
+}
+
+/* ───────────────────────── cover dropzone ───────────────────────── */
+.ems-cc-cover {
+    position: relative; border: 1.5px dashed var(--border); border-radius: 16px;
+    background: var(--paper); padding: 22px; text-align: center; cursor: pointer;
+    transition: border-color .16s, background .16s;
+}
+.ems-cc-cover:hover,
+.ems-cc-cover.dragover { border-color: var(--accent); background: var(--accent-soft); }
+.ems-cc-cover input[type="file"] {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer;
+}
+.ems-cc-cover-ic {
+    width: 46px; height: 46px; border-radius: 13px; margin: 0 auto 12px;
+    display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent);
+}
+.ems-cc-cover-t { font-size: 14px; font-weight: 650; color: var(--ink); }
+.ems-cc-cover-t b { color: var(--accent); }
+.ems-cc-cover-s { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+.ems-cc-preview { margin-top: 14px; display: none; position: relative; }
+.ems-cc-preview.show { display: block; }
+.ems-cc-preview img {
+    width: 100%; max-height: 240px; object-fit: cover;
+    border-radius: 12px; border: 1px solid var(--border); display: block;
+}
+.ems-cc-preview .rm {
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px; border-radius: 9px;
+    background: rgba(11,20,55,.62); color: #fff; display: grid; place-items: center;
+    backdrop-filter: blur(4px); transition: .14s;
+}
+.ems-cc-preview .rm:hover { background: var(--danger); }
+
+/* real status sahəsi DOM-da qalır, amma gizlənir (forma kontraktı üçün) */
+.ems-cc-hidden-field { display: none; }
+
+/* ───────────────────────── status / draft note ───────────────────────── */
+.ems-cc-note {
+    display: flex; gap: 11px; align-items: flex-start;
+    padding: 13px 15px; border-radius: 13px; font-size: 12.8px; line-height: 1.5;
+    background: #FEF6E7; color: #92400E; border: 1px solid #FCE9C2;
+}
+.ems-cc-note svg { flex-shrink: 0; margin-top: 1px; }
+.ems-cc-note b { font-weight: 700; }
+
+/* ───────────────────────── error mesajları ───────────────────────── */
+.ems-cc-errors {
+    margin-bottom: 18px; border-radius: 12px;
+    border: 1px solid #FBD5D5; background: var(--danger-soft);
+    color: #991B1B; padding: 12px 14px; font-size: 13px; font-weight: 500;
+}
+.ems-cc .field-error {
+    display: flex; align-items: center; gap: 7px;
+    color: var(--danger); font-size: 12.5px; font-weight: 600; margin-top: 8px;
+}
+.ems-cc .field-error svg { flex-shrink: 0; }
+/* invalid input vurğusu */
+.ems-cc .field.has-error .form-control,
+.ems-cc .field.has-error .ipt,
+.ems-cc .field.has-error .txa,
+.ems-cc .field.has-error .sel { border-color: var(--danger); }
+
+/* ───────────────────────── düymələr ───────────────────────── */
+.ems-cc .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    height: 48px; padding: 0 22px; border: none; border-radius: 13px;
+    font-family: var(--sans); font-size: 14.5px; font-weight: 650; cursor: pointer;
+    white-space: nowrap; transition: transform .15s, box-shadow .15s, background .15s, border-color .15s;
+}
+.ems-cc .btn svg { flex-shrink: 0; }
+.ems-cc .btn.primary {
+    background: var(--accent); color: #fff; box-shadow: 0 8px 18px rgba(44,91,255,.24);
+}
+.ems-cc .btn.primary:hover { background: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(44,91,255,.30); }
+.ems-cc .btn.primary:disabled { opacity: .6; transform: none; box-shadow: none; cursor: not-allowed; }
+.ems-cc .btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--border); }
+.ems-cc .btn.ghost:hover { border-color: var(--subtle); background: var(--paper); }
+.ems-cc .btn.subtle { background: var(--paper); color: var(--text); }
+.ems-cc .btn.subtle:hover { background: #ECEFF6; }
+
+/* form altlığı */
+.ems-cc-foot {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border-soft);
+}
+.ems-cc-foot .grow { flex: 1; }
+
+/* məlumat kartı (kursdan sonra) */
+.ems-cc-info {
+    margin-top: 18px; display: flex; gap: 14px; align-items: flex-start;
+    padding: 18px 20px; border-radius: 16px;
+    background: var(--accent-soft); border: 1px solid #DBE3FF; color: var(--accent-deep);
+}
+.ems-cc-info-ic {
+    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+    display: grid; place-items: center; background: var(--accent); color: #fff;
+}
+.ems-cc-info h5 { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0 8px; }
+.ems-cc-info ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.ems-cc-info li {
+    position: relative; padding-left: 22px; font-size: 13px; color: var(--text); line-height: 1.5;
+}
+.ems-cc-info li::before {
+    content: ''; position: absolute; left: 0; top: 6px; width: 14px; height: 8px;
+    border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+    transform: rotate(-45deg);
+}
+
+/* ───────────────────────── responsive ───────────────────────── */
+@media (max-width: 600px) {
+    .ems-cc-page { padding: 22px 14px 80px; }
+    .ems-cc-card-body { padding: 20px 18px; }
+    .ems-cc-hero { gap: 12px; }
+    .ems-cc-hero-ic { width: 46px; height: 46px; border-radius: 13px; }
+    .ems-cc-foot { flex-direction: column-reverse; }
+    .ems-cc-foot .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ems-cc *, .ems-cc *::before, .ems-cc *::after { transition: none !important; animation: none !important; }
+}

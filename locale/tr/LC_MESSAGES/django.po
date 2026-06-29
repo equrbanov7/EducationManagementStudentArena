@@ -29238,6 +29238,46 @@ msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "PIN ile canlı sınava katıl"
 
+msgctxt "courses.create_page"
+msgid "optional"
+msgstr "İsteğe bağlı"
+
+msgctxt "courses.create_page"
+msgid "breadcrumb_my_courses"
+msgstr "Kurslarım"
+
+msgctxt "courses.create_page"
+msgid "subtitle_create"
+msgstr ""
+"Kursun adını, açıklamasını ve kapağını girin. Konuları ve kaynakları sonra "
+"panelden eklersiniz."
+
+msgctxt "courses.create_page"
+msgid "cover_drop_title"
+msgstr "Görseli buraya sürükleyin ya da"
+
+msgctxt "courses.create_page"
+msgid "action_remove_image"
+msgstr "Görseli kaldır"
+
+msgctxt "courses.create_page"
+msgid "help_created_as_draft"
+msgstr ""
+"Kurs önce taslak olarak oluşturulur. Oluşturduktan sonra panelden "
+"yayımlayabilirsiniz."
+
+msgctxt "courses.dashboard"
+msgid "ai_generate"
+msgstr "AI ile oluştur"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_title"
+msgstr "AI ile kurs oluştur"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_sub"
+msgstr "Asistandan müfredat, kaynak ve görev önerileri alın."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."
