@@ -154,7 +154,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        bindCoverImagePreview();
+        // Yeni dizayn: cover dropzone + sayğac reusable enhancer ilə bağlanır.
+        if (window.EMSCourseForm && typeof window.EMSCourseForm.init === "function") {
+            window.EMSCourseForm.init(modalBody);
+        } else {
+            // Köhnə fallback (enhancer yüklənməyibsə)
+            bindCoverImagePreview();
+        }
 
         var closeInlineButton = modalBody.querySelector(".js-close-create-course");
         if (closeInlineButton) {

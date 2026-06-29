@@ -1,67 +1,27 @@
 {% load i18n %}
+{% comment %}
+  AJAX modal forması. Sahələr ortaq partial-dan gəlir (_course_form_fields.html).
+  `.ems-cc` scope ilə dizayn stilləri modal daxilində də tətbiq olunur.
+{% endcomment %}
 
 <form id="createCourseModalForm"
+      class="ems-cc"
       method="post"
       action="{% url 'courses:create_course' %}?modal=1"
       enctype="multipart/form-data"
+      data-ems-course-form
       novalidate>
-    {% csrf_token %}
+  {% csrf_token %}
 
-    {% if form.non_field_errors %}
-        <div class="create-course-form-errors">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
+  {% include "courses/partials/_course_form_fields.html" %}
 
-    <div class="create-course-form-grid">
-        {% if form.organization %}
-        <div class="create-course-field create-course-field--full">
-            {{ form.organization.label_tag }}
-            {{ form.organization }}
-            {% if form.organization.errors %}<div class="create-course-field-error">{{ form.organization.errors.0 }}</div>{% endif %}
-            <small class="create-course-help-text">
-                {% trans "Select the organization where this course should be created." context "courses.partial.create_modal_form" %}
-            </small>
-        </div>
-        {% endif %}
-
-        <div class="create-course-field create-course-field--full">
-            {{ form.title.label_tag }}
-            {{ form.title }}
-            {% if form.title.errors %}<div class="create-course-field-error">{{ form.title.errors.0 }}</div>{% endif %}
-        </div>
-
-        <div class="create-course-field create-course-field--full">
-            {{ form.description.label_tag }}
-            {{ form.description }}
-            {% if form.description.errors %}<div class="create-course-field-error">{{ form.description.errors.0 }}</div>{% endif %}
-            <small class="create-course-help-text">
-                {% trans "help_description" context "courses.partial.create_modal_form" %}
-            </small>
-        </div>
-
-        <div class="create-course-field create-course-field--full">
-            {{ form.cover_image.label_tag }}
-            {{ form.cover_image }}
-            {% if form.cover_image.errors %}<div class="create-course-field-error">{{ form.cover_image.errors.0 }}</div>{% endif %}
-            <small class="create-course-help-text">
-                {% trans "help_cover" context "courses.partial.create_modal_form" %}
-            </small>
-
-            <div id="createCourseImagePreviewWrap" class="create-course-image-preview-wrap" hidden>
-                <img id="createCourseImagePreview" class="create-course-image-preview" src="" alt="{% trans 'alt_cover_preview' context 'courses.partial.create_modal_form' %}">
-            </div>
-        </div>
-
-        <div class="create-course-field">
-            {{ form.status.label_tag }}
-            {{ form.status }}
-            {% if form.status.errors %}<div class="create-course-field-error">{{ form.status.errors.0 }}</div>{% endif %}
-        </div>
-    </div>
-
-    <div class="course-modal-actions">
-        <button type="button" class="course-modal-cancel-btn js-close-create-course">{% trans "action_cancel" context "courses.partial.create_modal_form" %}</button>
-        <button type="submit" class="course-modal-confirm-btn">{% trans "action_create_course" context "courses.partial.create_modal_form" %}</button>
-    </div>
+  <div class="course-modal-actions">
+    <button type="button" class="course-modal-cancel-btn js-close-create-course">
+      {% trans "action_cancel" context "courses.partial.create_modal_form" %}
+    </button>
+    <button type="submit" class="course-modal-confirm-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      {% trans "action_create_course" context "courses.partial.create_modal_form" %}
+    </button>
+  </div>
 </form>

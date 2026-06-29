@@ -16,7 +16,7 @@ from django.utils.translation import override, pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.assignments.models import Assignment
-from apps.courses.models import Course, CourseMembership
+from apps.courses.models import Course, CourseMembership, CourseResource, CourseTopic
 from apps.exams.models import Exam
 from apps.labs.models import Lab
 from apps.organizations.models import Membership, Organization
@@ -470,6 +470,85 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(CourseMembership.objects.filter(course=self.course_a, user=self.external_student).exists())
+
+    def test_owner_can_add_topic_ajax_and_dashboard_renders_it(self):
+        response = self.client.post(
+            reverse("courses:add_topic", kwargs={"course_id": self.course_a.id}),
+            {
+                "title": "Visible AJAX Topic",
+                "description": "This topic must appear on the dashboard after reload.",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+
+        topic = CourseTopic.objects.get(course=self.course_a, title="Visible AJAX Topic")
+        self.assertEqual(topic.order, 1)
+
+        dashboard = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertContains(dashboard, "Visible AJAX Topic")
+        self.assertContains(dashboard, f'id="topic-{topic.id}"')
+
+    def test_owner_can_add_resource_to_topic_ajax_and_topic_panel_renders_it(self):
+        topic = CourseTopic.objects.create(
+            course=self.course_a,
+            title="Resource Parent Topic",
+            description="",
+            order=1,
+        )
+
+        response = self.client.post(
+            reverse("courses:add_resource", kwargs={"course_id": self.course_a.id}),
+            {
+                "title": "Topic Bound Resource",
+                "description": "Resource attached to the selected topic.",
+                "resource_type": "link",
+                "url": "https://example.com/topic-resource",
+                "topic": str(topic.id),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+
+        resource = CourseResource.objects.get(course=self.course_a, title="Topic Bound Resource")
+        self.assertEqual(resource.topic, topic)
+
+        dashboard = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertContains(dashboard, "Resource Parent Topic")
+        self.assertContains(dashboard, "Topic Bound Resource")
+
+    def test_course_dashboard_wires_topic_resource_and_member_controls(self):
+        topic = CourseTopic.objects.create(
+            course=self.course_a,
+            title="Wired Topic",
+            description="",
+            order=1,
+        )
+        CourseResource.objects.create(
+            course=self.course_a,
+            topic=topic,
+            title="Wired Resource",
+            resource_type="link",
+            url="https://example.com/wired-resource",
+        )
+
+        response = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-delete-course-id="')
+        self.assertContains(response, 'data-edit-topic-id="')
+        self.assertContains(response, 'data-delete-topic-id="')
+        self.assertContains(response, 'data-open-resource-modal-topic-id="')
+        self.assertContains(response, 'data-delete-resource-id="')
+        self.assertContains(response, "shown.bs.modal")
+        self.assertContains(response, 'id="sidebar-members-count"')
+        self.assertContains(response, '.snav-item[data-key="members"] .snav-count')
 
 
 class StudentUserQuerysetRoleSourceTests(TestCase):

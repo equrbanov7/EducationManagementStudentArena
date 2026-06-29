@@ -26,7 +26,7 @@
     max-height: 92vh;
     overflow: hidden;
     background: #ffffff;
-    border-radius: 14px;
+    border-radius: 20px;
     box-shadow: 0 24px 56px rgba(2, 6, 23, 0.3);
     display: flex;
     flex-direction: column;
@@ -53,8 +53,10 @@
     gap: 0.55rem;
     font-size: 1.15rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #0B1437;
 }
+
+.course-modal-header h3 i { color: #2C5BFF; }
 
 .course-modal-close-btn {
     border: none;
@@ -182,12 +184,19 @@
 }
 
 .course-modal-confirm-btn {
-    background: #d97706;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2C5BFF;
     color: #ffffff;
+    box-shadow: 0 8px 18px rgba(44, 91, 255, 0.24);
 }
 
+.course-modal-confirm-btn svg { flex-shrink: 0; }
+
 .course-modal-confirm-btn:hover {
-    background: #b45309;
+    background: #1E40AF;
+    box-shadow: 0 12px 24px rgba(44, 91, 255, 0.30);
 }
 
 .course-modal-confirm-btn:disabled {

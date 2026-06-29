@@ -1,0 +1,100 @@
+{% load i18n %}
+{% comment %}
+  Ortaq kurs forması sahələri (DRY).
+  Həm tam səhifə (create_course.html), həm də AJAX modal
+  (_create_course_modal_form.html) bu partial-ı istifadə edir.
+  Yalnız SAHƏLƏRİ render edir — <form> tagı və düymələr sarğı şablonlarındadır.
+  Stillər: courses/css/course_create.css (.ems-cc scope).
+{% endcomment %}
+
+{% if form.non_field_errors %}
+  <div class="ems-cc-errors">{{ form.non_field_errors }}</div>
+{% endif %}
+
+{% if form.organization %}
+<div class="field{% if form.organization.errors %} has-error{% endif %}">
+  <label for="{{ form.organization.id_for_label }}" class="flabel">
+    {% trans "organization" context "courses.create_page" %}
+    <span class="req">*</span>
+  </label>
+  {{ form.organization }}
+  <div class="fhint">{% trans "Select the organization where this course should be created." context "courses.create_page" %}</div>
+  {% if form.organization.errors %}
+    <div class="field-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      {{ form.organization.errors.0 }}
+    </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{# Kurs adı — sayğac ilə #}
+<div class="field{% if form.title.errors %} has-error{% endif %}">
+  <label for="{{ form.title.id_for_label }}" class="flabel">
+    {% trans "field_course_name" context "courses.create_page" %}
+    <span class="req">*</span>
+    <span class="field-counter" data-ems-counter-for="{{ form.title.id_for_label }}" data-ems-counter-max="255">0/255</span>
+  </label>
+  {{ form.title }}
+  {% if form.title.errors %}
+    <div class="field-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      {{ form.title.errors.0 }}
+    </div>
+  {% endif %}
+</div>
+
+{# Təsvir #}
+<div class="field{% if form.description.errors %} has-error{% endif %}">
+  <label for="{{ form.description.id_for_label }}" class="flabel">
+    {% trans "field_course_description" context "courses.create_page" %}
+    <span class="opt">{% trans "optional" context "courses.create_page" %}</span>
+  </label>
+  {{ form.description }}
+  <div class="fhint">{% trans "help_course_description" context "courses.create_page" %}</div>
+  {% if form.description.errors %}
+    <div class="field-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      {{ form.description.errors.0 }}
+    </div>
+  {% endif %}
+</div>
+
+{# Cover şəkli — dropzone + önizləmə #}
+<div class="field{% if form.cover_image.errors %} has-error{% endif %}">
+  <label class="flabel" for="{{ form.cover_image.id_for_label }}">
+    {% trans "field_course_cover" context "courses.create_page" %}
+    <span class="opt">{% trans "optional" context "courses.create_page" %}</span>
+  </label>
+
+  <div class="ems-cc-cover" data-ems-cover>
+    <div class="ems-cc-cover-ic">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+    </div>
+    <div class="ems-cc-cover-t">{% trans "cover_drop_title" context "courses.create_page" %} <b>{% trans "action_choose_image" context "courses.create_page" %}</b></div>
+    <div class="ems-cc-cover-s">{% trans "help_cover_default" context "courses.create_page" %} {% trans "help_cover_optimal_size" context "courses.create_page" %}</div>
+    {{ form.cover_image }}
+  </div>
+
+  <div class="ems-cc-preview" data-ems-preview>
+    <img src="" alt="{% trans 'alt_preview' context 'courses.create_page' %}" data-ems-preview-img>
+    <button type="button" class="rm" data-ems-preview-remove aria-label="{% trans 'action_remove_image' context 'courses.create_page' %}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  {% if form.cover_image.errors %}
+    <div class="field-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      {{ form.cover_image.errors.0 }}
+    </div>
+  {% endif %}
+</div>
+
+{# Status — backend kursu həmişə "Qaralama" yaradır, ona görə məlumat qeydi göstərilir.
+   Real sahə DOM-da gizli saxlanılır ki, forma kontraktı pozulmasın. #}
+<div class="ems-cc-hidden-field">{{ form.status }}</div>
+<div class="ems-cc-note">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+  <span>{% trans "help_created_as_draft" context "courses.create_page" %}</span>
+</div>

@@ -7,6 +7,7 @@
 
 {% block extraCss %}
     {% include "courses/partials/_courses_assets_css.html" %}
+    <link rel="stylesheet" href="{% static 'courses/css/course_dashboard_redesign.css' %}?v=20260630-2">
     {% if is_student %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
     {% endif %}
@@ -17,205 +18,203 @@
 
 {% block extraJs %}
     {% include "courses/partials/_courses_assets_js.html" %}
+    <script src="{% static 'courses/js/course_panel_tabs.js' %}?v=20260630-2" defer></script>
+    <script src="{% static 'courses/js/course_modals_enhance.js' %}?v=20260630-2" defer></script>
+    <script src="{% static 'courses/js/course_ai_drawer.js' %}?v=20260630-2" defer></script>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-5">
-    <div class="row">
-        
-        <!-- SIDEBAR -->
-        <div class="col-lg-3 mb-4">
-            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
-                <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); height: 200px;">
-                    {% with cover_image_url=course.cover_image_url %}
-                        {% if cover_image_url %}
-                            <img src="{{ cover_image_url }}" alt="{{ course.title }}" class="w-100 h-100 object-fit-cover">
-                        {% else %}
-                            <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-book fa-5x text-white opacity-50"></i>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
-                </div>
-                
-                <div class="card-body">
-                    <h5 class="card-title mb-2">{{ course.title }}</h5>
-                    
-                    <div class="mb-3">
-                        <small class="text-muted d-block">
-                            <i class="fas fa-user"></i> {% trans "label_teacher" context "courses.dashboard" %}: <strong>{{ course.owner.get_full_name|default:course.owner.username }}</strong>
-                        </small>
-                        <small class="text-muted d-block">
-                            <i class="fas fa-calendar"></i> {% trans "label_created" context "courses.dashboard" %}: <strong>{{ course.created_at|date:"d.m.Y" }}</strong>
-                        </small>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <div class="accordion course-status-accordion" id="courseVisibilityAccordion">
-                            <div class="accordion-item course-status-item">
-                                <h2 class="accordion-header" id="courseVisibilityHeading">
-                                    <button
-                                        class="accordion-button course-status-toggle {% if course.status == 'published' %}collapsed{% endif %}"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#courseVisibilityCollapse"
-                                        aria-expanded="{% if course.status == 'published' %}false{% else %}true{% endif %}"
-                                        aria-controls="courseVisibilityCollapse"
-                                    >
-                                        <span class="course-status-heading">
-                                            <i class="fas fa-broadcast-tower"></i>
-                                            {% trans "label_course_visibility" context "courses.dashboard" %}
-                                        </span>
-                                        <span class="course-status-current course-status-current--{{ course.status }}">
-                                            {% if course.status == 'published' %}
-                                                {% trans "status_published" context "courses.dashboard" %}
-                                            {% elif course.status == 'draft' %}
-                                                {% trans "status_draft" context "courses.dashboard" %}
-                                            {% else %}
-                                                {% trans "status_archived" context "courses.dashboard" %}
-                                            {% endif %}
-                                        </span>
-                                    </button>
-                                </h2>
-                                <div
-                                    id="courseVisibilityCollapse"
-                                    class="accordion-collapse collapse {% if course.status != 'published' %}show{% endif %}"
-                                    aria-labelledby="courseVisibilityHeading"
-                                    data-bs-parent="#courseVisibilityAccordion"
-                                >
-                                    <div class="accordion-body course-status-body">
-                                        {% if is_owner %}
-                                            <form method="post" action="{% url 'courses:update_course_status' course.id %}" class="course-status-switch-form">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                                <div class="course-status-switch" role="group" aria-label="{% trans 'label_course_visibility' context 'courses.dashboard' %}">
-                                                    <button
-                                                        type="submit"
-                                                        name="status"
-                                                        value="draft"
-                                                        class="course-status-option course-status-option--draft {% if course.status == 'draft' %}is-active{% endif %}"
-                                                    >
-                                                        <i class="fas fa-eye-slash"></i> {% trans "status_draft" context "courses.dashboard" %}
-                                                    </button>
-                                                    <button
-                                                        type="submit"
-                                                        name="status"
-                                                        value="published"
-                                                        class="course-status-option course-status-option--published {% if course.status == 'published' %}is-active{% endif %}"
-                                                    >
-                                                        <i class="fas fa-globe"></i> {% trans "status_published" context "courses.dashboard" %}
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        {% endif %}
+<div class="ems-cd">
+  <div class="ems-cd-shell">
 
-                                        {% if course.status == 'draft' %}
-                                            <div class="course-status-warning">
-                                                <i class="fas fa-triangle-exclamation"></i>
-                                                {% trans "message_draft_hidden_students" context "courses.dashboard" %}
-                                            </div>
-                                        {% elif course.status == 'published' %}
-                                            <div class="course-status-note">
-                                                <i class="fas fa-circle-check"></i>
-                                                {% trans "message_published_visible_students" context "courses.dashboard" %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row text-center border-top pt-3">
-                        <div class="col-6 mb-3">
-                            <div class="fw-bold text-primary fs-5">{{ topics|length }}</div>
-                            <small class="text-muted">{% trans "stat_topics" context "courses.dashboard" %}</small>
-                        </div>
-                        {% if can_view_members %}
-                        <div class="col-6 mb-3">
-                            <div class="fw-bold text-success fs-5">{{ members|length }}</div>
-                            <small class="text-muted">{% trans "stat_members" context "courses.dashboard" %}</small>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    {% if is_owner %}
-                        <div class="btn-group w-100 mt-3" role="group">
-                            <a href="{% url 'courses:edit_course' course.id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-edit"></i> {% trans "action_edit" context "courses.dashboard" %}
-                            </a>
-                            <button type="button" class="btn btn-sm btn-outline-danger" data-delete-course-id="{{ course.id }}">
-                                <i class="fas fa-trash"></i> {% trans "action_delete" context "courses.dashboard" %}
-                            </button>
-                        </div>
-                    {% endif %}
+    <!-- MAIN -->
+    <div class="ems-cd-main">
 
-                    <div class="mt-3">
-                        <a href="{{ profile_return_url }}"
-                           class="btn btn-sm btn-outline-secondary w-100"
-                           id="courseDashboardBackLink"
-                           data-fallback-url="{{ profile_return_url }}">
-                            <i class="fas fa-arrow-left"></i> {% trans "action_back_profile" context "courses.dashboard" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
+      <div class="ems-cd-head">
+        <div class="ems-cd-crumb">
+          <a href="{{ profile_return_url }}">{% trans "action_back_profile" context "courses.dashboard" %}</a>
+          <span class="sep">/</span>
+          <span class="cur">{{ course.title }}</span>
         </div>
-        
-        <!-- MAIN -->
-        <div class="col-lg-9">
-            
-            {% if course.description %}
-                <div class="alert alert-light border-start border-primary border-5 mb-4">
-                    <p class="mb-0">{{ course.description }}</p>
-                </div>
+        <h1 class="ems-cd-title" data-ems-fallback-title>{{ course.title }}</h1>
+      </div>
+
+      {# Bölmə tab-bar-ı (JS dolduracaq; JS yoxdursa gizli qalır → akkordeon fallback) #}
+      <nav class="snav" id="emsSnav" aria-label="{% trans 'page_suffix_dashboard' context 'courses.dashboard' %}" hidden></nav>
+
+      {# Aktiv bölmə başlığı (JS dolduracaq) #}
+      <header class="chead" id="emsChead" hidden>
+        <div class="chead-tx">
+          <h2 class="chead-h"><span class="chead-dot"></span> <span data-ems-active-label></span></h2>
+          <p class="chead-desc" data-ems-active-hint></p>
+        </div>
+        {% if is_owner %}
+        <div class="chead-actions">
+          <button type="button" class="btn ai-soft" data-ems-ai>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16l-1.8-4.5L5 9.7l5.2-1.8L12 3Z"/></svg>
+            {% trans "ai_generate" context "courses.dashboard" %}
+          </button>
+        </div>
+        {% endif %}
+      </header>
+
+      <div class="accordion" id="courseDashboard">
+
+        <section class="ems-sec" data-key="topics" data-icon="book"
+                 data-color="#2C5BFF" data-soft="#EEF2FF" data-deep="#1E40AF">
+          {% include 'courses/partials/_topic_accordion.html' %}
+        </section>
+
+        <section class="ems-sec" data-key="assignments" data-icon="clip"
+                 data-color="#B45309" data-soft="#FEF3C7" data-deep="#92400E">
+          {% include 'assignments/assignment_section.html' %}
+        </section>
+
+        <section class="ems-sec" data-key="labs" data-icon="flask"
+                 data-color="#7C3AED" data-soft="#F2ECFE" data-deep="#5B21B6">
+          {% include 'labs/lab_section.html' %}
+        </section>
+
+        <section class="ems-sec" data-key="exams" data-icon="doc"
+                 data-color="#0284C7" data-soft="#E0F2FE" data-deep="#075985">
+          {% include 'exams/teacher/exam_section.html' %}
+        </section>
+
+        <section class="ems-sec" data-key="projects" data-icon="flow"
+                 data-color="#BE3455" data-soft="#FCE7EE" data-deep="#9F1239">
+          {% include 'projects/project_section.html' %}
+        </section>
+
+        <section class="ems-sec" data-key="resources" data-icon="folder"
+                 data-color="#0F766E" data-soft="#E6FBF7" data-deep="#0B544E">
+          {% include 'courses/partials/_resource_accordion.html' %}
+        </section>
+
+        {% if can_view_members %}
+        <section class="ems-sec" data-key="members" data-icon="users"
+                 data-color="#16A34A" data-soft="#DCFCE7" data-deep="#15803D">
+          {% include 'courses/partials/_member_accordion.html' %}
+        </section>
+        {% endif %}
+
+      </div>{# /#courseDashboard #}
+
+    </div>{# /.ems-cd-main #}
+
+    <!-- SIDEBAR — kurs kartı -->
+    <aside class="ems-cd-side">
+      <div class="ccard">
+        {% with cover_image_url=course.cover_image_url %}
+        <div class="ccard-cover{% if cover_image_url %} has-img{% endif %}">
+          {% if cover_image_url %}
+            <img src="{{ cover_image_url }}" alt="{{ course.title }}">
+          {% else %}
+            <svg class="ph" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          {% endif %}
+        </div>
+        {% endwith %}
+
+        <div class="ccard-body">
+          <h2 class="ccard-title">{{ course.title }}</h2>
+
+          <div class="ccard-meta">
+            <span class="m">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {% trans "label_teacher" context "courses.dashboard" %}: <b>{{ course.owner.get_full_name|default:course.owner.username }}</b>
+            </span>
+            <span class="m">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              {% trans "label_created" context "courses.dashboard" %}: <b>{{ course.created_at|date:"d.m.Y" }}</b>
+            </span>
+          </div>
+
+          {% if course.description %}
+          <p class="ccard-desc">{{ course.description }}</p>
+          {% endif %}
+
+          {# Görünürlük — Draft / Released segmented (real POST forması) #}
+          <div class="pub">
+            {% if is_owner %}
+            <form method="post" action="{% url 'courses:update_course_status' course.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <div class="pub-seg" role="group" aria-label="{% trans 'label_course_visibility' context 'courses.dashboard' %}">
+                <button type="submit" name="status" value="draft" class="draft{% if course.status != 'published' %} on{% endif %}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 12s3 8 10 8a9.3 9.3 0 0 0 5.4-1.6"/><path d="M14.1 14.1A3 3 0 1 1 9.9 9.9M2 2l20 20"/></svg>
+                  {% trans "status_draft" context "courses.dashboard" %}
+                </button>
+                <button type="submit" name="status" value="published" class="live{% if course.status == 'published' %} on{% endif %}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>
+                  {% trans "status_published" context "courses.dashboard" %}
+                </button>
+              </div>
+            </form>
             {% endif %}
-            
-            <div class="accordion" id="courseDashboard">
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- MÖVZULAR                                                    -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% include 'courses/partials/_topic_accordion.html' %}
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- SƏRBƏST İŞLƏR - Həmişə göstər                               -->
-                <!-- ══════════════════════════════════════════��════════════════ -->
-                {% include 'assignments/assignment_section.html' %}
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- LAB İŞLƏRİ - Həmişə göstər                                  -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% include 'labs/lab_section.html' %}
 
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- İMTAHANLAR                                                  -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% include 'exams/teacher/exam_section.html' %}
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- KURS İŞLƏRİ - Həmişə göstər                                 -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% include 'projects/project_section.html' %}
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- RESURSLAR                                                   -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% include 'courses/partials/_resource_accordion.html' %}
-                
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- ÜZVLƏR - Yalnız owner və assistant görür                    -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                {% if can_view_members %}
-                  {% include 'courses/partials/_member_accordion.html' %}
-                {% endif %}
-                
-            </div>
+            {% if course.status == 'published' %}
+              <div class="pub-note live">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>{% trans "message_published_visible_students" context "courses.dashboard" %}</span>
+              </div>
+            {% else %}
+              <div class="pub-note draft">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                <span>{% trans "message_draft_hidden_students" context "courses.dashboard" %}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          {# Statistika #}
+          <div class="ccard-stats">
+            <div class="cstat"><div class="n">{{ topics|length }}</div><div class="l">{% trans "stat_topics" context "courses.dashboard" %}</div></div>
+            {% if can_view_members %}
+            <div class="cstat"><div class="n" id="sidebar-members-count">{{ members|length }}</div><div class="l">{% trans "stat_members" context "courses.dashboard" %}</div></div>
+            {% endif %}
+          </div>
+
+          {% if is_owner %}
+          <div class="ccard-foot">
+            <a href="{% url 'courses:edit_course' course.id %}" class="btn ghost">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              {% trans "action_edit" context "courses.dashboard" %}
+            </a>
+            <button type="button" class="btn danger" data-delete-course-id="{{ course.id }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+              {% trans "action_delete" context "courses.dashboard" %}
+            </button>
+          </div>
+          {% endif %}
+
+          <div class="ccard-back">
+            <a href="{{ profile_return_url }}" class="btn ghost" id="courseDashboardBackLink" data-fallback-url="{{ profile_return_url }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              {% trans "action_back_profile" context "courses.dashboard" %}
+            </a>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
+
+      {% if is_owner %}
+      <button type="button" class="ai-entry" data-ems-ai>
+        <div class="ai-entry-top">
+          <span class="ai-entry-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16l-1.8-4.5L5 9.7l5.2-1.8L12 3Z"/></svg>
+          </span>
+          <span class="ai-entry-t">{% trans "ai_build_title" context "courses.dashboard" %}</span>
+          <span class="ai-entry-chev">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+          </span>
+        </div>
+        <div class="ai-entry-s">{% trans "ai_build_sub" context "courses.dashboard" %}</div>
+      </button>
+      {% endif %}
+    </aside>
+
+  </div>{# /.ems-cd-shell #}
+</div>{# /.ems-cd #}
 
 <!-- MODALS -->
+<div class="ems-cd-modals">
 {% if can_manage_course %}
     {% include "courses/partials/_action_confirm_modal.html" %}
 {% endif %}
@@ -230,6 +229,10 @@
     {% include "labs/partials/_lab_modals.html" %}
 {% endif %}
 
+</div>{# /.ems-cd-modals #}
+
+{# İmtahan modalları (pilləli sehrbaz) öz xüsusi dizaynı ilə qalır — generic
+   restyle/enhancer-dən kənarda saxlanılır ki, ikiqat başlıq/pozulma olmasın. #}
 {% if is_owner or user_role == 'teacher' %}
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}
@@ -265,6 +268,14 @@
             form.submit();
         }
     }
+
+    document.addEventListener('click', function(event) {
+        const deleteCourseButton = event.target.closest('[data-delete-course-id]');
+        if (!deleteCourseButton) return;
+
+        event.preventDefault();
+        deleteCourse(deleteCourseButton.dataset.deleteCourseId);
+    });
 
     window.deleteMember = function(memberId, userName) {
         if (!confirm(userName + MSG_MEMBER_DELETE_SUFFIX)) return;

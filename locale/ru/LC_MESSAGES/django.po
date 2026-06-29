@@ -18852,7 +18852,7 @@ msgstr ""
 #: apps/exams/templates/exams/teacher/exam_section.html:7
 msgctxt "exams.partial.exam_section"
 msgid "section_exams"
-msgstr "Exams"
+msgstr "Экзамены"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:25
 #: apps/exams/templates/exams/teacher/exam_section.html:134
@@ -18876,7 +18876,7 @@ msgstr "Экзамен еще не начался. Начало: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:174
 msgctxt "exams.partial.exam_section"
 msgid "status_finished"
-msgstr "Status published"
+msgstr "Завершён"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:56
 msgctxt "exams.partial.exam_section"
@@ -18916,7 +18916,7 @@ msgstr "Редактировать"
 #: apps/exams/templates/exams/teacher/exam_section.html:130
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_in_course"
-msgstr "Empty active courses"
+msgstr "В этом курсе нет экзаменов."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:166
 msgctxt "exams.partial.exam_section"
@@ -18926,7 +18926,7 @@ msgstr "Закрыто"
 #: apps/exams/templates/exams/teacher/exam_section.html:176
 msgctxt "exams.partial.exam_section"
 msgid "status_open"
-msgstr "Pending"
+msgstr "Открыт"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:203
 #, python-format
@@ -18943,12 +18943,12 @@ msgstr "Попытки: %(attempt_count)s / %(max_attempts)s"
 #: apps/exams/templates/exams/teacher/exam_section.html:242
 msgctxt "exams.partial.exam_section"
 msgid "action_restart_exam"
-msgstr "Start exam"
+msgstr "Перезапустить экзамен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:260
 msgctxt "exams.partial.exam_section"
 msgid "action_start_exam"
-msgstr "Start exam"
+msgstr "Начать экзамен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:265
 msgctxt "exams.partial.exam_section"
@@ -18973,7 +18973,7 @@ msgstr "Студенты без групп"
 #: apps/exams/templates/exams/teacher/exam_section.html:293
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam"
-msgstr "Empty upcoming exams"
+msgstr "Нет экзаменов."
 
 #: apps/exams/templates/exams/teacher/partials/_bank_picker_shell.html:16
 msgid "Kitabxanadan sual seçib bu imtahana birbaşa əlavə et."
@@ -29339,6 +29339,46 @@ msgstr "Войти"
 msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "Войдите в живой экзамен по PIN-коду"
+
+msgctxt "courses.create_page"
+msgid "optional"
+msgstr "Необязательно"
+
+msgctxt "courses.create_page"
+msgid "breadcrumb_my_courses"
+msgstr "Мои курсы"
+
+msgctxt "courses.create_page"
+msgid "subtitle_create"
+msgstr ""
+"Укажите название, описание и обложку курса. Темы и ресурсы добавите позже в "
+"панели."
+
+msgctxt "courses.create_page"
+msgid "cover_drop_title"
+msgstr "Перетащите изображение или"
+
+msgctxt "courses.create_page"
+msgid "action_remove_image"
+msgstr "Удалить изображение"
+
+msgctxt "courses.create_page"
+msgid "help_created_as_draft"
+msgstr ""
+"Курс создаётся как черновик. После создания вы сможете опубликовать его из "
+"панели."
+
+msgctxt "courses.dashboard"
+msgid "ai_generate"
+msgstr "Создать с ИИ"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_title"
+msgstr "Создать курс с ИИ"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_sub"
+msgstr "Получите от ассистента программу, ресурсы и задания."
 
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"

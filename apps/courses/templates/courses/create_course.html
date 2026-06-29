@@ -6,465 +6,78 @@
 
 {% block extraCss %}
     {% include "courses/partials/_courses_assets_css.html" %}
+    <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
 {% endblock %}
 
 {% block extraJs %}
     {% include "courses/partials/_courses_assets_js.html" %}
+    <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629" defer></script>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- HEADER CARD -->
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);">
-                    <h2 class="mb-0 text-white">
-                        <i class="fas fa-graduation-cap"></i> {% trans "page_title" context "courses.create_page" %}
-                    </h2>
-                </div>
-                
-                <!-- FORM CARD -->
-                <div class="card-body p-5">
-                    <!-- Form -->
-                    <form method="post" enctype="multipart/form-data" id="courseForm">
-                        {% csrf_token %}
+<div class="ems-cc ems-cc-page">
+  <div class="ems-cc-shell">
 
-                        {% if form.organization %}
-                        <div class="mb-4">
-                            <label for="{{ form.organization.id_for_label }}" class="form-label">
-                                <strong>
-                                    <i class="fas fa-building"></i> {% trans "organization" context "courses.create_page" %}
-                                </strong>
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.organization }}
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle"></i>
-                                {% trans "Select the organization where this course should be created." context "courses.create_page" %}
-                            </small>
-                            {% if form.organization.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.organization.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Title Field -->
-                        <div class="mb-4">
-                            <label for="{{ form.title.id_for_label }}" class="form-label">
-                                <strong>
-                                    <i class="fas fa-book"></i> {% trans "field_course_name" context "courses.create_page" %}
-                                </strong>
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.title }}
-                            {% if form.title.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ form.title.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Description Field -->
-                        <div class="mb-4">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">
-                                <strong>
-                                    <i class="fas fa-pen-fancy"></i> {% trans "field_course_description" context "courses.create_page" %}
-                                </strong>
-                            </label>
-                            {{ form.description }}
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle"></i>
-                                {% trans "help_course_description" context "courses.create_page" %}
-                            </small>
-                            {% if form.description.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.description.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Cover Image Field -->
-                        <div class="mb-4">
-                            <label for="{{ form.cover_image.id_for_label }}" class="form-label">
-                                <strong>
-                                    <i class="fas fa-image"></i> {% trans "field_course_cover" context "courses.create_page" %}
-                                </strong>
-                            </label>
-                            
-                            <!-- Image Preview -->
-                            <div id="imagePreview" class="mb-3" style="display: none;">
-                                <img id="previewImg" src="#" alt="{% trans 'alt_preview' context 'courses.create_page' %}" 
-                                     style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            </div>
-                            
-                            <!-- File Input -->
-                            <div class="input-group">
-                                {{ form.cover_image }}
-                                <label class="input-group-text" for="{{ form.cover_image.id_for_label }}">
-                                    <i class="fas fa-upload" style="padding:6px"></i> {% trans "action_choose_image" context "courses.create_page" %}
-                                </label>
-                            </div>
-                            
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-lightbulb"></i>
-                                {% trans "help_cover_default" context "courses.create_page" %}
-                                {% trans "help_cover_optimal_size" context "courses.create_page" %}
-                            </small>
-                            
-                            {% if form.cover_image.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.cover_image.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Status Field -->
-                        <div class="mb-4">
-                            <label for="{{ form.status.id_for_label }}" class="form-label">
-                                <strong>
-                                    <i class="fas fa-toggle-on"></i> {% trans "field_status" context "courses.create_page" %}
-                                </strong>
-                            </label>
-                            {{ form.status }}
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle"></i>
-                                <strong>{% trans "status_draft" context "courses.create_page" %}:</strong> {% trans "help_status_draft" context "courses.create_page" %} |
-                                <strong>{% trans "status_published" context "courses.create_page" %}:</strong> {% trans "help_status_published" context "courses.create_page" %}
-                            </small>
-                        </div>
-                        
-                        <!-- SUBMIT BUTTONS -->
-                        <div class="d-flex gap-3 mt-5">
-                            <a href="{% url 'accounts:profile' %}?section=my-courses" 
-                               class="btn btn-secondary btn-lg flex-grow-1">
-                                <i class="fas fa-arrow-left"></i> {% trans "action_back" context "courses.create_page" %}
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
-                                <i class="fas fa-check-circle"></i> {% trans "action_create_course" context "courses.create_page" %}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- INFO CARD -->
-            <div class="alert alert-info border-0 shadow-sm">
-                <h5 class="mb-3">
-                    <i class="fas fa-lightbulb"></i> {% trans "after_create_title" context "courses.create_page" %}
-                </h5>
-                <ul class="mb-0">
-                    <li>{% trans "after_create_item_1" context "courses.create_page" %}</li>
-                    <li>{% trans "after_create_item_2" context "courses.create_page" %}</li>
-                    <li>{% trans "after_create_item_3" context "courses.create_page" %}</li>
-                    <li>{% trans "after_create_item_4" context "courses.create_page" %}</li>
-                </ul>
-            </div>
-        </div>
+    {# Geri / breadcrumb #}
+    <div class="ems-cc-crumb">
+      <a href="{% url 'accounts:profile' %}?section=my-courses" class="back" aria-label="{% trans 'action_back' context 'courses.create_page' %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </a>
+      <a href="{% url 'accounts:profile' %}?section=my-courses">{% trans "breadcrumb_my_courses" context "courses.create_page" %}</a>
+      <span class="sep">/</span>
+      <span class="cur">{% trans "page_title" context "courses.create_page" %}</span>
     </div>
+
+    {# Hero başlıq #}
+    <div class="ems-cc-hero">
+      <div class="ems-cc-hero-ic">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.5 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>
+      </div>
+      <div>
+        <h1>{% trans "page_title" context "courses.create_page" %}</h1>
+        <p class="sub">{% trans "subtitle_create" context "courses.create_page" %}</p>
+      </div>
+    </div>
+
+    {# Forma kartı #}
+    <div class="ems-cc-card">
+      <div class="ems-cc-card-body">
+        <form method="post" enctype="multipart/form-data" id="courseForm" data-ems-course-form novalidate>
+          {% csrf_token %}
+
+          {% include "courses/partials/_course_form_fields.html" %}
+
+          <div class="ems-cc-foot">
+            <a href="{% url 'accounts:profile' %}?section=my-courses" class="btn ghost">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              {% trans "action_back" context "courses.create_page" %}
+            </a>
+            <span class="grow"></span>
+            <button type="submit" class="btn primary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              {% trans "action_create_course" context "courses.create_page" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {# Məlumat kartı — kursdan sonra #}
+    <div class="ems-cc-info">
+      <div class="ems-cc-info-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V18h6v-1.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z"/></svg>
+      </div>
+      <div>
+        <h5>{% trans "after_create_title" context "courses.create_page" %}</h5>
+        <ul>
+          <li>{% trans "after_create_item_1" context "courses.create_page" %}</li>
+          <li>{% trans "after_create_item_2" context "courses.create_page" %}</li>
+          <li>{% trans "after_create_item_3" context "courses.create_page" %}</li>
+          <li>{% trans "after_create_item_4" context "courses.create_page" %}</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
 </div>
-
-<!-- Image Preview Script -->
-<script nonce="{{ request.csp_nonce }}">
-    document.getElementById('{{ form.cover_image.id_for_label }}').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('previewImg').src = event.target.result;
-                document.getElementById('imagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-
-<style nonce="{{ request.csp_nonce }}">
-    /*=============================================
-    =            Modern Form Styling              =
-    =============================================*/
-    position: relative;
-    right: 4px;
-    
-    /* --- Ümumi Konteyner və Arxa Plan --- */
-    body {
-        background-color: #f8f9fc; /* Çox açıq boz arxa plan */
-    }
-    
-    .container {
-        max-width: 1200px; /* Böyük ekranlarda məzmun çox yayılmasın */
-    }
-    
-    /* --- Əsas Kart Dizaynı --- */
-    .card.shadow-lg {
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important; /* Daha yumşaq kölgə */
-        overflow: hidden; /* Header border-radius üçün */
-        background: #fff;
-    }
-    
-    /* --- Kart Başlığı (Header) --- */
-    .card-header.bg-gradient {
-        background: linear-gradient(120deg, #4e73df, #224abe) !important; /* Daha peşəkar mavi qradient */
-        padding: 2.5rem 2rem; /* Daha geniş daxili boşluq */
-        border-bottom: none;
-    }
-    
-    .card-header h2 {
-        font-weight: 700;
-        font-size: 1.8rem;
-        letter-spacing: 0.5px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    /* --- Kart Gövdəsi (Body) və Form --- */
-    .card-body.p-5 {
-        padding: 3rem !important; /* Bootstrap p-5-i override edir */
-    }
-    
-    /* --- Etiketlər (Labels) --- */
-    .form-label {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #4a5568; /* Daha tünd boz */
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .form-label i {
-        color: #4e73df; /* İkon rəngi */
-        margin-right: 0.5rem;
-        font-size: 1.1rem;
-    }
-    
-    .text-danger {
-        color: #e3342f !important; /* Daha canlı qırmızı */
-        margin-left: 4px;
-    }
-    
-    /* --- İnput Sahələri --- */
-    .form-control, 
-    .form-select,
-    .input-group-text {
-        border: 2px solid #e2e8f0; /* Daha qalın, açıq boz çərçivə */
-        border-radius: 12px !important; /* Daha yumru künclər */
-        padding: 0.875rem 1.2rem; /* Daha rahat daxili boşluq */
-        font-size: 1rem;
-        color: #2d3748;
-        background-color: #fff;
-        transition: all 0.3s ease-in-out;
-    }
-    
-    /* İnput Fokus Halı */
-    .form-control:focus, 
-    .form-select:focus {
-        border-color: #4e73df; /* Fokus rəngi */
-        box-shadow: 0 0 0 4px rgba(78, 115, 223, 0.15) !important; /* Yumşaq fokus kölgəsi */
-        background-color: #fff;
-    }
-    
-    /* Textarea Xüsusi Stili */
-    textarea.form-control {
-        resize: vertical; /* Yalnız şaquli ölçülən */
-        min-height: 120px;
-    }
-    
-    /* --- Fayl Yükləmə Sahəsi --- */
-    .input-group {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    }
-    
-    .input-group .form-control {
-        border-top-right-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-        border-right: none;
-    }
-    
-    .input-group-text {
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-        background-color: #f1f5f9;
-        color: #4a5568;
-        font-weight: 600;
-        border-left: 1px solid #e2e8f0;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .input-group-text:hover {
-        background-color: #e2e8f0;
-        color: #2d3748;
-    }
-    
-    /* Şəkil Preview */
-    #previewImg {
-        border-radius: 12px !important;
-        border: 3px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    }
-    
-    /* --- Köməkçi Mətnlər (Small Text) --- */
-    .text-muted {
-        color: #718096 !important; /* Daha oxunaqlı boz */
-        font-size: 0.85rem;
-        margin-top: 0.6rem !important;
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    .text-muted i {
-        color: #a0aec0;
-        margin-right: 0.4rem;
-        margin-top: 0.2rem;
-    }
-    
-    /* --- Xəta Mesajları --- */
-    .alert-danger {
-        background-color: #fff5f5;
-        border-left: 4px solid #e3342f;
-        color: #c53030;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-    }
-    
-    .alert-danger i {
-        font-size: 1.1rem;
-        margin-right: 0.5rem;
-    }
-    
-    /* --- Düymələr --- */
-    .btn-lg {
-        padding: 0.875rem 2rem;
-        font-weight: 700;
-        font-size: 1rem;
-        border-radius: 12px;
-        text-transform: uppercase; /* Düymə mətnlərini böyük hərflə yazmaq */
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-primary {
-        background: linear-gradient(to right, #4e73df, #224abe);
-        border: none;
-    }
-    
-    .btn-primary:hover {
-        background: linear-gradient(to right, #224abe, #1a365d);
-        transform: translateY(-2px); /* Yüngül qalxma effekti */
-        box-shadow: 0 6px 12px rgba(78, 115, 223, 0.25);
-    }
-    
-    .btn-secondary {
-        background-color: #e2e8f0;
-        color: #4a5568;
-        border: none;
-        box-shadow: none;
-    }
-    
-    .btn-secondary:hover {
-        background-color: #cbd5e0;
-        color: #2d3748;
-        transform: translateY(-2px);
-    }
-    
-    /* --- Məlumat Kartı (Info Card) --- */
-    .alert-info.border-0 {
-        background-color: #ebf8ff; /* Çox açıq mavi */
-        border-left: 5px solid #4299e1; /* Sol tərəfdə qalın xətt */
-        color: #2c5282;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-    }
-    
-    .alert-info h5 {
-        color: #2b6cb0;
-        font-weight: 700;
-        margin-bottom: 1.2rem !important;
-    }
-    
-    .alert-info ul li {
-        margin-bottom: 0.8rem;
-        padding-left: 1.5rem;
-        position: relative;
-    }
-    
-    /* Siyahı elementləri üçün xüsusi ikon (font awesome əvəzinə CSS ilə) */
-    .alert-info ul li::before {
-        content: '✓';
-        position: absolute;
-        left: 0;
-        color: #4299e1;
-        font-weight: bold;
-    }
-    
-    /*=============================================
-    =            Responsive Düzəlişlər           =
-    =============================================*/
-    
-    /* Mobil Cihazlar (768px-dən kiçik) */
-    @media (max-width: 768px) {
-        .container {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-        
-        .card.shadow-lg {
-            border-radius: 15px;
-        }
-    
-        /* Header padding-i azaldırıq */
-        .card-header.bg-gradient {
-            padding: 1.5rem;
-        }
-    
-        .card-header h2 {
-            font-size: 1.4rem;
-            text-align: center; /* Başlığı mərkəzləşdir */
-        }
-    
-        /* Body padding-i azaldırıq */
-        .card-body.p-5 {
-            padding: 1.5rem !important;
-        }
-    
-        /* İnputlar daha yığcam olsun */
-        .form-control, 
-        .form-select,
-        .input-group-text,
-        .btn-lg {
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            border-radius: 10px !important;
-        }
-        
-        /* Düymələr alt-alta düşsün (əgər yan-yana sığmırsa) */
-        .d-flex.gap-3.mt-5 {
-            flex-direction: column-reverse; /* Geri düyməsi aşağı düşsün */
-            gap: 1rem !important;
-            margin-top: 2rem !important;
-        }
-    
-        .btn-lg {
-            width: 100%; /* Düymələr tam genişlikdə olsun */
-        }
-    
-        /* Məlumat kartı daha yığcam olsun */
-        .alert-info.border-0 {
-            padding: 1.5rem;
-            margin-top: 2rem !important; /* Yuxarıdan boşluq */
-        }
-    }
-</style>
 {% endblock %}

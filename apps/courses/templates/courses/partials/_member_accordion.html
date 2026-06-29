@@ -161,28 +161,25 @@
         const row = document.getElementById(`member-row-${memberId}`);
         if (row) row.remove();
 
-        function decCountById(id) {
-            const el = document.getElementById(id);
+        function decCountElement(el) {
             if (!el) return;
             const n = parseInt(el.textContent || "0", 10);
             el.textContent = Math.max(0, n - 1);
-          }
-          
-          // DOM-dan siləndən sonra:
-          decCountById("sidebar-members-count");
-          decCountById("accordion-members-count");
-          
-  
-        // ✅ Badge sayını azalt (accordion header-də olan yaşıl badge)
-        const badge = document.querySelector('#memberCollapse')
-          ?.closest('.accordion-item')
-          ?.querySelector('.accordion-header .badge');
-  
-        if (badge) {
-          const n = parseInt(badge.textContent || "0", 10);
-          badge.textContent = Math.max(0, n - 1);
         }
-  
+
+        function decCountById(id) {
+            decCountElement(document.getElementById(id));
+        }
+
+        function decCountBySelector(selector) {
+            document.querySelectorAll(selector).forEach(decCountElement);
+        }
+
+        // DOM-dan siləndən sonra:
+        decCountById("sidebar-members-count");
+        decCountById("accordion-members-count");
+        decCountBySelector('.snav-item[data-key="members"] .snav-count');
+          
       } catch (err) {
         console.error(err);
         alert("{% trans 'error_network' context 'courses.partial.member_accordion' %}");

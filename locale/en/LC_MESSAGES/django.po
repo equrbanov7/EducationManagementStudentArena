@@ -9179,7 +9179,7 @@ msgstr ""
 #: apps/assignments/templates/assignments/assignment_section.html:7
 msgctxt "assignment.section"
 msgid "title"
-msgstr "Title"
+msgstr "Assignments"
 
 #: apps/assignments/templates/assignments/assignment_section.html:24
 msgctxt "assignment.section"
@@ -29402,6 +29402,46 @@ msgstr "Join"
 msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "Enter a live exam with a PIN"
+
+msgctxt "courses.create_page"
+msgid "optional"
+msgstr "Optional"
+
+msgctxt "courses.create_page"
+msgid "breadcrumb_my_courses"
+msgstr "My courses"
+
+msgctxt "courses.create_page"
+msgid "subtitle_create"
+msgstr ""
+"Enter a name, description and cover for your course. You'll add topics and "
+"resources later from the dashboard."
+
+msgctxt "courses.create_page"
+msgid "cover_drop_title"
+msgstr "Drag an image here or"
+
+msgctxt "courses.create_page"
+msgid "action_remove_image"
+msgstr "Remove image"
+
+msgctxt "courses.create_page"
+msgid "help_created_as_draft"
+msgstr ""
+"The course is first created as a draft. You can publish it from the "
+"dashboard afterwards."
+
+msgctxt "courses.dashboard"
+msgid "ai_generate"
+msgstr "Generate with AI"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_title"
+msgstr "Build course with AI"
+
+msgctxt "courses.dashboard"
+msgid "ai_build_sub"
+msgstr "Get syllabus, resource and task ideas from the assistant."
 
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
