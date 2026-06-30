@@ -1,0 +1,8 @@
+# Historical .env.example entries from b083fdf6.
+# Keep these exact fingerprints so future unrelated leaks still fail CI.
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:2
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:11
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:14
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:gcp-api-key:47
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:sendinblue-api-token:63
+b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:93
