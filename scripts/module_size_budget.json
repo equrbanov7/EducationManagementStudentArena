@@ -1,0 +1,28 @@
+{
+  "_comment": "Avtomatik yaradılır: python scripts/check_module_size.py --update. SOFT_CAP=600. Buradakı fayllar grandfathered-dir (cari ölçüdə dondurulub) və yalnız kiçilə bilər. Yeni böyük fayl əlavə etmək üçün əvvəlcə onu bölün.",
+  "soft_cap": 600,
+  "budgets": {
+    "apps/accounts/forms/auth.py": 740,
+    "apps/accounts/services/statistics_selectors.py": 1053,
+    "apps/accounts/views/_helpers/org_sections.py": 1021,
+    "apps/accounts/views/auth.py": 889,
+    "apps/accounts/views/organization/management.py": 977,
+    "apps/accounts/views/profile/main.py": 2313,
+    "apps/accounts/views/roles/assignment.py": 906,
+    "apps/courses/models.py": 615,
+    "apps/exams/domain/question_bank.py": 612,
+    "apps/exams/management/commands/seed_group_demo_data.py": 611,
+    "apps/exams/services/coding_runtime.py": 1033,
+    "apps/exams/services/parsing/extraction.py": 836,
+    "apps/exams/services/supervision.py": 1215,
+    "apps/exams/views/teacher/exams.py": 748,
+    "apps/exams/views/teacher/question_library.py": 1020,
+    "apps/exams/views/teacher/questions.py": 711,
+    "apps/exams/views/teacher/supervision.py": 642,
+    "apps/labs/models.py": 613,
+    "apps/live_exam/views/host.py": 637,
+    "apps/live_exam/views/player.py": 791,
+    "apps/organizations/structure_views.py": 620,
+    "config/settings/base.py": 650
+  }
+}

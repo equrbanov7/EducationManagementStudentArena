@@ -50,7 +50,7 @@ celery==5.5.2
 
 # Channels/Daphne Dependencies (WebSocket Support)
 attrs==25.4.0
-autobahn==25.12.2
+autobahn==24.4.2
 Automat==25.4.16
 cffi==2.0.0
 constantly==23.10.4
@@ -63,7 +63,7 @@ pycparser==2.23
 pyOpenSSL==26.3.0
 service-identity==24.2.0
 Twisted==26.4.0
-txaio==25.12.2
+txaio==25.9.2
 zope.interface==8.1.1
 
 # ═══════════════════════════════════════════════════════════════════════════

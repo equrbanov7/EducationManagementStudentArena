@@ -77,3 +77,13 @@ jobs:
             --show-source
           echo "✅ Flake8 check passed!"
           echo "::endgroup::"
+
+      - name: 📏 Module size budget (god-file guard)
+        run: |
+          echo "::group::📏 Module Size Budget"
+          python scripts/check_module_size.py --check || {
+            echo "::error::❌ Module-size budget aşıldı! Böyük fayllara yeni sətir əlavə etmək əvəzinə məntiqi alt-modullara bölün. Şüurlu böyütmə üçün: python scripts/check_module_size.py --update"
+            exit 1
+          }
+          echo "✅ Module size budget check passed!"
+          echo "::endgroup::"
