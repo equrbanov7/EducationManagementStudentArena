@@ -25,5 +25,6 @@ playwright-report/
 test-results/
 media/
 staticfiles/
+docker/nginx/certs/
 
 .DS_Store
