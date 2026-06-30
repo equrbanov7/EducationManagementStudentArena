@@ -10,6 +10,9 @@ from ._attempt_views import (  # noqa: F401
 from ._helpers import (  # noqa: F401
     ANONYMOUS_NAME_CODE_LENGTH,
     ANONYMOUS_NAME_TOKEN_SALT,
+    _attempt_effective_duration,
+    _attempt_effective_finish,
+    _expire_overdue_attempts,
 )
 from ._results_views import (  # noqa: F401
     export_exam_results_xlsx,
@@ -26,4 +29,7 @@ __all__ = [
     "teacher_view_attempt",
     "ANONYMOUS_NAME_CODE_LENGTH",
     "ANONYMOUS_NAME_TOKEN_SALT",
+    "_attempt_effective_duration",
+    "_attempt_effective_finish",
+    "_expire_overdue_attempts",
 ]
