@@ -1807,6 +1807,31 @@ class ExamGradingServiceTest(TestCase):
         count = bulk_grade_answers([self.answer.id, answer2.id], [5, 7])
         self.assertEqual(count, 2)
 
+    def test_bulk_grade_answers_pairs_score_to_correct_answer(self):
+        """Regression: hər bal id üzrə düzgün cavaba yazılmalıdır, DB sırasından asılı olmayaraq."""
+        from apps.exams.services.grading import bulk_grade_answers
+
+        answer2 = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=ExamQuestion.objects.create(exam=self.exam, text="Q2?", points=5, order=2),
+        )
+        # answer_ids-i qəsdən tərs sıra ilə veririk; xəritə əsaslı uyğunlaşdırma
+        # hər balı öz id-sinə bağlamalıdır.
+        bulk_grade_answers([answer2.id, self.answer.id], [7, 5])
+        self.answer.refresh_from_db()
+        answer2.refresh_from_db()
+        self.assertEqual(self.answer.teacher_score, 5)
+        self.assertEqual(answer2.teacher_score, 7)
+
+    def test_grade_exam_answer_rounds_half_up_instead_of_truncating(self):
+        """Kəsr bal səssizcə kəsilmir, ən yaxına yuvarlaqlaşdırılır (integer sahə)."""
+        from decimal import Decimal
+
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, Decimal("2.5"))
+        self.assertEqual(result.teacher_score, 3)
+
     def test_calculate_attempt_score_test_type_correct(self):
         from decimal import Decimal
 

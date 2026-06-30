@@ -208,10 +208,9 @@ class OrganizationMiddleware:
                 for membership in request.org_memberships:
                     if membership.role.permissions:
                         permissions_set.update(membership.role.permissions)
-                    if getattr(membership.role, "name", "") == "teacher":
-                        # Back-compat: older default teacher roles missed course.create
-                        # even though the UI and flow allow teachers to create courses.
-                        permissions_set.add("course.create")
+                # NOTE: the legacy teacher `course.create` back-compat was moved to
+                # the data layer (migration organizations.0011) so RBAC stays fully
+                # centralised — no role-name special-casing here.
                 request.org_permissions = list(permissions_set)
             elif request.organization is not None:
                 request.organization = None

@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.db import transaction
 
@@ -19,7 +19,11 @@ def calculate_attempt_score(attempt):
 def grade_exam_answer(answer, score, graded_by=None, feedback=None):
     if isinstance(score, str):
         score = Decimal(score)
-    answer.teacher_score = int(Decimal(score))
+    # teacher_score PositiveIntegerField-dir (qiymətləndirmə sistemi qəsdən
+    # integer-əsaslıdır). Səssiz kəsmə (int() truncation) əvəzinə ən yaxına
+    # yuvarlaqlaşdırırıq və mənfi dəyərləri 0-a sıxırıq — live_exam.scoring
+    # ilə eyni davranış.
+    answer.teacher_score = max(0, int(Decimal(score).quantize(Decimal("1"), rounding=ROUND_HALF_UP)))
     if feedback is not None:
         answer.teacher_feedback = feedback
         answer.save(update_fields=["teacher_score", "teacher_feedback"])
@@ -30,10 +34,18 @@ def grade_exam_answer(answer, score, graded_by=None, feedback=None):
 
 @transaction.atomic
 def bulk_grade_answers(answer_ids, scores, graded_by=None):
+    # answer_ids və scores eyni indeks üzrə uyğunlaşdırılır. ÖNCƏ id→score
+    # xəritəsi qururuq: `filter(id__in=...)` qaytardığı sıra answer_ids-in
+    # sırasına ZƏMANƏTLİ deyil (ORDER BY yoxdur), ona görə birbaşa zip() ballarla
+    # səhv cavabları cütləşdirə bilərdi. Xəritə ilə hər balı düzgün cavaba
+    # bağlayırıq.
+    score_by_id = dict(zip(answer_ids, scores))
     answers = ExamAnswer.objects.filter(id__in=answer_ids)
     count = 0
-    for answer, score in zip(answers, scores):
-        grade_exam_answer(answer, score, graded_by)
+    for answer in answers:
+        if answer.id not in score_by_id:
+            continue
+        grade_exam_answer(answer, score_by_id[answer.id], graded_by)
         count += 1
     return count
 

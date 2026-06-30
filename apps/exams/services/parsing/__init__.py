@@ -1,0 +1,85 @@
+"""parsing paketi — köhnə tək-fayllı parsing.py-nin geriyə-uyğun fasadı.
+Bütün simvollar (public + underscore) re-export olunur ki, mövcud import
+yolları (`from apps.exams.services.parsing import X`) dəyişmədən işləsin."""
+
+# isort: skip_file  (fasad: re-export sırası qəsdən saxlanılır)
+
+from .extraction import *  # noqa: F401,F403
+from ._core import *  # noqa: F401,F403
+
+from .extraction import (  # noqa: F401
+    logger,
+    MAX_UPLOAD_BYTES,
+    FILE_SIGNATURES,
+    IMAGE_EXTENSIONS,
+    _ensure_within_size_limit,
+    _peek_magic_bytes,
+    _verify_magic_bytes,
+    _pdf_safety_check,
+    END_QUESTION_RE,
+    JOINED_OPTION_BOUNDARY_RE,
+    _BULLET_CHARS,
+    _CHECK_CHARS,
+    _BULLET_OPTION_LINE_RE,
+    _CHECK_OPTION_LINE_RE,
+    _CYRILLIC_SEQ_MAP,
+    _CYRILLIC_LOOKALIKE_MAP,
+    _CYR_OPTION_LABEL_RE,
+    _CYR_ANSWERLINE_RE,
+    _normalize_cyrillic_option_labels,
+    _BARE_QNO_RE,
+    _merge_bare_question_numbers,
+    _convert_marker_options,
+    normalize_pdf_extracted_text,
+    _HIGHLIGHT_CORE_RE,
+    _highlight_core,
+    _frag_label_and_core,
+    _fragment_matches_option,
+    _mark_correct_option_lines,
+    _mark_correct_options_by_position,
+    _extract_pdf_highlights,
+    _pdf_has_text_layer,
+    _build_yellow_mask,
+    _line_yellow_ratio,
+    _word_bbox,
+    _line_words_have_yellow,
+    _ensure_tessdata_prefix,
+    _ocr_pdf_text,
+    _ocr_image_text,
+    _ocr_page_text_with_highlights,
+    extract_text_from_upload,
+)
+from ._core import (  # noqa: F401
+    _new_question,
+    _strip_question_number,
+    _finish_question,
+    _is_option_continuation,
+    _coerce_unlabeled_options,
+    _question_line_index,
+    _looks_like_question_prompt,
+    _split_unlabeled_question_and_options,
+    _parse_unlabeled_end_question_block,
+    _parse_labeled_end_question_block,
+    _parse_end_question_blocks,
+    SEVERITY_ERROR,
+    SEVERITY_WARNING,
+    SEVERITY_INFO,
+    _add_warning,
+    _validate_questions,
+    parse_bulk_mcq,
+)
+
+__all__ = [
+    "logger",
+    "MAX_UPLOAD_BYTES",
+    "FILE_SIGNATURES",
+    "IMAGE_EXTENSIONS",
+    "END_QUESTION_RE",
+    "JOINED_OPTION_BOUNDARY_RE",
+    "normalize_pdf_extracted_text",
+    "extract_text_from_upload",
+    "SEVERITY_ERROR",
+    "SEVERITY_WARNING",
+    "SEVERITY_INFO",
+    "parse_bulk_mcq",
+]
