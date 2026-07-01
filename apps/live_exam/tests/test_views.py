@@ -1363,6 +1363,7 @@ class LiveWaitRoomInteractionTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
         self.assertContains(response, reverse("liveExam:answer_submit", kwargs={"pin": self.session.pin}))
+        self.assertContains(response, "player/player.entry.js?v=")
 
     def test_answer_submit_saves_answer_for_authenticated_player(self):
         question = ExamQuestion.objects.create(exam=self.exam, text="HTTP fallback answer question")
@@ -1770,7 +1771,7 @@ class HostOrgRBACTest(TestCase):
                 # host_lobby.css böyük fayl kimi component hissələrə bölünüb
                 # (host_lobby/_partN.css, bayt-qoruyan, ardıcıl link) — ilk hissəni yoxlayırıq.
                 self.assertContains(response, "host_lobby/_part1.css?v=")
-                self.assertContains(response, "host_lobby.js?v=")
+                self.assertContains(response, "host_lobby/host_lobby.entry.js?v=")
 
     def test_missing_exam_host_permission_blocks_host_access(self):
         """A user without exam.host or exam.manage cannot perform host actions."""

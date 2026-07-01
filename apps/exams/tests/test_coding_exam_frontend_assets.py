@@ -13,6 +13,7 @@ from django.conf import settings
 from django.test import SimpleTestCase
 
 JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "coding_exam.js"
+JS_MODULE_DIR = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "coding_exam"
 SUPERVISION_JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "exam_supervision.js"
 
 
@@ -28,10 +29,12 @@ class CodingExamJavaScriptAssetTests(SimpleTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.source = JS_ASSET.read_text(encoding="utf-8")
+        module_sources = [path.read_text(encoding="utf-8") for path in sorted(JS_MODULE_DIR.glob("*.js"))]
+        cls.source = JS_ASSET.read_text(encoding="utf-8") + "\n".join(module_sources)
 
     def test_js_asset_exists_on_disk(self):
         self.assertTrue(JS_ASSET.exists(), f"Expected {JS_ASSET} to exist")
+        self.assertTrue(JS_MODULE_DIR.joinpath("coding_exam.entry.js").exists())
 
     def test_inline_terminal_helpers_are_defined(self):
         # The interactive terminal that students type into; these names are

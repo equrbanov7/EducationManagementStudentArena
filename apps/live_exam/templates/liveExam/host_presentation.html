@@ -229,7 +229,7 @@
     </script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-fallback-20260408"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-fallback-20260408"></script>
-    <script src="{% static 'js/host_lobby.js' %}?v=live-option-shapes-20260520"></script>
+    <script type="module" src="{% static 'js/host_lobby/host_lobby.entry.js' %}?v=live-option-shapes-20260520"></script>
     {% if presentation_controls %}
     <script src="{% static 'js/host_lobby_shell.js' %}?v=live-host-settings-20260506-scrollfix"></script>
     {% endif %}

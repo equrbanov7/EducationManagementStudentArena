@@ -3,20 +3,15 @@
   "soft_cap": 600,
   "budgets": {
     "apps/accounts/static/accounts/js/permission_editor_ui.js": 973,
-    "apps/accounts/static/accounts/js/profile.js": 2022,
     "apps/accounts/static/accounts/js/register_wizard.js": 1704,
     "apps/accounts/static/accounts/js/statistics.js": 615,
     "apps/accounts/templates/accounts/partials/_staff_management_scripts.html": 663,
-    "apps/blog/static/css/profile.css": 790,
     "apps/blog/static/js/user_profile.js": 628,
-    "apps/exams/static/exams/js/coding_exam.js": 2087,
     "apps/exams/static/exams/js/exam_create_edit_modal.js": 809,
     "apps/exams/static/exams/js/exam_live_monitor.js": 675,
     "apps/exams/static/exams/js/exam_supervision.js": 1351,
     "apps/exams/static/exams/js/profile_group_modal.js": 680,
     "apps/exams/templates/exams/student/partials/_take_exam_scripts.html": 1309,
-    "apps/live_exam/static/js/host_lobby.js": 2181,
-    "apps/live_exam/static/js/player.js": 1558,
     "static/css/ai_assistant.css": 635,
     "static/css/navbar.css": 983
   }
