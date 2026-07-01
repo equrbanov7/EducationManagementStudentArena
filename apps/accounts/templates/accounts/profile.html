@@ -219,7 +219,15 @@ window.EXAM_WIZARD_I18N = {
     titleRequired: "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
 };
 </script>
-<script src="{% static 'accounts/js/profile.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/ui.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/ajax.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/assigned_exam.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/init.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/profile.entry.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script src="{% static 'accounts/js/statistics.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/category_management.js' %}"></script>

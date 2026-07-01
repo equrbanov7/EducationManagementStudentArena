@@ -74,14 +74,23 @@ i18n string-ləri `{{ data|json_script:"..." }}` elementinə çıxar, JS-i stati
 
 ---
 
-## 🟢 FAZA 9 — Edge-case CSS (CLAUDE analiz + qərar; icra qərardan sonra)
-Bunlar byte-təhlükəsiz bölünə bilər, amma qərar/aydınlaşdırma tələb edir:
+## ✅ FAZA 9 — Edge-case CSS (CLAUDE — HƏLL OLUNDU 2026-07)
 
-| Fayl | Sətir | Problem / qərar |
-|------|-------|-----------------|
-| `static/css/navbar.css` | 983 | **QLOBAL** (base.html, hər səhifə). Bölmək hər səhifəyə əlavə HTTP request qoyar. **Qərar:** ya `django-compressor`/bundler əlavə et (mənbə bölünür, çatdırılma bundle-lanır) və sonra böl; ya olduğu kimi burax. |
-| `blog/static/css/profile.css` | 790 | Template `<link>` loader-i tapılmır — **dead code?** yoxsa dinamik? Əvvəlcə loader-i tap; tapılsa byte-təhlükəsiz böl, tapılmasa sil (dead). |
-| `static/css/ai_assistant.css` | 635 | base.html-də yüklənir (qlobal-vari). navbar kimi: bundler və ya burax. |
+| Fayl | Sətir | Nəticə |
+|------|-------|--------|
+| `blog/static/css/profile.css` | 790 | ✅ **SİLİNDİ (dead code).** Bütün repo yoxlanıldı (template `{% static %}`, JS dinamik, CSS `@import`, Python, git-grep) — heç bir referans yoxdur. Yeganə canlı `profile.css` = `accounts/css/profile.css` (7 template). Silindi; 265 şablon 0 xəta. |
+| `static/css/navbar.css` | 983 | ⏸️ **FROZEN saxlanılır (qərar).** base.html-də **qeyd-şərtsiz** yüklənir (hər səhifə). Fiziki bölmək hər səhifəyə əlavə HTTP request qoyar → perf reqressiya. Bundler olmadan bölmə YOX. |
+| `static/css/ai_assistant.css` | 635 | ⏸️ **FROZEN saxlanılır (qərar).** Eyni səbəb — base.html-də qeyd-şərtsiz (qlobal). |
+
+**Nəticə:** Claude-un edə biləcəyi bütün CSS işi bitdi. Qalan 2 qlobal CSS yalnız **bundler**
+(FAZA 10) ilə bölünməlidir — o, ayrıca deliberate task-dır (bütün static pipeline-a təsir edir,
+brauzer-doğrulaması lazım), kor-koranə edilməməlidir.
+
+## 🔵 FAZA 10 — Bundler (CODEX/deliberate — bütün qlobal asset üçün)
+`django-compressor` (və ya Vite/esbuild) əlavə et: `{% compress css/js %}` ilə mənbə komponentlərə
+bölünür, istehsalda tək bundle verilir → həm oxunaqlıq həm perf. Bu, navbar.css/ai_assistant.css +
+bütün JS-in fiziki bölgüsünü çatdırılma-cəzasız edir. Settings + template + `manage.py compress`
+offline-manifest + collectstatic dəyişikliyi; **brauzerdə vizual doğrulama MƏCBURİ.**
 
 ---
 

@@ -1,0 +1,27 @@
+export const $ = id => document.getElementById(id);
+
+export const UI = {
+    startBtn: $("startBtn"),
+    presentBtn: $("presentBtn"),
+    revealBtn: $("revealBtn"),
+    nextBtn: $("nextBtn"),
+    finishBtn: $("finishBtn"),
+    questionCount: $("questionCount"),
+    autoMode: $("autoMode"),
+    gameState: $("gameState"),
+    gameArea: $("gameArea"),
+    presentationStage: $("presentationStage"),
+    presentationContent: $("presentationContent"),
+    playersSection: $("playersSection"),
+    playersCount: $("playersCount"),
+    playersList: $("playersList"),
+    finalPodium: $("finalPodium"),
+    podiumStage: $("podiumStage"),
+    othersList: $("othersList"),
+    confetti: $("confetti"),
+    progressBox: $("progressBox"),
+    answeredText: $("answeredText"),
+    debugBtn: $("debugBtn"),
+    debugLog: $("debugLog"),
+    reactionOverlay: $("hostReactionOverlay"),
+};
