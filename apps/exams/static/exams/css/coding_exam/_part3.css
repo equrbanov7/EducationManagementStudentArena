@@ -1,0 +1,460 @@
+
+.coding-browser-reload {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #d8dde6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.coding-browser-reload:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.coding-browser-reload:active {
+    transform: rotate(-90deg);
+}
+
+.coding-preview-frame {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    border: 1px solid var(--coding-border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    background: #ffffff;
+}
+
+.coding-preview-console {
+    min-height: 4rem;
+    max-height: 8rem;
+    margin-top: 0;
+    overflow: auto;
+}
+
+.coding-preview-console:empty {
+    display: none;
+}
+
+.coding-test-cases {
+    display: grid;
+    gap: 10px;
+}
+
+.coding-test-case {
+    border: 1px solid var(--coding-border);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.coding-test-case.is-passed {
+    border-color: #8bd6a2;
+    background: #f3fff6;
+}
+
+.coding-test-case.is-failed {
+    border-color: #f4a6a6;
+    background: #fff6f6;
+}
+
+.coding-exam-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(100%, 1540px);
+    margin: 0 auto;
+    padding: 28px 28px 42px 326px;
+    background: var(--coding-bg);
+    border-top: 1px solid var(--coding-border);
+    box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.03);
+}
+
+.coding-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.coding-footer-btn {
+    min-height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--coding-border);
+    border-radius: 16px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    padding: 12px 26px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.coding-footer-btn:hover {
+    border-color: var(--coding-border-strong);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+}
+
+.coding-footer-btn--primary {
+    border-color: var(--coding-border);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.coding-footer-btn--finish {
+    border: 0;
+    background: linear-gradient(135deg, var(--coding-red) 0%, var(--coding-red-strong) 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
+}
+
+.coding-footer-btn--finish:hover {
+    background: linear-gradient(135deg, var(--coding-red-strong) 0%, var(--ems-danger-strong) 100%);
+    color: #ffffff;
+    box-shadow: 0 16px 28px rgba(239, 68, 68, 0.26);
+    transform: translateY(-1px);
+}
+
+.coding-footer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.coding-statusbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 1.25rem;
+    background: #ffffff;
+    border-top: 1px solid var(--coding-border);
+    color: var(--coding-muted);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 1180px) {
+    .coding-workspace {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 0;
+    }
+
+    .coding-editor-pane {
+        min-height: 520px;
+    }
+
+    .coding-result-pane {
+        min-height: 520px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .coding-exam-topbar__inner {
+        grid-template-columns: 1fr auto;
+    }
+
+    .coding-progress-center {
+        grid-column: 1 / -1;
+        order: 3;
+    }
+
+    .coding-exam-content {
+        grid-template-columns: 1fr;
+    }
+
+    .coding-question-sidebar {
+        position: static;
+    }
+
+    .coding-question-grid {
+        grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+    }
+
+    .coding-exam-footer {
+        padding-left: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    .coding-exam-topbar__inner,
+    .coding-exam-content,
+    .coding-exam-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .coding-exam-topbar__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .coding-timer-slot {
+        justify-content: stretch;
+    }
+
+    .coding-timer {
+        flex: 1;
+    }
+
+    body #supervision-active-badge {
+        top: auto !important;
+        right: 16px !important;
+        bottom: 18px !important;
+    }
+
+    .coding-exam-content {
+        gap: 18px;
+        padding-top: 20px;
+    }
+
+    .coding-map-card,
+    .coding-question-card {
+        padding: 20px;
+    }
+
+    .coding-question-text {
+        max-height: 180px;
+        font-size: 1rem;
+    }
+
+    .coding-result-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .coding-run-controls {
+        justify-content: flex-start;
+        margin-left: 0;
+    }
+
+    .coding-editor-pane {
+        grid-template-columns: 1fr;
+    }
+
+    .coding-editor-pane.is-files-collapsed {
+        grid-template-columns: 1fr;
+    }
+
+    .coding-editor-pane.is-files-collapsed .coding-file-explorer {
+        display: none;
+    }
+
+    .coding-file-explorer {
+        min-height: 180px;
+    }
+
+    .coding-exam-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding-top: 22px;
+        padding-bottom: 32px;
+    }
+
+    .coding-footer-btn {
+        width: 100%;
+        padding: 12px 16px;
+    }
+
+    .coding-sidebar-finish-btn {
+        margin-top: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .coding-progress-center {
+        gap: 10px;
+        font-size: 0.78rem;
+    }
+
+    .coding-tabs,
+    .coding-run-controls,
+    .coding-select-group,
+    .coding-bootstrap-select--language,
+    .coding-footer-btn,
+    .coding-btn--muted,
+    .coding-btn--run {
+        width: 100%;
+    }
+
+    .coding-tabs {
+        min-width: 0;
+    }
+
+    .coding-tab {
+        flex: 1 1 0;
+    }
+
+    .coding-icon-btn,
+    .coding-bootstrap-select--font {
+        flex: 0 0 auto;
+    }
+
+    .coding-btn span,
+    .coding-select-label {
+        display: none;
+    }
+}
+
+/* --- Active line + hint widget polish (VS Code-style) --- */
+.CodeMirror-activeline-background {
+    background: rgba(99, 102, 241, 0.07);
+}
+
+.coding-exam-shell.is-light-editor .CodeMirror-activeline-background {
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.CodeMirror-activeline-gutter .CodeMirror-linenumber {
+    color: #cbd5f5;
+}
+
+.coding-exam-shell.is-light-editor .CodeMirror-activeline-gutter .CodeMirror-linenumber {
+    color: #4338ca;
+}
+
+/* Make sure the hint popup floats above CodeMirror gutters + bootstrap modals
+   (modal default z-index is 1055). */
+.CodeMirror-hints {
+    z-index: 1200;
+}
+
+/* Console output: monospaced, soft scrollbar to match VS Code terminal. */
+.coding-console-output::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.coding-console-output::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.25);
+    border-radius: 8px;
+}
+.coding-console-output::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.45);
+}
+
+/* --- Inline interactive terminal --------------------------------- */
+/* The output panel is now a <div>; the <pre> child below carries the
+   actual mono-spaced text so layout still matches a terminal. */
+.coding-console-output {
+    display: block;
+    white-space: normal;
+}
+
+.coding-terminal-history {
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: inherit;
+    background: transparent;
+}
+
+.coding-terminal-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-top: 2px;
+}
+
+.coding-terminal-prompt {
+    white-space: pre;
+    color: inherit;
+}
+
+.coding-terminal-input {
+    flex: 1;
+    min-width: 80px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fef9c3; /* warm yellow — distinguishes user input from program output */
+    font: inherit;
+    outline: none;
+    caret-color: #facc15;
+}
+
+.coding-terminal-input:focus {
+    outline: none;
+}
+
+/* Blinking caret feedback so the student sees exactly where to type. */
+@keyframes codingTerminalCaret {
+    0%, 49% { box-shadow: inset -2px 0 0 0 rgba(250, 204, 21, 0); }
+    50%, 100% { box-shadow: inset -2px 0 0 0 rgba(250, 204, 21, 0.85); }
+}
+
+.coding-terminal-hint {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--ems-neutral-400);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-style: italic;
+}
+
+/* Advanced stdin disclosure (collapsed by default — most students will use
+   the inline terminal). */
+.coding-console-advanced {
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 10px 14px 12px;
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.coding-console-advanced[open] {
+    padding-bottom: 14px;
+}
+
+.coding-console-advanced summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #cbd5f5;
+    list-style: none;
+    user-select: none;
+    padding: 4px 0;
+}
+
+.coding-console-advanced summary::-webkit-details-marker {
+    display: none;
+}
+
+.coding-console-advanced summary::before {
+    content: "▸";
+    display: inline-block;
+    transition: transform 120ms ease;
+    color: var(--ems-neutral-400);
+}
+
+.coding-console-advanced[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.coding-console-advanced .coding-console-input-row {
+    margin-top: 8px;
+}
+
+/* Light theme variants for the terminal input. */
+.coding-exam-shell.is-light-editor .coding-terminal-input {
+    color: #92400e;
+    caret-color: #d97706;
+}
+

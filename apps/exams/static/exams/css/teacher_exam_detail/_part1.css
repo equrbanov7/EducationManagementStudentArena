@@ -1,0 +1,522 @@
+/* static/css/exam_detail.css */
+
+/* --- Ümumi Səhifə Wrapper --- */
+.exam-detail-page-wrapper {
+    padding: 40px 20px;
+    background-color: var(--bg-light, #f9fafb);
+    min-height: calc(100vh - 200px); /* Footer-i nəzərə alaraq */
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Əsas Kart Dizaynı --- */
+.exam-detail-card {
+    background: #ffffff;
+    max-width: 900px; /* Bir az daha geniş edirik */
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Kart Başlığı Hissəsi --- */
+.card-header {
+    padding: 30px;
+    border-bottom: 1px solid #e5e7eb;
+    background: var(--ems-neutral-50);
+    text-align: center;
+}
+
+.exam-header-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 14px;
+}
+
+.exam-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--ems-neutral-700);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.exam-back-btn:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
+    border-color: var(--ems-neutral-400);
+}
+
+.exam-detail-title {
+    font-size: 2.2rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.exam-detail-description {
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    margin: 0 auto;
+    max-width: 600px; /* Açıqlama mətni çox uzun olmasın */
+    line-height: 1.6;
+}
+
+/* --- Kartın Gövdəsi --- */
+.card-body {
+    padding: 30px;
+}
+
+/* --- İmtahan Məlumatları Hissəsi (Status Kartları) --- */
+.exam-info-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.info-card {
+    background-color: var(--ems-neutral-50);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 88px;
+    justify-content: center;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.info-label i {
+    font-size: 1rem;
+    color: #9ca3af;
+}
+
+.info-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-dark, var(--ems-neutral-800));
+}
+
+/* --- Canlı sessiya başlat (tam enli) --- */
+.live-start-section {
+    margin-bottom: 28px;
+}
+
+.live-start-tooltip {
+    display: block;
+    width: 100%;
+    cursor: help;
+}
+
+.live-start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.live-start-btn:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.live-start-btn-disabled {
+    opacity: 0.55;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+body.live-session-modal-open {
+    overflow: hidden;
+}
+
+.live-session-modal[hidden] {
+    display: none;
+}
+
+.live-session-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1085;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.live-session-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+}
+
+.live-session-modal__panel {
+    position: relative;
+    z-index: 1;
+    width: min(520px, 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(134, 239, 172, 0.48);
+    background:
+        radial-gradient(circle at top right, rgba(187, 247, 208, 0.46), transparent 36%),
+        linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.26);
+    padding: 28px;
+    color: var(--ems-neutral-900);
+}
+
+.live-session-modal__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--ems-neutral-500);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.live-session-modal__close:hover {
+    background: #ffffff;
+    color: var(--ems-neutral-900);
+}
+
+.live-session-modal__icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+    box-shadow: 0 18px 36px rgba(22, 163, 74, 0.28);
+    margin-bottom: 16px;
+}
+
+.live-session-modal__eyebrow {
+    margin: 0 0 8px;
+    color: #047857;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.live-session-modal h2 {
+    margin: 0 0 10px;
+    color: var(--ems-neutral-900);
+    font-size: 1.42rem;
+    font-weight: 850;
+    line-height: 1.24;
+}
+
+.live-session-modal__text {
+    margin: 0;
+    color: var(--ems-neutral-600);
+    line-height: 1.6;
+}
+
+.live-session-modal__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 18px 0 22px;
+}
+
+.live-session-modal__meta div {
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
+    padding: 12px 14px;
+}
+
+.live-session-modal__meta dt {
+    margin: 0 0 4px;
+    color: var(--ems-neutral-500);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.live-session-modal__meta dd {
+    margin: 0;
+    color: var(--ems-neutral-900);
+    font-size: 1rem;
+    font-weight: 850;
+}
+
+.live-session-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.live-session-modal__btn {
+    min-height: 46px;
+    border-radius: 14px;
+    padding: 0 16px;
+    font-weight: 800;
+    border: 1px solid transparent;
+}
+
+.live-session-modal__btn--ghost {
+    background: #ffffff;
+    color: var(--ems-neutral-700);
+    border-color: var(--ems-neutral-300);
+}
+
+.live-session-modal__btn--ghost:hover {
+    border-color: var(--ems-neutral-400);
+    background: var(--ems-neutral-50);
+}
+
+.live-session-modal__btn--primary {
+    color: #ffffff;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 16px 28px rgba(22, 163, 74, 0.24);
+}
+
+.live-session-modal__btn--primary:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background-color: #d1fae5; /* Açıq yaşıl */
+    color: #047857; /* Tünd yaşıl */
+}
+
+.status-badge.passive {
+    background-color: #fee2e2; /* Açıq qırmızı */
+    color: var(--ems-danger-strong); /* Tünd qırmızı */
+}
+
+/* --- İmtahan Hərəkətləri Hissəsi --- */
+.exam-actions-section {
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* İkon-Kart Şəbəkəsi */
+.action-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--ems-neutral-50);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    background: #ffffff;
+    border-color: var(--ems-neutral-300);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    transform: translateY(-2px);
+}
+
+.action-card__icon {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.05rem;
+}
+
+.action-card__body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.action-card__title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+    line-height: 1.3;
+}
+
+.action-card__desc {
+    font-size: 0.82rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.action-card__arrow {
+    flex-shrink: 0;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.action-card:hover .action-card__arrow {
+    color: var(--ems-neutral-600);
+    transform: translateX(3px);
+}
+
+/* İkon rəng variantları */
+.action-card--blue .action-card__icon  { background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%); }
+.action-card--green .action-card__icon { background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%); }
+.action-card--slate .action-card__icon { background: linear-gradient(135deg, var(--ems-neutral-500) 0%, var(--ems-neutral-600) 100%); }
+
+/* İdarəetmə düymələri sətri */
+.exam-control-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.exam-control-row form,
+.inline-action-form {
+    margin: 0;
+}
+
+.action-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent; /* default */
+}
+
+/* Düymə Stilləri */
+.primary-btn {
+    background-color: var(--primary-color, var(--ems-primary-500));
+    color: white;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+}
+.primary-btn:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-1px);
+    color: white; /* Hover zamanı mətn rəngini qoru */
+}
+
+.secondary-btn {
+    background-color: #6b7280;
+    color: white;
+    box-shadow: 0 2px 5px rgba(107, 114, 128, 0.3);
+}
+.secondary-btn:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+    color: white;
+}
+
+.visibility-hide-btn {
+    background-color: var(--ems-neutral-600);
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(71, 85, 105, 0.28);
+}
+
+.visibility-hide-btn:hover {
+    background-color: var(--ems-neutral-700);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.visibility-show-btn {
+    background-color: var(--ems-success-strong);
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(15, 118, 110, 0.28);
+}
+
+.visibility-show-btn:hover {
+    background-color: #0d5f59;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.bank-btn {
+    background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.32);
+}
+
+.bank-btn:hover {
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.library-btn {
+    background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+}
+
+.library-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}

@@ -1,0 +1,127 @@
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Error summary (form-level)
+   ───────────────────────────────────────────────────────────────────────── */
+.register-global-errors__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.register-global-errors__list {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.register-global-errors__list a {
+    color: #991b1b;
+    text-decoration: underline;
+}
+
+.register-global-errors:focus {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Selected organization chip
+   ───────────────────────────────────────────────────────────────────────── */
+.register-selected-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--primary-color, var(--ems-primary-600));
+    background-color: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: 100%;
+}
+
+.register-selected-chip.is-neutral {
+    border-color: #9ca3af;
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.register-selected-chip__icon {
+    display: inline-flex;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.register-selected-chip__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.register-selected-chip__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(30, 64, 175, 0.12);
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.register-selected-chip__clear:hover {
+    background-color: rgba(30, 64, 175, 0.25);
+}
+
+/* Search input invalid state */
+#organizationSearchInput[aria-invalid="true"] {
+    border-color: #ef4444;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Submit button: disabled + loading states
+   ───────────────────────────────────────────────────────────────────────── */
+.register-submit-btn:disabled,
+.register-submit-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.register-submit-btn:disabled:hover,
+.register-submit-btn.is-disabled:hover {
+    background-color: var(--primary-color, var(--ems-primary-600));
+    transform: none;
+}
+
+.register-submit-btn.is-loading {
+    cursor: progress;
+}
+
+.register-submit-btn__spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: 8px;
+    vertical-align: -0.125em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: register-spin 0.7s linear infinite;
+}
+
+@keyframes register-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+

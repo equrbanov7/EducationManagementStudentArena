@@ -1,0 +1,389 @@
+{% load i18n %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+    var actionModal = document.getElementById("roleAssignmentActionConfirmModal");
+    var actionForm = document.getElementById("roleAssignmentActionForm");
+    if (!actionModal || !actionForm) {
+        return;
+    }
+
+    var leadNode = document.getElementById("roleAssignmentConfirmLeadText");
+    var fullNameNode = document.getElementById("roleAssignmentConfirmFullName");
+    var usernameNode = document.getElementById("roleAssignmentConfirmUsername");
+    var emailNode = document.getElementById("roleAssignmentConfirmEmail");
+    var orgNode = document.getElementById("roleAssignmentConfirmOrg");
+    var oldRoleNode = document.getElementById("roleAssignmentConfirmOldRole");
+    var roleNode = document.getElementById("roleAssignmentConfirmRole");
+    var confirmBtn = document.getElementById("roleAssignmentConfirmSubmitBtn");
+    var actionInput = actionForm.querySelector('input[name="action"]');
+    var membershipInput = actionForm.querySelector('input[name="membership_id"]');
+    var userInput = actionForm.querySelector('input[name="user_id"]');
+    var roleInput = actionForm.querySelector('input[name="role_id"]');
+    var operationTokenInput = actionForm.querySelector('input[name="operation_token"]');
+    var nextInput = actionForm.querySelector('input[name="next"]');
+    var csrfInput = actionForm.querySelector('input[name="csrfmiddlewaretoken"]');
+    var modalInstance = window.bootstrap ? new window.bootstrap.Modal(actionModal) : null;
+    var pendingOperation = null;
+    var submitInFlight = false;
+    var confirmDefaultLabel = confirmBtn ? (confirmBtn.textContent || "Təsdiqlə").trim() : "Təsdiqlə";
+
+    if (!modalInstance || !confirmBtn) {
+        return;
+    }
+
+    function normalizeText(value) {
+        return (value || "").toString().trim();
+    }
+
+    function fallbackText(row, cellIndex) {
+        if (!row || typeof cellIndex !== "number") {
+            return "";
+        }
+        var cell = row.cells && row.cells.length > cellIndex ? row.cells[cellIndex] : null;
+        if (!cell) {
+            return "";
+        }
+        return normalizeText((cell.textContent || "").replace(/\s+/g, " "));
+    }
+
+    function selectedRoleData(select) {
+        if (!select) {
+            return { id: "", label: "" };
+        }
+        var roleId = normalizeText(select.value);
+        var option = roleId ? select.options[select.selectedIndex] : null;
+        return {
+            id: roleId,
+            label: normalizeText(option ? option.textContent : "")
+        };
+    }
+
+    function buildPendingOperation(button) {
+        if (!button) {
+            return null;
+        }
+
+        var row = button.closest("tr");
+        var select = row ? row.querySelector("[data-role-assignment-role-select]") : null;
+        var selectedRole = selectedRoleData(select);
+        var actionName = normalizeText(button.getAttribute("data-target-action"));
+        var membershipId = normalizeText(button.getAttribute("data-target-membership-id"));
+        var userId = normalizeText(button.getAttribute("data-target-user-id"));
+        var username = normalizeText(button.getAttribute("data-user-username"));
+        if (username && username.charAt(0) !== "@") {
+            username = "@" + username;
+        }
+
+        var operation = {
+            action: actionName,
+            membershipId: membershipId,
+            userId: userId,
+            roleId: selectedRole.id,
+            roleLabel: selectedRole.label,
+            fullName: normalizeText(button.getAttribute("data-user-full-name")) || fallbackText(row, 0),
+            username: username,
+            email: normalizeText(button.getAttribute("data-user-email")) || fallbackText(row, 1),
+            organization: normalizeText(button.getAttribute("data-organization-name")),
+            oldRole: normalizeText(button.getAttribute("data-old-role")) || (actionName === "update_member" ? fallbackText(row, 2) : ""),
+            sourceButton: button,
+        };
+
+        if (!operation.oldRole && actionName === "attach_user") {
+            operation.oldRole = "Üzvlük yoxdur";
+        }
+
+        operation.isValid = Boolean(
+            operation.action
+            && operation.roleId
+            && operation.roleLabel
+            && operation.fullName
+            && operation.username
+            && operation.email
+            && operation.organization
+            && operation.oldRole
+            && (
+                (operation.action === "update_member" && operation.membershipId)
+                || (operation.action === "attach_user" && operation.userId)
+            )
+        );
+
+        return operation;
+    }
+
+    function populateConfirmModal(operation) {
+        if (!operation) {
+            return;
+        }
+
+        if (leadNode) {
+            leadNode.textContent = operation.action === "attach_user"
+                ? "İstifadəçini təşkilata əlavə etməyi təsdiqləyin."
+                : "İstifadəçinin rolunu yeniləməyi təsdiqləyin.";
+        }
+        if (fullNameNode) {
+            fullNameNode.textContent = operation.fullName;
+        }
+        if (usernameNode) {
+            usernameNode.textContent = operation.username;
+        }
+        if (emailNode) {
+            emailNode.textContent = operation.email;
+        }
+        if (orgNode) {
+            orgNode.textContent = operation.organization;
+        }
+        if (oldRoleNode) {
+            oldRoleNode.textContent = operation.oldRole;
+        }
+        if (roleNode) {
+            roleNode.textContent = operation.roleLabel;
+        }
+    }
+
+    function setConfirmButtonState() {
+        confirmBtn.disabled = submitInFlight || !pendingOperation || !pendingOperation.isValid;
+    }
+
+    function setConfirmLoading(isLoading, label) {
+        submitInFlight = isLoading;
+        if (isLoading) {
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' + label;
+        } else {
+            confirmBtn.textContent = label || confirmDefaultLabel;
+        }
+        setConfirmButtonState();
+    }
+
+    function resetActionFormFields() {
+        if (actionInput) {
+            actionInput.value = "";
+        }
+        if (membershipInput) {
+            membershipInput.value = "";
+        }
+        if (userInput) {
+            userInput.value = "";
+        }
+        if (roleInput) {
+            roleInput.value = "";
+        }
+        if (operationTokenInput) {
+            operationTokenInput.value = "";
+        }
+    }
+
+    function fillActionFormFields(operation, operationToken) {
+        resetActionFormFields();
+
+        if (!operation) {
+            return;
+        }
+        if (actionInput) {
+            actionInput.value = operation.action;
+        }
+        if (membershipInput && operation.membershipId) {
+            membershipInput.value = operation.membershipId;
+        }
+        if (userInput && operation.userId) {
+            userInput.value = operation.userId;
+        }
+        if (roleInput) {
+            roleInput.value = operation.roleId;
+        }
+        if (operationTokenInput) {
+            operationTokenInput.value = operationToken || "";
+        }
+        if (nextInput && !normalizeText(nextInput.value)) {
+            nextInput.value = window.location.pathname + window.location.search;
+        }
+    }
+
+    function showToast(type, message) {
+        var text = normalizeText(message) || "Xəta baş verdi. Yenidən cəhd edin.";
+        if (type === "success" && typeof window.notifySuccess === "function") {
+            window.notifySuccess(text);
+            return;
+        }
+        if (type !== "success" && typeof window.notifyError === "function") {
+            window.notifyError(text);
+            return;
+        }
+        if (typeof window.notify === "function") {
+            window.notify(text, type === "success" ? "success" : "error");
+            return;
+        }
+        window.alert(text);
+    }
+
+    function parseJsonResponse(response, fallbackErrorMessage) {
+        return response.json().catch(function () {
+            return {
+                success: false,
+                message: fallbackErrorMessage || "Xəta baş verdi. Yenidən cəhd edin."
+            };
+        });
+    }
+
+    async function prepareOperationToken(operation) {
+        var csrfToken = csrfInput ? csrfInput.value : "";
+        var payload = new URLSearchParams();
+        payload.set("action", "prepare_operation");
+        payload.set("target_action", operation.action);
+        payload.set("new_role_id", operation.roleId);
+        if (operation.membershipId) {
+            payload.set("membership_id", operation.membershipId);
+        }
+        if (operation.userId) {
+            payload.set("user_id", operation.userId);
+        }
+        if (csrfToken) {
+            payload.set("csrfmiddlewaretoken", csrfToken);
+        }
+
+        var response = await fetch(actionForm.getAttribute("action"), {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-CSRFToken": csrfToken
+            },
+            body: payload.toString()
+        });
+        var data = await parseJsonResponse(response, "Əməliyyat təsdiqi hazırlanmadı.");
+        if (!response.ok || !data.success || !normalizeText(data.operation_token)) {
+            throw new Error(data.message || "Əməliyyat təsdiqi hazırlanmadı.");
+        }
+        return data.operation_token;
+    }
+
+    async function submitPreparedOperation(operationToken, operation) {
+        fillActionFormFields(operation, operationToken);
+
+        var csrfToken = csrfInput ? csrfInput.value : "";
+        var payload = new URLSearchParams();
+        if (actionInput) {
+            payload.set("action", actionInput.value);
+        }
+        if (membershipInput && normalizeText(membershipInput.value)) {
+            payload.set("membership_id", membershipInput.value);
+        }
+        if (userInput && normalizeText(userInput.value)) {
+            payload.set("user_id", userInput.value);
+        }
+        if (roleInput) {
+            payload.set("role_id", roleInput.value);
+        }
+        if (operationTokenInput && normalizeText(operationTokenInput.value)) {
+            payload.set("operation_token", operationTokenInput.value);
+        }
+        if (nextInput && normalizeText(nextInput.value)) {
+            payload.set("next", nextInput.value);
+        }
+        if (csrfToken) {
+            payload.set("csrfmiddlewaretoken", csrfToken);
+        }
+
+        var response = await fetch(actionForm.getAttribute("action"), {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-CSRFToken": csrfToken
+            },
+            body: payload.toString()
+        });
+        return parseJsonResponse(response, "Əməliyyat tamamlanmadı.");
+    }
+
+    document.querySelectorAll(".js-role-assignment-action-confirm").forEach(function (button) {
+        button.addEventListener("click", function () {
+            pendingOperation = buildPendingOperation(button);
+            populateConfirmModal(pendingOperation);
+            setConfirmButtonState();
+
+            modalInstance.show();
+        });
+    });
+
+    document.querySelectorAll("[data-role-assignment-role-select]").forEach(function (select) {
+        select.addEventListener("change", function () {
+            if (!pendingOperation || !pendingOperation.sourceButton) {
+                return;
+            }
+            var currentRow = select.closest("tr");
+            var pendingRow = pendingOperation.sourceButton.closest("tr");
+            if (!currentRow || !pendingRow || currentRow !== pendingRow) {
+                return;
+            }
+            pendingOperation = buildPendingOperation(pendingOperation.sourceButton);
+            populateConfirmModal(pendingOperation);
+            setConfirmButtonState();
+        });
+    });
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener("click", async function () {
+            if (!pendingOperation || !pendingOperation.isValid || submitInFlight) {
+                return;
+            }
+            var inFlightLabel = pendingOperation.action === "attach_user" ? "Əlavə olunur..." : "Yenilənir...";
+            setConfirmLoading(true, inFlightLabel);
+
+            try {
+                var operationToken = await prepareOperationToken(pendingOperation);
+                var submitResult = await submitPreparedOperation(operationToken, pendingOperation);
+                if (!submitResult.success) {
+                    showToast("error", submitResult.message || "Əməliyyat tamamlanmadı.");
+                    return;
+                }
+
+                showToast("success", submitResult.message || "Əməliyyat uğurla tamamlandı.");
+                modalInstance.hide();
+
+                var redirectUrl = normalizeText(submitResult.redirect_url);
+                window.setTimeout(function () {
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                        return;
+                    }
+                    window.location.reload();
+                }, 420);
+            } catch (error) {
+                showToast("error", error && error.message ? error.message : "Xəta baş verdi. Yenidən cəhd edin.");
+            } finally {
+                setConfirmLoading(false, confirmDefaultLabel);
+            }
+        });
+    }
+
+    actionModal.addEventListener("hidden.bs.modal", function () {
+        pendingOperation = null;
+        resetActionFormFields();
+        if (leadNode) {
+            leadNode.textContent = "";
+        }
+        if (fullNameNode) {
+            fullNameNode.textContent = "";
+        }
+        if (usernameNode) {
+            usernameNode.textContent = "";
+        }
+        if (emailNode) {
+            emailNode.textContent = "";
+        }
+        if (orgNode) {
+            orgNode.textContent = "";
+        }
+        if (oldRoleNode) {
+            oldRoleNode.textContent = "";
+        }
+        if (roleNode) {
+            roleNode.textContent = "";
+        }
+        setConfirmLoading(false, confirmDefaultLabel);
+    });
+});
+</script>
+

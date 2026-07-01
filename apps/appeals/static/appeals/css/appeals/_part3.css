@@ -1,0 +1,243 @@
+/* Bootstrap-select müraciət panelində native ilə eyni hündürlük */
+.appeal-review-panel .bootstrap-single-select {
+    width: 100%;
+}
+
+.appeal-review-panel .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+    background: #fff;
+}
+
+/* ── Sual variantları / cavab analizi (review panelində) ── */
+.appeal-answer-review {
+    margin: 12px 0 4px;
+    padding: 14px 16px;
+    border: 1px solid var(--appeal-border);
+    border-radius: 14px;
+    background: #fbfdff;
+}
+
+.appeal-answer-review__label {
+    color: var(--appeal-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.appeal-answer-review__text {
+    color: var(--appeal-ink);
+    font-weight: 400;
+    white-space: pre-wrap;
+}
+
+.appeal-answer-review__empty {
+    margin-top: 8px;
+    color: #b45309;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.appeal-options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.appeal-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid var(--appeal-border);
+    border-radius: 11px;
+    background: #fff;
+}
+
+.appeal-option__icon {
+    flex-shrink: 0;
+    color: var(--ems-neutral-400);
+}
+
+.appeal-option__text {
+    flex: 1 1 auto;
+    color: var(--appeal-ink);
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.appeal-option__text b {
+    font-weight: 700;
+    margin-right: 2px;
+}
+
+.appeal-option__tags {
+    display: inline-flex;
+    gap: 6px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.appeal-option__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #e0e7ff;
+    color: #3730a3;
+    white-space: nowrap;
+}
+
+.appeal-option__tag--correct {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.appeal-option.is-correct {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.appeal-option.is-correct .appeal-option__icon {
+    color: #22c55e;
+}
+
+.appeal-option.is-wrong {
+    border-color: #fca5a5;
+    background: #fef2f2;
+}
+
+.appeal-option.is-wrong .appeal-option__icon {
+    color: #ef4444;
+}
+
+/* ── 5 dəqiqəlik redaktə pəncərəsi qeydi ── */
+.appeal-edit-window {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 13px;
+    border-radius: 11px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.appeal-option__icon i,
+.appeal-edit-window i {
+    font-size: 0.95em;
+}
+
+@media (max-width: 640px) {
+    .appeal-option {
+        flex-wrap: wrap;
+    }
+
+    .appeal-option__tags {
+        width: 100%;
+        padding-left: 26px;
+    }
+}
+
+@media (max-width: 768px) {
+    .appeal-shell {
+        padding: 20px 12px 24px;
+    }
+
+    .appeal-modal__dialog {
+        max-width: calc(100vw - 12px);
+        margin: 6px auto;
+    }
+
+    .appeal-modal__body {
+        padding: 14px;
+    }
+
+    /* Manage cədvəli → mobil kart görünüşü */
+    .appeal-manage-table thead {
+        display: none;
+    }
+
+    .appeal-manage-table,
+    .appeal-manage-table tbody,
+    .appeal-manage-table tr,
+    .appeal-manage-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .appeal-manage-table tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--appeal-border);
+        border-radius: 14px;
+        padding: 6px 12px;
+    }
+
+    .appeal-manage-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        border: 0;
+        padding: 8px 0;
+        text-align: right;
+    }
+
+    .appeal-manage-table td::before {
+        content: attr(data-label);
+        color: var(--appeal-muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .appeal-manage-table td.text-end {
+        justify-content: flex-end;
+    }
+
+    .appeal-manage-table td.text-end::before {
+        content: "";
+    }
+
+    .appeal-hero {
+        flex-direction: column;
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .appeal-hero__actions {
+        justify-content: stretch;
+        min-width: 0;
+    }
+
+    .appeal-hero__actions .btn,
+    .appeal-sticky-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .appeal-case-card__head,
+    .appeal-question-card__top {
+        flex-direction: column;
+    }
+
+    .appeal-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .appeal-sticky-actions__inner {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
+

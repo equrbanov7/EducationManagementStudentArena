@@ -1,0 +1,273 @@
+{% load i18n static %}
+  <div class="stats-summary-cards row g-3 mb-4">
+
+    {% if role_capabilities.is_superadmin %}
+    {# Superadmin cards #}
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--primary h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_orgs }}</div>
+          <div class="stats-card-label">{% trans "card_organizations" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--info h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_users }}</div>
+          <div class="stats-card-label">{% trans "card_users" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--success h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
+          <div class="stats-card-label">{% trans "card_courses" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--warning h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_exams }}</div>
+          <div class="stats-card-label">{% trans "card_exams" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.assignment_total }}</div>
+          <div class="stats-card-label">{% trans "card_assignment_submissions" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.lab_total }}</div>
+          <div class="stats-card-label">{% trans "card_lab_submissions" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.project_total }}</div>
+          <div class="stats-card-label">{% trans "card_project_submissions" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+
+    {% elif role_capabilities.is_org_admin or statistics_unit_layout %}
+    {# Org admin cards #}
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--primary h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_members }}</div>
+          <div class="stats-card-label">{% trans "card_members" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--info h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.teacher_count }}</div>
+          <div class="stats-card-label">{% trans "card_teachers" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--success h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.student_count }}</div>
+          <div class="stats-card-label">{% trans "card_students" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--warning h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
+          <div class="stats-card-label">{% trans "card_courses" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.assignment_graded }}/{{ statistics_data.summary.assignment_total }}</div>
+          <div class="stats-card-label">{% trans "card_assignment_graded" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.assignment_late }}</div>
+          <div class="stats-card-label">{% trans "card_late_submissions" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.lab_total }}</div>
+          <div class="stats-card-label">{% trans "card_lab_submissions" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+
+    {% elif role_capabilities.is_teacher %}
+    {# Teacher cards #}
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--primary h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_courses }}</div>
+          <div class="stats-card-label">{% trans "card_my_courses" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--info h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_students }}</div>
+          <div class="stats-card-label">{% trans "card_students" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--success h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.exam_avg_score }}%</div>
+          <div class="stats-card-label">{% trans "card_avg_score" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--warning h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.exam_pass_rate }}%</div>
+          <div class="stats-card-label">{% trans "card_pass_rate" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_attempts }}</div>
+          <div class="stats-card-label">{% trans "card_exam_attempts" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.checked_attempts }}/{{ statistics_data.summary.total_attempts }}</div>
+          <div class="stats-card-label">{% trans "card_checked" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.avg_grading_turnaround_days }} {% trans "unit_days" context "profile.statistics" %}</div>
+          <div class="stats-card-label">{% trans "card_avg_grading_time" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.assignment_late }}</div>
+          <div class="stats-card-label">{% trans "card_late_assignments" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    {# Student cards #}
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--primary h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.avg_score }}%</div>
+          <div class="stats-card-label">{% trans "card_avg_score" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--success h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.pass_rate }}%</div>
+          <div class="stats-card-label">{% trans "card_pass_rate" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--info h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.total_items }}</div>
+          <div class="stats-card-label">{% trans "card_total_tasks" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card stats-card--warning h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.pending_items }}</div>
+          <div class="stats-card-label">{% trans "card_pending" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.exam_count }}</div>
+          <div class="stats-card-label">{% trans "card_exams" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.assignment_count }}</div>
+          <div class="stats-card-label">{% trans "card_assignments" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.lab_count }}</div>
+          <div class="stats-card-label">{% trans "card_labs" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="stats-card-value">{{ statistics_data.summary.on_time_count }}/{{ statistics_data.summary.late_count }}</div>
+          <div class="stats-card-label">{% trans "card_ontime_late" context "profile.statistics" %}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>

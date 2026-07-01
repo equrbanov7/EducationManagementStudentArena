@@ -1,0 +1,215 @@
+{% load i18n static %}
+            <div class="wizard-panel" id="step4" hidden>
+                <h3 class="register-step-title">{% trans "personal_info" context "accounts.register" %}</h3>
+
+                <div class="register-selection-summary" id="signupSelectionSummary" hidden>
+                    <div class="register-selection-summary__grid">
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{{ form.country.label }}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryCountry">-</span>
+                        </div>
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{% trans "step_account_type" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryAccountType">-</span>
+                        </div>
+                        <div class="register-selection-summary__item">
+                            <span class="register-selection-summary__label">{% trans "choose_role" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryRole">-</span>
+                        </div>
+                        <div class="register-selection-summary__item" id="signupSummaryOrganizationItem" hidden>
+                            <span class="register-selection-summary__label">{% trans "institution_search_label" context "accounts.register" %}</span>
+                            <span class="register-selection-summary__value" id="signupSummaryOrganization">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="register-field-error">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="register-field-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="register-field-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="register-field-error">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Phone (optional, shown for teacher / staff / student) -->
+                <div class="register-form-field" id="phoneField">
+                    {{ form.phone.label_tag }}
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="register-field-error">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Student-specific fields -->
+                <div id="studentSpecificFields" hidden>
+                    <p class="register-step-subtitle">{% trans "student_fields_title" context "accounts.register" %}</p>
+                    <div class="register-form-field">
+                        {{ form.specialization.label_tag }}
+                        {{ form.specialization }}
+                        {% if form.specialization.errors %}
+                            <div class="register-field-error">{{ form.specialization.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="register-form-field">
+                        <label for="{{ form.group_number.id_for_label }}">
+                            {{ form.group_number.label }}
+                            <span class="register-required-badge">{% trans "required_badge" context "accounts.register" %}</span>
+                        </label>
+                        {{ form.group_number }}
+                        {% if form.group_number.errors %}
+                            <div class="register-field-error">{{ form.group_number.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Teacher-specific fields -->
+                <div id="teacherSpecificFields" hidden>
+                    <p class="register-step-subtitle">{% trans "teacher_fields_title" context "accounts.register" %}</p>
+                </div>
+
+                <!-- Staff-specific fields -->
+                <div id="staffSpecificFields" hidden>
+                    <p class="register-step-subtitle">{% trans "staff_fields_title" context "accounts.register" %}</p>
+                    <div class="register-form-field">
+                        {{ form.staff_position.label_tag }}
+                        {{ form.staff_position }}
+                        {% if form.staff_position.errors %}
+                            <div class="register-field-error">{{ form.staff_position.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Department field: shared between teacher and staff (shown for both) -->
+                <div class="register-form-field" id="departmentField" hidden>
+                    {{ form.department.label_tag }}
+                    {{ form.department }}
+                    {% if form.department.errors %}
+                        <div class="register-field-error">{{ form.department.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field" id="initialRoleField" hidden>
+                    {{ form.initial_role.label_tag }}
+                    {{ form.initial_role }}
+                    {% if form.initial_role.errors %}
+                        <div class="register-field-error">{{ form.initial_role.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field" id="autoRoleInfoField">
+                    <small class="register-help-text" id="autoRoleInfoText">
+                        {% trans "auto_role_info_org" context "accounts.register" %}
+                    </small>
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.password.label_tag }}
+                    <div class="input-visibility-wrapper">
+                        {{ form.password }}
+                        <button
+                            type="button"
+                            class="input-visibility-toggle"
+                            data-toggle-visibility
+                            data-target="{{ form.password.id_for_label }}"
+                            aria-label="Toggle field visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="register-field-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.password2.label_tag }}
+                    <div class="input-visibility-wrapper">
+                        {{ form.password2 }}
+                        <button
+                            type="button"
+                            class="input-visibility-toggle"
+                            data-toggle-visibility
+                            data-target="{{ form.password2.id_for_label }}"
+                            aria-label="Toggle field visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}
+                        <div class="register-field-error">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field register-privacy-field">
+                    <div class="register-privacy-card{% if form.accept_privacy_policy.errors %} is-invalid{% endif %}" id="privacyConsentCard">
+                        <div class="register-privacy-card__header">
+                            <div class="register-privacy-card__icon" aria-hidden="true">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="register-privacy-card__copy">
+                                <h4 class="register-privacy-card__title">
+                                    {% trans "privacy_card_title" context "accounts.register" %}
+                                </h4>
+                                <p class="register-privacy-card__description">
+                                    {% trans "privacy_card_description" context "accounts.register" %}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                class="register-privacy-card__button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#privacyPolicyModal"
+                            >
+                                {% trans "privacy_open_button" context "accounts.register" %}
+                            </button>
+                        </div>
+
+                        <label class="register-checkbox{% if form.accept_privacy_policy.errors %} is-invalid{% endif %}" for="{{ form.accept_privacy_policy.id_for_label }}">
+                            {{ form.accept_privacy_policy }}
+                            <span>{{ form.accept_privacy_policy.label }}</span>
+                        </label>
+
+                        <p class="register-help-text register-help-text--privacy" id="privacyConsentHelp">
+                            {% trans "privacy_accept_hint" context "accounts.register" %}
+                        </p>
+                        <div class="register-field-error" id="privacyConsentClientError" hidden aria-live="polite"></div>
+                        {% if form.accept_privacy_policy.errors %}
+                            <div class="register-field-error" id="privacyConsentServerError">{{ form.accept_privacy_policy.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="wizard-nav">
+                    <button type="button" class="register-back-btn" data-wizard-back="3">
+                        <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
+                    </button>
+                    <button type="submit" class="register-submit-btn" id="registerSubmitBtn">
+                        <span class="register-submit-btn__label">{% trans "submit" context "accounts.register" %}</span>
+                        <span class="register-submit-btn__spinner" hidden aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>

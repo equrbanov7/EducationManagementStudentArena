@@ -129,10 +129,13 @@ Render-test ilə doğrulanır.
 | 22 | ✅ `accounts/partials/_student_org_management_content.html` | 1268 | BÖLÜNDÜ → 1268→64; `student_org_management/`: students/pending/unassigned/invites + modals + scripts (hamısı <600, characterization yaşıl) |
 | 23 | `exams/student/partials/_take_exam_scripts.html` | 1309 | Çıxarılmış JS — template-var yoxdursa hissələri static `.js`-ə |
 | 24 | `accounts/profile/sections/_statistics.html` | 815 | Kart/qrafik blokları partial |
-| 25 | `exams/teacher/supervision_monitor.html` | 803 | style/script çıxar + kart partial |
+| 25 | ✅ `exams/teacher/supervision_monitor.html` | 803 | BÖLÜNDÜ → 803→270; inline `<style>`→static `exams/css/supervision_monitor.css` (197, CSP nonce-suz), inline `<script>`→`partials/_supervision_monitor_js.html` (337); 30 test yaşıl |
 | 26 | `liveExam/teacher_live_session_detail.html` | 775 | Bölmə partial |
 | 27 | ✅ `labs/partials/_lab_modals.html` | 738 | BÖLÜNDÜ → 738→12; `lab_modals/`: add/edit modal + scripts. **Dərs:** xarici `{% if is_owner %}` bütöv qalmalı — yalnız daxili məzmun çıxarılmalı (bağlayan `{% endif %}` main-də) |
-| 28 | `accounts/partials/_role_assignment_content.html` (686), `exams/teacher/exam_section.html` (678), `teacher_exam_statistics.html` (675), `_exam_live_monitor_js.html` (675), `accounts/register.html` (666) | 666-686 | Script/style çıxar + təkrar bloklar ortaq partial |
+| 23 | ✅ `teacher_live_session_detail.html` | 775 | BÖLÜNDÜ → 775→241; inline style→static CSS, script→partial |
+| 24 | ✅ `accounts/profile/sections/_statistics.html` | 815 | BÖLÜNDÜ → 815→458; summary_cards + filter_bar partial |
+| 28 | ✅ Cluster (666-686) BÖLÜNDÜ | | `_role_assignment_content` 686→299 (script→partial), `exam_section` 678→395 (script→partial), `teacher_exam_statistics` 675→352 (style→CSS, script→partial), `_exam_live_monitor_js` 675→**static JS** (exam_live_monitor.js), `register` 666→277 (wizard step-lər partial), `_sidebar` 612→500 (org menyu qrupu partial), `_create_question_bank_styles` 602→**static CSS** (create_question_bank.css). Bütün 265 şablon 0 sintaksis xətası, 250+ test yaşıl. |
+| — | **Qalan (2 HTML frozen):** `_staff_management_scripts.html` (663), `_take_exam_scripts.html` (1309) — hər ikisi `{% trans %}`-lı JS; JS-aware bölgü + vizual/E2E doğrulama lazım (istifadəçi tərəfi). | | |
 
 ## FAZA 6 — CSS (600+) → rəng token miqrasiyası + bölgü
 
@@ -141,8 +144,8 @@ komponent üzrə (@import parçaları) böl.
 
 | # | Fayl | Sətir | Qeyd |
 |---|------|-------|------|
-| 29 | `live_exam/css/host_lobby.css` | 3606 | Komponent üzrə böl (lobby / player-card / avatar / grid); token davam |
-| 30 | `player.css` (1576), `test_question_bank.css` (1524), `coding_exam.css` (1504) | 1500+ | Ekran-bölmə üzrə böl |
+| 29 | ✅ `live_exam/css/host_lobby.css` | 3606 | BÖLÜNDÜ → `host_lobby/_part1..7.css` (hər ~520, brace-balanslı, **bayt-identik konkatenasiya**); 2 template ardıcıl `<link>`; 114 test yaşıl. Metod: brace-depth-0 sərhədlərində böl, sıra qoru → cascade dəyişmir (vizual yoxlama tələb etmir). |
+| 30 | ✅ `player.css`(1576), `test_question_bank.css`(1524), `coding_exam.css`(1504), `appeals.css`(1282), `register.css`(1194), `take_exam.css`(1099), `wait_room.css`(1012) | 1000+ | BÖLÜNDÜ → hər biri `<file>/_partN.css` (byte-identik, brace-balanslı, template `<link>` ardıcıl yeniləndi); reusable splitter (`/tmp/css_split.py` metodu); 427 test yaşıl. **Qeyd:** yalnız SƏHİFƏ-SPESİFİK CSS bölünür; QLOBAL (navbar, base.html) bölünmür (hər səhifəyə request əlavə edər). |
 | 31 | `appeals.css` (1282), `register.css` (1194), `take_exam.css` (1099), `wait_room.css` (1012), `navbar.css` (983), `teacher_questions_bank.css` (979) | 979-1282 | Bölmə/komponent üzrə böl + token tamamla |
 | 32 | Qalan CSS (teacher_exam_detail 835, bulk_workbench_extras 783, host_lobby_shell 770, exam_result 764, teacher_check_attempt 744, posts 693, contact_messages 645, ai_assistant 635, join 623, teacher_exam_results 610) | 610-835 | Token miqrasiyası + lazımsa böl |
 

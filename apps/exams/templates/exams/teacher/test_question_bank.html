@@ -4,8 +4,11 @@
 {% block title %}{{ exam.title }} - {% trans "title_question_bank" context "exams.template.test_question_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}?v=20260621-sticky-footer">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras.css' %}?v=20260607-drawer">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20260621-sticky-footer">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20260621-sticky-footer">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20260621-sticky-footer">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-drawer">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260607-drawer">
     <link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20260607-picker">
 {% endblock %}
 
