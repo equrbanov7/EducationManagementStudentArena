@@ -1,0 +1,240 @@
+
+/* --- Teacher Feedback --- */
+.teacher-feedback-box {
+    margin-top: 25px;
+    background: #fff;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.tf-header {
+    background: var(--ems-primary-50);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--ems-primary-100);
+}
+.tf-avatar {
+    width: 32px; height: 32px;
+    background: var(--ems-primary-600);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.tf-title { color: var(--ems-primary-700); font-weight: 700; margin-left: 8px; }
+.tf-score {
+    background: #fff;
+    color: var(--ems-primary-700);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    border: 1px solid var(--ems-primary-200);
+}
+.tf-body { padding: 20px; color: var(--ems-neutral-800); line-height: 1.6; }
+
+/* --- Footer Düymələr --- */
+.action-footer {
+    /* Sticky → scroll boyu aşağıda üzür, səhifənin sonunda (Digər cəhdlərdən
+       sonra) öz yerində dayanır və footer-in üstünə düşmür. */
+    position: sticky;
+    bottom: 16px;
+    z-index: 1030;
+    max-width: 980px;
+    margin: 24px auto 0;
+    padding: 14px 18px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+}
+
+.action-footer__inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    width: min(980px, 100%);
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.custom-blue-btn {
+    background-color: var(--ems-primary-500);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.custom-blue-btn:hover {
+    background-color: var(--ems-primary-600);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+
+/* ===== Student paint preview ===== */
+.paint-answer-box{
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+  
+  .paint-open-link{
+    display: block;
+    text-decoration: none;
+    border-radius: 10px;
+    overflow: auto;      /* böyükdürsə scroll olsun */
+    max-height: 520px;   /* istəsən 400/600 et */
+  }
+  
+  .paint-answer-img{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 250px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    object-fit: contain;
+  }
+  
+
+/* Mobil Uyğunluq */
+@media (max-width: 992px) {
+    .result-container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .result-container {
+        max-width: 100%;
+        padding-left: 14px;
+        padding-right: 14px;
+        padding-bottom: 24px;
+        margin: 20px auto;
+    }
+    .page-title {
+        font-size: 1.4rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    .summary-card {
+        padding: 18px;
+        max-width: 100%;
+    }
+    .main-score .stat-value { font-size: 2.45rem; }
+    .score-points-value { padding: 0 58px; }
+    .score-percent-chip {
+        right: 0;
+        min-width: 48px;
+        padding: 6px 9px;
+        font-size: 0.85rem;
+    }
+    .test-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 14px;
+    }
+    .result-action-panel {
+        flex-direction: column;
+        align-items: stretch;
+        margin-top: 0;
+    }
+    .result-action-panel__actions {
+        justify-content: stretch;
+    }
+    .result-action-panel__actions .btn {
+        flex: 1 1 180px;
+    }
+    .action-footer__inner {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .action-footer .btn,
+    .custom-blue-btn { width: 100%; justify-content: center; }
+    .question-media img, .question-media video { max-height: 250px; }
+    .q-header {
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .q-body {
+        padding: 16px;
+    }
+    .option-item {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .tf-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 12px 16px;
+    }
+    .section-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-container {
+        padding-left: 10px;
+        padding-right: 10px;
+        margin: 14px auto;
+    }
+    .page-title {
+        font-size: 1.2rem;
+    }
+    .summary-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .main-score .stat-value {
+        font-size: 2rem;
+    }
+    .score-display-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .score-points-value {
+        padding: 0;
+    }
+    .score-percent-chip {
+        position: static;
+        transform: none;
+    }
+    .q-header {
+        padding: 12px;
+    }
+    .q-body {
+        padding: 12px;
+    }
+    .custom-blue-btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+    .action-footer__inner {
+        grid-template-columns: 1fr;
+    }
+    .section-divider {
+        margin: 30px 0 20px 0;
+    }
+}
+

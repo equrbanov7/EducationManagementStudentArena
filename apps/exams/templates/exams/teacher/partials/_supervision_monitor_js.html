@@ -1,0 +1,337 @@
+{% load static i18n %}
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+<script nonce="{{ request.csp_nonce }}">
+var SUPERVISION_I18N = {
+    sevInfo: "{% filter escapejs %}{% trans 'sev_info' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevLow: "{% filter escapejs %}{% trans 'sev_low' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevMedium: "{% filter escapejs %}{% trans 'sev_medium' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevHigh: "{% filter escapejs %}{% trans 'sev_high' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    sevCritical: "{% filter escapejs %}{% trans 'sev_critical' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    chartCount: "{% filter escapejs %}{% trans 'chart_count_label' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    confirmResume: "{% filter escapejs %}{% trans 'confirm_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeSuccess: "{% filter escapejs %}{% trans 'resume_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeError: "{% filter escapejs %}{% trans 'resume_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    connectionError: "{% filter escapejs %}{% trans 'connection_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    confirmStop: "{% filter escapejs %}{% trans 'confirm_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopSuccess: "{% filter escapejs %}{% trans 'stop_success' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopError: "{% filter escapejs %}{% trans 'stop_error' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    resumeTitle: "{% filter escapejs %}{% trans 'action_resume' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    stopTitle: "{% filter escapejs %}{% trans 'action_stop' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    btnConfirm: "{% filter escapejs %}{% trans 'action_search' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtFullscreenExited: "{% filter escapejs %}{% trans 'vt_fullscreen_exited' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtFullscreenRestored: "{% filter escapejs %}{% trans 'vt_fullscreen_restored' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTabSwitched: "{% filter escapejs %}{% trans 'vt_tab_switched' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtWindowBlurred: "{% filter escapejs %}{% trans 'vt_window_blurred' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtWindowFocused: "{% filter escapejs %}{% trans 'vt_window_focused' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtCopyAttempt: "{% filter escapejs %}{% trans 'vt_copy_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtPasteAttempt: "{% filter escapejs %}{% trans 'vt_paste_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtCutAttempt: "{% filter escapejs %}{% trans 'vt_cut_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtRightClickAttempt: "{% filter escapejs %}{% trans 'vt_right_click_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtKeyboardShortcut: "{% filter escapejs %}{% trans 'vt_keyboard_shortcut' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTextSelectAttempt: "{% filter escapejs %}{% trans 'vt_text_select_attempt' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtSuspiciousRepeated: "{% filter escapejs %}{% trans 'vt_suspicious_repeated' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtGracePeriodExpired: "{% filter escapejs %}{% trans 'vt_grace_period_expired' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtAutoLocked: "{% filter escapejs %}{% trans 'vt_auto_locked' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtAutoSubmitted: "{% filter escapejs %}{% trans 'vt_auto_submitted' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTeacherResumed: "{% filter escapejs %}{% trans 'vt_teacher_resumed' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtTeacherGrantedChance: "{% filter escapejs %}{% trans 'vt_teacher_granted_chance' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtExamStartedSupervised: "{% filter escapejs %}{% trans 'vt_exam_started_supervised' context 'exams.template.supervision_monitor' %}{% endfilter %}",
+    vtStudentAcknowledged: "{% filter escapejs %}{% trans 'vt_student_acknowledged' context 'exams.template.supervision_monitor' %}{% endfilter %}"
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+    // --- Charts ---
+    try {
+        var severityData = JSON.parse(document.getElementById("severity-data").textContent);
+        var sevLabels = Object.keys(severityData);
+        var sevValues = Object.values(severityData);
+        var sevColors = {"info":"#17a2b8","low":"#28a745","medium":"#ffc107","high":"#fd7e14","critical":"#dc3545"};
+        var sevI18n = {"info":SUPERVISION_I18N.sevInfo,"low":SUPERVISION_I18N.sevLow,"medium":SUPERVISION_I18N.sevMedium,"high":SUPERVISION_I18N.sevHigh,"critical":SUPERVISION_I18N.sevCritical};
+
+        if (sevValues.some(function(v) { return v > 0; })) {
+            new Chart(document.getElementById("severityChart"), {
+                type: "doughnut",
+                data: {
+                    labels: sevLabels.map(function(l) { return sevI18n[l] || l; }),
+                    datasets: [{
+                        data: sevValues,
+                        backgroundColor: sevLabels.map(function(l){ return sevColors[l] || "#ccc"; })
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+            });
+        }
+    } catch(e) { console.warn("Severity chart error:", e); }
+
+    try {
+        var vtData = JSON.parse(document.getElementById("violation-type-data").textContent);
+        var vtLabels = Object.keys(vtData);
+        var vtValues = Object.values(vtData);
+        var vtI18n = {
+            "fullscreen_exited": SUPERVISION_I18N.vtFullscreenExited,
+            "fullscreen_restored": SUPERVISION_I18N.vtFullscreenRestored,
+            "tab_switched": SUPERVISION_I18N.vtTabSwitched,
+            "window_blurred": SUPERVISION_I18N.vtWindowBlurred,
+            "window_focused": SUPERVISION_I18N.vtWindowFocused,
+            "copy_attempt": SUPERVISION_I18N.vtCopyAttempt,
+            "paste_attempt": SUPERVISION_I18N.vtPasteAttempt,
+            "cut_attempt": SUPERVISION_I18N.vtCutAttempt,
+            "right_click_attempt": SUPERVISION_I18N.vtRightClickAttempt,
+            "keyboard_shortcut": SUPERVISION_I18N.vtKeyboardShortcut,
+            "text_select_attempt": SUPERVISION_I18N.vtTextSelectAttempt,
+            "suspicious_repeated": SUPERVISION_I18N.vtSuspiciousRepeated,
+            "grace_period_expired": SUPERVISION_I18N.vtGracePeriodExpired,
+            "auto_locked": SUPERVISION_I18N.vtAutoLocked,
+            "auto_submitted": SUPERVISION_I18N.vtAutoSubmitted,
+            "teacher_resumed": SUPERVISION_I18N.vtTeacherResumed,
+            "teacher_granted_chance": SUPERVISION_I18N.vtTeacherGrantedChance,
+            "exam_started_supervised": SUPERVISION_I18N.vtExamStartedSupervised,
+            "student_acknowledged": SUPERVISION_I18N.vtStudentAcknowledged
+        };
+
+        if (vtValues.some(function(v) { return v > 0; })) {
+            new Chart(document.getElementById("violationTypeChart"), {
+                type: "bar",
+                data: {
+                    labels: vtLabels.map(function(l){ return vtI18n[l] || l.replace(/_/g, " "); }),
+                    datasets: [{
+                        label: SUPERVISION_I18N.chartCount,
+                        data: vtValues,
+                        backgroundColor: "#007bff"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+    } catch(e) { console.warn("Violation type chart error:", e); }
+
+    // --- Debounced search ---
+    var searchInput = document.getElementById("monitorSearchInput");
+    var debounceTimer = null;
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() {
+                document.getElementById("monitorFilterForm").submit();
+            }, 500);
+        });
+    }
+
+    // --- Confirmation modal ---
+    var confirmModal = document.getElementById("confirmModal");
+    var confirmTitle = document.getElementById("confirmModalTitle");
+    var confirmMsg = document.getElementById("confirmModalMessage");
+    var confirmOk = document.getElementById("confirmModalOk");
+    var confirmCancel = document.getElementById("confirmModalCancel");
+    var pendingAction = null;
+
+    function showConfirmModal(title, message, btnText, btnClass, onConfirm) {
+        confirmTitle.textContent = title;
+        confirmMsg.textContent = message;
+        confirmOk.textContent = btnText;
+        confirmOk.className = btnClass;
+        pendingAction = onConfirm;
+        confirmModal.classList.add("show");
+    }
+
+    function hideConfirmModal() {
+        confirmModal.classList.remove("show");
+        pendingAction = null;
+    }
+
+    confirmCancel.addEventListener("click", hideConfirmModal);
+    confirmModal.addEventListener("click", function(e) {
+        if (e.target === confirmModal) hideConfirmModal();
+    });
+    confirmOk.addEventListener("click", function() {
+        if (pendingAction) pendingAction();
+        hideConfirmModal();
+    });
+
+    // --- Resume / Stop actions ---
+    function getCSRFToken() {
+        var el = document.querySelector("[name=csrfmiddlewaretoken]");
+        return el ? el.value : "{{ csrf_token }}";
+    }
+
+    function resumeAttempt(attemptId) {
+        fetch("/exams/supervision/api/resume/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ grant_extra_chance: true })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(SUPERVISION_I18N.resumeError + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(SUPERVISION_I18N.connectionError); });
+    }
+
+    function stopAttempt(attemptId) {
+        fetch("/exams/supervision/api/stop/" + attemptId + "/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(SUPERVISION_I18N.stopError + (data.error || ""));
+            }
+        })
+        .catch(function() { alert(SUPERVISION_I18N.connectionError); });
+    }
+
+    document.addEventListener("click", function(event) {
+        var resumeBtn = event.target.closest("[data-resume-attempt-id]");
+        if (resumeBtn && !resumeBtn.hasAttribute("data-stop-attempt-id")) {
+            event.preventDefault();
+            var aid = parseInt(resumeBtn.getAttribute("data-resume-attempt-id"), 10);
+            showConfirmModal(
+                SUPERVISION_I18N.resumeTitle,
+                SUPERVISION_I18N.confirmResume,
+                SUPERVISION_I18N.resumeTitle,
+                "btn-confirm-success",
+                function() { resumeAttempt(aid); }
+            );
+            return;
+        }
+
+        var stopBtn = event.target.closest("[data-stop-attempt-id]");
+        if (stopBtn) {
+            event.preventDefault();
+            var sid = parseInt(stopBtn.getAttribute("data-stop-attempt-id"), 10);
+            showConfirmModal(
+                SUPERVISION_I18N.stopTitle,
+                SUPERVISION_I18N.confirmStop,
+                SUPERVISION_I18N.stopTitle,
+                "btn-confirm-danger",
+                function() { stopAttempt(sid); }
+            );
+        }
+    });
+
+    // --- Resume-window countdowns ---
+    // Each resumed-but-not-returned row shows how long the student still has
+    // to come back before the backend auto-finishes them. Ticks every second.
+    function fmtRemaining(totalSeconds) {
+        totalSeconds = Math.max(0, totalSeconds);
+        var m = Math.floor(totalSeconds / 60);
+        var s = totalSeconds % 60;
+        return m + ":" + (s < 10 ? "0" + s : s);
+    }
+    var resumeCountdownReloaded = false;
+    function tickResumeCountdowns() {
+        var now = Date.now();
+        var anyExpired = false;
+        document.querySelectorAll(".resume-countdown").forEach(function (el) {
+            var deadline = Date.parse(el.getAttribute("data-resume-deadline"));
+            if (isNaN(deadline)) return;
+            var remaining = Math.round((deadline - now) / 1000);
+            var valueEl = el.querySelector(".resume-countdown-value");
+            if (remaining <= 0) {
+                if (valueEl) valueEl.textContent = "0:00";
+                el.style.background = "#f8d7da";
+                el.style.color = "#721c24";
+                anyExpired = true;
+            } else {
+                if (valueEl) valueEl.textContent = fmtRemaining(remaining);
+                if (remaining <= 60) { el.style.background = "#f8d7da"; el.style.color = "#721c24"; }
+            }
+        });
+        // A window just elapsed → the backend will auto-finish it; refresh once
+        // so the row flips to "Terminated".
+        if (anyExpired && !resumeCountdownReloaded) {
+            resumeCountdownReloaded = true;
+            setTimeout(function () { location.reload(); }, 2000);
+        }
+    }
+    if (document.querySelector(".resume-countdown")) {
+        tickResumeCountdowns();
+        setInterval(tickResumeCountdowns, 1000);
+    }
+
+    // --- Exam card: compute per-card metrics from rows + collapse/expand ---
+    document.querySelectorAll("[data-exam-card]").forEach(function (card, index) {
+        var rows = card.querySelectorAll("[data-student-row]");
+        var violations = 0;
+        var activeCount = 0;
+        rows.forEach(function (row) {
+            violations += parseInt(row.getAttribute("data-violations"), 10) || 0;
+            var status = row.getAttribute("data-status");
+            // "active" + "warned" students are still in the exam (not locked/removed/resumed-out)
+            if (status === "active" || status === "warned") activeCount++;
+        });
+
+        var vEl = card.querySelector('[data-metric="violations"]');
+        var aEl = card.querySelector('[data-metric="active"]');
+        if (vEl) vEl.textContent = violations;
+        if (aEl) aEl.textContent = activeCount;
+
+        // Risk tint from total violations in this exam
+        if (violations >= 6) card.classList.add("risk-high");
+        else if (violations >= 3) card.classList.add("risk-medium");
+        else card.classList.add("risk-low");
+
+        // First card opens by default; rest stay collapsed for a tidy overview.
+        if (index === 0) {
+            card.classList.remove("collapsed");
+            var head0 = card.querySelector("[data-card-toggle]");
+            if (head0) head0.setAttribute("aria-expanded", "true");
+        }
+    });
+
+    function toggleCard(card) {
+        var collapsed = card.classList.toggle("collapsed");
+        var head = card.querySelector("[data-card-toggle]");
+        if (head) head.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    }
+
+    document.addEventListener("click", function (event) {
+        var head = event.target.closest("[data-card-toggle]");
+        if (!head) return;
+        // Don't toggle when an interactive control inside the head was clicked.
+        if (event.target.closest("a, button")) return;
+        var card = head.closest("[data-exam-card]");
+        if (card) toggleCard(card);
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        var head = event.target.closest("[data-card-toggle]");
+        if (!head) return;
+        event.preventDefault();
+        var card = head.closest("[data-exam-card]");
+        if (card) toggleCard(card);
+    });
+
+    // --- Loading overlay on navigation ---
+    var loadingOverlay = document.getElementById("loadingOverlay");
+    function showLoading() { if (loadingOverlay) loadingOverlay.classList.add("show"); }
+    document.querySelectorAll("[data-nav], .pagination-wrapper a").forEach(function(el) {
+        el.addEventListener("click", showLoading);
+    });
+    var filterForm = document.getElementById("monitorFilterForm");
+    if (filterForm) {
+        filterForm.addEventListener("submit", showLoading);
+    }
+});
+</script>

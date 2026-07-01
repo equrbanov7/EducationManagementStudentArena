@@ -1,0 +1,88 @@
+{% load i18n static %}
+  <div class="stats-filter-bar card mb-3">
+    <div class="card-body py-2">
+      <form method="get" action="" id="statsFilterForm" class="row g-2 align-items-end" data-stats-auto-submit="true">
+        <input type="hidden" name="section" value="statistics">
+
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_date_from" context "profile.statistics" %}</label>
+          <input type="date" class="form-control form-control-sm" name="stat_date_from"
+                 value="{{ statistics_filters.date_from|default:'' }}">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_date_to" context "profile.statistics" %}</label>
+          <input type="date" class="form-control form-control-sm" name="stat_date_to"
+                 value="{{ statistics_filters.date_to|default:'' }}">
+        </div>
+
+        {% if statistics_courses %}
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_course" context "profile.statistics" %}</label>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_course" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for c in statistics_courses %}
+              <option value="{{ c.id }}" {% if statistics_filters.course == c.id|stringformat:"s" %}selected{% endif %}>
+                {{ c.title|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if statistics_groups %}
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_group" context "profile.statistics" %}</label>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_group" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for g in statistics_groups %}
+              <option value="{{ g.id }}" {% if statistics_filters.group == g.id|stringformat:"s" %}selected{% endif %}>
+                {{ g.name|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if is_superadmin %}
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_organization_id" context "profile.statistics" %}</label>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_organization" data-bootstrap-select>
+              <option value="">{% trans "filter_all" context "profile.statistics" %}</option>
+              {% for org in statistics_organizations %}
+              <option value="{{ org.id }}" {% if statistics_filters.organization == org.id|stringformat:"s" %}selected{% endif %}>
+                {{ org.name|truncatewords:5 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="col-6 col-md-2">
+          <label class="form-label form-label-sm mb-0">{% trans "filter_content_type" context "profile.statistics" %}</label>
+          <div class="bootstrap-single-select">
+            <select class="form-select form-select-sm bootstrap-single-select__native" name="stat_content_type" data-bootstrap-select>
+              <option value="all" {% if statistics_filters.content_type == "all" %}selected{% endif %}>{% trans "filter_all" context "profile.statistics" %}</option>
+              <option value="exam" {% if statistics_filters.content_type == "exam" %}selected{% endif %}>{% trans "content_exam" context "profile.statistics" %}</option>
+              <option value="assignment" {% if statistics_filters.content_type == "assignment" %}selected{% endif %}>{% trans "content_assignment" context "profile.statistics" %}</option>
+              <option value="lab" {% if statistics_filters.content_type == "lab" %}selected{% endif %}>{% trans "content_lab" context "profile.statistics" %}</option>
+              <option value="project" {% if statistics_filters.content_type == "project" %}selected{% endif %}>{% trans "content_project" context "profile.statistics" %}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-auto ms-auto">
+          {% if statistics_has_active_filters %}
+          <a href="{{ statistics_reset_url }}" class="btn btn-sm btn-outline-secondary stats-filter-reset" id="statsFilterReset" title="Filterləri sıfırla">
+            <i class="fas fa-times"></i>
+          </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>

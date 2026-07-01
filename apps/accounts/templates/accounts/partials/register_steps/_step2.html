@@ -1,0 +1,125 @@
+{% load i18n static %}
+            <div class="wizard-panel" id="step2" hidden>
+
+                <!-- Sub-step 2a: Organization Type Selection -->
+                <div id="step2a">
+                    <h3 class="register-step-title">{% trans "choose_registration_type" context "accounts.register" %}</h3>
+
+                    <!-- Hidden select keeps the combined value for form submission -->
+                    <div class="register-hidden-field">
+                        {{ form.organization_type }}
+                        {% if form.organization_type.errors %}
+                            <div class="register-field-error">{{ form.organization_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="register-persona-grid" id="orgTypeCards">
+                        {# Temporary: hide personal workspace signup to prevent university users from registering into the wrong flow. #}
+                        <button type="button" class="register-persona-card" data-org-type="school">
+                            <span class="register-persona-card__icon"><i class="fas fa-school"></i></span>
+                            <span class="register-persona-card__title">{% trans "org_type_school" context "accounts.form.register.choice" %}</span>
+                            <span class="register-persona-card__desc"></span>
+                        </button>
+                        <button type="button" class="register-persona-card" data-org-type="university">
+                            <span class="register-persona-card__icon"><i class="fas fa-university"></i></span>
+                            <span class="register-persona-card__title">{% trans "org_type_university" context "accounts.form.register.choice" %}</span>
+                            <span class="register-persona-card__desc"></span>
+                        </button>
+                        <button type="button" class="register-persona-card" data-org-type="course_center">
+                            <span class="register-persona-card__icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                            <span class="register-persona-card__title">{% trans "org_type_course_center" context "accounts.form.register.choice" %}</span>
+                            <span class="register-persona-card__desc"></span>
+                        </button>
+                    </div>
+
+                    <div class="wizard-nav">
+                        <button type="button" class="register-back-btn" data-wizard-back="1">
+                            <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-step 2b: Role / Persona Selection (shown after org type picked) -->
+                <div id="step2b" hidden>
+                    <h3 class="register-step-title" id="step2bTitle">{% trans "choose_role" context "accounts.register" %}</h3>
+
+                    <div class="register-persona-grid" id="roleCards">
+                        <!-- Owner card (shown for non-individual) -->
+                        <button type="button" class="register-persona-card register-persona-role-card" data-role="owner" id="roleCardOwner">
+                            <span class="register-persona-card__icon"><i class="fas fa-crown"></i></span>
+                            <span class="register-persona-card__title">{% trans "role_owner_title" context "accounts.register" %}</span>
+                            <span class="register-persona-card__desc">{% trans "role_owner_description" context "accounts.register" %}</span>
+                        </button>
+                        <!-- Teacher card -->
+                        <button type="button" class="register-persona-card register-persona-role-card" data-role="teacher" id="roleCardTeacher">
+                            <span class="register-persona-card__icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                            <span class="register-persona-card__title">{% trans "role_teacher_title" context "accounts.register" %}</span>
+                            <span class="register-persona-card__desc">{% trans "role_teacher_description" context "accounts.register" %}</span>
+                        </button>
+                        <!-- Staff card -->
+                        <button type="button" class="register-persona-card register-persona-role-card" data-role="staff" id="roleCardStaff">
+                            <span class="register-persona-card__icon"><i class="fas fa-id-badge"></i></span>
+                            <span class="register-persona-card__title">{% trans "role_staff_title" context "accounts.register" %}</span>
+                            <span class="register-persona-card__desc">{% trans "role_staff_description" context "accounts.register" %}</span>
+                        </button>
+                        <!-- Student card -->
+                        <button type="button" class="register-persona-card register-persona-role-card" data-role="student" id="roleCardStudent">
+                            <span class="register-persona-card__icon"><i class="fas fa-user-graduate"></i></span>
+                            <span class="register-persona-card__title">{% trans "role_student_title" context "accounts.register" %}</span>
+                            <span class="register-persona-card__desc">{% trans "role_student_description" context "accounts.register" %}</span>
+                        </button>
+                    </div>
+
+                    <!-- Org create fields (shown when owner of school/university/course_center) -->
+                    <div id="orgCreateFields" hidden>
+                        <div class="register-form-field">
+                            <label for="{{ form.institution_not_listed_name.id_for_label }}" id="organizationNameLabel">{{ form.institution_not_listed_name.label }}</label>
+                            {{ form.institution_not_listed_name }}
+                            {% if form.institution_not_listed_name.errors %}
+                                <div class="register-field-error">{{ form.institution_not_listed_name.errors.0 }}</div>
+                            {% endif %}
+                            <small class="register-help-text" id="organizationNameHelp">
+                                {% trans "institution_not_listed_help" context "accounts.register" %}
+                            </small>
+                        </div>
+
+                        <div class="register-form-field" id="orgIdentifierField">
+                            <label for="{{ form.organization_identifier.id_for_label }}" id="orgIdentifierLabel">{{ form.organization_identifier.label }}</label>
+                            {{ form.organization_identifier }}
+                            {% if form.organization_identifier.errors %}
+                                <div class="register-field-error">{{ form.organization_identifier.errors.0 }}</div>
+                            {% endif %}
+                            <small class="register-help-text" id="orgIdentifierHelp">
+                                {% trans "org_identifier_help_university" context "accounts.register" %}
+                            </small>
+                        </div>
+
+                        <div class="register-form-field">
+                            <label for="{{ form.organization_license_identifier.id_for_label }}" id="licenseIdentifierLabel">{{ form.organization_license_identifier.label }}</label>
+                            {{ form.organization_license_identifier }}
+                            {% if form.organization_license_identifier.errors %}
+                                <div class="register-field-error">{{ form.organization_license_identifier.errors.0 }}</div>
+                            {% endif %}
+                            <small class="register-help-text" id="licenseIdentifierHelp">
+                                {% trans "license_identifier_help_required" context "accounts.register" %}
+                            </small>
+                        </div>
+
+                        <div class="register-form-field">
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {% trans "org_pending_approval_notice" context "accounts.register" %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-nav">
+                        <button type="button" class="register-back-btn" id="step2bBackBtn" data-persona-back>
+                            <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
+                        </button>
+                        <button type="button" class="register-submit-btn" data-wizard-next="3">
+                            {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>

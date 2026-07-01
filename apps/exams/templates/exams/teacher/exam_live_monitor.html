@@ -253,7 +253,5 @@
 </script>
 
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
-<script nonce="{{ request.csp_nonce }}">
-{% include "exams/teacher/_exam_live_monitor_js.html" %}
-</script>
+<script src="{% static 'exams/js/exam_live_monitor.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,520 @@
+
+/* Aktiv kart vizual olaraq fərqlənir */
+.appeal-question-card {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.appeal-question-card.is-active {
+    border-color: var(--ems-primary-200);
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.12);
+}
+
+.appeal-question-card.is-active.is-marked {
+    border-color: #f59e0b;
+}
+
+.appeal-question-card.has-error {
+    border-color: #fca5a5;
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.12);
+}
+
+/* Yığılan body — yalnız JS aktiv olanda gizlədilir (no-JS fallback üçün açıq) */
+.appeal-q-body {
+    margin-top: 4px;
+}
+
+.appeal-create-form.is-enhanced .appeal-question-card:not(.is-active) .appeal-q-body,
+.appeal-q-body[hidden] {
+    display: none;
+}
+
+.appeal-q-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+/* Canlı simvol sayğacı */
+.appeal-q-counter {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--appeal-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.appeal-q-counter__unit {
+    font-weight: 700;
+    opacity: 0.8;
+}
+
+.appeal-q-counter.is-short {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.appeal-q-counter.is-ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.appeal-q-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 0 0;
+    color: var(--ems-danger-strong);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.appeal-q-error::before {
+    content: "\f06a"; /* fa exclamation-circle */
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+    font-weight: 700;
+}
+
+/* Sticky bar status + buttons */
+.appeal-sticky-actions__inner {
+    justify-content: space-between;
+}
+
+.appeal-sticky-actions__status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.appeal-sticky-actions__buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.appeal-selected-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--appeal-blue-soft);
+    color: var(--appeal-blue);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.appeal-empty-hint {
+    color: #b45309;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.appeal-create-form [data-appeal-submit].is-ready {
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+}
+
+/* =========================================================================
+   Dashboard-a yerləşdirilmiş variant (profil bölməsi kimi açılır)
+   ========================================================================= */
+.appeal-embedded {
+    /* Dashboard bölməsində `.appeal-shell` wrapper yoxdur — buna görə bütün
+       `--appeal-*` dəyişənlərini burada da təyin edirik (əks halda hero badge
+       qradiyenti və digər rənglər boş/ağ görünür). */
+    --appeal-blue: var(--ems-primary-600);
+    --appeal-blue-strong: var(--ems-primary-700);
+    --appeal-blue-soft: var(--ems-primary-50);
+    --appeal-ink: #172033;
+    --appeal-muted: var(--ems-neutral-500);
+    --appeal-border: var(--ems-neutral-200);
+    --appeal-surface: #ffffff;
+    --appeal-bg: transparent;
+    --appeal-amber: #f59e0b;
+    --appeal-amber-soft: #fffbeb;
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    color: var(--appeal-ink);
+}
+
+.appeal-embedded .appeal-hero {
+    border-radius: 18px;
+}
+
+.appeal-embedded .appeal-sticky-actions {
+    position: static;
+    margin-top: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+/* Bootstrap modal daxilində apellyasiya detalı/review paneli */
+.appeal-modal {
+    --appeal-blue: var(--ems-primary-600);
+    --appeal-blue-strong: var(--ems-primary-700);
+    --appeal-blue-soft: var(--ems-primary-50);
+    --appeal-ink: #172033;
+    --appeal-muted: var(--ems-neutral-500);
+    --appeal-border: var(--ems-neutral-200);
+    --appeal-surface: #ffffff;
+    --appeal-bg: #f6f8fc;
+    --appeal-amber: #f59e0b;
+    --appeal-amber-soft: #fffbeb;
+}
+
+.appeal-modal__dialog {
+    max-width: min(1120px, calc(100vw - 24px));
+}
+
+.appeal-modal__content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 26px 70px rgba(15, 23, 42, 0.24);
+}
+
+.appeal-modal__header {
+    border-bottom: 1px solid var(--appeal-border);
+    background: var(--ems-neutral-50);
+    padding: 16px 20px;
+}
+
+.appeal-modal__header .modal-title {
+    color: var(--appeal-ink);
+    font-weight: 700;
+}
+
+.appeal-modal__body {
+    background: var(--appeal-bg);
+    padding: 20px;
+}
+
+.appeal-modal .appeal-hero {
+    margin-bottom: 16px;
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.appeal-modal .appeal-question-card,
+.appeal-modal .appeal-note-card,
+.appeal-modal .appeal-summary-tile {
+    background: #ffffff;
+}
+
+.appeal-modal .appeal-sticky-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 -10px 26px rgba(15, 23, 42, 0.1);
+    backdrop-filter: blur(16px);
+}
+
+/* =========================================================================
+   Status badge rəngləri — vizual fərqlilik (pending/under_review/...)
+   ========================================================================= */
+.appeal-status-badge::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+
+.appeal-status-badge.bg-success::before { content: "\f00c"; }       /* check */
+.appeal-status-badge.bg-danger::before { content: "\f00d"; }        /* times */
+.appeal-status-badge.bg-warning::before { content: "\f252"; }       /* hourglass-half */
+.appeal-status-badge.bg-info::before { content: "\f042"; }          /* adjust */
+.appeal-status-badge.bg-secondary::before { content: "\f017"; }     /* clock */
+
+/* =========================================================================
+   Skeleton / loading state
+   ========================================================================= */
+.appeal-skeleton {
+    display: grid;
+    gap: 14px;
+}
+
+.appeal-skeleton__row {
+    height: 86px;
+    border-radius: 18px;
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: appeal-shimmer 1.4s ease infinite;
+}
+
+@keyframes appeal-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+.appeal-detail-back {
+    margin-bottom: 16px;
+}
+
+/* Detal — status timeline / xülasə */
+.appeal-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.appeal-summary-tile {
+    padding: 14px 16px;
+    border: 1px solid var(--appeal-border);
+    border-radius: 16px;
+    background: var(--appeal-surface);
+}
+
+.appeal-summary-tile span {
+    display: block;
+    color: var(--appeal-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.appeal-summary-tile strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--appeal-ink);
+}
+
+/* =========================================================================
+   Teacher manage — status stat plitələri (sürətli filtr)
+   ========================================================================= */
+.appeal-stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.appeal-stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px;
+    border: 1px solid var(--appeal-border);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: 16px;
+    background: var(--appeal-surface);
+    text-decoration: none;
+    color: var(--appeal-ink);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.appeal-stat-tile:hover {
+    color: var(--appeal-ink);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+
+.appeal-stat-tile.is-active {
+    border-color: var(--appeal-blue);
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.16);
+}
+
+.appeal-stat-tile__label {
+    color: var(--appeal-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.appeal-stat-tile__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.appeal-stat-tile--pending { border-left-color: var(--ems-neutral-400); }
+.appeal-stat-tile--under_review { border-left-color: #f59e0b; }
+.appeal-stat-tile--accepted { border-left-color: #22c55e; }
+.appeal-stat-tile--rejected { border-left-color: #ef4444; }
+.appeal-stat-tile--partially_accepted { border-left-color: #06b6d4; }
+
+/* =========================================================================
+   Teacher review — qərar paneli (cavab tələb olunur vəziyyəti)
+   ========================================================================= */
+.appeal-review-panel.is-decided {
+    background: var(--appeal-blue-soft);
+    margin-left: -18px;
+    margin-right: -18px;
+    margin-bottom: -18px;
+    padding: 16px 18px;
+    border-radius: 0 0 18px 18px;
+    border-top-color: var(--ems-primary-200);
+}
+
+.appeal-required-star {
+    color: var(--ems-danger);
+    font-weight: 700;
+    margin-left: 3px;
+}
+
+.appeal-review-panel .appeal-q-error {
+    margin-top: 6px;
+}
+
+.appeal-question-card.has-error .appeal-review-panel {
+    background: #fef2f2;
+    border-top-color: #fecaca;
+}
+
+.appeal-review-decisions-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--appeal-blue-soft);
+    color: var(--appeal-blue);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* ── Bal xülasəsi: hazırkı → yeni ── */
+.appeal-score-summary {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.appeal-score-summary__item {
+    flex: 1 1 200px;
+    padding: 14px 18px;
+    border: 1px solid var(--appeal-border);
+    border-radius: 16px;
+    background: var(--appeal-surface);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.appeal-score-summary__item span {
+    display: block;
+    color: var(--appeal-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.appeal-score-summary__item strong {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--appeal-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.appeal-score-summary__item--next {
+    border-color: #bbf7d0;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 80%);
+}
+
+.appeal-score-summary__item--next strong {
+    color: #166534;
+}
+
+.appeal-score-summary__arrow {
+    align-self: center;
+    color: var(--ems-neutral-400);
+    font-size: 1.1rem;
+}
+
+.appeal-chip--soft {
+    background: var(--ems-neutral-100);
+    color: var(--appeal-muted);
+}
+
+/* ── Veriləcək bal sahəsi ── */
+.appeal-review-points {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 14px;
+    background: var(--ems-neutral-50);
+}
+
+.appeal-review-points__field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.appeal-review-points__input {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.appeal-review-points__input .form-control {
+    width: 110px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.appeal-review-points__max {
+    color: var(--appeal-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.appeal-review-points__preview {
+    margin-top: 10px;
+    color: var(--appeal-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.appeal-review-points__preview strong {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Kilidli (qərar verilmiş) item ── */
+.appeal-question-card.is-locked {
+    background: var(--ems-neutral-50);
+    border-style: solid;
+}
+
+.appeal-review-panel--locked {
+    background: transparent;
+}
+
+.appeal-locked-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.appeal-locked-note i {
+    color: var(--ems-neutral-400);
+}
+
