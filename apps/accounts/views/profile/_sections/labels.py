@@ -1,0 +1,80 @@
+"""Profil bölmələrinin başlıqları və birbaşa-render şablon xəritəsi.
+
+`user_profile` (main.py) daxilindən çıxarılıb ki, fayl şişməsin və yeni bölmə
+gələndə buraya əlavə olunsun (main.py-a yox).
+
+DİQQƏT: ``build_section_titles()`` qəsdən funksiyadır — bəzi başlıqlar **eager**
+``gettext`` (``_``) istifadə edir, yəni cari dilə görə per-request hesablanmalıdır.
+Modul-səviyyə sabit etsək, import vaxtı (yanlış dildə) tərcümə olunardı.
+"""
+
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext_lazy
+
+# Birbaşa-render şablonları sırf statikdir (tərcümə yoxdur) → modul sabiti.
+DIRECT_PROFILE_SECTION_TEMPLATES = {
+    "pending-answers": "accounts/profile/sections/_pending_answers.html",
+    "pending-review": "accounts/profile/sections/_pending_review.html",
+    "review-results": "accounts/profile/sections/_review_results.html",
+    "student-organization-management": "accounts/profile/sections/_student_org_management.html",
+    "student-organization-request": "accounts/profile/sections/_student_org_request.html",
+    "manage-roles": "accounts/profile/sections/_manage_roles.html",
+    "permission-editor": "accounts/profile/sections/_permission_editor.html",
+    "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
+    "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
+    "org-structure": "accounts/profile/sections/_org_structure.html",
+    "org-faculties": "accounts/profile/sections/_org_faculties.html",
+    "org-kafedras": "accounts/profile/sections/_org_kafedras.html",
+    "org-members": "accounts/profile/sections/_org_members.html",
+    "org-roles": "accounts/profile/sections/_org_roles.html",
+    "audit-log": "accounts/profile/sections/_audit_log.html",
+}
+
+
+def build_section_titles() -> dict:
+    """Bölmə başlıqları xəritəsi (per-request — eager ``_()`` tərcümələri üçün)."""
+    return {
+        "profile-info": pgettext_lazy("profile.section", "profile_info"),
+        "notifications": pgettext_lazy("profile.section", "notifications"),
+        "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
+        "posts": pgettext_lazy("profile.section", "posts"),
+        "create-post": pgettext_lazy("profile.section", "create_post"),
+        "create-category": _("Create category"),
+        "category-management": _("Categories"),
+        "courses": pgettext_lazy("profile.section", "my_courses"),
+        "my-exams": pgettext_lazy("profile.section", "my_exams"),
+        "my-courses": pgettext_lazy("profile.section", "my_created_courses"),
+        "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
+        "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
+        "my-results": pgettext_lazy("profile.section", "my_results"),
+        "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),
+        "groups": pgettext_lazy("profile.section", "groups"),
+        "pending-post-approvals": "Postların idarəetməsi",
+        "pending-review": pgettext_lazy("profile.section", "pending_review"),
+        "review-results": "Dəyərləndirilmiş nəticələr",
+        "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
+        "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
+        "student-organization-management": pgettext_lazy("profile.section", "staff_management"),
+        "permission-editor": pgettext_lazy("profile.section", "permissions"),
+        "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
+        "superadmin-org-features": "Təşkilat özəllikləri",
+        "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
+        "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
+        "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
+        "superadmin-contact-messages": _("Contact Messages"),
+        "blog": pgettext_lazy("nav", "home"),
+        "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
+        "change-password": pgettext_lazy("profile.section", "change_password"),
+        "statistics": pgettext_lazy("profile.section", "statistics"),
+        "question-bank": "Sual Bankı",
+        "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
+        "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
+        "unit-exams": "Bölmə imtahanları",
+        "org-structure": "Fakültə və kafedralar",
+        "org-faculties": "Fakültələr",
+        "org-kafedras": "Kafedralar",
+        "org-members": "Struktur üzvləri",
+        "org-roles": "Təşkilat rolları",
+        "audit-log": "Audit jurnalı",
+        "superadmin-org-inspector": "Təşkilat məlumatları",
+    }

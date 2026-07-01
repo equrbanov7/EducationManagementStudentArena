@@ -12,6 +12,7 @@ from django.core import signing
 
 from apps.live_exam.models import LivePlayer, LiveSession
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 PLAYER_COOKIE_NAME = "live_player_token"
 PLAYER_TOKEN_SALT = "liveExam.player"  # nosec B105
@@ -121,7 +122,8 @@ def authenticate_player_token(token: str | None, *, pin: str) -> tuple[dict[str,
     if payload is None:
         return None, None
 
-    with bypass_rls():
+    # Player token auth is PIN/client scoped rather than tenant-argument scoped.
+    with rls_worker_atomic(), bypass_rls():
         player_qs = LivePlayer.objects.select_related("session").filter(
             id=payload["player_id"],
             session__pin=str(pin),
@@ -154,7 +156,8 @@ def authorize_socket_connection(
     token: str | None,
     allow_anonymous: bool = False,
 ) -> dict[str, Any] | None:
-    with bypass_rls():
+    # Socket auth first resolves a public PIN; keep the existing system bypass.
+    with rls_worker_atomic(), bypass_rls():
         session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
     if session is None:
         return None

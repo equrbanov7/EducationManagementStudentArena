@@ -9,8 +9,6 @@ shared helpers come from the ``_helpers`` and ``_dashboard_helpers`` packages.
 Behavior is identical to the pre-refactor single-file implementation.
 """
 
-from urllib.parse import urlencode
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -21,16 +19,10 @@ from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 
 from apps.courses.models import Course
-from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, StudentGroup
-from apps.notifications.models import NotificationType, StudentOrganizationRequestStatus
-from apps.notifications.services import (
-    build_profile_notification_state,
-    get_unread_count,
-    get_user_notifications,
-)
+from apps.notifications.models import NotificationType
+from apps.notifications.services import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
-from core.rls import bypass_rls
 from core.tenancy import restore_request_organization_from_profile
 
 from ...forms import CustomPasswordChangeForm
@@ -38,10 +30,8 @@ from ...models import ProfileRole, UserProfile
 from ...services.profile_actions import validate_profile_avatar_upload
 from .._dashboard_helpers import (
     _collect_assigned_tasks,
-    _collect_evaluated_review_items,
     _collect_my_results,
     _collect_pending_answer_items,
-    _collect_pending_review_items,
 )
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from .._helpers import (
@@ -50,18 +40,14 @@ from .._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
     _append_query_params,
-    _assignable_profile_roles_for_user,
     _assigned_courses_queryset,
     _assigned_exams_queryset,
-    _bind_active_role_context,
     _build_student_org_management_section,
     _build_student_org_request_section,
     _build_user_organization_access_rows,
     _collect_actor_permissions,
-    _decorate_manage_role_profiles,
     _ensure_profile_admin_membership,
     _get_active_organization,
-    _pending_student_request_queryset,
     _query_string,
     _role_capabilities,
     _tenant_scoped_courses,
@@ -69,6 +55,19 @@ from .._helpers import (
 )
 from ..account_management import build_superadmin_user_management_context
 from ..superadmin import build_superadmin_ai_settings_context
+from ._sections.exams import build_my_exams_context
+from ._sections.groups import build_groups_context
+from ._sections.labels import DIRECT_PROFILE_SECTION_TEMPLATES, build_section_titles
+from ._sections.manage_roles import build_manage_roles_section
+from ._sections.notifications import build_notifications_context
+from ._sections.permission_editor import build_permission_editor_section
+from ._sections.posts import build_posts_context
+from ._sections.question_bank import build_question_bank_context
+from ._sections.review_queue import build_pending_review_context, build_review_results_context
+from ._sections.role_assignment import build_role_assignment_section
+from ._sections.statistics import build_statistics_section
+from ._sections.superadmin_orgs import build_superadmin_orgs_sections
+from ._sections.unit_exams import build_unit_exams_context
 from .constants import (
     PROFILE_EXAM_NAV_SECTIONS,
     PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK,
@@ -205,14 +204,9 @@ def user_profile(request):
     Now accessible to ALL users (not just teachers).
     """
     from apps.blog.forms import CategoryManagementForm
-    from apps.blog.models import Category, Post
+    from apps.blog.models import Category
     from apps.blog.selectors import build_post_category_picker_options, get_post_category_tree
-    from apps.blog.services import (
-        author_requires_post_approval,
-        can_user_publish_post,
-        collect_reviewable_posts,
-        count_pending_reviewable_posts,
-    )
+    from apps.blog.services import collect_reviewable_posts, count_pending_reviewable_posts
 
     # Ensure profile exists (get_or_create for safety)
     profile, _created = UserProfile.objects.get_or_create(user=request.user)
@@ -339,147 +333,43 @@ def user_profile(request):
         if active_section == "my-courses":
             my_created_courses = list(created_courses_qs[:10])
 
-        if active_section == "my-exams":
-            # --- Search ---
-            my_exams_search_query = (request.GET.get("exam_q", "") or "").strip()
-            if my_exams_search_query:
-                my_exams_qs = my_exams_qs.filter(title__icontains=my_exams_search_query)
+        # "my-exams" bölməsi `_sections.exams`-ə çıxarılıb (context-fragment).
+        _my_exams_ctx = build_my_exams_context(request, my_exams_qs=my_exams_qs, active_section=active_section)
+        my_exams_count = _my_exams_ctx["my_exams_count"]
+        my_exams_list = _my_exams_ctx["my_exams_list"]
+        my_exams_dashboard = _my_exams_ctx["my_exams_dashboard"]
+        my_exams_search_query = _my_exams_ctx["my_exams_search_query"]
+        my_exams_filter_type = _my_exams_ctx["my_exams_filter_type"]
 
-            # --- Filter by exam type ---
-            my_exams_filter_type = (request.GET.get("exam_type", "") or "").strip()
-            if my_exams_filter_type not in {"", "test", "written", "coding"}:
-                my_exams_filter_type = ""
-            if my_exams_filter_type:
-                my_exams_qs = my_exams_qs.filter(exam_type=my_exams_filter_type)
+    # "unit-exams" bölməsi `_sections.unit_exams`-ə çıxarılıb (context-fragment).
+    _unit_exams_ctx = build_unit_exams_context(
+        request, allowed_sections=allowed_sections, active_section=active_section
+    )
+    unit_exams_page_obj = _unit_exams_ctx["unit_exams_page_obj"]
+    unit_exams_search_query = _unit_exams_ctx["unit_exams_search_query"]
+    unit_exams_total_count = _unit_exams_ctx["unit_exams_total_count"]
+    unit_exams_pagination_query = _unit_exams_ctx["unit_exams_pagination_query"]
 
-            # Kart redizaynı üçün: sual sayı + apellyasiya sayı (annotate) və
-            # aktiv dil variantları (prefetch). Müəllim paneli imtahanları status
-            # üzrə qruplaşdırdığı üçün səhifələmə yoxdur — müəllifin bütün
-            # imtahanları bir sorğuda yüklənir (annotate/prefetch ilə N+1 önlənir),
-            # qruplaşma və KPI sayğacları servisdə Python tərəfdə hesablanır.
-            from django.db.models import Prefetch
+    # "question-bank" bölməsi `_sections.question_bank`-ə çıxarılıb (context-fragment).
+    _qb_ctx = build_question_bank_context(request, allowed_sections=allowed_sections, active_section=active_section)
+    question_bank_banks = _qb_ctx["question_bank_banks"]
+    question_bank_page_obj = _qb_ctx["question_bank_page_obj"]
+    question_bank_search_query = _qb_ctx["question_bank_search_query"]
+    question_bank_pagination_query = _qb_ctx["question_bank_pagination_query"]
+    question_bank_back_url = _qb_ctx["question_bank_back_url"]
+    question_bank_language_choices = _qb_ctx["question_bank_language_choices"]
+    question_bank_default_type_choices = _qb_ctx["question_bank_default_type_choices"]
 
-            from apps.exams.models import ExamLanguageVariant
-            from apps.exams.services.teacher_dashboard import build_teacher_exam_dashboard
-
-            my_exams_display_qs = my_exams_qs.annotate(
-                card_question_count=Count("questions", filter=Q(questions__is_active=True), distinct=True),
-                card_appeal_count=Count("appeals", distinct=True),
-            ).prefetch_related(
-                Prefetch(
-                    "language_variants",
-                    queryset=ExamLanguageVariant.objects.filter(is_active=True).order_by("language"),
-                    to_attr="active_language_variants",
-                )
-            )
-            my_exams_list = list(my_exams_display_qs)
-            my_exams_count = len(my_exams_list)
-            my_exams_dashboard = build_teacher_exam_dashboard(my_exams_list)
-        else:
-            # Yalnız sidebar/profile-info üçün ucuz sayğac.
-            my_exams_count = my_exams_qs.count()
-
-    # ── Unit imtahanları (Faza 3) — dekan/kafedra müdürü üçün öz alt-ağacının
-    # imtahanlarına oxu-only baxış. Data scope-u organizations.scoping ilə.
-    unit_exams_page_obj = None
-    unit_exams_search_query = ""
-    unit_exams_total_count = 0
-    unit_exams_pagination_query = ""
-    if active_section == "unit-exams" and "unit-exams" in allowed_sections:
-        from apps.organizations.models import Membership as _UnitMembership
-        from apps.organizations.models import OrgUnit as _UnitExamOrgUnit
-        from apps.organizations.scoping import get_unit_scope as _ue_get_unit_scope
-
-        _ue_org = _get_active_organization(request)
-        if _ue_org is not None:
-            _ue_scope = _ue_get_unit_scope(request.user, _ue_org, request=request)
-            if _ue_scope.is_unit_scoped:
-                _ue_unit_ids = _UnitExamOrgUnit.objects.filter(organization=_ue_org).filter(_ue_scope.unit_subtree_q())
-                _ue_member_user_ids = _UnitMembership.objects.filter(
-                    organization=_ue_org,
-                    is_active=True,
-                    scope_unit__in=_ue_unit_ids.values("pk"),
-                ).values("user_id")
-                unit_exams_qs = (
-                    Exam.objects.filter(organization=_ue_org)
-                    .filter(Q(course__unit__in=_ue_unit_ids.values("pk")) | Q(author_id__in=_ue_member_user_ids))
-                    .select_related("author", "course")
-                    .annotate(attempts_total=Count("attempts", distinct=True))
-                    .order_by("-created_at")
-                )
-                unit_exams_search_query = (request.GET.get("unit_exam_q") or "").strip()[:120]
-                if unit_exams_search_query:
-                    unit_exams_qs = unit_exams_qs.filter(
-                        Q(title__icontains=unit_exams_search_query)
-                        | Q(author__username__icontains=unit_exams_search_query)
-                        | Q(course__title__icontains=unit_exams_search_query)
-                    )
-                unit_exams_total_count = unit_exams_qs.count()
-                unit_exams_page_obj = Paginator(unit_exams_qs, 10).get_page(request.GET.get("unit_exam_page"))
-                unit_exams_pagination_query = _query_string(
-                    section="unit-exams",
-                    unit_exam_q=unit_exams_search_query,
-                )
-
-    if active_section == "question-bank" and "question-bank" in allowed_sections:
-        from apps.exams.constants import EXAM_LANGUAGE_CHOICES
-        from apps.exams.models import QuestionBank
-        from apps.exams.services.question_bank_attach import accessible_banks
-        from core.tenancy import get_request_organization
-
-        organization = get_request_organization(request)
-        question_bank_search_query = (request.GET.get("bank_q") or "").strip()[:120]
-        question_bank_qs = accessible_banks(request.user, organization).annotate(
-            lib_count=Count("library_questions", filter=Q(library_questions__is_active=True))
-        )
-        if question_bank_search_query:
-            question_bank_qs = question_bank_qs.filter(
-                Q(name__icontains=question_bank_search_query) | Q(subject__icontains=question_bank_search_query)
-            )
-        question_bank_qs = question_bank_qs.order_by("-created_at")
-
-        question_bank_page_obj = Paginator(question_bank_qs, 9).get_page(request.GET.get("bank_page"))
-        question_bank_banks = question_bank_page_obj.object_list
-        question_bank_pagination_query = _query_string(
-            section="question-bank",
-            bank_q=question_bank_search_query,
-        )
-        question_bank_back_url = _append_query_params(
-            reverse("accounts:profile"),
-            section="question-bank",
-            bank_q=question_bank_search_query,
-            bank_page=request.GET.get("bank_page"),
-        )
-        question_bank_language_choices = EXAM_LANGUAGE_CHOICES
-        question_bank_default_type_choices = QuestionBank.DEFAULT_QUESTION_TYPE_CHOICES
-
-    user_posts = None
-    posts_count = 0
-    post_category_tree = []
-    post_category_root_options = []
-    post_category_subcategory_options = []
-    post_creation_requires_approval = False
-    posting_blocked = False
-    posting_blocked_reason = ""
-    if capabilities["can_manage_blog"]:
-        user_posts_qs = (
-            Post.objects.filter(author=request.user)
-            .select_related("category")
-            .prefetch_related("approval_logs")
-            .order_by("-created_at")
-        )
-        # Sidebar/profile-info üçün ucuz sayğac hər zaman.
-        posts_count = user_posts_qs.count()
-        if active_section in {"posts", "create-post"}:
-            user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
-            post_category_tree = get_post_category_tree()
-            post_category_root_options, post_category_subcategory_options = build_post_category_picker_options(
-                post_category_tree
-            )
-            post_creation_requires_approval = author_requires_post_approval(request.user)
-            can_publish, blocked_reason = can_user_publish_post(request.user)
-            posting_blocked = not can_publish
-            posting_blocked_reason = blocked_reason
+    # "posts" / "create-post" bölmələri `_sections.posts`-a çıxarılıb (context-fragment).
+    _posts_ctx = build_posts_context(request, capabilities=capabilities, active_section=active_section)
+    user_posts = _posts_ctx["user_posts"]
+    posts_count = _posts_ctx["posts_count"]
+    post_category_tree = _posts_ctx["post_category_tree"]
+    post_category_root_options = _posts_ctx["post_category_root_options"]
+    post_category_subcategory_options = _posts_ctx["post_category_subcategory_options"]
+    post_creation_requires_approval = _posts_ctx["post_creation_requires_approval"]
+    posting_blocked = _posts_ctx["posting_blocked"]
+    posting_blocked_reason = _posts_ctx["posting_blocked_reason"]
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -628,124 +518,30 @@ def user_profile(request):
     group_form = None
     can_multi_assign_group_teachers = False
     groups_section_return_url = f"{reverse('accounts:profile')}?section=groups"
-    if "groups" in allowed_sections and active_section == "groups":
-        if active_organization is not None:
-            current_role_level = (
-                request.user._highest_role_level()
-                if hasattr(request.user, "_highest_role_level")
-                else ProfileRole.LEVELS.get(getattr(profile, "role", ProfileRole.MEMBER), 0)
-            )
-            can_multi_assign_group_teachers = capabilities["is_superadmin"] or (
-                current_role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
-            )
-            group_form = StudentGroupForm(
-                actor=request.user,
-                organization=active_organization,
-                can_multi_assign_teachers=can_multi_assign_group_teachers,
-                is_superadmin=capabilities["is_superadmin"],
-                auto_id="group_%s",
-            )
-
-            teacher_groups_qs = (
-                StudentGroup.objects.filter(organization=active_organization)
-                .select_related("teacher")
-                .prefetch_related("students", "teachers")
-                .order_by("name")
-            )
-            can_view_all_groups = capabilities["is_superadmin"] or capabilities["can_manage_org"]
-            if not can_view_all_groups:
-                teacher_groups_qs = teacher_groups_qs.filter(
-                    Q(teacher=request.user) | Q(teachers=request.user)
-                ).distinct()
-
-            visible_teacher_groups_qs = teacher_groups_qs
-            teacher_groups_count = visible_teacher_groups_qs.count()
-
-            if teacher_groups_search_query:
-                visible_teacher_groups_qs = visible_teacher_groups_qs.filter(
-                    Q(name__icontains=teacher_groups_search_query)
-                    | Q(teacher__username__icontains=teacher_groups_search_query)
-                    | Q(teacher__first_name__icontains=teacher_groups_search_query)
-                    | Q(teacher__last_name__icontains=teacher_groups_search_query)
-                    | Q(students__username__icontains=teacher_groups_search_query)
-                    | Q(students__first_name__icontains=teacher_groups_search_query)
-                    | Q(students__last_name__icontains=teacher_groups_search_query)
-                    | Q(students__profile__student_group_number__icontains=teacher_groups_search_query)
-                ).distinct()
-
-            teacher_groups_filtered_count = visible_teacher_groups_qs.count()
-            teacher_groups_page = Paginator(visible_teacher_groups_qs, 8).get_page(request.GET.get("groups_page"))
-            teacher_groups = list(teacher_groups_page.object_list)
-
-            selected_group_id = (request.GET.get("group") or "").strip()
-            if selected_group_id.isdigit():
-                selected_teacher_group = teacher_groups_qs.filter(id=int(selected_group_id)).first()
-
-            teacher_groups_pagination_query = urlencode(
-                {
-                    key: value
-                    for key, value in {
-                        "section": "groups",
-                        "group_q": teacher_groups_search_query,
-                        "group": selected_teacher_group.id if selected_teacher_group else "",
-                        "student_q": group_students_search_query if selected_teacher_group else "",
-                    }.items()
-                    if value not in ("", None)
-                }
-            )
-
-            if selected_teacher_group:
-                students_qs = selected_teacher_group.students.select_related("profile").order_by(
-                    "first_name", "last_name", "username", "id"
-                )
-                selected_group_students_count = students_qs.count()
-                if group_students_search_query:
-                    students_qs = students_qs.filter(
-                        Q(username__icontains=group_students_search_query)
-                        | Q(first_name__icontains=group_students_search_query)
-                        | Q(last_name__icontains=group_students_search_query)
-                        | Q(email__icontains=group_students_search_query)
-                        | Q(profile__student_group_number__icontains=group_students_search_query)
-                    )
-                selected_group_students_filtered_count = students_qs.count()
-                selected_group_students_page = Paginator(students_qs, 12).get_page(request.GET.get("students_page"))
-                group_students_pagination_query = urlencode(
-                    {
-                        key: value
-                        for key, value in {
-                            "section": "groups",
-                            "group": selected_teacher_group.id,
-                            "group_q": teacher_groups_search_query,
-                            "groups_page": teacher_groups_page.number if teacher_groups_page else "",
-                            "student_q": group_students_search_query,
-                        }.items()
-                        if value not in ("", None)
-                    }
-                )
-
-            for group in teacher_groups:
-                student_ids = [student.id for student in group.students.all()]
-                teacher_ids = [teacher.id for teacher in group.teachers.all()]
-                if group.teacher_id and group.teacher_id not in teacher_ids:
-                    teacher_ids.append(group.teacher_id)
-
-                teacher_groups_payload[str(group.id)] = {
-                    "name": group.name,
-                    "primary_teacher": group.teacher_id,
-                    "students": student_ids,
-                    "teachers": teacher_ids,
-                }
-            if selected_teacher_group and str(selected_teacher_group.id) not in teacher_groups_payload:
-                student_ids = [student.id for student in selected_teacher_group.students.all()]
-                teacher_ids = [teacher.id for teacher in selected_teacher_group.teachers.all()]
-                if selected_teacher_group.teacher_id and selected_teacher_group.teacher_id not in teacher_ids:
-                    teacher_ids.append(selected_teacher_group.teacher_id)
-                teacher_groups_payload[str(selected_teacher_group.id)] = {
-                    "name": selected_teacher_group.name,
-                    "primary_teacher": selected_teacher_group.teacher_id,
-                    "students": student_ids,
-                    "teachers": teacher_ids,
-                }
+    # "groups" bölməsi `_sections.groups`-a çıxarılıb (context-fragment). Köhnə
+    # iç-içə `if groups: if org:` indi tək şərtdir; davranış eynidir.
+    if "groups" in allowed_sections and active_section == "groups" and active_organization is not None:
+        _groups_ctx = build_groups_context(
+            request,
+            profile=profile,
+            capabilities=capabilities,
+            active_organization=active_organization,
+            teacher_groups_search_query=teacher_groups_search_query,
+            group_students_search_query=group_students_search_query,
+        )
+        can_multi_assign_group_teachers = _groups_ctx["can_multi_assign_group_teachers"]
+        group_form = _groups_ctx["group_form"]
+        teacher_groups = _groups_ctx["teacher_groups"]
+        teacher_groups_count = _groups_ctx["teacher_groups_count"]
+        teacher_groups_filtered_count = _groups_ctx["teacher_groups_filtered_count"]
+        teacher_groups_page = _groups_ctx["teacher_groups_page"]
+        teacher_groups_pagination_query = _groups_ctx["teacher_groups_pagination_query"]
+        selected_teacher_group = _groups_ctx["selected_teacher_group"]
+        selected_group_students_count = _groups_ctx["selected_group_students_count"]
+        selected_group_students_filtered_count = _groups_ctx["selected_group_students_filtered_count"]
+        selected_group_students_page = _groups_ctx["selected_group_students_page"]
+        group_students_pagination_query = _groups_ctx["group_students_pagination_query"]
+        teacher_groups_payload = _groups_ctx["teacher_groups_payload"]
 
     pending_post_approval_items = []
     pending_post_approval_count = 0
@@ -819,50 +615,29 @@ def user_profile(request):
     evaluated_review_submitted_order = "newest"
     evaluated_review_page_obj = None
     evaluated_review_pagination_query = ""
+    # "pending-review" / "review-results" bölmələri `_sections.review_queue`-ya çıxarılıb.
     if active_section == "pending-review" and "pending-review" in allowed_sections:
-        (
-            pending_review_items,
-            pending_review_search_query,
-            pending_review_filter_type,
-            pending_review_filter_status,
-            pending_review_submitted_order,
-            pending_review_filter_group,
-            pending_review_available_groups,
-        ) = _collect_pending_review_items(request)
-        pending_review_page_obj = Paginator(pending_review_items, 15).get_page(request.GET.get("pr_page", 1))
-        pr_extra = ["section=pending-review"]
-        if pending_review_search_query:
-            pr_extra.append(f"search={pending_review_search_query}")
-        if pending_review_filter_type != "all":
-            pr_extra.append(f"type={pending_review_filter_type}")
-        if pending_review_filter_status != "all":
-            pr_extra.append(f"status={pending_review_filter_status}")
-        if pending_review_submitted_order != "oldest":
-            pr_extra.append(f"submitted_order={pending_review_submitted_order}")
-        if pending_review_filter_group:
-            pr_extra.append(f"pr_group={pending_review_filter_group}")
-        pending_review_pagination_query = "&".join(pr_extra)
+        _pr = build_pending_review_context(request)
+        pending_review_items = _pr["pending_review_items"]
+        pending_review_search_query = _pr["pending_review_search_query"]
+        pending_review_filter_type = _pr["pending_review_filter_type"]
+        pending_review_filter_status = _pr["pending_review_filter_status"]
+        pending_review_submitted_order = _pr["pending_review_submitted_order"]
+        pending_review_filter_group = _pr["pending_review_filter_group"]
+        pending_review_available_groups = _pr["pending_review_available_groups"]
+        pending_review_page_obj = _pr["pending_review_page_obj"]
+        pending_review_pagination_query = _pr["pending_review_pagination_query"]
 
     if active_section == "review-results" and "review-results" in allowed_sections:
-        (
-            evaluated_review_items,
-            evaluated_review_search_query,
-            evaluated_review_filter_type,
-            evaluated_review_filter_group,
-            evaluated_review_available_groups,
-            evaluated_review_submitted_order,
-        ) = _collect_evaluated_review_items(request)
-        evaluated_review_page_obj = Paginator(evaluated_review_items, 15).get_page(request.GET.get("er_page", 1))
-        er_extra = ["section=review-results"]
-        if evaluated_review_search_query:
-            er_extra.append(f"evaluated_search={evaluated_review_search_query}")
-        if evaluated_review_filter_type != "all":
-            er_extra.append(f"evaluated_type={evaluated_review_filter_type}")
-        if evaluated_review_filter_group:
-            er_extra.append(f"evaluated_group={evaluated_review_filter_group}")
-        if evaluated_review_submitted_order != "newest":
-            er_extra.append(f"evaluated_submitted_order={evaluated_review_submitted_order}")
-        evaluated_review_pagination_query = "&".join(er_extra)
+        _er = build_review_results_context(request)
+        evaluated_review_items = _er["evaluated_review_items"]
+        evaluated_review_search_query = _er["evaluated_review_search_query"]
+        evaluated_review_filter_type = _er["evaluated_review_filter_type"]
+        evaluated_review_filter_group = _er["evaluated_review_filter_group"]
+        evaluated_review_available_groups = _er["evaluated_review_available_groups"]
+        evaluated_review_submitted_order = _er["evaluated_review_submitted_order"]
+        evaluated_review_page_obj = _er["evaluated_review_page_obj"]
+        evaluated_review_pagination_query = _er["evaluated_review_pagination_query"]
 
     role_assignment_section = {
         "organization": None,
@@ -1120,103 +895,15 @@ def user_profile(request):
             management_min_level_ok = capabilities["is_superadmin"] or management_user_level >= 50
 
     if "role-assignment" in allowed_sections and active_section == "role-assignment":
-        from apps.organizations.models import Membership, Role
-
-        role_assignment_search = request.GET.get("q", request.GET.get("search", ""))
-        role_assignment_unassigned_search = request.GET.get("unassigned_search", "")
-        role_assignment_section.update(
-            {
-                "organization": management_org,
-                "search_query": role_assignment_search,
-                "unassigned_search_query": role_assignment_unassigned_search,
-                "can_assign_roles": management_can_assign_roles,
-                "post_next_url": _append_query_params(
-                    reverse("accounts:profile"),
-                    section="role-assignment",
-                    q=role_assignment_search,
-                    unassigned_search=role_assignment_unassigned_search,
-                    role_members_page=request.GET.get("role_members_page", ""),
-                    role_pending_page=request.GET.get("role_pending_page", ""),
-                ),
-            }
+        role_assignment_section = build_role_assignment_section(
+            request,
+            role_assignment_section,
+            management_org=management_org,
+            management_can_assign_roles=management_can_assign_roles,
+            management_min_level_ok=management_min_level_ok,
+            management_user_level=management_user_level,
+            capabilities=capabilities,
         )
-
-        if management_org is None:
-            role_assignment_section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
-        elif not management_min_level_ok:
-            role_assignment_section["access_denied_message"] = (
-                "Bu bölmə üçün minimum müəllim və ya daha yüksək səviyyə tələb olunur."
-            )
-        else:
-            members = (
-                Membership.objects.filter(organization=management_org, is_active=True)
-                .select_related("user", "role")
-                .order_by("-role__level", "user__username")
-            )
-            if not capabilities["is_superadmin"]:
-                members = members.filter(role__level__lt=management_user_level)
-
-            assignable_roles = Role.objects.filter(organization=management_org, is_active=True).order_by("-level")
-            if not capabilities["is_superadmin"]:
-                assignable_roles = assignable_roles.filter(level__lt=management_user_level)
-
-            if role_assignment_search:
-                members = members.filter(
-                    Q(user__username__icontains=role_assignment_search)
-                    | Q(user__email__icontains=role_assignment_search)
-                    | Q(user__first_name__icontains=role_assignment_search)
-                    | Q(user__last_name__icontains=role_assignment_search)
-                )
-
-            unassigned_users = UserProfile.objects.filter(
-                user__is_active=True, organization__isnull=True
-            ).select_related(
-                "user",
-                "requested_organization",
-            )
-            if not capabilities["is_superadmin"]:
-                pending_request_user_ids = _pending_student_request_queryset(
-                    organization=management_org,
-                    statuses=[StudentOrganizationRequestStatus.PENDING],
-                ).values_list("user_id", flat=True)
-                unassigned_users = unassigned_users.filter(
-                    Q(user_id__in=pending_request_user_ids)
-                    | Q(requested_organization=management_org)
-                    | Q(
-                        requested_organization__isnull=True,
-                        requested_organization_name__iexact=management_org.name,
-                    )
-                )
-            if role_assignment_unassigned_search:
-                unassigned_users = unassigned_users.filter(
-                    Q(user__username__icontains=role_assignment_unassigned_search)
-                    | Q(user__email__icontains=role_assignment_unassigned_search)
-                    | Q(user__first_name__icontains=role_assignment_unassigned_search)
-                    | Q(user__last_name__icontains=role_assignment_unassigned_search)
-                )
-
-            role_assignment_members_page = request.GET.get("role_members_page")
-            role_assignment_members_page_obj = Paginator(members, 12).get_page(role_assignment_members_page)
-
-            role_assignment_pending_page = request.GET.get("role_pending_page")
-            role_assignment_pending_page_obj = Paginator(unassigned_users.order_by("user__username"), 12).get_page(
-                role_assignment_pending_page
-            )
-
-            role_assignment_section["members"] = role_assignment_members_page_obj
-            role_assignment_section["assignable_roles"] = assignable_roles
-            role_assignment_section["unassigned_users"] = role_assignment_pending_page_obj
-            role_assignment_section["members_pagination_query"] = _query_string(
-                section="role-assignment",
-                q=role_assignment_search,
-                unassigned_search=role_assignment_unassigned_search,
-            )
-            role_assignment_section["unassigned_pagination_query"] = _query_string(
-                section="role-assignment",
-                q=role_assignment_search,
-                unassigned_search=role_assignment_unassigned_search,
-            )
-
     if "student-organization-management" in allowed_sections and active_section == "student-organization-management":
         student_org_management_section = _build_student_org_management_section(
             request=request,
@@ -1270,127 +957,18 @@ def user_profile(request):
         )
 
     if "permission-editor" in allowed_sections and active_section == "permission-editor":
-        from apps.organizations.models import Role
-        from apps.organizations.permissions import PERMISSION_CATEGORIES
-
-        selected_permission_role_id = request.GET.get("role")
-        permission_editor_section.update(
-            {
-                "organization": management_org,
-                "permission_categories": PERMISSION_CATEGORIES,
-                "actor_permissions": sorted(management_actor_permissions),
-                "grantable_permissions": sorted(management_grantable_permissions),
-                "can_manage_permissions": management_can_assign_roles,
-            }
+        permission_editor_section = build_permission_editor_section(
+            request,
+            permission_editor_section,
+            management_org=management_org,
+            management_actor_permissions=management_actor_permissions,
+            management_grantable_permissions=management_grantable_permissions,
+            management_can_assign_roles=management_can_assign_roles,
+            management_user_level=management_user_level,
+            capabilities=capabilities,
         )
-
-        if management_org is None:
-            permission_editor_section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
-        elif not capabilities["is_superadmin"] and not management_can_assign_roles:
-            permission_editor_section["access_denied_message"] = (
-                "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur."
-            )
-        else:
-            roles = Role.objects.filter(organization=management_org, is_active=True).order_by("-level")
-            if not capabilities["is_superadmin"]:
-                roles = roles.filter(level__lt=management_user_level)
-
-            selected_permission_role = None
-            if selected_permission_role_id:
-                selected_permission_role = roles.filter(id=selected_permission_role_id).first()
-            if selected_permission_role is None:
-                selected_permission_role = roles.first()
-
-            permission_editor_section["roles"] = roles
-            permission_editor_section["selected_role"] = selected_permission_role
-
-            # Delegasiya olunmuş icazələr (grant:<perm> girişlərinin suffix-ləri) —
-            # template-də "Delegasiya" toggle-ının vəziyyətini göstərmək üçün.
-            if selected_permission_role is not None:
-                from apps.organizations.permissions import is_grant_entry, strip_grant_prefix
-
-                permission_editor_section["delegated_permissions"] = {
-                    strip_grant_prefix(perm)
-                    for perm in (selected_permission_role.permissions or [])
-                    if is_grant_entry(perm)
-                }
-
     if "manage-roles" in allowed_sections and active_section == "manage-roles":
-        manage_roles_search = request.GET.get("manage_roles_search", "")
-        manage_roles_org = _get_active_organization(request)
-        _bind_active_role_context(
-            request.user,
-            manage_roles_org,
-            memberships=getattr(request, "org_memberships", []),
-            permissions=getattr(request, "org_permissions", []),
-        )
-        manage_roles_user_level = (
-            request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
-        )
-        assignable_roles = _assignable_profile_roles_for_user(request.user)
-        manage_roles_section.update(
-            {
-                "search_query": manage_roles_search,
-                "organization": manage_roles_org,
-                "assignable_roles": assignable_roles,
-                "post_next_url": _append_query_params(
-                    reverse("accounts:profile"),
-                    section="manage-roles",
-                    manage_roles_search=manage_roles_search,
-                ),
-            }
-        )
-
-        if manage_roles_org is None:
-            manage_roles_section["access_denied_message"] = "Rol idarəetməsi üçün aktiv təşkilat tapılmadı."
-            manage_role_profiles = UserProfile.objects.none()
-        else:
-            manage_role_profiles = (
-                UserProfile.objects.filter(
-                    user__memberships__organization=manage_roles_org,
-                    user__memberships__is_active=True,
-                )
-                .select_related("user")
-                .prefetch_related("user__memberships__role")
-                .distinct()
-            )
-
-            # Include the requesting superadmin's own profile even without a formal membership
-            if capabilities["is_superadmin"] and not manage_role_profiles.filter(user=request.user).exists():
-                own_profile_qs = (
-                    UserProfile.objects.filter(user=request.user)
-                    .select_related("user")
-                    .prefetch_related("user__memberships__role")
-                    .distinct()
-                )
-                manage_role_profiles = (manage_role_profiles | own_profile_qs).distinct()
-
-        if manage_roles_search:
-            manage_role_profiles = manage_role_profiles.filter(
-                Q(user__username__icontains=manage_roles_search)
-                | Q(user__email__icontains=manage_roles_search)
-                | Q(user__first_name__icontains=manage_roles_search)
-                | Q(user__last_name__icontains=manage_roles_search)
-            )
-
-        manage_roles_page = request.GET.get("manage_roles_page")
-        manage_roles_page_obj = Paginator(manage_role_profiles.order_by("user__username"), 12).get_page(
-            manage_roles_page
-        )
-        _decorate_manage_role_profiles(
-            manage_roles_page_obj.object_list,
-            actor_level=manage_roles_user_level,
-            is_superadmin=capabilities["is_superadmin"],
-            organization=manage_roles_org,
-            actor_user=request.user,
-        )
-
-        manage_roles_section["profiles"] = manage_roles_page_obj
-        manage_roles_section["profiles_pagination_query"] = _query_string(
-            section="manage-roles",
-            manage_roles_search=manage_roles_search,
-        )
-
+        manage_roles_section = build_manage_roles_section(request, manage_roles_section, capabilities=capabilities)
     if active_section == "org-structure" and "org-structure" in allowed_sections and active_organization is not None:
         from apps.organizations.views import build_organization_structure_context
 
@@ -1446,76 +1024,14 @@ def user_profile(request):
     if ("superadmin-org-features" in allowed_sections and active_section == "superadmin-org-features") or (
         "superadmin-organizations" in allowed_sections and active_section == "superadmin-organizations"
     ):
-        from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
-
-        superadmin_organizations_queryset = (
-            Organization.objects.select_related("owner")
-            .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
-            .order_by("name")
+        build_superadmin_orgs_sections(
+            request,
+            superadmin_org_features_section,
+            superadmin_organizations_section,
+            allowed_sections=allowed_sections,
+            active_section=active_section,
+            organization_access_rows=organization_access_rows,
         )
-        organization_status_filter = (request.GET.get("status") or "").strip().lower()
-        if organization_status_filter in {"active", "pending", "suspended"}:
-            superadmin_organizations_queryset = superadmin_organizations_queryset.filter(
-                status=organization_status_filter
-            )
-        elif organization_status_filter == "inactive":
-            superadmin_organizations_queryset = superadmin_organizations_queryset.filter(is_active=False).exclude(
-                status="suspended"
-            )
-
-        if "superadmin-org-features" in allowed_sections and active_section == "superadmin-org-features":
-            superadmin_feature_org_page = request.GET.get("superadmin_feature_org_page")
-            superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
-                superadmin_feature_org_page
-            )
-            for organization in superadmin_org_features_page.object_list:
-                organization.review_feature_items = [
-                    {
-                        "key": feature_name,
-                        "label": feature_config["label"],
-                        "short_label": feature_config["short_label"],
-                        "enabled": organization.is_review_identity_reveal_enabled(feature_name),
-                    }
-                    for feature_name, feature_config in REVIEW_VISIBILITY_FEATURES.items()
-                ]
-            superadmin_org_features_section["organizations"] = superadmin_org_features_page
-            superadmin_org_features_section["organizations_pagination_query"] = _query_string(
-                section="superadmin-org-features"
-            )
-            superadmin_org_features_section["post_next_url"] = _append_query_params(
-                reverse("accounts:profile"),
-                section="superadmin-org-features",
-                superadmin_feature_org_page=superadmin_feature_org_page,
-            )
-
-        if "superadmin-organizations" in allowed_sections and active_section == "superadmin-organizations":
-            superadmin_org_page = request.GET.get("superadmin_org_page")
-            superadmin_organizations_section["organizations"] = Paginator(
-                superadmin_organizations_queryset, 12
-            ).get_page(superadmin_org_page)
-            superadmin_organizations_section["organization_access_rows"] = organization_access_rows
-            superadmin_organizations_section["all_modules"] = [
-                "accounts",
-                "organizations",
-                "courses",
-                "exams",
-                "assignments",
-                "projects",
-                "labs",
-                "live_exam",
-                "blog",
-                "audit",
-            ]
-            superadmin_organizations_section["organizations_pagination_query"] = _query_string(
-                section="superadmin-organizations"
-            )
-            superadmin_organizations_section["post_next_url"] = _append_query_params(
-                reverse("accounts:profile"),
-                section="superadmin-organizations",
-                superadmin_org_page=superadmin_org_page,
-            )
-            superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
-
     if "superadmin-users" in allowed_sections and active_section == "superadmin-users":
         superadmin_users_section.update(
             build_superadmin_user_management_context(
@@ -1535,42 +1051,13 @@ def user_profile(request):
     # InAppNotification data for profile notifications section.
     # Sidebar yalnız `notifications_unread_count`-dan istifadə edir; tam siyahını
     # yalnız notifications bölməsi açıq olduqda hazırla.
-    notif_filter = "all"
-    notif_type = ""
-    notif_search_query = ""
-    notif_pagination_query = ""
-    in_app_notifications_page = None
-    if active_section == "notifications":
-        notif_filter = request.GET.get("notif_filter", "all")
-        if notif_filter not in ("all", "unread", "read"):
-            notif_filter = "all"
-        # Tip filtri — yalnız mövcud NotificationType dəyərləri qəbul olunur.
-        notif_type = request.GET.get("notif_type", "")
-        if notif_type not in {t.value for t in NotificationType}:
-            notif_type = ""
-        notif_search_query = _normalize_public_profile_query_value(
-            request.GET.get("notif_search"),
-            max_length=100,
-        )
-        in_app_notifications_qs = get_user_notifications(
-            user=request.user,
-            filter_by=notif_filter,
-            notification_type=notif_type,
-            search_query=notif_search_query,
-        )
-        # recipient=user is the security boundary; bypass RLS so the profile inbox
-        # shows the user's notifications across every organisation (see
-        # get_user_notifications docstring).
-        in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
-        with bypass_rls():
-            in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
-            in_app_notifications_page.object_list = list(in_app_notifications_page.object_list)
-        notif_pagination_query = _query_string(
-            section="notifications",
-            notif_filter=notif_filter,
-            notif_type=notif_type,
-            notif_search=notif_search_query,
-        )
+    # "notifications" bölməsi `_sections.notifications`-ə çıxarılıb (context-fragment).
+    _notif_ctx = build_notifications_context(request, active_section=active_section)
+    notif_filter = _notif_ctx["notif_filter"]
+    notif_type = _notif_ctx["notif_type"]
+    notif_search_query = _notif_ctx["notif_search_query"]
+    notif_pagination_query = _notif_ctx["notif_pagination_query"]
+    in_app_notifications_page = _notif_ctx["in_app_notifications_page"]
 
     # Publish-notification data (teacher groups, org info)
     publish_notification_targets = []
@@ -1720,304 +1207,39 @@ def user_profile(request):
     statistics_course_pagination_query = ""
     statistics_group_pagination_query = ""
     statistics_teacher_course_pagination_query = ""
+    # "statistics" bölməsi `_sections.statistics`-ə çıxarılıb (context-fragment).
+    # AJAX AI-summary üçün funksiya JsonResponse qaytarır (erkən-return).
     if active_section == "statistics" and "statistics" in allowed_sections:
-        from apps.accounts.services.statistics_selectors import (
-            get_org_admin_statistics,
-            get_student_statistics,
-            get_superadmin_statistics,
-            get_teacher_statistics,
-        )
-        from apps.organizations.models import Organization as _StatisticsOrganization
+        from django.http import HttpResponse as _HttpResponse
 
-        stat_org = _get_active_organization(request)
-        statistics_content_type = (request.GET.get("stat_content_type") or "all").strip().lower()
-        if statistics_content_type not in {"all", "exam", "assignment", "lab", "project"}:
-            statistics_content_type = "all"
-        statistics_filters = {
-            "date_from": (request.GET.get("stat_date_from") or "").strip(),
-            "date_to": (request.GET.get("stat_date_to") or "").strip(),
-            "course": (request.GET.get("stat_course") or "").strip() or None,
-            "group": (request.GET.get("stat_group") or "").strip() or None,
-            "content_type": statistics_content_type,
-            "organization": (request.GET.get("stat_organization") or "").strip() or None,
-        }
-        if not capabilities["is_superadmin"]:
-            statistics_filters["organization"] = None
+        _stats = build_statistics_section(request, capabilities=capabilities)
+        if isinstance(_stats, _HttpResponse):
+            return _stats
+        statistics_filters = _stats["statistics_filters"]
+        statistics_data = _stats["statistics_data"]
+        statistics_courses = _stats["statistics_courses"]
+        statistics_groups = _stats["statistics_groups"]
+        statistics_organizations = _stats["statistics_organizations"]
+        statistics_has_active_filters = _stats["statistics_has_active_filters"]
+        statistics_unit_layout = _stats["statistics_unit_layout"]
+        statistics_org_page = _stats["statistics_org_page"]
+        statistics_org_rows = _stats["statistics_org_rows"]
+        statistics_org_pagination_query = _stats["statistics_org_pagination_query"]
+        statistics_teacher_page = _stats["statistics_teacher_page"]
+        statistics_teacher_rows = _stats["statistics_teacher_rows"]
+        statistics_teacher_pagination_query = _stats["statistics_teacher_pagination_query"]
+        statistics_course_page = _stats["statistics_course_page"]
+        statistics_course_rows = _stats["statistics_course_rows"]
+        statistics_course_pagination_query = _stats["statistics_course_pagination_query"]
+        statistics_group_page = _stats["statistics_group_page"]
+        statistics_group_rows = _stats["statistics_group_rows"]
+        statistics_group_pagination_query = _stats["statistics_group_pagination_query"]
+        statistics_teacher_course_page = _stats["statistics_teacher_course_page"]
+        statistics_teacher_course_rows = _stats["statistics_teacher_course_rows"]
+        statistics_teacher_course_pagination_query = _stats["statistics_teacher_course_pagination_query"]
 
-        selected_statistics_org = None
-        if capabilities["is_superadmin"] and statistics_filters["organization"]:
-            selected_statistics_org = (
-                _StatisticsOrganization.objects.filter(
-                    id=statistics_filters["organization"],
-                    is_active=True,
-                    status="active",
-                )
-                .only("id", "name")
-                .first()
-            )
-            if selected_statistics_org is None:
-                statistics_filters["organization"] = None
-
-        statistics_scope_org = selected_statistics_org or stat_org
-
-        # Unit scoping (Faza 2): dekan/kafedra müdürü statistikaları yalnız öz
-        # fakültə/kafedra alt-ağacı üzrə görür. Alt-ağac id-ləri bir dəfə
-        # hesablanır və həm filtr seçimlərinə, həm selector-a ötürülür.
-        statistics_scoped_unit_ids = None
-        if stat_org and not capabilities["is_superadmin"]:
-            from apps.organizations.models import OrgUnit as _StatOrgUnit
-            from apps.organizations.scoping import get_unit_scope as _get_unit_scope
-
-            _stat_unit_scope = _get_unit_scope(request.user, stat_org, request=request)
-            if _stat_unit_scope.is_unit_scoped:
-                statistics_scoped_unit_ids = list(
-                    _StatOrgUnit.objects.filter(organization=stat_org)
-                    .filter(_stat_unit_scope.unit_subtree_q())
-                    .values_list("pk", flat=True)
-                )
-
-        statistics_uses_personal_scope = not (
-            capabilities["is_superadmin"]
-            or capabilities["is_org_admin"]
-            or capabilities["is_teacher"]
-            or (capabilities.get("is_tutor") and stat_org and statistics_scoped_unit_ids is not None)
-        )
-
-        # Populate filter options
-        if statistics_scope_org and not capabilities["is_superadmin"]:
-            statistics_course_qs = Course.objects.filter(organization=statistics_scope_org)
-            if statistics_uses_personal_scope:
-                statistics_course_qs = statistics_course_qs.filter(
-                    memberships__user=request.user,
-                    memberships__role="student",
-                )
-            elif capabilities["is_teacher"] and not capabilities["is_org_admin"]:
-                statistics_course_qs = statistics_course_qs.filter(owner=request.user)
-            if statistics_scoped_unit_ids is not None:
-                statistics_course_qs = statistics_course_qs.filter(unit_id__in=statistics_scoped_unit_ids)
-            statistics_courses = list(statistics_course_qs.order_by("title").values("id", "title").distinct()[:100])
-            allowed_course_ids = {str(row["id"]) for row in statistics_courses}
-            if statistics_filters["course"] and statistics_filters["course"] not in allowed_course_ids:
-                statistics_filters["course"] = None
-        elif capabilities["is_superadmin"]:
-            statistics_organizations = list(
-                _StatisticsOrganization.objects.filter(is_active=True, status="active")
-                .order_by("name")
-                .values("id", "name")[:150]
-            )
-            superadmin_course_qs = Course.objects.all()
-            if selected_statistics_org:
-                superadmin_course_qs = superadmin_course_qs.filter(organization=selected_statistics_org)
-            statistics_courses = list(superadmin_course_qs.order_by("title").values("id", "title")[:150])
-
-        if statistics_scope_org:
-            from apps.exams.models import StudentGroup as _SG
-
-            statistics_group_qs = _SG.objects.filter(organization=statistics_scope_org)
-            if statistics_uses_personal_scope:
-                statistics_group_qs = statistics_group_qs.filter(students=request.user)
-            elif capabilities["is_teacher"] and not capabilities["is_org_admin"] and not capabilities["is_superadmin"]:
-                statistics_group_qs = statistics_group_qs.filter(Q(teacher=request.user) | Q(teachers=request.user))
-            statistics_groups = list(statistics_group_qs.order_by("name").values("id", "name").distinct()[:100])
-            allowed_group_ids = {str(row["id"]) for row in statistics_groups}
-            if statistics_filters["group"] and statistics_filters["group"] not in allowed_group_ids:
-                statistics_filters["group"] = None
-
-        statistics_has_active_filters = any(
-            [
-                statistics_filters["date_from"],
-                statistics_filters["date_to"],
-                statistics_filters["course"],
-                statistics_filters["group"],
-                statistics_filters["organization"],
-                statistics_filters["content_type"] != "all",
-            ]
-        )
-
-        # Dashboard statistics are expensive (~44 aggregate queries) but do not
-        # need to be real-time, so each (role, scope, filters) result is cached
-        # briefly via core.cache.get_or_set_cached_statistics (FAZA 12).
-        from core.cache import get_or_set_cached_statistics
-
-        if capabilities["is_superadmin"]:
-            statistics_data = get_or_set_cached_statistics(
-                role="superadmin",
-                scope_id="global",
-                filters=statistics_filters,
-                compute=lambda: get_superadmin_statistics(filters=statistics_filters),
-            )
-        elif capabilities["is_org_admin"]:
-            if stat_org:
-                if statistics_scoped_unit_ids is not None:
-                    # Dekan/kafedra müdürü — unit-scoped statistika. Cache açarı
-                    # istifadəçinin alt-ağacına görə ayrılır ki, rektorun org-wide
-                    # nəticəsi ilə qarışmasın (data sızması olmasın).
-                    _scoped_ids = statistics_scoped_unit_ids
-                    statistics_data = get_or_set_cached_statistics(
-                        role="unit_manager",
-                        scope_id=f"{stat_org.pk}:{request.user.pk}",
-                        filters=statistics_filters,
-                        compute=lambda: get_org_admin_statistics(
-                            organization=stat_org,
-                            filters=statistics_filters,
-                            scoped_unit_ids=_scoped_ids,
-                        ),
-                    )
-                else:
-                    statistics_data = get_or_set_cached_statistics(
-                        role="org_admin",
-                        scope_id=stat_org.pk,
-                        filters=statistics_filters,
-                        compute=lambda: get_org_admin_statistics(organization=stat_org, filters=statistics_filters),
-                    )
-        elif capabilities["is_teacher"]:
-            statistics_data = get_or_set_cached_statistics(
-                role="teacher",
-                scope_id=request.user.pk,
-                filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
-                compute=lambda: get_teacher_statistics(request.user, organization=stat_org, filters=statistics_filters),
-            )
-        elif capabilities.get("is_tutor") and stat_org and statistics_scoped_unit_ids is not None:
-            # Tyutor — öz alt-ağacının qrup statistikası (unit_manager rejimi,
-            # öz cache açarı ilə).
-            statistics_unit_layout = True
-            _tutor_scoped_ids = statistics_scoped_unit_ids
-            statistics_data = get_or_set_cached_statistics(
-                role="unit_manager",
-                scope_id=f"{stat_org.pk}:{request.user.pk}",
-                filters=statistics_filters,
-                compute=lambda: get_org_admin_statistics(
-                    organization=stat_org,
-                    filters=statistics_filters,
-                    scoped_unit_ids=_tutor_scoped_ids,
-                ),
-            )
-        else:
-            # Student / lead student / member
-            statistics_data = get_or_set_cached_statistics(
-                role="student",
-                scope_id=request.user.pk,
-                filters={**statistics_filters, "_org": getattr(stat_org, "pk", None)},
-                compute=lambda: get_student_statistics(request.user, organization=stat_org, filters=statistics_filters),
-            )
-
-        statistics_base_query = _query_string(
-            section="statistics",
-            stat_date_from=statistics_filters["date_from"],
-            stat_date_to=statistics_filters["date_to"],
-            stat_course=statistics_filters["course"],
-            stat_group=statistics_filters["group"],
-            stat_content_type=(
-                None if statistics_filters["content_type"] == "all" else statistics_filters["content_type"]
-            ),
-            stat_organization=statistics_filters["organization"],
-        )
-
-        if statistics_data.get("org_comparison"):
-            statistics_org_page = Paginator(statistics_data["org_comparison"], 8).get_page(
-                request.GET.get(statistics_org_page_param)
-            )
-            statistics_org_rows = list(statistics_org_page.object_list)
-            statistics_org_pagination_query = statistics_base_query
-
-        if statistics_data.get("teacher_overview"):
-            statistics_teacher_page = Paginator(statistics_data["teacher_overview"], 8).get_page(
-                request.GET.get(statistics_teacher_page_param)
-            )
-            statistics_teacher_rows = list(statistics_teacher_page.object_list)
-            statistics_teacher_pagination_query = statistics_base_query
-
-        if statistics_data.get("course_rankings"):
-            statistics_course_page = Paginator(statistics_data["course_rankings"], 8).get_page(
-                request.GET.get(statistics_course_page_param)
-            )
-            statistics_course_rows = list(statistics_course_page.object_list)
-            statistics_course_pagination_query = statistics_base_query
-
-        if statistics_data.get("group_comparison"):
-            statistics_group_page = Paginator(statistics_data["group_comparison"], 8).get_page(
-                request.GET.get(statistics_group_page_param)
-            )
-            statistics_group_rows = list(statistics_group_page.object_list)
-            statistics_group_pagination_query = statistics_base_query
-
-        if statistics_data.get("course_overview"):
-            statistics_teacher_course_page = Paginator(statistics_data["course_overview"], 8).get_page(
-                request.GET.get(statistics_teacher_course_page_param)
-            )
-            statistics_teacher_course_rows = list(statistics_teacher_course_page.object_list)
-            statistics_teacher_course_pagination_query = statistics_base_query
-
-        # ── AI summary (AJAX) ─────────────────────────────────────
-        if request.GET.get("stat_ai_summary") == "1" and statistics_data:
-            from apps.accounts.services.statistics_selectors import build_ai_stats_payload
-            from apps.exams.services.ai_summary import generate_exam_statistics_summary
-
-            role_label = (
-                "superadmin"
-                if capabilities["is_superadmin"]
-                else (
-                    "org_admin"
-                    if capabilities["is_org_admin"]
-                    else ("teacher" if capabilities["is_teacher"] else "student")
-                )
-            )
-            ai_payload = build_ai_stats_payload(role=role_label, stats=statistics_data)
-            result = generate_exam_statistics_summary(
-                exam_title=f"Profil Statistikası ({role_label})",
-                exam_type="profile_statistics",
-                stats=ai_payload,
-                user_id=request.user.pk,
-            )
-            from django.http import JsonResponse as _JR
-
-            return _JR(result)
-
-    section_titles = {
-        "profile-info": pgettext_lazy("profile.section", "profile_info"),
-        "notifications": pgettext_lazy("profile.section", "notifications"),
-        "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
-        "posts": pgettext_lazy("profile.section", "posts"),
-        "create-post": pgettext_lazy("profile.section", "create_post"),
-        "create-category": _("Create category"),
-        "category-management": _("Categories"),
-        "courses": pgettext_lazy("profile.section", "my_courses"),
-        "my-exams": pgettext_lazy("profile.section", "my_exams"),
-        "my-courses": pgettext_lazy("profile.section", "my_created_courses"),
-        "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
-        "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
-        "my-results": pgettext_lazy("profile.section", "my_results"),
-        "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),
-        "groups": pgettext_lazy("profile.section", "groups"),
-        "pending-post-approvals": "Postların idarəetməsi",
-        "pending-review": pgettext_lazy("profile.section", "pending_review"),
-        "review-results": "Dəyərləndirilmiş nəticələr",
-        "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
-        "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
-        "student-organization-management": pgettext_lazy("profile.section", "staff_management"),
-        "permission-editor": pgettext_lazy("profile.section", "permissions"),
-        "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
-        "superadmin-org-features": "Təşkilat özəllikləri",
-        "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
-        "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
-        "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
-        "superadmin-contact-messages": _("Contact Messages"),
-        "blog": pgettext_lazy("nav", "home"),
-        "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
-        "change-password": pgettext_lazy("profile.section", "change_password"),
-        "statistics": pgettext_lazy("profile.section", "statistics"),
-        "question-bank": "Sual Bankı",
-        "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
-        "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
-        "unit-exams": "Bölmə imtahanları",
-        "org-structure": "Fakültə və kafedralar",
-        "org-faculties": "Fakültələr",
-        "org-kafedras": "Kafedralar",
-        "org-members": "Struktur üzvləri",
-        "org-roles": "Təşkilat rolları",
-        "audit-log": "Audit jurnalı",
-        "superadmin-org-inspector": "Təşkilat məlumatları",
-    }
+    # Bölmə başlıqları `_sections.labels`-ə çıxarılıb (per-request, eager tərcümə).
+    section_titles = build_section_titles()
 
     shortcut_sections = []
     if capabilities["can_view_blog"]:
@@ -2035,23 +1257,7 @@ def user_profile(request):
 
     active_section_title = section_titles.get(active_section, pgettext_lazy("profile.sidebar", "title"))
     direct_profile_section = getattr(request, "direct_profile_section", "")
-    direct_profile_section_templates = {
-        "pending-answers": "accounts/profile/sections/_pending_answers.html",
-        "pending-review": "accounts/profile/sections/_pending_review.html",
-        "review-results": "accounts/profile/sections/_review_results.html",
-        "student-organization-management": "accounts/profile/sections/_student_org_management.html",
-        "student-organization-request": "accounts/profile/sections/_student_org_request.html",
-        "manage-roles": "accounts/profile/sections/_manage_roles.html",
-        "permission-editor": "accounts/profile/sections/_permission_editor.html",
-        "superadmin-organizations": "accounts/profile/sections/_superadmin_organizations.html",
-        "superadmin-ai": "accounts/profile/sections/_superadmin_ai_settings.html",
-        "org-structure": "accounts/profile/sections/_org_structure.html",
-        "org-faculties": "accounts/profile/sections/_org_faculties.html",
-        "org-kafedras": "accounts/profile/sections/_org_kafedras.html",
-        "org-members": "accounts/profile/sections/_org_members.html",
-        "org-roles": "accounts/profile/sections/_org_roles.html",
-        "audit-log": "accounts/profile/sections/_audit_log.html",
-    }
+    direct_profile_section_templates = DIRECT_PROFILE_SECTION_TEMPLATES
 
     context = {
         "profile": profile,
