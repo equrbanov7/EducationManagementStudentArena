@@ -7,7 +7,7 @@
     "apps/accounts/views/_helpers/org_sections.py": 1021,
     "apps/accounts/views/auth.py": 889,
     "apps/accounts/views/organization/management.py": 977,
-    "apps/accounts/views/profile/main.py": 2313,
+    "apps/accounts/views/profile/main.py": 1519,
     "apps/accounts/views/roles/assignment.py": 906,
     "apps/courses/models.py": 615,
     "apps/exams/domain/question_bank.py": 612,

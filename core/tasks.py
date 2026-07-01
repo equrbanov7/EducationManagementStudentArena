@@ -114,9 +114,15 @@ def warm_session_settings_cache(session_pk: int) -> None:
     try:
         from apps.live_exam.models import LiveSession
         from apps.live_exam.session_settings import get_session_settings
+        from core.rls import bypass_rls
+        from core.rls_pooling import rls_worker_atomic
 
-        session = LiveSession.objects.select_related("exam").get(pk=session_pk)
-        get_session_settings(session)
+        # System cache warmer receives only a session PK, so it must look up any
+        # tenant's live session under bypass; rls_worker_atomic makes it SET LOCAL
+        # when transaction-scoped RLS is enabled.
+        with rls_worker_atomic(), bypass_rls():
+            session = LiveSession.objects.select_related("exam").get(pk=session_pk)
+            get_session_settings(session)
     except Exception:
         logger.exception("warm_session_settings_cache failed for session %s", session_pk)
 

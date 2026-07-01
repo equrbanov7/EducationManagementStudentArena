@@ -18,7 +18,9 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.utils.functional import SimpleLazyObject
 
 from apps.accounts.models import ProfileRole
@@ -241,15 +243,41 @@ class OrganizationMiddleware:
             #  • org resolved         → user + bypass OFF + tenant=org
             #  • no org (secure stop) → user + bypass OFF + tenant="" (deny all)
             is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-            apply_rls_request_context(
-                user_id=request.user.pk,
-                org_id=request.organization.pk if request.organization is not None else None,
-                bypass=is_superuser,
-            )
+
+            # Faza 2 / Mərhələ 3B: flaq açıq olduqda RLS-i request transaction-ı
+            # daxilində SET LOCAL ilə tətbiq edən execute_wrapper qoşulur
+            # (PgBouncer transaction-mode təhlükəsiz). Default OFF → mövcud
+            # session-scope davranış. Bax: docs/FAZA2_3B_TRANSACTION_POOLING.md.
+            if getattr(settings, "RLS_TRANSACTION_SCOPED", False):
+                from core.rls_pooling import RLSTransactionGuard
+
+                guard = RLSTransactionGuard(
+                    user_id=request.user.pk,
+                    org_id=request.organization.pk if request.organization is not None else None,
+                    bypass=is_superuser,
+                )
+                rls_wrapper_cm = connection.execute_wrapper(guard)
+                rls_wrapper_cm.__enter__()
+                request._rls_wrapper_cm = rls_wrapper_cm
+            else:
+                apply_rls_request_context(
+                    user_id=request.user.pk,
+                    org_id=request.organization.pk if request.organization is not None else None,
+                    bypass=is_superuser,
+                )
 
             return self.get_response(request)
         finally:
             # ── Cleanup: reset RLS context before connection returns to pool ──
             # This prevents tenant state from leaking into the next request that
             # reuses the same pooled connection, even if the view raises.
-            reset_rls_context(only_if_connection_open=True)
+            rls_wrapper_cm = getattr(request, "_rls_wrapper_cm", None)
+            if rls_wrapper_cm is not None:
+                from core.rls_pooling import reset_txn_flags
+
+                try:
+                    rls_wrapper_cm.__exit__(None, None, None)
+                finally:
+                    reset_txn_flags(connection)
+            else:
+                reset_rls_context(only_if_connection_open=True)

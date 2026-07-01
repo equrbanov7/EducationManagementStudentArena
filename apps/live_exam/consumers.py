@@ -29,6 +29,7 @@ from apps.live_exam.transport import (
 )
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 logger = logging.getLogger("live_exam.ws.rate_limit")
 
@@ -90,7 +91,9 @@ class LiveSessionSocketAuthMixin:
         *,
         allow_anonymous: bool = False,
     ) -> dict[str, Any] | None:
-        return authorize_socket_connection(pin=pin, user_id=user_id, token=token, allow_anonymous=allow_anonymous)
+        # Auth helper performs PIN/token based system lookup under bypass_rls().
+        with rls_worker_atomic():
+            return authorize_socket_connection(pin=pin, user_id=user_id, token=token, allow_anonymous=allow_anonymous)
 
 
 # -------------------------
@@ -152,7 +155,8 @@ class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def _get_lobby_state(self, pin: str) -> dict:
-        with bypass_rls():
+        # PIN-based live-session lookup is system-scoped; keep existing bypass.
+        with rls_worker_atomic(), bypass_rls():
             session = LiveSession.objects.get(pin=pin)
             return build_lobby_state_payload(session)
 
@@ -329,27 +333,33 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def _get_answer_progress(self, pin: str, question_id: int) -> dict:
-        return get_answer_progress(pin=pin, question_id=question_id)
+        # get_answer_progress performs PIN-based system lookup under bypass_rls().
+        with rls_worker_atomic():
+            return get_answer_progress(pin=pin, question_id=question_id)
 
     @database_sync_to_async
     def _get_reveal_payload(self, pin: str, question_id: int) -> dict:
-        with bypass_rls():
+        # PIN-based reveal broadcast is system-scoped; keep existing bypass.
+        with rls_worker_atomic(), bypass_rls():
             session = LiveSession.objects.get(pin=pin)
             return build_reveal_payload(session, question_id)
 
     @database_sync_to_async
     def _get_player_reveal_payload(self, pin: str, question_id: int) -> dict:
-        with bypass_rls():
+        # PIN-based player reveal broadcast is system-scoped; keep existing bypass.
+        with rls_worker_atomic(), bypass_rls():
             session = LiveSession.objects.get(pin=pin)
             return build_player_reveal_payload(session, question_id)
 
     @database_sync_to_async
     def _save_answer_and_score(self, pin, player_id, client_id, question_id, option_ids, answer_ms):
-        return save_answer_and_score(
-            pin=pin,
-            player_id=player_id,
-            client_id=client_id,
-            question_id=question_id,
-            option_ids=option_ids,
-            answer_ms=answer_ms,
-        )
+        # Scoring is PIN/player-token scoped and keeps its existing bypass_rls().
+        with rls_worker_atomic():
+            return save_answer_and_score(
+                pin=pin,
+                player_id=player_id,
+                client_id=client_id,
+                question_id=question_id,
+                option_ids=option_ids,
+                answer_ms=answer_ms,
+            )

@@ -267,6 +267,19 @@ DATABASES = {
     )
 }
 
+# ── Faza 2 / Mərhələ 3B — PgBouncer transaction pooling + RLS (default OFF) ──
+# Açıq olduqda hər request bir atomik transaction-da işləyir və RLS tenant
+# konteksti həmin transaction daxilində SET LOCAL ilə qoyulur (transaction-mode
+# təhlükəsiz). DISABLE_SERVER_SIDE_CURSORS transaction pooling tələbidir.
+#
+# DİQQƏT: bu flaq YALNIZ staging-də cross-tenant izolyasiya + k6 load testindən
+# sonra açılmalıdır. Canlı RLS plumbing və PgBouncer POOL_MODE=transaction keçidi
+# üçün bax: docs/FAZA2_3B_TRANSACTION_POOLING.md. Default OFF → mövcud davranış.
+RLS_TRANSACTION_SCOPED = _env_bool("RLS_TRANSACTION_SCOPED", False)
+if RLS_TRANSACTION_SCOPED:
+    DATABASES["default"]["ATOMIC_REQUESTS"] = True
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
