@@ -1,0 +1,120 @@
+{% load i18n %}
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-chalkboard-teacher"></i> {% trans "ts_requests_title" context "accounts.student_org" %}
+        {% if pending_teacher_staff_requests.paginator.count %}
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning ms-2">{{ pending_teacher_staff_requests.paginator.count }}</span>
+        {% endif %}
+    </div>
+    <p class="text-muted mb-3">
+        {% trans "ts_requests_desc" context "accounts.student_org" %}
+    </p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="{% trans "ts_search_ph" context "accounts.student_org" %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'search_clear' context 'common' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
+        </button>
+    </form>
+
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_role_type" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_message" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_request_date" context "accounts.student_org" %}</th>
+                    <th>{% trans "col_action" context "accounts.student_org" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ts_request in pending_teacher_staff_requests %}
+                <tr>
+                    <td>{{ ts_request.user.get_full_name|default:ts_request.user.username }}</td>
+                    <td>@{{ ts_request.user.username }}</td>
+                    <td>{{ ts_request.user.email }}</td>
+                    <td>
+                        {% if ts_request.role_type == "teacher" %}
+                            <span class="role-badge">{% trans "role_teacher" context "accounts.student_org" %}</span>
+                        {% elif ts_request.role_type == "staff" %}
+                            <span class="role-badge role-warning">{% trans "role_staff" context "accounts.student_org" %}</span>
+                        {% else %}
+                            <span class="role-badge">{{ ts_request.role_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ts_request.message %}
+                            <small>{{ ts_request.message }}</small>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ ts_request.created_at|date:"d.m.Y H:i" }}</small>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="approve_teacher_staff_request">
+                                <input type="hidden" name="ts_request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-success btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-user-check"></i> {% trans "approve" context "accounts.student_org" %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="reject_teacher_staff_request">
+                                <input type="hidden" name="ts_request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-times"></i> {% trans "reject" context "common" %}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not pending_teacher_staff_requests.paginator.count %}
+    <p class="text-center text-muted mt-2 mb-0">{% trans "no_ts_requests" context "accounts.student_org" %}</p>
+    {% endif %}
+    {% include "partials/_pagination.html" with page_obj=pending_teacher_staff_requests extra_query=teacher_staff_pagination_query page_param=teacher_staff_page_param %}
+</div>

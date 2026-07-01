@@ -1,0 +1,128 @@
+{% load i18n %}
+{% if is_superadmin %}
+<div class="section-card org-management-panel" data-management-panel="organizations">
+    <div class="section-title">
+        <i class="fas fa-building"></i> {% trans "Organizations" context "staff.management" %}
+        {% if pending_org_count %}
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning ms-2">{{ pending_org_count }}</span>
+        {% endif %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Superadmin organization overview and status actions." context "staff.management" %}</p>
+    <form method="get"
+          class="org-management-org-filters"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="organizations">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="organization_search"
+                   value="{{ organization_search_query }}"
+                   placeholder="{% trans 'Search organizations...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <select name="organization_status" class="form-select org-management-select">
+            <option value="">{% trans "All statuses" context "staff.management" %}</option>
+            <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
+            <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
+            <option value="suspended" {% if organization_status_filter == "suspended" %}selected{% endif %}>{% trans "Suspended" context "staff.management" %}</option>
+            <option value="inactive" {% if organization_status_filter == "inactive" %}selected{% endif %}>{% trans "Inactive" context "staff.management" %}</option>
+        </select>
+        <select name="organization_type" class="form-select org-management-select">
+            <option value="">{% trans "All types" context "staff.management" %}</option>
+            <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
+            <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>
+            <option value="course_center" {% if organization_type_filter == "course_center" %}selected{% endif %}>{% trans "Course center" context "staff.management" %}</option>
+            <option value="individual" {% if organization_type_filter == "individual" %}selected{% endif %}>{% trans "Individual" context "staff.management" %}</option>
+        </select>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter"></i> {% trans "Apply filters" context "staff.management" %}
+        </button>
+    </form>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "Organization" context "staff.management" %}</th>
+                    <th>{% trans "Type" context "staff.management" %}</th>
+                    <th>{% trans "Owner" context "staff.management" %}</th>
+                    <th>{% trans "Status" context "staff.management" %}</th>
+                    <th>{% trans "Active members" context "staff.management" %}</th>
+                    <th>{% trans "Details" context "staff.management" %}</th>
+                    <th>{% trans "Manage" context "staff.management" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for organization_item in organization_records %}
+                <tr>
+                    <td>{{ organization_item.name }}</td>
+                    <td>{{ organization_item.get_org_type_display }}</td>
+                    <td>{{ organization_item.owner.username }}</td>
+                    <td>
+                        {% if organization_item.status == "suspended" %}
+                        <span class="role-badge role-danger">{% trans "Suspended" context "staff.management" %}</span>
+                        {% elif organization_item.status == "pending" %}
+                        <span class="role-badge role-warning">{% trans "Pending" context "staff.management" %}</span>
+                        {% elif organization_item.is_active %}
+                        <span class="role-badge role-success">{% trans "Active" context "staff.management" %}</span>
+                        {% else %}
+                        <span class="role-badge role-warning">{% trans "Inactive" context "staff.management" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ organization_item.active_member_count }}</td>
+                    <td>
+                        <div><strong>{% trans "Code" context "staff.management" %}:</strong> {{ organization_item.organization_identifier|default:"-" }}</div>
+                        <div><strong>{% trans "License" context "staff.management" %}:</strong> {{ organization_item.license_identifier|default:"-" }}</div>
+                        {% if organization_item.suspension_reason %}
+                        <div><strong>{% trans "Reason" context "staff.management" %}:</strong> {{ organization_item.suspension_reason }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'accounts:superadmin_organizations' %}" class="org-management-inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ post_next_url }}">
+                            <input type="hidden" name="organization_id" value="{{ organization_item.id }}">
+                            {% if organization_item.status == "pending" %}
+                            <div class="d-flex flex-column gap-2">
+                                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> {% trans "Approve" context "staff.management" %}
+                                </button>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}">
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
+                                    </button>
+                                </div>
+                            </div>
+                            {% elif organization_item.status == "suspended" or not organization_item.is_active %}
+                            <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">{% trans "Unsuspend" context "staff.management" %}</button>
+                            {% else %}
+                            <div class="d-flex flex-column gap-2">
+                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}">
+                                <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "Suspend" context "staff.management" %}</button>
+                            </div>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">{% trans "No organization found." context "staff.management" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=organization_records extra_query=organizations_pagination_query page_param=organizations_page_param %}
+</div>
+{% endif %}

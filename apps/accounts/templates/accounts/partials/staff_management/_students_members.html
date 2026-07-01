@@ -1,0 +1,83 @@
+{% load i18n %}
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="student-members">
+    <div class="section-title">
+        <i class="fas fa-user-graduate"></i> {% trans "Organization students" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Manage active students from here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="students">
+        <input type="hidden" name="student_tab" value="members">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_search"
+                   value="{{ student_search_query }}"
+                   placeholder="{% trans 'Search students...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.user.get_full_name|default:student.user.username }}</td>
+                    <td>@{{ student.user.username }}</td>
+                    <td>{{ student.user.email }}</td>
+                    <td>
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeStudentConfirmModal"
+                            data-student-user-id="{{ student.user.id }}"
+                            data-student-full-name="{{ student.user.get_full_name|default:student.user.username }}"
+                            data-student-username="@{{ student.user.username }}"
+                            data-student-email="{{ student.user.email }}"
+                            data-student-org="{{ organization.name }}"
+                            data-student-role="{% trans 'Student' context 'membership_request.role' %}"
+                            {% if not can_manage_students %}disabled{% endif %}>
+                            <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">{% trans "No student found." context "staff.management" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=students extra_query=students_pagination_query page_param=students_page_param %}
+</div>
+{% endif %}

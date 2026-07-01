@@ -33,16 +33,35 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BUDGET_FILE = Path(__file__).resolve().parent / "module_size_budget.json"
 
-# Skan olunan kök qovluqlar.
-SOURCE_DIRS = ["apps", "core", "config"]
+# Python skan olunan kök qovluqlar.
+PY_DIRS = ["apps", "core", "config"]
+# Asset (HTML/CSS/JS) skan olunan kök qovluqlar (şablonlar + statiklər daxil).
+ASSET_DIRS = ["apps", "core", "config", "templates", "static"]
 
-# Yeni (baseline-də olmayan) fayllar üçün sərt yuxarı hədd.
+# Skan olunan uzantılar.
+PY_EXT = ".py"
+ASSET_EXTS = (".html", ".css", ".js")
+
+# Yeni (baseline-də olmayan) fayllar üçün sərt yuxarı hədd (bütün tiplər üçün eyni).
 SOFT_CAP = 600
 
-# Bu yol fraqmentlərini ehtiva edən fayllar yoxlanmır.
-EXCLUDE_PARTS = ("/migrations/", "/__pycache__/", "/tests/")
+# Bu yol fraqmentlərini ehtiva edən fayllar yoxlanmır (generated / vendor / test / collected).
+EXCLUDE_PARTS = (
+    "/migrations/",
+    "/__pycache__/",
+    "/tests/",
+    "/staticfiles/",  # collectstatic çıxışı
+    "/htmlcov/",  # coverage HTML
+    "/output/",  # generated PDF/HTML
+    "/node_modules/",
+    "/vendor/",  # üçüncü tərəf assetlər
+    "/libs/",
+    "/dist/",
+)
 EXCLUDE_NAME_PREFIX = ("test_",)
 EXCLUDE_NAME_EXACT = ("tests.py",)
+# Minifikasiya olunmuş / xəritə faylları (mənbə deyil).
+EXCLUDE_NAME_SUFFIX = (".min.css", ".min.js", ".bundle.js", ".map")
 
 
 def _is_excluded(rel: str, name: str) -> bool:
@@ -53,6 +72,8 @@ def _is_excluded(rel: str, name: str) -> bool:
         return True
     if any(name.startswith(p) for p in EXCLUDE_NAME_PREFIX):
         return True
+    if any(name.endswith(s) for s in EXCLUDE_NAME_SUFFIX):
+        return True
     return False
 
 
@@ -62,15 +83,22 @@ def _count_lines(path: Path) -> int:
 
 
 def _iter_py_files():
-    for d in SOURCE_DIRS:
-        base = ROOT / d
-        if not base.exists():
-            continue
-        for path in base.rglob("*.py"):
-            rel = str(path.relative_to(ROOT))
-            if _is_excluded(rel, path.name):
+    """Python mənbə faylları (apps/core/config) + HTML/CSS/JS assetlər
+    (əlavə olaraq templates/ və static/). Təkrarlar rel yola görə silinir."""
+    seen = set()
+    scans = [(PY_DIRS, (PY_EXT,)), (ASSET_DIRS, ASSET_EXTS)]
+    for dirs, exts in scans:
+        for d in dirs:
+            base = ROOT / d
+            if not base.exists():
                 continue
-            yield rel, path
+            for ext in exts:
+                for path in base.rglob(f"*{ext}"):
+                    rel = str(path.relative_to(ROOT))
+                    if rel in seen or _is_excluded(rel, path.name):
+                        continue
+                    seen.add(rel)
+                    yield rel, path
 
 
 def _load_budget() -> dict:

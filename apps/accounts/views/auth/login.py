@@ -1,0 +1,182 @@
+"""accounts auth view paketi — login."""
+
+from django.conf import settings
+from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
+from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
+
+from apps.accounts.models import EmailOTP
+from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
+from core.utils import get_auth_otp_expiry_minutes, get_client_ip
+
+from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetCodeForm, OTPPasswordResetConfirmForm
+from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
+from ...services import get_otp_timer_context
+from ._shared import (
+    _authenticate_superadmin_for_rate_limit_reset,
+    _clear_login_rate_limits_after_password_reset,
+    _ensure_auth_device_cookie,
+    _get_auth_device_id,
+    _login_limit_keys,
+    _sanitize_auth_redirect_target,
+)
+from .constants import (
+    AUTH_RATE_LIMIT_MESSAGE,
+    PASSWORD_RESET_EMAIL_SESSION_KEY,
+    logger,
+)
+
+
+class CustomLoginView(LoginView):
+    """Login view with custom form and suspended-organization checks."""
+
+    template_name = "accounts/login.html"
+    authentication_form = CustomLoginForm
+    redirect_authenticated_user = True
+    # SEO: the login page is indexable (it carries brand keywords) but
+    # ranks low. These values flow into the shared head partial.
+    extra_context = {
+        "seo_title": "Daxil ol | EMSArena",
+        "seo_description": (
+            "EMSArena hesabınıza daxil olun və təhsil, imtahan, kurs və " "idarəetmə panelindən istifadə edin."
+        ),
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        return _ensure_auth_device_cookie(request, response)
+
+    def get_redirect_url(self):
+        redirect_to = self.request.POST.get(
+            self.redirect_field_name,
+            self.request.GET.get(self.redirect_field_name),
+        )
+        return _sanitize_auth_redirect_target(self.request, redirect_to)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        limit_keys = _login_limit_keys(request, username)
+
+        for scope, *key_parts in limit_keys:
+            is_limited, retry_after = is_rate_limited(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
+            if is_limited:
+                superadmin_user = _authenticate_superadmin_for_rate_limit_reset(request, username, password)
+                if superadmin_user is not None:
+                    for reset_scope, *reset_key_parts in limit_keys:
+                        clear_rate_limit(reset_scope, *reset_key_parts)
+                    form.user_cache = superadmin_user
+                    logger.warning(
+                        "Cleared login rate limit after successful superadmin authentication",
+                        extra={
+                            "username": normalize_rate_identity(username),
+                            "auth_device": _get_auth_device_id(request),
+                            "client_ip": get_client_ip(request) or "unknown",
+                        },
+                    )
+                    return self.form_valid(form)
+
+                form.add_error(None, AUTH_RATE_LIMIT_MESSAGE)
+                response = self.render_to_response(self.get_context_data(form=form), status=429)
+                if retry_after:
+                    response.headers["Retry-After"] = str(retry_after)
+                return response
+
+        if form.is_valid():
+            for scope, *key_parts in limit_keys:
+                clear_rate_limit(scope, *key_parts)
+            return self.form_valid(form)
+
+        for scope, *key_parts in limit_keys:
+            record_rate_limit_hit(scope, settings.LOGIN_RATE_LIMIT, *key_parts)
+        return self.form_invalid(form)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
+        return response
+
+
+class NamespacedPasswordResetView(PasswordResetView):
+    """Password reset view that sends an OTP and keeps the reset on-site."""
+
+    template_name = "accounts/password_reset.html"
+    form_class = CustomPasswordResetForm
+    subject_template_name = "accounts/password_reset_subject.txt"
+    email_template_name = "accounts/password_reset_email.txt"
+    html_email_template_name = "accounts/password_reset_email.html"
+    success_url = reverse_lazy("accounts:password_reset_done")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        reset_users = getattr(form, "password_reset_users", [])
+        if reset_users:
+            reset_email = EmailOTP.normalize_email(form.cleaned_data["email"])
+            self.request.session[PASSWORD_RESET_EMAIL_SESSION_KEY] = reset_email
+        else:
+            self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return response
+
+
+class NamespacedPasswordResetDoneView(FormView):
+    template_name = "accounts/password_reset_done.html"
+    form_class = OTPPasswordResetCodeForm
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+    def get_reset_email(self):
+        return EmailOTP.normalize_email(self.request.session.get(PASSWORD_RESET_EMAIL_SESSION_KEY, ""))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["email"] = self.get_reset_email()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reset_email = self.get_reset_email()
+        if reset_email:
+            context.update(get_otp_timer_context(email=reset_email, purpose=EmailOTP.Purpose.PASSWORD_RESET))
+        else:
+            context["otp_expires_at"] = None
+            context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
+        context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
+        context["password_reset_email"] = reset_email
+        return context
+
+    def form_valid(self, form):
+        user = form.save()
+        _clear_login_rate_limits_after_password_reset(self.request, user)
+        self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return super().form_valid(form)
+
+
+class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
+    """Password reset confirm view with namespaced completion redirect."""
+
+    template_name = "accounts/password_reset_confirm.html"
+    form_class = OTPPasswordResetConfirmForm
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if getattr(self, "user", None) is not None and getattr(self.user, "is_authenticated", False):
+            context.update(get_otp_timer_context(self.user, purpose=EmailOTP.Purpose.PASSWORD_RESET))
+        else:
+            context["otp_expires_at"] = None
+            context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
+            context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = getattr(form, "user", None) or getattr(self, "user", None)
+        if user is not None:
+            _clear_login_rate_limits_after_password_reset(self.request, user)
+        self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+        return response

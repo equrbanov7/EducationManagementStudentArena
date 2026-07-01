@@ -1,0 +1,154 @@
+{% load static i18n %}
+<div class="modal fade" id="editLabModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> {% trans "modal_edit_lab" context "labs.template.lab_modals" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editLabForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="editLabId" name="lab_id">
+                <div class="modal-body">
+                    
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#editLabTabInfo" type="button">
+                                <i class="fas fa-info-circle me-1"></i> {% trans "tab_basic_info" context "labs.template.lab_modals" %}
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabSettings" type="button">
+                                <i class="fas fa-cog me-1"></i> {% trans "tab_settings" context "labs.template.lab_modals" %}
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabMaterials" type="button">
+                                <i class="fas fa-file-alt me-1"></i> {% trans "tab_materials" context "labs.template.lab_modals" %}
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="editLabTabInfo">
+                            <div class="mb-3">
+                                <label class="form-label">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                <input type="text" id="editLabTitle" name="title" class="form-control" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" id="editLabMaxScore" name="max_score" class="form-control" min="1">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" id="editLabMaxAttempts" name="max_attempts" class="form-control" min="1">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">{% trans "label_status" context "labs.template.lab_modals" %}</label>
+                                    <select id="editLabStatus" name="status" class="form-select">
+                                        <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
+                                        <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{% trans "label_description" context "labs.template.lab_modals" %}</label>
+                                <textarea id="editLabDescription" name="description" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" id="editLabStart" name="start_datetime" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" id="editLabEnd" name="end_datetime" class="form-control" required>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="editLabGroupSearch" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
+                                    <div id="editLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabGroupCount">0</span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="editLabStudentSearch" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
+                                    <div id="editLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
+                                        <p class="text-muted text-center py-3">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
+                                    </div>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabStudentCount">0</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="editLabTabSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" id="editLabQPS" name="questions_per_student" class="form-control" min="0">
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowLate" name="allow_late_submission">
+                                        <label class="form-check-label" for="editAllowLate">{% trans "label_allow_late_submission" context "labs.template.lab_modals" %}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" id="editLatePenalty" name="late_penalty_percent" class="form-control" min="0" max="100">
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowFile" name="allow_file_upload">
+                                        <label class="form-check-label" for="editAllowFile">{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowLink" name="allow_link_submission">
+                                        <label class="form-check-label" for="editAllowLink">{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
+                                    <input type="number" id="editMaxFileSize" name="max_file_size_mb" class="form-control" min="1">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
+                                <input type="text" id="editAllowedExt" name="allowed_extensions" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="editLabTabMaterials">
+                            <div class="mb-3">
+                                <label class="form-label">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
+                                <input type="file" name="teacher_files" class="form-control">
+                                <div id="editCurrentFile" class="mt-2"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
+                                <textarea id="editLabInstructions" name="teacher_instructions" class="form-control" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.lab_modals" %}</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> {% trans "action_save" context "labs.template.lab_modals" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

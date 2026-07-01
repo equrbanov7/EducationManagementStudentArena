@@ -1,0 +1,153 @@
+{% load i18n %}
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="student-pending">
+    <div class="section-title">
+        <i class="fas fa-user-clock"></i> {% trans "Pending students" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Approve or delete pending requests from here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="students">
+        <input type="hidden" name="student_tab" value="pending">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_pending_search"
+                   value="{{ pending_search_query }}"
+                   placeholder="{% trans 'Search pending students...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_approve_requested_students">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllPendingStudents"
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
+            </label>
+            <div class="d-flex gap-2">
+                <button type="button"
+                        class="btn btn-success btn-sm js-pending-add-confirm-bulk"
+                        data-default-label="{% trans 'Add selected users to the organization' context 'staff.management' %}"
+                        data-selected-label="{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}"
+                        data-disabled-tooltip="{% trans 'Select at least 1 student' context 'staff.management' %}"
+                        data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                        title="{% trans 'Select at least 1 student' context 'staff.management' %}"
+                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
+                    <i class="fas fa-check-double"></i>
+                    <span class="js-pending-add-bulk-label">{% trans "Add selected users to the organization" context "staff.management" %}</span>
+                </button>
+                <button type="submit"
+                        name="bulk_reject"
+                        value="1"
+                        class="btn btn-outline-danger btn-sm js-pending-remove-bulk"
+                        data-default-label="{% trans 'Delete selected users' context 'staff.management' %}"
+                        data-selected-label="{% trans 'Delete selected users ({count} selected)' context 'staff.management' %}"
+                        data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                        data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                        title="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
+                    <i class="fas fa-trash"></i> {% trans "Delete selected users" context "staff.management" %}
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Message" context "staff.management" %}</th>
+                        <th>{% trans "Status / note" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pending_request in pending_requested_students %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="pending-student-checkbox form-check-input"
+                                   name="selected_pending_user_ids"
+                                   value="{{ pending_request.user.id }}"
+                                   data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
+                                   data-user-username="@{{ pending_request.user.username }}"
+                                   data-user-email="{{ pending_request.user.email }}"
+                                   data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                   {% if not pending_request.request_is_actionable %}disabled{% endif %}>
+                        </td>
+                        <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>
+                        <td>@{{ pending_request.user.username }}</td>
+                        <td>{{ pending_request.user.email }}</td>
+                        <td>{% if pending_request.message %}<small>{{ pending_request.message }}</small>{% else %}-{% endif %}</td>
+                        <td>
+                            <span class="badge bg-{{ pending_request.request_display_class }}">{{ pending_request.request_display_status }}</span>
+                            {% if pending_request.request_note %}
+                            <div class="mt-1"><small class="text-muted">{{ pending_request.request_note }}</small></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                {% if pending_request.request_is_actionable %}
+                                <button type="button"
+                                        class="btn btn-success btn-sm js-pending-add-confirm"
+                                        data-single-user-id="{{ pending_request.user.id }}"
+                                        data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
+                                        data-user-username="@{{ pending_request.user.username }}"
+                                        data-user-email="{{ pending_request.user.email }}"
+                                        data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-user-check"></i> {% trans "Add to organization" context "staff.management" %}
+                                </button>
+                                {% endif %}
+                                <button type="submit"
+                                        name="reject_user_id"
+                                        value="{{ pending_request.user.id }}"
+                                        class="btn btn-outline-danger btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-trash"></i> {% trans "Delete" context "staff.management" %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if not pending_requested_students.paginator.count %}
+        <p class="text-center text-muted mt-2 mb-0">{% trans "There are no pending students." context "staff.management" %}</p>
+        {% endif %}
+    </form>
+    {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
+</div>
+{% endif %}
