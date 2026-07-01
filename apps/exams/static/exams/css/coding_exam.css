@@ -1,21 +1,21 @@
 :root {
-    --coding-blue: #2563eb;
-    --coding-blue-strong: #1d4ed8;
-    --coding-blue-soft: #dbeafe;
-    --coding-green: #10b981;
+    --coding-blue: var(--ems-primary-600);
+    --coding-blue-strong: var(--ems-primary-700);
+    --coding-blue-soft: var(--ems-primary-100);
+    --coding-green: var(--ems-success);
     --coding-green-soft: #d1fae5;
     --coding-red: #ef4444;
-    --coding-red-strong: #dc2626;
+    --coding-red-strong: var(--ems-danger);
     --coding-red-soft: #fee2e2;
-    --coding-bg: #f8fafc;
+    --coding-bg: var(--ems-neutral-50);
     --coding-card: #ffffff;
     --coding-text: #1e293b;
-    --coding-muted: #64748b;
-    --coding-border: #e2e8f0;
-    --coding-border-strong: #cbd5e1;
+    --coding-muted: var(--ems-neutral-500);
+    --coding-border: var(--ems-neutral-200);
+    --coding-border-strong: var(--ems-neutral-300);
     --coding-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
     --coding-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
-    --coding-editor-bg: #0f172a;
+    --coding-editor-bg: var(--ems-neutral-900);
     --coding-editor-panel: #111827;
 }
 
@@ -136,8 +136,8 @@ body > main {
     min-height: 40px;
     padding: 8px 16px;
     border-radius: 16px;
-    background: #f1f5f9;
-    color: #334155;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
     font-size: 0.98rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
@@ -217,7 +217,7 @@ body #supervision-active-badge {
     aspect-ratio: 1;
     border: 1.5px solid var(--coding-border);
     border-radius: 14px;
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     color: var(--coding-muted);
     font-size: 0.92rem;
     font-weight: 800;
@@ -227,8 +227,8 @@ body #supervision-active-badge {
 
 .coding-question-nav-btn:hover {
     border-color: var(--coding-border-strong);
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
     transform: translateY(-1px);
 }
 
@@ -281,7 +281,7 @@ body #supervision-active-badge {
 
 .coding-legend-unanswered {
     border-color: var(--coding-border);
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
 }
 
 .coding-question-stats {
@@ -297,7 +297,7 @@ body #supervision-active-badge {
     min-width: 0;
     padding: 14px 8px;
     border-radius: 14px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     text-align: center;
 }
 
@@ -398,7 +398,7 @@ body #supervision-active-badge {
     align-items: center;
     justify-content: center;
     background: #ffffff;
-    color: #475569;
+    color: var(--ems-neutral-600);
     text-decoration: none;
     cursor: pointer;
     transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
@@ -406,7 +406,7 @@ body #supervision-active-badge {
 
 .coding-icon-btn:hover {
     border-color: var(--coding-border-strong);
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     color: var(--coding-text);
     transform: translateY(-1px);
 }
@@ -720,17 +720,17 @@ body #supervision-active-badge {
 }
 
 .coding-btn--muted {
-    color: #475569;
-    background: #f1f5f9;
+    color: var(--ems-neutral-600);
+    background: var(--ems-neutral-100);
     border: 1px solid var(--coding-border);
 }
 
 .coding-btn--muted:hover {
-    background: #e2e8f0;
+    background: var(--ems-neutral-200);
 }
 
 .coding-btn--run {
-    background: #0f766e;
+    background: var(--ems-success-strong);
 }
 
 .coding-btn--run:hover {
@@ -809,7 +809,7 @@ body #supervision-active-badge {
 
 .coding-console-dot--red { background: #ef4444; }
 .coding-console-dot--yellow { background: #f59e0b; }
-.coding-console-dot--green { background: #10b981; }
+.coding-console-dot--green { background: var(--ems-success); }
 
 .coding-console-header__title {
     margin-left: 6px;
@@ -820,7 +820,7 @@ body #supervision-active-badge {
 }
 
 .coding-console-meta {
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
@@ -864,7 +864,7 @@ body #supervision-active-badge {
     margin-left: auto;
     font-size: 0.72rem;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .coding-console-input-hint--warn {
@@ -876,7 +876,7 @@ body #supervision-active-badge {
 }
 
 .coding-console-input-hint--muted {
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .coding-console-output {
@@ -929,7 +929,7 @@ body #supervision-active-badge {
 }
 
 .coding-stdin::placeholder {
-    color: #64748b;
+    color: var(--ems-neutral-500);
     opacity: 1;
 }
 
@@ -960,7 +960,7 @@ body #supervision-active-badge {
 
 .coding-output:empty::before {
     content: attr(data-empty);
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .coding-output--error {
@@ -1136,8 +1136,8 @@ body #supervision-active-badge {
     gap: 10px;
     border: 1px solid var(--coding-border);
     border-radius: 16px;
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
     padding: 12px 26px;
     font-size: 1rem;
     font-weight: 800;
@@ -1147,14 +1147,14 @@ body #supervision-active-badge {
 
 .coding-footer-btn:hover {
     border-color: var(--coding-border-strong);
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
 }
 
 .coding-footer-btn--primary {
     border-color: var(--coding-border);
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
 }
 
 .coding-footer-btn--finish {
@@ -1165,7 +1165,7 @@ body #supervision-active-badge {
 }
 
 .coding-footer-btn--finish:hover {
-    background: linear-gradient(135deg, var(--coding-red-strong) 0%, #b91c1c 100%);
+    background: linear-gradient(135deg, var(--coding-red-strong) 0%, var(--ems-danger-strong) 100%);
     color: #ffffff;
     box-shadow: 0 16px 28px rgba(239, 68, 68, 0.26);
     transform: translateY(-1px);
@@ -1449,7 +1449,7 @@ body #supervision-active-badge {
 .coding-terminal-hint {
     margin-top: 10px;
     font-size: 0.78rem;
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-style: italic;
 }
@@ -1486,7 +1486,7 @@ body #supervision-active-badge {
     content: "▸";
     display: inline-block;
     transition: transform 120ms ease;
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .coding-console-advanced[open] summary::before {

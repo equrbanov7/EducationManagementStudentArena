@@ -2,10 +2,10 @@
     --wait-room-bg-1: #081427;
     --wait-room-bg-2: #0b2a52;
     --wait-room-bg-3: #0f4c81;
-    --wait-room-bg-4: #2563eb;
+    --wait-room-bg-4: var(--ems-primary-600);
     --wait-room-accent: #38bdf8;
-    --wait-room-accent-strong: #1d4ed8;
-    --wait-room-accent-soft: #dbeafe;
+    --wait-room-accent-strong: var(--ems-primary-700);
+    --wait-room-accent-soft: var(--ems-primary-100);
     --wait-room-shadow: 0 32px 90px rgba(8, 23, 55, 0.28);
 }
 
@@ -201,7 +201,7 @@ body.wait-room-page {
     padding: 18px 20px 12px;
     border-radius: 28px;
     background: rgba(248, 250, 252, 0.96);
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     box-shadow: var(--wait-room-shadow);
     text-align: center;
     position: relative;
@@ -250,7 +250,7 @@ body.wait-room-page {
     font-size: 1rem;
     line-height: 1.25;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 @keyframes waitRoomSpin {
@@ -267,7 +267,7 @@ body.wait-room-page {
     border: none;
     border-radius: 50%;
     background: #ffffff;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     box-shadow: 0 18px 28px rgba(15, 23, 42, 0.18);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -425,7 +425,7 @@ body.wait-room-page {
     overflow: hidden;
     border-radius: 30px;
     background: #ffffff;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     box-shadow: var(--wait-room-shadow);
     transform: translate(-50%, -42%) scale(0.96);
     opacity: 0;
@@ -450,7 +450,7 @@ body.wait-room-page {
 }
 
 .wait-room-modal__header {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--ems-neutral-200);
     position: sticky;
     top: 0;
     justify-content: flex-start;
@@ -477,8 +477,8 @@ body.wait-room-page {
     height: 44px;
     border: none;
     border-radius: 14px;
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
 }
 
 .wait-room-modal__body {
@@ -495,7 +495,7 @@ body.wait-room-page {
     position: relative;
     border-radius: 22px;
     padding: 14px;
-    background: linear-gradient(180deg, #dbeafe, #eff6ff);
+    background: linear-gradient(180deg, var(--ems-primary-100), var(--ems-primary-50));
     display: grid;
     gap: 8px;
     justify-items: center;
@@ -503,7 +503,7 @@ body.wait-room-page {
 }
 
 .wait-room-preview__label {
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-weight: 700;
     font-size: 0.92rem;
 }
@@ -520,7 +520,7 @@ body.wait-room-page {
 
 .wait-room-form__label {
     font-weight: 800;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .wait-room-form__input {
@@ -528,7 +528,7 @@ body.wait-room-page {
     padding: 15px 16px;
     border-radius: 18px;
     border: 2px solid #dbe4ef;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     font-size: 1rem;
     font-weight: 700;
 }
@@ -541,7 +541,7 @@ body.wait-room-page {
 
 .wait-room-form__error {
     min-height: 20px;
-    color: #dc2626;
+    color: var(--ems-danger);
     font-size: 0.92rem;
     font-weight: 700;
 }
@@ -558,7 +558,7 @@ body.wait-room-page {
     padding: 4px;
     border: 1px solid #d9e2ef;
     border-radius: 18px;
-    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    background: linear-gradient(180deg, var(--ems-neutral-50), var(--ems-neutral-100));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
@@ -566,7 +566,7 @@ body.wait-room-page {
     min-height: 50px;
     border: none;
     background: transparent;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 1rem;
     font-weight: 800;
     border-radius: 14px;
@@ -575,7 +575,7 @@ body.wait-room-page {
 
 .wait-room-picker-switch__button.is-active {
     background: #ffffff;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.12), inset 0 0 0 2px rgba(37, 99, 235, 0.72);
 }
 
@@ -603,8 +603,8 @@ body.wait-room-page {
 
 .wait-room-picker__item,
 .wait-room-picker__chip {
-    border: 2px solid #e2e8f0;
-    background: #f8fafc;
+    border: 2px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
     transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
@@ -665,7 +665,7 @@ body.wait-room-page {
 }
 
 .wait-room-modal__footer {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ems-neutral-200);
     justify-content: flex-end;
     flex-wrap: wrap;
     position: sticky;
@@ -687,8 +687,8 @@ body.wait-room-page {
 }
 
 .wait-room-modal__button--ghost {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
 }
 
 .wait-room-modal__button--primary {

@@ -28,6 +28,9 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
 
     <!-- Sənin global CSS-lərin -->
+    <!-- Design tokens (rəng palitrası) — bütün digər CSS-lərdən ƏVVƏL yüklənir
+         ki, var(--ems-*) hər yerdə əlçatan olsun. Bax: docs/UI_COLOR_TOKENS_MIGRASIYA.md -->
+    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20260618-2">
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}">

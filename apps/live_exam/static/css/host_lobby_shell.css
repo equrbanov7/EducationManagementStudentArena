@@ -7,12 +7,12 @@ body.host-live-page {
     --host-sidebar-width: minmax(290px, 320px);
     --theme-stage-bg:
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%),
-        linear-gradient(135deg, #081427 0%, #0f3b6b 42%, #2563eb 100%);
+        linear-gradient(135deg, #081427 0%, #0f3b6b 42%, var(--ems-primary-600) 100%);
     --theme-body-bg:
         radial-gradient(circle at 18% 16%, rgba(250, 204, 21, 0.12), transparent 20%),
         radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.08), transparent 18%),
         radial-gradient(circle at 50% 74%, rgba(96, 165, 250, 0.22), transparent 30%),
-        linear-gradient(150deg, #081427 0%, #0b2a52 28%, #0f4c81 62%, #2563eb 100%);
+        linear-gradient(150deg, #081427 0%, #0b2a52 28%, #0f4c81 62%, var(--ems-primary-600) 100%);
 }
 
 body.host-live-page {
@@ -30,7 +30,7 @@ body.host-live-page[data-live-theme="winter"] {
     --theme-body-bg:
         radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.22), transparent 18%),
         radial-gradient(circle at 76% 18%, rgba(147, 197, 253, 0.2), transparent 22%),
-        linear-gradient(160deg, #0a1d36 0%, #12375f 44%, #3b82f6 100%);
+        linear-gradient(160deg, #0a1d36 0%, #12375f 44%, var(--ems-primary-500) 100%);
 }
 
 body.host-live-page[data-live-theme="aurora"] {
@@ -40,17 +40,17 @@ body.host-live-page[data-live-theme="aurora"] {
     --theme-body-bg:
         radial-gradient(circle at 18% 18%, rgba(45, 212, 191, 0.2), transparent 18%),
         radial-gradient(circle at 82% 12%, rgba(134, 239, 172, 0.16), transparent 18%),
-        linear-gradient(150deg, #04262d 0%, #084c61 42%, #0f766e 100%);
+        linear-gradient(150deg, #04262d 0%, #084c61 42%, var(--ems-success-strong) 100%);
 }
 
 body.host-live-page[data-live-theme="sweet"] {
     --theme-stage-bg:
         linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 30%),
-        linear-gradient(135deg, #0b4f4a 0%, #0f766e 38%, #5eead4 100%);
+        linear-gradient(135deg, #0b4f4a 0%, var(--ems-success-strong) 38%, #5eead4 100%);
     --theme-body-bg:
         radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.12), transparent 18%),
         radial-gradient(circle at 75% 20%, rgba(94, 234, 212, 0.18), transparent 20%),
-        linear-gradient(155deg, #052e2b 0%, #0f766e 40%, #5eead4 100%);
+        linear-gradient(155deg, #052e2b 0%, var(--ems-success-strong) 40%, #5eead4 100%);
 }
 
 body.host-live-page.live-high-contrast {
@@ -313,7 +313,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-drawer__eyebrow {
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .host-settings-drawer__body {
@@ -450,7 +450,7 @@ body.host-settings-open .host-settings-drawer {
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--ems-primary-600);
     border: 3px solid #fff;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
     cursor: pointer;
@@ -460,7 +460,7 @@ body.host-settings-open .host-settings-drawer {
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #2563eb;
+    background: var(--ems-primary-600);
     border: 3px solid #fff;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
     cursor: pointer;
@@ -481,7 +481,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .host-settings-item--disabled .host-switch {
-    background: #e2e8f0;
+    background: var(--ems-neutral-200);
 }
 
 .host-settings-badge {
@@ -517,7 +517,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .theme-card.is-active {
-    border-color: #2563eb;
+    border-color: var(--ems-primary-600);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
@@ -529,7 +529,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .theme-card__swatch--standard {
-    background: linear-gradient(135deg, #0b2a52 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #0b2a52 0%, var(--ems-primary-600) 100%);
 }
 
 .theme-card__swatch--winter {
@@ -541,7 +541,7 @@ body.host-settings-open .host-settings-drawer {
 }
 
 .theme-card__swatch--sweet {
-    background: linear-gradient(135deg, #0f766e 0%, #5eead4 100%);
+    background: linear-gradient(135deg, var(--ems-success-strong) 0%, #5eead4 100%);
 }
 
 .host-live-page .player-chip {

@@ -30,6 +30,8 @@ Notes:
 
     <!-- Bootstrap 5 (core grid/forms/alerts only; bundle JS intentionally NOT loaded) -->
     <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Design tokens — main.css və per-page CSS-dən əvvəl (var(--ems-*) əlçatan olsun). -->
+    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
     {% block extraCss %}{% endblock %}

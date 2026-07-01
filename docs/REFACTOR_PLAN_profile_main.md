@@ -21,19 +21,43 @@
   - ✅ `_sections/notifications.py` → `build_notifications_context` ("notifications")
   - ✅ `_sections/review_queue.py` → `build_pending_review_context` + `build_review_results_context`
   - ✅ `_sections/posts.py` → `build_posts_context` ("posts" / "create-post")
-- Fayl: 2313 → **1519 sətir** (~794 sətir, ~34% azalma). Qoruyucu baseline 1519-a sıxıldı.
-  `_sections/` paketi: 13 bölmə modulu. **Bütün təhlükəsiz, yüksək-ROI bölmələr çıxarıldı.**
+  - ✅ `_sections/category_management.py` → `build_create_category_context` +
+    `build_category_management_context` (CI Postgres yaşıl olduğu üçün çıxarıldı — sqlite-da
+    düşən 3 test CI-də KEÇİR, yəni sqlite-mühit problemi idi, real reqressiya deyil)
+- Fayl: 2313 → **1442 sətir** (~871 sətir, ~38% azalma). Qoruyucu baseline 1442-yə sıxıldı.
+  `_sections/` paketi: 14 bölmə modulu. **Bütün bölmələr çıxarıldı.**
 
-## Qalan — best-practice qeydi
+## Yekun mərhələ — faylı <600-ə salmaq (context-obyekt arxitekturası)
 
-- **category-management** (~80 sətir): sqlite-da 3 testi (`test_superadmin_*category_management*`)
-  ƏVVƏLCƏDƏN düşür. Best-practice: bu bloku zəif lokal safety net ilə deyil, **CI/Postgres
-  ilə doğrulanan ayrıca PR-da** çıxar. Sandbox-da TOXUNULMADI.
-- **posts / create-post**: orta blok; çıxarıla bilər (safe).
-- Student cluster (assigned-exams/courses, my-results, pending-answers): kiçik + paylaşılan
-  default-lar → aşağı ROI, inline saxlamaq məqbuldur.
-- Yekun `context = {...}` literal-ı (~200 sətir) sırf açar→dəyər xəritəsidir; faylı 600-dən
-  aşağı salmaq üçün ya registry-əsaslı dispatch, ya context-obyekt lazımdır (ayrıca böyük PR).
+`user_profile` indi ~1442 sətirdir: preamble (~250) + section-fragment çağırışları (~800,
+artıq `_sections/`-ə delegasiya) + yekun `context = {...}` (~200 açar) + `context.update`-lar.
+Qalan kütlə **~150 qarşılıqlı-asılı lokal dəyişənin monolit context-yığımıdır**. Onu təhlükəsiz
+<600-ə salmaq üçün mərhələli, **hər mərhələsi ayrıca PR + CI (Postgres) doğrulaması**:
+
+**Mərhələ A — HTTP view-ni logikadan ayır (təhlükəsiz, mexaniki). ✅ EDİLDİ.**
+`user_profile` gövdəsi `context_builder.py: build_profile_response(request)`-ə köçürüldü;
+`main.py` artıq **14 sətir** (`@login_required def user_profile(request): return build_profile_response(request)`).
+main.py god-file-ı aradan qalxdı (baseline-dən çıxdı). `context_builder.py` (~1440) qoruyucu
+baseline-ında grandfathered — Mərhələ B/C-də bölünəcək. 153 test + flake8/black/isort yaşıl.
+
+**Mərhələ B — state-obyekt (`ProfileContext` dataclass) tətbiq et.**
+~150 lokalı bir `@dataclass ProfileContext` sahələrinə çevir. Section fragment-ləri
+`ctx.update(build_X(...))` ilə birbaşa yazsın (lokal açma və yekun dict təkrarı silinir).
+Rename/ifadə açarları (`"my_exams": my_exams_list`, `pending_review_page_obj or pending_review_items`,
+`len(...)`) fragment daxilində və ya nazik adapter-də həll olunur.
+
+**Mərhələ C — `context_builder.py`-ni mərhələ funksiyalarına böl** (hər biri <600):
+`_stage_base(ctx)` (badge/courses/notification), `_stage_sections(ctx)` (fragment orkestrasiyası),
+`_stage_assemble(ctx) -> dict`. Ortaq `ctx` obyekti mərhələlər arasında ötürülür.
+
+**Test:** hər mərhələdə `pytest apps/accounts/tests/test_profile_views.py` (CI-də Postgres, o
+cümlədən category-management testləri) + `black/isort/flake8` + `check_module_size.py`.
+
+**Risk:** Orta-yüksək (ən çox istifadə olunan səhifə, ~150 açar). Ona görə tələsik tək keçid YOX
+— mərhələ-mərhələ, hər dəfə CI yaşıl. Qoruyucu faylı 1442-də dondurduğu üçün TƏCİLİ deyil.
+
+### Toxunulmayan (best-practice)
+- Student cluster: kiçik + paylaşılan default-lar → inline saxlamaq məqbuldur.
 - Onsuz da ideal formda (toxunulmadı): org-structure/faculties/kafedras/members/roles,
   audit-log, superadmin-org-inspector, superadmin-users, superadmin-ai,
   student-organization-management, my-appeals, manage-appeals.

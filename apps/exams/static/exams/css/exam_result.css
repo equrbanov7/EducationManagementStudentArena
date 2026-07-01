@@ -37,7 +37,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-600));
 }
 
 .summary-header {
@@ -87,7 +87,7 @@
     display: block;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 /* Əsas Bal (Böyük) */
@@ -99,7 +99,7 @@
 .main-score .stat-value {
     font-size: 3rem;
     font-weight: 800;
-    color: #3b82f6; /* Brand Blue */
+    color: var(--ems-primary-500); /* Brand Blue */
     line-height: 1;
 }
 
@@ -126,9 +126,9 @@
     min-width: 54px;
     padding: 7px 11px;
     border-radius: 999px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #2563eb;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-600);
     font-size: 0.95rem;
     font-weight: 800;
     line-height: 1;
@@ -156,9 +156,9 @@
     gap: 18px;
     margin: -12px auto 34px;
     padding: 18px 20px;
-    border: 1px solid #dbeafe;
+    border: 1px solid var(--ems-primary-100);
     border-radius: 18px;
-    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--ems-primary-50) 100%);
     box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
 }
 
@@ -169,7 +169,7 @@
 }
 
 .result-action-panel__eyebrow {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -182,7 +182,7 @@
 }
 
 .result-action-panel__copy small {
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-weight: 600;
 }
 
@@ -235,7 +235,7 @@
     display: block;
     width: 5px;
     height: 24px;
-    background: #3b82f6;
+    background: var(--ems-primary-500);
     border-radius: 4px;
 }
 
@@ -308,7 +308,7 @@
 }
 
 .q-number {
-    background: #3b82f6;
+    background: var(--ems-primary-500);
     color: white;
     width: 34px;
     height: 34px;
@@ -334,7 +334,7 @@
     justify-content: center; /* Mərkəzləşdirmə */
     align-items: center;
     margin: 15px 0;
-    background-color: #f8fafc;
+    background-color: var(--ems-neutral-50);
     border-radius: 8px;
     padding: 10px;
 }
@@ -376,7 +376,7 @@
 }
 
 .option-icon { font-size: 1.2rem; margin-right: 12px; color: #d1d5db; }
-.correct-icon { font-size: 1.2rem; margin-right: 12px; color: #10b981; }
+.correct-icon { font-size: 1.2rem; margin-right: 12px; color: var(--ems-success); }
 .wrong-icon { font-size: 1.2rem; margin-right: 12px; color: #ef4444; }
 
 /* Variant rəngləri */
@@ -389,7 +389,7 @@
 .wrong-selected {
     background-color: #fef2f2; /* Açıq qırmızı */
     border-color: #fca5a5;
-    color: #b91c1c;
+    color: var(--ems-danger-strong);
 }
 
 .correct-selected {
@@ -408,18 +408,18 @@
 }
 
 .code-block {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 8px;
     padding: 15px;
     font-family: 'Courier New', monospace;
     font-size: 0.95rem;
-    color: #334155;
+    color: var(--ems-neutral-700);
     white-space: pre-wrap;
     word-break: break-word;
 }
-.user-answer { border-left: 4px solid #3b82f6; }
-.correct-answer { border-left: 4px solid #10b981; background: #f0fdf4; }
+.user-answer { border-left: 4px solid var(--ems-primary-500); }
+.correct-answer { border-left: 4px solid var(--ems-success); background: #f0fdf4; }
 
 .coding-files-review {
     display: grid;
@@ -440,7 +440,7 @@
     justify-content: space-between;
     gap: 10px;
     padding: 14px 16px;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     cursor: pointer;
     font-weight: 700;
     list-style: none;
@@ -453,7 +453,7 @@
 
 .coding-file-detail summary::after {
     content: "+";
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 1.1rem;
     font-weight: 800;
 }
@@ -471,8 +471,8 @@
     margin-left: auto;
     padding: 2px 8px;
     border-radius: 999px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
     font-size: 0.72rem;
     white-space: nowrap;
 }
@@ -482,7 +482,7 @@
     padding: 14px 16px;
     max-height: 360px;
     overflow: auto;
-    background: #0f172a;
+    background: var(--ems-neutral-900);
     color: #e5edf8;
     border-top: 1px solid #e5e7eb;
     border-radius: 0;
@@ -497,7 +497,7 @@
     background: #f9fafb;
     border-radius: 8px;
     padding: 12px;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--ems-neutral-300);
 }
 
 .file-item {
@@ -509,7 +509,7 @@
     gap: 8px;
 }
 .file-link {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     text-decoration: none;
     font-weight: 500;
 }
@@ -528,37 +528,37 @@
 .teacher-feedback-box {
     margin-top: 25px;
     background: #fff;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .tf-header {
-    background: #eff6ff;
+    background: var(--ems-primary-50);
     padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #dbeafe;
+    border-bottom: 1px solid var(--ems-primary-100);
 }
 .tf-avatar {
     width: 32px; height: 32px;
-    background: #2563eb;
+    background: var(--ems-primary-600);
     color: white;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
 }
-.tf-title { color: #1d4ed8; font-weight: 700; margin-left: 8px; }
+.tf-title { color: var(--ems-primary-700); font-weight: 700; margin-left: 8px; }
 .tf-score {
     background: #fff;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     padding: 4px 12px;
     border-radius: 20px;
     font-weight: 700;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
 }
-.tf-body { padding: 20px; color: #1f2937; line-height: 1.6; }
+.tf-body { padding: 20px; color: var(--ems-neutral-800); line-height: 1.6; }
 
 /* --- Footer Düymələr --- */
 .action-footer {
@@ -588,7 +588,7 @@
 }
 
 .custom-blue-btn {
-    background-color: #3b82f6;
+    background-color: var(--ems-primary-500);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -602,7 +602,7 @@
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .custom-blue-btn:hover {
-    background-color: #2563eb;
+    background-color: var(--ems-primary-600);
     color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);

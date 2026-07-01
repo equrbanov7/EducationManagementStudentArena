@@ -24,7 +24,7 @@
 .card-header {
     padding: 30px;
     border-bottom: 1px solid #e5e7eb;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     text-align: center;
 }
 
@@ -38,10 +38,10 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 8px;
     background: #ffffff;
-    color: #334155;
+    color: var(--ems-neutral-700);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
@@ -50,9 +50,9 @@
 }
 
 .exam-back-btn:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #94a3b8;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
+    border-color: var(--ems-neutral-400);
 }
 
 .exam-detail-title {
@@ -84,7 +84,7 @@
 }
 
 .info-card {
-    background-color: #f8fafc;
+    background-color: var(--ems-neutral-50);
     border: 1px solid #e5e7eb;
     border-radius: 14px;
     padding: 18px 22px;
@@ -112,7 +112,7 @@
 .info-value {
     font-size: 1.15rem;
     font-weight: 800;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 
 /* --- Canlı sessiya başlat (tam enli) --- */
@@ -194,7 +194,7 @@ body.live-session-modal-open {
         linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
     box-shadow: 0 30px 80px rgba(15, 23, 42, 0.26);
     padding: 28px;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .live-session-modal__close {
@@ -206,7 +206,7 @@ body.live-session-modal-open {
     border: 0;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.72);
-    color: #64748b;
+    color: var(--ems-neutral-500);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -214,7 +214,7 @@ body.live-session-modal-open {
 
 .live-session-modal__close:hover {
     background: #ffffff;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .live-session-modal__icon {
@@ -241,7 +241,7 @@ body.live-session-modal-open {
 
 .live-session-modal h2 {
     margin: 0 0 10px;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 1.42rem;
     font-weight: 850;
     line-height: 1.24;
@@ -249,7 +249,7 @@ body.live-session-modal-open {
 
 .live-session-modal__text {
     margin: 0;
-    color: #475569;
+    color: var(--ems-neutral-600);
     line-height: 1.6;
 }
 
@@ -269,7 +269,7 @@ body.live-session-modal-open {
 
 .live-session-modal__meta dt {
     margin: 0 0 4px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -278,7 +278,7 @@ body.live-session-modal-open {
 
 .live-session-modal__meta dd {
     margin: 0;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 1rem;
     font-weight: 850;
 }
@@ -299,13 +299,13 @@ body.live-session-modal-open {
 
 .live-session-modal__btn--ghost {
     background: #ffffff;
-    color: #334155;
-    border-color: #cbd5e1;
+    color: var(--ems-neutral-700);
+    border-color: var(--ems-neutral-300);
 }
 
 .live-session-modal__btn--ghost:hover {
-    border-color: #94a3b8;
-    background: #f8fafc;
+    border-color: var(--ems-neutral-400);
+    background: var(--ems-neutral-50);
 }
 
 .live-session-modal__btn--primary {
@@ -335,7 +335,7 @@ body.live-session-modal-open {
 
 .status-badge.passive {
     background-color: #fee2e2; /* Açıq qırmızı */
-    color: #b91c1c; /* Tünd qırmızı */
+    color: var(--ems-danger-strong); /* Tünd qırmızı */
 }
 
 /* --- İmtahan Hərəkətləri Hissəsi --- */
@@ -357,7 +357,7 @@ body.live-session-modal-open {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     border: 1px solid #e5e7eb;
     border-radius: 14px;
     padding: 18px 20px;
@@ -368,7 +368,7 @@ body.live-session-modal-open {
 
 .action-card:hover {
     background: #ffffff;
-    border-color: #cbd5e1;
+    border-color: var(--ems-neutral-300);
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
     transform: translateY(-2px);
 }
@@ -396,7 +396,7 @@ body.live-session-modal-open {
 .action-card__title {
     font-size: 0.98rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     line-height: 1.3;
 }
 
@@ -414,14 +414,14 @@ body.live-session-modal-open {
 }
 
 .action-card:hover .action-card__arrow {
-    color: #475569;
+    color: var(--ems-neutral-600);
     transform: translateX(3px);
 }
 
 /* İkon rəng variantları */
-.action-card--blue .action-card__icon  { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.action-card--green .action-card__icon { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.action-card--slate .action-card__icon { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+.action-card--blue .action-card__icon  { background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%); }
+.action-card--green .action-card__icon { background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%); }
+.action-card--slate .action-card__icon { background: linear-gradient(135deg, var(--ems-neutral-500) 0%, var(--ems-neutral-600) 100%); }
 
 /* İdarəetmə düymələri sətri */
 .exam-control-row {
@@ -452,7 +452,7 @@ body.live-session-modal-open {
 
 /* Düymə Stilləri */
 .primary-btn {
-    background-color: var(--primary-color, #3b82f6);
+    background-color: var(--primary-color, var(--ems-primary-500));
     color: white;
     box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
 }
@@ -474,19 +474,19 @@ body.live-session-modal-open {
 }
 
 .visibility-hide-btn {
-    background-color: #475569;
+    background-color: var(--ems-neutral-600);
     color: #fff;
     box-shadow: 0 2px 5px rgba(71, 85, 105, 0.28);
 }
 
 .visibility-hide-btn:hover {
-    background-color: #334155;
+    background-color: var(--ems-neutral-700);
     color: #fff;
     transform: translateY(-1px);
 }
 
 .visibility-show-btn {
-    background-color: #0f766e;
+    background-color: var(--ems-success-strong);
     color: #fff;
     box-shadow: 0 2px 5px rgba(15, 118, 110, 0.28);
 }
@@ -498,19 +498,19 @@ body.live-session-modal-open {
 }
 
 .bank-btn {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%);
     color: #fff;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.32);
 }
 
 .bank-btn:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
     color: #fff;
     transform: translateY(-1px);
 }
 
 .library-btn {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%);
     color: #fff;
     box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
 }
@@ -533,7 +533,7 @@ body.live-session-modal-open {
 }
 
 .success-btn { /* Aktiv et düyməsi */
-    background-color: #10b981;
+    background-color: var(--ems-success);
     color: white;
     box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
 }
@@ -574,7 +574,7 @@ body.live-session-modal-open {
 }
 .outline-btn:hover {
     background-color: #f3f4f6;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     border-color: #6b7280;
 }
 
@@ -584,7 +584,7 @@ body.live-session-modal-open {
     box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
 }
 .danger-btn:hover {
-    background-color: #dc2626;
+    background-color: var(--ems-danger);
     transform: translateY(-1px);
     color: white;
 }
@@ -636,7 +636,7 @@ body.live-session-modal-open {
 
 .question-item:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    border-color: #bfdbfe;
+    border-color: var(--ems-primary-200);
 }
 
 .question-content {
@@ -646,14 +646,14 @@ body.live-session-modal-open {
 .question-order {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary-color, #3b82f6);
+    color: var(--primary-color, var(--ems-primary-500));
     margin-right: 10px;
 }
 
 .question-text {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     display: inline; /* Sıra nömrəsi ilə yan-yana */
 }
 
@@ -686,7 +686,7 @@ body.live-session-modal-open {
 }
 
 .option-item.correct .option-indicator i {
-    color: #10b981; /* Düzgün cavab yaşıl */
+    color: var(--ems-success); /* Düzgün cavab yaşıl */
 }
 
 .option-item.correct .option-text {
@@ -715,18 +715,18 @@ body.live-session-modal-open {
     justify-content: center;
     min-height: 42px;
     padding: 0 18px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 999px;
     background: #ffffff;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-weight: 700;
     transition: all 0.2s ease;
 }
 
 .question-lazy-button:hover {
-    border-color: #94a3b8;
-    background: #f8fafc;
-    color: #0f172a;
+    border-color: var(--ems-neutral-400);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
 }
 
 .question-lazy-button[disabled] {
@@ -738,7 +738,7 @@ body.live-session-modal-open {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-weight: 700;
 }
 

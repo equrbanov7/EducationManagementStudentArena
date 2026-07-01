@@ -1,7 +1,7 @@
 :root {
     --player-bg-1: #0b2a52;
     --player-bg-2: #0f4c81;
-    --player-bg-3: #2563eb;
+    --player-bg-3: var(--ems-primary-600);
     --player-bg-4: #081427;
     --player-surface: rgba(255, 255, 255, 0.16);
     --player-surface-strong: rgba(255, 255, 255, 0.94);
@@ -447,7 +447,7 @@ body.live-player-page {
     height: 100%;
     width: 0;
     border-radius: inherit;
-    background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
+    background: linear-gradient(90deg, var(--ems-primary-600) 0%, var(--ems-primary-800) 100%);
     transition: width 0.14s linear;
 }
 
@@ -515,11 +515,11 @@ body.live-player-page {
 }
 
 .option-btn.opt-0 { background: linear-gradient(135deg, #ff4d6d, #e11d48); }
-.option-btn.opt-1 { background: linear-gradient(135deg, #2b8fff, #1d4ed8); }
+.option-btn.opt-1 { background: linear-gradient(135deg, #2b8fff, var(--ems-primary-700)); }
 .option-btn.opt-2 { background: linear-gradient(135deg, #ffb703, #f97316); }
 .option-btn.opt-3 { background: linear-gradient(135deg, #35c982, #0f9f74); }
-.option-btn.opt-4 { background: linear-gradient(135deg, #2563eb, #1e40af); }
-.option-btn.opt-5 { background: linear-gradient(135deg, #2dd4bf, #0f766e); }
+.option-btn.opt-4 { background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-800)); }
+.option-btn.opt-5 { background: linear-gradient(135deg, #2dd4bf, var(--ems-success-strong)); }
 
 .option-letter {
     position: relative;
@@ -602,7 +602,7 @@ body.live-player-page {
     justify-content: center;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.94);
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .multi-actions {
