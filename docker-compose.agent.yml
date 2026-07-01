@@ -1,0 +1,95 @@
+# EMS Arena — AI Agent PostgreSQL Sandbox
+#
+# Standalone local stack for Claude/Codex-style agents that need a real
+# PostgreSQL server. It intentionally avoids the repository .env contract by
+# using AGENT_* variables with safe local defaults.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: emsarena-agent-postgres
+    environment:
+      POSTGRES_DB: ${AGENT_POSTGRES_DB:-emsarena_agent}
+      POSTGRES_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
+      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+    ports:
+      - "${AGENT_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - agent_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - emsarena-agent-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: emsarena-agent-redis
+    ports:
+      - "${AGENT_REDIS_PORT:-56379}:6379"
+    volumes:
+      - agent_redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - emsarena-agent-network
+
+  agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    image: emsarena-agent:local
+    container_name: emsarena-agent-shell
+    working_dir: /app
+    entrypoint: []
+    command: ["sleep", "infinity"]
+    init: true
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: ${AGENT_SECRET_KEY:-emsarena-agent-dev-secret-key-not-for-production}
+      DEBUG: ${AGENT_DEBUG:-True}
+      ALLOWED_HOSTS: ${AGENT_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,testserver}
+      DATABASE_URL: postgres://${AGENT_POSTGRES_USER:-emsarena_agent}:${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}@postgres:5432/${AGENT_POSTGRES_DB:-emsarena_agent}
+      POSTGRES_DB: ${AGENT_POSTGRES_DB:-emsarena_agent}
+      POSTGRES_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
+      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
+      DB_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${AGENT_POSTGRES_DB:-emsarena_agent}
+      PGUSER: ${AGENT_POSTGRES_USER:-emsarena_agent}
+      PGPASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      USE_REDIS: ${AGENT_USE_REDIS:-True}
+      REDIS_URL: redis://redis:6379/0
+      PYTHONPATH: /app
+    volumes:
+      - .:/app
+      - agent_pip_cache:/root/.cache/pip
+      - agent_npm_cache:/root/.npm
+    networks:
+      - emsarena-agent-network
+
+networks:
+  emsarena-agent-network:
+    driver: bridge
+
+volumes:
+  agent_postgres_data:
+  agent_redis_data:
+  agent_pip_cache:
+  agent_npm_cache:

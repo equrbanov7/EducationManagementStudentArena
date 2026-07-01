@@ -11,10 +11,13 @@ oxuyun.**
 Böyük tək-fayllı modullar (1000+ sətir view/servis) oxunması, test edilməsi və
 təhlükəsiz dəyişdirilməsi çətindir. Ona görə **sərt qayda** var:
 
-- **Yeni `.py` faylı ≤ 600 sətir** olmalıdır (`SOFT_CAP`).
+- **Yeni fayl ≤ 600 sətir** olmalıdır (`SOFT_CAP`). Qayda `.py` **və HTML/CSS/JS
+  assetlərini** (şablonlar + statiklər) əhatə edir. İstisnalar: migrations, tests,
+  `staticfiles/`/`htmlcov/`/`output/`/`node_modules/`/`vendor/`, `.min.*`/`.map`.
 - Mövcud böyük fayllar `scripts/module_size_budget.json`-da **dondurulub
   (ratchet)**: onlara yeni sətir əlavə edib **böyütmək qadağandır** — yalnız
-  kiçildə bilərsiniz.
+  kiçildə bilərsiniz. (Cari: 0 Python; ~44 asset donmuş — HTML {% include %}
+  partial, CSS komponent-bölgü, JS ES-modul ilə tədricən kiçildilir.)
 - Task həll edərkən böyük fayla məntiq əlavə etmək lazımdırsa: məntiqi **ayrı
   servis / helper / alt-modula** çıxarın və ya faylı **paketə** çevirin
   (aşağıdakı pattern-ə bax).
@@ -54,12 +57,74 @@ from .extraction import (_private_used_externally, END_QUESTION_RE)  # underscor
 from ._core import (_validate_questions, parse_bulk_mcq)
 ```
 
-Diqqət: testlər `patch.object(module, "Name")` istifadə edirsə, həmin `Name`-i
-işlədən funksiya onu **call-time fasaddan** həll etməlidir (yoxsa mock alt-modula
-təsir etməz). Real nümunə: `apps/exams/services/parsing/extraction.py` →
-`extract_text_from_upload`.
+Diqqət 1 — **patch/mock:** testlər `patch.object(module, "Name")` və ya
+`patch("module.Name")` istifadə edirsə, həmin `Name`-i işlədən funksiya onu
+**call-time fasaddan** həll etməlidir (yoxsa mock alt-modula təsir etməz). Modul
+obyektləri (`subprocess`, `shutil`) fasadda `import`-la expose olunmalıdır.
+Nümunələr: `parsing/extraction.py` → `extract_text_from_upload`;
+`coding_runtime/execution.py`,`grading.py` → docker/`execute_code`.
 
-İstinad nümunəsi (artıq bölünmüş): `apps/exams/services/parsing/`.
+Diqqət 2 — **relative importlar (KRİTİK):** fayl paketə çevriləndə bir səviyyə
+DƏRİNLƏŞİR. Ona görə orijinal `from .X import ...` (qonşu modul) alt-modullarda
+`from ..X import ...` OLMALIDIR (əks halda `.X` paketin öz içində axtarılır →
+`ModuleNotFoundError`). Həmçinin alt-modul adı qonşu modulla TOQQUŞMAMALIDIR
+(məs. `apps.organizations.views` varsa, alt-modulu `views` yox, `endpoints`
+adlandır). Nümunə: `apps/organizations/structure_views/` (`..models`, `..views`,
+`endpoints.py`).
+
+Diqqət 3 — **hər bölgüdən sonra** `python manage.py check` + `makemigrations
+--check` işlət (relative-import/registry problemlərini tutur).
+
+İstinad nümunəsi (artıq bölünmüş): `apps/exams/services/parsing/`,
+`apps/exams/services/coding_runtime/`, `apps/organizations/structure_views/`.
+
+### Nəhəng tək-funksiyalı view (extract-class pattern)
+
+Tək 800+ sətirlik view funksiyası çoxlu iç-içə closure ilə request-scoped state
+(`request`, `org`, icazə bayraqları) tutursa, onu **extract-class** ilə böl:
+closure-ları `self.*` state ilə **mixin metodlarına** çevir, view isə nazik
+qalır (`return _Flow(request).run()`). Paylaşılan state (`org`, `request`, setup-da
+hesablanan lokallar closure-larda işlənirsə) `self.*` olur; module-level import/helper-lər
+olmur (mixin fayllarında import edilir). Fayl `_x_flow/` paketinə bölünür
+(`_audit`/`_predicates`/`_resolvers` və s. mixin + `flow.py` = `__init__`+`run`).
+**Diqqət:** (a) closure-lar `patch`/mock hədəfi deyilsə AST-transform işlədir; (b) fayllar
+paketə düşəndə relative-import səviyyəsi +1 (bax yuxarı); (c) `ast.unparse` şərhləri
+(`# noqa`) silir — F811/F401 üçün əl ilə geri qoy; (d) **MÜTLƏQ** characterization
+testi ilə davranışı təsdiqlə. Nümunələr: `roles/_assignment_flow/`,
+`organization/_management_flow/`.
+
+**Linear god-funksiya (org_sections pattern):** funksiyanın erkən-return-ları YALNIZ
+setup-da, qalan gövdə lineardırsa → **verbatim statement-split**: setup+guard public
+funksiyada, tail `_queries`/`_pagination` kimi hissələrə; sərhəddə yalnız keçən dəyişənləri
+açıq threading et (AST-rewrite yox, source-slice, şərhlər qorunur). Sərhəd dəyişənlərini
+AST-lə hesabla (assigned-before ∩ used-after). Nümunə: `_helpers/org_sections/`.
+
+**Çox-lokal-lı god-funksiya (context_builder pattern, staged-builder):** funksiya nested
+def-siz, comprehension/walrus/global-suz, çoxlu (~100+) lokal bütün gövdə boyu axırsa →
+**extract-class + self.X**: bütün funksiya-lokallarını (assigned adlar ∪ param − import-adları)
+AST-rewrite ilə `self.X`-ə çevir, gövdəni ardıcıl `_stage_N` mixin-metodlarına böl (istənilən
+statement-sərhədi təhlükəsiz, çünki bütün state self-dədir). Erkən-return-ları `run()`-da
+None-check ilə propagate et. Func-level (lazy) importlar method-daxili qalır; DIRECT-body
+cross-stage importları re-inject et; **bütün relative body-importlar (nested daxil) +1 bump**.
+`ast.unparse` şərhləri itirir — bu pattern üçün qəbul edilir, MÜTLƏQ characterization testi ilə
+doğrula. Nümunə: `profile/context_builder/`.
+
+**Nə vaxt tam əl işi:** linear funksiyada erkən-return-lar gövdəyə yayılıbsa VƏ çoxlu-lokal-lıdırsa
+(hər iki çətinlik birləşirsə) — avtomatlaşdırma risklidir, manual staged Postgres-CI PR lazımdır.
+
+### Settings faylını bölmə (fərqli pattern)
+
+`config/settings/base.py` funksiya/sinif deyil, sıralı **assignment**-lərdən ibarət
+idi (çarpaz-istinadlar: `CELERY_RESULT_BACKEND = CELERY_BROKER_URL`,
+`PASSWORD_RESET_TIMEOUT = AUTH_OTP_EXPIRY_SECONDS`, CSP → `MICROSOFT_CLARITY_*`).
+Belə faylı paket-fasada YOX, **`components/` + exec-include** (django-split-settings
+üslubu) ilə böl: hər komponent base.py-nin **paylaşılan qlobal namespace-ində**
+`exec` olunur, ona görə davranış dəyişmir və çarpaz-istinadlar işləyir. Sıra
+asılılıq istiqamətinə görə `_COMPONENTS` siyahısında idarə olunur. Köməkçilər
+(`_env_*`, `_redis_url_with_db`) və importlar base.py başlığında qalır.
+**Doğrulama:** bölgüdən əvvəl/sonra bütün UPPER_CASE setting-ləri `repr`-lə
+snapshot götür və diff-i sıfır olduğunu təsdiqlə (BASE_DIR fərqi yalnız fayl
+yerindən yaranırsa, eyni qovluqdan snapshot al).
 
 ---
 

@@ -1,0 +1,119 @@
+{% load i18n %}
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-paper-plane"></i> {% trans "sent_invites_title" context "accounts.student_org" %}
+    </div>
+    <p class="text-muted mb-3">
+        {% trans "sent_invites_desc" context "accounts.student_org" %}
+    </p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_sent_invite_search"
+                   value="{{ sent_invite_search_query }}"
+                   placeholder="{% trans "sent_invite_search_ph" context "accounts.student_org" %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'search_clear' context 'common' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "search" context "common" %}
+        </button>
+    </form>
+
+    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="revoke_sent_invites">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllSentInvites"
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">{% trans "select_all" context "common" %}</span>
+            </label>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
+                    data-bs-toggle="modal"
+                    data-bs-target="#revokeSentInvitesConfirmModal"
+                    data-revoke-mode="bulk"
+                    data-default-label="{% trans 'revoke_selected' context 'accounts.student_org' %}"
+                    data-selected-label="{% trans 'revoke_selected_count' context 'accounts.student_org' %}"
+                    data-disabled-tooltip="{% trans 'min_one' context 'accounts.student_org' %}"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="{% trans 'min_one' context 'accounts.student_org' %}"
+                    {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-trash"></i> {% trans "revoke_selected" context "accounts.student_org" %}
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>{% trans "col_user" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_username" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_email" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_sender" context "accounts.student_org" %}</th>
+                        <th>{% trans "col_action" context "accounts.student_org" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invite in sent_student_invites %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="sent-invite-checkbox form-check-input"
+                                   name="selected_sent_invite_user_ids"
+                                   value="{{ invite.user.id }}"
+                                   {% if not can_manage_students %}disabled{% endif %}>
+                        </td>
+                        <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
+                        <td>@{{ invite.user.username }}</td>
+                        <td>{{ invite.user.email }}</td>
+                        <td>@{{ invite.assigned_by.username|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeSentInvitesConfirmModal"
+                                    data-revoke-mode="single"
+                                    data-single-revoke-user-id="{{ invite.user.id }}"
+                                    data-single-revoke-username="@{{ invite.user.username }}"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-trash"></i> {% trans "revoke" context "accounts.student_org" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">{% trans "no_active_invite" context "accounts.student_org" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=sent_student_invites extra_query=sent_invites_pagination_query page_param=sent_invites_page_param %}
+</div>

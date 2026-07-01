@@ -1,0 +1,445 @@
+{% load i18n %}
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-members">
+    <div class="section-title">
+        <i class="fas fa-id-badge"></i> {% trans "Organization staff" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Non-teaching staff members are listed here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="members">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="{% trans 'Search staff...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Position" context "staff.management" %}</th>
+                    <th>{% trans "Role" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membership in staff_members %}
+                <tr>
+                    <td>{{ membership.user.get_full_name|default:membership.user.username }}</td>
+                    <td>@{{ membership.user.username }}</td>
+                    <td>{{ membership.user.email }}</td>
+                    <td>{{ membership.management_position|default:"-" }}</td>
+                    <td><span class="role-badge role-warning">{{ membership.management_role_label }}</span></td>
+                    <td>
+                        {% if membership.management_can_remove %}
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeStudentConfirmModal"
+                            data-student-user-id="{{ membership.user.id }}"
+                            data-student-full-name="{{ membership.user.get_full_name|default:membership.user.username }}"
+                            data-student-username="@{{ membership.user.username }}"
+                            data-student-email="{{ membership.user.email }}"
+                            data-student-org="{{ organization.name }}"
+                            data-student-role="{{ membership.management_role_label }}"
+                            {% if not can_manage_students %}disabled{% endif %}>
+                            <i class="fas fa-user-minus"></i> {% trans "Remove from organization" context "staff.management" %}
+                        </button>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">{% trans "No staff member found." context "staff.management" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=staff_members extra_query=staff_members_pagination_query page_param=staff_members_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-requests">
+    <div class="section-title">
+        <i class="fas fa-user-clock"></i> {% trans "Staff requests" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Review pending staff requests here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="requests">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="{% trans 'Search staff requests...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "User" context "staff.management" %}</th>
+                    <th>{% trans "Username" context "staff.management" %}</th>
+                    <th>{% trans "Email" context "staff.management" %}</th>
+                    <th>{% trans "Message" context "staff.management" %}</th>
+                    <th>{% trans "Request date" context "staff.management" %}</th>
+                    <th>{% trans "Action" context "staff.management" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ts_request in pending_staff_requests %}
+                <tr>
+                    <td>{{ ts_request.user.get_full_name|default:ts_request.user.username }}</td>
+                    <td>@{{ ts_request.user.username }}</td>
+                    <td>{{ ts_request.user.email }}</td>
+                    <td>{% if ts_request.message %}<small>{{ ts_request.message }}</small>{% else %}-{% endif %}</td>
+                    <td><small class="text-muted">{{ ts_request.created_at|date:"d.m.Y H:i" }}</small></td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="approve_teacher_staff_request">
+                                <input type="hidden" name="request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-success btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-user-check"></i> {% trans "Approve" context "staff.management" %}
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="reject_teacher_staff_request">
+                                <input type="hidden" name="request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">{% trans "There are no pending staff requests." context "staff.management" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% include "partials/_pagination.html" with page_obj=pending_staff_requests extra_query=staff_requests_pagination_query page_param=staff_requests_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-unassigned">
+    <div class="section-title">
+        <i class="fas fa-user-plus"></i> {% trans "Staff without organization" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Staff users who can be invited appear here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="unassigned">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="{% trans 'Search staff...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_invite_teacher_staff">
+        <input type="hidden" name="invite_role_type" value="staff">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllUnassignedStaff"
+                       data-select-all-unassigned
+                       class="form-check-input mt-0"
+                       {% if not can_invite_members or not unassigned_staff.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
+            </label>
+            <button type="button"
+                    class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    data-invite-action="bulk_invite_teacher_staff"
+                    data-invite-role-type="staff"
+                    data-default-label="{% trans 'Invite selected staff users' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Invite selected staff users ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    data-permission-disabled="{% if not can_invite_members %}1{% else %}0{% endif %}"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    {% if not can_invite_members or not unassigned_staff.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> {% trans "Invite selected users" context "staff.management" %}
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Department" context "staff.management" %}</th>
+                        <th>{% trans "Position" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_staff %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="unassigned-student-checkbox form-check-input"
+                                   name="selected_unassigned_staff_user_ids"
+                                    value="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="{% trans 'Staff' context 'membership_request.role' %}"
+                                    {% if not can_invite_members %}disabled{% endif %}>
+                        </td>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>@{{ profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>{{ profile.department|default:"-" }}</td>
+                        <td>{{ profile.staff_position|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-invite-action="bulk_invite_teacher_staff"
+                                    data-invite-role-type="staff"
+                                    data-single-invite-user-id="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="{% trans 'Staff' context 'membership_request.role' %}"
+                                    {% if not can_invite_members %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">{% trans "No staff member available for invitation." context "staff.management" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+{% include "partials/_pagination.html" with page_obj=unassigned_staff extra_query=staff_unassigned_pagination_query page_param=staff_unassigned_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-invites">
+    <div class="section-title">
+        <i class="fas fa-paper-plane"></i> {% trans "Sent staff invites" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Withdraw pending staff invites from here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="invites">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_sent_invite_search"
+                   value="{{ sent_invite_search_query }}"
+                   placeholder="{% trans 'Search staff invites...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-sent-invites-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="revoke_teacher_staff_invites">
+        <input type="hidden" name="revoke_role_type" value="staff">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllStaffInvites"
+                       data-select-all-sent-invites
+                       class="form-check-input mt-0"
+                       {% if not can_invite_members or not sent_staff_invites.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
+            </label>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
+                    data-bs-toggle="modal"
+                    data-bs-target="#revokeSentInvitesConfirmModal"
+                    data-revoke-mode="bulk"
+                    data-revoke-action="revoke_teacher_staff_invites"
+                    data-revoke-role-type="staff"
+                    data-default-label="{% trans 'Withdraw selected invites' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Withdraw selected invites ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    data-permission-disabled="{% if not can_invite_members %}1{% else %}0{% endif %}"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    {% if not can_invite_members or not sent_staff_invites.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-trash"></i> {% trans "Withdraw selected invites" context "staff.management" %}
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Position" context "staff.management" %}</th>
+                        <th>{% trans "Sender" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invite in sent_staff_invites %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="sent-invite-checkbox form-check-input"
+                                   name="selected_sent_staff_invite_user_ids"
+                                   value="{{ invite.user.id }}"
+                                   {% if not can_invite_members %}disabled{% endif %}>
+                        </td>
+                        <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
+                        <td>@{{ invite.user.username }}</td>
+                        <td>{{ invite.user.email }}</td>
+                        <td>{{ invite.user.profile.staff_position|default:"-" }}</td>
+                        <td>@{{ invite.assigned_by.username|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeSentInvitesConfirmModal"
+                                    data-revoke-mode="single"
+                                    data-revoke-action="revoke_teacher_staff_invites"
+                                    data-revoke-role-type="staff"
+                                    data-single-revoke-user-id="{{ invite.user.id }}"
+                                    data-single-revoke-username="@{{ invite.user.username }}"
+                                    {% if not can_invite_members %}disabled{% endif %}>
+                                <i class="fas fa-trash"></i> {% trans "Withdraw" context "staff.management" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">{% trans "There are no active staff invites to withdraw." context "staff.management" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=sent_staff_invites extra_query=staff_invites_pagination_query page_param=staff_invites_page_param %}
+</div>
+{% endif %}

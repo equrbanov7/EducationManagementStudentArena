@@ -1,0 +1,11 @@
+# EMS Arena agent sandbox dependencies.
+#
+# This includes local developer tooling plus the full test runner stack so an
+# AI coding agent can run the same PostgreSQL-backed checks that CI runs.
+
+-r local.txt
+-r test.txt
+
+# CI installs these separately; keep them available inside the agent container.
+flake8
+flake8-bugbear

@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if not teacher_student_only %}
+{% include "accounts/partials/staff_management/_teacher_tabs.html" %}
+
+{% include "accounts/partials/staff_management/_staff_tabs.html" %}
+{% endif %}

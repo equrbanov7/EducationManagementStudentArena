@@ -1,0 +1,124 @@
+{% load i18n %}
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="student-unassigned">
+    <div class="section-title">
+        <i class="fas fa-user-plus"></i> {% trans "Students without organization" context "staff.management" %}
+    </div>
+    <p class="text-muted mb-3">{% trans "Students who can be invited appear here." context "staff.management" %}</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="students">
+        <input type="hidden" name="student_tab" value="unassigned">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_unassigned_search"
+                   value="{{ unassigned_search_query }}"
+                   placeholder="{% trans 'Search students...' context 'staff.management' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="{% trans 'Clear search' context 'staff.management' %}"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> {% trans "Search" context "staff.management" %}
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_invite_students">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllUnassignedStudents"
+                       data-select-all-unassigned
+                       class="form-check-input mt-0"
+                       {% if not can_invite_members or not unassigned_students.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">{% trans "Select all" context "staff.management" %}</span>
+            </label>
+            <button type="button"
+                    class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    data-invite-action="bulk_invite_students"
+                    data-invite-role-type="student"
+                    data-default-label="{% trans 'Invite selected users' context 'staff.management' %}"
+                    data-selected-label="{% trans 'Invite selected users ({count} selected)' context 'staff.management' %}"
+                    data-disabled-tooltip="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    data-permission-disabled="{% if not can_invite_members %}1{% else %}0{% endif %}"
+                    title="{% trans 'Select at least 1 user' context 'staff.management' %}"
+                    {% if not can_invite_members or not unassigned_students.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> {% trans "Invite selected users" context "staff.management" %}
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>{% trans "User" context "staff.management" %}</th>
+                        <th>{% trans "Username" context "staff.management" %}</th>
+                        <th>{% trans "Email" context "staff.management" %}</th>
+                        <th>{% trans "Action" context "staff.management" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_students %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="unassigned-student-checkbox form-check-input"
+                                   name="selected_unassigned_user_ids"
+                                   value="{{ profile.user.id }}"
+                                   data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                   data-user-username="@{{ profile.user.username }}"
+                                   data-user-email="{{ profile.user.email }}"
+                                   data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                   {% if not can_invite_members %}disabled{% endif %}>
+                        </td>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>@{{ profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-invite-action="bulk_invite_students"
+                                    data-invite-role-type="student"
+                                    data-single-invite-user-id="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                    {% if not can_invite_members %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane"></i> {% trans "Invite" context "staff.management" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">{% trans "No student available for invitation." context "staff.management" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=unassigned_students extra_query=unassigned_pagination_query page_param=unassigned_page_param %}
+</div>
+{% endif %}

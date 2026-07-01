@@ -1,0 +1,141 @@
+{% load i18n %}
+<div class="modal fade" id="revokeSentInvitesConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="revoke_sent_invites">
+                <input type="hidden" name="single_revoke_user_id" id="revokeSentInvitesSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="revokeSentInvitesSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>{% trans "revoke_invite" context "accounts.student_org" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="revokeSentInvitesModalText">
+                        {% trans "revoke_confirm" context "accounts.student_org" %}
+                    </p>
+                    <small class="text-muted d-block mt-2" id="revokeSentInvitesModalHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
+                    <button type="submit" class="btn btn-danger" id="revokeSentInvitesConfirmBtn">
+                        <i class="fas fa-trash"></i> {% trans "confirm" context "common" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeStudentConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="remove_student">
+                <input type="hidden" name="user_id" id="removeStudentModalUserId">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>{% trans "remove_from_org" context "accounts.student_org" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">{% trans "remove_lead" context "accounts.student_org" %}</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="removeStudentModalFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="removeStudentModalUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="removeStudentModalEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="removeStudentModalOrg">-</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="removeStudentModalRole">-</span></li>
+                    </ul>
+                    <label for="removeStudentReasonInput" class="form-label mt-3">{% trans "remove_reason_label" context "accounts.student_org" %} <span class="text-danger">*</span></label>
+                    <textarea
+                        id="removeStudentReasonInput"
+                        name="remove_reason"
+                        class="form-control"
+                        rows="3"
+                        maxlength="280"
+                        required
+                        placeholder="{% trans "remove_reason_ph" context "accounts.student_org" %}"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-user-minus"></i> {% trans "remove_from_org" context "accounts.student_org" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pendingAddConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}" id="pendingAddConfirmForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="bulk_approve_requested_students">
+                <input type="hidden" name="single_user_id" id="pendingAddSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="pendingAddSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>{% trans "add_to_org" context "accounts.student_org" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3" id="pendingAddLeadText">{% trans "add_lead" context "accounts.student_org" %}</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="pendingAddModalFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="pendingAddModalUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="pendingAddModalEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="pendingAddModalRole">Tələbə</span></li>
+                    </ul>
+                    <small class="text-muted d-block mt-2" id="pendingAddModalHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
+                    <button type="submit" class="btn btn-success" id="pendingAddConfirmBtn">
+                        <i class="fas fa-user-check"></i> {% trans "add_to_org" context "accounts.student_org" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="inviteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}" id="inviteConfirmForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="bulk_invite_students">
+                <input type="hidden" name="single_invite_user_id" id="inviteConfirmSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="inviteConfirmSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>{% trans "invite" context "accounts.student_org" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3" id="inviteConfirmLeadText">{% trans "invite_lead" context "accounts.student_org" %}</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>{% trans "field_name" context "accounts.student_org" %}:</strong> <span id="inviteConfirmFullName">-</span></li>
+                        <li><strong>{% trans "col_username" context "accounts.student_org" %}:</strong> <span id="inviteConfirmUsername">-</span></li>
+                        <li><strong>{% trans "col_email" context "accounts.student_org" %}:</strong> <span id="inviteConfirmEmail">-</span></li>
+                        <li><strong>{% trans "field_org" context "accounts.student_org" %}:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
+                        <li><strong>{% trans "field_role_change" context "accounts.student_org" %}:</strong> <span id="inviteConfirmRole">Tələbə</span></li>
+                    </ul>
+                    <small class="text-muted d-block mt-2" id="inviteConfirmHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "common" %}</button>
+                    <button type="submit" class="btn btn-success" id="inviteConfirmBtn">
+                        <i class="fas fa-paper-plane"></i> {% trans "invite" context "accounts.student_org" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
