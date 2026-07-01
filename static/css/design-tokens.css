@@ -1,0 +1,50 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMSArena — Design Tokens (mərkəzi rəng/spacing palitrası)
+   ───────────────────────────────────────────────────────────────────────────
+   MƏQSƏD: hazırda CSS-lərdə hardcode edilmiş brend rəngləri (məs. #2563eb 269
+   dəfə, #ffffff 718 dəfə) burada VAHİD mənbədən idarə olunsun. Yeni/redaktə
+   olunan stillərdə hex əvəzinə var(--...) istifadə edin. Miqrasiya tədricən:
+   docs/UI_COLOR_TOKENS_MIGRASIYA.md.
+
+   Palitra layihədəki mövcud de-fakto dəyərlərdən (Tailwind slate/blue) çıxarılıb
+   — heç bir vizual dəyişiklik yoxdur, sadəcə adlandırma.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ── Brend (primary — mavi) ─────────────────────────────────────────── */
+    --ems-primary-50: #eff6ff;
+    --ems-primary-100: #dbeafe;
+    --ems-primary-200: #bfdbfe;
+    --ems-primary-500: #3b82f6;
+    --ems-primary-600: #2563eb; /* əsas brend rəngi (269+ istifadə) */
+    --ems-primary-700: #1d4ed8;
+    --ems-primary-800: #1e40af;
+
+    /* ── Neytral (slate/gray) ───────────────────────────────────────────── */
+    --ems-neutral-0: #ffffff;
+    --ems-neutral-50: #f8fafc;
+    --ems-neutral-100: #f1f5f9;
+    --ems-neutral-200: #e2e8f0;
+    --ems-neutral-300: #cbd5e1;
+    --ems-neutral-400: #94a3b8;
+    --ems-neutral-500: #64748b;
+    --ems-neutral-600: #475569;
+    --ems-neutral-700: #334155;
+    --ems-neutral-800: #1f2937;
+    --ems-neutral-900: #0f172a;
+
+    /* ── Semantik ───────────────────────────────────────────────────────── */
+    --ems-success: #10b981;
+    --ems-success-strong: #0f766e;
+    --ems-danger: #dc2626;
+    --ems-danger-strong: #b91c1c;
+
+    /* ── Səma-uyğun alias-lar (istifadəni asanlaşdırmaq üçün) ────────────── */
+    --ems-text: var(--ems-neutral-900);
+    --ems-text-muted: var(--ems-neutral-500);
+    --ems-border: var(--ems-neutral-200);
+    --ems-bg: var(--ems-neutral-0);
+    --ems-bg-subtle: var(--ems-neutral-50);
+    --ems-link: var(--ems-primary-600);
+    --ems-link-hover: var(--ems-primary-700);
+}

@@ -1,0 +1,663 @@
+{% load i18n %}
+<script nonce="{{ request.csp_nonce }}">
+document.addEventListener("DOMContentLoaded", function () {
+    var managementFilterRoot = document.querySelector("[data-management-filter-root]");
+    var managementAllButton = managementFilterRoot
+        ? managementFilterRoot.querySelector("[data-management-all]")
+        : null;
+    var managementFilterButtons = managementFilterRoot
+        ? Array.from(managementFilterRoot.querySelectorAll("[data-management-chip]"))
+        : [];
+    var managementPanels = Array.from(document.querySelectorAll("[data-management-panel]"));
+
+    function getActiveManagementKeys() {
+        return managementFilterButtons
+            .filter(function (button) {
+                return button.classList.contains("is-active");
+            })
+            .map(function (button) {
+                return button.getAttribute("data-management-chip") || "";
+            })
+            .filter(function (value) {
+                return value !== "";
+            });
+    }
+
+    function setAllManagementFiltersActive() {
+        managementFilterButtons.forEach(function (button) {
+            button.classList.add("is-active");
+        });
+        if (managementAllButton) {
+            managementAllButton.classList.add("is-active");
+        }
+    }
+
+    function syncManagementPanels() {
+        if (!managementPanels.length) {
+            return;
+        }
+
+        if (!managementFilterButtons.length) {
+            managementPanels.forEach(function (panel) {
+                panel.hidden = false;
+            });
+            if (managementAllButton) {
+                managementAllButton.classList.add("is-active");
+            }
+            return;
+        }
+
+        var activeKeys = getActiveManagementKeys();
+        if (!activeKeys.length) {
+            setAllManagementFiltersActive();
+            activeKeys = getActiveManagementKeys();
+        }
+
+        var showAllPanels = activeKeys.length === managementFilterButtons.length;
+        if (managementAllButton) {
+            managementAllButton.classList.toggle("is-active", showAllPanels);
+            managementAllButton.setAttribute("aria-pressed", showAllPanels ? "true" : "false");
+        }
+
+        managementFilterButtons.forEach(function (button) {
+            button.setAttribute(
+                "aria-pressed",
+                button.classList.contains("is-active") ? "true" : "false"
+            );
+        });
+
+        managementPanels.forEach(function (panel) {
+            var panelKey = panel.getAttribute("data-management-panel") || "";
+            panel.hidden = !showAllPanels && activeKeys.indexOf(panelKey) === -1;
+        });
+    }
+
+    if (managementAllButton) {
+        managementAllButton.addEventListener("click", function () {
+            setAllManagementFiltersActive();
+            syncManagementPanels();
+        });
+    }
+
+    managementFilterButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            var isAllState = managementFilterButtons.every(function (entry) {
+                return entry.classList.contains("is-active");
+            });
+
+            if (isAllState) {
+                managementFilterButtons.forEach(function (entry) {
+                    entry.classList.remove("is-active");
+                });
+                button.classList.add("is-active");
+            } else {
+                button.classList.toggle("is-active");
+            }
+
+            syncManagementPanels();
+        });
+    });
+
+    if (managementFilterButtons.length || managementPanels.length) {
+        setAllManagementFiltersActive();
+        syncManagementPanels();
+    }
+
+    var selectAll = document.getElementById("selectAllPendingStudents");
+    var pendingCheckboxes = Array.from(document.querySelectorAll(".pending-student-checkbox"));
+    var pendingSelectableCheckboxes = pendingCheckboxes.filter(function (checkbox) {
+        return !checkbox.disabled;
+    });
+    var pendingAddBulkBtn = document.querySelector(".js-pending-add-confirm-bulk");
+    var pendingRemoveBulkBtn = document.querySelector(".js-pending-remove-bulk");
+    var pendingAddBulkLabel = document.querySelector(".js-pending-add-bulk-label");
+    var pendingAddDefaultLabel = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "{% trans 'Add selected users to the organization' context 'staff.management' %}")
+        : "{% trans 'Add selected users to the organization' context 'staff.management' %}";
+    var pendingAddSelectedLabelTemplate = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}")
+        : "{% trans 'Add selected users to the organization ({count} selected)' context 'staff.management' %}";
+    var pendingAddDisabledTooltip = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 student' context 'staff.management' %}")
+        : "{% trans 'Select at least 1 student' context 'staff.management' %}";
+    var pendingAddPermissionDisabled = pendingAddBulkBtn
+        ? pendingAddBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+    var pendingRemovePermissionDisabled = pendingRemoveBulkBtn
+        ? pendingRemoveBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+    var pendingRemoveDisabledTooltip = pendingRemoveBulkBtn
+        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+        : "{% trans 'Select at least 1 user' context 'staff.management' %}";
+
+    var inviteForms = [];
+    document
+        .querySelectorAll("[data-unassigned-form], .js-invite-confirm-bulk, .js-invite-confirm-single")
+        .forEach(function (node) {
+            var form = node && node.tagName === "FORM" ? node : node.closest("form");
+            if (!form || inviteForms.indexOf(form) !== -1) {
+                return;
+            }
+            if (!form.querySelector(".js-invite-confirm-bulk") && !form.querySelector(".js-invite-confirm-single")) {
+                return;
+            }
+            inviteForms.push(form);
+        });
+
+    var unassignedFormConfigs = inviteForms.map(function (form) {
+        var bulkButton = form.querySelector(".js-invite-confirm-bulk");
+        return {
+            form: form,
+            selectAll: form.querySelector("[data-select-all-unassigned]"),
+            checkboxes: Array.from(form.querySelectorAll(".unassigned-student-checkbox")),
+            bulkButton: bulkButton,
+            permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
+            disabledTooltip: bulkButton
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+                : "{% trans 'Select at least 1 user' context 'staff.management' %}",
+        };
+    });
+
+    var sentInviteFormConfigs = Array.from(document.querySelectorAll("[data-sent-invites-form]")).map(function (form) {
+        var bulkButton = form.querySelector(".js-sent-invite-revoke-bulk");
+        return {
+            form: form,
+            selectAll: form.querySelector("[data-select-all-sent-invites]"),
+            checkboxes: Array.from(form.querySelectorAll(".sent-invite-checkbox")),
+            bulkButton: bulkButton,
+            permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
+            disabledTooltip: bulkButton
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "{% trans 'Select at least 1 user' context 'staff.management' %}")
+                : "{% trans 'Select at least 1 user' context 'staff.management' %}",
+        };
+    });
+
+    function syncBulkButtonState(button, selectedCount, hasRows, isPermissionDisabled, tooltipText) {
+        if (!button) {
+            return;
+        }
+        var shouldDisable = isPermissionDisabled || !hasRows || selectedCount === 0;
+        button.disabled = shouldDisable;
+        if (!isPermissionDisabled && shouldDisable) {
+            button.setAttribute("title", tooltipText);
+        } else {
+            button.removeAttribute("title");
+        }
+    }
+
+    function syncPendingBulkSelectionUi() {
+        var selectedPendingCount = pendingSelectableCheckboxes.filter(function (checkbox) {
+            return checkbox.checked;
+        }).length;
+        var hasPendingRows = pendingSelectableCheckboxes.length > 0;
+
+        if (pendingAddBulkLabel) {
+            pendingAddBulkLabel.textContent = selectedPendingCount > 0
+                ? pendingAddSelectedLabelTemplate.replace("{count}", String(selectedPendingCount))
+                : pendingAddDefaultLabel;
+        }
+
+        syncBulkButtonState(
+            pendingAddBulkBtn,
+            selectedPendingCount,
+            hasPendingRows,
+            pendingAddPermissionDisabled,
+            pendingAddDisabledTooltip
+        );
+        syncBulkButtonState(
+            pendingRemoveBulkBtn,
+            selectedPendingCount,
+            hasPendingRows,
+            pendingRemovePermissionDisabled,
+            pendingRemoveDisabledTooltip
+        );
+
+        if (selectAll) {
+            var canToggleAll = hasPendingRows && !pendingAddPermissionDisabled && !pendingRemovePermissionDisabled;
+            selectAll.disabled = !canToggleAll;
+            if (!canToggleAll) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+                return;
+            }
+
+            if (selectedPendingCount === 0) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            } else if (selectedPendingCount === pendingSelectableCheckboxes.length) {
+                selectAll.checked = true;
+                selectAll.indeterminate = false;
+            } else {
+                selectAll.checked = false;
+                selectAll.indeterminate = true;
+            }
+        }
+    }
+
+    function syncScopedBulkSelectionUi(config) {
+        var selectableCheckboxes = config.checkboxes.filter(function (checkbox) {
+            return !checkbox.disabled;
+        });
+        var selectedCount = selectableCheckboxes.filter(function (checkbox) {
+            return checkbox.checked;
+        }).length;
+        var hasRows = selectableCheckboxes.length > 0;
+
+        syncBulkButtonState(
+            config.bulkButton,
+            selectedCount,
+            hasRows,
+            config.permissionDisabled,
+            config.disabledTooltip
+        );
+
+        if (!config.selectAll) {
+            return;
+        }
+
+        var canToggleAll = hasRows && !config.permissionDisabled;
+        config.selectAll.disabled = !canToggleAll;
+        if (!canToggleAll) {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = false;
+            return;
+        }
+
+        if (selectedCount === 0) {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = false;
+        } else if (selectedCount === selectableCheckboxes.length) {
+            config.selectAll.checked = true;
+            config.selectAll.indeterminate = false;
+        } else {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = true;
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener("change", function () {
+            pendingSelectableCheckboxes.forEach(function (checkbox) {
+                checkbox.checked = selectAll.checked;
+            });
+            syncPendingBulkSelectionUi();
+        });
+    }
+    pendingSelectableCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", syncPendingBulkSelectionUi);
+    });
+    syncPendingBulkSelectionUi();
+
+    unassignedFormConfigs.forEach(function (config) {
+        if (config.selectAll) {
+            config.selectAll.addEventListener("change", function () {
+                config.checkboxes.forEach(function (checkbox) {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = config.selectAll.checked;
+                    }
+                });
+                syncScopedBulkSelectionUi(config);
+            });
+        }
+        config.checkboxes.forEach(function (checkbox) {
+            if (!checkbox.disabled) {
+                checkbox.addEventListener("change", function () {
+                    syncScopedBulkSelectionUi(config);
+                });
+            }
+        });
+        syncScopedBulkSelectionUi(config);
+    });
+
+    sentInviteFormConfigs.forEach(function (config) {
+        if (config.selectAll) {
+            config.selectAll.addEventListener("change", function () {
+                config.checkboxes.forEach(function (checkbox) {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = config.selectAll.checked;
+                    }
+                });
+                syncScopedBulkSelectionUi(config);
+            });
+        }
+        config.checkboxes.forEach(function (checkbox) {
+            if (!checkbox.disabled) {
+                checkbox.addEventListener("change", function () {
+                    syncScopedBulkSelectionUi(config);
+                });
+            }
+        });
+        syncScopedBulkSelectionUi(config);
+    });
+
+    function getSelectedUsers(selector) {
+        return Array.from(document.querySelectorAll(selector + ":checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
+            .map(function (checkbox) {
+                return {
+                    id: checkbox.value || "",
+                    fullName: checkbox.getAttribute("data-user-full-name") || "-",
+                    username: checkbox.getAttribute("data-user-username") || "-",
+                    email: checkbox.getAttribute("data-user-email") || "-",
+                    role: checkbox.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
+                };
+            })
+            .filter(function (entry) {
+                return entry.id !== "";
+            });
+    }
+
+    function getSelectedUsersWithin(container, selector) {
+        return Array.from((container || document).querySelectorAll(selector + ":checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
+            .map(function (checkbox) {
+                return {
+                    id: checkbox.value || "",
+                    fullName: checkbox.getAttribute("data-user-full-name") || "-",
+                    username: checkbox.getAttribute("data-user-username") || "-",
+                    email: checkbox.getAttribute("data-user-email") || "-",
+                    role: checkbox.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
+                };
+            })
+            .filter(function (entry) {
+                return entry.id !== "";
+            });
+    }
+
+    function getSelectedSentInviteUserIds(container) {
+        return Array.from((container || document).querySelectorAll(".sent-invite-checkbox:checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
+            .map(function (checkbox) {
+                return checkbox.value || "";
+            })
+            .filter(function (value) {
+                return value !== "";
+            });
+    }
+
+    var revokeModal = document.getElementById("revokeSentInvitesConfirmModal");
+    if (revokeModal) {
+        var revokeTextNode = document.getElementById("revokeSentInvitesModalText");
+        var revokeHintNode = document.getElementById("revokeSentInvitesModalHint");
+        var revokeActionInput = document.getElementById("revokeSentInvitesAction");
+        var revokeRoleTypeInput = document.getElementById("revokeSentInvitesRoleType");
+        var revokeSingleInput = document.getElementById("revokeSentInvitesSingleUserId");
+        var revokeSelectedInput = document.getElementById("revokeSentInvitesSelectedUserIds");
+        var revokeConfirmBtn = document.getElementById("revokeSentInvitesConfirmBtn");
+
+        revokeModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            var mode = trigger ? (trigger.getAttribute("data-revoke-mode") || "bulk") : "bulk";
+            var sourceForm = trigger ? trigger.closest("form") : null;
+
+            if (revokeSingleInput) {
+                revokeSingleInput.value = "";
+            }
+            if (revokeSelectedInput) {
+                revokeSelectedInput.value = "";
+            }
+            if (revokeActionInput) {
+                revokeActionInput.value = trigger
+                    ? (trigger.getAttribute("data-revoke-action") || "revoke_sent_invites")
+                    : "revoke_sent_invites";
+            }
+            if (revokeRoleTypeInput) {
+                revokeRoleTypeInput.value = trigger
+                    ? (trigger.getAttribute("data-revoke-role-type") || "student")
+                    : "student";
+            }
+            if (revokeHintNode) {
+                revokeHintNode.textContent = "";
+            }
+            if (revokeConfirmBtn) {
+                revokeConfirmBtn.disabled = false;
+            }
+
+            if (mode === "single") {
+                var singleUserId = trigger ? (trigger.getAttribute("data-single-revoke-user-id") || "") : "";
+                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "{% trans 'This user' context 'staff.management' %}") : "{% trans 'This user' context 'staff.management' %}";
+                if (revokeSingleInput) {
+                    revokeSingleInput.value = singleUserId;
+                }
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = singleUsername + " üçün göndərilmiş dəvəti geri çəkmək istədiyinizi təsdiqləyin.";
+                }
+                return;
+            }
+
+            var selectedUserIds = getSelectedSentInviteUserIds(sourceForm);
+            if (revokeSelectedInput) {
+                revokeSelectedInput.value = selectedUserIds.join(",");
+            }
+
+            if (selectedUserIds.length) {
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = "{% trans 'Please confirm that you want to withdraw the selected invites.' context 'staff.management' %}";
+                }
+                if (revokeHintNode) {
+                    revokeHintNode.textContent = "{% trans 'Selected invites:' context 'staff.management' %}" + " " + String(selectedUserIds.length);
+                }
+            } else {
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = "{% trans 'Please select at least one invite first.' context 'staff.management' %}";
+                }
+                if (revokeHintNode) {
+                    revokeHintNode.textContent = "{% trans 'The confirm button is disabled in this state.' context 'staff.management' %}";
+                }
+                if (revokeConfirmBtn) {
+                    revokeConfirmBtn.disabled = true;
+                }
+            }
+        });
+    }
+
+    var removeStudentModal = document.getElementById("removeStudentConfirmModal");
+    if (removeStudentModal) {
+        var userIdInput = document.getElementById("removeStudentModalUserId");
+        var fullNameNode = document.getElementById("removeStudentModalFullName");
+        var usernameNode = document.getElementById("removeStudentModalUsername");
+        var emailNode = document.getElementById("removeStudentModalEmail");
+        var orgNode = document.getElementById("removeStudentModalOrg");
+        var roleNode = document.getElementById("removeStudentModalRole");
+        var reasonInput = document.getElementById("removeStudentReasonInput");
+        removeStudentModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) return;
+            if (userIdInput) {
+                userIdInput.value = trigger.getAttribute("data-student-user-id") || "";
+            }
+            if (fullNameNode) {
+                fullNameNode.textContent = trigger.getAttribute("data-student-full-name") || "-";
+            }
+            if (usernameNode) {
+                usernameNode.textContent = trigger.getAttribute("data-student-username") || "{% trans 'This user' context 'staff.management' %}";
+            }
+            if (emailNode) {
+                emailNode.textContent = trigger.getAttribute("data-student-email") || "-";
+            }
+            if (orgNode) {
+                orgNode.textContent = trigger.getAttribute("data-student-org") || "-";
+            }
+            if (roleNode) {
+                roleNode.textContent = trigger.getAttribute("data-student-role") || "{% trans 'Student' context 'membership_request.role' %}";
+            }
+            if (reasonInput) {
+                reasonInput.value = "";
+            }
+        });
+    }
+
+    var pendingAddModal = document.getElementById("pendingAddConfirmModal");
+    if (pendingAddModal && window.bootstrap) {
+        var pendingAddModalInstance = new window.bootstrap.Modal(pendingAddModal);
+        var pendingAddSingleInput = document.getElementById("pendingAddSingleUserId");
+        var pendingAddSelectedInput = document.getElementById("pendingAddSelectedUserIds");
+        var pendingAddLeadText = document.getElementById("pendingAddLeadText");
+        var pendingAddFullName = document.getElementById("pendingAddModalFullName");
+        var pendingAddUsername = document.getElementById("pendingAddModalUsername");
+        var pendingAddEmail = document.getElementById("pendingAddModalEmail");
+        var pendingAddRole = document.getElementById("pendingAddModalRole");
+        var pendingAddHint = document.getElementById("pendingAddModalHint");
+        var pendingAddConfirmBtn = document.getElementById("pendingAddConfirmBtn");
+
+        function fillPendingAddModal(users, mode) {
+            var firstUser = users.length ? users[0] : null;
+            if (pendingAddSingleInput) {
+                pendingAddSingleInput.value = mode === "single" && firstUser ? firstUser.id : "";
+            }
+            if (pendingAddSelectedInput) {
+                pendingAddSelectedInput.value = mode === "bulk"
+                    ? users.map(function (entry) { return entry.id; }).join(",")
+                    : "";
+            }
+            if (pendingAddFullName) {
+                pendingAddFullName.textContent = firstUser ? firstUser.fullName : "-";
+            }
+            if (pendingAddUsername) {
+                pendingAddUsername.textContent = firstUser ? firstUser.username : "-";
+            }
+            if (pendingAddEmail) {
+                pendingAddEmail.textContent = firstUser ? firstUser.email : "-";
+            }
+            if (pendingAddRole) {
+                pendingAddRole.textContent = firstUser ? firstUser.role : "{% trans 'Student' context 'membership_request.role' %}";
+            }
+            if (pendingAddLeadText) {
+                pendingAddLeadText.textContent = mode === "bulk"
+                    ? "{% trans 'Please confirm that you want to add the selected user(s) to the organization.' context 'staff.management' %}"
+                    : "{% trans 'Please confirm that you want to add this user to the organization.' context 'staff.management' %}";
+            }
+            if (pendingAddHint) {
+                pendingAddHint.textContent = users.length > 1
+                    ? "{% trans 'Selected users:' context 'staff.management' %}" + " " + String(users.length)
+                    : "";
+            }
+            if (pendingAddConfirmBtn) {
+                pendingAddConfirmBtn.disabled = users.length === 0;
+            }
+        }
+
+        document.querySelectorAll(".js-pending-add-confirm").forEach(function (button) {
+            button.addEventListener("click", function () {
+                fillPendingAddModal([
+                    {
+                        id: button.getAttribute("data-single-user-id") || "",
+                        fullName: button.getAttribute("data-user-full-name") || "-",
+                        username: button.getAttribute("data-user-username") || "-",
+                        email: button.getAttribute("data-user-email") || "-",
+                        role: button.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
+                    }
+                ], "single");
+                pendingAddModalInstance.show();
+            });
+        });
+
+        if (pendingAddBulkBtn) {
+            pendingAddBulkBtn.addEventListener("click", function () {
+                fillPendingAddModal(getSelectedUsers(".pending-student-checkbox"), "bulk");
+                pendingAddModalInstance.show();
+            });
+        }
+    }
+
+    var inviteModal = document.getElementById("inviteConfirmModal");
+    if (inviteModal && window.bootstrap) {
+        var inviteModalInstance = new window.bootstrap.Modal(inviteModal);
+        var inviteActionInput = document.getElementById("inviteConfirmAction");
+        var inviteRoleTypeInput = document.getElementById("inviteConfirmRoleType");
+        var inviteSingleInput = document.getElementById("inviteConfirmSingleUserId");
+        var inviteSelectedInput = document.getElementById("inviteConfirmSelectedUserIds");
+        var inviteLeadText = document.getElementById("inviteConfirmLeadText");
+        var inviteFullName = document.getElementById("inviteConfirmFullName");
+        var inviteUsername = document.getElementById("inviteConfirmUsername");
+        var inviteEmail = document.getElementById("inviteConfirmEmail");
+        var inviteRole = document.getElementById("inviteConfirmRole");
+        var inviteHint = document.getElementById("inviteConfirmHint");
+        var inviteConfirmBtn = document.getElementById("inviteConfirmBtn");
+
+        function fillInviteModal(users, mode, inviteConfig) {
+            var firstUser = users.length ? users[0] : null;
+            inviteConfig = inviteConfig || {};
+            if (inviteActionInput) {
+                inviteActionInput.value = inviteConfig.action || "bulk_invite_students";
+            }
+            if (inviteRoleTypeInput) {
+                inviteRoleTypeInput.value = inviteConfig.roleType || "student";
+            }
+            if (inviteSingleInput) {
+                inviteSingleInput.value = mode === "single" && firstUser ? firstUser.id : "";
+            }
+            if (inviteSelectedInput) {
+                inviteSelectedInput.value = mode === "bulk"
+                    ? users.map(function (entry) { return entry.id; }).join(",")
+                    : "";
+            }
+            if (inviteFullName) {
+                inviteFullName.textContent = firstUser ? firstUser.fullName : "-";
+            }
+            if (inviteUsername) {
+                inviteUsername.textContent = firstUser ? firstUser.username : "-";
+            }
+            if (inviteEmail) {
+                inviteEmail.textContent = firstUser ? firstUser.email : "-";
+            }
+            if (inviteRole) {
+                inviteRole.textContent = firstUser ? firstUser.role : "{% trans 'Student' context 'membership_request.role' %}";
+            }
+            if (inviteLeadText) {
+                inviteLeadText.textContent = mode === "bulk"
+                    ? "{% trans 'Please confirm that you want to invite the selected user(s).' context 'staff.management' %}"
+                    : "{% trans 'Please confirm that you want to invite this user.' context 'staff.management' %}";
+            }
+            if (inviteHint) {
+                inviteHint.textContent = users.length > 1
+                    ? "{% trans 'Selected users:' context 'staff.management' %}" + " " + String(users.length)
+                    : "";
+            }
+            if (inviteConfirmBtn) {
+                inviteConfirmBtn.disabled = users.length === 0;
+            }
+        }
+
+        unassignedFormConfigs.forEach(function (config) {
+            config.form.querySelectorAll(".js-invite-confirm-single").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    fillInviteModal([
+                        {
+                            id: button.getAttribute("data-single-invite-user-id") || "",
+                            fullName: button.getAttribute("data-user-full-name") || "-",
+                            username: button.getAttribute("data-user-username") || "-",
+                            email: button.getAttribute("data-user-email") || "-",
+                            role: button.getAttribute("data-target-role") || "{% trans 'Student' context 'membership_request.role' %}",
+                        }
+                    ], "single", {
+                        action: button.getAttribute("data-invite-action") || "bulk_invite_students",
+                        roleType: button.getAttribute("data-invite-role-type") || "student",
+                    });
+                    inviteModalInstance.show();
+                });
+            });
+
+            if (config.bulkButton) {
+                config.bulkButton.addEventListener("click", function () {
+                    fillInviteModal(
+                        getSelectedUsersWithin(config.form, ".unassigned-student-checkbox"),
+                        "bulk",
+                        {
+                            action: config.bulkButton.getAttribute("data-invite-action") || "bulk_invite_students",
+                            roleType: config.bulkButton.getAttribute("data-invite-role-type") || "student",
+                        }
+                    );
+                    inviteModalInstance.show();
+                });
+            }
+        });
+    }
+});
+</script>

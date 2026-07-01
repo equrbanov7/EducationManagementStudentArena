@@ -49,7 +49,7 @@ body:has(.register-page-wrapper) {
 /* --- Başlıq və Altyazı --- */
 .register-heading {
     font-size: 2rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 10px;
     font-weight: 700;
 }
@@ -87,7 +87,7 @@ body:has(.register-page-wrapper) {
 .register-form-field label {
     display: block; /* Etiketi yuxarıda göstər */
     font-size: 0.9rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -161,7 +161,7 @@ body:has(.register-page-wrapper) {
 }
 
 .input-visibility-toggle:hover {
-    color: #2563eb;
+    color: var(--ems-primary-600);
 }
 
 .register-form-field input[type="text"]:focus,
@@ -169,7 +169,7 @@ body:has(.register-page-wrapper) {
 .register-form-field input[type="password"]:focus,
 .register-form-field select.form-select:focus,
 .register-form-field select.form-control:focus {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Yüngül focus kölgəsi */
     background-color: #ffffff; /* Focus olanda ağ fon */
 }
@@ -202,7 +202,7 @@ body:has(.register-page-wrapper) {
     border: 1px solid #d1d5db;
     border-radius: 8px;
     background: #f9fafb;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -219,14 +219,14 @@ body:has(.register-page-wrapper) {
 .register-bootstrap-select__toggle:hover {
     background: #ffffff;
     border-color: #93c5fd;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .register-bootstrap-select__toggle:focus,
 .register-bootstrap-select__toggle.show {
     background: #ffffff;
-    border-color: #2563eb;
-    color: #1f2937;
+    border-color: var(--ems-primary-600);
+    color: var(--ems-neutral-800);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -257,7 +257,7 @@ body:has(.register-page-wrapper) {
 
 .register-bootstrap-select__toggle.show .register-bootstrap-select__caret {
     transform: rotate(180deg);
-    color: #2563eb;
+    color: var(--ems-primary-600);
 }
 
 .register-bootstrap-select__menu {
@@ -278,20 +278,20 @@ body:has(.register-page-wrapper) {
     gap: 12px;
     padding: 10px 12px;
     border-radius: 10px;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     font-size: 0.95rem;
     white-space: normal;
 }
 
 .register-bootstrap-select__option:hover,
 .register-bootstrap-select__option:focus {
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
 }
 
 .register-bootstrap-select__option.is-selected {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
     font-weight: 600;
 }
 
@@ -301,7 +301,7 @@ body:has(.register-page-wrapper) {
 }
 
 .register-bootstrap-select__option-check {
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     opacity: 0;
     transition: opacity 0.2s ease;
 }
@@ -321,7 +321,7 @@ body:has(.register-page-wrapper) {
 .register-submit-btn {
     width: 100%;
     padding: 14px;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color, var(--ems-primary-600));
     color: white;
     border: none;
     border-radius: 8px;
@@ -333,7 +333,7 @@ body:has(.register-page-wrapper) {
 }
 
 .register-submit-btn:hover {
-    background-color: #1e40af; /* Hover rəngi */
+    background-color: var(--ems-primary-800); /* Hover rəngi */
     transform: translateY(-2px); /* Yüngül yuxarı qalxma */
 }
 
@@ -349,14 +349,14 @@ body:has(.register-page-wrapper) {
 }
 
 .register-footer-text a {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     font-weight: 600;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .register-footer-text a:hover {
-    color: #1e40af;
+    color: var(--ems-primary-800);
     text-decoration: underline;
 }
 
@@ -416,12 +416,12 @@ body:has(.register-page-wrapper) {
 }
 
 .wizard-step.active .wizard-step-number {
-    background: #2563eb;
+    background: var(--ems-primary-600);
     color: white;
 }
 
 .wizard-step.completed .wizard-step-number {
-    background: #10b981;
+    background: var(--ems-success);
     color: white;
 }
 
@@ -436,7 +436,7 @@ body:has(.register-page-wrapper) {
 }
 
 .wizard-step.active .wizard-step-label {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-weight: 600;
 }
 
@@ -498,7 +498,7 @@ body:has(.register-page-wrapper) {
     padding: 10px 12px;
     cursor: pointer;
     font-size: 0.95rem;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     border-bottom: 1px solid #e5e7eb;
 }
 
@@ -508,7 +508,7 @@ body:has(.register-page-wrapper) {
 
 .register-search-option:hover,
 .register-search-option.is-selected {
-    background: #eff6ff;
+    background: var(--ems-primary-50);
 }
 
 .register-search-option--neutral {
@@ -558,7 +558,7 @@ body:has(.register-page-wrapper) {
 .register-selection-summary__label {
     display: block;
     margin-bottom: 0.35rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -567,7 +567,7 @@ body:has(.register-page-wrapper) {
 
 .register-selection-summary__value {
     display: block;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.35;
@@ -583,15 +583,15 @@ body:has(.register-page-wrapper) {
     padding: 12px 14px;
     margin: 0 0 18px;
     border-radius: 12px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-700);
 }
 
 .otp-timer-banner.is-expired {
     background: #fef2f2;
     border-color: #fecaca;
-    color: #b91c1c;
+    color: var(--ems-danger-strong);
 }
 
 .otp-timer-banner__label {
@@ -645,7 +645,7 @@ body:has(.register-page-wrapper) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     background: rgba(37, 99, 235, 0.12);
     font-size: 1rem;
 }
@@ -676,7 +676,7 @@ body:has(.register-page-wrapper) {
     border: 0;
     border-radius: 999px;
     background: #e0ebff;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     padding: 10px 14px;
     font-size: 0.88rem;
     font-weight: 700;
@@ -717,12 +717,12 @@ body:has(.register-page-wrapper) {
     margin-top: 3px;
     width: 18px;
     height: 18px;
-    accent-color: #2563eb;
+    accent-color: var(--ems-primary-600);
     flex: 0 0 auto;
 }
 
 .register-checkbox span {
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     font-size: 0.95rem;
     line-height: 1.55;
     font-weight: 600;
@@ -730,7 +730,7 @@ body:has(.register-page-wrapper) {
 
 .register-help-text--privacy {
     margin-top: 10px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .register-policy-modal__content {
@@ -768,7 +768,7 @@ body:has(.register-page-wrapper) {
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -792,7 +792,7 @@ body:has(.register-page-wrapper) {
 
 .register-policy-modal__body {
     padding: 20px 24px 8px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 .register-policy-modal__summary {
@@ -809,15 +809,15 @@ body:has(.register-page-wrapper) {
     gap: 8px;
     padding: 8px 12px;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 0.8rem;
     font-weight: 700;
 }
 
 .register-policy-modal__summary-text {
     margin: 12px 0 0;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.94rem;
     line-height: 1.7;
 }
@@ -847,21 +847,21 @@ body:has(.register-page-wrapper) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 0.95rem;
 }
 
 .register-policy-section__title {
     margin: 0 0 8px;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 1rem;
     font-weight: 700;
 }
 
 .register-policy-section__body {
     margin: 0;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.92rem;
     line-height: 1.7;
 }
@@ -1105,9 +1105,9 @@ body:has(.register-page-wrapper) {
     gap: 8px;
     margin-top: 10px;
     padding: 8px 12px;
-    border: 1.5px solid var(--primary-color, #2563eb);
-    background-color: #eff6ff;
-    color: #1e40af;
+    border: 1.5px solid var(--primary-color, var(--ems-primary-600));
+    background-color: var(--ems-primary-50);
+    color: var(--ems-primary-800);
     border-radius: 999px;
     font-size: 0.9rem;
     font-weight: 600;
@@ -1167,7 +1167,7 @@ body:has(.register-page-wrapper) {
 
 .register-submit-btn:disabled:hover,
 .register-submit-btn.is-disabled:hover {
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color, var(--ems-primary-600));
     transform: none;
 }
 

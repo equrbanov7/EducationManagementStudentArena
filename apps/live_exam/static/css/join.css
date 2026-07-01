@@ -2,7 +2,7 @@
     --join-bg-1: #081427;
     --join-bg-2: #0b2a52;
     --join-bg-3: #0f4c81;
-    --join-bg-4: #2563eb;
+    --join-bg-4: var(--ems-primary-600);
     --join-surface: rgba(255, 255, 255, 0.94);
     --join-surface-soft: rgba(255, 255, 255, 0.14);
     --join-line: rgba(255, 255, 255, 0.18);
@@ -11,8 +11,8 @@
     --join-ink-soft: #5f7796;
     --join-shadow: 0 30px 80px rgba(8, 23, 55, 0.28);
     --join-accent: #38bdf8;
-    --join-accent-strong: #1d4ed8;
-    --join-accent-soft: #dbeafe;
+    --join-accent-strong: var(--ems-primary-700);
+    --join-accent-soft: var(--ems-primary-100);
 }
 
 * {
@@ -190,7 +190,7 @@ body.join-page {
     gap: 12px;
     padding: 14px 16px;
     border-radius: 22px;
-    background: linear-gradient(180deg, #dbeafe, #eff6ff);
+    background: linear-gradient(180deg, var(--ems-primary-100), var(--ems-primary-50));
 }
 
 .join-preview {
@@ -347,7 +347,7 @@ body.join-page {
     padding: 15px 16px;
     border-radius: 18px;
     border: 2px solid #dbe4ef;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     font: inherit;
     font-size: 1rem;
     transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
@@ -362,7 +362,7 @@ body.join-page {
 
 .join-form__error {
     min-height: 18px;
-    color: #dc2626;
+    color: var(--ems-danger);
     font-size: 0.88rem;
     font-weight: 700;
 }
@@ -371,7 +371,7 @@ body.join-page {
     display: inline-flex;
     padding: 4px;
     border-radius: 999px;
-    background: #eff6ff;
+    background: var(--ems-primary-50);
     gap: 6px;
 }
 
@@ -394,8 +394,8 @@ body.join-page {
 
 .join-picker-panels {
     border-radius: 22px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     padding: 14px;
 }
 
@@ -469,7 +469,7 @@ body.join-page {
     width: 24px;
     height: 24px;
     border-radius: 8px;
-    background: #dbeafe;
+    background: var(--ems-primary-100);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -492,11 +492,11 @@ body.join-page {
 }
 
 .join-status.is-error {
-    color: #dc2626;
+    color: var(--ems-danger);
 }
 
 .join-status.is-success {
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .join-btn {
@@ -565,7 +565,7 @@ body.join-page {
     height: 42px;
     border: none;
     border-radius: 14px;
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     color: var(--join-ink);
 }
 
@@ -582,7 +582,7 @@ body.join-page {
 }
 
 .join-modal__button--secondary {
-    background: #eff6ff;
+    background: var(--ems-primary-50);
     color: var(--join-ink);
 }
 
