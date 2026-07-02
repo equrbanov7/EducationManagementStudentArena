@@ -1,50 +1,31 @@
 """
-projects/views/__init__.py
-───────────────────────────
-Re-exports all views for backward compatibility with URLs.
+projects/views/__init__.py — FASAD.
 
-This allows the existing urls.py to continue working with:
-    from . import views
-    views.create_project
+F1 rol-skeleti (2026-07-02, AGENTS §6): fayllar views/{student,teacher,shared}/
+rol qovluqlarına köçürülüb. Mövcud import səthi dəyişmir.
 """
 
-# ═══════════════════════════════════════════════════════════════
-# API Views
-# ═══════════════════════════════════════════════════════════════
-from .api import api_get_groups, api_get_students
-
-# ═══════════════════════════════════════════════════════════════
-# CRUD
-# ═══════════════════════════════════════════════════════════════
-from .crud import create_project, delete_project, edit_project
-
-# ═══════════════════════════════════════════════════════════════
-# Student Views
-# ═══════════════════════════════════════════════════════════════
+from .shared import api_get_groups, api_get_students
 from .student import my_submissions, project_detail, submit_project
+from .teacher import (
+    create_project,
+    delete_project,
+    delete_submissions,
+    edit_project,
+    grade_submission,
+    review_submissions,
+)
 
-# ═══════════════════════════════════════════════════════════════
-# Teacher Views
-# ═══════════════════════════════════════════════════════════════
-from .teacher import delete_submissions, grade_submission, review_submissions
-
-# ═══════════════════════════════════════════════════════════════
-# __all__ - Explicit exports
-# ═══════════════════════════════════════════════════════════════
 __all__ = [
-    # CRUD
     "create_project",
     "edit_project",
     "delete_project",
-    # Student
     "project_detail",
     "submit_project",
     "my_submissions",
-    # Teacher
     "review_submissions",
     "delete_submissions",
     "grade_submission",
-    # API
     "api_get_groups",
     "api_get_students",
 ]

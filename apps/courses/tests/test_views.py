@@ -161,7 +161,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertNotContains(response, self.course_b.title)
 
     def test_my_courses_shows_no_data_without_active_organization(self):
-        from apps.courses.views.crud import MyCoursesListView
+        from apps.courses.views import MyCoursesListView
 
         request = RequestFactory().get(reverse("courses:my_courses"))
         request.user = self.owner
@@ -553,7 +553,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
 
 class StudentUserQuerysetRoleSourceTests(TestCase):
     def test_auth_groups_do_not_make_member_users_visible_as_students(self):
-        from apps.courses.views._helpers import _student_users_queryset
+        from apps.courses.views.shared._helpers import _student_users_queryset
 
         real_student = User.objects.create_user(
             username="course_helper_student",
@@ -641,7 +641,7 @@ class CourseOrganizationRequiredTest(TestCase):
         """CreateCourseView form_valid raises PermissionDenied when request has no organization."""
         from django.core.exceptions import PermissionDenied
 
-        from apps.courses.views.crud import CreateCourseView
+        from apps.courses.views import CreateCourseView
 
         # Simulate a request with organization=None (no active org)
         request = RequestFactory().post(

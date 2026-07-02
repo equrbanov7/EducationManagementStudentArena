@@ -29433,6 +29433,34 @@ msgctxt "core.errors.csrf"
 msgid "Return to the verification page"
 msgstr "Вернуться на страницу подтверждения"
 
+msgctxt "labs.view.message"
+msgid "bulk_delete_select_at_least_one"
+msgstr "Выберите хотя бы один ответ для удаления."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_none_found"
+msgstr "Выбранные ответы не найдены."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_success"
+msgstr "Удалено ответов: {count}."
+
+msgctxt "labs.view.message"
+msgid "grading_window_expired"
+msgstr "Окно проверки истекло. Изменения больше невозможны."
+
+msgctxt "labs.view.message"
+msgid "unexpected_error_try_again"
+msgstr "Произошла непредвиденная ошибка. Повторите попытку."
+
+msgctxt "labs.view.label"
+msgid "anonymous_student"
+msgstr "Анонимный студент"
+
+msgctxt "labs.view.label"
+msgid "anonymous_view"
+msgstr "Анонимный режим"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Роль студента нельзя выбирать вручную."

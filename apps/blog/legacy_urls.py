@@ -10,7 +10,7 @@ from .views import (
     questions_i_can_see,
     review_post,
 )
-from .views.legacy import (
+from .views.public.legacy import (
     legacy_about,
     legacy_article_detail,
     legacy_category_detail,

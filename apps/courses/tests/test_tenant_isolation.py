@@ -290,7 +290,7 @@ class CourseNoOrgContextTest(TestCase):
         """my_courses returns empty list when no active_organization is in the session."""
         from django.test import RequestFactory
 
-        from apps.courses.views.crud import MyCoursesListView
+        from apps.courses.views import MyCoursesListView
 
         factory = RequestFactory()
         request = factory.get(reverse("courses:my_courses"))

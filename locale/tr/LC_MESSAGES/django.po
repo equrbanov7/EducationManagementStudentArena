@@ -29330,6 +29330,34 @@ msgctxt "core.errors.csrf"
 msgid "Return to the verification page"
 msgstr "Doğrulama sayfasına dön"
 
+msgctxt "labs.view.message"
+msgid "bulk_delete_select_at_least_one"
+msgstr "Silmek için en az bir cevap seçin."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_none_found"
+msgstr "Seçilen cevaplar bulunamadı."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_success"
+msgstr "{count} cevap silindi."
+
+msgctxt "labs.view.message"
+msgid "grading_window_expired"
+msgstr "İnceleme süresi doldu. Artık değişiklik yapılamaz."
+
+msgctxt "labs.view.message"
+msgid "unexpected_error_try_again"
+msgstr "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+
+msgctxt "labs.view.label"
+msgid "anonymous_student"
+msgstr "Anonim öğrenci"
+
+msgctxt "labs.view.label"
+msgid "anonymous_view"
+msgstr "Anonim görünüm"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."

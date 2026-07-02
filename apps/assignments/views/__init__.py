@@ -1,50 +1,32 @@
 """
-assignments/views/__init__.py
-──────────────────────────────
-Re-exports all views for backward compatibility with URLs.
+assignments/views/__init__.py — FASAD.
 
-This allows the existing urls.py to continue working with:
-    from . import views
-    views.create_assignment
+F1 rol-skeleti (2026-07-02, AGENTS §6): fayllar views/{student,teacher,shared}/
+rol qovluqlarına köçürülüb. Bu fasad bütün mövcud import səthini
+(`from . import views` → views.create_assignment və s.) DƏYİŞMƏDƏN saxlayır.
 """
 
-# ═══════════════════════════════════════════════════════════════
-# API Views
-# ═══════════════════════════════════════════════════════════════
-from .api import remove_student_from_assignment, search_groups, search_students, students_by_groups
-
-# ═══════════════════════════════════════════════════════════════
-# CRUD
-# ═══════════════════════════════════════════════════════════════
-from .crud import create_assignment, delete_assignment, edit_assignment
-
-# ═══════════════════════════════════════════════════════════════
-# Student Views
-# ═══════════════════════════════════════════════════════════════
+from .shared import remove_student_from_assignment, search_groups, search_students, students_by_groups
 from .student import assignment_detail, my_submissions, submit_assignment
+from .teacher import (
+    create_assignment,
+    delete_assignment,
+    delete_submissions,
+    edit_assignment,
+    grade_submission,
+    review_submissions,
+)
 
-# ═══════════════════════════════════════════════════════════════
-# Teacher Views
-# ═══════════════════════════════════════════════════════════════
-from .teacher import delete_submissions, grade_submission, review_submissions
-
-# ═══════════════════════════════════════════════════════════════
-# __all__ - Explicit exports
-# ═══════════════════════════════════════════════════════════════
 __all__ = [
-    # CRUD
     "create_assignment",
     "edit_assignment",
     "delete_assignment",
-    # Student
     "assignment_detail",
     "submit_assignment",
     "my_submissions",
-    # Teacher
     "review_submissions",
     "delete_submissions",
     "grade_submission",
-    # API
     "search_students",
     "search_groups",
     "students_by_groups",

@@ -113,17 +113,17 @@
             {% elif active_section == "category-management" %}
                 {% include "accounts/profile/sections/_category_management.html" %}
             {% elif active_section == "superadmin-org-features" %}
-                {% include "accounts/profile/sections/_superadmin_org_features.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_org_features.html" %}
             {% elif active_section == "superadmin-org-inspector" %}
-                {% include "accounts/profile/sections/_superadmin_org_inspector.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_org_inspector.html" %}
             {% elif active_section == "superadmin-organizations" %}
-                {% include "accounts/profile/sections/_superadmin_organizations.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_organizations.html" %}
             {% elif active_section == "superadmin-users" %}
-                {% include "accounts/profile/sections/_superadmin_user_management.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_user_management.html" %}
             {% elif active_section == "superadmin-ai" %}
-                {% include "accounts/profile/sections/_superadmin_ai_settings.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_ai_settings.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
-                {% include "accounts/profile/sections/_superadmin_contact_messages.html" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
             {% elif active_section == "statistics" %}
                 {% include "accounts/profile/sections/_statistics.html" %}
             {% elif active_section == "edit-profile" %}
