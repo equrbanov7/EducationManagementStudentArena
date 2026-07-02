@@ -51,6 +51,20 @@ def question_bank_word_export(request, bank_id):
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
 
     language = (request.GET.get("language") or "").strip().lower() or None
+
+    # C2 (2026-07-03): böyük banklar worker-də hazırlanır (export job).
+    from django.conf import settings as _settings
+
+    threshold = getattr(_settings, "EXPORT_SYNC_MAX_ROWS", 500)
+    if bank.library_questions.count() > threshold:
+        from apps.exams.views.teacher.extract_jobs import start_export_job
+
+        return start_export_job(
+            request,
+            export_name="bank_word",
+            params={"bank_id": bank.pk, "language": language or ""},
+        )
+
     payload = bank_questions_payload(bank, language=language)
     if not payload:
         messages.warning(request, pgettext("exams.view.bank.message", "Export üçün aktiv sual tapılmadı."))

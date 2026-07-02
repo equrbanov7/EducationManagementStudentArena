@@ -122,12 +122,16 @@
             background: #fee2e2;
             color: #991b1b;
         }
-    </style>
+    
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { font-size: 24px; font-weight: 600; }
+  .c3-2 { margin-bottom: 2rem; }
+</style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
+            <div class="c3-1">{{ organization.name }}</div>
             <nav class="nav-menu">
                 <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
                 <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
@@ -139,7 +143,7 @@
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.settings" %}</h1>
+        <h1 class="c3-2">{% trans "heading" context "organizations.settings" %}</h1>
 
         {% if messages %}
         <div class="messages">

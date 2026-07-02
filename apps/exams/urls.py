@@ -22,6 +22,11 @@ urlpatterns = [
     # ==========================
     # TEACHER - Question Bank library (imtahandan asılı olmayan) (sabit)
     # ==========================
+    # P3: asinxron mətn-çıxarma (OCR-lı PDF importu üçün status-poll axını)
+    path("import/extract-jobs/", views.start_text_extraction, name="start_text_extraction"),
+    path("import/extract-jobs/<uuid:job_id>/", views.text_extraction_status, name="text_extraction_status"),
+    path("export-jobs/<uuid:job_id>/waiting/", views.export_job_waiting, name="export_job_waiting"),
+    path("export-jobs/<uuid:job_id>/download/", views.export_job_download, name="export_job_download"),
     path("question-bank/", views.question_bank_list, name="question_bank_list"),
     path("question-bank/<int:bank_id>/", views.question_bank_detail, name="question_bank_detail"),
     path("question-bank/<int:bank_id>/update/", views.question_bank_update, name="question_bank_update"),

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n lab_filters %}
-
 {% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
@@ -12,9 +11,14 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width: 900px; margin: 0 auto; }
+</style>
+
 {% trans "file_name_fallback" context "accounts.my_result_detail_page" as file_name_fallback %}
 <div class="profile-page my-result-detail-page">
-    <div class="profile-main" style="max-width: 900px; margin: 0 auto;">
+    <div class="profile-main c3-1">
         <div class="profile-header">
             <h1 class="profile-title">{{ item_title }}</h1>
             <a href="{{ back_url }}" class="btn btn-secondary">

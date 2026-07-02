@@ -29358,6 +29358,55 @@ msgctxt "labs.view.label"
 msgid "anonymous_view"
 msgstr "Anonim görünüm"
 
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarılır..."
+msgstr "Dosyadan metin çıkarılıyor..."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarıla bilmədi."
+msgstr "Dosyadan metin çıkarılamadı."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
+msgstr "Metin çıkarma çok uzun sürdü. Yeniden deneyin."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_required"
+msgstr "Dosya seçilmedi."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_too_large"
+msgstr "Dosya çok büyük (45MB sınırı)."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_title"
+msgstr "Dışa aktarma hazırlanıyor"
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_body"
+msgstr ""
+"Dosya hazır olduğunda indirme otomatik başlayacak. Sayfayı açık tutun."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_failed_body"
+msgstr "Dışa aktarma başarısız oldu. Yeniden deneyin."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_timeout_body"
+msgstr "Dışa aktarma çok uzun sürdü. Daha sonra yeniden deneyin."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_back_link"
+msgstr "Geri dön"
+
+msgctxt "exams.view.export_job.error"
+msgid "export_failed"
+msgstr "Dışa aktarma başarısız oldu. Daha sonra yeniden deneyin."
+
+msgctxt "exams.view.export_job.error"
+msgid "empty_export"
+msgstr "Dışa aktarılacak aktif soru bulunamadı."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."

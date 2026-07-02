@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n %}
-
 {% block title %}{% trans "title" context "accounts.assigned_courses_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
@@ -8,9 +7,14 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width: 1000px; margin: 0 auto; }
+</style>
+
 {% trans "category_missing" context "accounts.assigned_courses_page" as assigned_courses_category_missing %}
 <div class="profile-page">
-    <div class="profile-main" style="max-width: 1000px; margin: 0 auto;">
+    <div class="profile-main c3-1">
         <div class="profile-header">
             <h1 class="profile-title">
                 <i class="fas fa-graduation-cap"></i> {% trans "heading" context "accounts.assigned_courses_page" %}

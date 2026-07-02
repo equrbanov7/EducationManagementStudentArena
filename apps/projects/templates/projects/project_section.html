@@ -1,9 +1,15 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { color: #17a2b8; }
+  .c3-2 { font-size: 2rem; color: #ccc; }
+</style>
+
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                 data-bs-target="#projectCollapse" aria-expanded="false">
-            <i class="fa-solid fa-project-diagram me-2 fs-5" style="color: #17a2b8;"></i>
+            <i class="fa-solid fa-project-diagram me-2 fs-5 c3-1"></i>
             <span class="fw-bold">{% trans "section_title" context "projects.section" %}</span>
             <span class="badge bg-info ms-2">
                 {% if is_student %}
@@ -91,7 +97,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fa-solid fa-folder-open c3-2"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "projects.section" %}</p>
                         <button class="btn btn-info btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addProjectModal">
                             <i class="fa-solid fa-plus-circle"></i> {% trans "add_first_project" context "projects.section" %}
@@ -180,14 +186,14 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fa-solid fa-folder-open c3-2"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_student" context "projects.section" %}</p>
                     </div>
                 {% endif %}
 
             {% else %}
                 <div class="alert alert-light text-center py-4">
-                    <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                    <i class="fa-solid fa-folder-open c3-2"></i>
                     <p class="text-muted mt-2 mb-0">{% trans "empty_generic" context "projects.section" %}</p>
                 </div>
             {% endif %}

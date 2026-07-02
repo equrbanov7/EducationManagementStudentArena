@@ -184,3 +184,14 @@ def invalidate_blog_cache_on_category_save(sender, instance, **kwargs):
 @receiver(post_delete, sender=Category)
 def invalidate_blog_cache_on_category_delete(sender, instance, **kwargs):
     invalidate_blog_listing_cache()
+
+
+# ── Kateqoriya-ağacı keş invalidasiyası (P10) ─────────────────────────────────
+# Default ağac selectors-da keşlənir; kateqoriya dəyişən kimi sil.
+
+
+@receiver([post_save, post_delete], sender=Category)
+def invalidate_category_tree_on_change(sender, instance, **kwargs):
+    from apps.blog.selectors import invalidate_category_tree_cache
+
+    invalidate_category_tree_cache()

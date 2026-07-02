@@ -1,4 +1,9 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-height: 160px; overflow:auto; }
+</style>
+
 <div id="editFormData"
      data-members-bulk-url="{% url 'assignments:course_group_members_bulk' course.id %}">
 
@@ -54,7 +59,7 @@
               <input type="text" class="form-control js-group-search-edit" placeholder="{% trans 'search_group' context 'assignment.legacy.edit_form' %}">
             </div>
 
-            <div class="js-group-list-edit" style="max-height: 160px; overflow:auto;">
+            <div class="js-group-list-edit c3-1">
               {% for g in assignment_groups %}
                 <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">
                   <input type="checkbox"
@@ -72,7 +77,7 @@
               <input type="text" class="form-control js-student-search-edit" placeholder="{% trans 'search_student' context 'assignment.legacy.edit_form' %}">
             </div>
 
-            <div class="js-student-list-edit" style="max-height: 160px; overflow:auto;">
+            <div class="js-student-list-edit c3-1">
               {% for m in course.memberships.all %}
                 {% if m.role == "student" %}
                   <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">

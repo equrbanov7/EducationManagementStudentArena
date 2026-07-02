@@ -10,7 +10,6 @@ from django.utils.translation import pgettext
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.forms import BankQuestionCreateForm
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.ai_question_generation import generate_question_bank_text
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     analyze_written_bulk,
@@ -30,7 +29,6 @@ from ._shared import (
     _normalize_format,
     _render_bank_question_form_html,
     _save_bank_questions,
-    logger,
 )
 
 
@@ -155,45 +153,29 @@ def ai_generate_bank_questions(request, bank_id):
     # Format: AI kartından (q_format) gəlir, yoxsa bankın default tipi.
     q_format = _normalize_format(request.POST.get("q_format") or bank.default_question_type)
 
-    source_text = (request.POST.get("source_text") or "").strip()
-    uploaded = request.FILES.get("source_file") or request.FILES.get("ai_source_file")
-    if uploaded:
-        try:
-            extracted_text = extract_text_from_upload(uploaded)
-        except Exception as exc:  # noqa: BLE001
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "error": pgettext("exams.view.bank.ai.error", "Fayl oxunmadı: {error}").format(error=exc),
-                },
-                status=400,
-            )
-        source_text = "\n\n".join(part for part in [source_text, extracted_text] if part.strip())
+    # P4 (2026-07-02): generasiya worker-də (fayl-çıxarma daxil); eager halda
+    # cavab köhnə forma ilə birə-birdir.
+    from apps.exams.views.teacher.extract_jobs import start_ai_generation_job
 
-    try:
-        result = generate_question_bank_text(
-            exam_title=bank.name,
-            exam_type=q_format,
-            prompt_text=request.POST.get("prompt", ""),
-            source_text=source_text,
-            question_count=request.POST.get("question_count") or 5,
-            difficulty=request.POST.get("difficulty") or "medium",
-            block_name="",
-            language_code=request.LANGUAGE_CODE,
-            user_id=request.user.pk,
-        )
-    except Exception:  # noqa: BLE001
-        logger.exception("AI bank question endpoint failed for bank %s", bank.pk)
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": pgettext(
-                    "exams.view.bank.ai.error", "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
-                ),
-            },
-            status=500,
-        )
-    return JsonResponse(result, status=200 if result.get("ok") else 400)
+    payload = {
+        "exam_title": bank.name,
+        "exam_type": q_format,
+        "prompt_text": request.POST.get("prompt", ""),
+        "source_text": (request.POST.get("source_text") or "").strip(),
+        "question_count": request.POST.get("question_count") or 5,
+        "difficulty": request.POST.get("difficulty") or "medium",
+        "block_name": "",
+        "language_code": request.LANGUAGE_CODE,
+        "user_id": request.user.pk,
+    }
+    return start_ai_generation_job(
+        request,
+        payload=payload,
+        uploaded=request.FILES.get("source_file") or request.FILES.get("ai_source_file"),
+        service_error_message=pgettext(
+            "exams.view.bank.ai.error", "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın."
+        ),
+    )
 
 
 @login_required

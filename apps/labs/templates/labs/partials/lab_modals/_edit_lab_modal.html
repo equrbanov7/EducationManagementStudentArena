@@ -1,4 +1,9 @@
 {% load static i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-height:200px;overflow-y:auto; }
+</style>
+
 <div class="modal fade" id="editLabModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -71,13 +76,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
                                     <input type="text" class="form-control mb-2" id="editLabGroupSearch" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
-                                    <div id="editLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
+                                    <div id="editLabGroupList" class="border rounded c3-1"></div>
                                     <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabGroupCount">0</span></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
                                     <input type="text" class="form-control mb-2" id="editLabStudentSearch" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
-                                    <div id="editLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
+                                    <div id="editLabStudentList" class="border rounded c3-1">
                                         <p class="text-muted text-center py-3">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
                                     </div>
                                     <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabStudentCount">0</span></small>

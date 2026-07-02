@@ -1,4 +1,9 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { border-radius: 8px; }
+</style>
+
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
     <div class="section-card">
@@ -92,7 +97,7 @@
                 </div>
             </div>
 
-            <div id="editProfileTypeWarning" class="alert alert-warning mt-3" style="border-radius: 8px;">
+            <div id="editProfileTypeWarning" class="alert alert-warning mt-3 c3-1">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 {% trans "edit_profile_type_change_warning" context "profile.edit" %}
                 {% if 'student-organization-request' in allowed_sections %}

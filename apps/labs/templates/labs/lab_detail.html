@@ -2,7 +2,6 @@
 {% load static %}
 {% load i18n %}
 {% load lab_filters %}
-
 {% block title %}{{ lab.title }}{% endblock %}
 
 {% block extraCss %}
@@ -11,6 +10,11 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { width: 0%; }
+</style>
+
 <div class="container py-5">
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-5 gap-3">
@@ -116,7 +120,7 @@
             </div>
             <div class="col-md-4">
                 <div class="progress shadow-sm lab-progress">
-                    <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+                    <div class="progress-bar c3-1" id="progressBar"></div>
                 </div>
             </div>
         </div>

@@ -1,4 +1,9 @@
 {% load static i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { width:70px; }
+</style>
+
 {% comment %}
 ================================================================================
 ORTAQ TOPLU SUAL "WORKBENCH" PARTIAL
@@ -130,6 +135,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
              data-ai-question-form
              data-ai-context="{{ wb_ai_context|default:'test' }}"
              data-ai-url="{{ wb_ai_url }}"
+             data-extract-url="{% url 'exams:start_text_extraction' %}"
              data-ai-target="#testRawEditor">
         {# Format toggle olan səhifələrdə (bank) AI da seçilmiş formata uyğun yaradır. #}
         {% if wb_show_format %}
@@ -198,7 +204,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
     {# ───────────────────── UPLOAD SIDEBAR + EDITOR (form) ────────────────── #}
     <div class="main-card">
-        <form method="post" enctype="multipart/form-data" class="split-layout" {% if wb_show_settings %}data-sync-bank-settings{% endif %}>
+        <form method="post" enctype="multipart/form-data" class="split-layout" data-extract-url="{% url 'exams:start_text_extraction' %}" {% if wb_show_settings %}data-sync-bank-settings{% endif %}>
             {% csrf_token %}
             <input type="hidden" name="action" value="preview"/>
             <input type="hidden" name="math_token" value="{{ math_token }}">
@@ -488,7 +494,7 @@ Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):
 
                     <div class="points-mini">
                         <label>{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
-                        <input type="number" name="points_{{ forloop.counter }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" style="width:70px;">
+                        <input type="number" name="points_{{ forloop.counter }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" class="c3-1">
                     </div>
 
                     <div class="q-content">

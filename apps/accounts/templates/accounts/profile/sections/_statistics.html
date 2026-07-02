@@ -1,4 +1,10 @@
 {% load i18n static %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width:200px; }
+  .c3-2 { max-width:220px; }
+</style>
+
 <section class="profile-section-panel profile-section--statistics {% if active_section == 'statistics' %}is-active{% endif %}"
          data-profile-section-panel="statistics">
 
@@ -185,8 +191,8 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-building me-1"></i> {% trans "card_organizations" context "profile.statistics" %}</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
-             id="statsTableSearchOrg" style="max-width:200px;">
+      <input class="form-control form-control-sm w-auto c3-1" type="text" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchOrg">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -232,8 +238,8 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-chalkboard-teacher me-1"></i> {% trans "card_teachers" context "profile.statistics" %}</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
-             id="statsTableSearchTeacher" style="max-width:200px;">
+      <input class="form-control form-control-sm w-auto c3-1" type="text" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchTeacher">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -273,8 +279,8 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-trophy me-1"></i> {% trans "table_course_ranking_title" context "profile.statistics" %}</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
-             id="statsTableSearchCourse" style="max-width:200px;">
+      <input class="form-control form-control-sm w-auto c3-1" type="text" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchCourse">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -320,8 +326,8 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-users me-1"></i> {% trans "chart_group_comparison" context "profile.statistics" %}</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
-             id="statsTableSearchGroup" style="max-width:200px;">
+      <input class="form-control form-control-sm w-auto c3-1" type="text" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchGroup">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -363,8 +369,8 @@
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6 class="mb-0"><i class="fas fa-book-open me-1"></i> Kurs drill-down</h6>
-      <input type="text" class="form-control form-control-sm w-auto" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
-             id="statsTableSearchTeacherCourse" style="max-width:220px;">
+      <input class="form-control form-control-sm w-auto c3-2" type="text" placeholder="{% trans 'table_search' context 'profile.statistics' %}"
+             id="statsTableSearchTeacherCourse">
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">

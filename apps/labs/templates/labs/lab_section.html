@@ -1,4 +1,9 @@
 {% load static i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { font-size: 2rem; color: #ccc; }
+</style>
+
 <link rel="stylesheet" href="{% static 'labs/css/lab_section.css' %}">
 
 <div class="accordion-item">
@@ -83,7 +88,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fas fa-flask c3-1"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_no_labs_yet" context "labs.template.lab_section" %}</p>
                         <button class="btn btn-danger btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addLabModal">
                             <i class="fas fa-plus-circle"></i> {% trans "action_add_first_lab" context "labs.template.lab_section" %}
@@ -175,14 +180,14 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fas fa-flask c3-1"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_no_assigned_labs" context "labs.template.lab_section" %}</p>
                     </div>
                 {% endif %}
             
             {% else %}
                 <div class="alert alert-light text-center py-4">
-                    <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                    <i class="fas fa-flask c3-1"></i>
                     <p class="text-muted mt-2 mb-0">{% trans "empty_no_labs" context "labs.template.lab_section" %}</p>
                 </div>
             {% endif %}

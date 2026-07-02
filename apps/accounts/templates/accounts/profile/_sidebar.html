@@ -1,4 +1,10 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { color:#dc3545; }
+  .c3-2 { margin:0;padding:0; }
+</style>
+
 <aside class="profile-sidebar" id="profileSidebar">
     <div class="sidebar-header">
         <h2 class="sidebar-title">{% trans "title" context "profile.sidebar" %}</h2>
@@ -175,7 +181,7 @@
             <li class="sidebar-menu-item">
                 <a href="{% url 'exams:supervision_monitor' %}"
                    class="sidebar-menu-link">
-                    <i class="fas fa-shield-alt sidebar-menu-icon" style="color:#dc3545;"></i>
+                    <i class="fas fa-shield-alt sidebar-menu-icon c3-1"></i>
                     <span class="sidebar-menu-text">İmtahan Nəzarəti</span>
                 </a>
             </li>
@@ -488,7 +494,7 @@
             </a>
         </li>
         <li class="sidebar-menu-item">
-            <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;padding:0">
+            <form method="post" action="{% url 'accounts:logout' %}" class="c3-2">
                 {% csrf_token %}
                 <button type="submit" class="sidebar-menu-link sidebar-menu-link--logout">
                     <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>

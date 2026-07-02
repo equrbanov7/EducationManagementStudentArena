@@ -185,7 +185,11 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { margin-bottom: 2rem; font-size: 28px; }
+  .c3-2 { background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 6px; font-size: 14px; }
+</style>
 </head>
 <body>
     <div class="header">
@@ -203,7 +207,7 @@
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem; font-size: 28px;">{% trans "heading" context "organizations.dashboard" %}</h1>
+        <h1 class="c3-1">{% trans "heading" context "organizations.dashboard" %}</h1>
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -278,7 +282,7 @@
             {% if user_memberships %}
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     {% for membership in user_memberships %}
-                    <span style="background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 6px; font-size: 14px;">
+                    <span class="c3-2">
                         {{ membership.role.display_name }}
                         {% if membership.scope_unit %}
                         ({{ membership.scope_unit.name }})

@@ -353,6 +353,11 @@ def _apply_results_filters(exam, request):
 
     Qaytarır: (attempts_qs, filter_state_dict)
     """
+    return _apply_results_filters_from_params(exam, request.GET)
+
+
+def _apply_results_filters_from_params(exam, params):
+    """Filter məntiqi düz mapping üzərində — export job worker-i də çağıra bilir."""
     # Lazy expire: vaxtı keçmiş "davam edir" cəhdləri filter/siyahıdan ƏVVƏL
     # expired-ə çevir ki, status həm cədvəldə, həm filterlərdə düzgün görünsün.
     _expire_overdue_attempts(exam)
@@ -362,7 +367,7 @@ def _apply_results_filters(exam, request):
         "answers__selected_options",
     )
 
-    search_query = (request.GET.get("q") or "").strip()
+    search_query = (params.get("q") or "").strip()
     if search_query:
         attempts = attempts.filter(
             Q(user__username__icontains=search_query)
@@ -370,14 +375,14 @@ def _apply_results_filters(exam, request):
             | Q(user__last_name__icontains=search_query)
         )
 
-    status_filter = (request.GET.get("status") or "all").strip().lower()
+    status_filter = (params.get("status") or "all").strip().lower()
     allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}
     if status_filter not in allowed_status_filters:
         status_filter = "all"
     if status_filter != "all":
         attempts = attempts.filter(status=status_filter)
 
-    checked_filter = (request.GET.get("checked") or "all").strip().lower()
+    checked_filter = (params.get("checked") or "all").strip().lower()
     if checked_filter == "checked":
         attempts = attempts.filter(checked_by_teacher=True)
     elif checked_filter == "unchecked":
@@ -385,15 +390,15 @@ def _apply_results_filters(exam, request):
     else:
         checked_filter = "all"
 
-    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
-    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+    date_from_raw, date_from = _parse_filter_date(params.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(params.get("date_to"))
     if date_from:
         attempts = attempts.filter(started_at__date__gte=date_from)
     if date_to:
         attempts = attempts.filter(started_at__date__lte=date_to)
 
     # Group filter — imtahanın iştirakçılarının üzvü olduğu istənilən qrupdan
-    group_filter_raw = (request.GET.get("group") or "").strip().lower()
+    group_filter_raw = (params.get("group") or "").strip().lower()
     group_id = None
     if group_filter_raw and group_filter_raw != "all":
         try:
@@ -405,8 +410,8 @@ def _apply_results_filters(exam, request):
     else:
         group_id = None
 
-    sort_by = (request.GET.get("sort_by") or "").strip()
-    sort_dir = (request.GET.get("sort_dir") or "").strip()
+    sort_by = (params.get("sort_by") or "").strip()
+    sort_dir = (params.get("sort_dir") or "").strip()
     ALLOWED_SORT_FIELDS = {
         "user": "user__first_name",
         "username": "user__username",

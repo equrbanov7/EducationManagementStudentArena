@@ -53,13 +53,13 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
-                            <div id="addGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <div id="addGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
-                            <div id="addStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <div id="addStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addStudentCount">0</span></small>
@@ -128,13 +128,13 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
-                            <div id="editGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <div id="editGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
-                            <div id="editStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <div id="editStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editStudentCount">0</span></small>
@@ -159,6 +159,9 @@
 .chk-row input{width:18px;height:18px;margin-right:10px}
 .chk-row label{margin:0;flex:1;cursor:pointer}
 .chk-row .badge{margin-left:auto}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { max-height:250px;overflow-y:auto; }
 </style>
 
 <script nonce="{{ request.csp_nonce }}">

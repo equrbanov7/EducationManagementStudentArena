@@ -1,4 +1,9 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { width: 44px; }
+</style>
+
 {% if organization %}
 <div class="section-card org-management-panel" data-management-panel="staff-members">
     <div class="section-title">
@@ -260,7 +265,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 44px;"></th>
+                        <th class="c3-1"></th>
                         <th>{% trans "User" context "staff.management" %}</th>
                         <th>{% trans "Username" context "staff.management" %}</th>
                         <th>{% trans "Email" context "staff.management" %}</th>
@@ -392,7 +397,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 44px;"></th>
+                        <th class="c3-1"></th>
                         <th>{% trans "User" context "staff.management" %}</th>
                         <th>{% trans "Username" context "staff.management" %}</th>
                         <th>{% trans "Email" context "staff.management" %}</th>

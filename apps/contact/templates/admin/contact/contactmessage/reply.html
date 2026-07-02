@@ -47,6 +47,10 @@
 .reply-error { margin-top: 12px; color: #991b1b; background: #fef2f2;
                border: 1px solid #fecaca; padding: 10px 12px;
                border-radius: 8px; font-size: 13px; }
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { margin-bottom:16px; }
+  .c3-2 { border-left-color:#1e40af; }
 </style>
 {% endblock %}
 
@@ -104,7 +108,7 @@
         <form method="post" class="reply-form" novalidate>
             {% csrf_token %}
 
-            <div style="margin-bottom:16px;">
+            <div class="c3-1">
                 <label for="{{ form.reply_from.id_for_label }}">{{ form.reply_from.label }}</label>
                 {{ form.reply_from }}
                 {{ form.reply_from.errors }}
@@ -113,7 +117,7 @@
                 </p>
             </div>
 
-            <div style="margin-bottom:16px;">
+            <div class="c3-1">
                 <label for="{{ form.reply_body.id_for_label }}">{{ form.reply_body.label }}</label>
                 {{ form.reply_body }}
                 {{ form.reply_body.errors }}
@@ -154,7 +158,7 @@
         {% if message.reply_delivery_error %}
         <div class="reply-error">{{ message.reply_delivery_error }}</div>
         {% endif %}
-        <div class="original-msg" style="border-left-color:#1e40af;">{{ message.reply_body }}</div>
+        <div class="original-msg c3-2">{{ message.reply_body }}</div>
     </div>
     {% endif %}
 

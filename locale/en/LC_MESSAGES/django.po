@@ -29523,6 +29523,56 @@ msgctxt "labs.view.label"
 msgid "anonymous_view"
 msgstr "Anonymous view"
 
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarılır..."
+msgstr "Extracting text from the file..."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarıla bilmədi."
+msgstr "Could not extract text from the file."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
+msgstr "Text extraction took too long. Please try again."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_required"
+msgstr "File is required."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_too_large"
+msgstr "File is too large (45MB limit)."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_title"
+msgstr "Preparing export"
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_body"
+msgstr ""
+"The download will start automatically once the file is ready. Keep this page"
+" open."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_failed_body"
+msgstr "Export failed. Please try again."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_timeout_body"
+msgstr "The export took too long. Please try again later."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_back_link"
+msgstr "Go back"
+
+msgctxt "exams.view.export_job.error"
+msgid "export_failed"
+msgstr "Export failed. Please try again later."
+
+msgctxt "exams.view.export_job.error"
+msgid "empty_export"
+msgstr "No active questions found to export."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Student role cannot be selected manually."

@@ -395,6 +395,88 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
+
+    // P3-b (2026-07-02): fayl seçilibsə submit-dən əvvəl mətn worker-də çıxarılır
+    // (start + status poll, düstur-şəkil stash daxil). Endpoint yoxdursa köhnə
+    // sinxron POST davranışı qalır.
+    function getCsrfTokenTQ() {
+      const el = document.querySelector("[name=csrfmiddlewaretoken]");
+      if (el && el.value) return el.value;
+      const m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+      return m ? decodeURIComponent(m[1]) : "";
+    }
+
+    function pollExtractJob(statusUrl, attempt) {
+      return fetch(statusUrl, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin"
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (json) {
+          if (json.status === "success") return json;
+          if (json.status === "failed") throw new Error(json.error || "Fayldan mətn çıxarıla bilmədi.");
+          if (attempt >= 240) throw new Error("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.");
+          return new Promise(function (res) { setTimeout(res, 2500); }).then(function () {
+            return pollExtractJob(statusUrl, attempt + 1);
+          });
+        });
+    }
+
+    function extractBeforeSubmit(form, fileInput, submitter) {
+      const extractUrl = form.getAttribute("data-extract-url");
+      const fd = new FormData();
+      fd.append("source_file", fileInput.files[0]);
+      fd.append("stash_math", "1");
+
+      if (submitter) {
+        if (!submitter.dataset.defaultLabel) submitter.dataset.defaultLabel = submitter.innerHTML;
+        submitter.disabled = true;
+        submitter.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Mətn çıxarılır...';
+      }
+
+      return fetch(extractUrl, {
+        method: "POST",
+        body: fd,
+        headers: { "X-CSRFToken": getCsrfTokenTQ(), "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin"
+      })
+        .then(function (r) {
+          if (r.status === 404) return null; // endpoint yoxdur → köhnə yol
+          return r.text().then(function (body) {
+            let json = {};
+            try { json = body ? JSON.parse(body) : {}; } catch (e) { json = {}; }
+            if (!r.ok || !json.ok) throw new Error(json.error || "Fayldan mətn çıxarıla bilmədi.");
+            return json;
+          });
+        })
+        .then(function (json) {
+          if (json === null) return null;
+          if (json.status === "success") return json;
+          return pollExtractJob(extractUrl + json.job_id + "/", 0);
+        })
+        .then(function (done) {
+          if (done === null) return false; // fallback: faylla köhnə submit
+          const textarea = form.querySelector('textarea[name="raw_text"]');
+          if (textarea) {
+            textarea.value = done.text || "";
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          const meta = done.meta || {};
+          if (meta.math_token) {
+            let tokenInput = form.querySelector('input[name="math_token"]');
+            if (!tokenInput) {
+              tokenInput = document.createElement("input");
+              tokenInput.type = "hidden";
+              tokenInput.name = "math_token";
+              form.appendChild(tokenInput);
+            }
+            tokenInput.value = meta.math_token;
+          }
+          fileInput.value = "";
+          return true;
+        });
+    }
+
     function guardLongSubmit(form) {
       if (!form) return;
       form.addEventListener("submit", function (event) {
@@ -406,6 +488,39 @@ document.addEventListener("DOMContentLoaded", function () {
         const fileInput = form.querySelector('input[type="file"]');
         if (fileInput && !validateFileClientSide(fileInput)) {
           event.preventDefault();
+          return;
+        }
+
+        // P3-b: fayl varsa əvvəl asinxron çıxarma, sonra normal POST (faylsız).
+        if (
+          form.getAttribute("data-extract-url") &&
+          fileInput &&
+          fileInput.files.length &&
+          form.dataset.extractDone !== "true"
+        ) {
+          event.preventDefault();
+          const submitter = event.submitter || form.querySelector('button[type="submit"]');
+          extractBeforeSubmit(form, fileInput, submitter)
+            .then(function (extracted) {
+              form.dataset.extractDone = "true";
+              if (submitter && submitter.dataset.defaultLabel) {
+                submitter.innerHTML = submitter.dataset.defaultLabel;
+                submitter.disabled = false;
+              }
+              if (extracted === false && submitter) {
+                // endpoint yoxdur → köhnə davranış: faylla birbaşa göndər
+              }
+              form.requestSubmit(submitter || undefined);
+            })
+            .catch(function (error) {
+              form.dataset.extractDone = "";
+              form.dataset.isSubmitting = "";
+              if (submitter && submitter.dataset.defaultLabel) {
+                submitter.innerHTML = submitter.dataset.defaultLabel;
+                submitter.disabled = false;
+              }
+              window.alert(error.message || "Fayldan mətn çıxarıla bilmədi.");
+            });
           return;
         }
 

@@ -27,7 +27,7 @@
                 <div class="row">
                     {% for resource in resources %}
                         <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-left-success" style="border-left: 4px solid #28a745;">
+                            <div class="card h-100 border-left-success c3-1">
                                 <div class="card-body">
                                     <!-- Resource Icon & Title -->
                                     <div class="d-flex align-items-start mb-2">
@@ -140,4 +140,7 @@ function deleteResource(courseId, resourceId) {
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         transform: translateY(-2px);
     }
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { border-left: 4px solid #28a745; }
 </style>

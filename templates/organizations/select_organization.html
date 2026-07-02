@@ -168,7 +168,10 @@
                 margin-top: 8px;
             }
         }
-    </style>
+    
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { margin-top: 12px; }
+</style>
 </head>
 <body>
     <div class="container">
@@ -215,7 +218,7 @@
             <div class="no-orgs-icon">📚</div>
             <h2>{% trans "empty_title" context "organizations.select" %}</h2>
             <p>{% trans "empty_subtitle" context "organizations.select" %}</p>
-            <p style="margin-top: 12px;">{% trans "empty_help" context "organizations.select" %}</p>
+            <p class="c3-1">{% trans "empty_help" context "organizations.select" %}</p>
         </div>
         {% endif %}
     </div>

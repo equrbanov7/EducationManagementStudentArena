@@ -1,5 +1,10 @@
 {% load i18n %}
 
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { width:100%; border-radius:8px; }
+</style>
+
 <div class="{% if is_modal %}question-form-shell question-form-shell--modal{% else %}question-container question-form-shell{% endif %} js-exam-question-form-root"
      data-confirm-delete-image="{% trans 'confirm_delete_image' context 'exams.template.add_exam_question' %}"
      data-confirm-delete-video="{% trans 'confirm_delete_video' context 'exams.template.add_exam_question' %}"
@@ -106,7 +111,7 @@
                     {% if editing and form.instance.video %}
                         <div class="media-preview" data-current-video-preview>
                             <span class="media-preview-label">{% trans "label_current_video" context "exams.template.add_exam_question" %}:</span>
-                            <video controls style="width:100%; border-radius:8px;" data-current-video>
+                            <video controls class="c3-1" data-current-video>
                                 <source src="{{ form.instance.video.url }}">
                             </video>
                             <button type="button" class="clear-media-btn" data-question-clear-media="video">
@@ -117,7 +122,7 @@
 
                     <div class="media-preview" data-new-video-preview hidden>
                         <span class="media-preview-label">{% trans "label_selected_video_preview" context "exams.template.add_exam_question" %}:</span>
-                        <video controls style="width:100%; border-radius:8px;" data-new-video>
+                        <video controls class="c3-1" data-new-video>
                             <source src="" data-new-video-source>
                         </video>
                     </div>

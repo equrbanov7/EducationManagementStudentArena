@@ -1,4 +1,10 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width: 240px; }
+  .c3-2 { width: 48px; }
+</style>
+
 <div class="section-card">
     <div class="section-title">
         <i class="fas fa-building"></i>
@@ -111,7 +117,7 @@
                value="{{ search_query }}"
                placeholder="{% trans 'search_placeholder' context 'profile.join_org' %}"
                class="form-control">
-        <select name="student_org_request_type" class="form-select" style="max-width: 240px;">
+        <select name="student_org_request_type" class="form-select c3-1">
             <option value="">{% trans "all_org_types" context "profile.join_org" %}</option>
             <option value="university" {% if org_type_filter == 'university' %}selected{% endif %}>{% trans "university" context "organization.type" %}</option>
             <option value="school" {% if org_type_filter == 'school' %}selected{% endif %}>{% trans "school" context "organization.type" %}</option>
@@ -170,7 +176,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 48px;">{% trans "select" context "profile.join_org" %}</th>
+                        <th class="c3-2">{% trans "select" context "profile.join_org" %}</th>
                         <th>{% trans "organization" context "profile.join_org" %}</th>
                         <th>{% trans "type" context "profile.join_org" %}</th>
                         <th>{% trans "country" context "profile.join_org" %}</th>

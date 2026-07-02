@@ -127,6 +127,88 @@
         }
     }
 
+
+    // P3 (2026-07-02): fayl varsa AI sorğusundan ƏVVƏL mətn worker-də çıxarılır
+    // (start + status-poll). OCR-lı PDF-lər sinxron sorğunu dəqiqələrlə tuturdu.
+    // Endpoint yoxdursa/404-dürsə köhnə davranışa (faylı birbaşa göndər) qayıdır.
+    var EXTRACT_POLL_MS = 2500;
+    var EXTRACT_POLL_MAX = 240; // ~10 dəq
+
+    function pollJob(statusUrl, attempt, failFallback) {
+        return fetch(statusUrl, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            credentials: "same-origin"
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (json) {
+                if (json.status === "success") return json;
+                if (json.status === "failed") {
+                    var meta = json.meta || {};
+                    throw new Error(json.error || meta.error || failFallback);
+                }
+                if (attempt >= EXTRACT_POLL_MAX) {
+                    throw new Error(t("extractTimeout", "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."));
+                }
+                return new Promise(function (resolve) {
+                    setTimeout(resolve, EXTRACT_POLL_MS);
+                }).then(function () {
+                    return pollJob(statusUrl, attempt + 1, failFallback);
+                });
+            });
+    }
+
+    function pollExtraction(statusUrl, attempt) {
+        return pollJob(statusUrl, attempt, t("extractFailed", "Fayldan mətn çıxarıla bilmədi.")).then(function (json) {
+            return json.text || "";
+        });
+    }
+
+    function extractFileTextIfNeeded(panel, formData) {
+        var extractUrl = panel.getAttribute("data-extract-url");
+        var file = formData.get("source_file");
+        if (!extractUrl || !file || typeof file === "string" || !file.name || !file.size) {
+            return Promise.resolve(formData);
+        }
+
+        var fd = new FormData();
+        fd.append("source_file", file);
+        setStatus(panel, t("extracting", "Fayldan mətn çıxarılır..."), "loading");
+
+        return fetch(extractUrl, {
+            method: "POST",
+            body: fd,
+            headers: {
+                "X-CSRFToken": getCsrfToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: "same-origin"
+        })
+            .then(function (response) {
+                if (response.status === 404) return null; // endpoint yoxdur → köhnə yol
+                return response.text().then(function (body) {
+                    var json = {};
+                    try { json = body ? JSON.parse(body) : {}; } catch (e) { json = {}; }
+                    if (!response.ok || !json.ok) {
+                        throw new Error(json.error || t("extractFailed", "Fayldan mətn çıxarıla bilmədi."));
+                    }
+                    return json;
+                });
+            })
+            .then(function (json) {
+                if (json === null) return formData;
+                var textPromise = json.status === "success"
+                    ? Promise.resolve(json.text || "")
+                    : pollExtraction(extractUrl + json.job_id + "/", 0);
+                return textPromise.then(function (text) {
+                    var prev = String(formData.get("source_text") || "").trim();
+                    formData.set("source_text", prev ? prev + "\n\n" + text : text);
+                    formData.delete("source_file");
+                    setStatus(panel, t("loading", "Gemini 2.5 Pro sualları hazırlayır..."), "loading");
+                    return formData;
+                });
+            });
+    }
+
     function handleGenerate(panel) {
         var url = panel.getAttribute("data-ai-url");
         if (!url) {
@@ -147,9 +229,10 @@
         setBusy(panel, true);
         setStatus(panel, t("loading", "Gemini 2.5 Pro sualları hazırlayır..."), "loading");
 
-        fetch(url, {
+        extractFileTextIfNeeded(panel, formData).then(function (preparedFormData) {
+        return fetch(url, {
             method: "POST",
-            body: formData,
+            body: preparedFormData,
             headers: {
                 "X-CSRFToken": getCsrfToken(),
                 "X-Requested-With": "XMLHttpRequest"
@@ -168,6 +251,27 @@
                     }
                     return json;
                 });
+            })
+            .then(function (json) {
+                // P4: real broker rejimində 202 + job_id gəlir → status poll.
+                if (json.job_id && json.status && json.status !== "success") {
+                    var extractUrl = panel.getAttribute("data-extract-url") || "";
+                    return pollJob(
+                        extractUrl + json.job_id + "/",
+                        0,
+                        t("generateFailed", "AI sual yaratma alınmadı.")
+                    ).then(function (done) {
+                        var meta = done.meta || {};
+                        return {
+                            ok: true,
+                            text: done.text || "",
+                            question_count: meta.question_count,
+                            remaining: meta.remaining,
+                            limit: meta.limit
+                        };
+                    });
+                }
+                return json;
             })
             .then(function (json) {
                 insertGeneratedText(panel, json.text || "", String(formData.get("insert_mode") || "append"));
@@ -189,6 +293,10 @@
             .finally(function () {
                 setBusy(panel, false);
             });
+        }).catch(function (error) {
+            setStatus(panel, error.message || t("extractFailed", "Fayldan mətn çıxarıla bilmədi."), "error");
+            setBusy(panel, false);
+        });
     }
 
     function initPanel(panel) {

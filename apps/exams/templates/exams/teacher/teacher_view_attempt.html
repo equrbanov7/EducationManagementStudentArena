@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n exam_filters get_item %}
-
 {% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ student_display }}{% endblock %}
 
 {% block extraCss %}
@@ -10,6 +9,11 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-height:360px; }
+</style>
+
 <div class="container my-4 view-attempt-container">
     <div class="page-header">
         <div class="page-header-top">
@@ -183,12 +187,12 @@
                     {# ================== SUALIN MEDİASI (şəkil / video) ================== #}
                     {% if item.question.image %}
                         <div class="question-media mb-3">
-                            <img src="{{ item.question.image.url }}" alt="{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}" class="img-fluid rounded" style="max-height:360px;">
+                            <img src="{{ item.question.image.url }}" alt="{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}" class="img-fluid rounded c3-1">
                         </div>
                     {% endif %}
                     {% if item.question.video %}
                         <div class="question-media mb-3">
-                            <video controls preload="metadata" playsinline class="img-fluid rounded" style="max-height:360px;">
+                            <video controls preload="metadata" playsinline class="img-fluid rounded c3-1">
                                 <source src="{{ item.question.video.url }}">
                             </video>
                         </div>

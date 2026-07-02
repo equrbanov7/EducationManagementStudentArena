@@ -18,6 +18,9 @@ Hər iki səhifə bu partial-ı include edir ki, kod təkrarı olmasın.
 {% trans "Mətn sahəsi tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_target_missing %}
 {% trans "AI boş cavab qaytardı." context "exams.template.ai_question_bank" as ai_i18n_empty_response %}
 {% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" as ai_i18n_no_file_selected %}
+{% trans "Fayldan mətn çıxarılır..." context "exams.template.ai_question_bank" as ai_i18n_extracting %}
+{% trans "Fayldan mətn çıxarıla bilmədi." context "exams.template.ai_question_bank" as ai_i18n_extract_failed %}
+{% trans "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin." context "exams.template.ai_question_bank" as ai_i18n_extract_timeout %}
 window.AI_QUESTION_BANK_I18N = {
     generating: "{{ ai_i18n_generating|escapejs }}",
     endpointMissing: "{{ ai_i18n_endpoint_missing|escapejs }}",
@@ -28,8 +31,11 @@ window.AI_QUESTION_BANK_I18N = {
     readyTemplate: "{{ ai_i18n_ready_template|escapejs }}",
     targetMissing: "{{ ai_i18n_target_missing|escapejs }}",
     emptyResponse: "{{ ai_i18n_empty_response|escapejs }}",
-    noFileSelected: "{{ ai_i18n_no_file_selected|escapejs }}"
+    noFileSelected: "{{ ai_i18n_no_file_selected|escapejs }}",
+    extracting: "{{ ai_i18n_extracting|escapejs }}",
+    extractFailed: "{{ ai_i18n_extract_failed|escapejs }}",
+    extractTimeout: "{{ ai_i18n_extract_timeout|escapejs }}"
 };
 </script>
-<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260702-extract-jobs"></script>
 <script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>

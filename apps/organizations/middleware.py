@@ -43,6 +43,35 @@ class OrganizationMiddleware:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    # P9 (2026-07-02): org-switcher siyahısının per-user TTL keşi. YALNIZ navbar
+    # lazy yolunda istifadə olunur — org-həlli/permission yolları hər zaman canlı
+    # sorğu ilə işləyir. Membership dəyişikliyində signal invalidasiyası var
+    # (signals.py), TTL yalnız ehtiyat tordur.
+    ORG_SWITCHER_CACHE_TTL = 60
+
+    @staticmethod
+    def org_switcher_cache_key(user_id):
+        return f"ems:org_switcher:v1:{user_id}"
+
+    @classmethod
+    def _cached_active_memberships(cls, user):
+        """Navbar org-switcher üçün üzvlük siyahısı — 60s keşlə."""
+        from django.core.cache import cache
+
+        key = cls.org_switcher_cache_key(user.pk)
+        try:
+            cached = cache.get(key)
+        except Exception:
+            cached = None
+        if cached is not None:
+            return cached
+        memberships = cls._fetch_active_memberships(user)
+        try:
+            cache.set(key, memberships, timeout=cls.ORG_SWITCHER_CACHE_TTL)
+        except Exception:
+            pass
+        return memberships
+
     @staticmethod
     def _fetch_active_memberships(user):
         """Return all active memberships for *user* across active organizations."""
@@ -202,7 +231,7 @@ class OrganizationMiddleware:
                 # SimpleLazyObject so it runs at most once, and only if something
                 # actually accesses ``request._all_org_memberships`` — removing a
                 # per-request membership query from every non-navbar response.
-                request._all_org_memberships = SimpleLazyObject(lambda: self._fetch_active_memberships(request.user))
+                request._all_org_memberships = SimpleLazyObject(lambda: self._cached_active_memberships(request.user))
 
             # ── Step 3: finalize permissions for the resolved org ─────────────
             if is_tenant_accessible_organization(request.organization):

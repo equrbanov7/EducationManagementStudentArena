@@ -1,4 +1,10 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { border-bottom-color: var(--danger-color, #dc3545); }
+  .c3-2 { color: var(--danger-color, #dc3545); }
+</style>
+
 {% if 'delete-account' in allowed_sections %}
 <div class="modal fade" id="deleteAccountConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -16,8 +22,8 @@
                        tabindex="-1"
                        style="display:none;">
 
-                <div class="modal-header" style="border-bottom-color: var(--danger-color, #dc3545);">
-                    <h5 class="modal-title" style="color: var(--danger-color, #dc3545);">
+                <div class="modal-header c3-1">
+                    <h5 class="modal-title c3-2">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         {% trans "delete_account_confirm_title" context "profile.delete_account" %}
                     </h5>
