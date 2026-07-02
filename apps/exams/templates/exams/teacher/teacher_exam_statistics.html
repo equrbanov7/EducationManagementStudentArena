@@ -96,11 +96,11 @@
                 </div>
                 {% endif %}
                 {% if teacher_groups %}
-                <div class="sd-filter-field" style="grid-column:1/-1">
+                <div class="sd-filter-field sd-filter-field--full">
                     <label>{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</label>
-                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <div class="sd-check-row">
                         {% for g in teacher_groups %}
-                            <label style="display:flex;align-items:center;gap:4px;font-size:.84rem;cursor:pointer">
+                            <label class="sd-check-label">
                                 <input type="checkbox" name="compare_groups" value="{{ g.id }}"
                                        {% if g.id|stringformat:"d" in f_compare_groups %}checked{% endif %}>
                                 {{ g.name }}
@@ -110,7 +110,7 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="sd-filter-actions" style="margin-top:14px">
+            <div class="sd-filter-actions sd-filter-actions--spaced">
                 <button type="submit" class="sd-filter-btn sd-filter-btn--apply">
                     <i class="fas fa-filter"></i> {% trans "filter_apply" context "exams.template.exam_statistics" %}
                 </button>
@@ -132,7 +132,7 @@
             <div class="sd-card__icon"><i class="fas fa-chart-bar"></i></div>
             <span class="sd-card__label">{% trans "card_avg_score" context "exams.template.exam_statistics" %}</span>
             {% if is_written %}
-                <span class="sd-card__value">{{ avg_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+                <span class="sd-card__value">{{ avg_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
             {% else %}
                 <span class="sd-card__value">{{ avg_score }}%</span>
             {% endif %}
@@ -141,7 +141,7 @@
             <div class="sd-card__icon"><i class="fas fa-trophy"></i></div>
             <span class="sd-card__label">{% trans "card_max_score" context "exams.template.exam_statistics" %}</span>
             {% if is_written %}
-                <span class="sd-card__value">{{ max_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+                <span class="sd-card__value">{{ max_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
             {% else %}
                 <span class="sd-card__value">{{ max_score }}%</span>
             {% endif %}
@@ -150,7 +150,7 @@
             <div class="sd-card__icon"><i class="fas fa-arrow-down"></i></div>
             <span class="sd-card__label">{% trans "card_min_score" context "exams.template.exam_statistics" %}</span>
             {% if is_written %}
-                <span class="sd-card__value">{{ min_raw_score }}<small style="font-size:.55em;opacity:.7">/{{ max_possible_score }}</small></span>
+                <span class="sd-card__value">{{ min_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
             {% else %}
                 <span class="sd-card__value">{{ min_score }}%</span>
             {% endif %}
@@ -169,7 +169,7 @@
         <div class="sd-card sd-card--purple">
             <div class="sd-card__icon"><i class="fas fa-user-check"></i></div>
             <span class="sd-card__label">{% trans "card_checked" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ checked_count }}<small style="font-size:.55em;opacity:.7">/{{ total_attempts }}</small></span>
+            <span class="sd-card__value">{{ checked_count }}<small class="sd-card__value-sub">/{{ total_attempts }}</small></span>
         </div>
         {% else %}
         <div class="sd-card sd-card--purple">
@@ -290,7 +290,7 @@
             <table class="sd-table" id="questionTable">
                 <thead>
                     <tr>
-                        <th style="width:50px">#</th>
+                        <th class="sd-col-index">#</th>
                         <th>{% trans "table_question" context "exams.template.exam_statistics" %}</th>
                         <th>{% trans "table_answers" context "exams.template.exam_statistics" %}</th>
                         {% if is_written %}
@@ -300,28 +300,28 @@
                         <th>{% trans "table_correct" context "exams.template.exam_statistics" %}</th>
                         <th>{% trans "table_incorrect" context "exams.template.exam_statistics" %}</th>
                         {% endif %}
-                        <th style="min-width:180px">{% if is_written %}{% trans "table_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "table_accuracy" context "exams.template.exam_statistics" %}{% endif %}</th>
+                        <th class="sd-col-accuracy">{% if is_written %}{% trans "table_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "table_accuracy" context "exams.template.exam_statistics" %}{% endif %}</th>
                     </tr>
                 </thead>
                 <tbody id="questionTbody">
                     {% for qs in question_stats %}
                     <tr data-question="{{ qs.question.text|lower }}">
-                        <td><span style="font-weight:700;color:#64748b">{{ forloop.counter }}</span></td>
+                        <td><span class="sd-num--index">{{ forloop.counter }}</span></td>
                         <td title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:60 }}</td>
                         <td>{{ qs.total_answers }}</td>
                         {% if is_written %}
-                        <td style="font-weight:600;color:#1d4ed8">{{ qs.avg_score }}</td>
-                        <td style="font-weight:600;color:#64748b">{{ qs.max_points }}</td>
+                        <td class="sd-num--primary">{{ qs.avg_score }}</td>
+                        <td class="sd-num--secondary">{{ qs.max_points }}</td>
                         {% else %}
-                        <td style="color:#059669;font-weight:600">{{ qs.correct_answers }}</td>
-                        <td style="color:#dc2626;font-weight:600">{{ qs.incorrect_answers }}</td>
+                        <td class="sd-num--correct">{{ qs.correct_answers }}</td>
+                        <td class="sd-num--incorrect">{{ qs.incorrect_answers }}</td>
                         {% endif %}
                         <td>
                             <div class="sd-bar">
                                 <div class="sd-bar__track">
                                     <div class="sd-bar__fill {% if qs.accuracy_percent >= 70 %}sd-bar__fill--green{% elif qs.accuracy_percent >= 40 %}sd-bar__fill--blue{% else %}sd-bar__fill--red{% endif %}" style="width:{{ qs.accuracy_percent }}%"></div>
                                 </div>
-                                <span class="sd-bar__text" style="color:{% if qs.accuracy_percent >= 70 %}#059669{% elif qs.accuracy_percent >= 40 %}#1d4ed8{% else %}#dc2626{% endif %}">{{ qs.accuracy_percent }}%</span>
+                                <span class="sd-bar__text {% if qs.accuracy_percent >= 70 %}sd-bar__text--green{% elif qs.accuracy_percent >= 40 %}sd-bar__text--blue{% else %}sd-bar__text--red{% endif %}">{{ qs.accuracy_percent }}%</span>
                             </div>
                         </td>
                     </tr>
@@ -341,7 +341,7 @@
             </button>
         </div>
         <div class="sd-ai-content" id="aiSummaryContent">
-            <p style="color:#6b7280;font-style:italic">{% trans "ai_initial_message" context "exams.template.exam_statistics" %}</p>
+            <p class="sd-ai-placeholder">{% trans "ai_initial_message" context "exams.template.exam_statistics" %}</p>
         </div>
     </div>
 </div>

@@ -29,6 +29,23 @@ jobs:
       E2E_USERNAME: "ci_university_e2e"
       E2E_PASSWORD: "CiE2EUniversity2026!"
       E2E_ROLE_PASSWORD: "CiE2ERoles2026!"
+      # Docker Compose interpolates the full production+CI config even for
+      # `exec`, `logs`, and `down`; keep the CI-safe dummy stack env available
+      # to every compose invocation in this job.
+      APP_IMAGE: emsarena-prod:ci
+      SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+      POSTGRES_DB: emsarena
+      POSTGRES_USER: emsarena
+      POSTGRES_PASSWORD: ci-smoke-postgres-password
+      REDIS_PASSWORD: ci-smoke-redis-password
+      GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
+      ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
+      ADMIN_ALLOWED_IPS: "127.0.0.1"
+      CSRF_TRUSTED_ORIGINS: "http://localhost"
+      SITE_URL: "http://localhost"
+      SECURE_SSL_REDIRECT: "False"
+      SESSION_COOKIE_SECURE: "False"
+      CSRF_COOKIE_SECURE: "False"
 
     steps:
       - name: 📥 Checkout code
@@ -57,21 +74,6 @@ jobs:
       # SECURE_SSL_REDIRECT=False prevents HTTPS redirects inside plain-HTTP
       # CI so Playwright can reach the app on http://localhost.
       - name: 🚀 Start production stack
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
-          ADMIN_ALLOWED_IPS: "127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
-          SECURE_SSL_REDIRECT: "False"
-          SESSION_COOKIE_SECURE: "False"
-          CSRF_COOKIE_SECURE: "False"
         run: |
           # Docker Hub anonim pull-lar paylaşılan CI IP-sində rate-limit-ə və ya keçici
           # "unknown" manifest xətasına düşə bilir. Backoff ilə 3 dəfəyə qədər təkrar edirik.
@@ -181,34 +183,10 @@ jobs:
       # Always dump container logs and tear down, even on failure.
       - name: 📋 Dump container logs
         if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
-          ADMIN_ALLOWED_IPS: "127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
         run: |
           docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml logs --no-color || true
 
       - name: 🧹 Tear down production stack
         if: always()
-        env:
-          APP_IMAGE: emsarena-prod:ci
-          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
-          POSTGRES_DB: emsarena
-          POSTGRES_USER: emsarena
-          POSTGRES_PASSWORD: ci-smoke-postgres-password
-          REDIS_PASSWORD: ci-smoke-redis-password
-          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
-          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
-          ADMIN_ALLOWED_IPS: "127.0.0.1"
-          CSRF_TRUSTED_ORIGINS: "http://localhost"
-          SITE_URL: "http://localhost"
         run: |
           docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml down -v --remove-orphans || true

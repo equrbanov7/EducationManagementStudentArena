@@ -181,7 +181,7 @@
             {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedStudentCount">0</span> {% trans "label_student" context "exams.template.teacher_group_list" %}
           </div>
 
-          <div style="display:none;">
+          <div class="tgl-hidden">
             {{ form.students }}
           </div>
           {% for error in form.students.errors %}
@@ -206,7 +206,7 @@
               {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedTeacherCount">0</span> {% trans "label_teacher" context "exams.template.teacher_group_list" %}
             </div>
 
-            <div style="display:none;">
+            <div class="tgl-hidden">
               {{ form.assigned_teachers }}
             </div>
             {% for error in form.assigned_teachers.errors %}
@@ -214,7 +214,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div style="display:none;">
+          <div class="tgl-hidden">
             {{ form.assigned_teachers }}
           </div>
         {% endif %}
@@ -236,7 +236,7 @@
       </div>
     </form>
 
-    <form id="groupDeleteForm" method="post" action="" style="display:none;">
+    <form id="groupDeleteForm" method="post" action="" class="tgl-hidden">
       {% csrf_token %}
     </form>
   </div>

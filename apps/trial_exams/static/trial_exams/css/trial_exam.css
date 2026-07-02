@@ -399,3 +399,11 @@
     .trial-drop.is-dragover { transform: none; }
     .skeleton { animation: none; }
 }
+
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02): skeleton ölçü variantları ═══ */
+.tr-skel--title { width: 45%; height: 22px; }
+.tr-skel--sub { width: 80%; margin-top: 14px; }
+.tr-skel--input { width: 100%; height: 46px; margin-top: 14px; border-radius: 12px; }
+.tr-skel--input-lead { margin-top: 22px; }
+.tr-skel--area { width: 100%; height: 120px; margin-top: 14px; border-radius: 16px; }
+.tr-skel--btn { width: 100%; height: 50px; margin-top: 20px; border-radius: 12px; }

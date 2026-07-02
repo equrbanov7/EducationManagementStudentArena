@@ -143,3 +143,8 @@
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02): inline → klass ═══ */
+.lab-label-caps { letter-spacing: 0.5px; }
+.lab-input-xs { max-width: 96px; }
+.lab-card--blue { background-color: var(--light-blue); }
+.lab-empty-ic { width: 80px; height: 80px; }

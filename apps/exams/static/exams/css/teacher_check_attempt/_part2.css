@@ -223,3 +223,25 @@
     overflow: auto;
 }
 
+
+/* ═══ Faza 6.4 Sprint-3 (2026-07-02): inline style → klass ═══ */
+.proctor-flag {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    background: #fceaea;
+    border: 1px solid #e24b4a;
+    border-left: 4px solid #a32d2d;
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    color: #791f1f;
+    max-width: 720px;
+}
+.proctor-flag > i { margin-top: 2px; color: #a32d2d; }
+.proctor-flag__title { display: block; color: #a32d2d; }
+.proctor-flag__note { font-size: 0.9rem; }
+.tca-media-capped { max-height: 300px; }
+/* Daimi-gizli data konteynerləri (JS yalnız value/dataset oxuyur, toggle etmir) */
+.tca-hidden { display: none; }
+.tca-paint-date { opacity: 0.7; font-weight: 400; }

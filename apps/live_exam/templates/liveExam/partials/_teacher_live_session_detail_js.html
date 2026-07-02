@@ -379,7 +379,7 @@
         aiBtn.addEventListener("click", function() {
             aiBtn.disabled = true;
             aiBtn.style.opacity = "0.6";
-            aiContent.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:#6366f1;font-weight:600;font-size:.9rem"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "liveExam.template.session_detail" %}</div>';
+            aiContent.innerHTML = '<div class="sd-ai-loading"><i class="fas fa-spinner fa-spin"></i> {% trans "ai_loading" context "liveExam.template.session_detail" %}</div>';
 
             var currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set("ai_summary", "1");
@@ -390,22 +390,22 @@
                     if (data.ok) {
                         var quotaHtml = "";
                         if (typeof data.remaining !== "undefined") {
-                            quotaHtml = '<div style="margin-top:12px;padding:8px 12px;background:#f0f9ff;border-radius:6px;font-size:13px;color:#1e40af">'
+                            quotaHtml = '<div class="sd-ai-quota">'
                                 + '<i class="fas fa-info-circle"></i> '
                                 + '{% trans "ai_quota_info" context "liveExam.template.session_detail" %}: '
                                 + '<strong>' + data.remaining + '/' + data.limit + '</strong> (' + data.window + ')'
-                                + (data.cached ? ' &middot; <span style="color:#059669"><i class="fas fa-bolt"></i> {% trans "ai_cached" context "liveExam.template.session_detail" %}</span>' : '')
+                                + (data.cached ? ' &middot; <span class="sd-ai-cached"><i class="fas fa-bolt"></i> {% trans "ai_cached" context "liveExam.template.session_detail" %}</span>' : '')
                                 + '</div>';
                         }
                         aiContent.innerHTML = formatMd(data.summary) + quotaHtml;
                     } else {
-                        aiContent.innerHTML = '<div style="color:#dc2626;font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:6px"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || "{% trans 'ai_error' context 'liveExam.template.session_detail' %}") + '</div>';
+                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || "{% trans 'ai_error' context 'liveExam.template.session_detail' %}") + '</div>';
                     }
                     aiBtn.disabled = false;
                     aiBtn.style.opacity = "1";
                 })
                 .catch(function() {
-                    aiContent.innerHTML = '<div style="color:#dc2626;font-weight:600"><i class="fas fa-exclamation-triangle"></i> {% trans "ai_error" context "liveExam.template.session_detail" %}</div>';
+                    aiContent.innerHTML = '<div class="sd-ai-error--plain"><i class="fas fa-exclamation-triangle"></i> {% trans "ai_error" context "liveExam.template.session_detail" %}</div>';
                     aiBtn.disabled = false;
                     aiBtn.style.opacity = "1";
                 });
@@ -414,13 +414,13 @@
 
     function formatMd(text) {
         var html = text
-            .replace(/### (.*)/g, '<h3 style="color:#4338ca;margin:16px 0 8px;font-size:1rem">$1</h3>')
-            .replace(/## (.*)/g, '<h2 style="color:#4338ca;margin:16px 0 8px;font-size:1.05rem">$1</h2>')
-            .replace(/# (.*)/g, '<h1 style="color:#4338ca;margin:16px 0 8px;font-size:1.1rem">$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#312e81">$1</strong>')
+            .replace(/### (.*)/g, '<h3 class="sd-md-h3">$1</h3>')
+            .replace(/## (.*)/g, '<h2 class="sd-md-h2">$1</h2>')
+            .replace(/# (.*)/g, '<h1 class="sd-md-h1">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="sd-md-strong">$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/^- (.*)/gm, '<li>$1</li>')
-            .replace(/(<li>.*<\/li>)/s, '<ul style="padding-left:20px;margin:8px 0">$1</ul>')
+            .replace(/(<li>.*<\/li>)/s, '<ul class="sd-md-ul">$1</ul>')
             .replace(/\n\n/g, '</p><p>')
             .replace(/\n/g, '<br>');
         return '<p>' + html + '</p>';

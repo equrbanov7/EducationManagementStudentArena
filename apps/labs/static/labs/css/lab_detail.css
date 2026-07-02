@@ -220,3 +220,10 @@
     .question-number { width: 30px; height: 30px; font-size: 1rem; }
     .question-header { font-size: 1rem; padding: 1rem; }
 }
+
+/* ═══ Faza 6.4 Sprint-3 (2026-07-02): inline style → klass ═══ */
+.lab-desc { max-width: 800px; }
+.lab-card--green { background-color: var(--light-green); }
+.lab-progress { height: 14px; }
+.lab-stat-ic { width: 40px; height: 40px; }
+.lab-alert-danger-soft { background-color: var(--ems-danger-100); border: 2px dashed var(--ems-danger-200); }

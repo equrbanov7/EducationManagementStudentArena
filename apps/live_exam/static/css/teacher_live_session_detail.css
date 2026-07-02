@@ -176,3 +176,15 @@
     color: var(--ems-gray-500);
     font-style: italic;
 }
+
+/* ═══ Sprint-3: JS innerHTML şablonlarındakı inline stillər → klass ═══ */
+.sd-ai-loading { display: flex; align-items: center; gap: 10px; color: #6366f1; font-weight: 600; font-size: 0.9rem; }
+.sd-ai-quota { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 6px; font-size: 13px; color: #1e40af; }
+.sd-ai-cached { color: var(--ems-success-600); }
+.sd-ai-error { color: var(--ems-danger); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; }
+.sd-ai-error--plain { color: var(--ems-danger); font-weight: 600; }
+.sd-md-h1 { color: #4338ca; margin: 16px 0 8px; font-size: 1.1rem; }
+.sd-md-h2 { color: #4338ca; margin: 16px 0 8px; font-size: 1.05rem; }
+.sd-md-h3 { color: #4338ca; margin: 16px 0 8px; font-size: 1rem; }
+.sd-md-strong { color: #312e81; }
+.sd-md-ul { padding-left: 20px; margin: 8px 0; }

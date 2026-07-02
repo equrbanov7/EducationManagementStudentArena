@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="bulk-page-wrapper" style="padding-bottom:0;">
+<div class="bulk-page-wrapper elm-wrapper-flush">
 
     <header class="page-header">
         <div class="title-section">
@@ -34,7 +34,7 @@
     {# ── Mövcud dillər ── #}
     <div class="wb-panel">
         <div class="wb-panel__head"><i class="fas fa-language"></i> {% trans "Mövcud dillər" %}</div>
-        <div class="wb-panel__body" style="padding:0;">
+        <div class="wb-panel__body wb-panel__body--flush">
             {% if variant_rows %}
             <table class="wb-lang-table">
                 <thead>
@@ -42,7 +42,7 @@
                         <th>{% trans "Dil" %}</th>
                         <th>{% trans "Sual sayı" %}</th>
                         <th>{% trans "Status" %}</th>
-                        <th style="text-align:right;">{% trans "Əməliyyat" %}</th>
+                        <th class="elm-cell-right">{% trans "Əməliyyat" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,12 +57,12 @@
                             <span class="wb-status wb-status--inactive"><i class="fas fa-circle-pause"></i> {% trans "Deaktiv" %}</span>
                             {% endif %}
                         </td>
-                        <td style="text-align:right;">
-                            <form method="post" style="display:inline;">
+                        <td class="elm-cell-right">
+                            <form method="post" class="elm-inline-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="toggle_variant">
                                 <input type="hidden" name="variant_id" value="{{ row.variant.id }}">
-                                <button type="submit" class="qbx-btn qbx-btn--ghost" style="padding:7px 14px;">
+                                <button type="submit" class="qbx-btn qbx-btn--ghost qbx-btn--compact">
                                     {% if row.variant.is_active %}{% trans "Deaktiv et" %}{% else %}{% trans "Aktiv et" %}{% endif %}
                                 </button>
                             </form>
@@ -72,7 +72,7 @@
                 </tbody>
             </table>
             {% else %}
-            <div class="qb-empty" style="padding:32px;">{% trans "Hələ heç bir dil variantı yoxdur." %}</div>
+            <div class="qb-empty qb-empty--padded">{% trans "Hələ heç bir dil variantı yoxdur." %}</div>
             {% endif %}
         </div>
     </div>
@@ -98,7 +98,7 @@
                     <input type="text" class="qb-input" id="add_display_name" name="display_name"
                            placeholder="{% trans 'məs. Azərbaycan (2024 buraxılış)' %}">
                 </div>
-                <div class="qb-field" style="justify-content:flex-end;">
+                <div class="qb-field qb-field--end">
                     <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Əlavə et" %}</button>
                 </div>
             </form>
