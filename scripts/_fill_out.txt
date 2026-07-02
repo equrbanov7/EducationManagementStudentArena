@@ -1,4 +1,0 @@
-  az: filled=0 appended_noctx=0
-  en: filled=0 appended_noctx=0
-  ru: filled=0 appended_noctx=0
-  tr: filled=0 appended_noctx=0

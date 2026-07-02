@@ -152,8 +152,8 @@ Organizations are completely isolated at the database level. All content is scop
 └──────┬──────────┘
        │
 ┌──────▼──────────┐
-│  WSGI Server    │
-│   (Gunicorn)    │
+│  ASGI Server    │
+│   (Daphne)      │
 └──────┬──────────┘
        │
 ┌──────▼──────────┐

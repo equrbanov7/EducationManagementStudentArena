@@ -1,6 +1,14 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Faza 2 (audit 2026-07-02): production image-ə YALNIZ runtime üçün lazım olan
+# kontent düşməlidir. Yeni qovluq əlavə edərkən bura baxın.
+# ═══════════════════════════════════════════════════════════════════════════
 .git
 .github
 .gitignore
+.gitleaks.toml
+.gitleaksignore
+.claude/
+.devcontainer/
 
 .env
 .env.*
@@ -17,14 +25,32 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.coverage
+.coverage*
 coverage.xml
 htmlcov/
 
 playwright-report/
 test-results/
+.playwright-cli/
+output/
+tmp/
+logs/
+backups/
+
 media/
 staticfiles/
+static_root_files/
+outputs_tmp_favicon/
 docker/nginx/certs/
+docker/alertmanager/alertmanager.yml
+
+# Runtime-da lazım deyil: testlər, sənədlər, yük testləri, tərcümə mənbələri
+tests/
+docs/
+k6/
+*.md
+**/*.po
+scripts/_*.txt
 
 .DS_Store
+.zshrc

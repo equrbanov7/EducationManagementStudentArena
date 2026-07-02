@@ -77,9 +77,23 @@ RUN pip install --no-cache-dir --upgrade pip \
     && apt-get purge -y --auto-remove gcc libpq-dev libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project and make entrypoints executable.
-COPY . /app/
-RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh
+# Copy the project owned by the runtime user directly (Faza 2, audit
+# 2026-07-02): the previous separate `RUN chown -R appuser /app` duplicated
+# every copied file into a second image layer (~2x app content).  With
+# --chown the ownership is set inside the COPY layer itself.
+COPY --chown=appuser:appgroup . /app/
+
+# Entrypoints executable + writable runtime dirs.  Only /app itself and the
+# two runtime mount targets are chowned (non-recursive, cheap): staticfiles
+# and media are named-volume mountpoints — creating them here appuser-owned
+# means FRESH volumes initialise with the correct ownership.
+RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh \
+    && mkdir -p /app/staticfiles /app/media \
+    && chown appuser:appgroup /app /app/staticfiles /app/media
+
+# Drop privileges: run the application as a non-root user.  collectstatic
+# below then produces appuser-owned files without any recursive chown.
+USER appuser
 
 # Build-time arguments: dummy values used only during the collectstatic RUN
 # step so that production.py can be imported without real secrets.
@@ -98,13 +112,6 @@ RUN SECRET_KEY="${BUILD_SECRET_KEY}" \
     ALLOWED_HOSTS="${BUILD_ALLOWED_HOSTS}" \
     ADMIN_ALLOWED_IPS="${BUILD_ADMIN_ALLOWED_IPS}" \
     python manage.py collectstatic --noinput
-
-# Transfer ownership of the entire app directory (including collected statics)
-# to the app user AFTER collectstatic so all files are accessible at runtime.
-RUN chown -R appuser:appgroup /app
-
-# Drop privileges: run the application as a non-root user.
-USER appuser
 
 # Expose port
 EXPOSE 8000
