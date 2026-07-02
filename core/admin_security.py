@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils.translation import gettext as _
 
-from apps.audit.utils import log_action
+from core.audit import log_action
 from core.constants import AuditAction
 from core.rate_limit import record_rate_limit_hit
 from core.utils import get_client_ip

@@ -11,7 +11,6 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from apps.accounts.models import EmailOTP
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
@@ -124,8 +123,13 @@ def get_admin_otp_resend_rate_limit() -> str:
 
 
 def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
-    from apps.accounts.services import issue_email_otp
+    # M3 (2026-07-02): accounts OTP servisi hook üzərindən (core.auth_otp) —
+    # core→accounts import kənarını kəsir; model lazy get_model ilə.
+    from django.apps import apps as django_apps
 
+    from core.auth_otp import issue_email_otp
+
+    EmailOTP = django_apps.get_model("accounts", "EmailOTP")
     code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.ADMIN_LOGIN)
     context = {
         "user": user,
@@ -150,7 +154,7 @@ def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
 def log_admin_security_event(
     *, action: str, request, user=None, reason: str, resource_type: str, resource_id: str = ""
 ):
-    from apps.audit.utils import log_action
+    from core.audit import log_action
 
     try:
         log_action(

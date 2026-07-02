@@ -16,8 +16,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from apps.exams.models import Exam, ExamQuestion
-from apps.exams.services.access_policy import is_teacher_user
-from apps.exams.services.ai_summary import generate_exam_statistics_summary
+from apps.exams.public import generate_exam_statistics_summary, is_teacher_user
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission

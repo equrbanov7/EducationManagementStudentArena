@@ -243,7 +243,7 @@ def review_appeal(request, appeal_id):
         review_current_score = score_info["effective_score"]
         review_max_score = score_info["max_score"]
     else:
-        from apps.exams.services.grading import calculate_attempt_score
+        from apps.exams.public import calculate_attempt_score
 
         review_current_score = calculate_attempt_score(appeal.attempt)
         review_max_score = None

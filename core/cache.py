@@ -33,12 +33,9 @@ Usage
 -----
 ::
 
-    from core.cache import get_cached_session_settings, invalidate_session_settings_cache
+    # Oxu tərəfi app-dadır: apps/live_exam/cache.py → get_cached_session_settings
+    from core.cache import invalidate_session_settings_cache  # yazan tərəf üçün
 
-    # Read (returns dict, never None)
-    settings = get_cached_session_settings(session)
-
-    # Invalidate after host updates settings
     invalidate_session_settings_cache(session)
 """
 
@@ -87,28 +84,6 @@ def _exam_metadata_key(exam_pk: int) -> str:
 SESSION_SETTINGS_TTL = 120  # seconds
 
 
-def get_cached_session_settings(session) -> dict[str, Any]:
-    """
-    Return the normalised session settings for *session*, reading from the
-    cache first and falling through to the DB on a miss.
-
-    The result is always a fully normalised settings dict (never ``None``).
-    """
-    key = _session_settings_key(session)
-    cached = _safe_cache_get(key)
-    if cached is not None:
-        return cached
-
-    from apps.live_exam.session_settings import get_session_settings  # avoid circular import
-
-    settings = get_session_settings(session)
-    try:
-        cache.set(key, settings, timeout=SESSION_SETTINGS_TTL)
-    except Exception:
-        logger.warning("Redis unavailable; session settings cache not populated for session %s", session.pk)
-    return settings
-
-
 def invalidate_session_settings_cache(session) -> None:
     """Remove the session settings cache entry for *session*."""
     try:
@@ -122,29 +97,6 @@ def invalidate_session_settings_cache(session) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 
 EXAM_QUESTION_IDS_TTL = 300  # seconds
-
-
-def get_cached_exam_question_ids(session) -> list[int]:
-    """
-    Return the ordered list of question IDs for the exam attached to *session*,
-    reading from the cache on a hit.
-
-    Safe to call frequently; the list only changes when an exam author adds or
-    removes questions (which should invalidate this cache).
-    """
-    key = _exam_question_ids_key(session)
-    cached = _safe_cache_get(key)
-    if cached is not None:
-        return cached
-
-    from apps.live_exam.domain.session import get_exam_question_ids  # avoid circular import
-
-    ids = get_exam_question_ids(session)
-    try:
-        cache.set(key, ids, timeout=EXAM_QUESTION_IDS_TTL)
-    except Exception:
-        logger.warning("Redis unavailable; exam question IDs cache not populated for exam %s", session.exam_id)
-    return ids
 
 
 def invalidate_exam_question_ids_cache(exam_pk: int) -> None:

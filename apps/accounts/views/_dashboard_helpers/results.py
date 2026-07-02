@@ -10,7 +10,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Submission
 from apps.exams.models import ExamAttempt
-from apps.exams.services.result_calculation import calculate_test_attempt_result
+from apps.exams.public import calculate_test_attempt_result
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
 
@@ -64,7 +64,7 @@ def _collect_my_results(request, filter_type=None, search=None):
         # Apellyasiya bonusları (tək sorğu) — qəbul olunmuş apellyasiyalar
         # tələbənin görəcəyi balda dərhal əks olunsun.
         try:
-            from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
+            from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
 
             _appeal_bonus_by_attempt = appeal_bonus_map([a.id for a in attempts])
         except Exception:

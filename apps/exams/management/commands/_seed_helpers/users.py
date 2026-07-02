@@ -4,7 +4,7 @@ from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 
 from apps.organizations.models import Membership, Organization, Role
-from core.constants import OrganizationType
+from core.constants import OrganizationType, RoleScopeType
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -93,6 +93,31 @@ class UsersSeedMixin:
                 role = roles.filter(name=role_name).first()
                 if role:
                     return role
+            if profile_role == ProfileRole.TEACHER:
+                role, _ = Role.objects.get_or_create(
+                    organization=organization,
+                    name=ProfileRole.TEACHER,
+                    defaults={
+                        "display_name": "Teacher",
+                        "description": "Demo teacher role created for group demo seed data",
+                        "level": ProfileRole.LEVELS[ProfileRole.TEACHER],
+                        "scope_type": RoleScopeType.COURSE,
+                        "permissions": [
+                            "course.view",
+                            "course.create",
+                            "course.edit",
+                            "grade.view",
+                            "grade.input",
+                            "exam.view",
+                            "exam.create",
+                            "exam.edit",
+                            "exam.host",
+                        ],
+                        "is_system": True,
+                        "is_active": True,
+                    },
+                )
+                return role
             return roles.filter(level__gte=50).order_by("level").first() or roles.order_by("-level").first()
 
         if profile_role == ProfileRole.STUDENT:

@@ -6,9 +6,9 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.notifications.models import MembershipRequestRoleType, StudentOrganizationRequestStatus
-from apps.notifications.services import notify_user_invited_to_organization
+from apps.notifications.public import notify_user_invited_to_organization
 from apps.organizations.models import Membership
-from apps.organizations.services import create_audit_log
+from apps.organizations.public import create_audit_log
 
 from ....models import UserProfile
 from ..._helpers import (

@@ -500,27 +500,29 @@ class CacheLayerTest(TestCase):
         self.session = LiveSession.objects.create(exam=exam, host_user=self.teacher)
 
     def test_get_cached_session_settings_returns_dict(self):
-        from core.cache import get_cached_session_settings
+        from apps.live_exam.cache import get_cached_session_settings
 
         settings = get_cached_session_settings(self.session)
         self.assertIsInstance(settings, dict)
         self.assertIn("randomize_questions", settings)
 
     def test_invalidate_session_settings_cache_does_not_raise(self):
-        from core.cache import get_cached_session_settings, invalidate_session_settings_cache
+        from apps.live_exam.cache import get_cached_session_settings
+        from core.cache import invalidate_session_settings_cache
 
         get_cached_session_settings(self.session)  # populate
         # Must not raise even when cache is empty or unavailable
         invalidate_session_settings_cache(self.session)
 
     def test_get_cached_exam_question_ids_returns_list(self):
-        from core.cache import get_cached_exam_question_ids
+        from apps.live_exam.cache import get_cached_exam_question_ids
 
         ids = get_cached_exam_question_ids(self.session)
         self.assertIsInstance(ids, list)
 
     def test_invalidate_exam_question_ids_cache_does_not_raise(self):
-        from core.cache import get_cached_exam_question_ids, invalidate_exam_question_ids_cache
+        from apps.live_exam.cache import get_cached_exam_question_ids
+        from core.cache import invalidate_exam_question_ids_cache
 
         get_cached_exam_question_ids(self.session)  # populate
         invalidate_exam_question_ids_cache(self.session.exam_id)
@@ -594,7 +596,7 @@ class BackgroundTaskTest(TestCase):
         exam, _, _, _ = _make_exam_with_question(self.teacher, self.org)
         session = LiveSession.objects.create(exam=exam, host_user=self.teacher)
 
-        from core.tasks import warm_session_settings_cache
+        from apps.live_exam.cache import warm_session_settings_cache
 
         try:
             warm_session_settings_cache(session.pk)

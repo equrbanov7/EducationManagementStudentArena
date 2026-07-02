@@ -14,9 +14,9 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import NotificationType
-from apps.notifications.services import create_notification
+from apps.notifications.public import create_notification
 from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
-from apps.organizations.services import ensure_owner_membership
+from apps.organizations.public import ensure_owner_membership
 
 from .._helpers import (
     _append_query_params,

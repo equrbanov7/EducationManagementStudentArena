@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Membership
-from apps.organizations.services import create_audit_log
+from apps.organizations.public import create_audit_log
 from core.constants import OrganizationType
 
 from ....models import ProfileRole

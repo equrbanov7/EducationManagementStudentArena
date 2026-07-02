@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
-from apps.exams.views.shared.tenant import tenant_scoped_exams
+from apps.exams.public import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
 from ...constants import APPEAL_MIN_COMMENT_LENGTH, APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES, APPEAL_TYPE_CHOICES

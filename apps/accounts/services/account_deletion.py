@@ -12,7 +12,7 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from core.constants import AuditAction
 
 logger = logging.getLogger(__name__)

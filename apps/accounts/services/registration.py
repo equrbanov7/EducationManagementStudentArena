@@ -13,7 +13,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
-from apps.notifications.services import notify_org_admins_of_new_request, notify_org_owner_pending_approval
+from apps.notifications.public import notify_org_admins_of_new_request, notify_org_owner_pending_approval
 from core.constants import OrganizationType
 from core.rls import bypass_rls
 

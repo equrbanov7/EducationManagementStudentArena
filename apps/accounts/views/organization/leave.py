@@ -24,7 +24,7 @@ User = get_user_model()
 def student_leave_organization(request):
     """Allow eligible non-admin members to leave their current organization with mandatory reason."""
     from apps.organizations.models import Membership
-    from apps.organizations.services import create_audit_log
+    from apps.organizations.public import create_audit_log
 
     if request.method != "POST":
         return redirect(f"{reverse('accounts:profile')}?section=profile-info")

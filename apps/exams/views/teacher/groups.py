@@ -131,7 +131,7 @@ def teacher_create_group(request):
     if organization is None:
         return redirect("accounts:profile")
 
-    from apps.notifications.services import notify_group_assignment
+    from apps.notifications.public import notify_group_assignment
 
     form = _group_form_for_request(request, organization, data=request.POST)
     if form.is_valid():
@@ -141,7 +141,7 @@ def teacher_create_group(request):
             student_ids=list(group.students.values_list("id", flat=True)),
             teacher_ids=list(group.teachers.values_list("id", flat=True)),
         )
-        from apps.audit.utils import log_action
+        from apps.audit.public import log_action
         from core.constants import AuditAction
 
         log_action(
@@ -180,7 +180,7 @@ def teacher_update_group(request, group_id):
     if organization is None:
         return redirect("accounts:profile")
 
-    from apps.notifications.services import notify_group_assignment
+    from apps.notifications.public import notify_group_assignment
 
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
     previous_student_ids = set(group.students.values_list("id", flat=True))
@@ -194,7 +194,7 @@ def teacher_update_group(request, group_id):
             student_ids=set(group.students.values_list("id", flat=True)) - previous_student_ids,
             teacher_ids=set(group.teachers.values_list("id", flat=True)) - previous_teacher_ids,
         )
-        from apps.audit.utils import log_action
+        from apps.audit.public import log_action
         from core.constants import AuditAction
 
         log_action(
@@ -241,7 +241,7 @@ def teacher_delete_group(request, group_id):
         return redirect("accounts:profile")
 
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(
@@ -269,7 +269,7 @@ def teacher_remove_student_from_group(request, group_id, student_id):
     if organization is None:
         return redirect("accounts:profile")
 
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)

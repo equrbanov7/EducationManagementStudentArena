@@ -45,7 +45,7 @@ def create_project(request, course_id):
     │ Təyin etmə: group_names[] və ya students[]                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    from apps.notifications.services import notify_task_assignment
+    from apps.notifications.public import notify_task_assignment
     from apps.projects.models import Project
 
     course = _get_tenant_course_or_404(request, course_id)
@@ -209,7 +209,7 @@ def edit_project(request, pk):
             current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
         )
         if new_recipient_ids and project.status == "active":
-            from apps.notifications.services import notify_task_assignment
+            from apps.notifications.public import notify_task_assignment
 
             notify_task_assignment(
                 task=project,

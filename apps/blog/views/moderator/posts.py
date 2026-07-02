@@ -180,7 +180,7 @@ def teacher_moderate_post(request, post_id):
         # Notify the author about the deletion before removing the record.
         try:
             from apps.notifications.models import NotificationType
-            from apps.notifications.services import create_notification
+            from apps.notifications.public import create_notification
 
             create_notification(
                 recipient=post_author,
@@ -215,7 +215,7 @@ def teacher_moderate_post(request, post_id):
 
         try:
             from apps.notifications.models import NotificationType
-            from apps.notifications.services import create_notification
+            from apps.notifications.public import create_notification
 
             create_notification(
                 recipient=post.author,
@@ -256,7 +256,7 @@ def teacher_moderate_post(request, post_id):
 
     try:
         from apps.notifications.models import NotificationType
-        from apps.notifications.services import create_notification
+        from apps.notifications.public import create_notification
 
         create_notification(
             recipient=post.author,

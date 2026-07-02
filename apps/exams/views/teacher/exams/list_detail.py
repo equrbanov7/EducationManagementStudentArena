@@ -107,7 +107,7 @@ def createAndEditExamView(request, slug=None):
         previous_is_active = exam.is_active if is_editing else False
         previous_recipient_ids = set()
         if is_editing and exam is not None:
-            from apps.notifications.services import get_exam_assigned_user_ids
+            from apps.notifications.public import get_exam_assigned_user_ids
 
             previous_recipient_ids = get_exam_assigned_user_ids(exam)
 
@@ -156,7 +156,7 @@ def createAndEditExamView(request, slug=None):
 
             save_supervision_config_from_form(exam_instance, request.POST)
 
-            from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+            from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
             current_recipient_ids = get_exam_assigned_user_ids(exam_instance)
             should_notify_all = not previous_is_active and exam_instance.is_active
@@ -170,7 +170,7 @@ def createAndEditExamView(request, slug=None):
                     task_kind="exam",
                 )
 
-            from apps.audit.utils import log_action
+            from apps.audit.public import log_action
             from core.constants import AuditAction
 
             log_action(

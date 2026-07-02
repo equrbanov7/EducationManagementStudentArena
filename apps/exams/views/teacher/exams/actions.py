@@ -37,7 +37,7 @@ def toggle_exam_active(request, slug):
         exam.save()
         if exam.is_active:
             from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
-            from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+            from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
             schedule_ai_question_difficulty_warmup(exam)
             notify_task_assignment(
@@ -94,7 +94,7 @@ def delete_exam(request, slug):
         _ensure_exam_permission(request, "exam.delete")
 
     if request.method == "POST":
-        from apps.audit.utils import log_action
+        from apps.audit.public import log_action
         from core.constants import AuditAction
 
         log_action(
@@ -143,7 +143,7 @@ def toggle_exam_archive(request, slug):
     exam.archived_at = timezone.now() if exam.is_archived else None
     exam.save(update_fields=["is_archived", "archived_at"])
 
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(
@@ -192,7 +192,7 @@ def duplicate_exam(request, slug):
 
     copy = duplicate_exam_service(exam=exam, user=request.user)
 
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(

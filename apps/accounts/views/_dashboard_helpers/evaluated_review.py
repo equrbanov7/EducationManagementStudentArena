@@ -86,8 +86,8 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(exam__title__icontains=search_query)
                 | Q(exam__course__title__icontains=search_query)
             )
-        from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
-        from apps.exams.services.result_calculation import calculate_test_attempt_result
+        from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
+        from apps.exams.public import calculate_test_attempt_result
 
         attempts = list(attempts)
         # Apellyasiya bonusları tək sorğu ilə (əvvəl hər attempt üçün ayrıca

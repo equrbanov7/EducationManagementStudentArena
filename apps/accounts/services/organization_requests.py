@@ -11,10 +11,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
-from apps.notifications.services import (
-    notify_membership_request_resolution,
-    notify_org_admins_of_new_request,
-)
+from apps.notifications.public import notify_membership_request_resolution, notify_org_admins_of_new_request
 from core.constants import OrganizationType
 from core.rls import bypass_rls
 

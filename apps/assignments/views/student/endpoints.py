@@ -20,8 +20,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
 from apps.assignments.services import create_assignment_submission
-from apps.task_submission_core.review import annotate_student_review_state
-from apps.task_submission_core.uploads import prepare_submission_upload
+from apps.task_submission_core.public import annotate_student_review_state, prepare_submission_upload
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 from ..shared._helpers import _append_return_to, _assignment_back_url, _get_tenant_assignment_or_404, _student_return_to

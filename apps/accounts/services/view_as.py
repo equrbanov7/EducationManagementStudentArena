@@ -152,7 +152,7 @@ def _unit_scope_user_ids(user, organization, memberships):
         return None
 
     from apps.organizations.models import Membership
-    from apps.organizations.scoping import get_unit_scope, scope_memberships_by_unit
+    from apps.organizations.public import get_unit_scope, scope_memberships_by_unit
 
     scope = get_unit_scope(user, organization)
     if scope.is_org_wide:
@@ -282,7 +282,7 @@ def get_view_as_state(request):
 
 def start_view_as(request, target_user, organization, mode):
     """View-as sessiyasını başladır; aktiv org-u hədəfin org-una keçirir."""
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     # QEYD: pk-lar str kimi saxlanılır — Organization UUID pk istifadə edir və
@@ -331,7 +331,7 @@ def stop_view_as(request, *, reason="view_as_stop"):
         request.session.pop("active_organization", None)
 
     try:
-        from apps.audit.utils import log_action
+        from apps.audit.public import log_action
         from apps.organizations.models import Organization
         from core.constants import AuditAction
 

@@ -103,7 +103,7 @@ class _Stage3Mixin:
             or "student-organization-management" in self.allowed_sections
         ):
             from apps.organizations.permissions import has_permission
-            from apps.organizations.services import get_user_org_role_level
+            from apps.organizations.public import get_user_org_role_level
 
             self.management_org = _get_active_organization(self.request)
             if self.management_org:
@@ -200,7 +200,7 @@ class _Stage3Mixin:
             and "org-structure" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.views import build_organization_structure_context
+            from apps.organizations.public import build_organization_structure_context
 
             self.org_structure_section = build_organization_structure_context(self.request, self.active_organization)
             self.org_structure_section["embedded_in_profile"] = True
@@ -209,7 +209,7 @@ class _Stage3Mixin:
             and "org-faculties" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.structure_views import build_organization_faculties_context
+            from apps.organizations.public import build_organization_faculties_context
 
             self.org_faculties_section = build_organization_faculties_context(self.request, self.active_organization)
             self.org_faculties_section["embedded_in_profile"] = True
@@ -218,7 +218,7 @@ class _Stage3Mixin:
             and "org-kafedras" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.structure_views import build_organization_kafedras_context
+            from apps.organizations.public import build_organization_kafedras_context
 
             self.org_kafedras_section = build_organization_kafedras_context(self.request, self.active_organization)
             self.org_kafedras_section["embedded_in_profile"] = True
@@ -227,7 +227,7 @@ class _Stage3Mixin:
             and "org-members" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.views import build_organization_members_context
+            from apps.organizations.public import build_organization_members_context
 
             self.org_members_section = build_organization_members_context(self.request, self.active_organization)
             self.org_members_section["embedded_in_profile"] = True
@@ -236,12 +236,12 @@ class _Stage3Mixin:
             and "org-roles" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.views import build_organization_roles_context
+            from apps.organizations.public import build_organization_roles_context
 
             self.org_roles_section = build_organization_roles_context(self.request, self.active_organization)
             self.org_roles_section["embedded_in_profile"] = True
         if self.active_section == "audit-log" and "audit-log" in self.allowed_sections:
-            from apps.audit.views import build_audit_log_context
+            from apps.audit.public import build_audit_log_context
 
             self.audit_log_section = build_audit_log_context(self.request)
             self.audit_log_section["embedded_in_profile"] = True

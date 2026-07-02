@@ -13,7 +13,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
-from apps.organizations.services import is_tenant_accessible_organization
+from apps.organizations.public import is_tenant_accessible_organization
 from core.rate_limit import clear_rate_limit, is_rate_limited, record_rate_limit_hit
 
 from ...forms import RegisterForm

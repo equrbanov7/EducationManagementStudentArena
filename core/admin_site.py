@@ -17,8 +17,6 @@ from django.urls import path, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 
-from apps.accounts.models import EmailOTP
-from apps.accounts.services import verify_otp_code
 from core.admin_auth import (
     AdminOTPForm,
     admin_2fa_pending_for_request,
@@ -36,6 +34,7 @@ from core.admin_auth import (
     record_admin_verify_failure,
     send_admin_otp_email,
 )
+from core.auth_otp import verify_otp_code
 from core.constants import AuditAction
 from core.utils import get_auth_otp_expiry_minutes
 
@@ -170,9 +169,12 @@ class EMSArenaAdminSite(admin.AdminSite):
                 )
                 form.add_error(None, "Çox sayda yalnış OTP cəhdi edildi. Bir az sonra yenidən cəhd edin.")
             elif form.is_valid():
+                from django.apps import apps as django_apps
+
+                EmailOTP = django_apps.get_model("accounts", "EmailOTP")
                 success, otp = verify_otp_code(
                     user,
-                    form.cleaned_data["code"],
+                    code=form.cleaned_data["code"],
                     purpose=EmailOTP.Purpose.ADMIN_LOGIN,
                 )
                 if not success or otp is None:

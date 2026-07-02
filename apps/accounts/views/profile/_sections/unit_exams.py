@@ -29,7 +29,7 @@ def build_unit_exams_context(request, *, allowed_sections, active_section) -> di
 
     from apps.exams.models import Exam
     from apps.organizations.models import Membership, OrgUnit
-    from apps.organizations.scoping import get_unit_scope
+    from apps.organizations.public import get_unit_scope
 
     org = _get_active_organization(request)
     if org is None:

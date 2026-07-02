@@ -282,7 +282,7 @@ class ViewAsMiddleware:
 
             # FULL rejimdə hər unsafe əməliyyat audit-ə yazılır (əsl istifadəçi adından).
             try:
-                from apps.audit.utils import log_action
+                from apps.audit.public import log_action
                 from core.constants import AuditAction
 
                 log_action(

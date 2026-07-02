@@ -21,10 +21,8 @@ from django.views.generic import DetailView
 from apps.courses import dashboard_sources
 from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
-from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
-from apps.exams.services.language_variants import available_language_options
+from apps.exams.public import DEFAULT_EXAM_LANGUAGE, available_language_options, without_disabled_practical_exams
 from core.helpers import (
     ASSIGNED_TASK_FILTER_CHOICES,
     _safe_same_origin_redirect_path,

@@ -364,7 +364,7 @@ def teacher_resume_api(request, attempt_id):
         )
 
     # Audit log
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(
@@ -417,7 +417,7 @@ def teacher_stop_api(request, attempt_id):
         )
 
     # Audit log
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(
@@ -470,7 +470,7 @@ def teacher_lock_api(request, attempt_id):
         )
 
     # Audit log
-    from apps.audit.utils import log_action
+    from apps.audit.public import log_action
     from core.constants import AuditAction
 
     log_action(

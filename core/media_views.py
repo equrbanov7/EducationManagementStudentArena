@@ -39,6 +39,7 @@ from __future__ import annotations
 import mimetypes
 import posixpath
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
 from django.core.files.storage import default_storage
@@ -94,7 +95,7 @@ def _check_exam_upload_access(user, path: str) -> bool:
     exam's organization may access it.
     """
     try:
-        from apps.exams.domain.attempts import ExamAnswerFile
+        ExamAnswerFile = django_apps.get_model("exams", "ExamAnswerFile")
 
         af = ExamAnswerFile.objects.select_related(
             "answer__attempt__user",
@@ -117,7 +118,7 @@ def _check_exam_paint_access(user, path: str) -> bool:
     the exam's organization, may access it.
     """
     try:
-        from apps.exams.domain.attempts import ExamAnswer
+        ExamAnswer = django_apps.get_model("exams", "ExamAnswer")
 
         answer = ExamAnswer.objects.select_related(
             "attempt__user",
@@ -140,7 +141,7 @@ def _check_project_submission_access(user, path: str) -> bool:
     course organization, may access it.
     """
     try:
-        from apps.projects.models import ProjectSubmission
+        ProjectSubmission = django_apps.get_model("projects", "ProjectSubmission")
 
         sub = ProjectSubmission.objects.select_related(
             "student",
@@ -168,7 +169,7 @@ def _check_lab_file_access(user, path: str) -> bool:
 
     if clean.startswith("labs/teacher_files/"):
         try:
-            from apps.labs.models import Lab
+            Lab = django_apps.get_model("labs", "Lab")
 
             lab = Lab.objects.select_related("course__organization").get(teacher_files=path)
             return _user_has_org_membership(user, lab.course.organization, min_level=_TEACHER_MIN_LEVEL)
@@ -177,7 +178,7 @@ def _check_lab_file_access(user, path: str) -> bool:
 
     if clean.startswith("labs/questions/"):
         try:
-            from apps.labs.models import LabQuestion
+            LabQuestion = django_apps.get_model("labs", "LabQuestion")
 
             lq = LabQuestion.objects.select_related("block__lab__course__organization").get(attachment=path)
             # Students who are members of the org may view question attachments.
@@ -187,7 +188,7 @@ def _check_lab_file_access(user, path: str) -> bool:
 
     if clean.startswith("labs/submissions/"):
         try:
-            from apps.labs.models import LabSubmission
+            LabSubmission = django_apps.get_model("labs", "LabSubmission")
 
             sub = LabSubmission.objects.select_related(
                 "assignment__student",
@@ -202,7 +203,7 @@ def _check_lab_file_access(user, path: str) -> bool:
 
     if clean.startswith("labs/answers/"):
         try:
-            from apps.labs.models import LabAnswer
+            LabAnswer = django_apps.get_model("labs", "LabAnswer")
 
             ans = LabAnswer.objects.select_related(
                 "student",
@@ -248,7 +249,8 @@ def _check_question_media_access(user, path: str) -> bool:
         return False
 
     try:
-        from apps.exams.models import Exam, ExamAttempt
+        Exam = django_apps.get_model("exams", "Exam")
+        ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
 
         exam = Exam.objects.select_related("organization").get(pk=int(exam_id_str))
         if exam.organization is None:
@@ -286,7 +288,7 @@ def _check_course_resource_access(user, path: str) -> bool:
     Any active member of the resource's course organization may access it.
     """
     try:
-        from apps.courses.models import CourseResource
+        CourseResource = django_apps.get_model("courses", "CourseResource")
 
         resource = CourseResource.objects.select_related("course__organization").get(file=path)
         return _user_has_org_membership(user, resource.course.organization, min_level=0)
@@ -308,7 +310,7 @@ def _check_trial_exam_access(user, path: str) -> bool:
     ``_check_private_media_access`` (they review submissions via the admin).
     """
     try:
-        from apps.trial_exams.models import TrialExamRequest
+        TrialExamRequest = django_apps.get_model("trial_exams", "TrialExamRequest")
 
         req = TrialExamRequest.objects.only("user_id").get(questions_file=path)
         return req.user_id is not None and req.user_id == user.id

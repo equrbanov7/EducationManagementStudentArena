@@ -13,12 +13,16 @@ class CoursesSeedMixin:
             owner=teacher,
             title=f"{organization.name} Demo Kursu",
             defaults={
+                "organization": organization,
                 "description": f"{organization.name} üçün demo kurs.",
                 "status": "published",
                 "settings": {"seeded": True},
             },
         )
         update_fields = []
+        if course.organization_id != organization.id:
+            course.organization = organization
+            update_fields.append("organization")
         if course.status != "published":
             course.status = "published"
             update_fields.append("status")

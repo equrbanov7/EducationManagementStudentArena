@@ -21,10 +21,10 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import UserProfile
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from apps.blog.models import Post, PostApprovalLog
 from apps.notifications.models import NotificationType
-from apps.notifications.services import create_notification
+from apps.notifications.public import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import AuditAction
 from core.rate_limit import is_rate_limited, record_rate_limit_hit

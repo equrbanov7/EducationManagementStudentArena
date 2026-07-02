@@ -26,9 +26,8 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
     if not (active_section == "question-bank" and "question-bank" in allowed_sections):
         return _inactive_defaults()
 
-    from apps.exams.constants import EXAM_LANGUAGE_CHOICES
     from apps.exams.models import QuestionBank
-    from apps.exams.services.question_bank_attach import accessible_banks
+    from apps.exams.public import EXAM_LANGUAGE_CHOICES, accessible_banks
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)

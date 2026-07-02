@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from apps.accounts.views._helpers.formatting import _query_string
 from apps.accounts.views.profile.search import _normalize_public_profile_query_value
 from apps.notifications.models import NotificationType
-from apps.notifications.services import get_user_notifications
+from apps.notifications.public import get_user_notifications
 from core.rls import bypass_rls
 
 

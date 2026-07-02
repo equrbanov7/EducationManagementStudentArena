@@ -8,7 +8,7 @@ import secrets
 from copy import deepcopy
 from typing import Any
 
-from apps.accounts.models import ProfileRole
+from apps.accounts.public import ProfileRole
 
 THEME_KEYS = {"standard", "winter", "aurora", "sweet"}
 LANGUAGE_KEYS = {"system", "az", "en", "ru", "tr"}

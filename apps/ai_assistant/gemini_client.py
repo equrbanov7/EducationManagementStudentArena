@@ -68,7 +68,7 @@ def _get_model() -> str:
         return env_model.strip()
 
     try:
-        from apps.exams.domain.ai_config import get_ai_config
+        from apps.exams.public import get_ai_config
 
         configured = (get_ai_config().assistant_model or "").strip()
         if configured:

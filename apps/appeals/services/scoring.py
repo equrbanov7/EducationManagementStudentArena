@@ -61,7 +61,7 @@ def effective_test_score(attempt, *, answers=None):
     `answers` verilərsə (prefetch olunmuş attempt.answers.all()), siyahı
     görünüşlərində hər attempt üçün əlavə answer sorğuları yaranmır.
     """
-    from apps.exams.services.result_calculation import calculate_test_attempt_result
+    from apps.exams.public import calculate_test_attempt_result
 
     base = calculate_test_attempt_result(attempt, answers=answers)
     bonus = appeal_score_state(attempt)["bonus_points"]
@@ -179,7 +179,7 @@ def _mark_item_resolved(item, status, reviewer, response_text):
 
 def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
     try:
-        from apps.audit.utils import log_action
+        from apps.audit.public import log_action
         from core.constants import AuditAction
 
         log_action(
@@ -261,7 +261,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
         # Yazılı/praktiki: sual üçün TAM bal verilir (answer.teacher_score = points),
         # sonra attempt.teacher_score cavablardan yenidən hesablanır. Beləliklə
         # nəticə dərhal əks olunur (test-dən fərqli olaraq, ayrıca bonus qatı yox).
-        from apps.exams.services.grading import calculate_attempt_score
+        from apps.exams.public import calculate_attempt_score
 
         previous_answer_score = (
             Decimal(str(answer.teacher_score)) if (answer is not None and answer.teacher_score is not None) else None
@@ -354,7 +354,7 @@ def revert_item_adjustment(item):
     exam = attempt.exam
 
     if getattr(exam, "exam_type", None) != "test" and adjustment.question_id:
-        from apps.exams.services.grading import calculate_attempt_score
+        from apps.exams.public import calculate_attempt_score
 
         answer = item.answer or attempt.answers.filter(question_id=adjustment.question_id).first()
         if answer is not None:
@@ -427,7 +427,7 @@ def _notify_student_appeal_resolved(appeal):
     try:
         from django.urls import reverse
 
-        from apps.notifications.services import create_notification
+        from apps.notifications.public import create_notification
 
         create_notification(
             recipient=appeal.student,

@@ -85,7 +85,7 @@ def build_statistics_section(request, *, capabilities):
     statistics_scoped_unit_ids = None
     if stat_org and not capabilities["is_superadmin"]:
         from apps.organizations.models import OrgUnit as _StatOrgUnit
-        from apps.organizations.scoping import get_unit_scope as _get_unit_scope
+        from apps.organizations.public import get_unit_scope as _get_unit_scope
 
         _stat_unit_scope = _get_unit_scope(request.user, stat_org, request=request)
         if _stat_unit_scope.is_unit_scoped:
@@ -268,7 +268,7 @@ def build_statistics_section(request, *, capabilities):
     # ── AI summary (AJAX) ─────────────────────────────────────
     if request.GET.get("stat_ai_summary") == "1" and statistics_data:
         from apps.accounts.services.statistics_selectors import build_ai_stats_payload
-        from apps.exams.services.ai_summary import generate_exam_statistics_summary
+        from apps.exams.public import generate_exam_statistics_summary
 
         role_label = (
             "superadmin"

@@ -138,7 +138,7 @@ def edit_lab(request, pk):
     # POST - yenilə
     try:
         previous_status = lab.status
-        from apps.notifications.services import get_lab_assigned_user_ids, notify_task_assignment
+        from apps.notifications.public import get_lab_assigned_user_ids, notify_task_assignment
 
         previous_recipient_ids = get_lab_assigned_user_ids(lab)
         group_names = request.POST.getlist("group_names[]")
@@ -237,7 +237,7 @@ def publish_lab(request, pk):
 
     lab.status = "published"
     lab.save()
-    from apps.notifications.services import get_lab_assigned_user_ids, notify_task_assignment
+    from apps.notifications.public import get_lab_assigned_user_ids, notify_task_assignment
 
     notify_task_assignment(
         task=lab,

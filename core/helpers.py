@@ -14,7 +14,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from apps.courses.models import Course
 from core.tenancy import scoped_by_organization
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -41,6 +40,9 @@ def _tenant_scoped_courses(request, queryset=None):
     Returns:
         QuerySet of courses filtered by organization
     """
+    from django.apps import apps as django_apps
+
+    Course = django_apps.get_model("courses", "Course")
     base_queryset = queryset if queryset is not None else Course.objects.all()
     return scoped_by_organization(base_queryset, request)
 

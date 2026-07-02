@@ -1,17 +1,6 @@
 {
   "cycles": [],
-  "core_to_apps": [
-    "accounts",
-    "audit",
-    "blog",
-    "courses",
-    "exams",
-    "labs",
-    "live_exam",
-    "organizations",
-    "projects",
-    "trial_exams"
-  ],
+  "core_to_apps": [],
   "edges": {
     "accounts": [
       "appeals",

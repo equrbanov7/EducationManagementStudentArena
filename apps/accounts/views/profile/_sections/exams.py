@@ -21,7 +21,7 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         }
 
     from apps.exams.models import ExamLanguageVariant
-    from apps.exams.services.teacher_dashboard import build_teacher_exam_dashboard
+    from apps.exams.public import build_teacher_exam_dashboard
 
     # --- Search ---
     search_query = (request.GET.get("exam_q", "") or "").strip()
