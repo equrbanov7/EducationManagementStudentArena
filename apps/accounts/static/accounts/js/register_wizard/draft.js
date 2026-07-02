@@ -17,15 +17,8 @@ function getLegacyDraftStorage() {
 }
 
 function getCookie(name) {
-    var prefix = name + "=";
-    var parts = document.cookie ? document.cookie.split(";") : [];
-    for (var i = 0; i < parts.length; i += 1) {
-        var cookie = parts[i].trim();
-        if (cookie.indexOf(prefix) === 0) {
-            return decodeURIComponent(cookie.slice(prefix.length));
-        }
-    }
-    return "";
+    // Faza 6.3: mərkəzi EMSCore.getCookie (core/csrf.js); bu fayl "" gözləyir.
+    return window.EMSCore.getCookie(name) || "";
 }
 
 function syncFreshCsrfToken() {

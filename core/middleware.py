@@ -43,6 +43,8 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import pgettext
 
 from core.request_context import clear_request_id, set_request_id
+from core.settings_utils import safe_float_setting as _safe_float_setting
+from core.settings_utils import safe_int_setting as _safe_int_setting
 
 # Maximum length accepted from client-supplied header values to prevent
 # header-injection / log-injection attacks.
@@ -363,26 +365,6 @@ class SecurityHeadersMiddleware:
             if header_value:
                 response.setdefault(header_name, header_value)
         return response
-
-
-def _safe_int_setting(name: str, default: int, *, minimum: int | None = None) -> int:
-    try:
-        value = int(getattr(settings, name, default))
-    except (TypeError, ValueError):
-        value = default
-    if minimum is not None:
-        value = max(minimum, value)
-    return value
-
-
-def _safe_float_setting(name: str, default: float, *, minimum: float | None = None) -> float:
-    try:
-        value = float(getattr(settings, name, default))
-    except (TypeError, ValueError):
-        value = default
-    if minimum is not None:
-        value = max(minimum, value)
-    return value
 
 
 def _request_wants_json(request) -> bool:

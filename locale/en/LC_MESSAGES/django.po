@@ -29443,6 +29443,58 @@ msgctxt "courses.dashboard"
 msgid "ai_build_sub"
 msgstr "Get syllabus, resource and task ideas from the assistant."
 
+msgctxt "core.errors.csrf"
+msgid "Page expired"
+msgstr "Page expired"
+
+msgctxt "core.errors.csrf"
+msgid "The security token has expired"
+msgstr "The security token has expired"
+
+msgctxt "core.errors.csrf"
+msgid ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+msgstr ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+
+msgctxt "core.errors.csrf"
+msgid "You will be redirected to a fresh page in a few seconds."
+msgstr "You will be redirected to a fresh page in a few seconds."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page and try the action again."
+msgstr "Refresh the page and try the action again."
+
+msgctxt "core.errors.csrf"
+msgid "Back to home"
+msgstr "Back to home"
+
+msgctxt "core.errors.csrf"
+msgid "If the problem persists, make sure browser cookies are enabled."
+msgstr "If the problem persists, make sure browser cookies are enabled."
+
+msgctxt "core.errors.csrf"
+msgid "Stale security token — the page needs to be refreshed."
+msgstr "Stale security token — the page needs to be refreshed."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page"
+msgstr "Refresh the page"
+
+msgctxt "core.errors.csrf"
+msgid "Go to the login page"
+msgstr "Go to the login page"
+
+msgctxt "core.errors.csrf"
+msgid "Return to sign-up"
+msgstr "Return to sign-up"
+
+msgctxt "core.errors.csrf"
+msgid "Return to the verification page"
+msgstr "Return to the verification page"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Student role cannot be selected manually."

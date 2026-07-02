@@ -17,8 +17,8 @@
   "use strict";
 
   function getCookie(name) {
-    var match = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
-    return match ? decodeURIComponent(match.pop()) : "";
+    // Faza 6.3: mərkəzi EMSCore.getCookie (core/csrf.js); bu fayl "" gözləyir.
+    return window.EMSCore.getCookie(name) || "";
   }
 
   document.addEventListener("DOMContentLoaded", function () {

@@ -52,7 +52,7 @@
     border: 1px solid #edf2fb;
     color: #31445f;
     text-decoration: none;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #fbfdff 100%);
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
@@ -100,7 +100,7 @@
     flex-shrink: 0;
     min-width: 46px;
     text-align: right;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.92rem;
     font-weight: 700;
   }

@@ -11,7 +11,7 @@
 }
 .ter-badge--success { background: var(--ter-success-soft); color: #047857; }
 .ter-badge--info { background: var(--ter-info-soft); color: #0369a1; }
-.ter-badge--neutral { background: #e2e8f0; color: var(--ter-text-muted); }
+.ter-badge--neutral { background: var(--ems-neutral-200); color: var(--ter-text-muted); }
 .ter-badge--checked {
     background: var(--ter-primary-soft);
     color: var(--ter-primary-dark);

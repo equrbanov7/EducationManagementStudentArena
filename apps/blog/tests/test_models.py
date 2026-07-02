@@ -14,6 +14,8 @@ from django.utils.translation import override
 from apps.accounts.models import EmailOTP
 from apps.blog.models import Category, Comment, Post, Question, Subscriber
 
+from .seed_helpers import ensure_blog_seed_data, skip_unless_seed_migrations
+
 User = get_user_model()
 
 
@@ -82,6 +84,7 @@ class CategoryTest(TestCase):
     """Test Category model functionality."""
 
     def test_default_category_tree_seeded(self):
+        skip_unless_seed_migrations(self)
         technology = Category.objects.get(slug="technology")
         programming = Category.objects.get(slug="programming")
 
@@ -171,6 +174,7 @@ class PostTest(TestCase):
     """Test Post model functionality."""
 
     def setUp(self):
+        ensure_blog_seed_data()
         self.author = User.objects.create_user("postauthor", "author@example.com", "StrongPass123!")
         self.category = Category.objects.get(slug="technology")
 
@@ -235,6 +239,7 @@ class PostTest(TestCase):
         self.assertIn("category-education.svg", education_post.get_image)
 
     def test_default_demo_content_seeded_with_comments(self):
+        skip_unless_seed_migrations(self)
         demo_post = Post.objects.get(slug="ai-saglamliq-analizinde-nece-komek-edir")
 
         self.assertTrue(demo_post.is_published)

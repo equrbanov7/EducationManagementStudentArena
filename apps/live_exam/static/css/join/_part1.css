@@ -6,7 +6,7 @@
     --join-surface: rgba(255, 255, 255, 0.94);
     --join-surface-soft: rgba(255, 255, 255, 0.14);
     --join-line: rgba(255, 255, 255, 0.18);
-    --join-text: #ffffff;
+    --join-text: var(--ems-neutral-0);
     --join-ink: #10243f;
     --join-ink-soft: #5f7796;
     --join-shadow: 0 30px 80px rgba(8, 23, 55, 0.28);
@@ -251,7 +251,7 @@ body.join-page {
     padding: 9px 12px;
     border-radius: 14px;
     background: linear-gradient(135deg, var(--join-accent), var(--join-accent-strong));
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-family: "Space Grotesk", sans-serif;
     font-size: 1.14rem;
     letter-spacing: 0.18em;
@@ -317,7 +317,7 @@ body.join-page {
     padding: 12px 16px;
     border-radius: 16px;
     background: rgba(37, 99, 235, 0.92);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .join-resume__button:hover,
@@ -387,7 +387,7 @@ body.join-page {
 }
 
 .join-tabs__button.is-active {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--join-ink);
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.08);
 }
@@ -431,7 +431,7 @@ body.join-page {
     min-width: 0;
     aspect-ratio: 1;
     border-radius: 20px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 2px solid transparent;
     display: inline-flex;
     align-items: center;
@@ -455,7 +455,7 @@ body.join-page {
     min-height: 48px;
     padding: 10px 12px;
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 2px solid transparent;
     display: inline-flex;
     align-items: center;
@@ -505,7 +505,7 @@ body.join-page {
     margin-top: 2px;
     border-radius: 18px;
     background: linear-gradient(135deg, var(--join-accent), var(--join-accent-strong));
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;

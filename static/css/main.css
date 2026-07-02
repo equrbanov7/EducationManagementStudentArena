@@ -1,10 +1,10 @@
      /* --- Ümumi CSS Sıfırlama və Dəyişənlər --- */
      :root {
-        --primary-color: #2563eb;
-        --text-dark: #1f2937;
-        --text-light: #6b7280;
+        --primary-color: var(--ems-primary-600);
+        --text-dark: var(--ems-neutral-800);
+        --text-light: var(--ems-gray-500);
         --bg-color: #f3f4f6;
-        --card-bg: #ffffff;
+        --card-bg: var(--ems-neutral-0);
         --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 

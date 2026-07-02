@@ -1914,3 +1914,88 @@ class ExamGradingServiceTest(TestCase):
 
         self.assertIsNone(parse_score_value(None))
         self.assertIsNone(parse_score_value(""))
+
+
+class AttachTestResultSummariesQueryTests(TestCase):
+    """Faza 4 (audit 2026-07-02): attach_test_result_summaries N+1 reqressiyası.
+
+    Sorğu sayı attempt SAYINDAN ASILI OLMAMALIDIR: bütün cavablar tək
+    queryset (base + 2 prefetch) ilə yığılır, bonus map onsuz da toplu idi.
+    Köhnə davranış 3 attempt üçün ~9-10 sorğu edirdi.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user(username="attach_t", email="attach_t@example.com", password="pass123")
+        self.student = User.objects.create_user(username="attach_s", email="attach_s@example.com", password="pass123")
+        self.org = Organization.objects.create(
+            name="Attach Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.exam = Exam.objects.create(
+            title="Attach Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+            exam_type="test",
+        )
+        self.questions = []
+        self.correct_options = {}
+        for i in range(2):
+            question = ExamQuestion.objects.create(exam=self.exam, text=f"Q{i}", points=1)
+            correct = ExamQuestionOption.objects.create(question=question, label="A", text="düz", is_correct=True)
+            ExamQuestionOption.objects.create(question=question, label="B", text="səhv", is_correct=False)
+            self.questions.append(question)
+            self.correct_options[question.id] = correct
+
+        self.attempts = []
+        for attempt_number in range(1, 4):
+            attempt = ExamAttempt.objects.create(
+                user=self.student,
+                exam=self.exam,
+                attempt_number=attempt_number,
+                status="submitted",
+            )
+            for question in self.questions:
+                answer = ExamAnswer.objects.create(attempt=attempt, question=question)
+                answer.selected_options.set([self.correct_options[question.id]])
+            self.attempts.append(attempt)
+
+    def test_query_count_is_independent_of_attempt_count(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from apps.exams.services.result_calculation import attach_test_result_summaries
+
+        attempts = list(ExamAttempt.objects.filter(exam=self.exam).select_related("exam").order_by("attempt_number"))
+        self.assertEqual(len(attempts), 3)
+
+        with CaptureQueriesContext(connection) as ctx:
+            attach_test_result_summaries(attempts)
+
+        # 1 answers + 2 prefetch + ≤2 bonus-map sorğusu — attempt sayına görə BÖYÜMÜR.
+        self.assertLessEqual(len(ctx), 5, f"Gözləniləndən çox sorğu: {len(ctx)}")
+
+        for attempt in attempts:
+            self.assertEqual(attempt.test_result.correct_count, 2)
+            self.assertEqual(attempt.test_result.delivered_count, 2)
+            self.assertEqual(attempt.test_result.wrong_count, 0)
+
+    def test_attempt_without_answers_falls_back_to_legacy(self):
+        from apps.exams.services.result_calculation import attach_test_result_summaries
+
+        bare_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            attempt_number=99,
+            status="submitted",
+        )
+        bare_attempt.correct_count = 4
+        bare_attempt.wrong_count = 1
+
+        attach_test_result_summaries([bare_attempt])
+
+        self.assertTrue(bare_attempt.test_result.used_legacy_fallback)
+        self.assertEqual(bare_attempt.test_result.correct_count, 4)

@@ -49,7 +49,7 @@
    ══════════════════════════════════════════════════════��════════ */
 
 .lobby-header {
-    background: linear-gradient(135deg, #059669 0%, var(--ems-success) 100%);
+    background: linear-gradient(135deg, var(--ems-success-600) 0%, var(--ems-success) 100%);
     border-radius: 20px;
     padding: 30px;
     text-align: center;
@@ -60,8 +60,8 @@
 
 .pin-display {
     display: inline-block;
-    background: #fff;
-    color: #059669;
+    background: var(--ems-neutral-0);
+    color: var(--ems-success-600);
     font-size: 3rem;
     font-weight: 900;
     letter-spacing: 10px;
@@ -73,7 +73,7 @@
 .join-info { display: flex; justify-content: center; align-items: center; gap: 25px; flex-wrap: wrap; }
 
 .qr-box {
-    background: #fff;
+    background: var(--ems-neutral-0);
     padding: 10px;
     border-radius: 12px;
     cursor: pointer;
@@ -85,7 +85,7 @@
 .link-box { text-align: left; }
 .link-box small { opacity: 0.8; display: block; margin-bottom: 4px; }
 .link-box a {
-    color: #fef3c7;
+    color: var(--ems-warning-100);
     font-size: 1.05rem;
     font-weight: 700;
     text-decoration: none;
@@ -133,10 +133,10 @@
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-.btn-start { background: linear-gradient(135deg, var(--ems-success), #059669); color: #fff; }
-.btn-reveal { background: linear-gradient(135deg, #38bdf8, var(--ems-primary-600)); color: #fff; }
-.btn-next { background: linear-gradient(135deg, var(--ems-primary-500), var(--ems-primary-600)); color: #fff; }
-.btn-finish { background: linear-gradient(135deg, #ef4444, var(--ems-danger)); color: #fff; }
+.btn-start { background: linear-gradient(135deg, var(--ems-success), var(--ems-success-600)); color: var(--ems-neutral-0); }
+.btn-reveal { background: linear-gradient(135deg, #38bdf8, var(--ems-primary-600)); color: var(--ems-neutral-0); }
+.btn-next { background: linear-gradient(135deg, var(--ems-primary-500), var(--ems-primary-600)); color: var(--ems-neutral-0); }
+.btn-finish { background: linear-gradient(135deg, var(--ems-danger-500), var(--ems-danger)); color: var(--ems-neutral-0); }
 .btn-present { background: linear-gradient(135deg, #111827, var(--ems-neutral-800)); color: var(--ems-neutral-50); }
 
 /* Question Count Input */
@@ -154,7 +154,7 @@
 .question-count-box input {
     width: 50px;
     padding: 6px 8px;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--ems-gray-200);
     border-radius: 8px;
     font-size: 16px;
     font-weight: 800;
@@ -168,7 +168,7 @@
 }
 
 .question-count-box span {
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-weight: 600;
 }
 
@@ -349,7 +349,7 @@ body.host-presentation-page .present-view {
     border: 1px solid rgba(255,255,255,0.16);
     background: rgba(255,255,255,0.14);
     backdrop-filter: blur(16px);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 800;
     letter-spacing: 0.01em;
 }

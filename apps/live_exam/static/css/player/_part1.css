@@ -6,7 +6,7 @@
     --player-surface: rgba(255, 255, 255, 0.16);
     --player-surface-strong: rgba(255, 255, 255, 0.94);
     --player-border: rgba(255, 255, 255, 0.22);
-    --player-text: #ffffff;
+    --player-text: var(--ems-neutral-0);
     --player-text-muted: rgba(255, 255, 255, 0.72);
     --player-ink: #10284a;
     --player-ink-soft: #5f7796;
@@ -478,7 +478,7 @@ body.live-player-page {
     border-radius: 26px;
     min-height: 104px;
     padding: 18px 22px;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font: inherit;
     font-size: 1.05rem;
     font-weight: 800;

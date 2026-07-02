@@ -76,13 +76,13 @@
 }
 
 .wb-info-banner i {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 1.1rem;
     margin-top: 2px;
 }
 
 .wb-panel {
-    background: var(--card-bg, #fff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border: 1px solid var(--border, #e1e4e8);
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -98,7 +98,7 @@
     border-bottom: 1px solid #eef1f6;
     font-weight: 800;
     color: var(--text-dark, #2d3436);
-    background: linear-gradient(120deg, #f6f9ff 0%, #ffffff 100%);
+    background: linear-gradient(120deg, #f6f9ff 0%, var(--ems-neutral-0) 100%);
 }
 
 .wb-panel__head i {
@@ -156,13 +156,13 @@
 }
 
 .wb-status--active {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #15803d;
 }
 
 .wb-status--inactive {
     background: #f1f3f7;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .wb-mini-form {
@@ -191,7 +191,7 @@
     gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid #f1f3f7;
-    background: #fff;
+    background: var(--ems-neutral-0);
     transition: background 0.15s ease;
 }
 

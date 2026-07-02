@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import connection
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils.translation import pgettext
 
 import redis as redis_client
 
@@ -212,20 +213,20 @@ def csrf_failure(request, reason=""):
     is_verify_code_path = normalized_path in {verify_code_path, "/accounts/resend-code"}
 
     retry_url = request.path or "/"
-    retry_label = "Səhifəni yenilə"
+    retry_label = pgettext("core.errors.csrf", "Refresh the page")
     auto_redirect = False
 
     if is_login_path:
         retry_url = settings.LOGIN_URL
-        retry_label = "Giriş səhifəsinə keç"
+        retry_label = pgettext("core.errors.csrf", "Go to the login page")
         auto_redirect = True
     elif is_register_path:
         retry_url = "/accounts/register/?signup_restore=1"
-        retry_label = "Qeydiyyata qayıt"
+        retry_label = pgettext("core.errors.csrf", "Return to sign-up")
         auto_redirect = True
     elif is_verify_code_path:
         retry_url = "/accounts/verify-code/"
-        retry_label = "Təsdiq səhifəsinə qayıt"
+        retry_label = pgettext("core.errors.csrf", "Return to the verification page")
         auto_redirect = True
 
     context = {

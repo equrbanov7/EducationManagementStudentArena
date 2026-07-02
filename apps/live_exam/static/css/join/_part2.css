@@ -68,7 +68,7 @@
 
 .join-modal__button--primary {
     background: linear-gradient(135deg, var(--join-accent), var(--join-accent-strong));
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 @media (max-width: 640px) {

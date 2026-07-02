@@ -155,8 +155,24 @@ def attach_test_result_summaries(attempts):
     except Exception:
         bonus_by_attempt_id = {}
 
+    # Faza 4 (audit 2026-07-02): N+1 aradan qaldırıldı — bütün attempt-lərin
+    # cavabları TƏK sorğu dəsti ilə (base + 2 prefetch) yığılır və
+    # calculate_test_attempt_result-a hazır ötürülür. Boş siyahı halında
+    # funksiya əvvəlki kimi legacy fallback-a düşür (davranış eynidir).
+    from apps.exams.models import ExamAnswer
+
+    answers_by_attempt_id: dict[int, list] = {attempt.id: [] for attempt in test_attempts}
+    answers_qs = (
+        ExamAnswer.objects.filter(attempt_id__in=list(answers_by_attempt_id))
+        .select_related("question")
+        .prefetch_related("question__options", "selected_options")
+        .order_by("id")
+    )
+    for answer in answers_qs:
+        answers_by_attempt_id[answer.attempt_id].append(answer)
+
     for attempt in test_attempts:
-        result = calculate_test_attempt_result(attempt)
+        result = calculate_test_attempt_result(attempt, answers=answers_by_attempt_id.get(attempt.id, []))
         bonus = bonus_by_attempt_id.get(attempt.id)
         if bonus and apply_bonus is not None:
             result = apply_bonus(result, bonus)

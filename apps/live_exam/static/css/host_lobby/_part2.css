@@ -19,7 +19,7 @@
     padding: 14px 22px;
     border-radius: 18px;
     background: rgba(37, 99, 235, 0.72);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-size: clamp(1rem, 2vw, 1.35rem);
     font-weight: 800;
     box-shadow: 0 18px 36px rgba(8, 37, 92, 0.28);
@@ -93,7 +93,7 @@
 .lobby-stage__audience-copy strong {
     font-size: 1rem;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .lobby-stage__audience-count {
@@ -106,7 +106,7 @@
     justify-content: center;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.14);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-family: "Space Grotesk", "Manrope", sans-serif;
     font-size: 1.15rem;
     font-weight: 700;
@@ -204,7 +204,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(239, 68, 68, 0.92);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 10px 22px rgba(220, 38, 38, 0.28);
     opacity: 0;
     pointer-events: none;
@@ -268,7 +268,7 @@
 
 .host-live-page .players-header h3 span {
     background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
@@ -481,7 +481,7 @@ body {
     background: linear-gradient(135deg, var(--ems-neutral-900) 0%, #1e293b 100%);
     min-height: 100vh;
     font-family: 'Segoe UI', system-ui, sans-serif;
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 body.host-presentation-page {

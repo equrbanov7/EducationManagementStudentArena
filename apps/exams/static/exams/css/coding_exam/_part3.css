@@ -29,7 +29,7 @@
     border: 1px solid var(--coding-border);
     border-top: none;
     border-radius: 0 0 12px 12px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .coding-preview-console {
@@ -115,13 +115,13 @@
 .coding-footer-btn--finish {
     border: 0;
     background: linear-gradient(135deg, var(--coding-red) 0%, var(--coding-red-strong) 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
 }
 
 .coding-footer-btn--finish:hover {
     background: linear-gradient(135deg, var(--coding-red-strong) 0%, var(--ems-danger-strong) 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 16px 28px rgba(239, 68, 68, 0.26);
     transform: translateY(-1px);
 }
@@ -136,7 +136,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.55rem 1.25rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-top: 1px solid var(--coding-border);
     color: var(--coding-muted);
     font-size: 0.85rem;
@@ -454,7 +454,7 @@
 
 /* Light theme variants for the terminal input. */
 .coding-exam-shell.is-light-editor .coding-terminal-input {
-    color: #92400e;
-    caret-color: #d97706;
+    color: var(--ems-warning-800);
+    caret-color: var(--ems-warning-600);
 }
 

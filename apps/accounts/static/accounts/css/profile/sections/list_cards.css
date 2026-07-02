@@ -58,10 +58,10 @@
 }
 
 .post-item:hover {
-    background: #fff;
+    background: var(--ems-neutral-0);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
-    border-color: #cbd5e1;
+    border-color: var(--ems-neutral-300);
 }
 
 .post-icon {
@@ -77,8 +77,8 @@
 }
 
 .post-icon--course {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
 }
 
 .post-icon--exam {
@@ -110,8 +110,8 @@
 }
 
 .post-item--group-active {
-    background: #ffffff;
-    border-color: #3b82f6;
+    background: var(--ems-neutral-0);
+    border-color: var(--ems-primary-500);
     box-shadow: 0 10px 24px rgba(59, 130, 246, 0.12);
 }
 
@@ -145,7 +145,7 @@
 .profile-group-search i {
     position: absolute;
     left: 0.85rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     pointer-events: none;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .profile-group-count {
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.9rem;
     font-weight: 600;
 }
@@ -173,7 +173,7 @@
     margin-top: 1.25rem;
     border: 1px solid #dbe3ef;
     border-radius: 0.85rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     padding: 1.1rem;
 }
 
@@ -183,13 +183,13 @@
     justify-content: space-between;
     gap: 1rem;
     padding-bottom: 0.9rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--ems-neutral-200);
 }
 
 .profile-group-detail__eyebrow {
     display: inline-flex;
     margin-bottom: 0.2rem;
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -197,14 +197,14 @@
 
 .profile-group-detail h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 1.25rem;
     font-weight: 800;
 }
 
 .profile-group-detail p {
     margin: 0.3rem 0 0;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.92rem;
 }
 
@@ -212,7 +212,7 @@
     display: flex;
     align-items: center;
     gap: 0.9rem;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 .profile-group-detail--empty i {
@@ -222,8 +222,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 0.75rem;
-    background: #eff6ff;
-    color: #2563eb;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-600);
 }
 
 .profile-group-teacher-strip {
@@ -236,7 +236,7 @@
 
 .profile-group-teacher-strip > span {
     min-width: 120px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -252,9 +252,9 @@
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    border: 1px solid #dbeafe;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border: 1px solid var(--ems-primary-100);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     padding: 0.25rem 0.65rem;
     font-size: 0.82rem;
     font-weight: 700;
@@ -276,7 +276,7 @@
     padding: 0.75rem;
     border: 1px solid #edf2f7;
     border-radius: 0.7rem;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 .profile-group-student-avatar {
@@ -286,8 +286,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
     font-weight: 800;
     flex: 0 0 auto;
 }
@@ -299,13 +299,13 @@
 }
 
 .profile-group-student-row strong {
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     line-height: 1.25;
 }
 
 .profile-group-student-row span,
 .profile-group-student-row small {
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.84rem;
 }
 
@@ -316,20 +316,20 @@
     width: fit-content;
     margin-top: 3px;
     padding: 2px 8px;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8 !important;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700) !important;
     font-weight: 600;
 }
 
 .profile-group-detail__empty {
     padding: 1.2rem;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--ems-neutral-300);
     border-radius: 0.75rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     text-align: center;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 @media (max-width: 720px) {

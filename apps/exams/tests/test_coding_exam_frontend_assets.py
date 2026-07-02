@@ -14,7 +14,10 @@ from django.test import SimpleTestCase
 
 JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "coding_exam.js"
 JS_MODULE_DIR = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "coding_exam"
-SUPERVISION_JS_ASSET = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "exam_supervision.js"
+# Refaktor 2026-07-02: monolit exam_supervision.js paketə bölündü — davranış
+# müqavilələri paketdəki BÜTÜN modulların birləşməsində yoxlanılır ki, gələcək
+# yenidən-bölgülər testi sındırmasın.
+SUPERVISION_JS_DIR = Path(settings.BASE_DIR) / "apps" / "exams" / "static" / "exams" / "js" / "exam_supervision"
 
 
 class CodingExamJavaScriptAssetTests(SimpleTestCase):
@@ -87,7 +90,7 @@ class ExamSupervisionJavaScriptAssetTests(SimpleTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.source = SUPERVISION_JS_ASSET.read_text(encoding="utf-8")
+        cls.source = "\n".join(path.read_text(encoding="utf-8") for path in sorted(SUPERVISION_JS_DIR.glob("*.js")))
 
     def test_result_navigation_is_idempotent(self):
         self.assertIn("_navigatingToResult", self.source)

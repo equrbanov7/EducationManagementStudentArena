@@ -2,9 +2,9 @@
     margin-top: 1.5rem;
     padding: 1rem 1.25rem;
     background: var(--light-blue);
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: var(--radius-md);
-    color: #1e40af;
+    color: var(--ems-primary-800);
     font-size: 0.875rem;
     line-height: 1.5;
 }

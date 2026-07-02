@@ -3,19 +3,19 @@
 
 :root {
     --ems-blue-900: #1e3a8a;
-    --ems-blue-800: #1e40af;
-    --ems-blue-700: #1d4ed8;
-    --ems-teal-700: #0f766e;
+    --ems-blue-800: var(--ems-primary-800);
+    --ems-blue-700: var(--ems-primary-700);
+    --ems-teal-700: var(--ems-success-strong);
     --ems-teal-500: #14b8a6;
-    --ems-green-500: #10b981;
-    --ems-bg: #f8fafc;
-    --ems-surface: #ffffff;
-    --ems-text: #0f172a;
-    --ems-text-muted: #475569;
+    --ems-green-500: var(--ems-success);
+    --ems-bg: var(--ems-neutral-50);
+    --ems-surface: var(--ems-neutral-0);
+    --ems-text: var(--ems-neutral-900);
+    --ems-text-muted: var(--ems-neutral-600);
     --ems-border: rgba(15, 23, 42, 0.1);
-    --ems-error: #dc2626;
+    --ems-error: var(--ems-danger);
     --ems-success: #16a34a;
-    --ems-gradient: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
+    --ems-gradient: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-success-strong) 55%, var(--ems-success) 100%);
     --ems-gradient-soft: linear-gradient(135deg, rgba(30, 64, 175, 0.08), rgba(16, 185, 129, 0.08));
 }
 
@@ -29,7 +29,7 @@
 /* ---------- Hero ---------- */
 .ems-contact__hero {
     background: var(--ems-gradient);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     padding: 80px 24px 100px;
     text-align: center;
     position: relative;
@@ -178,7 +178,7 @@
 
 .ems-contact__social:hover {
     background: var(--ems-gradient);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(30, 64, 175, 0.25);
 }
@@ -326,14 +326,14 @@
 
 .ems-contact__btn--primary {
     background: var(--ems-gradient);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 12px 28px rgba(15, 118, 110, 0.25);
 }
 
 .ems-contact__btn--primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 16px 32px rgba(15, 118, 110, 0.35);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .ems-contact__btn--ghost {
@@ -344,7 +344,7 @@
 
 .ems-contact__btn--ghost:hover {
     background: var(--ems-blue-800);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 /* Success state */

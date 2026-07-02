@@ -14,7 +14,7 @@
 .page-header-link--accent {
     background: var(--primary, #4361ee);
     border-color: var(--primary, #4361ee);
-    color: #fff;
+    color: var(--ems-neutral-0);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
@@ -22,7 +22,7 @@
 .page-header-link--accent:hover {
     background: var(--primary-hover, #3751d4);
     border-color: var(--primary-hover, #3751d4);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 body.bankpicker-open {
@@ -54,7 +54,7 @@ body.bankpicker-open {
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    background: var(--card-bg, #fff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border-radius: 18px;
     box-shadow: 0 24px 60px rgba(18, 28, 60, 0.28);
     overflow: hidden;
@@ -100,7 +100,7 @@ body.bankpicker-open {
     height: 38px;
     border-radius: 50%;
     border: 1px solid var(--border, #e1e4e8);
-    background: #fff;
+    background: var(--ems-neutral-0);
     color: var(--text-muted, #636e72);
     font-size: 1rem;
     cursor: pointer;
@@ -179,7 +179,7 @@ body.bankpicker-open {
     border-radius: 10px;
     font-size: 0.9rem;
     color: var(--text-dark, #2d3436);
-    background: #fff;
+    background: var(--ems-neutral-0);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .bankpicker-select:focus,
@@ -233,7 +233,7 @@ body.bankpicker-open {
     padding: 4px 11px;
     border-radius: 999px;
     border: 1px solid #dbe4ff;
-    background: #fff;
+    background: var(--ems-neutral-0);
     color: var(--text-dark, #2d3436);
     font-size: 0.8rem;
     font-weight: 600;
@@ -245,9 +245,9 @@ body.bankpicker-open {
 .bankpicker-langchip.is-active {
     background: var(--primary, #4361ee);
     border-color: var(--primary, #4361ee);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
-.bankpicker-langchip.is-active strong { color: #fff; }
+.bankpicker-langchip.is-active strong { color: var(--ems-neutral-0); }
 .bankpicker-langchip--muted {
     cursor: default;
     color: var(--text-muted, #636e72);
@@ -359,7 +359,7 @@ body.bankpicker-open {
     gap: 12px;
     padding: 14px 22px;
     border-top: 1px solid var(--border, #e1e4e8);
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 .bankpicker-selcount {
     font-size: 0.88rem;
@@ -374,7 +374,7 @@ body.bankpicker-open {
     border: none;
     border-radius: 11px;
     background: var(--primary, #4361ee);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
@@ -399,7 +399,7 @@ body.bankpicker-open {
     border-radius: 999px;
     border: 1px solid var(--primary, #4361ee);
     background: var(--primary, #4361ee);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
@@ -408,7 +408,7 @@ body.bankpicker-open {
 .bankpicker-open-btn:hover {
     background: var(--primary-hover, #3751d4);
     border-color: var(--primary-hover, #3751d4);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 /* ======================================================================== *
@@ -418,7 +418,7 @@ body.bankpicker-open {
     position: sticky;
     top: 0;
     z-index: 6;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 .bankpicker-footer {
     z-index: 6;
@@ -504,7 +504,7 @@ body.bankpicker-open {
     display: grid;
     place-items: center;
     border-radius: 6px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--border, #e1e4e8);
     font-weight: 700;
     font-size: 0.78rem;
@@ -512,7 +512,7 @@ body.bankpicker-open {
 .bankpicker-opt.is-correct .bankpicker-opt__label {
     background: var(--success, #27ae60);
     border-color: var(--success, #27ae60);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 .bankpicker-opt__text { flex: 1; min-width: 0; }
 .bankpicker-opt__mark { color: var(--success, #27ae60); flex-shrink: 0; }

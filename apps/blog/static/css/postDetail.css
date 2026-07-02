@@ -18,22 +18,22 @@
     background: rgba(255, 255, 255, 0.96);
     border: 1px solid #dbe2ec;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     font-weight: 600;
 }
 
 .article-back-link:hover {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     border-color: rgba(37, 99, 235, 0.25);
 }
 
 .article-back-link i {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
 }
 
 /* --- Məqalənin Əsas Konteyneri --- */
 .article-container {
-    background: var(--card-bg, #ffffff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     padding: 40px;
@@ -48,8 +48,8 @@
 
 .article-category {
     display: inline-block;
-    background-color: var(--primary-light, #eff6ff); /* Açıq primary rəng */
-    color: var(--primary-color, #2563eb);
+    background-color: var(--primary-light, var(--ems-primary-50)); /* Açıq primary rəng */
+    color: var(--primary-color, var(--ems-primary-600));
     padding: 8px 16px;
     border-radius: 25px;
     font-size: 0.85rem;
@@ -63,13 +63,13 @@
 .article-title {
     font-size: 2.8rem; /* Daha böyük başlıq */
     line-height: 1.2;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 15px;
     font-weight: 700;
 }
 
 .article-meta {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 0.9rem;
     display: flex;
     justify-content: center;
@@ -84,11 +84,11 @@
 
 .article-meta span i {
     margin-right: 6px;
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
 }
 
 .article-meta .fa-eye {
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 /* --- Məqalə Şəkli --- */
@@ -118,7 +118,7 @@
     font-size: 2rem;
     margin-top: 40px;
     margin-bottom: 20px;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     font-weight: 600;
 }
 
@@ -142,13 +142,13 @@
 }
 
 .article-content a {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     text-decoration: underline;
     transition: color 0.2s ease;
 }
 
 .article-content a:hover {
-    color: #1e40af;
+    color: var(--ems-primary-800);
 }
 
 .article-content img {
@@ -161,7 +161,7 @@
 }
 
 .article-content blockquote {
-    border-left: 5px solid var(--primary-color, #2563eb);
+    border-left: 5px solid var(--primary-color, var(--ems-primary-600));
     margin: 30px 0;
     padding: 20px 25px;
     font-style: italic;
@@ -191,7 +191,7 @@
 
 /* --- Reytinq Blok --- */
 .article-rating-block {
-    background: var(--card-bg, #ffffff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     padding: 25px 30px;
@@ -202,19 +202,19 @@
 
 .article-rating-block p {
     font-size: 1.1rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin: 0;
 }
 
 .article-rating-block strong {
     font-size: 1.3rem;
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     font-weight: 700;
 }
 
 /* --- Şərhlər Bölməsi --- */
 .comments-section { /* article-comments -> comments-section */
-    background: var(--card-bg, #ffffff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     padding: 30px;
@@ -226,7 +226,7 @@
 
 .comments-title {
     font-size: 1.8rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 30px;
     font-weight: 600;
     padding-bottom: 15px;
@@ -253,13 +253,13 @@
 
 .comment-author {
     font-weight: 700;
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     font-size: 1rem;
 }
 
 .comment-meta {
     font-size: 0.85rem;
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     display: flex;
     align-items: center;
     gap: 8px;
@@ -278,7 +278,7 @@
 }
 
 .comments-section p:last-child {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-style: italic;
     text-align: center;
     padding: 20px;
@@ -286,7 +286,7 @@
 
 /* --- Şərh Yazma Formu --- */
 .add-comment-section { /* article-add-comment -> add-comment-section */
-    background: var(--card-bg, #ffffff);
+    background: var(--card-bg, var(--ems-neutral-0));
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     padding: 30px;
@@ -295,7 +295,7 @@
 
 .add-comment-section h3 {
     font-size: 1.6rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 25px;
     font-weight: 600;
     text-align: left;
@@ -303,13 +303,13 @@
 
 .comment-auth-message {
     font-size: 1rem;
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     margin-bottom: 20px;
     text-align: left;
 }
 
 .comment-auth-message a {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     text-decoration: none;
     font-weight: 600;
 }
@@ -332,7 +332,7 @@
 .comment-form .form-group label {
     display: block;
     font-size: 0.9rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -353,9 +353,9 @@
 
 .comment-form .form-group textarea:focus,
 .comment-form .form-group select:focus {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    background-color: #ffffff;
+    background-color: var(--ems-neutral-0);
 }
 
 .comment-form .form-group textarea {
@@ -372,7 +372,7 @@
 }
 
 .comment-form .form-error {
-    color: #ef4444;
+    color: var(--ems-danger-500);
     font-size: 0.85rem;
     margin-top: 5px;
 }
@@ -381,7 +381,7 @@
     width: auto; /* Avtomatik en */
     align-self: flex-start; /* Sola yanaşdır */
     padding: 12px 25px;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color, var(--ems-primary-600));
     color: white;
     border: none;
     border-radius: 8px;
@@ -393,7 +393,7 @@
 }
 
 .comment-submit-btn:hover {
-    background-color: #1e40af;
+    background-color: var(--ems-primary-800);
     transform: translateY(-2px);
 }
 

@@ -1,12 +1,12 @@
 /* Rəng Palitrası və Qlobal Dəyişənlər */
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e40af;
-    --light-blue: #eff6ff;
-    --pale-blue: #bfdbfe;
+    --primary-blue: var(--ems-primary-600);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-50);
+    --pale-blue: var(--ems-primary-200);
     
-    --primary-green: #10b981;
-    --dark-green: #059669;
+    --primary-green: var(--ems-success);
+    --dark-green: var(--ems-success-600);
     --light-green: #ecfdf5;
 }
 
@@ -17,7 +17,7 @@
 
 /* Kart Dizaynı (Card Modern) */
 .card-modern {
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: none;
     border-radius: 1.25rem;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
@@ -44,14 +44,14 @@
 .btn-gradient-success {
     background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
     border: none;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
     border-radius: 0.5rem;
     padding: 0.5rem 1.25rem;
     transition: filter 0.3s ease, transform 0.2s ease;
 }
 .btn-gradient-success:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     filter: brightness(0.9);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
@@ -92,7 +92,7 @@
 
 .question-toggle-btn {
     border: 1px solid rgba(255, 255, 255, 0.4);
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: rgba(255, 255, 255, 0.1);
     border-radius: 999px;
     width: 34px;
@@ -103,7 +103,7 @@
 }
 
 .question-toggle-btn:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -138,7 +138,7 @@
     min-height: 120px;
     font-family: inherit;
     border-radius: 0.75rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     padding: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -149,9 +149,9 @@
 
 /* File Upload Area */
 .file-upload-area {
-    border: 2px dashed #cbd5e1 !important;
+    border: 2px dashed var(--ems-neutral-300) !important;
     cursor: pointer;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     transition: all 0.3s ease;
     border-radius: 0.75rem;
 }
@@ -184,12 +184,12 @@
 
 /* Timer and Progress Box */
 .timer-box {
-    background-color: #fff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 1.25rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.02);
 }
-.progress { border-radius: 2rem; overflow: hidden; background-color: #e2e8f0; }
+.progress { border-radius: 2rem; overflow: hidden; background-color: var(--ems-neutral-200); }
 .progress-bar { transition: width 0.5s ease; background-color: var(--primary-green) !important; }
 
 /* Status Badges */
@@ -204,7 +204,7 @@
 }
 .badge-open { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
 .badge-upcoming { background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--pale-blue); }
-.badge-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.badge-closed { background: var(--ems-danger-100); color: var(--ems-danger-strong); border: 1px solid var(--ems-danger-200); }
 
 /* Empty States / Alerts */
 .alert-modern {
@@ -213,7 +213,7 @@
     padding: 3rem 2rem;
 }
 .alert-info-modern { background-color: var(--light-blue); border: 2px dashed var(--pale-blue); }
-.alert-warning-modern { background-color: #fef3c7; border: 2px dashed #fde68a; }
+.alert-warning-modern { background-color: var(--ems-warning-100); border: 2px dashed #fde68a; }
 .alert-success-modern { background-color: var(--light-green); border: 2px dashed #a7f3d0; }
 
 @media (max-width: 768px) {

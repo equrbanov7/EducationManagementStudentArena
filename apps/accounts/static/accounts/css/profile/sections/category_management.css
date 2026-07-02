@@ -76,7 +76,7 @@
 }
 
 .subcategory-node {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .category-management-modal__content {

@@ -59,7 +59,7 @@
     border: 0;
     border-radius: 12px;
     background: rgba(239, 68, 68, 0.94);
-    color: #fff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;

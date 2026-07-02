@@ -202,3 +202,29 @@ class SendNewPostNotificationEmailTaskTest(TestCase):
         )
 
         self.assertEqual(len(mail.outbox), 0)
+
+
+class EmailTaskRetryContractTests(TestCase):
+    """Faza 7: e-poçt tasklarının retry müqaviləsi (audit 7.6).
+
+    Bütün shared e-poçt taskları müvəqqəti SMTP nasazlığında avtomatik təkrar
+    cəhd etməlidir — bu konfiqurasiya təsadüfən silinsə, test dərhal bildirir.
+    """
+
+    def test_all_email_tasks_declare_autoretry(self):
+        from core import email_tasks
+
+        task_objects = [
+            obj
+            for obj in vars(email_tasks).values()
+            if callable(obj) and hasattr(obj, "apply_async") and hasattr(obj, "max_retries")
+        ]
+        self.assertGreaterEqual(len(task_objects), 3, "e-poçt taskları tapılmadı")
+        for task in task_objects:
+            with self.subTest(task=task.name):
+                # Say/gecikmə task-a görə fərqlənə bilər (məs. toplu abunəçi
+                # maili 2×120s işlədir) — müqavilə: autoretry MÜTLƏQ açıqdır
+                # və ağlabatan hədlərdədir.
+                self.assertIn(Exception, tuple(getattr(task, "autoretry_for", ()) or ()))
+                self.assertGreaterEqual(task.max_retries, 2)
+                self.assertGreaterEqual(task.default_retry_delay, 60)

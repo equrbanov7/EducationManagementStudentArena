@@ -1,8 +1,8 @@
 :root {
-    --primary-blue: #2563eb;
-    --primary-green: #10b981;
-    --dark-blue: #1e40af;
-    --light-blue: #dbeafe;
+    --primary-blue: var(--ems-primary-600);
+    --primary-green: var(--ems-success);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-100);
     --light-green: #d1fae5;
     --sidebar-width: 260px;
 }
@@ -103,7 +103,7 @@ body {
 .dashboard-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .toggle-sidebar-btn {
@@ -144,8 +144,8 @@ body {
 
 .stat-card.blue { border-left-color: var(--primary-blue); }
 .stat-card.green { border-left-color: var(--primary-green); }
-.stat-card.orange { border-left-color: #f59e0b; }
-.stat-card.red { border-left-color: #ef4444; }
+.stat-card.orange { border-left-color: var(--ems-warning-500); }
+.stat-card.red { border-left-color: var(--ems-danger-500); }
 
 .stat-card-header {
     display: flex;
@@ -175,25 +175,25 @@ body {
 }
 
 .stat-card.orange .stat-icon {
-    background: #fef3c7;
-    color: #f59e0b;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-500);
 }
 
 .stat-card.red .stat-icon {
-    background: #fee2e2;
-    color: #ef4444;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-500);
 }
 
 .stat-label {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     margin-bottom: 0.25rem;
 }
 
 .stat-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 /* Widget Cards */
@@ -223,7 +223,7 @@ body {
 .widget-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .widget-link {
@@ -252,7 +252,7 @@ body {
 }
 
 .widget-list-item a {
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     text-decoration: none;
     display: flex;
     justify-content: space-between;
@@ -271,13 +271,13 @@ body {
 }
 
 .widget-badge.urgent {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger);
 }
 
 .widget-badge.pending {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
 }
 
 .widget-badge.info {

@@ -99,4 +99,25 @@ def _normalise_path(path: str) -> str:
     path = re.sub(r"/\d+(?=/|$)", "/<id>", path)
     # Media download trailing path
     path = re.sub(r"(/media/download/).*", r"\1<path>", path)
+    # ── Faza 4 (audit 2026-07-02): slug seqmentləri ──
+    # Aşağıdakı qaydalar label kardinallığını imtahan/məqalə/təşkilat
+    # SAYINDAN asılı olmaqdan çıxarır. Statik alt-səhifələr qorunur.
+    # /exams/<slug>/… (statiklər: assigned, available, code-check, create,
+    # groups, my-history, pending-work, question-bank)
+    path = re.sub(
+        r"(/exams/)(?!(?:assigned|available|code-check|create|groups|"
+        r"my-history|pending-work|question-bank)(?:/|$))(?!<slug>)[^/]+",
+        r"\1<slug>",
+        path,
+    )
+    # Blog: /articles/<slug>/ və /categories/<slug>/
+    path = re.sub(r"(/(?:articles|categories)/)[^/]+(?=/|$)", r"\1<slug>", path)
+    # Təşkilatlar: /organizations/<slug>/… və /organizations/switch/<slug>/
+    # (statik: select)
+    path = re.sub(r"(/organizations/switch/)[^/]+(?=/|$)", r"\1<slug>", path)
+    path = re.sub(
+        r"(/organizations/)(?!(?:select|switch)(?:/|$))(?!<slug>)[^/]+",
+        r"\1<slug>",
+        path,
+    )
     return path

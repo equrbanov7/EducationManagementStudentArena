@@ -9,11 +9,11 @@
     align-items: center;
     gap: 0.5rem;
     border: 1px solid rgba(15, 23, 42, 0.14);
-    background: #fff;
+    background: var(--ems-neutral-0);
     border-radius: 10px;
     padding: 0.44rem 0.66rem;
     cursor: pointer;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 0.87rem;
     line-height: 1;
     transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -35,7 +35,7 @@
 }
 
 .language-switcher__label {
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-weight: 600;
 }
 
@@ -47,7 +47,7 @@
     justify-content: center;
     border-radius: 999px;
     background: rgba(37, 99, 235, 0.08);
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .language-switcher__value {
@@ -58,7 +58,7 @@
 .language-switcher__caret {
     margin-left: auto;
     font-size: 0.7rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     transition: transform 0.18s ease;
 }
 
@@ -71,7 +71,7 @@
     min-width: 210px;
     max-width: min(280px, calc(100vw - 24px));
     max-height: min(22rem, calc(100vh - 6rem));
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
     box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
@@ -121,17 +121,17 @@
 }
 
 .language-switcher__option:hover {
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
 }
 
 .language-switcher__option.dropdown-item:active {
     color: #1e293b;
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
 }
 
 .language-switcher__option:focus-visible {
     outline: none;
-    background: #e2e8f0;
+    background: var(--ems-neutral-200);
 }
 
 .language-switcher__option-code {
@@ -141,8 +141,8 @@
     width: 34px;
     height: 24px;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-weight: 700;
     font-size: 0.72rem;
 }
@@ -154,7 +154,7 @@
 
 .language-switcher__option-check {
     opacity: 0;
-    color: #0f766e;
+    color: var(--ems-success-strong);
     font-weight: 700;
 }
 

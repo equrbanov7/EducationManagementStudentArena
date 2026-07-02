@@ -4,13 +4,13 @@
     --exam-blue-soft: var(--ems-primary-100);
     --exam-green: var(--ems-success);
     --exam-green-soft: #d1fae5;
-    --exam-red: #ef4444;
+    --exam-red: var(--ems-danger-500);
     --exam-red-strong: var(--ems-danger);
-    --exam-red-soft: #fee2e2;
-    --exam-amber: #f59e0b;
-    --exam-amber-soft: #fef3c7;
+    --exam-red-soft: var(--ems-danger-100);
+    --exam-amber: var(--ems-warning-500);
+    --exam-amber-soft: var(--ems-warning-100);
     --exam-bg: var(--ems-neutral-50);
-    --exam-card: #ffffff;
+    --exam-card: var(--ems-neutral-0);
     --exam-text: #1e293b;
     --exam-muted: var(--ems-neutral-500);
     --exam-border: var(--ems-neutral-200);
@@ -238,7 +238,7 @@ body > main {
 .question-nav-btn.is-current {
     border-color: var(--exam-blue);
     background: var(--exam-blue);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
 }
 
@@ -251,7 +251,7 @@ body > main {
 .question-nav-btn.is-marked:not(.is-current):not(.is-answered) {
     border-color: var(--exam-amber);
     background: var(--exam-amber-soft);
-    color: #92400e;
+    color: var(--ems-warning-800);
 }
 
 .question-nav-btn.is-marked.is-answered:not(.is-current) {
@@ -371,7 +371,7 @@ body > main {
     padding: 36px;
     border: 1px solid var(--exam-border);
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: var(--exam-shadow);
 }
 
@@ -489,7 +489,7 @@ body > main {
 .mark-question-btn:hover,
 .mark-question-btn.is-marked {
     background: var(--exam-amber-soft);
-    color: #92400e;
+    color: var(--ems-warning-800);
 }
 
 .mark-question-btn:active {
@@ -525,7 +525,7 @@ body > main {
     padding: 16px 20px;
     border: 1.5px solid var(--exam-border);
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-700);
     cursor: pointer;
     transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;

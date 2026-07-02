@@ -25,7 +25,7 @@
     padding: 0.95rem 1rem;
     border: 1px solid #d5e1f3;
     border-radius: 1rem;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #f8fbff 100%);
     color: #17233b;
     display: flex;
     align-items: center;
@@ -44,14 +44,14 @@
 
 .bootstrap-single-select__toggle:hover {
     border-color: #9dbaf5;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: #17233b;
 }
 
 .bootstrap-single-select__toggle:focus,
 .bootstrap-single-select__toggle.show {
     border-color: #4b7cf0;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: #17233b;
     box-shadow: 0 0 0 4px rgba(75, 124, 240, 0.14);
 }
@@ -184,7 +184,7 @@
 
 .bootstrap-single-select__hint {
     margin-top: 0.55rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.86rem;
     line-height: 1.45;
 }

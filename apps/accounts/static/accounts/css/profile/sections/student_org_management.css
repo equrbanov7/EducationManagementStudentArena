@@ -3,7 +3,7 @@
     overflow: auto;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 
 .profile-section-table-scroll .table {
@@ -62,7 +62,7 @@
     align-items: center;
     gap: 0.55rem;
     border: 1px solid var(--border-color);
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #f8fbff 100%);
     color: var(--text-primary);
     border-radius: 999px;
     padding: 0.75rem 1rem;
@@ -80,9 +80,9 @@
 
 .org-management-chip:hover,
 .org-management-subchip:hover {
-    background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(180deg, var(--ems-primary-50) 0%, var(--ems-primary-100) 100%);
     border-color: #93c5fd;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
     transform: translateY(-1px);
 }
@@ -96,9 +96,9 @@
 
 .org-management-chip.is-active,
 .org-management-subchip.is-active {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    border-color: #1d4ed8;
-    color: #fff;
+    background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-700));
+    border-color: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
     box-shadow: 0 14px 28px rgba(29, 78, 216, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
     transform: translateY(-1px);
 }
@@ -119,13 +119,13 @@
 .org-management-chip:hover .org-management-chip__count,
 .org-management-subchip:hover .org-management-subchip__count {
     background: rgba(37, 99, 235, 0.12);
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .org-management-chip.is-active .org-management-chip__count,
 .org-management-subchip.is-active .org-management-subchip__count {
     background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 .org-management-panel {

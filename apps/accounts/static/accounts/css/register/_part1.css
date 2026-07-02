@@ -36,7 +36,7 @@ body:has(.register-page-wrapper) {
 
 /* --- Qeydiyyat Kartı (Formanın olduğu əsas qutu) --- */
 .register-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-width: 450px; /* Qutunun maksimum eni */
     width: 100%;
     padding: 40px;
@@ -55,19 +55,19 @@ body:has(.register-page-wrapper) {
 }
 
 .register-subheading {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 1rem;
     margin-bottom: 30px;
 }
 
 /* --- Xəta Mesajları (Form-un yuxarısında) --- */
 .register-global-errors {
-    background-color: #fee2e2; /* Qırmızı fon */
+    background-color: var(--ems-danger-100); /* Qırmızı fon */
     color: #991b1b; /* Tünd qırmızı mətn */
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 25px;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     text-align: left;
     font-size: 0.95rem;
 }
@@ -98,7 +98,7 @@ body:has(.register-page-wrapper) {
     margin-left: 6px;
     padding: 2px 7px;
     border-radius: 999px;
-    background: #fee2e2;
+    background: var(--ems-danger-100);
     color: #991b1b;
     font-size: 0.72rem;
     font-weight: 700;
@@ -128,8 +128,8 @@ body:has(.register-page-wrapper) {
     -moz-appearance: none;
     padding-right: 44px;
     background-image:
-        linear-gradient(45deg, transparent 50%, #6b7280 50%),
-        linear-gradient(135deg, #6b7280 50%, transparent 50%);
+        linear-gradient(45deg, transparent 50%, var(--ems-gray-500) 50%),
+        linear-gradient(135deg, var(--ems-gray-500) 50%, transparent 50%);
     background-position:
         calc(100% - 20px) calc(50% - 3px),
         calc(100% - 14px) calc(50% - 3px);
@@ -154,7 +154,7 @@ body:has(.register-page-wrapper) {
     transform: translateY(-50%);
     border: 0;
     background: transparent;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     cursor: pointer;
     padding: 4px;
     line-height: 1;
@@ -171,11 +171,11 @@ body:has(.register-page-wrapper) {
 .register-form-field select.form-control:focus {
     border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Yüngül focus kölgəsi */
-    background-color: #ffffff; /* Focus olanda ağ fon */
+    background-color: var(--ems-neutral-0); /* Focus olanda ağ fon */
 }
 
 .register-form-field .is-invalid {
-    border-color: #ef4444 !important;
+    border-color: var(--ems-danger-500) !important;
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
 }
 
@@ -217,26 +217,26 @@ body:has(.register-page-wrapper) {
 }
 
 .register-bootstrap-select__toggle:hover {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-color: #93c5fd;
     color: var(--ems-neutral-800);
 }
 
 .register-bootstrap-select__toggle:focus,
 .register-bootstrap-select__toggle.show {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-color: var(--ems-primary-600);
     color: var(--ems-neutral-800);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .register-bootstrap-select__toggle.is-placeholder {
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-weight: 400;
 }
 
 .register-bootstrap-select__toggle.is-invalid {
-    border-color: #ef4444;
+    border-color: var(--ems-danger-500);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
 }
 
@@ -250,7 +250,7 @@ body:has(.register-page-wrapper) {
 }
 
 .register-bootstrap-select__caret {
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-size: 0.8rem;
     transition: transform 0.2s ease, color 0.2s ease;
 }
@@ -312,7 +312,7 @@ body:has(.register-page-wrapper) {
 
 /* Forma Sahəsinin Xətası */
 .register-field-error {
-    color: #ef4444; /* Qırmızı xəta mətni */
+    color: var(--ems-danger-500); /* Qırmızı xəta mətni */
     font-size: 0.85rem;
     margin-top: 5px;
 }
@@ -344,7 +344,7 @@ body:has(.register-page-wrapper) {
 /* --- Kartın Alt Mətni (Login linki) --- */
 .register-footer-text {
     margin-top: 30px;
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 0.95rem;
 }
 
@@ -380,7 +380,7 @@ body:has(.register-page-wrapper) {
     row-gap: 0.75rem;
     margin: 1.5rem 0;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 .wizard-step {
@@ -405,8 +405,8 @@ body:has(.register-page-wrapper) {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #e5e7eb;
-    color: #6b7280;
+    background: var(--ems-gray-200);
+    color: var(--ems-gray-500);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -427,7 +427,7 @@ body:has(.register-page-wrapper) {
 
 .wizard-step-label {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-weight: 500;
     min-width: 0;
     line-height: 1.25;
@@ -459,7 +459,7 @@ body:has(.register-page-wrapper) {
     border: 1px solid #d1d5db;
     border-radius: 8px;
     background: white;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.2s;
@@ -485,7 +485,7 @@ body:has(.register-page-wrapper) {
     margin-top: 8px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-height: 220px;
     overflow-y: auto;
 }
@@ -493,13 +493,13 @@ body:has(.register-page-wrapper) {
 .register-search-option {
     width: 100%;
     border: 0;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     text-align: left;
     padding: 10px 12px;
     cursor: pointer;
     font-size: 0.95rem;
     color: var(--ems-neutral-800);
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 .register-search-option:last-child {
@@ -519,5 +519,5 @@ body:has(.register-page-wrapper) {
 .register-search-empty {
     padding: 10px 12px;
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
 }

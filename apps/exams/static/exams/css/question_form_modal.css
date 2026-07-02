@@ -13,7 +13,7 @@
     max-height: calc(92vh - 82px);
     overflow-y: auto;
     padding: 1.5rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .question-form-modal__header {
@@ -22,14 +22,14 @@
     border: 0;
     background:
         radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.24), transparent 30%),
-        linear-gradient(135deg, #1d4ed8 0%, #2563eb 48%, #0ea5e9 100%);
+        linear-gradient(135deg, var(--ems-primary-700) 0%, var(--ems-primary-600) 48%, #0ea5e9 100%);
     box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .question-form-modal__header--edit {
     background:
         radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.22), transparent 30%),
-        linear-gradient(135deg, #1e40af 0%, #2563eb 52%, #38bdf8 100%);
+        linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-primary-600) 52%, #38bdf8 100%);
 }
 
 .question-form-modal__header .modal-title {
@@ -61,7 +61,7 @@
 .question-form-shell--modal .question-form-modal-intro {
     margin-bottom: 1.25rem;
     padding: 0.95rem 1rem;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 14px;
     background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
     box-shadow: 0 12px 28px rgba(37, 99, 235, 0.06);
@@ -71,19 +71,19 @@
     margin: 0 0 0.3rem;
     font-size: 0.92rem;
     font-weight: 700;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .question-form-shell--modal .info-text {
     margin: 0;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.92rem;
 }
 
 .question-form-shell--modal .media-help {
     margin: 1rem 0 0.85rem;
     padding: 0.9rem 1rem;
-    border: 1px solid #dbeafe;
+    border: 1px solid var(--ems-primary-100);
     border-radius: 12px;
     background: #f8fbff;
 }
@@ -91,7 +91,7 @@
 .question-form-shell--modal .media-help-title {
     display: block;
     margin-bottom: 0.35rem;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     font-size: 0.92rem;
     font-weight: 800;
 }
@@ -99,7 +99,7 @@
 .question-form-shell--modal .media-help-text,
 .question-form-shell--modal .help-text {
     margin: 0;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.88rem;
     line-height: 1.5;
 }
@@ -122,7 +122,7 @@
     display: block;
     margin-bottom: 0.45rem;
     font-weight: 700;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 0.92rem;
 }
 
@@ -133,9 +133,9 @@
 .question-form-shell--modal select {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 12px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     padding: 0.8rem 0.9rem;
     font-size: 0.95rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -149,8 +149,8 @@
 .question-form-shell--modal textarea:focus,
 .question-form-shell--modal select:focus {
     outline: none;
-    border-color: #3b82f6;
-    background: #ffffff;
+    border-color: var(--ems-primary-500);
+    background: var(--ems-neutral-0);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
@@ -162,9 +162,9 @@
 .question-form-shell--modal .media-preview {
     margin-top: 0.75rem;
     padding: 0.9rem;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--ems-neutral-300);
     border-radius: 12px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 .question-form-shell--modal .media-preview img,
@@ -179,16 +179,16 @@
     display: block;
     margin-bottom: 0.55rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--ems-neutral-600);
 }
 
 .question-form-shell--modal .file-name-display {
     margin-top: 0.55rem;
     padding: 0.65rem 0.8rem;
     border-radius: 10px;
-    border: 1px solid #bfdbfe;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border: 1px solid var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 0.88rem;
     word-break: break-word;
 }
@@ -199,7 +199,7 @@
     border-radius: 12px;
     border: 1px solid #fbbf24;
     background: #fffbeb;
-    color: #92400e;
+    color: var(--ems-warning-800);
     font-size: 0.84rem;
     font-weight: 700;
     line-height: 1.45;
@@ -213,9 +213,9 @@
     min-height: 5.35rem;
     margin: 0.45rem 0 0;
     padding: 1rem 1.1rem;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 16px;
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--ems-primary-50) 0%, var(--ems-neutral-0) 100%);
     cursor: pointer;
     box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -238,9 +238,9 @@
     width: 3rem;
     height: 3rem;
     border-radius: 14px;
-    border: 2px solid #bfdbfe;
-    background: #ffffff;
-    color: #64748b;
+    border: 2px solid var(--ems-primary-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-500);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -250,9 +250,9 @@
 }
 
 .question-form-shell--modal .question-paint-toggle input[type="checkbox"]:checked + .question-paint-toggle__box {
-    border-color: #2563eb;
-    background: #2563eb;
-    color: #ffffff;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
     transform: scale(1.03);
 }
 
@@ -270,7 +270,7 @@
 
 .question-form-shell--modal .question-paint-toggle__hint {
     display: block;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.88rem;
     font-weight: 500;
     line-height: 1.45;
@@ -305,14 +305,14 @@
     border: none;
     border-radius: 10px;
     padding: 0.65rem 0.95rem;
-    background: #ef4444;
-    color: #ffffff;
+    background: var(--ems-danger-500);
+    color: var(--ems-neutral-0);
     font-weight: 700;
     font-size: 0.88rem;
 }
 
 .question-form-shell--modal .clear-media-btn:hover {
-    background: #dc2626;
+    background: var(--ems-danger);
 }
 
 .question-form-shell--modal .variants-section {
@@ -330,7 +330,7 @@
 .question-form-shell--modal .variants-section h4 {
     margin: 0 0 0.4rem;
     font-size: 1.05rem;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-weight: 800;
 }
 
@@ -342,9 +342,9 @@
 
 .question-form-shell--modal .variant-card {
     padding: 0.95rem 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 14px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
@@ -358,17 +358,17 @@
 
 .question-form-shell--modal .variant-card-title {
     margin: 0;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 0.92rem;
     font-weight: 800;
 }
 
 .question-form-shell--modal .variant-card:hover {
-    border-color: #bfdbfe;
+    border-color: var(--ems-primary-200);
 }
 
 .question-form-shell--modal .variant-card input[type="text"] {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .question-form-shell--modal .custom-checkbox-container {
@@ -378,7 +378,7 @@
     padding-left: 2rem;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #475569;
+    color: var(--ems-neutral-600);
     margin-bottom: 0;
 }
 
@@ -397,13 +397,13 @@
     width: 1.4rem;
     height: 1.4rem;
     border-radius: 8px;
-    border: 2px solid #cbd5e1;
-    background: #f8fafc;
+    border: 2px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
 }
 
 .question-form-shell--modal .custom-checkbox-container input:checked ~ .checkmark {
-    background: #10b981;
-    border-color: #10b981;
+    background: var(--ems-success);
+    border-color: var(--ems-success);
 }
 
 .question-form-shell--modal .checkmark:after {
@@ -421,13 +421,13 @@
     top: 0.12rem;
     width: 0.35rem;
     height: 0.75rem;
-    border: solid #ffffff;
+    border: solid var(--ems-neutral-0);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
 
 .question-form-shell--modal .custom-checkbox-container input:checked ~ .label-text {
-    color: #059669;
+    color: var(--ems-success-600);
     font-weight: 700;
 }
 
@@ -444,13 +444,13 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.75rem 0.95rem;
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
+    color: var(--ems-neutral-0);
     box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
 }
 
 .question-form-shell--modal .variant-add-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--ems-primary-700) 0%, #0284c7 100%);
 }
 
 .question-form-shell--modal .variant-remove-btn {
@@ -468,14 +468,14 @@
     margin-bottom: 1rem;
     padding: 0.85rem 1rem;
     border-radius: 12px;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     background: #fef2f2;
     color: #991b1b;
 }
 
 .question-form-shell--modal .error-msg {
     margin-top: 0.35rem;
-    color: #dc2626;
+    color: var(--ems-danger);
     font-size: 0.82rem;
 }
 
@@ -497,24 +497,24 @@
 
 .question-form-shell--modal .modal-cancel-btn {
     border: 1px solid #dbe4f0;
-    background: #ffffff;
-    color: #475569;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-600);
 }
 
 .question-form-shell--modal .modal-cancel-btn:hover {
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     color: #1e293b;
 }
 
 .question-form-shell--modal .modal-confirm-btn {
     border: 0;
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
+    color: var(--ems-neutral-0);
     box-shadow: 0 12px 26px rgba(37, 99, 235, 0.22);
 }
 
 .question-form-shell--modal .modal-confirm-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--ems-primary-700) 0%, #0284c7 100%);
     box-shadow: 0 16px 30px rgba(37, 99, 235, 0.28);
     transform: translateY(-1px);
 }

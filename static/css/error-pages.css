@@ -1,8 +1,8 @@
 :root {
     --error-surface: rgba(255, 255, 255, 0.88);
     --error-border: rgba(148, 163, 184, 0.18);
-    --error-text: #0f172a;
-    --error-muted: #64748b;
+    --error-text: var(--ems-neutral-900);
+    --error-muted: var(--ems-neutral-500);
     --error-shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
     --error-radius: 28px;
 }
@@ -81,7 +81,7 @@ body.error-page {
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.7);
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 0.92rem;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -94,7 +94,7 @@ body.error-page {
     display: inline-grid;
     place-items: center;
     background: linear-gradient(135deg, var(--error-primary), var(--error-accent));
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 10px 24px color-mix(in srgb, var(--error-primary) 22%, transparent);
 }
 
@@ -149,7 +149,7 @@ body.error-page {
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.76);
     border: 1px solid rgba(148, 163, 184, 0.16);
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.88rem;
     font-weight: 600;
 }
@@ -202,7 +202,7 @@ body.error-page {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.88rem;
     font-weight: 700;
 }
@@ -225,7 +225,7 @@ body.error-page {
 
 .error-code-caption {
     margin-top: 10px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.98rem;
     line-height: 1.6;
 }
@@ -257,13 +257,13 @@ body.error-page {
 }
 
 .error-btn-primary {
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, var(--error-primary), var(--error-accent));
     box-shadow: 0 18px 30px color-mix(in srgb, var(--error-primary) 26%, transparent);
 }
 
 .error-btn-primary:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 .error-btn-secondary {
@@ -279,21 +279,21 @@ body.error-page {
 
 .error-footer-note {
     margin-top: 16px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.88rem;
     line-height: 1.6;
 }
 
 .error-page.error-400 {
-    --error-primary: #d97706;
-    --error-primary-dark: #92400e;
-    --error-accent: #f59e0b;
+    --error-primary: var(--ems-warning-600);
+    --error-primary-dark: var(--ems-warning-800);
+    --error-accent: var(--ems-warning-500);
     --error-bg-start: #fff7ed;
     --error-bg-end: #fde68a;
 }
 
 .error-page.error-403 {
-    --error-primary: #dc2626;
+    --error-primary: var(--ems-danger);
     --error-primary-dark: #991b1b;
     --error-accent: #fb7185;
     --error-bg-start: #fff1f2;
@@ -301,7 +301,7 @@ body.error-page {
 }
 
 .error-page.error-404 {
-    --error-primary: #0f766e;
+    --error-primary: var(--ems-success-strong);
     --error-primary-dark: #134e4a;
     --error-accent: #14b8a6;
     --error-bg-start: #ecfeff;
@@ -309,11 +309,11 @@ body.error-page {
 }
 
 .error-page.error-500 {
-    --error-primary: #2563eb;
-    --error-primary-dark: #1d4ed8;
+    --error-primary: var(--ems-primary-600);
+    --error-primary-dark: var(--ems-primary-700);
     --error-accent: #60a5fa;
-    --error-bg-start: #eff6ff;
-    --error-bg-end: #dbeafe;
+    --error-bg-start: var(--ems-primary-50);
+    --error-bg-end: var(--ems-primary-100);
 }
 
 @media (max-width: 760px) {

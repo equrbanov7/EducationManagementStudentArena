@@ -6,12 +6,12 @@
    =========================================================================== */
 
 .profile-section--my-exams {
-  --tx-ink:#0B1437; --tx-blue:#2C5BFF; --tx-blue-deep:#1E40AF; --tx-blue-soft:#EEF2FF;
-  --tx-amber:#F59E0B; --tx-teal:#14B8A6;
-  --tx-paper:#F6F7FB; --tx-surface:#FFFFFF; --tx-border:#E5E8F0; --tx-border-soft:#EFF1F5;
-  --tx-text:#1F2937; --tx-muted:#6B7280; --tx-subtle:#9CA3AF;
-  --tx-danger:#DC2626; --tx-danger-soft:#FEECEC; --tx-green:#16A34A; --tx-green-soft:#DCFCE7;
-  --tx-accent:#2C5BFF; --tx-accent-deep:#1E40AF; --tx-accent-soft:#EEF2FF;
+  --tx-ink:#0B1437; --tx-blue:#2C5BFF; --tx-blue-deep:var(--ems-primary-800); --tx-blue-soft:#EEF2FF;
+  --tx-amber:var(--ems-warning-500); --tx-teal:#14B8A6;
+  --tx-paper:#F6F7FB; --tx-surface:var(--ems-neutral-0); --tx-border:#E5E8F0; --tx-border-soft:#EFF1F5;
+  --tx-text:var(--ems-neutral-800); --tx-muted:var(--ems-gray-500); --tx-subtle:#9CA3AF;
+  --tx-danger:var(--ems-danger); --tx-danger-soft:#FEECEC; --tx-green:#16A34A; --tx-green-soft:var(--ems-success-100);
+  --tx-accent:#2C5BFF; --tx-accent-deep:var(--ems-primary-800); --tx-accent-soft:#EEF2FF;
   --tx-radius:18px; --tx-card-pad:22px; --tx-grid-min:300px;
   --tx-serif:'Fraunces','Iowan Old Style',Georgia,serif;
   --tx-sans:inherit;
@@ -49,12 +49,12 @@
   font-size: 14px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap;
   font-family: inherit;
 }
-.profile-section--my-exams .tx-btn--primary { background: var(--tx-accent); color: #fff; box-shadow: 0 8px 18px rgba(44,91,255,.24); }
+.profile-section--my-exams .tx-btn--primary { background: var(--tx-accent); color: var(--ems-neutral-0); box-shadow: 0 8px 18px rgba(44,91,255,.24); }
 .profile-section--my-exams .tx-btn--primary:hover { background: var(--tx-accent-deep); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(44,91,255,.30); }
 .profile-section--my-exams .tx-btn--ghost { background: var(--tx-surface); color: var(--tx-ink); border-color: var(--tx-border); }
 .profile-section--my-exams .tx-btn--ghost:hover { border-color: var(--tx-subtle); background: var(--tx-paper); }
-.profile-section--my-exams .tx-btn--danger { background: var(--tx-danger); color: #fff; }
-.profile-section--my-exams .tx-btn--danger:hover { background: #B91C1C; }
+.profile-section--my-exams .tx-btn--danger { background: var(--tx-danger); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-btn--danger:hover { background: var(--ems-danger-strong); }
 .profile-section--my-exams .tx-btn--sm { height: 38px; padding: 0 13px; font-size: 13px; border-radius: 11px; }
 .profile-section--my-exams .tx-btn.tx-icon-only { width: 44px; padding: 0; flex-shrink: 0; }
 
@@ -95,7 +95,7 @@
   cursor: pointer; transition: .14s; white-space: nowrap; font-family: inherit;
 }
 .profile-section--my-exams .tx-typeseg-btn:hover { color: var(--tx-ink); }
-.profile-section--my-exams .tx-typeseg-btn.is-on { background: var(--tx-ink); color: #fff; }
+.profile-section--my-exams .tx-typeseg-btn.is-on { background: var(--tx-ink); color: var(--ems-neutral-0); }
 .profile-section--my-exams .tx-tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .profile-section--my-exams .tx-typeseg-btn.is-on .tx-tdot { box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
 
@@ -105,7 +105,7 @@
 }
 .profile-section--my-exams .tx-viewtoggle button { width: 40px; height: 38px; border: none; background: none; border-radius: 10px; display: grid; place-items: center; color: var(--tx-subtle); cursor: pointer; transition: .15s; }
 .profile-section--my-exams .tx-viewtoggle button:hover { color: var(--tx-ink); }
-.profile-section--my-exams .tx-viewtoggle button.is-on { background: var(--tx-ink); color: #fff; }
+.profile-section--my-exams .tx-viewtoggle button.is-on { background: var(--tx-ink); color: var(--ems-neutral-0); }
 
 /* ─────────────────────────── category chips ─────────────────────────── */
 .profile-section--my-exams .tx-catfilter { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; flex-wrap: wrap; }
@@ -120,9 +120,9 @@
 .profile-section--my-exams .tx-cat-chip.is-on { font-weight: 700; border-color: var(--cat-color); background: var(--cat-soft); color: var(--cat-deep); }
 .profile-section--my-exams .tx-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .profile-section--my-exams .tx-cat-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--tx-paper); color: var(--tx-muted); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
-.profile-section--my-exams .tx-cat-chip.is-on .tx-cat-n { background: var(--cat-color); color: #fff; }
-.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on { border-color: var(--tx-ink); background: var(--tx-ink); color: #fff; }
-.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on .tx-cat-n { background: rgba(255,255,255,.2); color: #fff; }
+.profile-section--my-exams .tx-cat-chip.is-on .tx-cat-n { background: var(--cat-color); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on { border-color: var(--tx-ink); background: var(--tx-ink); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on .tx-cat-n { background: rgba(255,255,255,.2); color: var(--ems-neutral-0); }
 
 /* ─────────────────────────── status section ─────────────────────────── */
 .profile-section--my-exams .tx-section { margin-bottom: 28px; }
@@ -175,7 +175,7 @@
 .profile-section--my-exams .tx-card-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 13px; font-size: 12.5px; color: var(--tx-muted); }
 .profile-section--my-exams .tx-m { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .profile-section--my-exams .tx-m b { color: var(--tx-text); font-weight: 700; }
-.profile-section--my-exams .tx-m--warn { color: #92400E; }
+.profile-section--my-exams .tx-m--warn { color: var(--ems-warning-800); }
 
 .profile-section--my-exams .tx-card-foot { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px; }
 .profile-section--my-exams .tx-codechip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 11px; background: var(--tx-paper); border: 1px dashed var(--tx-border); font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--tx-ink); }
@@ -248,17 +248,17 @@
 .tx-confirm-modal .modal-content { border: none; border-radius: 20px; overflow: hidden; }
 .tx-confirm-modal .modal-header { border: none; padding: 22px 24px 8px; }
 .tx-confirm-modal .modal-title { display: flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 700; color: #0B1437; }
-.tx-confirm-modal .tx-confirm-ic { width: 38px; height: 38px; border-radius: 11px; background: #FEECEC; color: #DC2626; display: grid; place-items: center; font-size: 16px; }
-.tx-confirm-modal .modal-body { padding: 6px 24px 18px; color: #6B7280; font-size: 14px; line-height: 1.55; }
+.tx-confirm-modal .tx-confirm-ic { width: 38px; height: 38px; border-radius: 11px; background: #FEECEC; color: var(--ems-danger); display: grid; place-items: center; font-size: 16px; }
+.tx-confirm-modal .modal-body { padding: 6px 24px 18px; color: var(--ems-gray-500); font-size: 14px; line-height: 1.55; }
 .tx-confirm-modal .tx-confirm-name { font-weight: 700; color: #0B1437; margin: 8px 0; font-size: 15px; }
-.tx-confirm-modal .tx-confirm-warn { display: flex; gap: 9px; background: #FEF6E7; border: 1px solid #FCE9C2; color: #92400E; border-radius: 12px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; }
+.tx-confirm-modal .tx-confirm-warn { display: flex; gap: 9px; background: #FEF6E7; border: 1px solid #FCE9C2; color: var(--ems-warning-800); border-radius: 12px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; }
 .tx-confirm-modal .modal-footer { border: none; padding: 0 24px 22px; gap: 10px; }
 .tx-confirm-modal .modal-footer form { margin: 0; }
 .tx-confirm-modal .tx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px; border: 1px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.tx-confirm-modal .tx-btn--ghost { background: #fff; color: #0B1437; border-color: #E5E8F0; }
+.tx-confirm-modal .tx-btn--ghost { background: var(--ems-neutral-0); color: #0B1437; border-color: #E5E8F0; }
 .tx-confirm-modal .tx-btn--ghost:hover { background: #F6F7FB; }
-.tx-confirm-modal .tx-btn--danger { background: #DC2626; color: #fff; }
-.tx-confirm-modal .tx-btn--danger:hover { background: #B91C1C; }
+.tx-confirm-modal .tx-btn--danger { background: var(--ems-danger); color: var(--ems-neutral-0); }
+.tx-confirm-modal .tx-btn--danger:hover { background: var(--ems-danger-strong); }
 
 /* ─────────────────────────── responsive ─────────────────────────── */
 @media (max-width: 1040px) { .profile-section--my-exams .tx-kpis { grid-template-columns: repeat(2, 1fr); } }
@@ -277,7 +277,7 @@
 /* ─────────────────────────── toast (body-level) ─────────────────────────── */
 .tx-toast {
   position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 1090;
-  background: #0B1437; color: #fff; padding: 12px 20px; border-radius: 13px;
+  background: #0B1437; color: var(--ems-neutral-0); padding: 12px 20px; border-radius: 13px;
   font-size: 14px; font-weight: 500; box-shadow: 0 24px 60px rgba(11,20,55,.30);
   display: flex; align-items: center; gap: 11px; max-width: 90vw;
   animation: txToastIn .2s ease;

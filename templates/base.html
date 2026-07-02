@@ -109,6 +109,9 @@
     <!-- Sənin JS-lərin -->
     <!-- Universal AJAX-safe init + event delegation (EMSReady / EMSDelegate).
          Section script-lərindən ƏVVƏL yüklənməlidir ki, global mövcud olsun. -->
+    {# Faza 6.3: EMSCore (getCookie/fetchJSON) — bütün custom JS-dən əvvəl. #}
+    <script src="{% static 'js/core/csrf.js' %}?v=20260702-1"></script>
+    <script src="{% static 'js/core/http.js' %}?v=20260702-1"></script>
     <script src="{% static 'js/ems_ajax_init.js' %}?v=20260604-ajaxinit"></script>
     <script src="{% static 'js/burgerMenu.js' %}?v=20260617-1"></script>
     <script src="{% static 'js/pagination.js' %}"></script>

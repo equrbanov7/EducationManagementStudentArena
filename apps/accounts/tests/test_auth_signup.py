@@ -90,7 +90,9 @@ class RegisterViewTest(TestCase):
         self.assertContains(response, "Hazırda heç bir təşkilata aid deyiləm")
 
     def test_register_wizard_js_binds_next_and_back_buttons(self):
-        source = Path("apps/accounts/static/accounts/js/register_wizard.js").read_text(encoding="utf-8")
+        # Refaktor 2026-07-02: monolit register_wizard.js paketə bölündü —
+        # next/back bağlama məntiqi indi register_wizard/submit.js-dədir.
+        source = Path("apps/accounts/static/accounts/js/register_wizard/submit.js").read_text(encoding="utf-8")
 
         self.assertIn('querySelectorAll("[data-wizard-next]")', source)
         self.assertIn('querySelectorAll("[data-wizard-back]")', source)

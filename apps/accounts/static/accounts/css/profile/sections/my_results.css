@@ -1,7 +1,7 @@
 /* --- Firuzəyi / Göy-yaşıl (Teal) Rəng Dəyişənləri --- */
 :root {
     --teal-primary: #0d9488;
-    --teal-hover: #0f766e;
+    --teal-hover: var(--ems-success-strong);
     --teal-light: #ccfbf1;
     --teal-border: #99f6e4;
 }
@@ -23,7 +23,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1.25rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--border-color);
     border-radius: 999px;
     color: var(--text-muted);
@@ -42,12 +42,12 @@
 .modern-tab.active {
     background: var(--teal-primary);
     border-color: var(--teal-primary);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 4px 10px rgba(13, 148, 136, 0.25);
 }
 
 .tab-count {
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     color: var(--text-muted);
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
@@ -56,12 +56,12 @@
 }
 
 .modern-tab:hover .tab-count {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--teal-primary);
 }
 
 .modern-tab.active .tab-count {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--teal-primary);
 }
 
@@ -80,19 +80,19 @@
     top: 50%;
     left: 0.85rem;
     transform: translateY(-50%);
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.9rem;
     pointer-events: none;
 }
 
 .profile-section--my-results .results-section-search-input-wrap input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 0.75rem;
     padding: 0.65rem 2.5rem 0.65rem 2.25rem;
     font-size: 0.92rem;
-    color: #0f172a;
-    background: #ffffff;
+    color: var(--ems-neutral-900);
+    background: var(--ems-neutral-0);
 }
 
 .profile-section--my-results .results-section-search-input-wrap input:focus {
@@ -112,7 +112,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     text-decoration: none;
     transition: all 0.2s ease;
 }
@@ -131,7 +131,7 @@
 
 /* --- Nəticə Kartı Dizaynı --- */
 .modern-result-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 1.5rem;
@@ -193,11 +193,11 @@
 }
 
 .kind-badge {
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     padding: 0.15rem 0.5rem;
     border-radius: 6px;
     font-weight: 600;
-    color: #475569;
+    color: var(--ems-neutral-600);
 }
 
 /* Status Badges */
@@ -217,9 +217,9 @@
     border: 1px solid transparent;
 }
 
-.status-submitted { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-.status-graded { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
-.status-pending { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+.status-submitted { background: var(--ems-primary-50); color: var(--ems-primary-700); border-color: var(--ems-primary-200); }
+.status-graded { background: var(--ems-success-100); color: #166534; border-color: #bbf7d0; }
+.status-pending { background: var(--ems-warning-100); color: #b45309; border-color: #fde68a; }
 
 /* Kart Body (Feedback & Score) */
 .result-card-body {
@@ -230,8 +230,8 @@
 }
 
 .result-score-box {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
+    background: var(--ems-neutral-50);
+    border: 1px dashed var(--ems-neutral-300);
     padding: 0.75rem 1rem;
     border-radius: 8px;
     display: flex;
@@ -255,9 +255,9 @@
 .score-percent-badge {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #2563eb;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
     border-radius: 999px;
     padding: 0.15rem 0.6rem;
     white-space: nowrap;
@@ -288,9 +288,9 @@
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-left: 3px solid #94a3b8;
+    background: var(--ems-neutral-50);
+    border: 1px dashed var(--ems-neutral-300);
+    border-left: 3px solid var(--ems-neutral-400);
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
 }
@@ -299,20 +299,20 @@
     font-size: 1rem;
     line-height: 1;
     margin-top: 0.15rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .result-pending-box p {
     margin: 0;
     line-height: 1.5;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--ems-neutral-600);
 }
 
 .result-pending-box--submitted {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    border-left-color: #3b82f6;
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    border-left-color: var(--ems-primary-500);
 }
 
 .result-pending-box--submitted .pending-icon,
@@ -323,12 +323,12 @@
 .result-pending-box--pending {
     background: #fffbeb;
     border-color: #fde68a;
-    border-left-color: #f59e0b;
+    border-left-color: var(--ems-warning-500);
 }
 
 .result-pending-box--pending .pending-icon,
 .result-pending-box--pending p {
-    color: #92400e;
+    color: var(--ems-warning-800);
 }
 
 /* Kart Footer (Düymə) */
@@ -342,7 +342,7 @@
 
 .btn-teal {
     background: var(--teal-primary);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     border: none;
     width: 100%;
     display: flex;
@@ -355,7 +355,7 @@
 
 .btn-teal:hover {
     background: var(--teal-hover);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
 }
 

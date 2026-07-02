@@ -12,8 +12,8 @@
 
 .project-review-table thead th {
     border: 0;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
     font-weight: 700;
     padding: 0.9rem 0.85rem;
 }
@@ -34,39 +34,39 @@
 }
 
 .project-review-status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .project-review-status-graded {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .project-review-status-rejected {
-    background: #fee2e2;
+    background: var(--ems-danger-100);
     color: #991b1b;
 }
 
 .project-review-view-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-success) 100%);
     border: 0;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
 }
 
 .project-review-view-btn:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     filter: brightness(0.95);
 }
 
 .project-review-modal-header {
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #10b981 100%);
+    background: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-primary-600) 55%, var(--ems-success) 100%);
     border: 0;
 }
 
 .project-review-grade-btn {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--ems-success) 0%, var(--ems-success-600) 100%);
     border: 0;
     font-weight: 600;
 }

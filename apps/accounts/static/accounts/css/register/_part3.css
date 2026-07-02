@@ -24,7 +24,7 @@
 }
 
 .register-global-errors:focus {
-    outline: 2px solid #ef4444;
+    outline: 2px solid var(--ems-danger-500);
     outline-offset: 2px;
 }
 
@@ -84,7 +84,7 @@
 
 /* Search input invalid state */
 #organizationSearchInput[aria-invalid="true"] {
-    border-color: #ef4444;
+    border-color: var(--ems-danger-500);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────

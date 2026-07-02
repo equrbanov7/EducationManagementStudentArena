@@ -14,7 +14,7 @@
     border-radius: 16px;
     background:
         radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 35%),
-        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        linear-gradient(180deg, #f8fbff 0%, var(--ems-neutral-0) 100%);
     text-align: left;
 }
 
@@ -29,7 +29,7 @@
     padding: 0.85rem 0.9rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.92);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
 }
 
 .register-selection-summary__label {
@@ -67,7 +67,7 @@
 
 .otp-timer-banner.is-expired {
     background: #fef2f2;
-    border-color: #fecaca;
+    border-color: var(--ems-danger-200);
     color: var(--ems-danger-strong);
 }
 
@@ -94,7 +94,7 @@
     padding: 18px;
     background:
         radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 32%),
-        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        linear-gradient(180deg, #f8fbff 0%, var(--ems-neutral-0) 100%);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -176,7 +176,7 @@
     margin-top: 16px;
     padding: 14px 16px;
     border-radius: 14px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid #dbe4ff;
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
@@ -221,11 +221,11 @@
     align-items: flex-start;
     justify-content: center;
     padding: 24px 24px 12px 24px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
     text-align: center;
     background:
         radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 32%),
-        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        linear-gradient(180deg, #f8fbff 0%, var(--ems-neutral-0) 100%);
 }
 
 .register-policy-modal__header > div {
@@ -276,7 +276,7 @@
     padding: 16px 18px;
     margin-bottom: 18px;
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid #dbe4ff;
 }
 
@@ -311,8 +311,8 @@
     align-items: flex-start;
     padding: 18px;
     border-radius: 18px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-gray-200);
     min-height: 100%;
 }
 
@@ -347,8 +347,8 @@
     justify-content: space-between;
     gap: 12px;
     padding: 16px 24px 24px;
-    border-top: 1px solid #e5e7eb;
-    background: #ffffff;
+    border-top: 1px solid var(--ems-gray-200);
+    background: var(--ems-neutral-0);
 }
 
 .register-submit-btn--modal,
@@ -437,7 +437,7 @@
     padding: 1.1rem 0.9rem;
     border: 2px solid var(--border-color, #dee2e6);
     border-radius: 0.75rem;
-    background: #fff;
+    background: var(--ems-neutral-0);
     cursor: pointer;
     text-align: center;
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
@@ -477,7 +477,7 @@
 
 .register-persona-card__desc {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     line-height: 1.4;
     display: -webkit-box;
     min-width: 0;

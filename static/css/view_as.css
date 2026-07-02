@@ -6,8 +6,8 @@
 
 :root {
     --view-as-readonly: #b45309;
-    --view-as-readonly-bg: linear-gradient(90deg, #fffbeb, #fef3c7);
-    --view-as-readonly-border: #f59e0b;
+    --view-as-readonly-bg: linear-gradient(90deg, #fffbeb, var(--ems-warning-100));
+    --view-as-readonly-border: var(--ems-warning-500);
     --view-as-full: #7c2d92;
     --view-as-full-bg: linear-gradient(90deg, #fdf4ff, #fae8ff);
     --view-as-full-border: #c026d3;
@@ -85,7 +85,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: #fff;
+    color: var(--ems-neutral-0);
     vertical-align: 1px;
 }
 .view-as-banner--readonly .view-as-banner__chip { background: var(--view-as-readonly-border); }
@@ -104,7 +104,7 @@
     padding: 7px 14px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -127,7 +127,7 @@
     gap: 10px;
     padding: 8px 10px 8px 16px;
     border-radius: 999px;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-size: 0.85rem;
     font-weight: 600;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
@@ -148,7 +148,7 @@
 }
 .view-as-pill--readonly .view-as-pill__exit { color: var(--view-as-readonly); }
 .view-as-pill--full .view-as-pill__exit { color: var(--view-as-full); }
-.view-as-pill__exit:hover { background: #fff; }
+.view-as-pill__exit:hover { background: var(--ems-neutral-0); }
 
 @keyframes viewAsPillIn {
     from { opacity: 0; transform: translate(-50%, 12px); }
@@ -200,8 +200,8 @@
     top: calc(100% + 10px);
     width: min(560px, calc(100vw - 32px));
     max-height: min(78vh, 560px);
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 18px;
     box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
     padding: 18px;
@@ -213,7 +213,7 @@
 .view-as-dropdown__header {
     font-size: 0.84rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--ems-neutral-600);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     display: flex;
@@ -233,8 +233,8 @@
     height: 34px;
     border: 0;
     border-radius: 10px;
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
     display: inline-grid;
     place-items: center;
     flex: 0 0 auto;
@@ -243,15 +243,15 @@
 }
 .view-as-dropdown__close:hover,
 .view-as-dropdown__close:focus-visible {
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
     outline: none;
 }
 .view-as-dropdown__close:active {
     transform: scale(0.96);
 }
 .view-as-dropdown__field { margin-bottom: 14px; }
-.view-as-dropdown__field .form-label { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+.view-as-dropdown__field .form-label { font-size: 0.78rem; font-weight: 600; color: var(--ems-neutral-500); margin-bottom: 4px; }
 
 .view-as-dropdown__filters {
     display: grid;
@@ -269,14 +269,14 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.82rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     pointer-events: none;
 }
 .view-as-dropdown__search input {
     width: 100%;
     min-height: 46px;
     padding-left: 40px;
-    border-color: #cbd5e1;
+    border-color: var(--ems-neutral-300);
     border-radius: 13px;
     font-size: 0.92rem;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
@@ -293,7 +293,7 @@
 .view-as-dropdown .bootstrap-single-select__toggle {
     min-height: 46px;
     padding: 0.55rem 0.85rem;
-    border-color: #cbd5e1;
+    border-color: var(--ems-neutral-300);
     border-radius: 13px;
     font-size: 0.9rem;
     width: 100%;
@@ -312,7 +312,7 @@
     min-height: 0;
     max-height: min(300px, 42vh);
     overflow-y: auto;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--ems-neutral-100);
     margin-top: 2px;
     padding-top: 6px;
 }
@@ -330,8 +330,8 @@
     transition: background 0.12s ease, border-color 0.12s ease;
 }
 .view-as-result:hover, .view-as-result:focus-visible {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--ems-neutral-50);
+    border-color: var(--ems-neutral-200);
     outline: none;
 }
 
@@ -351,7 +351,7 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    background: #e2e8f0;
+    background: var(--ems-neutral-200);
 }
 .view-as-result__initials {
     position: absolute;
@@ -389,7 +389,7 @@
     min-width: 0;
     font-size: 0.86rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -397,7 +397,7 @@
 .view-as-result__meta {
     display: block;
     font-size: 0.74rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -421,28 +421,28 @@
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
-.view-as-result__go { color: #cbd5e1; font-size: 0.7rem; flex-shrink: 0; transition: color 0.12s ease, transform 0.12s ease; }
+.view-as-result__go { color: var(--ems-neutral-300); font-size: 0.7rem; flex-shrink: 0; transition: color 0.12s ease, transform 0.12s ease; }
 .view-as-result:hover .view-as-result__go { color: #4338ca; transform: translateX(2px); }
 
 .view-as-dropdown__status {
     padding: 16px 8px;
     text-align: center;
     font-size: 0.82rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 .view-as-dropdown__more {
     width: 100%;
-    border: 1px dashed #cbd5e1;
-    background: #f8fafc;
+    border: 1px dashed var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
     border-radius: 10px;
     padding: 7px;
     margin-top: 6px;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--ems-neutral-600);
     cursor: pointer;
 }
-.view-as-dropdown__more:hover { background: #f1f5f9; }
+.view-as-dropdown__more:hover { background: var(--ems-neutral-100); }
 
 @media (max-width: 576px) {
     .view-as-banner__inner {

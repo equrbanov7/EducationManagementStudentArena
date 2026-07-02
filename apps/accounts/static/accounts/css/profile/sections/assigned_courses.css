@@ -1,7 +1,7 @@
 /* --- Zümrüd/Yaşıl (Emerald) Rəng Dəyişənləri --- */
 :root {
-    --emerald-primary: #10b981;
-    --emerald-hover: #059669;
+    --emerald-primary: var(--ems-success);
+    --emerald-hover: var(--ems-success-600);
     --emerald-light: #d1fae5;
     --emerald-border: #a7f3d0;
 }
@@ -24,18 +24,18 @@
     top: 50%;
     left: 0.85rem;
     transform: translateY(-50%);
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.9rem;
 }
 
 .assigned-courses-search-input-wrap input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 0.75rem;
     padding: 0.65rem 0.85rem 0.65rem 2.25rem;
     font-size: 0.92rem;
-    color: #0f172a;
-    background: #ffffff;
+    color: var(--ems-neutral-900);
+    background: var(--ems-neutral-0);
 }
 
 .assigned-courses-search-input-wrap input:focus {
@@ -57,7 +57,7 @@
     align-items: center;
     gap: 1.25rem;
     padding: 1.25rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     text-decoration: none;
@@ -89,7 +89,7 @@
 
 .modern-assigned-course-card:hover .assigned-course-icon {
     background: var(--emerald-primary);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 /* Kart Məzmunu */
@@ -121,7 +121,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #cbd5e1;
+    color: var(--ems-neutral-300);
     font-size: 1rem;
     transition: transform 0.2s ease, color 0.2s;
 }

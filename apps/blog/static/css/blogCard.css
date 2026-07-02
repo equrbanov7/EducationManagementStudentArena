@@ -99,7 +99,7 @@
 }
 
 .card-author:hover {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
 }
 
 .card-author i, .card-date i, .card-views i {
@@ -109,7 +109,7 @@
 
 .card-date,
 .card-views {
-    color: var(--text-light, #6b7280); /* Tarix rəngi */
+    color: var(--text-light, var(--ems-gray-500)); /* Tarix rəngi */
 }
 
 .card-views {
@@ -127,7 +127,7 @@
 
 .read-more:hover {
     text-decoration: underline;
-    color: #1e40af; /* Daha tünd rəng */
+    color: var(--ems-primary-800); /* Daha tünd rəng */
 }
 
 /* --- Mobile Responsive --- */

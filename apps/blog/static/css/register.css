@@ -13,7 +13,7 @@
 
 /* --- Qeydiyyat Kartı (Formanın olduğu əsas qutu) --- */
 .register-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-width: 450px; /* Qutunun maksimum eni */
     width: 100%;
     padding: 40px;
@@ -26,25 +26,25 @@
 /* --- Başlıq və Altyazı --- */
 .register-heading {
     font-size: 2rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 10px;
     font-weight: 700;
 }
 
 .register-subheading {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 1rem;
     margin-bottom: 30px;
 }
 
 /* --- Xəta Mesajları (Form-un yuxarısında) --- */
 .register-global-errors {
-    background-color: #fee2e2; /* Qırmızı fon */
+    background-color: var(--ems-danger-100); /* Qırmızı fon */
     color: #991b1b; /* Tünd qırmızı mətn */
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 25px;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     text-align: left;
     font-size: 0.95rem;
 }
@@ -64,7 +64,7 @@
 .register-form-field label {
     display: block; /* Etiketi yuxarıda göstər */
     font-size: 0.9rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -100,27 +100,27 @@
     transform: translateY(-50%);
     border: 0;
     background: transparent;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     cursor: pointer;
     padding: 4px;
     line-height: 1;
 }
 
 .input-visibility-toggle:hover {
-    color: #2563eb;
+    color: var(--ems-primary-600);
 }
 
 .register-form-field input[type="text"]:focus,
 .register-form-field input[type="email"]:focus,
 .register-form-field input[type="password"]:focus {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Yüngül focus kölgəsi */
-    background-color: #ffffff; /* Focus olanda ağ fon */
+    background-color: var(--ems-neutral-0); /* Focus olanda ağ fon */
 }
 
 /* Forma Sahəsinin Xətası */
 .register-field-error {
-    color: #ef4444; /* Qırmızı xəta mətni */
+    color: var(--ems-danger-500); /* Qırmızı xəta mətni */
     font-size: 0.85rem;
     margin-top: 5px;
 }
@@ -129,7 +129,7 @@
 .register-submit-btn {
     width: 100%;
     padding: 14px;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color, var(--ems-primary-600));
     color: white;
     border: none;
     border-radius: 8px;
@@ -141,7 +141,7 @@
 }
 
 .register-submit-btn:hover {
-    background-color: #1e40af; /* Hover rəngi */
+    background-color: var(--ems-primary-800); /* Hover rəngi */
     transform: translateY(-2px); /* Yüngül yuxarı qalxma */
 }
 
@@ -152,19 +152,19 @@
 /* --- Kartın Alt Mətni (Login linki) --- */
 .register-footer-text {
     margin-top: 30px;
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 0.95rem;
 }
 
 .register-footer-text a {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color, var(--ems-primary-600));
     font-weight: 600;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .register-footer-text a:hover {
-    color: #1e40af;
+    color: var(--ems-primary-800);
     text-decoration: underline;
 }
 
@@ -185,7 +185,7 @@
     gap: 1.5rem;
     margin: 1.5rem 0;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 .wizard-step {
@@ -205,8 +205,8 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #e5e7eb;
-    color: #6b7280;
+    background: var(--ems-gray-200);
+    color: var(--ems-gray-500);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,23 +216,23 @@
 }
 
 .wizard-step.active .wizard-step-number {
-    background: #2563eb;
+    background: var(--ems-primary-600);
     color: white;
 }
 
 .wizard-step.completed .wizard-step-number {
-    background: #10b981;
+    background: var(--ems-success);
     color: white;
 }
 
 .wizard-step-label {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-weight: 500;
 }
 
 .wizard-step.active .wizard-step-label {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-weight: 600;
 }
 
@@ -255,7 +255,7 @@
     border: 1px solid #d1d5db;
     border-radius: 8px;
     background: white;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.2s;
@@ -281,7 +281,7 @@
     margin-top: 8px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-height: 220px;
     overflow-y: auto;
 }
@@ -289,13 +289,13 @@
 .register-search-option {
     width: 100%;
     border: 0;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     text-align: left;
     padding: 10px 12px;
     cursor: pointer;
     font-size: 0.95rem;
-    color: #1f2937;
-    border-bottom: 1px solid #e5e7eb;
+    color: var(--ems-neutral-800);
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 .register-search-option:last-child {
@@ -304,13 +304,13 @@
 
 .register-search-option:hover,
 .register-search-option.is-selected {
-    background: #eff6ff;
+    background: var(--ems-primary-50);
 }
 
 .register-search-empty {
     padding: 10px 12px;
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
 }
 
 .register-card {
@@ -324,15 +324,15 @@
     padding: 12px 14px;
     margin: 0 0 18px;
     border-radius: 12px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-700);
 }
 
 .otp-timer-banner.is-expired {
     background: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
 }
 
 .otp-timer-banner__label {

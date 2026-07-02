@@ -5,15 +5,15 @@
 
 .project-results-btn,
 .project-submit-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-success) 100%);
     border: none;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
 }
 
 .project-results-btn:hover,
 .project-submit-btn:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     filter: brightness(0.95);
 }
 
@@ -27,8 +27,8 @@
 
 .project-history-header,
 .project-submit-header {
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #10b981 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-primary-600) 55%, var(--ems-success) 100%);
+    color: var(--ems-neutral-0);
     font-size: 1.05rem;
     font-weight: 700;
     padding: 1rem 1.25rem;
@@ -37,8 +37,8 @@
 
 .project-history-table thead th {
     border: 0;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
     font-weight: 700;
     padding: 0.9rem 0.85rem;
 }
@@ -59,18 +59,18 @@
 }
 
 .project-status-pending {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .project-status-graded {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .project-file-name {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 8px;
     padding: 0.5rem 0.75rem;
 }

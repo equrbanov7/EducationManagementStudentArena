@@ -1,7 +1,7 @@
 .answer-toggle-btn {
-    border: 1px solid #cbd5e1;
-    color: #2563eb;
-    background: #fff;
+    border: 1px solid var(--ems-neutral-300);
+    color: var(--ems-primary-600);
+    background: var(--ems-neutral-0);
     border-radius: 999px;
     width: 34px;
     height: 34px;
@@ -32,7 +32,7 @@
     border-radius: 14px;
     border: 1px solid #fcd34d;
     background: #fffbeb;
-    color: #92400e;
+    color: var(--ems-warning-800);
 }
 
 .review-window-banner strong {
@@ -40,7 +40,7 @@
 }
 
 .review-window-banner--locked {
-    border-color: #cbd5e1;
-    background: #f8fafc;
-    color: #475569;
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
 }

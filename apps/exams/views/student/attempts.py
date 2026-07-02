@@ -490,16 +490,9 @@ def take_exam(request, slug, attempt_id):
         and (request.POST.get("submit_action") or "").strip() == "autosave"
         and exam.exam_type != "coding"
     )
-    autosave_question_ids_for_fetch = None
-    if is_autosave_post:
-        raw_ids = request.POST.getlist("changed_questions[]") or request.POST.getlist("changed_questions")
-        parsed_ids = set()
-        for raw_id in raw_ids:
-            try:
-                parsed_ids.add(int(raw_id))
-            except (TypeError, ValueError):
-                continue
-        autosave_question_ids_for_fetch = parsed_ids
+    autosave_question_ids_for_fetch = (
+        _posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
+    )
 
     answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
 

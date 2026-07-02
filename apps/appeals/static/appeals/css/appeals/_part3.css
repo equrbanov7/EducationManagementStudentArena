@@ -6,7 +6,7 @@
 .appeal-review-panel .bootstrap-single-select__toggle {
     width: 100%;
     justify-content: space-between;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 
 /* ── Sual variantları / cavab analizi (review panelində) ── */
@@ -55,7 +55,7 @@
     padding: 9px 12px;
     border: 1px solid var(--appeal-border);
     border-radius: 11px;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 
 .appeal-option__icon {
@@ -95,7 +95,7 @@
 }
 
 .appeal-option__tag--correct {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .appeal-option.is-wrong .appeal-option__icon {
-    color: #ef4444;
+    color: var(--ems-danger-500);
 }
 
 /* ── 5 dəqiqəlik redaktə pəncərəsi qeydi ── */
@@ -127,7 +127,7 @@
     border-radius: 11px;
     background: #fffbeb;
     border: 1px solid #fcd34d;
-    color: #92400e;
+    color: var(--ems-warning-800);
     font-weight: 600;
     font-size: 0.85rem;
 }

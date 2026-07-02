@@ -1,9 +1,9 @@
 .paint-card {
     margin-top: 15px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 8px;
     padding: 12px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .paint-toolbar {
@@ -27,7 +27,7 @@
 }
 
 .paint-toolbar button.active {
-    background-color: #3b82f6;
+    background-color: var(--ems-primary-500);
     color: white;
 }
 

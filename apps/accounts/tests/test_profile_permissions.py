@@ -20,6 +20,26 @@ from apps.blog.models import Category, Post
 User = get_user_model()
 
 
+def _ensure_default_blog_categories():
+    """Sqlite sürətli dövrə (--no-migrations) üçün blog seed kateqoriyalarını təmin et.
+
+    CI migrasiyaları işlədir və 0002_seed_default_categories bunları onsuz da
+    yaradır — orada get_or_create no-op olur. Yerli --no-migrations rejimində
+    isə bu testlərin arxalandığı "Technology"/"Programming" ağacı yaranır.
+    """
+    from apps.blog.models import Category
+
+    technology, _ = Category.objects.get_or_create(
+        slug="technology",
+        defaults={"name": "Technology", "sort_order": 10, "show_in_navbar": True, "is_default": True},
+    )
+    Category.objects.get_or_create(
+        slug="programming",
+        defaults={"name": "Programming", "parent": technology, "sort_order": 10, "is_default": True},
+    )
+    return technology
+
+
 class ProfileAccessTest(TestCase):
     """Test profile view access control."""
 
@@ -370,6 +390,7 @@ class PublicProfileViewTest(TestCase):
         )
 
     def test_public_profile_parent_category_filter_includes_child_category_posts(self):
+        _ensure_default_blog_categories()
         programming = Category.objects.get(slug="programming")
         Post.objects.create(
             author=self.owner,

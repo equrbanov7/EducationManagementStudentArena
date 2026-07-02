@@ -1,12 +1,12 @@
 /* Rəng Palitrası və Qlobal Dəyişənlər */
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e40af;
-    --light-blue: #eff6ff;
-    --pale-blue: #bfdbfe;
+    --primary-blue: var(--ems-primary-600);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-50);
+    --pale-blue: var(--ems-primary-200);
     
-    --primary-green: #10b981;
-    --dark-green: #059669;
+    --primary-green: var(--ems-success);
+    --dark-green: var(--ems-success-600);
     --light-green: #ecfdf5;
 }
 
@@ -30,20 +30,20 @@
 .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
 .stat-card.blue { background-color: var(--light-blue); border-color: var(--pale-blue); }
 .stat-card.green { background-color: var(--light-green); border-color: #a7f3d0; }
-.stat-card.white { background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.stat-card.white { background-color: var(--ems-neutral-0); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 
 /* Düymələr */
 .btn-gradient-primary {
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
     border: none;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
     border-radius: 0.5rem;
     padding: 0.5rem 1.25rem;
     transition: filter 0.3s ease, transform 0.2s ease;
 }
 .btn-gradient-primary:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     filter: brightness(0.9);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
@@ -69,10 +69,10 @@
     box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
     margin-bottom: 1.25rem;
     overflow: hidden;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 .custom-accordion .accordion-button {
-    background-color: #fff;
+    background-color: var(--ems-neutral-0);
     padding: 1.25rem 1.5rem;
     font-weight: 600;
     color: var(--dark-blue);
@@ -89,26 +89,26 @@
 /* Cədvəl Dizaynı */
 .table-modern { margin-bottom: 0; }
 .table-modern thead th {
-    background-color: #f8fafc;
-    color: #64748b;
+    background-color: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--ems-neutral-200);
     padding: 1rem 1.5rem;
 }
 .table-modern tbody td {
     
     padding: 1rem 1.5rem;
     vertical-align: middle;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--ems-neutral-700);
+    border-bottom: 1px solid var(--ems-neutral-100);
 }
 .table-modern tbody .operation-column{
     display: flex;
 }
-.table-modern tbody tr:hover { background-color: #f8fafc; }
+.table-modern tbody tr:hover { background-color: var(--ems-neutral-50); }
 
 /* Status Badges */
 .badge-soft-blue { background-color: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--pale-blue); }
@@ -116,8 +116,8 @@
 
 .status-badge { padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 2rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; }
 .status-published { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
-.status-archived { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-.status-draft { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+.status-archived { background: var(--ems-warning-100); color: #b45309; border: 1px solid #fde68a; }
+.status-draft { background: var(--ems-neutral-100); color: var(--ems-neutral-600); border: 1px solid var(--ems-neutral-300); }
 
 /* Modals */
 .modal-modern .modal-content {
@@ -126,16 +126,16 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 .modal-modern .modal-header {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--ems-neutral-100);
     padding: 1.5rem 1.5rem 1rem;
     background: transparent;
 }
 .modal-modern .modal-footer {
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--ems-neutral-100);
     padding: 1rem 1.5rem;
 }
 .form-control-modern {
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
 }

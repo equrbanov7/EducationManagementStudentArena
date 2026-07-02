@@ -10,7 +10,7 @@
 }
 
 .appeal-question-card.is-active.is-marked {
-    border-color: #f59e0b;
+    border-color: var(--ems-warning-500);
 }
 
 .appeal-question-card.has-error {
@@ -57,12 +57,12 @@
 }
 
 .appeal-q-counter.is-short {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .appeal-q-counter.is-ok {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
@@ -136,9 +136,9 @@
     --appeal-ink: #172033;
     --appeal-muted: var(--ems-neutral-500);
     --appeal-border: var(--ems-neutral-200);
-    --appeal-surface: #ffffff;
+    --appeal-surface: var(--ems-neutral-0);
     --appeal-bg: transparent;
-    --appeal-amber: #f59e0b;
+    --appeal-amber: var(--ems-warning-500);
     --appeal-amber-soft: #fffbeb;
     padding: 0;
     max-width: none;
@@ -168,9 +168,9 @@
     --appeal-ink: #172033;
     --appeal-muted: var(--ems-neutral-500);
     --appeal-border: var(--ems-neutral-200);
-    --appeal-surface: #ffffff;
+    --appeal-surface: var(--ems-neutral-0);
     --appeal-bg: #f6f8fc;
-    --appeal-amber: #f59e0b;
+    --appeal-amber: var(--ems-warning-500);
     --appeal-amber-soft: #fffbeb;
 }
 
@@ -210,7 +210,7 @@
 .appeal-modal .appeal-question-card,
 .appeal-modal .appeal-note-card,
 .appeal-modal .appeal-summary-tile {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .appeal-modal .appeal-sticky-actions {
@@ -347,9 +347,9 @@
 }
 
 .appeal-stat-tile--pending { border-left-color: var(--ems-neutral-400); }
-.appeal-stat-tile--under_review { border-left-color: #f59e0b; }
+.appeal-stat-tile--under_review { border-left-color: var(--ems-warning-500); }
 .appeal-stat-tile--accepted { border-left-color: #22c55e; }
-.appeal-stat-tile--rejected { border-left-color: #ef4444; }
+.appeal-stat-tile--rejected { border-left-color: var(--ems-danger-500); }
 .appeal-stat-tile--partially_accepted { border-left-color: #06b6d4; }
 
 /* =========================================================================
@@ -377,7 +377,7 @@
 
 .appeal-question-card.has-error .appeal-review-panel {
     background: #fef2f2;
-    border-top-color: #fecaca;
+    border-top-color: var(--ems-danger-200);
 }
 
 .appeal-review-decisions-pill {
@@ -427,7 +427,7 @@
 
 .appeal-score-summary__item--next {
     border-color: #bbf7d0;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 80%);
+    background: linear-gradient(135deg, #f0fdf4 0%, var(--ems-neutral-0) 80%);
 }
 
 .appeal-score-summary__item--next strong {

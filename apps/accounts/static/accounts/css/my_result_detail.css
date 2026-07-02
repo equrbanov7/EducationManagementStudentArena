@@ -17,8 +17,8 @@
     justify-content: center;
     padding: 8px 16px;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 14px;
     font-weight: 700;
     white-space: nowrap;
@@ -33,12 +33,12 @@
 }
 
 .my-result-lab-answer + .my-result-lab-answer {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ems-neutral-200);
 }
 
 .my-result-lab-extra {
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
     padding: 0 32px 32px;
 }
 

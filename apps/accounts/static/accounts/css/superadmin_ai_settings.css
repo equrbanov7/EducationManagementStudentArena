@@ -46,8 +46,8 @@
 }
 
 .settings-card {
-    background: var(--bg-card, #fff);
-    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-card, var(--ems-neutral-0));
+    border: 1px solid var(--border-color, var(--ems-neutral-200));
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
@@ -88,7 +88,7 @@
 
 .ai-settings-container .form-group .hint {
     font-size: 0.8rem;
-    color: var(--text-secondary, #64748b);
+    color: var(--text-secondary, var(--ems-neutral-500));
     margin-top: 0.25rem;
 }
 
@@ -99,7 +99,7 @@
     border: 1px solid var(--border-color, #d1d5db);
     border-radius: 8px;
     font-size: 0.95rem;
-    background: var(--bg-input, #fff);
+    background: var(--bg-input, var(--ems-neutral-0));
     color: var(--text-primary);
 }
 
@@ -120,14 +120,14 @@
     border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 500;
-    background: var(--bg-input, #fff);
+    background: var(--bg-input, var(--ems-neutral-0));
     border-color: var(--border-color, #d1d5db);
     box-shadow: none;
 }
 
 .ai-settings-container .form-group .bootstrap-single-select__toggle:hover {
     border-color: #818cf8;
-    background: var(--bg-input, #fff);
+    background: var(--bg-input, var(--ems-neutral-0));
 }
 
 .ai-settings-container .form-group .bootstrap-single-select__toggle:focus,
@@ -174,7 +174,7 @@
     position: absolute;
     cursor: pointer;
     inset: 0;
-    background-color: #cbd5e1;
+    background-color: var(--ems-neutral-300);
     transition: 0.3s;
     border-radius: 26px;
 }
@@ -212,8 +212,8 @@
 }
 
 .info-box {
-    background: var(--bg-secondary, #f8fafc);
-    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary, var(--ems-neutral-50));
+    border: 1px solid var(--border-color, var(--ems-neutral-200));
     border-radius: 8px;
     padding: 1rem;
     text-align: center;
@@ -227,7 +227,7 @@
 
 .info-box .label {
     font-size: 0.8rem;
-    color: var(--text-secondary, #64748b);
+    color: var(--text-secondary, var(--ems-neutral-500));
     margin-top: 0.25rem;
 }
 
@@ -241,7 +241,7 @@
 .btn-ai-save {
     padding: 0.6rem 1.5rem;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff;
+    color: var(--ems-neutral-0);
     border: none;
     border-radius: 8px;
     font-size: 0.95rem;

@@ -7,11 +7,11 @@ body {
 .question-container {
     max-width: 800px;
     margin: 40px auto;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     padding: 40px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
 }
 
 .form-header {
@@ -29,7 +29,7 @@ body {
 }
 
 .subtitle {
-    color: #6b7280;
+    color: var(--ems-gray-500);
     margin-top: 5px;
     font-size: 14px;
 }
@@ -73,8 +73,8 @@ select {
 
 input:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: #3b82f6;
-    background-color: #fff;
+    border-color: var(--ems-primary-500);
+    background-color: var(--ems-neutral-0);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -112,14 +112,14 @@ textarea {
 
 .info-text {
     font-size: 13px;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     margin-bottom: 0;
 }
 
 .media-help {
     margin: 18px 0 10px;
     padding: 14px 16px;
-    border: 1px solid #dbeafe;
+    border: 1px solid var(--ems-primary-100);
     border-radius: 10px;
     background: #f8fbff;
 }
@@ -127,7 +127,7 @@ textarea {
 .media-help-title {
     display: block;
     margin-bottom: 6px;
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     font-size: 14px;
     font-weight: 700;
 }
@@ -135,7 +135,7 @@ textarea {
 .media-help-text,
 .help-text {
     margin: 0;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 13px;
     line-height: 1.5;
 }
@@ -146,7 +146,7 @@ textarea {
     border: 1px solid #fbbf24;
     border-radius: 10px;
     background: #fffbeb;
-    color: #92400e;
+    color: var(--ems-warning-800);
     font-size: 13px;
     font-weight: 600;
     line-height: 1.45;
@@ -160,9 +160,9 @@ textarea {
     min-height: 86px;
     margin: 8px 0 0;
     padding: 16px 18px;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 16px;
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--ems-primary-50) 0%, var(--ems-neutral-0) 100%);
     cursor: pointer;
     box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -185,9 +185,9 @@ textarea {
     width: 48px;
     height: 48px;
     border-radius: 14px;
-    border: 2px solid #bfdbfe;
-    background: #ffffff;
-    color: #64748b;
+    border: 2px solid var(--ems-primary-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-500);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -197,9 +197,9 @@ textarea {
 }
 
 .question-paint-toggle input[type="checkbox"]:checked + .question-paint-toggle__box {
-    border-color: #2563eb;
-    background: #2563eb;
-    color: #ffffff;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
     transform: scale(1.03);
 }
 
@@ -217,7 +217,7 @@ textarea {
 
 .question-paint-toggle__hint {
     display: block;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 13px;
     font-weight: 500;
     line-height: 1.45;
@@ -248,8 +248,8 @@ textarea {
 }
 
 .variant-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-gray-200);
     border-radius: 10px;
     padding: 15px;
     display: flex;
@@ -268,7 +268,7 @@ textarea {
 
 .variant-card-title {
     margin: 0;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     font-size: 14px;
     font-weight: 700;
 }
@@ -281,7 +281,7 @@ textarea {
 
 /* Input stilini karta uyğunlaşdırırıq */
 .variant-card input[type="text"] {
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid #d1d5db;
 }
 
@@ -325,13 +325,13 @@ textarea {
 
 /* Checkbox üzərinə gələndə */
 .custom-checkbox-container:hover input ~ .checkmark {
-    background-color: #e5e7eb;
+    background-color: var(--ems-gray-200);
 }
 
 /* Checkbox SEÇİLƏNDƏ (.checkmark stili) */
 .custom-checkbox-container input:checked ~ .checkmark {
-    background-color: #10b981; /* Yaşıl rəng */
-    border-color: #10b981;
+    background-color: var(--ems-success); /* Yaşıl rəng */
+    border-color: var(--ems-success);
 }
 
 /* Seçiləndə içindəki "tick" işarəsi */
@@ -361,7 +361,7 @@ textarea {
    Javascriptsiz ən sadə yol vizual olaraq mətnin rəngini dəyişməkdir. */
 
 .custom-checkbox-container input:checked ~ .label-text {
-    color: #059669; /* Tünd yaşıl mətn */
+    color: var(--ems-success-600); /* Tünd yaşıl mətn */
     font-weight: 700;
     content: "Düzgün cavab";
 }
@@ -379,13 +379,13 @@ textarea {
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
+    color: var(--ems-neutral-0);
     box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
 }
 
 .variant-add-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    background: linear-gradient(135deg, var(--ems-primary-700) 0%, #0284c7 100%);
 }
 
 .variant-remove-btn {
@@ -422,19 +422,19 @@ button:active {
 }
 
 .btn-save {
-    background-color: #3b82f6;
+    background-color: var(--ems-primary-500);
     color: white;
     flex: 1;
 }
-.btn-save:hover { background-color: #2563eb; }
+.btn-save:hover { background-color: var(--ems-primary-600); }
 
 .btn-save-add {
-    background-color: #eff6ff;
-    color: #3b82f6;
-    border: 1px solid #bfdbfe;
+    background-color: var(--ems-primary-50);
+    color: var(--ems-primary-500);
+    border: 1px solid var(--ems-primary-200);
     flex: 1;
 }
-.btn-save-add:hover { background-color: #dbeafe; }
+.btn-save-add:hover { background-color: var(--ems-primary-100); }
 
 .btn-cancel {
     display: flex;
@@ -442,9 +442,9 @@ button:active {
     justify-content: center;
     padding: 12px 24px;
     text-decoration: none;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     background: #f9fafb;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 8px;
     font-weight: 600;
 }
@@ -453,15 +453,15 @@ button:active {
 /* Xəta mesajları */
 .alert-error {
     background-color: #fef2f2;
-    color: #b91c1c;
+    color: var(--ems-danger-strong);
     padding: 15px;
     border-radius: 8px;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     margin-bottom: 20px;
 }
 
 .error-msg {
-    color: #dc2626;
+    color: var(--ems-danger);
     font-size: 12px;
     margin-top: 5px;
 }
@@ -503,7 +503,7 @@ button:active {
     display: inline-block;
     margin-top: 10px;
     padding: 8px 16px;
-    background: #ef4444;
+    background: var(--ems-danger-500);
     color: white;
     border: none;
     border-radius: 6px;
@@ -513,7 +513,7 @@ button:active {
 }
 
 .clear-media-btn:hover {
-    background: #dc2626;
+    background: var(--ems-danger);
 }
 
 .file-input-wrapper {
@@ -524,10 +524,10 @@ button:active {
     margin-top: 8px;
     padding: 8px 12px;
     background: #f0f9ff;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 6px;
     font-size: 14px;
-    color: #1e40af;
+    color: var(--ems-primary-800);
 }
 
 @media (max-width: 768px) {

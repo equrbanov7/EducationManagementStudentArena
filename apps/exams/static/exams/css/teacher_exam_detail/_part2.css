@@ -1,11 +1,11 @@
 
 .warning-btn {
-    background-color: #f59e0b;
+    background-color: var(--ems-warning-500);
     color: white;
     box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);
 }
 .warning-btn:hover {
-    background-color: #d97706;
+    background-color: var(--ems-warning-600);
     transform: translateY(-1px);
     color: white;
 }
@@ -16,7 +16,7 @@
     box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
 }
 .success-btn:hover {
-    background-color: #059669;
+    background-color: var(--ems-success-600);
     transform: translateY(-1px);
     color: white;
 }
@@ -27,20 +27,20 @@
     box-shadow: 0 2px 5px rgba(180, 83, 9, 0.28);
 }
 .archive-btn:hover {
-    background-color: #92400e;
+    background-color: var(--ems-warning-800);
     transform: translateY(-1px);
     color: white;
 }
 
 .unarchive-btn {
-    background-color: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
+    background-color: var(--ems-warning-100);
+    border-color: var(--ems-warning-500);
+    color: var(--ems-warning-800);
     box-shadow: 0 2px 5px rgba(245, 158, 11, 0.16);
 }
 .unarchive-btn:hover {
     background-color: #fde68a;
-    border-color: #d97706;
+    border-color: var(--ems-warning-600);
     color: #78350f;
     transform: translateY(-1px);
 }
@@ -53,11 +53,11 @@
 .outline-btn:hover {
     background-color: #f3f4f6;
     color: var(--ems-neutral-800);
-    border-color: #6b7280;
+    border-color: var(--ems-gray-500);
 }
 
 .danger-btn {
-    background-color: #ef4444;
+    background-color: var(--ems-danger-500);
     color: white;
     box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
 }
@@ -90,7 +90,7 @@
     margin-bottom: 25px;
     font-weight: 700;
     padding-bottom: 10px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 .question-list {
@@ -101,7 +101,7 @@
 
 .question-item {
     background-color: #fcfcfd;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 12px;
     padding: 20px 25px;
     margin-bottom: 15px;
@@ -140,7 +140,7 @@
     list-style: none;
     padding: 10px 0 0 0;
     margin-top: 15px;
-    border-top: 1px dashed #e5e7eb;
+    border-top: 1px dashed var(--ems-gray-200);
     margin-left: 25px; /* Sual mətnindən bir az içəri */
 }
 
@@ -195,7 +195,7 @@
     padding: 0 18px;
     border: 1px solid var(--ems-neutral-300);
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-700);
     font-weight: 700;
     transition: all 0.2s ease;
@@ -226,7 +226,7 @@
     padding: 50px 20px;
     background: #f9fafb;
     border-radius: 12px;
-    border: 2px dashed #e5e7eb;
+    border: 2px dashed var(--ems-gray-200);
     margin-top: 20px;
 }
 
@@ -237,7 +237,7 @@
 }
 
 .empty-state-questions p {
-    color: #6b7280;
+    color: var(--ems-gray-500);
     font-size: 1rem;
     margin-bottom: 25px;
 }

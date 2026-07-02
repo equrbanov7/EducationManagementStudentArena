@@ -639,3 +639,38 @@ protections at Cloudflare can be bypassed entirely.
    `curl -m 5 https://<origin-ip>/ -k` from outside must time out or be
    refused, while https://emsarena.com works through Cloudflare.
 
+
+
+## Backup RESTORE runbook (Faza 7, audit 2026-07-02)
+
+Backuplar `postgres-backup` servisi ilə gündəlik `./backups/postgres/` altına
+yazılır (`-Z6 --blobs`, custom format deyil — plain `pg_dump | gzip`).
+**Aylıq drill:** aşağıdakı addımları staging-də icra edib nəticəni qeyd edin —
+yoxlanılmamış backup = backup deyil.
+
+```bash
+# 1) Ən son dump-ı seç
+LATEST=$(ls -t backups/postgres/daily/*.sql.gz | head -1); echo "$LATEST"
+
+# 2) Boş bərpa bazası yarat (mövcud produksiyaya TOXUNMA)
+docker exec -i emsarena-postgres createdb -U "$POSTGRES_USER" emsarena_restore_test
+
+# 3) Bərpa et
+gunzip -c "$LATEST" | docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d emsarena_restore_test
+
+# 4) Doğrulama sorğuları (say məntiqi produksiya ilə eyni miqyasda olmalıdır)
+docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d emsarena_restore_test -c \
+  "SELECT (SELECT count(*) FROM exams_examattempt)  AS attempts,
+          (SELECT count(*) FROM exams_examanswer)   AS answers,
+          (SELECT count(*) FROM auth_user)          AS users,
+          (SELECT count(*) FROM organizations_organization) AS orgs;"
+
+# 5) Təmizlik
+docker exec -i emsarena-postgres dropdb -U "$POSTGRES_USER" emsarena_restore_test
+```
+
+Tam fəlakət ssenarisində (host itirilib): yeni hostda repo + `.env` bərpa et →
+`docker compose -f docker-compose.prod.yml up -d postgres` → yuxarıdakı 3-cü
+addımı ƏSAS bazaya (`$POSTGRES_DB`) tətbiq et → sonra qalan stack-i qaldır.
+**Off-site nüsxə hələ konfiqurasiya olunmayıb** (audit K-tapıntısı): `./backups/`
+qovluğunu S3/B2-yə sync edən cron əlavə olunana qədər host itkisi = backup itkisi.

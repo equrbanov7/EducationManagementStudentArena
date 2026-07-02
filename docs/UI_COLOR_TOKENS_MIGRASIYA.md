@@ -9,8 +9,17 @@
   host_lobby_shell, test_question_bank, coding_exam, take_exam, teacher_questions_bank,
   teacher_exam_detail, exam_result, teacher_check_attempt, appeals, register, navbar,
   ai_assistant, blog/profile.
-- ⬜ Qalan CSS faylları (bulk_workbench_extras, teacher_exam_statistics və s.) —
-  eyni sed pattern ilə tədricən.
+- ✅ **2026-07-02 (Faza 6.1-6.2, audit icra planı):** qalan BÜTÜN uyğun CSS
+  faylları miqrasiya edildi — **+2723 hex → var(--ems-*)** (155 fayl, skript:
+  sərhəd-təhlükəsiz regex, `url(` sətirlərinə toxunulmur). design-tokens.css-ə
+  yeni token ailələri əlavə olundu: `--ems-gray-200/500` (legacy gray),
+  `--ems-warning-100/500/600/800` (amber), `--ems-danger-100/200/500`,
+  `--ems-success-100/600`. ✅ HƏLL OLUNDU (eyni gün): `errors/*.html` (5)
+  + `admin/verify_otp.html` şablonlarına design-tokens linki əlavə edildi və
+  `error-pages.css` (+19) / `admin_otp.css` (+2) də miqrasiya olundu — artıq
+  İSTİSNA YOXDUR.
+- ⬜ Qalan iş: `url()`-daxili/istisna fayllardakı ~18 map-lənmiş hex + aşağı
+  tezlikli legacy hex-lər (#eee/#333/#555...) — semantik qərar tələb edir.
 
 
 ## Problem
@@ -64,3 +73,25 @@ sed -i 's/#2563eb/var(--ems-primary-600)/gI; s/#1d4ed8/var(--ems-primary-700)/gI
 Sonra brauzer/regress smoke. **Kütləvi avtomatik əvəzləmə nəzarətsiz
 edilməməlidir** — hər fayl ayrıca yoxlanmalıdır (bəzi hex-lər gradient/rgba
 kontekstində fərqli davrana bilər).
+
+
+## İnline style → klass miqrasiyası (Faza 6.4, 2026-07-02)
+
+**İnventar:** cəmi 501 `style=""` atributu, bunun **165-i email şablonlarındadır
+və QANUNİDİR** (email klientləri xarici/embedded CSS-i dəstəkləmir — inline
+industry-standarddır; bu fayllar hədəfdən ÇIXARILIB). **Browser hədəfi: 336.**
+
+**Qaydalar:**
+1. Email şablonlarına (`*email*/`, `*mail*`) toxunulmur.
+2. Dinamik dəyərlər (`style="width:{{ x }}%"`) inline qalır — bu, düzgün pattern-dir.
+3. `style="display:none"` JS-toggle ilə işləyirsə klassa keçid JS-lə birgə edilməlidir
+   (kor-koranə `hidden` atributuna keçmək `el.style.display=""` açılışını sındırar).
+4. Statik dekorativ atributlar səhifənin ÖZ CSS faylına semantik klass kimi köçür,
+   rənglər `var(--ems-*)` tokenləri ilə.
+
+**Sprint-1 ✅:** `teacher_live_session_detail.html` — 22 atributdan 20-si klassa
+(`sd-ai-panel`, `sd-charts-grid`, `sd-num--correct/incorrect/muted`,
+`sd-bar__text--green/blue/red`, `sd-col-*` və s.), 2 dinamik width inline (düzgün).
+
+**Növbəti hədəflər (browser, çoxdan-aza):** `teacher_exam_statistics.html` (19),
+`_create_exam_modal_form.html` (16), `exam_live_monitor.html` (15) → eyni pattern.

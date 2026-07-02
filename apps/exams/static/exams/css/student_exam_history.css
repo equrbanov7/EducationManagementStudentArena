@@ -1,10 +1,10 @@
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e40af;
-    --light-blue: #eff6ff;
-    --pale-blue: #bfdbfe;
-    --primary-green: #10b981;
-    --dark-green: #059669;
+    --primary-blue: var(--ems-primary-600);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-50);
+    --pale-blue: var(--ems-primary-200);
+    --primary-green: var(--ems-success);
+    --dark-green: var(--ems-success-600);
     --light-green: #ecfdf5;
 }
 
@@ -38,7 +38,7 @@
 .stat-card.blue { background-color: var(--light-blue); }
 .stat-card.green { background-color: var(--light-green); }
 .stat-card.white {
-    background-color: #ffffff;
+    background-color: var(--ems-neutral-0);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
@@ -62,28 +62,28 @@
 
 .table-modern-header {
     background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
     padding: 1rem 1.5rem;
     border-radius: 1rem 1rem 0 0;
 }
 
 .table-modern thead th {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--ems-neutral-200);
     padding: 1rem;
 }
 
 .table-modern tbody td {
     padding: 1rem;
     vertical-align: middle;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--ems-neutral-700);
+    border-bottom: 1px solid var(--ems-neutral-100);
 }
 
 .table-modern tbody tr:hover {
@@ -101,7 +101,7 @@
 }
 
 .status-pending {
-    background: #fef3c7;
+    background: var(--ems-warning-100);
     color: #b45309;
 }
 
@@ -117,9 +117,9 @@
 }
 
 .status-expired {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+    border: 1px solid var(--ems-danger-200);
 }
 
 .empty-state-card {
