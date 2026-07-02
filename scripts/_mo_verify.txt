@@ -1,5 +1,0 @@
-az:  col_time=OK(Vaxt)  search=OK(Axtar)  btn_resume=OK(Bərpa et)  delete_confirm=OK(Silməni təsdiqlə)  save_grade=OK(Qiyməti yadda saxla)
-en:  col_time=OK(Time)  search=OK(Search)  btn_resume=OK(Resume)  delete_confirm=OK(Confirm deletion)  save_grade=OK(Save grade)
-ru:  col_time=OK(Время)  search=OK(Поиск)  btn_resume=OK(Восстановить)  delete_confirm=OK(Подтвердить удаление)  save_grade=OK(Сохранить оценку)
-tr:  col_time=OK(Zaman)  search=OK(Ara)  btn_resume=OK(Geri yükle)  delete_confirm=OK(Silmeyi onayla)  save_grade=OK(Notu kaydet)
-ALL_OK=True

@@ -2,7 +2,7 @@
 # EMS ARENA - BASE DEPENDENCIES
 # ═══════════════════════════════════════════════════════════════════════════
 # Core dependencies shared across all environments
-# Python: 3.11.6 | Django: 5.2.15
+# Python: 3.11 / 3.12 | Django: 5.2.15
 # ═══════════════════════════════════════════════════════════════════════════
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -22,7 +22,6 @@ dj-database-url==2.0.0
 # ═══════════════════════════════════════════════════════════════════════════
 # ENVIRONMENT VARIABLES
 # ═══════════════════════════════════════════════════════════════════════════
-python-decouple==3.8
 python-dotenv==1.2.2
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -83,11 +82,6 @@ django-ratelimit==4.1.0
 django-csp==4.0
 
 # ═══════════════════════════════════════════════════════════════════════════
-# SEARCH FUNCTIONALITY
-# ═══════════════════════════════════════════════════════════════════════════
-django-haystack==3.3.0
-
-# ═══════════════════════════════════════════════════════════════════════════
 # DOCUMENT PROCESSING
 # ═══════════════════════════════════════════════════════════════════════════
 python-docx==1.2.0
@@ -101,11 +95,9 @@ PyMuPDF==1.24.14       # PDF highlight (annotation) oxuması — mark olunmuş v
 qrcode==8.2
 
 # ═══════════════════════════════════════════════════════════════════════════
-# HTTP & WEB SCRAPING
+# HTTP CLIENT (Gemini/Piston inteqrasiyaları)
 # ═══════════════════════════════════════════════════════════════════════════
 requests==2.33.0
-beautifulsoup4==4.12.3
-soupsieve==2.6
 urllib3==2.7.0
 idna==3.15
 charset-normalizer==3.4.4
@@ -119,12 +111,12 @@ six==1.17.0
 packaging==25.0
 
 # ═══════════════════════════════════════════════════════════════════════════
-# SERIALIZATION & PERFORMANCE (Optional but included)
+# SERIALIZATION
+# msgpack channels_redis-in MƏCBURİ asılılığıdır (channel layer mesaj
+# serializasiyası). ujson/cbor2/py-ubjson silindi — yalnız autobahn-ın
+# istifadə olunmayan WAMP extras-ları idi (Faza 3, audit 2026-07-02).
 # ═══════════════════════════════════════════════════════════════════════════
 msgpack==1.2.1
-ujson==5.13.0
-cbor2==5.9.0
-py-ubjson==0.16.1
 
 # ═══════════════════════════════════════════════════════════════════════════
 # MONITORING & METRICS

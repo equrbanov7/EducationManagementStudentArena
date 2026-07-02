@@ -1,4 +1,0 @@
-az: Növ|Təşkilat tapılmadı.|Bərpa et
-en: Type|No organizations found.|Resume
-ru: Тип|Организации не найдены.|Восстановить
-tr: Tür|Organizasyon bulunamadı.|Geri yükle

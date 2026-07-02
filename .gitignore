@@ -159,3 +159,10 @@ security_report.html
 .zshrc
 actionlint
 .claude/worktrees/admiring-jones
+
+# =========================
+# Faza 2 (audit 2026-07-02) əlavələri
+# =========================
+.coverage*
+~$*
+scripts/_*.txt
