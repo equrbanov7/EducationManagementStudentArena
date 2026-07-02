@@ -5,7 +5,8 @@
 #
 # Required environment variables (set in .env or export before running):
 #   SECRET_KEY, DATABASE_URL (or POSTGRES_* vars), REDIS_PASSWORD,
-#   ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SITE_URL
+#   ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SITE_URL, GRAFANA_ADMIN_PASSWORD
+#   Alerting (e-mail): ALERT_EMAIL_TO (+ BREVO_SMTP_LOGIN / BREVO_SMTP_KEY)
 #
 # TLS / SSL Architecture:
 #   Cloudflare can connect to the origin over plain HTTP (Flexible) or HTTPS
@@ -19,7 +20,99 @@
 #   - Redis is password-protected via REDIS_PASSWORD.
 #   - PostgreSQL is NOT exposed externally.
 #   - Only nginx (ports 80/443) is accessible from outside.
+#
+# Faza 1 (audit 2026-07-02):
+#   - Hər serviste log rotasiyası (json-file 10m×3) və resurs limitləri
+#     (env ilə tənzimlənə bilər — deploy.resources.limits).
+#   - app healthcheck TCP əvəzinə real HTTP /health/ yoxlaması.
+#   - celery_beat servisi (CELERY_BEAT_SCHEDULE üçün) əlavə olundu.
+#   - node_exporter + alertmanager + Prometheus alert qaydaları əlavə olundu.
+#   - app/celery env dublikatı x-app-env anchor-una yığıldı.
 # ═══════════════════════════════════════════════════════════════════════════
+
+# ─── Ortaq log rotasiyası: bütün servislərə tətbiq olunur ───────────────────
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ─── Ortaq build tərifi (app / celery_worker / celery_beat eyni image) ──────
+x-app-build: &app-build
+  context: .
+  dockerfile: docker/Dockerfile.prod
+  args:
+    APT_PRIMARY_MIRROR: ${APT_PRIMARY_MIRROR:-https://deb.debian.org/debian}
+    APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-https://deb.debian.org/debian-security}
+    APT_FALLBACK_MIRROR: ${APT_FALLBACK_MIRROR:-https://ftp.debian.org/debian}
+    APT_FALLBACK_SECURITY_MIRROR: ${APT_FALLBACK_SECURITY_MIRROR:-https://security.debian.org/debian-security}
+
+# ─── app + celery_worker + celery_beat üçün ORTAQ mühit dəyişənləri ─────────
+# Servis-spesifik dəyişənlər (Daphne, admin, cookie, Piston client və s.)
+# aşağıda hər servisin öz environment blokunda əlavə olunur.
+x-app-env: &app-env
+  DJANGO_SETTINGS_MODULE: config.settings.production
+  APP_ENV: ${APP_ENV:-production}
+  APP_VERSION: ${APP_VERSION:-unknown}
+  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+  DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
+  REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+  SECRET_KEY: ${SECRET_KEY}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+  SITE_URL: ${SITE_URL}
+  EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
+  EMAIL_PORT: ${EMAIL_PORT:-587}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+  BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
+  BREVO_EMAIL: ${BREVO_EMAIL:-}
+  BREVO_FROM_EMAIL: ${BREVO_FROM_EMAIL:-}
+  BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
+  BREVO_API_KEY: ${BREVO_API_KEY:-}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GEMINI_MODEL: ${GEMINI_MODEL:-}
+  GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
+  AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
+  AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
+  EXAM_AUTOSAVE_INTERVAL_MS: ${EXAM_AUTOSAVE_INTERVAL_MS:-300000}
+  EXAM_AUTOSAVE_JITTER_MS: ${EXAM_AUTOSAVE_JITTER_MS:-60000}
+  EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED: ${EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED:-false}
+  EXAM_ANSWER_FILE_MAX_SIZE_MB: ${EXAM_ANSWER_FILE_MAX_SIZE_MB:-5}
+  EXAM_ANSWER_MAX_FILES_PER_QUESTION: ${EXAM_ANSWER_MAX_FILES_PER_QUESTION:-3}
+  EXAM_PAINT_MAX_BASE64_CHARS: ${EXAM_PAINT_MAX_BASE64_CHARS:-1500000}
+  EXAM_START_GLOBAL_CONCURRENCY: ${EXAM_START_GLOBAL_CONCURRENCY:-12}
+  EXAM_START_PER_EXAM_CONCURRENCY: ${EXAM_START_PER_EXAM_CONCURRENCY:-6}
+  EXAM_START_WAIT_TIMEOUT_SECONDS: ${EXAM_START_WAIT_TIMEOUT_SECONDS:-30}
+  EXAM_START_POLL_INTERVAL_SECONDS: ${EXAM_START_POLL_INTERVAL_SECONDS:-0.05}
+  EXAM_START_LOCK_LEASE_SECONDS: ${EXAM_START_LOCK_LEASE_SECONDS:-120}
+  EXAM_RANDOMIZER_USAGE_CACHE_SECONDS: ${EXAM_RANDOMIZER_USAGE_CACHE_SECONDS:-30}
+  EXAM_PDF_OCR_ENABLED: ${EXAM_PDF_OCR_ENABLED:-true}
+  EXAM_PDF_OCR_LANG: ${EXAM_PDF_OCR_LANG:-aze}
+  EXAM_PDF_OCR_DPI: ${EXAM_PDF_OCR_DPI:-160}
+  EXAM_PDF_OCR_MAX_PAGES: ${EXAM_PDF_OCR_MAX_PAGES:-90}
+  EXAM_PDF_OCR_HIGHLIGHT: ${EXAM_PDF_OCR_HIGHLIGHT:-true}
+  EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO: ${EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO:-0.08}
+  REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT: ${REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT:-8}
+  HEALTH_CHECK_CACHE_SECONDS: ${HEALTH_CHECK_CACHE_SECONDS:-2}
+  METRICS_ALLOW_ANONYMOUS: ${METRICS_ALLOW_ANONYMOUS:-true}
+  OBJECT_STORAGE_ENABLED: ${OBJECT_STORAGE_ENABLED:-false}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
+  AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
+  AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
+  AWS_S3_CUSTOM_DOMAIN: ${AWS_S3_CUSTOM_DOMAIN:-}
+  AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
+  AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
+  AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
+  SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
+  # Heavy exam features stay off in production (also hard-coded in
+  # config/settings/production.py — kept here for documentation parity).
+  PRACTICAL_EXAMS_ENABLED: "false"
+  EXAM_SUPERVISION_ENABLED: "false"
+  CODING_EXECUTION_BACKEND: "disabled"
 
 services:
 
@@ -41,6 +134,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${POSTGRES_CPU_LIMIT:-2.0}"
+          memory: ${POSTGRES_MEM_LIMIT:-2048M}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -74,6 +173,20 @@ services:
     volumes:
       - ./backups/postgres:/backups
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${BACKUP_CPU_LIMIT:-0.5}"
+          memory: ${BACKUP_MEM_LIMIT:-256M}
+    # Son backup uğursuzdursa 200 qaytarmır → konteyner unhealthy görünür və
+    # TargetDown/monitorinq üzərindən görünən siqnal yaranır.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 2m
     networks:
       - emsarena-network
 
@@ -101,6 +214,12 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PGBOUNCER_CPU_LIMIT:-0.5}"
+          memory: ${PGBOUNCER_MEM_LIMIT:-256M}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -110,11 +229,13 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Redis — channel layer (DB 0) and cache (DB 1)
+  # Redis — channel layer (DB 0), cache (DB 1) and Celery broker (DB 2)
   # No external port binding; accessible only within emsarena-network.
   # Password enforced via --requirepass; REDISCLI_AUTH is set so the
   # health check can authenticate without passing the password on the
   # command line (which would be visible in process listings).
+  # NOTE: maxmemory QƏSDƏN təyin edilməyib — Celery broker (DB 2) üçün
+  # eviction təhlükəlidir. Host yaddaşı HostMemoryHigh alerti ilə izlənir.
   # ─────────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -130,6 +251,12 @@ services:
       - --requirepass
       - ${REDIS_PASSWORD}
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${REDIS_CPU_LIMIT:-0.5}"
+          memory: ${REDIS_MEM_LIMIT:-512M}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -145,30 +272,15 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   app:
     image: ${APP_IMAGE:-emsarena-prod:latest}
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.prod
-      args:
-        APT_PRIMARY_MIRROR: ${APT_PRIMARY_MIRROR:-https://deb.debian.org/debian}
-        APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-https://deb.debian.org/debian-security}
-        APT_FALLBACK_MIRROR: ${APT_FALLBACK_MIRROR:-https://ftp.debian.org/debian}
-        APT_FALLBACK_SECURITY_MIRROR: ${APT_FALLBACK_SECURITY_MIRROR:-https://security.debian.org/debian-security}
+    build: *app-build
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.production
+      <<: *app-env
       RUN_RELEASE_ON_START: ${RUN_RELEASE_ON_START:-true}
-      APP_ENV: ${APP_ENV:-production}
-      APP_VERSION: ${APP_VERSION:-unknown}
       ASGI_THREADS: ${ASGI_THREADS:-8}
       DAPHNE_HTTP_TIMEOUT: ${DAPHNE_HTTP_TIMEOUT:-900}
       DAPHNE_APPLICATION_CLOSE_TIMEOUT: ${DAPHNE_APPLICATION_CLOSE_TIMEOUT:-120}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-multiproc
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
-      DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
-      REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
-      SECRET_KEY: ${SECRET_KEY}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
-      SITE_URL: ${SITE_URL}
       ADMIN_URL_PREFIX: ${ADMIN_URL_PREFIX:-manage/}
       ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS}
       ADMIN_LOGIN_RATE_LIMIT: ${ADMIN_LOGIN_RATE_LIMIT:-3/15m}
@@ -178,65 +290,14 @@ services:
       SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-True}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-True}
       CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-True}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
-      BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
-      BREVO_EMAIL: ${BREVO_EMAIL:-}
-      BREVO_FROM_EMAIL: ${BREVO_FROM_EMAIL:-}
-      BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
-      BREVO_API_KEY: ${BREVO_API_KEY:-}
-      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-}
-      GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
-      AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
-      AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
-      EXAM_AUTOSAVE_INTERVAL_MS: ${EXAM_AUTOSAVE_INTERVAL_MS:-300000}
-      EXAM_AUTOSAVE_JITTER_MS: ${EXAM_AUTOSAVE_JITTER_MS:-60000}
-      EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED: ${EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED:-false}
-      EXAM_ANSWER_FILE_MAX_SIZE_MB: ${EXAM_ANSWER_FILE_MAX_SIZE_MB:-5}
-      EXAM_ANSWER_MAX_FILES_PER_QUESTION: ${EXAM_ANSWER_MAX_FILES_PER_QUESTION:-3}
-      EXAM_PAINT_MAX_BASE64_CHARS: ${EXAM_PAINT_MAX_BASE64_CHARS:-1500000}
-      EXAM_START_GLOBAL_CONCURRENCY: ${EXAM_START_GLOBAL_CONCURRENCY:-12}
-      EXAM_START_PER_EXAM_CONCURRENCY: ${EXAM_START_PER_EXAM_CONCURRENCY:-6}
-      EXAM_START_WAIT_TIMEOUT_SECONDS: ${EXAM_START_WAIT_TIMEOUT_SECONDS:-30}
-      EXAM_START_POLL_INTERVAL_SECONDS: ${EXAM_START_POLL_INTERVAL_SECONDS:-0.05}
-      EXAM_START_LOCK_LEASE_SECONDS: ${EXAM_START_LOCK_LEASE_SECONDS:-120}
-      EXAM_RANDOMIZER_USAGE_CACHE_SECONDS: ${EXAM_RANDOMIZER_USAGE_CACHE_SECONDS:-30}
-      EXAM_PDF_OCR_ENABLED: ${EXAM_PDF_OCR_ENABLED:-true}
-      EXAM_PDF_OCR_LANG: ${EXAM_PDF_OCR_LANG:-aze}
-      EXAM_PDF_OCR_DPI: ${EXAM_PDF_OCR_DPI:-160}
-      EXAM_PDF_OCR_MAX_PAGES: ${EXAM_PDF_OCR_MAX_PAGES:-90}
-      EXAM_PDF_OCR_HIGHLIGHT: ${EXAM_PDF_OCR_HIGHLIGHT:-true}
-      EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO: ${EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO:-0.08}
-      REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT: ${REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT:-8}
-      HEALTH_CHECK_CACHE_SECONDS: ${HEALTH_CHECK_CACHE_SECONDS:-2}
-      METRICS_ALLOW_ANONYMOUS: ${METRICS_ALLOW_ANONYMOUS:-true}
-      OBJECT_STORAGE_ENABLED: ${OBJECT_STORAGE_ENABLED:-false}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
-      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
-      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
-      AWS_S3_CUSTOM_DOMAIN: ${AWS_S3_CUSTOM_DOMAIN:-}
-      AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
-      AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
-      AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
       AUTH_OTP_EXPIRY_SECONDS: ${AUTH_OTP_EXPIRY_SECONDS:-300}
       AUTH_OTP_RESEND_COOLDOWN_SECONDS: ${AUTH_OTP_RESEND_COOLDOWN_SECONDS:-60}
       AUTH_OTP_MAX_ATTEMPTS: ${AUTH_OTP_MAX_ATTEMPTS:-5}
       AUTH_OTP_MAX_SENDS_PER_HOUR: ${AUTH_OTP_MAX_SENDS_PER_HOUR:-5}
-      SENTRY_DSN: ${SENTRY_DSN:-}
-      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
-      SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
       MEDIA_ACCEL_REDIRECT_URL: /internal_media
-      PRACTICAL_EXAMS_ENABLED: "false"
-      EXAM_SUPERVISION_ENABLED: "false"
       # Practical/coding exams are disabled in production. Keep the settings
       # here for future controlled re-enable, but do not start Piston by
       # default or make app health depend on it.
-      CODING_EXECUTION_BACKEND: "disabled"
       CODING_PISTON_URL: ${CODING_PISTON_URL:-http://piston:2000/api/v2}
       CODING_PISTON_AUTH_TOKEN: ${CODING_PISTON_AUTH_TOKEN:-}
       CODING_RUN_RATE_LIMIT_PER_MINUTE: ${CODING_RUN_RATE_LIMIT_PER_MINUTE:-600}
@@ -251,10 +312,26 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${APP_CPU_LIMIT:-1.5}"
+          memory: ${APP_MEM_LIMIT:-1536M}
+    # Real HTTP yoxlaması: /health/ DB-ni yoxlayır (Redis problemi "degraded"
+    # 207 qaytarır və sağlam sayılır). X-Forwarded-Proto: https başlığı
+    # SECURE_SSL_REDIRECT yönləndirməsinin qarşısını alır (nginx /metrics/
+    # scrape-i ilə eyni pattern). ALLOWED_HOSTS "localhost" daxil etməlidir —
+    # server .env-də ALLOWED_HOSTS siyahısına localhost,127.0.0.1 daxil edin.
     healthcheck:
       test:
-        - "CMD-SHELL"
-        - "python -c \"import socket; s=socket.socket(); s.settimeout(5); s.connect(('localhost', 8000)); s.close()\""
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request,sys;
+          req=urllib.request.Request('http://localhost:8000/health/',
+          headers={'X-Forwarded-Proto': 'https'});
+          resp=urllib.request.urlopen(req, timeout=5);
+          sys.exit(0 if resp.status < 400 else 1)"
       interval: 30s
       timeout: 10s
       retries: 5
@@ -268,77 +345,11 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   celery_worker:
     image: ${APP_IMAGE:-emsarena-prod:latest}
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.prod
-      args:
-        APT_PRIMARY_MIRROR: ${APT_PRIMARY_MIRROR:-https://deb.debian.org/debian}
-        APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-https://deb.debian.org/debian-security}
-        APT_FALLBACK_MIRROR: ${APT_FALLBACK_MIRROR:-https://ftp.debian.org/debian}
-        APT_FALLBACK_SECURITY_MIRROR: ${APT_FALLBACK_SECURITY_MIRROR:-https://security.debian.org/debian-security}
+    build: *app-build
     command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=${CELERY_WORKER_CONCURRENCY:-2}"]
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.production
-      APP_ENV: ${APP_ENV:-production}
-      APP_VERSION: ${APP_VERSION:-unknown}
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
-      DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
-      REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
-      SECRET_KEY: ${SECRET_KEY}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
-      SITE_URL: ${SITE_URL}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
-      BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
-      BREVO_EMAIL: ${BREVO_EMAIL:-}
-      BREVO_FROM_EMAIL: ${BREVO_FROM_EMAIL:-}
-      BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
-      BREVO_API_KEY: ${BREVO_API_KEY:-}
-      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-}
-      GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
-      AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
-      AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
-      EXAM_AUTOSAVE_INTERVAL_MS: ${EXAM_AUTOSAVE_INTERVAL_MS:-300000}
-      EXAM_AUTOSAVE_JITTER_MS: ${EXAM_AUTOSAVE_JITTER_MS:-60000}
-      EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED: ${EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED:-false}
-      EXAM_ANSWER_FILE_MAX_SIZE_MB: ${EXAM_ANSWER_FILE_MAX_SIZE_MB:-5}
-      EXAM_ANSWER_MAX_FILES_PER_QUESTION: ${EXAM_ANSWER_MAX_FILES_PER_QUESTION:-3}
-      EXAM_PAINT_MAX_BASE64_CHARS: ${EXAM_PAINT_MAX_BASE64_CHARS:-1500000}
-      EXAM_START_GLOBAL_CONCURRENCY: ${EXAM_START_GLOBAL_CONCURRENCY:-12}
-      EXAM_START_PER_EXAM_CONCURRENCY: ${EXAM_START_PER_EXAM_CONCURRENCY:-6}
-      EXAM_START_WAIT_TIMEOUT_SECONDS: ${EXAM_START_WAIT_TIMEOUT_SECONDS:-30}
-      EXAM_START_POLL_INTERVAL_SECONDS: ${EXAM_START_POLL_INTERVAL_SECONDS:-0.05}
-      EXAM_START_LOCK_LEASE_SECONDS: ${EXAM_START_LOCK_LEASE_SECONDS:-120}
-      EXAM_RANDOMIZER_USAGE_CACHE_SECONDS: ${EXAM_RANDOMIZER_USAGE_CACHE_SECONDS:-30}
-      EXAM_PDF_OCR_ENABLED: ${EXAM_PDF_OCR_ENABLED:-true}
-      EXAM_PDF_OCR_LANG: ${EXAM_PDF_OCR_LANG:-aze}
-      EXAM_PDF_OCR_DPI: ${EXAM_PDF_OCR_DPI:-160}
-      EXAM_PDF_OCR_MAX_PAGES: ${EXAM_PDF_OCR_MAX_PAGES:-90}
-      EXAM_PDF_OCR_HIGHLIGHT: ${EXAM_PDF_OCR_HIGHLIGHT:-true}
-      EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO: ${EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO:-0.08}
-      REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT: ${REQUEST_QUEUE_GLOBAL_UNSAFE_LIMIT:-8}
-      HEALTH_CHECK_CACHE_SECONDS: ${HEALTH_CHECK_CACHE_SECONDS:-2}
-      METRICS_ALLOW_ANONYMOUS: ${METRICS_ALLOW_ANONYMOUS:-true}
-      OBJECT_STORAGE_ENABLED: ${OBJECT_STORAGE_ENABLED:-false}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-}
-      AWS_S3_ENDPOINT_URL: ${AWS_S3_ENDPOINT_URL:-}
-      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-}
-      AWS_S3_CUSTOM_DOMAIN: ${AWS_S3_CUSTOM_DOMAIN:-}
-      AWS_S3_ADDRESSING_STYLE: ${AWS_S3_ADDRESSING_STYLE:-virtual}
-      AWS_QUERYSTRING_AUTH: ${AWS_QUERYSTRING_AUTH:-true}
-      AWS_QUERYSTRING_EXPIRE: ${AWS_QUERYSTRING_EXPIRE:-900}
+      <<: *app-env
       EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
-      SENTRY_DSN: ${SENTRY_DSN:-}
-      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
-      SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
-      PRACTICAL_EXAMS_ENABLED: "false"
-      EXAM_SUPERVISION_ENABLED: "false"
-      CODING_EXECUTION_BACKEND: "disabled"
     volumes:
       - media_data:/app/media
     depends_on:
@@ -347,6 +358,39 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${CELERY_CPU_LIMIT:-1.0}"
+          memory: ${CELERY_MEM_LIMIT:-1024M}
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Celery beat — periodic task scheduler (Faza 1 / audit K5).
+  # CELERY_BEAT_SCHEDULE (config/settings/components/celery_cache.py) yalnız
+  # bu servis işləyəndə icra olunur. Schedule state /tmp-də saxlanır —
+  # restart-da itməsi problemsizdir (interval task yenidən hesablanır).
+  # ─────────────────────────────────────────────────────────────────────────
+  celery_beat:
+    image: ${APP_IMAGE:-emsarena-prod:latest}
+    build: *app-build
+    container_name: emsarena-celery-beat
+    command: ["celery", "-A", "config", "beat", "-l", "INFO", "--schedule", "/tmp/celerybeat-schedule"]
+    environment: *app-env
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${CELERY_BEAT_CPU_LIMIT:-0.25}"
+          memory: ${CELERY_BEAT_MEM_LIMIT:-256M}
     networks:
       - emsarena-network
 
@@ -365,6 +409,12 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PG_EXPORTER_CPU_LIMIT:-0.2}"
+          memory: ${PG_EXPORTER_MEM_LIMIT:-128M}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9187/metrics >/dev/null"]
       interval: 30s
@@ -374,7 +424,78 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Prometheus — scrapes app replicas and database exporter.
+  # Node exporter — host disk/yaddaş/CPU metrikləri (disk-full alerti üçün).
+  # Yalnız daxili şəbəkə; host kök faylsistemi read-only mount olunur.
+  # ─────────────────────────────────────────────────────────────────────────
+  node_exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: emsarena-node-exporter
+    command:
+      - --path.rootfs=/host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${NODE_EXPORTER_CPU_LIMIT:-0.2}"
+          memory: ${NODE_EXPORTER_MEM_LIMIT:-64M}
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Alertmanager — Prometheus alertlərini e-poçta (Brevo SMTP) göndərir.
+  # Config template-i (git-də, sirsiz) start zamanı env dəyərləri ilə
+  # doldurulur — sirlər yalnız .env-dən gəlir, fayl kimi commit olunmur.
+  # UI yalnız localhost-dadır (SSH tuneli ilə: silence/inhibit üçün).
+  # ─────────────────────────────────────────────────────────────────────────
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: emsarena-alertmanager
+    ports:
+      - "127.0.0.1:${ALERTMANAGER_PORT:-9093}:9093"
+    environment:
+      SMTP_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
+      SMTP_PORT: ${EMAIL_PORT:-587}
+      SMTP_USER: ${BREVO_SMTP_LOGIN:-}
+      SMTP_PASS: ${BREVO_SMTP_KEY:-}
+      ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
+      ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        sed -e "s|__SMTP_HOST__|$${SMTP_HOST}|g"
+        -e "s|__SMTP_PORT__|$${SMTP_PORT}|g"
+        -e "s|__SMTP_USER__|$${SMTP_USER}|g"
+        -e "s|__SMTP_PASS__|$${SMTP_PASS}|g"
+        -e "s|__ALERT_FROM__|$${ALERT_FROM}|g"
+        -e "s|__ALERT_TO__|$${ALERT_TO}|g"
+        /etc/alertmanager/alertmanager.tmpl.yml > /tmp/alertmanager.yml
+        && exec /bin/alertmanager --config.file=/tmp/alertmanager.yml
+        --storage.path=/alertmanager
+    volumes:
+      - ./docker/alertmanager/alertmanager.tmpl.yml:/etc/alertmanager/alertmanager.tmpl.yml:ro
+      - alertmanager_data:/alertmanager
+    restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${ALERTMANAGER_CPU_LIMIT:-0.2}"
+          memory: ${ALERTMANAGER_MEM_LIMIT:-128M}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9093/-/healthy >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Prometheus — scrapes app replicas, database and node exporters; evaluates
+  # alert rules (docker/prometheus/alerts.yml) and routes them to Alertmanager.
   # Exposed only on localhost; use SSH tunnel or a private admin network.
   # ─────────────────────────────────────────────────────────────────────────
   prometheus:
@@ -389,6 +510,7 @@ services:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
       - prometheus_data:/prometheus
     depends_on:
       app:
@@ -396,6 +518,12 @@ services:
       postgres_exporter:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PROMETHEUS_CPU_LIMIT:-0.5}"
+          memory: ${PROMETHEUS_MEM_LIMIT:-512M}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy >/dev/null"]
       interval: 30s
@@ -406,7 +534,8 @@ services:
 
   # ─────────────────────────────────────────────────────────────────────────
   # Grafana — pre-provisioned with Prometheus datasource and EMS dashboard.
-  # Exposed only on localhost; set GRAFANA_ADMIN_PASSWORD in production.
+  # Exposed only on localhost. GRAFANA_ADMIN_PASSWORD is REQUIRED (fail-fast):
+  # default parol ilə işə düşmə audit K-tapıntısı idi.
   # ─────────────────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:12.3.0
@@ -415,7 +544,7 @@ services:
       - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-before-production}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set in .env}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
@@ -428,6 +557,12 @@ services:
       prometheus:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${GRAFANA_CPU_LIMIT:-0.5}"
+          memory: ${GRAFANA_MEM_LIMIT:-256M}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health >/dev/null"]
       interval: 30s
@@ -478,6 +613,12 @@ services:
       PISTON_COMPILE_TIMEOUT: ${PISTON_COMPILE_TIMEOUT:-10000}
       PISTON_RUN_TIMEOUT: ${PISTON_RUN_TIMEOUT:-15000}
       PISTON_OUTPUT_MAX_SIZE: ${PISTON_OUTPUT_MAX_SIZE:-65536}
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${PISTON_CPU_LIMIT:-2.0}"
+          memory: ${PISTON_MEM_LIMIT:-4096M}
     healthcheck:
       test:
         - "CMD-SHELL"
@@ -509,6 +650,12 @@ services:
       app:
         condition: service_healthy
     restart: unless-stopped
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${NGINX_CPU_LIMIT:-0.5}"
+          memory: ${NGINX_MEM_LIMIT:-256M}
     healthcheck:
       test: ["CMD", "nginx", "-t"]
       interval: 30s
@@ -528,4 +675,5 @@ volumes:
   static_data:
   prometheus_data:
   grafana_data:
+  alertmanager_data:
   piston_packages:

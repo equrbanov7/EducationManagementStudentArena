@@ -246,30 +246,21 @@ and `python manage.py collectstatic --noinput` before starting Daphne, so
 database migrations and Docker-managed static assets stay current on every
 restart.
 
-## 5.1 GitHub Actions CD to Linode
+## 5.1 Automatic CI deploy — REMOVED (2026-07-02)
 
-The repository now includes a reusable deployment workflow at
-`.github/workflows/_deploy-linode.yml`, wired into `.github/workflows/ci.yml`.
-When a push to `main` passes the full CI pipeline, GitHub Actions will SSH
-into the Linode host, sync the checked-out repository snapshot into
-`/opt/emsarena/app` over SSH, preserve server-only runtime data, run
-`docker compose -f docker-compose.prod.yml up -d --build`, and verify
-`/ping/` plus `/health/` through the local nginx origin.
+The former GitHub Actions deploy workflow (`_deploy-linode.yml`, targeting a
+Linode host) has been deleted because the Linode server is no longer used.
+Deployments are now performed manually on the target server:
 
-### Required GitHub secrets
+```bash
+cd /opt/emsarena/app        # server-side checkout / rsync destination
+bash scripts/deploy/remote_deploy.sh   # host-agnostic: build + release + up + health-gate
+```
 
-Add these repository secrets before enabling automatic deploys:
-
-| Secret | Required | Notes |
-|--------|----------|-------|
-| `SSH_PASSWORD` | Yes, unless using key auth | Password-based fallback supported for first setup |
-| `SSH_PRIVATE_KEY` | Optional | Tried first; deploy falls back to `SSH_PASSWORD` when configured |
-| `ENV_OVERRIDES` | Optional | Newline-separated secret env values to upsert into `/opt/emsarena/app/.env` |
-
-The production workflow currently deploys to `172.104.154.170` as `root`.
-Non-secret host settings such as `SITE_URL`, `ALLOWED_HOSTS`, and
-`CSRF_TRUSTED_ORIGINS` are enforced during deploy so stale secret overrides
-cannot point the application back at an old server.
+`scripts/deploy/remote_deploy.sh` is host-agnostic (any Docker host works).
+Remember: the server `.env` must contain `ALLOWED_HOSTS` including
+`localhost,127.0.0.1` (app healthcheck and the nginx `/metrics/` scrape rely
+on it) plus `GRAFANA_ADMIN_PASSWORD` and `ALERT_EMAIL_TO` (Faza 1 alerting).
 
 ### First-time server setup
 
