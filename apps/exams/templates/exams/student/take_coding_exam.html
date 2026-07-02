@@ -498,25 +498,20 @@ window.CODING_EXAM_CONFIG = {
             lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
         };
         </script>
-        <script src="{% static 'exams/js/exam_supervision.js' %}?v=20260611-fresh-csrf"></script>
         <script nonce="{{ request.csp_nonce }}">
         window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";
-        document.addEventListener("DOMContentLoaded", function() {
-            if (window.ExamSupervision) {
-                var supervisionConfig = JSON.parse(document.getElementById("supervision-config-data").textContent);
-                ExamSupervision.init({
-                    config: supervisionConfig,
-                    supervised: {{ supervision.supervised|yesno:"true,false" }},
-                    attemptId: {{ attempt.id }},
-                    csrfToken: "{{ csrf_token }}",
-                    logEndpoint: "{% url 'exams:supervision_log_incident' attempt.id %}",
-                    statusEndpoint: "{% url 'exams:supervision_status_api' attempt.id %}",
-                    violationCount: {{ supervision.violation_count|default:"0" }},
-                    maxViolations: {{ supervision.max_violations|default:"3" }},
-                    supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
-                });
-            }
-        });
+        window.EXAM_SUPERVISION_INIT_CONFIG = {
+            config: JSON.parse(document.getElementById("supervision-config-data").textContent),
+            supervised: {{ supervision.supervised|yesno:"true,false" }},
+            attemptId: {{ attempt.id }},
+            csrfToken: "{{ csrf_token }}",
+            logEndpoint: "{% url 'exams:supervision_log_incident' attempt.id %}",
+            statusEndpoint: "{% url 'exams:supervision_status_api' attempt.id %}",
+            violationCount: {{ supervision.violation_count|default:"0" }},
+            maxViolations: {{ supervision.max_violations|default:"3" }},
+            supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
+        };
         </script>
+        <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260611-fresh-csrf"></script>
     {% endif %}
 {% endblock %}

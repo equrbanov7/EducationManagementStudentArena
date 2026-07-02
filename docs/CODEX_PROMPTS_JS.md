@@ -31,6 +31,13 @@ CRITICAL RULES:
    problem. If ES modules are not viable (legacy global dependencies), use the global-namespace
    pattern: extract features into separate files that attach to a single `window.EMS_X = {}`
    object, and load them via ordered classic `<script>` tags.
+   IMPORTANT — internal relative imports must be QUERY-FREE (`import './state.js'`, NOT
+   `import './state.js?v=...'`). Production uses CompressedManifestStaticFilesStorage which keeps
+   BOTH hashed and unhashed files and does NOT rewrite JS import statements — so query-free
+   relative imports resolve correctly to the unhashed file. Only the ENTRY is cache-busted (via
+   the `{% static %}` tag → hashed name). Do NOT put `?v=` inside import statements — a fixed
+   query gives no real cache-busting and creates inconsistency (verified: host_lobby/player/
+   coding_exam are query-free and correct; keep new splits the same).
 4. Keep each resulting file < 600 lines. Update the template(s) that load the original script.
 5. Preserve the cache-buster query string (e.g. `?v=...`) on the loaded assets.
 6. Work IN-PLACE (edit files directly). Do NOT `rm -rf` + recreate directories on a synced
