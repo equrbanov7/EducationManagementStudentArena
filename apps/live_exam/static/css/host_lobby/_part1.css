@@ -9,7 +9,7 @@
     --gold: #fbbf24;
     --silver: var(--ems-neutral-400);
     --bronze: #f97316;
-    --danger: #ef4444;
+    --danger: var(--ems-danger-500);
     --blue: var(--ems-primary-500);
     --sky: #38bdf8;
 }
@@ -190,13 +190,13 @@ body.host-live-page.host-presentation-page {
 }
 
 .host-live-page .btn-start {
-    background: linear-gradient(135deg, #ffffff 0%, #f4f4f5 100%);
+    background: linear-gradient(135deg, var(--ems-neutral-0) 0%, #f4f4f5 100%);
     color: #111827;
 }
 
 .host-live-page .btn-present {
     background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .host-live-page .btn-reveal {
@@ -208,7 +208,7 @@ body.host-live-page.host-presentation-page {
 }
 
 .host-live-page .btn-finish {
-    background: linear-gradient(135deg, #ef4444 0%, var(--ems-danger) 100%);
+    background: linear-gradient(135deg, var(--ems-danger-500) 0%, var(--ems-danger) 100%);
 }
 
 .host-live-page .progress-box {
@@ -218,7 +218,7 @@ body.host-live-page.host-presentation-page {
     border-radius: 18px;
     background: rgba(37, 99, 235, 0.32);
     border: 1px solid rgba(147, 197, 253, 0.25);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .host-live-page .debug-section {
@@ -504,7 +504,7 @@ body.host-presentation-page .lobby-stage__qr img {
     height: 116px;
     padding: 6px;
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
 }
 

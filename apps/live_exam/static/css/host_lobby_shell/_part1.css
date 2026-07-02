@@ -83,7 +83,7 @@ body.host-live-page.live-high-contrast {
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 999px;
     background: rgba(10, 9, 24, 0.84);
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 18px 36px rgba(8, 7, 23, 0.3);
     backdrop-filter: blur(14px);
     transform: translateY(-50%);
@@ -133,7 +133,7 @@ body.host-live-page.host-presentation-page.presentation-sidebar-open .host-sideb
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: rgba(10, 9, 24, 0.84);
     box-shadow: 0 18px 36px rgba(8, 7, 23, 0.3);
     backdrop-filter: blur(14px);
@@ -207,7 +207,7 @@ body.host-live-page.host-presentation-page.presentation-sidebar-open .host-sideb
 .control-toolbar__button {
     border: 1px solid var(--host-pill-border);
     background: var(--host-pill-bg);
-    color: #fff;
+    color: var(--ems-neutral-0);
     transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
@@ -329,7 +329,7 @@ body.host-settings-open .host-settings-drawer {
     gap: 14px;
     padding: 20px;
     border-radius: 24px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(24, 16, 40, 0.08);
 }
 
@@ -397,7 +397,7 @@ body.host-settings-open .host-settings-drawer {
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
     transition: transform 0.18s ease;
 }
@@ -421,7 +421,7 @@ body.host-settings-open .host-settings-drawer {
     padding: 0 16px;
     border-radius: 16px;
     border: 1px solid rgba(24, 16, 40, 0.12);
-    background: #fff;
+    background: var(--ems-neutral-0);
     color: #181028;
     font-weight: 700;
 }
@@ -451,7 +451,7 @@ body.host-settings-open .host-settings-drawer {
     height: 22px;
     border-radius: 50%;
     background: var(--ems-primary-600);
-    border: 3px solid #fff;
+    border: 3px solid var(--ems-neutral-0);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
     cursor: pointer;
 }
@@ -461,7 +461,7 @@ body.host-settings-open .host-settings-drawer {
     height: 22px;
     border-radius: 50%;
     background: var(--ems-primary-600);
-    border: 3px solid #fff;
+    border: 3px solid var(--ems-neutral-0);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
     cursor: pointer;
 }
@@ -506,7 +506,7 @@ body.host-settings-open .host-settings-drawer {
 
 .theme-card {
     border: 1px solid rgba(24, 16, 40, 0.1);
-    background: #fff;
+    background: var(--ems-neutral-0);
     border-radius: 18px;
     padding: 10px;
     display: flex;

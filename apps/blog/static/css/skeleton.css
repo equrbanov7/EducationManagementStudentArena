@@ -19,7 +19,7 @@
     background: linear-gradient(
         90deg,
         #eef2f8 0px,
-        #f8fafc 40px,
+        var(--ems-neutral-50) 40px,
         #eef2f8 80px
     );
     background-size: 800px 100%;
@@ -74,7 +74,7 @@
 }
 
 .blog-card-skeleton {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(207, 219, 236, 0.7);
     border-radius: 16px;
     padding: 16px;
@@ -120,7 +120,7 @@
     top: 0; left: 0;
     height: 3px;
     width: 0;
-    background: linear-gradient(90deg, #2563eb, #10b981);
+    background: linear-gradient(90deg, var(--ems-primary-600), var(--ems-success));
     z-index: 9999;
     border-radius: 0 999px 999px 0;
     box-shadow: 0 0 12px rgba(37, 99, 235, 0.45);

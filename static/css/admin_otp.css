@@ -109,7 +109,7 @@ body.admin-otp-page {
 }
 
 .admin-otp-form input[type="text"] {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid #cfd7ee;
     border-radius: 14px;
     box-sizing: border-box;
@@ -141,7 +141,7 @@ body.admin-otp-page {
     background: linear-gradient(135deg, #565add 0%, #7c80f2 100%);
     border: 0;
     border-radius: 14px;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     cursor: pointer;
     font-size: 1rem;
     font-weight: 700;

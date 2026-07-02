@@ -1,30 +1,30 @@
 body[data-live-theme="standard"] {
     --pin-bg-1: #071a2f;
     --pin-bg-2: #0d3654;
-    --pin-bg-3: #0f766e;
+    --pin-bg-3: var(--ems-success-strong);
     --pin-bg-4: #6ee7d8;
     --pin-secondary: #99f6e4;
     --pin-accent: #2dd4bf;
-    --pin-accent-strong: #0f766e;
+    --pin-accent-strong: var(--ems-success-strong);
 
     --join-bg-1: #071a2f;
     --join-bg-2: #0d3654;
-    --join-bg-3: #0f766e;
+    --join-bg-3: var(--ems-success-strong);
     --join-bg-4: #6ee7d8;
     --join-accent: #2dd4bf;
-    --join-accent-strong: #0f766e;
+    --join-accent-strong: var(--ems-success-strong);
     --join-accent-soft: #ccfbf1;
 
     --wait-room-bg-1: #071a2f;
     --wait-room-bg-2: #0d3654;
-    --wait-room-bg-3: #0f766e;
+    --wait-room-bg-3: var(--ems-success-strong);
     --wait-room-bg-4: #6ee7d8;
     --wait-room-accent: #2dd4bf;
-    --wait-room-accent-strong: #0f766e;
+    --wait-room-accent-strong: var(--ems-success-strong);
     --wait-room-accent-soft: #ccfbf1;
 
     --player-bg-1: #0d3654;
-    --player-bg-2: #0f766e;
+    --player-bg-2: var(--ems-success-strong);
     --player-bg-3: #6ee7d8;
     --player-bg-4: #071a2f;
 }
@@ -36,23 +36,23 @@ body[data-live-theme="winter"] {
     --pin-bg-4: #74c0fc;
     --pin-secondary: #93c5fd;
     --pin-accent: #60a5fa;
-    --pin-accent-strong: #2563eb;
+    --pin-accent-strong: var(--ems-primary-600);
 
     --join-bg-1: #081b33;
     --join-bg-2: #12375f;
     --join-bg-3: #2f68b6;
     --join-bg-4: #74c0fc;
     --join-accent: #60a5fa;
-    --join-accent-strong: #2563eb;
-    --join-accent-soft: #dbeafe;
+    --join-accent-strong: var(--ems-primary-600);
+    --join-accent-soft: var(--ems-primary-100);
 
     --wait-room-bg-1: #081b33;
     --wait-room-bg-2: #12375f;
     --wait-room-bg-3: #2f68b6;
     --wait-room-bg-4: #74c0fc;
     --wait-room-accent: #60a5fa;
-    --wait-room-accent-strong: #2563eb;
-    --wait-room-accent-soft: #dbeafe;
+    --wait-room-accent-strong: var(--ems-primary-600);
+    --wait-room-accent-soft: var(--ems-primary-100);
 
     --player-bg-1: #12375f;
     --player-bg-2: #2f68b6;
@@ -63,37 +63,37 @@ body[data-live-theme="winter"] {
 body[data-live-theme="aurora"] {
     --pin-bg-1: #04262d;
     --pin-bg-2: #084c61;
-    --pin-bg-3: #0f766e;
+    --pin-bg-3: var(--ems-success-strong);
     --pin-bg-4: #57c5b6;
     --pin-secondary: #5eead4;
     --pin-accent: #2dd4bf;
-    --pin-accent-strong: #0f766e;
+    --pin-accent-strong: var(--ems-success-strong);
 
     --join-bg-1: #04262d;
     --join-bg-2: #084c61;
-    --join-bg-3: #0f766e;
+    --join-bg-3: var(--ems-success-strong);
     --join-bg-4: #57c5b6;
     --join-accent: #2dd4bf;
-    --join-accent-strong: #0f766e;
+    --join-accent-strong: var(--ems-success-strong);
     --join-accent-soft: #ccfbf1;
 
     --wait-room-bg-1: #04262d;
     --wait-room-bg-2: #084c61;
-    --wait-room-bg-3: #0f766e;
+    --wait-room-bg-3: var(--ems-success-strong);
     --wait-room-bg-4: #57c5b6;
     --wait-room-accent: #2dd4bf;
-    --wait-room-accent-strong: #0f766e;
+    --wait-room-accent-strong: var(--ems-success-strong);
     --wait-room-accent-soft: #ccfbf1;
 
     --player-bg-1: #084c61;
-    --player-bg-2: #0f766e;
+    --player-bg-2: var(--ems-success-strong);
     --player-bg-3: #57c5b6;
     --player-bg-4: #04262d;
 }
 
 body[data-live-theme="sweet"] {
     --pin-bg-1: #052e2b;
-    --pin-bg-2: #0f766e;
+    --pin-bg-2: var(--ems-success-strong);
     --pin-bg-3: #14b8a6;
     --pin-bg-4: #5eead4;
     --pin-secondary: #a7f3d0;
@@ -101,7 +101,7 @@ body[data-live-theme="sweet"] {
     --pin-accent-strong: #14b8a6;
 
     --join-bg-1: #052e2b;
-    --join-bg-2: #0f766e;
+    --join-bg-2: var(--ems-success-strong);
     --join-bg-3: #14b8a6;
     --join-bg-4: #5eead4;
     --join-accent: #2dd4bf;
@@ -109,14 +109,14 @@ body[data-live-theme="sweet"] {
     --join-accent-soft: #ccfbf1;
 
     --wait-room-bg-1: #052e2b;
-    --wait-room-bg-2: #0f766e;
+    --wait-room-bg-2: var(--ems-success-strong);
     --wait-room-bg-3: #14b8a6;
     --wait-room-bg-4: #5eead4;
     --wait-room-accent: #2dd4bf;
     --wait-room-accent-strong: #14b8a6;
     --wait-room-accent-soft: #ccfbf1;
 
-    --player-bg-1: #0f766e;
+    --player-bg-1: var(--ems-success-strong);
     --player-bg-2: #14b8a6;
     --player-bg-3: #5eead4;
     --player-bg-4: #052e2b;

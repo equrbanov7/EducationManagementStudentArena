@@ -12,7 +12,7 @@
 
 /* Abunə qutusu */
 .subscribe-box {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-width: 600px;
     width: 100%;
     padding: 50px;
@@ -52,7 +52,7 @@
 /* Siyahı maddələrinin qarşısındakı kiçik ikonlar üçün */
 .subscribe-benefits li::before {
     content: '✓'; 
-    color: #2563eb; /* Əsas rəng */
+    color: var(--ems-primary-600); /* Əsas rəng */
     font-weight: bold;
     margin-right: 10px;
     font-size: 1.2rem;
@@ -72,7 +72,7 @@
     width: 100%;
     padding: 15px 20px;
     font-size: 1rem;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--ems-gray-200);
     border-radius: 8px;
     outline: none;
     transition: all 0.3s ease;
@@ -80,7 +80,7 @@
 }
 
 .form-group input[type="email"]:focus {
-    border-color: #2563eb; /* Focus olanda rəng dəyişsin */
+    border-color: var(--ems-primary-600); /* Focus olanda rəng dəyişsin */
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -95,7 +95,7 @@
 .btn-subscribe {
     width: 100%;
     padding: 15px;
-    background-color: #2563eb;
+    background-color: var(--ems-primary-600);
     color: white;
     border: none;
     border-radius: 8px;
@@ -106,7 +106,7 @@
 }
 
 .btn-subscribe:hover {
-    background-color: #1d4ed8;
+    background-color: var(--ems-primary-700);
 }
 
 /* Spam xəbərdarlığı */
@@ -131,14 +131,14 @@
 }
 
 .messages-list li.success {
-    background-color: #dcfce7;
+    background-color: var(--ems-success-100);
     color: #166534;
     border: 1px solid #bbf7d0;
 }
 .messages-list li.error {
-    background-color: #fee2e2;
+    background-color: var(--ems-danger-100);
     color: #991b1b;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
 }
 
 /* Responsive */

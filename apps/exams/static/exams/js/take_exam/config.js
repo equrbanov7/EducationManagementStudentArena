@@ -44,10 +44,8 @@
     }
 
     function getCookie(name) {
-        var row = document.cookie.split("; ").find(function (entry) {
-            return entry.indexOf(name + "=") === 0;
-        });
-        return row ? decodeURIComponent(row.split("=").slice(1).join("=")) : null;
+        // Faza 6.3: mərkəzi EMSCore.getCookie (core/csrf.js).
+        return window.EMSCore.getCookie(name);
     }
 
     ns.config = {

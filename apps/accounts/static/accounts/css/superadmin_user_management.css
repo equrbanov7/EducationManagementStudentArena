@@ -8,7 +8,7 @@
     width: 100%;
     padding: 1.25rem;
     border-radius: 1.25rem;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 }
@@ -31,16 +31,16 @@
     margin: 0 0 0.35rem;
     font-size: 1.45rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .user-management-heading i {
-    color: #2563eb;
+    color: var(--ems-primary-600);
 }
 
 .user-management-subtitle {
     margin: 0;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.95rem;
 }
 
@@ -64,8 +64,8 @@
     align-items: center;
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 0.875rem;
     font-weight: 600;
 }
@@ -77,7 +77,7 @@
 
 .user-summary-pill--deleted {
     background: #fef2f2;
-    color: #b91c1c;
+    color: var(--ems-danger-strong);
 }
 
 .user-tabs {
@@ -94,9 +94,9 @@
     padding: 0.7rem 1rem;
     border-radius: 0.9rem;
     text-decoration: none;
-    color: #334155;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
@@ -108,9 +108,9 @@
 }
 
 .user-tab.active {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-700));
     border-color: transparent;
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 .user-tab .badge {
@@ -129,8 +129,8 @@
     margin-bottom: 1.25rem;
     padding: 1rem;
     border-radius: 1rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
 }
 
 .user-management-filter-grid {
@@ -152,7 +152,7 @@
 .user-management-filter-field span {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--ems-neutral-700);
 }
 
 .user-management-filter-field input,
@@ -160,15 +160,15 @@
     min-height: 44px;
     padding: 0.7rem 0.85rem;
     border-radius: 0.85rem;
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    color: #0f172a;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
 }
 
 .user-management-filter-field input:focus,
 .user-management-filter-field select:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--ems-primary-600);
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
@@ -192,16 +192,16 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #64748b;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    color: var(--ems-neutral-500);
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
 }
 
 .user-table tbody td {
     padding: 1rem 0.95rem;
     vertical-align: top;
     border-bottom: 1px solid #edf2f7;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .user-table tbody tr:hover td {
@@ -219,7 +219,7 @@
 
 .user-table-muted {
     margin-top: 0.2rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.82rem;
 }
 
@@ -233,7 +233,7 @@
 }
 
 .status-badge--active {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
@@ -243,8 +243,8 @@
 }
 
 .status-badge--deleted {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
 }
 
 .action-buttons {
@@ -267,7 +267,7 @@
 .empty-state {
     padding: 3rem 1rem;
     text-align: center;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .empty-state i {
@@ -281,13 +281,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
-    color: #475569;
+    color: var(--ems-neutral-600);
     text-decoration: none;
     font-weight: 600;
 }
 
 .back-link:hover {
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 @media (max-width: 1200px) {

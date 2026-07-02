@@ -18,7 +18,7 @@
         margin: 0;
     }
     .table-card {
-        background: #fff;
+        background: var(--ems-neutral-0);
         border-radius: 12px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         overflow: hidden;
@@ -58,8 +58,8 @@
     .user-icon {
         width: 38px;
         height: 38px;
-        background: #dbeafe;
-        color: #2563eb;
+        background: var(--ems-primary-100);
+        color: var(--ems-primary-600);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -87,15 +87,15 @@
     
     /* Tip badge-ləri */
     .badge-test {
-        background: #dbeafe;
-        color: #1d4ed8;
+        background: var(--ems-primary-100);
+        color: var(--ems-primary-700);
         padding: 3px 8px;
         border-radius: 4px;
         font-size: 0.7rem;
         font-weight: 600;
     }
     .badge-essay {
-        background: #fef3c7;
+        background: var(--ems-warning-100);
         color: #b45309;
         padding: 3px 8px;
         border-radius: 4px;
@@ -103,7 +103,7 @@
         font-weight: 600;
     }
     .badge-practical {
-        background: #dcfce7;
+        background: var(--ems-success-100);
         color: #15803d;
         padding: 3px 8px;
         border-radius: 4px;
@@ -112,7 +112,7 @@
     }
 
     .btn-check-action {
-        background-color: #3b82f6;
+        background-color: var(--ems-primary-500);
         color: white;
         padding: 8px 16px;
         border-radius: 6px;
@@ -125,7 +125,7 @@
         gap: 6px;
     }
     .btn-check-action:hover {
-        background-color: #2563eb;
+        background-color: var(--ems-primary-600);
         transform: translateY(-2px);
         color: white;
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
@@ -155,21 +155,21 @@
     .filter-tab {
         padding: 8px 16px;
         border-radius: 20px;
-        border: 1px solid #e5e7eb;
-        background: #fff;
+        border: 1px solid var(--ems-gray-200);
+        background: var(--ems-neutral-0);
         color: #666;
         cursor: pointer;
         font-size: 0.9rem;
         transition: all 0.2s;
     }
     .filter-tab:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
+        border-color: var(--ems-primary-500);
+        color: var(--ems-primary-500);
     }
     .filter-tab.active {
-        background: #3b82f6;
+        background: var(--ems-primary-500);
         color: white;
-        border-color: #3b82f6;
+        border-color: var(--ems-primary-500);
     }
     .filter-tab .count {
         background: rgba(0,0,0,0.1);

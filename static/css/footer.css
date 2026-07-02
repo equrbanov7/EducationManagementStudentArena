@@ -3,14 +3,14 @@
    Mobile-first with desktop columns. */
 
 .ems-footer {
-    background: linear-gradient(180deg, #ffffff 0%, #f4fafb 100%);
-    color: #334155;
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #f4fafb 100%);
+    color: var(--ems-neutral-700);
     padding: 64px 24px 0;
     margin-top: auto;
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 0.95rem;
     line-height: 1.6;
-    border-top: 1px solid #dbeafe;
+    border-top: 1px solid var(--ems-primary-100);
 }
 
 .ems-footer__container {
@@ -48,7 +48,7 @@
 }
 
 .ems-footer__tagline {
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.9rem;
     line-height: 1.65;
     margin: 0;
@@ -68,8 +68,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;
-    color: #0f766e;
+    background: var(--ems-neutral-0);
+    color: var(--ems-success-strong);
     text-decoration: none;
     font-size: 0.95rem;
     transition: all 0.25s ease;
@@ -78,8 +78,8 @@
 }
 
 .ems-footer__social:hover {
-    background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-success-strong) 55%, var(--ems-success) 100%);
+    color: var(--ems-neutral-0);
     transform: translateY(-2px);
     border-color: transparent;
     box-shadow: 0 8px 20px rgba(15, 118, 110, 0.3);
@@ -93,7 +93,7 @@
 }
 
 .ems-footer__col-title {
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-size: 1rem;
     font-weight: 700;
     margin: 0 0 6px;
@@ -109,7 +109,7 @@
     bottom: 0;
     width: 32px;
     height: 2px;
-    background: linear-gradient(90deg, #1e40af, #10b981);
+    background: linear-gradient(90deg, var(--ems-primary-800), var(--ems-success));
     border-radius: 2px;
 }
 
@@ -124,7 +124,7 @@
 }
 
 .ems-footer__link {
-    color: #334155;
+    color: var(--ems-neutral-700);
     text-decoration: none;
     font-size: 0.92rem;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -132,12 +132,12 @@
 }
 
 .ems-footer__link:hover {
-    color: #0f766e;
+    color: var(--ems-success-strong);
     transform: translateX(3px);
 }
 
 .ems-footer__link--accent {
-    color: #0f766e;
+    color: var(--ems-success-strong);
     font-weight: 600;
 }
 
@@ -150,7 +150,7 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.9rem;
 }
 
@@ -163,7 +163,7 @@
 }
 
 .ems-footer__contact-item span {
-    color: #334155;
+    color: var(--ems-neutral-700);
 }
 
 /* CTA button in footer */
@@ -173,8 +173,8 @@
     gap: 8px;
     margin-top: 8px;
     padding: 10px 18px;
-    background: linear-gradient(135deg, #1e40af 0%, #0f766e 55%, #10b981 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-success-strong) 55%, var(--ems-success) 100%);
+    color: var(--ems-neutral-0);
     text-decoration: none;
     border-radius: 10px;
     font-weight: 600;
@@ -185,7 +185,7 @@
 
 .ems-footer__cta:hover {
     transform: translateY(-2px);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 10px 22px rgba(15, 118, 110, 0.4);
 }
 
@@ -197,7 +197,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.85rem;
 }
 
@@ -241,6 +241,6 @@
 /* ---------- Legacy compatibility ---------- */
 /* Keep old selectors functional in case any partial still references them */
 footer.ems-footer .footer-location {
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.85rem;
 }

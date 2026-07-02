@@ -11,19 +11,19 @@
 
 /* --- Əsas Kart Dizaynı --- */
 .exam-detail-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-width: 900px; /* Bir az daha geniş edirik */
     width: 100%;
     border-radius: 16px;
     box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     overflow: hidden;
 }
 
 /* --- Kart Başlığı Hissəsi --- */
 .card-header {
     padding: 30px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
     background: var(--ems-neutral-50);
     text-align: center;
 }
@@ -40,7 +40,7 @@
     gap: 8px;
     border: 1px solid var(--ems-neutral-300);
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-700);
     text-decoration: none;
     font-size: 0.9rem;
@@ -63,7 +63,7 @@
 }
 
 .exam-detail-description {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 1rem;
     margin: 0 auto;
     max-width: 600px; /* Açıqlama mətni çox uzun olmasın */
@@ -85,7 +85,7 @@
 
 .info-card {
     background-color: var(--ems-neutral-50);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 14px;
     padding: 18px 22px;
     display: flex;
@@ -97,7 +97,7 @@
 
 .info-label {
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -138,7 +138,7 @@
     font-size: 1rem;
     text-decoration: none;
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.28);
     transition: all 0.2s ease;
     border: none;
@@ -147,7 +147,7 @@
 
 .live-start-btn:hover {
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     transform: translateY(-1px);
 }
 
@@ -191,7 +191,7 @@ body.live-session-modal-open {
     border: 1px solid rgba(134, 239, 172, 0.48);
     background:
         radial-gradient(circle at top right, rgba(187, 247, 208, 0.46), transparent 36%),
-        linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+        linear-gradient(180deg, var(--ems-neutral-0) 0%, #f0fdf4 100%);
     box-shadow: 0 30px 80px rgba(15, 23, 42, 0.26);
     padding: 28px;
     color: var(--ems-neutral-900);
@@ -213,7 +213,7 @@ body.live-session-modal-open {
 }
 
 .live-session-modal__close:hover {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-900);
 }
 
@@ -224,7 +224,7 @@ body.live-session-modal-open {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
     box-shadow: 0 18px 36px rgba(22, 163, 74, 0.28);
     margin-bottom: 16px;
@@ -298,7 +298,7 @@ body.live-session-modal-open {
 }
 
 .live-session-modal__btn--ghost {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-700);
     border-color: var(--ems-neutral-300);
 }
@@ -309,7 +309,7 @@ body.live-session-modal-open {
 }
 
 .live-session-modal__btn--primary {
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     box-shadow: 0 16px 28px rgba(22, 163, 74, 0.24);
 }
@@ -334,7 +334,7 @@ body.live-session-modal-open {
 }
 
 .status-badge.passive {
-    background-color: #fee2e2; /* Açıq qırmızı */
+    background-color: var(--ems-danger-100); /* Açıq qırmızı */
     color: var(--ems-danger-strong); /* Tünd qırmızı */
 }
 
@@ -342,7 +342,7 @@ body.live-session-modal-open {
 .exam-actions-section {
     margin-bottom: 40px;
     padding-bottom: 25px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
 }
 
 /* İkon-Kart Şəbəkəsi */
@@ -358,7 +358,7 @@ body.live-session-modal-open {
     align-items: center;
     gap: 16px;
     background: var(--ems-neutral-50);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 14px;
     padding: 18px 20px;
     text-decoration: none;
@@ -367,7 +367,7 @@ body.live-session-modal-open {
 }
 
 .action-card:hover {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-color: var(--ems-neutral-300);
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
     transform: translateY(-2px);
@@ -381,7 +381,7 @@ body.live-session-modal-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-size: 1.05rem;
 }
 
@@ -402,7 +402,7 @@ body.live-session-modal-open {
 
 .action-card__desc {
     font-size: 0.82rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     line-height: 1.4;
 }
 
@@ -420,7 +420,7 @@ body.live-session-modal-open {
 
 /* İkon rəng variantları */
 .action-card--blue .action-card__icon  { background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%); }
-.action-card--green .action-card__icon { background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%); }
+.action-card--green .action-card__icon { background: linear-gradient(135deg, var(--ems-success) 0%, var(--ems-success-600) 100%); }
 .action-card--slate .action-card__icon { background: linear-gradient(135deg, var(--ems-neutral-500) 0%, var(--ems-neutral-600) 100%); }
 
 /* İdarəetmə düymələri sətri */
@@ -463,7 +463,7 @@ body.live-session-modal-open {
 }
 
 .secondary-btn {
-    background-color: #6b7280;
+    background-color: var(--ems-gray-500);
     color: white;
     box-shadow: 0 2px 5px rgba(107, 114, 128, 0.3);
 }
@@ -475,48 +475,48 @@ body.live-session-modal-open {
 
 .visibility-hide-btn {
     background-color: var(--ems-neutral-600);
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 2px 5px rgba(71, 85, 105, 0.28);
 }
 
 .visibility-hide-btn:hover {
     background-color: var(--ems-neutral-700);
-    color: #fff;
+    color: var(--ems-neutral-0);
     transform: translateY(-1px);
 }
 
 .visibility-show-btn {
     background-color: var(--ems-success-strong);
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 2px 5px rgba(15, 118, 110, 0.28);
 }
 
 .visibility-show-btn:hover {
     background-color: #0d5f59;
-    color: #fff;
+    color: var(--ems-neutral-0);
     transform: translateY(-1px);
 }
 
 .bank-btn {
     background: linear-gradient(135deg, var(--ems-primary-500) 0%, var(--ems-primary-600) 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.32);
 }
 
 .bank-btn:hover {
     background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     transform: translateY(-1px);
 }
 
 .library-btn {
-    background: linear-gradient(135deg, var(--ems-success) 0%, #059669 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--ems-success) 0%, var(--ems-success-600) 100%);
+    color: var(--ems-neutral-0);
     box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
 }
 
 .library-btn:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--ems-success-600) 0%, #047857 100%);
+    color: var(--ems-neutral-0);
     transform: translateY(-1px);
 }

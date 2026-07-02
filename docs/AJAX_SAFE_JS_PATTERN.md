@@ -114,3 +114,18 @@ yalnız refresh-də işləyir.
 > 2. Bölmənin modal və `<script>`-ləri `[data-profile-section-panel]` **içində** olmalıdır.
 > 3. `document`/`window`-a listener qoşan kodu `EMSReady.once(...)` və ya `window.__flag`
 >    ilə bir dəfə qoş ki, swap-da yığılmasın.
+
+
+---
+
+## EMSCore (Faza 6.3, 2026-07-02)
+
+`static/js/core/csrf.js` + `static/js/core/http.js` — base.html/base_auth.html-də
+bütün custom skriptlərdən əvvəl yüklənir:
+
+- `EMSCore.getCookie(name)` / `EMSCore.getCsrfToken()` — CSRF köməkçilərinin
+  vahid mənbəyi (4 köhnə lokal nüsxə bura delegasiya edir).
+- `EMSCore.fetchJSON(url, {method, data, headers, signal})` — YENİ kod üçün
+  standart fetch sarğısı: CSRF başlığı avtomatik, JSON parse, same-origin,
+  normallaşdırılmış xəta (`err.status`, `err.payload`). Köhnə fetch çağırışları
+  toxunulmadan tədricən miqrasiya olunur.

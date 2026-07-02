@@ -1,14 +1,14 @@
 /* Contact inbox inside the profile workspace. */
 
 .profile-section--contact-messages {
-    --contact-blue: #2563eb;
-    --contact-blue-dark: #1e40af;
-    --contact-green: #0f766e;
-    --contact-amber: #f59e0b;
-    --contact-red: #dc2626;
-    --contact-ink: #0f172a;
-    --contact-muted: #64748b;
-    --contact-soft: #f8fafc;
+    --contact-blue: var(--ems-primary-600);
+    --contact-blue-dark: var(--ems-primary-800);
+    --contact-green: var(--ems-success-strong);
+    --contact-amber: var(--ems-warning-500);
+    --contact-red: var(--ems-danger);
+    --contact-ink: var(--ems-neutral-900);
+    --contact-muted: var(--ems-neutral-500);
+    --contact-soft: var(--ems-neutral-50);
     --contact-border: rgba(15, 23, 42, 0.1);
 }
 
@@ -18,7 +18,7 @@
     gap: 16px;
     padding: 18px 20px;
     margin-bottom: 18px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--contact-border);
     border-radius: 14px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
@@ -32,7 +32,7 @@
     height: 48px;
     flex: 0 0 48px;
     border-radius: 12px;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, var(--contact-blue), var(--contact-green));
     box-shadow: 0 12px 26px rgba(37, 99, 235, 0.18);
 }
@@ -84,34 +84,34 @@
     font-size: 12px;
     font-weight: 800;
     line-height: 1;
-    background: #e2e8f0;
-    color: #475569;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
     white-space: nowrap;
 }
 
 .contact-pill--new {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .contact-pill--ok {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .contact-pill--pending {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 .contact-pill--failed {
-    background: #fee2e2;
+    background: var(--ems-danger-100);
     color: #991b1b;
 }
 
 .contact-pill--recorded {
-    background: #e2e8f0;
-    color: #475569;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
 }
 
 .contact-pill--trial {
@@ -133,7 +133,7 @@
     border-radius: 10px 0 0 10px;
     font-size: 14px;
     color: var(--contact-ink);
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .contact-msg-search input:focus {
@@ -150,7 +150,7 @@
     border: 0;
     border-radius: 0 10px 10px 0;
     background: var(--contact-blue-dark);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     cursor: pointer;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .contact-msg-item {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--contact-border);
     border-left: 4px solid transparent;
     border-radius: 12px;
@@ -190,7 +190,7 @@
 }
 
 .contact-msg-item--recorded {
-    border-left-color: #94a3b8;
+    border-left-color: var(--ems-neutral-400);
 }
 
 .contact-msg-item--trial {
@@ -261,7 +261,7 @@
 }
 
 .contact-msg-date {
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
@@ -270,7 +270,7 @@
 .contact-msg-empty {
     text-align: center;
     padding: 48px 20px;
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .contact-msg-empty i {
@@ -303,7 +303,7 @@
 .contact-msg-card,
 .contact-reply-form,
 .contact-delivery-alert {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--contact-border);
     border-radius: 12px;
     padding: 20px;
@@ -361,7 +361,7 @@
     border-left: 4px solid var(--contact-green);
     border-radius: 8px;
     background: var(--contact-soft);
-    color: #334155;
+    color: var(--ems-neutral-700);
     line-height: 1.65;
     white-space: pre-wrap;
 }

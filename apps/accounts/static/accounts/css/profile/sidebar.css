@@ -114,25 +114,25 @@
 }
 
 .sidebar-menu-link--accent-ocean.active {
-    background: linear-gradient(135deg, #0f766e, #2563eb);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-success-strong), var(--ems-primary-600));
+    color: var(--ems-neutral-0);
     box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
 }
 
 .sidebar-menu-link--accent-admin {
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(14, 165, 233, 0.18));
     border-color: rgba(37, 99, 235, 0.16);
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .sidebar-menu-link--accent-admin:hover {
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(14, 165, 233, 0.24));
-    color: #1e40af;
+    color: var(--ems-primary-800);
 }
 
 .sidebar-menu-link--accent-admin.active {
-    background: linear-gradient(135deg, #2563eb, #0ea5e9);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-600), #0ea5e9);
+    color: var(--ems-neutral-0);
     box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
 }
 
@@ -207,7 +207,7 @@
 
 .sidebar-menu-group.is-open {
     border-color: rgba(59, 130, 246, 0.28);
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.09);
 }
 
@@ -220,7 +220,7 @@
     border: 0;
     border-radius: 0;
     background: transparent;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -236,7 +236,7 @@
 }
 
 .sidebar-menu-group-toggle:hover {
-    color: #334155;
+    color: var(--ems-neutral-700);
     background: rgba(148, 163, 184, 0.08);
 }
 
@@ -300,18 +300,18 @@
 }
 
 .sidebar-menu-link--logout {
-    color: #ef4444 !important;
+    color: var(--ems-danger-500) !important;
     background: none !important;
     border: none !important;
 }
 
 .sidebar-menu-link--logout:hover {
     background: #fef2f2 !important;
-    color: #dc2626 !important;
+    color: var(--ems-danger) !important;
 }
 
 .sidebar-menu-badge--warning {
-    background: #f59e0b !important;
+    background: var(--ems-warning-500) !important;
 }
 
 .sidebar-menu-badge--pulse {

@@ -38,12 +38,12 @@
     font-size: 0.95rem;
     transition: all 0.2s;
     outline: none;
-    background-color: #ffffff;
+    background-color: var(--ems-neutral-0);
     font-family: inherit;
 }
 
 .search-wrapper input.custom-search-input:focus {
-    border-color: #3b82f6;
+    border-color: var(--ems-primary-500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -59,7 +59,7 @@
     display: flex;
     align-items: center;
     padding: 8px 12px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--ems-gray-200);
     cursor: pointer;
     transition: background 0.1s;
 }
@@ -69,7 +69,7 @@
 }
 
 .list-item-row:hover {
-    background-color: #eff6ff;
+    background-color: var(--ems-primary-50);
 }
 
 .custom-item-checkbox {
@@ -77,7 +77,7 @@
     height: 16px;
     margin-right: 10px;
     cursor: pointer;
-    accent-color: #3b82f6;
+    accent-color: var(--ems-primary-500);
 }
 
 .custom-item-label {
@@ -103,10 +103,10 @@
 .custom-item-label__group {
     flex: 0 0 auto;
     padding: 2px 8px;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
     font-size: 0.74rem;
     font-weight: 600;
     white-space: nowrap;
@@ -114,7 +114,7 @@
 
 .selection-counter {
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--ems-gray-500);
     margin-top: 6px;
     text-align: right;
 }
@@ -132,29 +132,29 @@
 }
 
 .custom-list-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     border-radius: 8px;
 }
 
 .custom-list-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--ems-neutral-300);
     border-radius: 8px;
 }
 
 .custom-list-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--ems-neutral-400);
 }
 
 /* Error state */
 .custom-selector-group .field-error {
-    color: #dc2626;
+    color: var(--ems-danger);
     font-size: 0.85rem;
     margin-top: 5px;
     font-weight: 500;
 }
 
 .custom-selector-group:has(.field-error) .custom-list-container {
-    border-color: #dc2626;
+    border-color: var(--ems-danger);
     background-color: #fef2f2;
 }
 

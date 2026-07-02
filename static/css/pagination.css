@@ -30,8 +30,8 @@
     font-size: 15px;
     font-weight: 600;
     color: #4b5563; /* Tünd boz */
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
+    background-color: var(--ems-neutral-0);
+    border: 1px solid var(--ems-gray-200);
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
@@ -44,18 +44,18 @@
 
 /* Hover effekti */
 .page-link:hover:not(.active):not(.disabled) {
-    background-color: #eff6ff; /* Açıq mavi */
-    color: #2563eb; /* Əsas mavi */
-    border-color: #2563eb;
+    background-color: var(--ems-primary-50); /* Açıq mavi */
+    color: var(--ems-primary-600); /* Əsas mavi */
+    border-color: var(--ems-primary-600);
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Aktiv (Seçili) Səhifə */
 .page-link.active {
-    background-color: #2563eb;
-    color: #ffffff;
-    border-color: #2563eb;
+    background-color: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border-color: var(--ems-primary-600);
     box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
     pointer-events: none; /* Aktiv səhifəyə təkrar kliklənməsin */
 }

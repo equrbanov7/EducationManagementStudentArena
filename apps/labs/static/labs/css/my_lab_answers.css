@@ -1,10 +1,10 @@
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e40af;
-    --light-blue: #eff6ff;
-    --pale-blue: #bfdbfe;
-    --primary-green: #10b981;
-    --dark-green: #059669;
+    --primary-blue: var(--ems-primary-600);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-50);
+    --pale-blue: var(--ems-primary-200);
+    --primary-green: var(--ems-success);
+    --dark-green: var(--ems-success-600);
     --light-green: #ecfdf5;
 }
 
@@ -13,7 +13,7 @@
 .text-primary-green { color: var(--primary-green) !important; }
 
 .card-modern {
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: none;
     border-radius: 1.25rem;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
@@ -38,7 +38,7 @@
 
 .stat-card.blue { background-color: var(--light-blue); }
 .stat-card.green { background-color: var(--light-green); }
-.stat-card.white { background-color: #fff; }
+.stat-card.white { background-color: var(--ems-neutral-0); }
 
 .tracking-label {
     letter-spacing: 0.5px;
@@ -46,28 +46,28 @@
 
 .table-modern-header {
     background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
     padding: 1rem 1.5rem;
     border-radius: 1.25rem 1.25rem 0 0;
 }
 
 .table-modern thead th {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--ems-neutral-200);
     padding: 1rem;
 }
 
 .table-modern tbody td {
     padding: 1rem;
     vertical-align: middle;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--ems-neutral-700);
+    border-bottom: 1px solid var(--ems-neutral-100);
 }
 
 .table-modern tbody tr:hover {
@@ -108,9 +108,9 @@
 }
 
 .answer-toggle-btn {
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     color: var(--primary-blue);
-    background: #fff;
+    background: var(--ems-neutral-0);
     border-radius: 999px;
     width: 34px;
     height: 34px;
@@ -132,14 +132,14 @@
 }
 
 .answer-box {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 0.75rem;
     padding: 1rem 1.25rem;
     transition: border-color 0.2s;
 }
 .answer-box:hover {
-    border-color: #cbd5e1;
+    border-color: var(--ems-neutral-300);
 }
 
 .file-download-box {
@@ -150,11 +150,11 @@
 }
 
 .empty-answer-box {
-    background-color: #fff;
-    border: 1px dashed #cbd5e1;
+    background-color: var(--ems-neutral-0);
+    border: 1px dashed var(--ems-neutral-300);
     border-radius: 0.75rem;
     padding: 1rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-style: italic;
 }
 
@@ -169,10 +169,10 @@
 }
 
 .status-graded { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
-.status-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.status-pending { background: var(--ems-warning-100); color: #b45309; border: 1px solid #fde68a; }
 .status-review-pending { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; font-variant-numeric: tabular-nums; }
 .status-active { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
-.status-expired { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.status-expired { background: var(--ems-danger-100); color: var(--ems-danger-strong); border: 1px solid var(--ems-danger-200); }
 .status-late { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
 
 .score-badge {
@@ -201,13 +201,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
 }
 
 .submission-meta-pill {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 1rem;
     padding: 1rem 1.1rem;
 }
@@ -218,13 +218,13 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     margin-bottom: 0.4rem;
 }
 
 .submission-feedback-box {
     padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--ems-neutral-200);
 }
 
 .review-pending-box {
@@ -235,7 +235,7 @@
 }
 
 .teacher-feedback {
-    background-color: #fff;
+    background-color: var(--ems-neutral-0);
     border-left: 4px solid var(--primary-green);
     border-radius: 0 0.75rem 0.75rem 0;
     padding: 1.25rem;
@@ -243,7 +243,7 @@
 }
 
 .modal-answers-shell {
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 
 .modal-answer-item {

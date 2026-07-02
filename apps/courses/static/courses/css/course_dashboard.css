@@ -5,7 +5,7 @@
    ════════════════════════════════════════════════════════════════════════════ */
 
    :root {
-    --primary-color: #2563eb;
+    --primary-color: var(--ems-primary-600);
     --secondary-color: #0ea5e9;
     --success-color: #28a745;
     --danger-color: #dc3545;
@@ -64,7 +64,7 @@
     padding: 1rem 1.5rem;
     font-weight: 600;
     font-size: 1.05rem;
-    background-color: #fff;
+    background-color: var(--ems-neutral-0);
     border: none;
     transition: all 0.3s ease;
 }
@@ -82,7 +82,7 @@
 
 .accordion-body {
     padding: 1.5rem;
-    background-color: #ffffff;
+    background-color: var(--ems-neutral-0);
 }
 
 .course-status-item {
@@ -108,7 +108,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     font-size: 0.92rem;
     font-weight: 700;
 }
@@ -123,18 +123,18 @@
 }
 
 .course-status-current--published {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .course-status-current--draft {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .course-status-current--archived {
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
 }
 
 .course-status-body {
@@ -153,8 +153,8 @@
 
 .course-status-option {
     border: 1px solid #dbe6ff;
-    background: #fff;
-    color: #334155;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
     border-radius: 10px;
     padding: 0.55rem 0.6rem;
     font-size: 0.82rem;
@@ -197,8 +197,8 @@
 
 .course-status-warning {
     background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
+    border: 1px solid var(--ems-danger-200);
+    color: var(--ems-danger-strong);
 }
 
 .course-status-note {

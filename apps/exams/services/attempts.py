@@ -2,7 +2,6 @@ import logging
 import time
 import uuid
 from contextlib import contextmanager
-from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,10 +9,11 @@ from django.core.cache import caches
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.navigation import append_return_to as _append_return_to
+from apps.exams.navigation import current_return_to
 from apps.exams.services.language_variants import (
     available_language_options,
     effective_needed_count_for_attempt,
@@ -22,32 +22,14 @@ from apps.exams.services.language_variants import (
 )
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer
+from core.settings_utils import safe_float_setting as _safe_float_setting
+from core.settings_utils import safe_int_setting as _safe_int_setting
 
 logger = logging.getLogger(__name__)
 
 
 class ExamStartBusy(Exception):
     """Raised when too many students are trying to build attempts at once."""
-
-
-def _safe_int_setting(name: str, default: int, *, minimum: int | None = None) -> int:
-    try:
-        value = int(getattr(settings, name, default))
-    except (TypeError, ValueError):
-        value = default
-    if minimum is not None:
-        value = max(minimum, value)
-    return value
-
-
-def _safe_float_setting(name: str, default: float, *, minimum: float | None = None) -> float:
-    try:
-        value = float(getattr(settings, name, default))
-    except (TypeError, ValueError):
-        value = default
-    if minimum is not None:
-        value = max(minimum, value)
-    return value
 
 
 def _exam_start_cache():
@@ -281,27 +263,6 @@ def submit_exam_attempt(attempt):
     return attempt
 
 
-def _safe_same_origin_redirect_path(request, candidate_url):
-    raw_url = (candidate_url or "").strip()
-    if not raw_url:
-        return ""
-
-    if not url_has_allowed_host_and_scheme(
-        raw_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return ""
-    return raw_url
-
-
-def _append_return_to(url, return_to):
-    if not return_to:
-        return url
-    separator = "&" if "?" in url else "?"
-    return f"{url}{separator}{urlencode({'return_to': return_to})}"
-
-
 def _build_exam_result_url(exam, attempt, return_to):
     return _append_return_to(
         reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
@@ -314,13 +275,7 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
     if not max_attempts or not exam.is_active or exam.is_before_start() or exam.is_after_end():
         return ""
 
-    return_to = _safe_same_origin_redirect_path(
-        request,
-        request.GET.get("return_to")
-        or request.GET.get("next")
-        or request.POST.get("return_to")
-        or request.POST.get("next"),
-    )
+    return_to = current_return_to(request)
 
     if get_active_attempt_for_user(exam, user):
         return ""
@@ -341,13 +296,7 @@ def _start_or_resume_attempt(request, exam: Exam):
     İstifadəçi üçün attempt yaradır və ya mövcud attempt-ə yönləndirir.
     """
     user = request.user
-    return_to = _safe_same_origin_redirect_path(
-        request,
-        request.GET.get("return_to")
-        or request.GET.get("next")
-        or request.POST.get("return_to")
-        or request.POST.get("next"),
-    )
+    return_to = current_return_to(request)
 
     # ── Çoxdilli imtahan: yeni attempt üçün dil seçimi ──────────────────────
     # Mövcud aktiv attempt varsa, dil onsuz da seçilib — resume zamanı sormuruq.

@@ -2523,6 +2523,18 @@ class StudentExamVisibilityFilteringTest(TestCase):
             reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]),
         )
 
+    @staticmethod
+    def _take_exam_static_source(relative_path):
+        """take_exam JS-i artıq inline deyil (refaktor 2026-07-02) — davranış
+        müqaviləsi xarici static faylın məzmununda yoxlanılır."""
+        from pathlib import Path
+
+        from django.contrib.staticfiles import finders
+
+        found = finders.find(relative_path)
+        assert found, f"Static fayl tapılmadı: {relative_path}"
+        return Path(found).read_text(encoding="utf-8")
+
     def test_take_exam_uses_deadline_based_timer_logic_for_background_tabs(self):
         self.course_assigned_exam.total_duration_minutes = 30
         self.course_assigned_exam.default_question_time_seconds = 45
@@ -2537,12 +2549,15 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "const examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);")
-        self.assertContains(response, "questionTimerDeadlineMs = Date.now() + (timeLimit * 1000);")
-        self.assertContains(response, "document.addEventListener('visibilitychange', refreshVisibleTimers);")
+        # Səhifə taymer skriptlərini yükləyir + xəbərdarlıq modalı yerindədir.
+        self.assertContains(response, "exams/js/take_exam/timers.js")
         self.assertContains(response, "examTimeWarningModal")
-        self.assertContains(response, "timeWarningStorageKey")
         self.assertContains(response, "exam_time_warning.js")
+        # Davranış müqaviləsi: taymerlər tick-əsaslı yox, DEADLINE-əsaslıdır
+        # (arxa fon tab-larında drift olmur).
+        timers_source = self._take_exam_static_source("exams/js/take_exam/timers.js")
+        self.assertIn("examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000)", timers_source)
+        self.assertIn("questionTimerDeadlineMs = Date.now() + (timeLimit * 1000)", timers_source)
 
     @override_settings(EXAM_AUTOSAVE_INTERVAL_MS=300000, EXAM_AUTOSAVE_JITTER_MS=60000)
     def test_take_exam_uses_five_minute_server_autosave_with_jitter(self):
@@ -2558,8 +2573,11 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'data-autosave-interval-ms="300000"')
         self.assertContains(response, 'data-autosave-jitter-ms="60000"')
-        self.assertContains(response, "const defaultAutoSaveIntervalMs = 300000;")
-        self.assertContains(response, "const autoSaveDelayMs = serverAutoSaveIntervalMs + autoSaveSpreadMs;")
+        self.assertContains(response, "exams/js/take_exam/config.js")
+        # Davranış müqaviləsi: 5 dəqiqəlik server default-u + jitter əlavəsi.
+        config_source = self._take_exam_static_source("exams/js/take_exam/config.js")
+        self.assertIn("defaultAutoSaveIntervalMs = 300000", config_source)
+        self.assertIn("autoSaveDelayMs = serverAutoSaveIntervalMs + autoSaveSpread(", config_source)
 
     def test_take_exam_time_warning_modal_strings_are_translated_for_supported_languages(self):
         self.course_assigned_exam.total_duration_minutes = 30
@@ -4505,7 +4523,8 @@ class SupervisionTeacherApiTest(TestCase):
         response = self.client.get(reverse("exams:take_exam", args=[self.exam.slug, self.attempt.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "exam_supervision.js")
+        # Refaktor 2026-07-02: monolit exam_supervision.js → exam_supervision/ paketi.
+        self.assertContains(response, "exam_supervision.entry.js")
         self.assertContains(response, "supervised: false")
 
     @override_settings(EXAM_SUPERVISION_ENABLED=False)

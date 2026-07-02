@@ -1,14 +1,14 @@
 /* --- Rəng Dəyişənləri və Klasslar (Narıncı/Kəhrəba) --- */
-.text-orange { color: #d97706 !important; }
+.text-orange { color: var(--ems-warning-600) !important; }
 
 .badge-orange {
-    background: #fef3c7 !important;
-    color: #d97706 !important;
+    background: var(--ems-warning-100) !important;
+    color: var(--ems-warning-600) !important;
 }
 
 .btn-orange {
-    background-color: #d97706 !important;
-    color: #ffffff !important;
+    background-color: var(--ems-warning-600) !important;
+    color: var(--ems-neutral-0) !important;
     border: none;
 }
 
@@ -18,8 +18,8 @@
 }
 
 .icon-orange-light {
-    color: #d97706 !important;
-    background: #fef3c7 !important;
+    color: var(--ems-warning-600) !important;
+    background: var(--ems-warning-100) !important;
 }
 
 /* --- Kart Dizaynı --- */
@@ -34,7 +34,7 @@
     align-items: center;
     gap: 1.25rem;
     padding: 1.25rem;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     text-decoration: none;
@@ -53,8 +53,8 @@
     width: 50px;
     height: 50px;
     border-radius: 12px;
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -64,8 +64,8 @@
 }
 
 .modern-course-card:hover .course-card-icon {
-    background: #d97706;
-    color: #ffffff;
+    background: var(--ems-warning-600);
+    color: var(--ems-neutral-0);
 }
 
 .course-card-content {
@@ -92,12 +92,12 @@
 }
 
 .course-card-action {
-    color: #cbd5e1;
+    color: var(--ems-neutral-300);
     font-size: 1.1rem;
     transition: transform 0.2s ease, color 0.2s;
 }
 
 .modern-course-card:hover .course-card-action {
-    color: #d97706;
+    color: var(--ems-warning-600);
     transform: translateX(4px);
 }

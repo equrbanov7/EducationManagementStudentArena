@@ -214,6 +214,18 @@ class AuditLogSchemaCompatibilityTest(TransactionTestCase):
             password="StrongPass123!",
         )
         self.content_type = ContentType.objects.get_for_model(self.user)
+        # Faza 4: introspeksiya nəticəsi alias başına keşlənir. Bu test
+        # sxemi PROSESS İÇİNDƏ dəyişir (sütun atır) — real ssenaridə bu,
+        # köhnə sxemlə başlamış TƏZƏ prosessdir, ona görə keş təmizlənərək
+        # "təzə prosess" davranışı simulyasiya olunur.
+        self._clear_missing_fields_cache()
+        self.addCleanup(self._clear_missing_fields_cache)
+
+    @staticmethod
+    def _clear_missing_fields_cache():
+        from .models import AuditLogManager
+
+        AuditLogManager._missing_fields_cache.clear()
 
     def _legacy_resource_index(self):
         return models.Index(fields=["resource_type", "resource_id"], name="audit_audit_resourc_2a3aef_idx")
@@ -229,6 +241,8 @@ class AuditLogSchemaCompatibilityTest(TransactionTestCase):
                 schema_editor.remove_index(AuditLog, self._legacy_resource_index())
             for field_name in ("resource_repr", "resource_id", "resource_type"):
                 schema_editor.remove_field(AuditLog, AuditLog._meta.get_field(field_name))
+        # Sxem dəyişdi → keşlənmiş introspeksiya nəticəsi artıq keçərsizdir.
+        self._clear_missing_fields_cache()
 
     def _restore_legacy_resource_fields(self):
         with connection.schema_editor() as schema_editor:
@@ -391,3 +405,42 @@ class SuperadminCrossOrgAuditTest(TransactionTestCase):
         self.assertEqual(log.action, AuditAction.UPDATE)
         self.assertIsNotNone(log.created_at)
         self.assertIn("Custom reason", log.reason)
+
+
+# ---------------------------------------------------------------------------
+# Faza 4 (audit 2026-07-02): introspeksiya keşi reqressiya testləri
+# ---------------------------------------------------------------------------
+
+
+class AuditLogManagerIntrospectionCacheTests(TestCase):
+    """Sxem introspeksiyası DB alias başına yalnız BİR dəfə işləməlidir.
+
+    Əvvəlki davranış: hər ``create()``/``get_queryset()`` çağırışı
+    ``get_table_description`` introspeksiyası işlədirdi (hər audit yazısına
+    əlavə kataloq sorğusu). Keş ilə ikinci ``create()`` tam olaraq 1 sorğu
+    (INSERT) olmalıdır.
+    """
+
+    def _clear_cache(self):
+        from .models import AuditLogManager
+
+        AuditLogManager._missing_fields_cache.clear()
+
+    def test_first_create_populates_cache(self):
+        self._clear_cache()
+        from .models import AuditLogManager
+
+        AuditLog.objects.create(action=AuditAction.CREATE, resource_type="warmup", resource_id="1")
+        self.assertIn(AuditLog.objects.db, AuditLogManager._missing_fields_cache)
+
+    def test_second_create_is_single_insert_query(self):
+        self._clear_cache()
+        AuditLog.objects.create(action=AuditAction.CREATE, resource_type="warmup", resource_id="1")
+        with self.assertNumQueries(1):
+            AuditLog.objects.create(action=AuditAction.CREATE, resource_type="cached", resource_id="2")
+
+    def test_queryset_read_after_warmup_is_single_query(self):
+        self._clear_cache()
+        AuditLog.objects.create(action=AuditAction.CREATE, resource_type="warmup", resource_id="1")
+        with self.assertNumQueries(1):
+            list(AuditLog.objects.all()[:5])

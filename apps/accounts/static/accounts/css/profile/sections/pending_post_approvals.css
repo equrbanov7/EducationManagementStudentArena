@@ -26,7 +26,7 @@
 .pending-post-item {
     align-items: flex-start;
     border: 1px solid #d5e8fb;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     width: 100%;
     max-width: 100%;
     overflow: hidden;
@@ -67,7 +67,7 @@
 }
 
 .pending-post-meta i {
-    color: #475569;
+    color: var(--ems-neutral-600);
     margin-right: 0.2rem;
 }
 
@@ -79,7 +79,7 @@
 
 .pending-post-text {
     margin: 0 0 0.55rem;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 0.9rem;
     line-height: 1.45;
     max-width: 100%;
@@ -88,7 +88,7 @@
 }
 
 .pending-post-text--excerpt {
-    color: #0f766e;
+    color: var(--ems-success-strong);
     font-weight: 600;
 }
 
@@ -107,7 +107,7 @@
 .pending-post-content-toggle {
     border: 0;
     background: transparent;
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 0.9rem;
     font-weight: 700;
     padding: 0;
@@ -117,7 +117,7 @@
 }
 
 .pending-post-content-toggle:hover {
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .pending-post-content-toggle:focus-visible {
@@ -129,11 +129,11 @@
 .pending-post-preview {
     width: 100%;
     max-width: min(520px, 100%);
-    border: 1px solid #dbeafe;
+    border: 1px solid var(--ems-primary-100);
     border-radius: 10px;
     overflow: hidden;
     margin: 0.35rem 0 0.65rem;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
 }
 
 .pending-post-preview img {
@@ -147,9 +147,9 @@
 .pending-post-feedback {
     margin-bottom: 0.65rem;
     padding: 0.55rem 0.7rem;
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--ems-primary-200);
     border-radius: 8px;
-    background: #eff6ff;
+    background: var(--ems-primary-50);
     color: #1e3a8a;
     font-size: 0.86rem;
     overflow-wrap: anywhere;
@@ -157,7 +157,7 @@
 }
 
 .pending-post-actions {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ems-neutral-200);
     padding-top: 0.65rem;
     max-width: 100%;
 }
@@ -165,7 +165,7 @@
 .pending-post-feedback-label {
     display: block;
     margin-bottom: 0.35rem;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-size: 0.84rem;
     font-weight: 600;
 }
@@ -183,25 +183,25 @@
 }
 
 .pending-post-buttons .pending-post-edit-btn {
-    border-color: #3b82f6;
-    color: #1d4ed8;
-    background: #eff6ff;
+    border-color: var(--ems-primary-500);
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
 }
 
 .pending-post-buttons .pending-post-edit-btn:hover {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
 }
 
 .pending-post-buttons .btn-outline-warning {
-    border-color: #f59e0b;
+    border-color: var(--ems-warning-500);
     color: #b45309;
     background: #fffbeb;
 }
 
 .pending-post-buttons .btn-outline-warning:hover {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .pending-post-approved-note {
@@ -227,7 +227,7 @@
     border-radius: 999px;
     border: 1px solid #fcd34d;
     background: #fffbeb;
-    color: #92400e;
+    color: var(--ems-warning-800);
     font-size: 0.82rem;
     font-weight: 700;
 }

@@ -15,7 +15,7 @@
 
 /* --- Forma Kartı --- */
 .post-form-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     max-width: 800px; /* Daha geniş forma üçün */
     width: 100%;
     padding: 50px;
@@ -28,13 +28,13 @@
 /* --- Başlıq və Altyazı --- */
 .post-form-heading {
     font-size: 2.5rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 10px;
     font-weight: 700;
 }
 
 .post-form-subheading {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light, var(--ems-gray-500));
     font-size: 1.1rem;
     margin-bottom: 40px;
 }
@@ -49,12 +49,12 @@
 
 /* Formun ümumi xəta mesajları (non_field_errors) */
 .post-form-global-errors {
-    background-color: #fee2e2;
+    background-color: var(--ems-danger-100);
     color: #991b1b;
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 25px;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     font-size: 0.95rem;
     text-align: left;
 }
@@ -71,7 +71,7 @@
 .post-form-group label {
     display: block;
     font-size: 0.95rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark, var(--ems-neutral-800));
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -97,9 +97,9 @@
 .post-form-group input[type="url"]:focus,
 .post-form-group textarea:focus,
 .post-form-group select:focus {
-    border-color: var(--primary-color, #2563eb);
+    border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    background-color: #ffffff;
+    background-color: var(--ems-neutral-0);
 }
 
 /* Textarea üçün xüsusi hündürlük */
@@ -122,7 +122,7 @@
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #dbe7ff;
-    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    background: linear-gradient(180deg, #f8fbff 0%, var(--ems-neutral-0) 100%);
     box-shadow: 0 16px 30px rgba(37, 99, 235, 0.08);
 }
 
@@ -136,7 +136,7 @@
     padding: 0.9rem;
     border-radius: 0.9rem;
     border: 1px solid #e5edf9;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .post-category-grid__label {
@@ -162,7 +162,7 @@
 
 .post-category-grid__hint {
     margin-top: 0.55rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.86rem;
     line-height: 1.45;
 }
@@ -179,7 +179,7 @@
 
 /* Forma sahəsinin xətası */
 .post-form-field-error {
-    color: #ef4444;
+    color: var(--ems-danger-500);
     font-size: 0.85rem;
     margin-top: 5px;
 }
@@ -188,7 +188,7 @@
 .post-form-submit-btn { /* btn-primary -> post-form-submit-btn */
     width: 100%;
     padding: 14px;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color, var(--ems-primary-600));
     color: white;
     border: none;
     border-radius: 8px;
@@ -200,7 +200,7 @@
 }
 
 .post-form-submit-btn:hover {
-    background-color: #1e40af;
+    background-color: var(--ems-primary-800);
     transform: translateY(-2px);
 }
 

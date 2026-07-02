@@ -2,7 +2,7 @@
 
 /* --- Ümumi Header Stilləri --- */
 .blog-header {
-    background-color: var(--card-bg, #ffffff);
+    background-color: var(--card-bg, var(--ems-neutral-0));
     /* Daha incə, modern shadow + alt sərhəd */
     box-shadow:
         0 1px 0 rgba(15, 23, 42, 0.06),
@@ -151,7 +151,7 @@
     padding: 9px 18px;
     border-radius: 10px;
     background: var(--primary-color, var(--ems-primary-600));
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 600;
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.12) inset,
@@ -163,7 +163,7 @@
 }
 
 .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: var(--ems-primary-700);
     transform: translateY(-1px);
     box-shadow:
@@ -172,7 +172,7 @@
 }
 
 .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams.blog-header__nav-link--active {
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: var(--ems-primary-700);
 }
 
@@ -269,7 +269,7 @@
     height: 28px;
     border-radius: 50%;
     background: var(--primary-color);
-    color: #fff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -278,7 +278,7 @@
 
 .blog-header__user-avatar--image {
     padding: 3px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(15, 23, 42, 0.12);
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
 }
@@ -325,7 +325,7 @@
     right: 0;
     top: 110%;
     min-width: 180px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
     padding: 8px 0;
@@ -418,7 +418,7 @@ button.blog-header__user-menu-item{
     right: -300px; /* Başlanğıcda ekranın kənarında gizli */
     width: 300px;
     height: 100%;
-    background: var(--card-bg, #ffffff);
+    background: var(--card-bg, var(--ems-neutral-0));
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
     z-index: 999; /* Overlaydən yuxarıda */
     display: flex;
@@ -469,7 +469,7 @@ button.blog-header__user-menu-item{
 
 .mobile-nav-panel .blog-header__nav-link--exams:hover,
 .mobile-nav-panel .blog-header__nav-link--exams.blog-header__nav-link--active {
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: var(--primary-color, var(--ems-primary-600));
     border-color: var(--primary-color, var(--ems-primary-600));
     box-shadow: none;
@@ -506,12 +506,12 @@ button.blog-header__user-menu-item{
 .mobile-nav-panel .blog-header__nav-link--logout {
     color: var(--ems-danger-strong);
     background: #fef2f2;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
 }
 
 .mobile-nav-panel .blog-header__nav-link--logout:hover {
     color: #991b1b;
-    background: #fee2e2;
+    background: var(--ems-danger-100);
 }
 
 .mobile-nav-panel .blog-header__nav-item--language {
@@ -622,7 +622,7 @@ button.blog-header__user-menu-item{
     font-size: 0.92rem;
     font-weight: 600;
     line-height: 1;
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: var(--primary-color, var(--ems-primary-600));
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.18) inset,
@@ -663,7 +663,7 @@ button.blog-header__user-menu-item{
     top: calc(100% + 10px);
     width: 340px;
     max-width: calc(100vw - 32px);
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 16px;
     box-shadow: 0 20px 44px -12px rgba(15, 23, 42, 0.28);
@@ -809,7 +809,7 @@ button.blog-header__user-menu-item{
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    color: #fff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -883,8 +883,8 @@ button.blog-header__user-menu-item{
     height: 20px;
     padding: 0 6px;
     border-radius: 999px;
-    background: #ef4444;
-    color: #fff;
+    background: var(--ems-danger-500);
+    color: var(--ems-neutral-0);
     font-size: 0.72rem;
     font-weight: 700;
     display: inline-flex;

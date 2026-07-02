@@ -25,8 +25,8 @@
     min-height: 42px;
     border: 1px solid #cbdcf2;
     border-radius: 10px;
-    background: #ffffff;
-    color: #1f2937;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-800);
     padding: 0.55rem 0.75rem;
     font-size: 0.95rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -47,7 +47,7 @@
     padding: 0.55rem 0.75rem;
     border-radius: 10px;
     border-color: #cbdcf2;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: none;
     font-size: 0.95rem;
     font-weight: 500;
@@ -55,7 +55,7 @@
 
 .pending-review-select-wrap .bootstrap-single-select__toggle:hover {
     border-color: #9ec5fe;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .pending-review-select-wrap .bootstrap-single-select__toggle:focus,
@@ -84,7 +84,7 @@
 }
 
 .pr-section-title i {
-    color: #2563eb;
+    color: var(--ems-primary-600);
 }
 
 .pr-item-card {
@@ -93,7 +93,7 @@
     align-items: flex-start;
     border: 1px solid #d5e8fb;
     border-radius: 14px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     padding: 1rem;
     margin-bottom: 0.75rem;
     box-shadow: 0 1px 1px rgba(15, 23, 42, 0.02);
@@ -108,7 +108,7 @@
     justify-content: center;
     flex-shrink: 0;
     background: #eaf3ff;
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 1.05rem;
 }
 
@@ -139,8 +139,8 @@
 }
 
 .pr-badge-type {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 .pr-badge-recheck {
@@ -153,18 +153,18 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.32rem 0.55rem;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.89rem;
 }
 
 .pr-item-meta strong {
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     max-width: 100%;
     overflow-wrap: anywhere;
 }
 
 .pr-item-meta-divider {
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
 }
 
 .pr-badge-status {
@@ -172,13 +172,13 @@
 }
 
 .pr-badge-status.pending {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .pr-badge-status.graded {
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
 }
 
 .pr-timer-box {
@@ -203,7 +203,7 @@
 .pr-btn-review {
     border: 1px solid #0f4fc4;
     background: linear-gradient(135deg, #1b67df 0%, #13926b 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-weight: 700;
     border-radius: 10px;
     padding: 0.52rem 0.95rem;
@@ -215,7 +215,7 @@
 }
 
 .pr-btn-review:hover {
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     border-color: #0d4ab9;
     filter: brightness(0.95);
 }
@@ -227,7 +227,7 @@
     border: 1px dashed #bfd8f5;
     border-radius: var(--radius-md);
     background: #f9fcff;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .pr-empty-state i {
@@ -238,7 +238,7 @@
 
 .pr-empty-state h4 {
     margin: 0 0 0.25rem;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 @media (max-width: 991px) {
@@ -308,7 +308,7 @@
 }
 
 .pending-review-results-table td {
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .pending-review-results-table tbody tr:hover {
@@ -327,18 +327,18 @@
 }
 
 .pending-review-type-badge--exam {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 .pending-review-type-badge--assignment {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .pending-review-type-badge--project {
     background: #cffafe;
-    color: #0f766e;
+    color: var(--ems-success-strong);
 }
 
 .pending-review-type-badge--lab {
@@ -361,7 +361,7 @@
 .pending-review-score-pct {
     display: inline-block;
     margin-left: 6px;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-weight: 600;
     font-size: 0.85rem;
     white-space: nowrap;
@@ -371,7 +371,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #334155;
+    color: var(--ems-neutral-700);
     font-weight: 700;
     line-height: 1.25;
     max-width: 180px;
@@ -379,7 +379,7 @@
 }
 
 .pending-review-evaluator i {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     flex-shrink: 0;
 }
 
@@ -397,18 +397,18 @@
 }
 
 .pending-item-type--exam {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 .pending-item-type--assignment {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .pending-item-type--project {
     background: #cffafe;
-    color: #0f766e;
+    color: var(--ems-success-strong);
 }
 
 .pending-item-type--lab {
@@ -439,14 +439,14 @@
 .btn-review-view {
     border: 1px solid #0f4fc4;
     background: linear-gradient(135deg, #1b67df 0%, #13926b 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-weight: 700;
     border-radius: 10px;
     padding-inline: 0.8rem;
 }
 
 .btn-review-view:hover {
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     border-color: #0d4ab9;
     filter: brightness(0.95);
 }
@@ -483,7 +483,7 @@
     padding: 0.65rem 0.9rem;
     border-radius: 10px;
     border-color: #cbdcf2;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
     font-size: 0.95rem;
     font-weight: 600;
@@ -491,7 +491,7 @@
 
 .pending-answers-select-wrap .bootstrap-single-select__toggle:hover {
     border-color: #9ec5fe;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .pending-answers-select-wrap .bootstrap-single-select__toggle:focus,
@@ -520,13 +520,13 @@
 }
 
 .pending-answer-status--pending {
-    background: #dcfce7;
+    background: var(--ems-success-100);
     color: #166534;
 }
 
 .pending-answer-status--reviewing {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 @media (max-width: 768px) {

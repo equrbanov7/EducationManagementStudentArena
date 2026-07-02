@@ -5,7 +5,7 @@
 .exam-create-edit-modal .modal-body {
     max-height: calc(100vh - 190px);
     overflow-y: auto;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
 }
 
 .create-exam-modal-loading,
@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-weight: 600;
     padding: 1rem;
 }
@@ -27,7 +27,7 @@
 .create-exam-form-errors {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--ems-danger-200);
     border-radius: 8px;
     background: #fef2f2;
     color: #991b1b;
@@ -74,7 +74,7 @@
 
 .create-exam-form-grid .form-group > label {
     font-weight: 600;
-    color: #334155;
+    color: var(--ems-neutral-700);
     margin-bottom: 0.35rem;
 }
 
@@ -92,9 +92,9 @@
 
 .create-exam-type-toggle > .create-exam-type-btn {
     border-radius: 12px !important;
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
-    color: #334155;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -106,8 +106,8 @@
 
 .create-exam-type-toggle > .create-exam-type-btn:hover {
     border-color: #93c5fd;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
 }
 
 .create-exam-type-toggle > .btn-check:focus + .create-exam-type-btn {
@@ -115,16 +115,16 @@
 }
 
 .create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    border-color: #1d4ed8;
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
+    border-color: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
     box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
 }
 
 .create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    border-color: #1e40af;
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--ems-primary-700) 0%, var(--ems-primary-800) 100%);
+    border-color: var(--ems-primary-800);
+    color: var(--ems-neutral-0);
 }
 
 .create-exam-type-btn i {
@@ -132,14 +132,14 @@
 }
 
 .create-exam-modal-section-title {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ems-neutral-200);
     padding-top: 0.7rem;
 }
 
 .create-exam-modal-section-title h4 {
     margin: 0 0 0.2rem;
     font-size: 1rem;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -148,7 +148,7 @@
 
 .create-exam-modal-section-title p {
     margin: 0;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.86rem;
 }
 
@@ -180,7 +180,7 @@
 
 .create-exam-searchable-label {
     font-weight: 600;
-    color: #334155;
+    color: var(--ems-neutral-700);
     margin-bottom: 0.35rem;
 }
 
@@ -194,29 +194,29 @@
     left: 0.7rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
     pointer-events: none;
 }
 
 .create-exam-search-input {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 8px;
     padding: 0.55rem 0.7rem 0.55rem 2rem;
     font-size: 0.92rem;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     outline: none;
 }
 
 .create-exam-search-input:focus {
-    border-color: #3b82f6;
+    border-color: var(--ems-primary-500);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .create-exam-search-list {
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--ems-neutral-50);
     min-height: 180px;
     max-height: 230px;
     overflow-y: auto;
@@ -227,7 +227,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.45rem 0.65rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--ems-neutral-200);
     cursor: pointer;
 }
 
@@ -236,26 +236,26 @@
 }
 
 .create-exam-list-item:hover {
-    background: #eff6ff;
+    background: var(--ems-primary-50);
 }
 
 .create-exam-item-checkbox {
     width: 1rem;
     height: 1rem;
-    accent-color: #2563eb;
+    accent-color: var(--ems-primary-600);
 }
 
 .create-exam-item-label {
     margin: 0;
     cursor: pointer;
     font-size: 0.91rem;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .create-exam-selection-counter {
     margin-top: 0.35rem;
     text-align: right;
-    color: #64748b;
+    color: var(--ems-neutral-500);
     font-size: 0.82rem;
 }
 
@@ -264,7 +264,7 @@
     align-items: center;
     gap: 0.55rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--ems-neutral-700);
     border-radius: 10px;
     padding: 0.35rem 0.55rem;
 }
@@ -273,7 +273,7 @@
     margin-top: 0;
     width: 1.05rem;
     height: 1.05rem;
-    accent-color: #2563eb;
+    accent-color: var(--ems-primary-600);
 }
 
 .modal-check-label-text {
@@ -290,9 +290,9 @@
 }
 
 .modal-check-label--active {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #0f172a;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-neutral-900);
     font-weight: 700;
 }
 
@@ -303,8 +303,8 @@
 }
 
 .modal-check-label--paint {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
 }
 
 .modal-check-label--public {
@@ -325,7 +325,7 @@
 .exam-create-edit-modal .modal-buttons {
     margin-top: 1.1rem;
     padding-top: 0.85rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--ems-neutral-200);
     display: flex;
     justify-content: flex-end;
     gap: 0.65rem;
@@ -343,8 +343,8 @@
 }
 
 .exam-create-edit-modal .modal-cancel-btn {
-    background: #6b7280;
-    color: #ffffff;
+    background: var(--ems-gray-500);
+    color: var(--ems-neutral-0);
 }
 
 .exam-create-edit-modal .modal-cancel-btn:hover {
@@ -353,7 +353,7 @@
 
 .exam-create-edit-modal .modal-confirm-btn {
     background: #7367f0;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .exam-create-edit-modal .modal-confirm-btn:hover:not(:disabled) {

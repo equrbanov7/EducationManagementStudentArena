@@ -4,10 +4,10 @@
    ===========================================================================*/
 
 .top-posts-rail {
-    --rail-accent: #2563eb;
+    --rail-accent: var(--ems-primary-600);
     --rail-accent-soft: rgba(37, 99, 235, 0.1);
     --rail-accent-border: rgba(37, 99, 235, 0.2);
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #fbfdff 100%);
     border: 1px solid rgba(207, 219, 236, 0.85);
     border-radius: 20px;
     padding: 20px 22px;
@@ -37,7 +37,7 @@
     gap: 10px;
     font-size: 1.05rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     letter-spacing: -0.01em;
 }
 
@@ -96,7 +96,7 @@
     height: var(--rank-size);
     border-radius: 999px;
     background: var(--rail-accent);
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-weight: 700;
     font-size: 0.9rem;
     display: inline-flex;
@@ -142,7 +142,7 @@
 .top-posts-card__title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     line-height: 1.35;
     /* 2-line clamp */
     display: -webkit-box;
@@ -158,7 +158,7 @@
     align-items: center;
     gap: 6px;
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .top-posts-card__meta i {

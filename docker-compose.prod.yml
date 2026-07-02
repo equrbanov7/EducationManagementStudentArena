@@ -108,10 +108,10 @@ x-app-env: &app-env
   SENTRY_DSN: ${SENTRY_DSN:-}
   SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
   SENTRY_PROFILES_SAMPLE_RATE: ${SENTRY_PROFILES_SAMPLE_RATE:-0}
-  # Heavy exam features stay off in production (also hard-coded in
-  # config/settings/production.py — kept here for documentation parity).
-  PRACTICAL_EXAMS_ENABLED: "false"
-  EXAM_SUPERVISION_ENABLED: "false"
+  # Praktiki/supervision imtahan bayraqları compose-dan SİLİNDİ (Faza 5):
+  # config/settings/production.py onları hard-code False saxlayır və env-i
+  # OXUMUR — burada saxlamaq çaşdırıcı idi. CODING_EXECUTION_BACKEND isə
+  # base settings-də env-dən oxunur, ona görə qalır.
   CODING_EXECUTION_BACKEND: "disabled"
 
 services:

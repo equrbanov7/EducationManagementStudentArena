@@ -29380,6 +29380,59 @@ msgctxt "courses.dashboard"
 msgid "ai_build_sub"
 msgstr "Получите от ассистента программу, ресурсы и задания."
 
+msgctxt "core.errors.csrf"
+msgid "Page expired"
+msgstr "Страница устарела"
+
+msgctxt "core.errors.csrf"
+msgid "The security token has expired"
+msgstr "Срок действия защитного токена истёк"
+
+msgctxt "core.errors.csrf"
+msgid ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+msgstr ""
+"Форма устарела, потому что страница долго оставалась открытой или была "
+"восстановлена из кеша браузера. Не волнуйтесь — данные не потеряны."
+
+msgctxt "core.errors.csrf"
+msgid "You will be redirected to a fresh page in a few seconds."
+msgstr "Через несколько секунд вы будете перенаправлены на новую страницу."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page and try the action again."
+msgstr "Обновите страницу и повторите действие."
+
+msgctxt "core.errors.csrf"
+msgid "Back to home"
+msgstr "Вернуться на главную"
+
+msgctxt "core.errors.csrf"
+msgid "If the problem persists, make sure browser cookies are enabled."
+msgstr ""
+"Если проблема повторяется, убедитесь, что файлы cookie включены в браузере."
+
+msgctxt "core.errors.csrf"
+msgid "Stale security token — the page needs to be refreshed."
+msgstr "Устаревший защитный токен — страницу нужно обновить."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page"
+msgstr "Обновить страницу"
+
+msgctxt "core.errors.csrf"
+msgid "Go to the login page"
+msgstr "Перейти на страницу входа"
+
+msgctxt "core.errors.csrf"
+msgid "Return to sign-up"
+msgstr "Вернуться к регистрации"
+
+msgctxt "core.errors.csrf"
+msgid "Return to the verification page"
+msgstr "Вернуться на страницу подтверждения"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Роль студента нельзя выбирать вручную."

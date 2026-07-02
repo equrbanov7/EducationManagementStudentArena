@@ -12,9 +12,15 @@
 const MODAL_I18N = window.COURSES_I18N || {};
 const MODAL_ERRORS_LABEL = MODAL_I18N.errorsLabel || "Errors";
 
-document.addEventListener('DOMContentLoaded', function() {
+// Faza 6.3: dual-guard — AJAX fraqmenti kimi yüklənsə də işə düşür.
+function initModalsWhenReady() {
     initializeModals();
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initModalsWhenReady);
+} else {
+    initModalsWhenReady();
+}
 
 /**
  * Modal-ları inisializasiya et

@@ -2,14 +2,14 @@
     --pin-bg-1: #081427;
     --pin-bg-2: #0b2a52;
     --pin-bg-3: #0f4c81;
-    --pin-bg-4: #2563eb;
+    --pin-bg-4: var(--ems-primary-600);
     --pin-surface: rgba(11, 42, 82, 0.5);
     --pin-surface-strong: rgba(255, 255, 255, 0.92);
     --pin-line: rgba(255, 255, 255, 0.14);
     --pin-text: #f8f7ff;
     --pin-muted: rgba(237, 233, 254, 0.8);
     --pin-accent: #38bdf8;
-    --pin-accent-strong: #1d4ed8;
+    --pin-accent-strong: var(--ems-primary-700);
     --pin-secondary: #93c5fd;
     --pin-shadow: 0 28px 80px rgba(8, 23, 55, 0.4);
 }
@@ -171,7 +171,7 @@ body.pin-entry-page {
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #dbeafe;
+    color: var(--ems-primary-100);
 }
 
 .pin-entry-copy__eyebrow::before {
@@ -276,7 +276,7 @@ body.pin-entry-page {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #dbeafe;
+    color: var(--ems-primary-100);
 }
 
 .pin-entry-panel__header h2 {
@@ -293,7 +293,7 @@ body.pin-entry-page {
     padding: 24px;
     border-radius: 24px;
     background: var(--pin-surface-strong);
-    color: #0f172a;
+    color: var(--ems-neutral-900);
 }
 
 .pin-entry-form__label {
@@ -303,13 +303,13 @@ body.pin-entry-page {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #475569;
+    color: var(--ems-neutral-600);
 }
 
 .pin-entry-input-wrap {
-    border: 2px solid #cbd5e1;
+    border: 2px solid var(--ems-neutral-300);
     border-radius: 20px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -320,7 +320,7 @@ body.pin-entry-page {
 }
 
 .pin-entry-input-wrap.has-error {
-    border-color: #ef4444;
+    border-color: var(--ems-danger-500);
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
 }
 
@@ -337,7 +337,7 @@ body.pin-entry-page {
     line-height: 1.05;
     text-align: center;
     text-transform: uppercase;
-    color: #0f172a;
+    color: var(--ems-neutral-900);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
 }
@@ -345,7 +345,7 @@ body.pin-entry-page {
 .pin-entry-input::placeholder {
     letter-spacing: normal;
     font-size: 1rem;
-    color: #94a3b8;
+    color: var(--ems-neutral-400);
     font-family: "Manrope", sans-serif;
 }
 
@@ -354,7 +354,7 @@ body.pin-entry-page {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #b91c1c;
+    color: var(--ems-danger-strong);
     font-size: 0.94rem;
     font-weight: 700;
 }
@@ -394,7 +394,7 @@ body.pin-entry-page {
     margin: 14px 0 0;
     font-size: 0.94rem;
     line-height: 1.6;
-    color: #64748b;
+    color: var(--ems-neutral-500);
 }
 
 .pin-entry-digits {

@@ -9,9 +9,16 @@
  * - Animation effects
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+// Faza 6.3: dual-guard — AJAX fraqmenti kimi yüklənsə də işə düşür
+// (DOM artıq hazırdırsa dərhal; staff_management/entry.js pattern-i).
+function initAccordionWhenReady() {
     initializeAccordion();
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAccordionWhenReady);
+} else {
+    initAccordionWhenReady();
+}
 
 /**
  * Accordion-u inisializasiya et

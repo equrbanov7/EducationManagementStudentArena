@@ -1,5 +1,5 @@
 .student-dashboard {
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
     min-height: 100vh;
     padding: 40px 0;
 }
@@ -13,7 +13,7 @@
 }
 
 .dashboard-header h1 {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     margin-bottom: 10px;
 }
 
@@ -42,7 +42,7 @@
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 2px solid var(--ems-gray-200);
 }
 
 .widget-icon {
@@ -57,12 +57,12 @@
 }
 
 .widget-icon.courses {
-    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
     color: white;
 }
 
 .widget-icon.assignments {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--ems-success) 0%, var(--ems-success-600) 100%);
     color: white;
 }
 
@@ -79,7 +79,7 @@
 .widget-title {
     font-size: 18px;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--ems-neutral-800);
 }
 
 .course-item, .assignment-item, .exam-item, .grade-item {
@@ -104,7 +104,7 @@
 
 .item-meta {
     font-size: 14px;
-    color: #6b7280;
+    color: var(--ems-gray-500);
 }
 
 .deadline-badge {
@@ -117,18 +117,18 @@
 }
 
 .deadline-badge.urgent {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger);
 }
 
 .deadline-badge.soon {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
 }
 
 .deadline-badge.normal {
-    background: #dbeafe;
-    color: #2563eb;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-600);
 }
 
 .grade-badge {
@@ -145,17 +145,17 @@
 }
 
 .grade-badge.good {
-    background: #dbeafe;
-    color: #1e40af;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
 }
 
 .grade-badge.average {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
 .grade-badge.poor {
-    background: #fee2e2;
+    background: var(--ems-danger-100);
     color: #991b1b;
 }
 

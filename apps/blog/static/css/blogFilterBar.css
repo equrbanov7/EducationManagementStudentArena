@@ -11,7 +11,7 @@
 .blog-filter-rail {
     margin: 0 0 24px;
     padding: 16px 14px 18px;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    background: linear-gradient(180deg, var(--ems-neutral-0) 0%, #fbfdff 100%);
     border: 1px solid rgba(207, 219, 236, 0.8);
     border-radius: 18px;
     box-shadow: 0 8px 20px -14px rgba(15, 23, 42, 0.15);
@@ -20,7 +20,7 @@
 .blog-filter-rail__group + .blog-filter-rail__group {
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px dashed #e2e8f0;
+    border-top: 1px dashed var(--ems-neutral-200);
 }
 
 .blog-filter-rail__heading {
@@ -36,7 +36,7 @@
 }
 
 .blog-filter-rail__heading i {
-    color: #2563eb;
+    color: var(--ems-primary-600);
     font-size: 0.85rem;
 }
 
@@ -92,14 +92,14 @@
 .blog-filter-chip:focus-visible {
     border-color: rgba(37, 99, 235, 0.4);
     background: rgba(37, 99, 235, 0.1);
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
     outline: none;
 }
 
 .blog-filter-chip.is-active {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: #ffffff;
+    background: var(--ems-primary-600);
+    border-color: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
     box-shadow: 0 6px 16px -8px rgba(37, 99, 235, 0.5);
 }
 
@@ -108,12 +108,12 @@
     padding: 1px 7px;
     border-radius: 999px;
     background: rgba(37, 99, 235, 0.12);
-    color: #1d4ed8;
+    color: var(--ems-primary-700);
 }
 
 .blog-filter-chip.is-active .blog-filter-chip__count {
     background: rgba(255, 255, 255, 0.22);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 /* "tag" variant — rose accent */
@@ -131,7 +131,7 @@
 .blog-filter-chip--tag.is-active {
     background: #db2777;
     border-color: #db2777;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 6px 16px -8px rgba(219, 39, 119, 0.5);
 }
 

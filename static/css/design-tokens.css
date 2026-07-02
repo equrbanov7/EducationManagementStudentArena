@@ -33,11 +33,26 @@
     --ems-neutral-800: #1f2937;
     --ems-neutral-900: #0f172a;
 
+    /* ── Legacy gray (Tailwind gray — slate-dən fərqli çalar) ───────────── */
+    /* Faza 6 (audit 2026-07-02): köhnə komponentlərdə geniş istifadə olunur. */
+    --ems-gray-200: #e5e7eb;
+    --ems-gray-500: #6b7280;
+
     /* ── Semantik ───────────────────────────────────────────────────────── */
     --ems-success: #10b981;
     --ems-success-strong: #0f766e;
+    --ems-success-100: #dcfce7;
+    --ems-success-600: #059669;
     --ems-danger: #dc2626;
     --ems-danger-strong: #b91c1c;
+    --ems-danger-100: #fee2e2;
+    --ems-danger-200: #fecaca;
+    --ems-danger-500: #ef4444;
+    /* Faza 6: warning (amber) ailəsi — badge/alert/status-larda geniş. */
+    --ems-warning-100: #fef3c7;
+    --ems-warning-500: #f59e0b;
+    --ems-warning-600: #d97706;
+    --ems-warning-800: #92400e;
 
     /* ── Səma-uyğun alias-lar (istifadəni asanlaşdırmaq üçün) ────────────── */
     --ems-text: var(--ems-neutral-900);

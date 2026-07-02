@@ -4,7 +4,7 @@
 }
 
 .create-group-card {
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
     border: 1px solid rgba(148, 163, 184, 0.35);
@@ -14,7 +14,7 @@
 .card-header-custom {
     padding: 18px 20px 10px;
     border-bottom: 1px solid rgba(148, 163, 184, 0.35);
-    background: linear-gradient(120deg, #f8fafc, #eff6ff);
+    background: linear-gradient(120deg, var(--ems-neutral-50), var(--ems-primary-50));
 }
 
 .card-title {

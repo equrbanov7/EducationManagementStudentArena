@@ -26,7 +26,7 @@
     height: 34px;
     border: 2px solid var(--exam-border-strong);
     color: var(--ems-neutral-400);
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     font-size: 0.9rem;
     font-weight: 900;
     line-height: 1;
@@ -68,7 +68,7 @@
     padding: 16px 18px;
     border: 1.5px solid var(--exam-border);
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--exam-text);
     font-size: 1rem;
     line-height: 1.5;
@@ -256,7 +256,7 @@
 
 .btn-primary {
     background: var(--exam-blue);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .btn-primary:hover {
@@ -265,16 +265,16 @@
 
 .btn-success {
     background: var(--exam-green);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .btn-success:hover {
-    background: #059669;
+    background: var(--ems-success-600);
 }
 
 .btn-danger {
     background: linear-gradient(135deg, var(--exam-red) 0%, var(--exam-red-strong) 100%);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
 }
 
@@ -301,7 +301,7 @@
     padding: 26px;
     border: 1px solid var(--exam-border);
     border-radius: 20px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
 }
 
@@ -327,7 +327,7 @@
 .confirm-modal-summary.is-warning {
     border: 1px solid #fde68a;
     background: var(--exam-amber-soft);
-    color: #92400e;
+    color: var(--ems-warning-800);
 }
 
 .confirm-modal-summary.is-success {
@@ -385,7 +385,7 @@
     padding: 36px;
     border: 1px solid var(--exam-border);
     border-radius: 16px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: var(--exam-shadow);
 }
 

@@ -27,19 +27,29 @@ class AuditLogManager(models.Manager):
 
     _LEGACY_RESOURCE_FIELDS = frozenset({"resource_type", "resource_id", "resource_repr"})
     _compat_warning_emitted = False
+    # Faza 4 (audit 2026-07-02): sxem introspeksiyası hər create()/queryset-də
+    # deyil, alias başına BİR DƏFƏ işləyir. Sxem yalnız irəli istiqamətdə
+    # "təmir" olunur (əskik sütunlar əlavə edilir); köhnəlmiş keş bu halda
+    # təhlükəsizdir — davranış təmirdən əvvəlki (defer/omit) rejimdə qalır.
+    _missing_fields_cache: dict[str, frozenset[str]] = {}
 
     def _missing_field_names(self, using: str) -> set[str]:
+        cached = self._missing_fields_cache.get(using)
+        if cached is not None:
+            return set(cached)
         connection = connections[using]
         table_name = self.model._meta.db_table
         with connection.cursor() as cursor:
             description = connection.introspection.get_table_description(cursor, table_name)
         normalize = connection.introspection.identifier_converter
         existing_columns = {normalize(column.name) for column in description}
-        return {
+        missing = {
             field.name
             for field in self.model._meta.local_concrete_fields
             if not field.generated and normalize(field.column) not in existing_columns
         }
+        type(self)._missing_fields_cache[using] = frozenset(missing)
+        return missing
 
     def get_queryset(self):
         queryset = super().get_queryset()

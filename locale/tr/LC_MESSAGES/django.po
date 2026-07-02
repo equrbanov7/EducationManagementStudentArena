@@ -29278,6 +29278,58 @@ msgctxt "courses.dashboard"
 msgid "ai_build_sub"
 msgstr "Asistandan müfredat, kaynak ve görev önerileri alın."
 
+msgctxt "core.errors.csrf"
+msgid "Page expired"
+msgstr "Sayfanın süresi doldu"
+
+msgctxt "core.errors.csrf"
+msgid "The security token has expired"
+msgstr "Güvenlik belirtecinin süresi doldu"
+
+msgctxt "core.errors.csrf"
+msgid ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+msgstr ""
+"Sayfa uzun süre açık kaldığı veya tarayıcı önbelleğinden geri yüklendiği "
+"için form eskidi. Endişelenmeyin — hiçbir veri kaybolmadı."
+
+msgctxt "core.errors.csrf"
+msgid "You will be redirected to a fresh page in a few seconds."
+msgstr "Birkaç saniye içinde yeni sayfaya yönlendirileceksiniz."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page and try the action again."
+msgstr "Sayfayı yenileyip işlemi tekrar edin."
+
+msgctxt "core.errors.csrf"
+msgid "Back to home"
+msgstr "Ana sayfaya dön"
+
+msgctxt "core.errors.csrf"
+msgid "If the problem persists, make sure browser cookies are enabled."
+msgstr "Sorun devam ederse tarayıcı çerezlerinin etkin olduğundan emin olun."
+
+msgctxt "core.errors.csrf"
+msgid "Stale security token — the page needs to be refreshed."
+msgstr "Eski güvenlik belirteci — sayfanın yenilenmesi gerekiyor."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page"
+msgstr "Sayfayı yenile"
+
+msgctxt "core.errors.csrf"
+msgid "Go to the login page"
+msgstr "Giriş sayfasına geç"
+
+msgctxt "core.errors.csrf"
+msgid "Return to sign-up"
+msgstr "Kayda geri dön"
+
+msgctxt "core.errors.csrf"
+msgid "Return to the verification page"
+msgstr "Doğrulama sayfasına dön"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Öğrenci rolü manuel seçilemez."

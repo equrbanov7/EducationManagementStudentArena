@@ -23,7 +23,7 @@
     background: rgba(255,255,255,0.1);
     border: none;
     border-radius: 50%;
-    color: #fff;
+    color: var(--ems-neutral-0);
     font-size: 20px;
     cursor: pointer;
     z-index: 10;
@@ -509,7 +509,7 @@
 }
 
 .podium-block--place-1 .podium-stand {
-    background: linear-gradient(180deg, #facc15 0%, #f59e0b 100%);
+    background: linear-gradient(180deg, #facc15 0%, var(--ems-warning-500) 100%);
 }
 
 .podium-block--place-2 .podium-stand {
@@ -517,5 +517,5 @@
 }
 
 .podium-block--place-3 .podium-stand {
-    background: linear-gradient(180deg, #f59e0b 0%, #c2410c 100%);
+    background: linear-gradient(180deg, var(--ems-warning-500) 0%, #c2410c 100%);
 }

@@ -215,7 +215,7 @@ body.wait-room-page {
     padding: 8px 15px;
     border-radius: 999px;
     background: linear-gradient(135deg, var(--wait-room-accent), var(--wait-room-accent-strong));
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -266,7 +266,7 @@ body.wait-room-page {
     height: 42px;
     border: none;
     border-radius: 50%;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-900);
     box-shadow: 0 18px 28px rgba(15, 23, 42, 0.18);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -332,7 +332,7 @@ body.wait-room-page {
     min-height: 52px;
     font-size: clamp(1.35rem, 2vw, 1.6rem);
     background: linear-gradient(180deg, rgba(37, 99, 235, 0.92), rgba(30, 64, 175, 0.92));
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 .wait-room-reaction__button:hover:not(:disabled),
@@ -351,7 +351,7 @@ body.wait-room-page {
     width: min(100%, 122px);
     padding: 10px 14px;
     background: rgba(37, 99, 235, 0.92);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -394,8 +394,8 @@ body.wait-room-page {
     font-weight: 700;
 }
 
-.wait-room-feedback.is-success { color: #dcfce7; }
-.wait-room-feedback.is-error { color: #fecaca; }
+.wait-room-feedback.is-success { color: var(--ems-success-100); }
+.wait-room-feedback.is-error { color: var(--ems-danger-200); }
 .wait-room-feedback.is-muted { color: rgba(255, 255, 255, 0.76); }
 
 .wait-room-modal-backdrop {
@@ -424,7 +424,7 @@ body.wait-room-page {
     max-height: calc(100vh - 48px);
     overflow: hidden;
     border-radius: 30px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-900);
     box-shadow: var(--wait-room-shadow);
     transform: translate(-50%, -42%) scale(0.96);
@@ -445,7 +445,7 @@ body.wait-room-page {
     align-items: center;
     gap: 12px;
     padding: 22px 24px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     z-index: 1;
 }
 

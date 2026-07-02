@@ -18,7 +18,7 @@
 .review-result-shell {
     max-width: 1120px;
     margin: 0 auto;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--rr-border);
     border-radius: 18px;
     box-shadow: var(--rr-shadow);
@@ -66,7 +66,7 @@
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, var(--rr-blue-700), var(--rr-green-700));
     border-radius: 10px;
     padding: 10px 14px;
@@ -74,7 +74,7 @@
 }
 
 .review-back-link:hover {
-    color: #fff;
+    color: var(--ems-neutral-0);
     filter: brightness(0.95);
 }
 
@@ -117,7 +117,7 @@
     border-radius: 14px;
     padding: 16px;
     margin-bottom: 16px;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 
 .review-block h2 {
@@ -176,7 +176,7 @@
     margin: 0;
     padding: 12px 14px;
     font-size: 16px;
-    color: #fff;
+    color: var(--ems-neutral-0);
     background: linear-gradient(135deg, var(--rr-blue-700), #2f7be8);
     display: flex;
     align-items: center;
@@ -190,7 +190,7 @@
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--ems-neutral-0);
     display: inline-flex;
     align-items: center;
     justify-content: center;

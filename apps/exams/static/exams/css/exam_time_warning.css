@@ -23,7 +23,7 @@
     padding: 1.35rem 1.4rem 1.25rem;
     border-radius: 16px;
     border: 1px solid #fed7aa;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
     transform: translateY(10px) scale(0.98);
     transition: transform 180ms ease;
@@ -77,7 +77,7 @@
 
 .exam-time-warning-body {
     margin: 0;
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: 0.96rem;
     line-height: 1.55;
 }

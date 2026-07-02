@@ -2,7 +2,7 @@
 /* --- Teacher Feedback --- */
 .teacher-feedback-box {
     margin-top: 25px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 1px solid var(--ems-primary-200);
     border-radius: 12px;
     overflow: hidden;
@@ -26,7 +26,7 @@
 }
 .tf-title { color: var(--ems-primary-700); font-weight: 700; margin-left: 8px; }
 .tf-score {
-    background: #fff;
+    background: var(--ems-neutral-0);
     color: var(--ems-primary-700);
     padding: 4px 12px;
     border-radius: 20px;
@@ -64,7 +64,7 @@
 
 .custom-blue-btn {
     background-color: var(--ems-primary-500);
-    color: #fff;
+    color: var(--ems-neutral-0);
     border: none;
     border-radius: 10px;
     padding: 12px 24px;
@@ -78,7 +78,7 @@
 }
 .custom-blue-btn:hover {
     background-color: var(--ems-primary-600);
-    color: #fff;
+    color: var(--ems-neutral-0);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
 }
@@ -86,10 +86,10 @@
 
 /* ===== Student paint preview ===== */
 .paint-answer-box{
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     border-radius: 12px;
     padding: 12px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     overflow: hidden;
   }
   
@@ -107,7 +107,7 @@
     max-width: 100%;
     height: 250px;
     border-radius: 10px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--ems-gray-200);
     background: #f9fafb;
     object-fit: contain;
   }

@@ -1,14 +1,14 @@
 :root {
-    --primary-blue: #3b82f6;
-    --primary-green: #10b981;
+    --primary-blue: var(--ems-primary-500);
+    --primary-green: var(--ems-success);
     --dark-blue: #1e3a8a;
-    --light-blue: #eff6ff;
+    --light-blue: var(--ems-primary-50);
 
-    --bg-page: #f8fafc;
-    --card-bg: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-color: #e2e8f0;
+    --bg-page: var(--ems-neutral-50);
+    --card-bg: var(--ems-neutral-0);
+    --text-main: var(--ems-neutral-900);
+    --text-muted: var(--ems-neutral-500);
+    --border-color: var(--ems-neutral-200);
 
     --sidebar-width: 300px;
     --sidebar-collapsed-width: 80px;

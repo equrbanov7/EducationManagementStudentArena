@@ -113,7 +113,6 @@
             socket = new WebSocket(getWsUrl());
 
             socket.onopen = () => {
-                console.log('WebSocket connected');
                 updateWsStatus('online', tr('wsOnline', 'Online'));
                 reconnectAttempts = 0;
             };
@@ -141,7 +140,6 @@
             };
 
             socket.onclose = (event) => {
-                console.log('WebSocket closed:', event.code);
                 updateWsStatus('offline', tr('wsDisconnected', 'Disconnected'));
 
                 // Reconnect logic

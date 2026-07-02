@@ -35,7 +35,7 @@
     background: rgba(255, 255, 255, 0.96);
     border: 1px solid #dbe2ec;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-    color: #1f2937;
+    color: var(--ems-neutral-800);
     font-weight: 600;
     text-decoration: none;
 }
@@ -60,7 +60,7 @@
     min-height: 34px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border: 1px solid #dfe8f5;
     color: #4b6078;
     text-decoration: none;
@@ -109,7 +109,7 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 60px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     border: 2px dashed #dfe6e9;
     border-radius: 20px;
 }

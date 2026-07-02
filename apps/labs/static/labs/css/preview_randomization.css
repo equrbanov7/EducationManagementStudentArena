@@ -1,12 +1,12 @@
 /* Rəng Palitrası və Qlobal Dəyişənlər */
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e40af;
-    --light-blue: #eff6ff;
-    --pale-blue: #bfdbfe;
+    --primary-blue: var(--ems-primary-600);
+    --dark-blue: var(--ems-primary-800);
+    --light-blue: var(--ems-primary-50);
+    --pale-blue: var(--ems-primary-200);
     
-    --primary-green: #10b981;
-    --dark-green: #059669;
+    --primary-green: var(--ems-success);
+    --dark-green: var(--ems-success-600);
     --light-green: #ecfdf5;
 }
 
@@ -41,7 +41,7 @@
 
 /* Form Elementləri */
 .form-select-modern {
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     font-size: 1rem;
@@ -71,7 +71,7 @@
     transition: background-color 0.2s ease;
 }
 .question-item:hover {
-    background-color: #f8fafc;
+    background-color: var(--ems-neutral-50);
 }
 
 .question-number {
@@ -103,8 +103,8 @@
 
 /* Parametr (Settings) Qutuları */
 .info-box {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 0.75rem;
     padding: 1.25rem;
     height: 100%;

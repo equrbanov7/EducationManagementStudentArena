@@ -12,10 +12,10 @@
 }
 
 .toast-container .app-toast {
-    --toast-accent: #2563eb;
-    --toast-accent-soft: #eff6ff;
-    --toast-ink: #0f172a;
-    --toast-muted: #64748b;
+    --toast-accent: var(--ems-primary-600);
+    --toast-accent-soft: var(--ems-primary-50);
+    --toast-ink: var(--ems-neutral-900);
+    --toast-muted: var(--ems-neutral-500);
     position: relative;
     display: grid;
     grid-template-columns: 34px minmax(0, 1fr) 34px;
@@ -54,18 +54,18 @@
 
 .toast-container .app-toast--danger,
 .toast-container .app-toast--error {
-    --toast-accent: #dc2626;
+    --toast-accent: var(--ems-danger);
     --toast-accent-soft: #fef2f2;
 }
 
 .toast-container .app-toast--warning {
-    --toast-accent: #d97706;
+    --toast-accent: var(--ems-warning-600);
     --toast-accent-soft: #fffbeb;
 }
 
 .toast-container .app-toast--info {
-    --toast-accent: #2563eb;
-    --toast-accent-soft: #eff6ff;
+    --toast-accent: var(--ems-primary-600);
+    --toast-accent-soft: var(--ems-primary-50);
 }
 
 .app-toast__icon {
@@ -106,7 +106,7 @@
 
 .app-toast__close:hover,
 .app-toast__close:focus {
-    background: #f1f5f9;
+    background: var(--ems-neutral-100);
     color: var(--toast-ink);
     transform: translateY(-1px);
     outline: none;

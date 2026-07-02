@@ -6,7 +6,7 @@
 
 .coding-mini-btn--danger {
     border-color: rgba(248, 113, 113, 0.5);
-    color: #fecaca;
+    color: var(--ems-danger-200);
 }
 
 .coding-editor-wrap {
@@ -42,7 +42,7 @@
     height: 38px;
     border-color: rgba(255, 255, 255, 0.16);
     background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    color: var(--ems-neutral-0);
 }
 
 .coding-editor-wrap .CodeMirror {
@@ -149,7 +149,7 @@
     height: 38px;
     padding: 0 12px;
     border-radius: 12px;
-    background: #ffffff;
+    background: var(--ems-neutral-0);
     border-color: var(--coding-border);
     box-shadow: none;
     color: var(--coding-text);
@@ -185,7 +185,7 @@
     border-radius: 12px;
     padding: 0 14px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--ems-neutral-0);
     cursor: pointer;
     transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
@@ -283,8 +283,8 @@
     display: inline-block;
 }
 
-.coding-console-dot--red { background: #ef4444; }
-.coding-console-dot--yellow { background: #f59e0b; }
+.coding-console-dot--red { background: var(--ems-danger-500); }
+.coding-console-dot--yellow { background: var(--ems-warning-500); }
 .coding-console-dot--green { background: var(--ems-success); }
 
 .coding-console-header__title {

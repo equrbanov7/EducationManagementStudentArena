@@ -35,7 +35,7 @@
 
 /* --- Kart Dizaynı --- */
 .blog-card {
-    background: #fff;
+    background: var(--ems-neutral-0);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -73,7 +73,7 @@
     top: 15px;
     right: 15px;
     background: rgba(0, 0, 0, 0.6);
-    color: #fff;
+    color: var(--ems-neutral-0);
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 0.8rem;

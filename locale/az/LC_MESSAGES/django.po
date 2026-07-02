@@ -28958,6 +28958,59 @@ msgctxt "courses.dashboard"
 msgid "ai_build_sub"
 msgstr "Köməkçidən sillabus, resurs və tapşırıq təklifləri al."
 
+msgctxt "core.errors.csrf"
+msgid "Page expired"
+msgstr "Səhifə köhnəlib"
+
+msgctxt "core.errors.csrf"
+msgid "The security token has expired"
+msgstr "Təhlükəsizlik tokeninin vaxtı keçib"
+
+msgctxt "core.errors.csrf"
+msgid ""
+"This form went stale because the page stayed open for a long time or was "
+"restored from the browser cache. Don't worry — nothing was lost."
+msgstr ""
+"Bu səhifə uzun müddət açıq qaldığı və ya brauzer keşindən bərpa olunduğu "
+"üçün forma köhnəlib. Narahat olmayın — heç bir məlumat itməyib."
+
+msgctxt "core.errors.csrf"
+msgid "You will be redirected to a fresh page in a few seconds."
+msgstr "Bir neçə saniyəyə təzə səhifəyə yönləndiriləcəksiniz."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page and try the action again."
+msgstr "Səhifəni yeniləyib əməliyyatı təkrar edin."
+
+msgctxt "core.errors.csrf"
+msgid "Back to home"
+msgstr "Ana səhifəyə qayıt"
+
+msgctxt "core.errors.csrf"
+msgid "If the problem persists, make sure browser cookies are enabled."
+msgstr ""
+"Problem davam edərsə, brauzer kuki parametrlərinin aktiv olduğunu yoxlayın."
+
+msgctxt "core.errors.csrf"
+msgid "Stale security token — the page needs to be refreshed."
+msgstr "Köhnəlmiş təhlükəsizlik tokeni — səhifə yenilənməlidir."
+
+msgctxt "core.errors.csrf"
+msgid "Refresh the page"
+msgstr "Səhifəni yenilə"
+
+msgctxt "core.errors.csrf"
+msgid "Go to the login page"
+msgstr "Giriş səhifəsinə keç"
+
+msgctxt "core.errors.csrf"
+msgid "Return to sign-up"
+msgstr "Qeydiyyata qayıt"
+
+msgctxt "core.errors.csrf"
+msgid "Return to the verification page"
+msgstr "Təsdiq səhifəsinə qayıt"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."

@@ -1,8 +1,8 @@
 .live-avatar {
     --live-avatar-size: 72px;
     --live-avatar-bg-start: #67e8f9;
-    --live-avatar-bg-end: #2563eb;
-    --live-avatar-shell: #f8fafc;
+    --live-avatar-bg-end: var(--ems-primary-600);
+    --live-avatar-shell: var(--ems-neutral-50);
     position: relative;
     display: inline-flex;
     align-items: center;

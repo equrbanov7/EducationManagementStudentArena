@@ -15,6 +15,8 @@ from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
+from .seed_helpers import ensure_blog_seed_data
+
 User = get_user_model()
 LOCMEM_CACHE_SETTINGS = {
     "default": {
@@ -662,6 +664,7 @@ class BlogRoleAccessTest(TestCase):
 
 class BlogCategoryHierarchyTest(TestCase):
     def setUp(self):
+        ensure_blog_seed_data()
         self.author = User.objects.create_user(
             username="categoryauthor",
             email="categoryauthor@example.com",

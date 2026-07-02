@@ -1,64 +1,24 @@
-from urllib.parse import urlencode
-
-from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 
+# Faza 5 (audit 2026-07-02): URL/redirect köməkçiləri apps/exams/navigation-a
+# köçürüldü (servis qatı ilə ortaq istifadə). Aşağıdakı re-exportlar mövcud
+# `from ._helpers import ...` çağırışlarının import səthini qoruyur.
+from apps.exams.navigation import (  # noqa: F401
+    append_query_params,
+    append_return_to,
+    build_exam_history_url,
+    build_exam_result_url,
+    current_return_to,
+    safe_same_origin_redirect_path,
+)
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.tenancy import request_has_active_organization_context, restore_request_organization_from_profile
-
-
-def safe_same_origin_redirect_path(request, candidate_url):
-    raw_url = (candidate_url or "").strip()
-    if not raw_url:
-        return ""
-
-    if not url_has_allowed_host_and_scheme(
-        raw_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return ""
-    return raw_url
 
 
 def ensure_student_exam_tenant_context(request):
     if request_has_active_organization_context(request):
         return True
     return restore_request_organization_from_profile(request, profile=getattr(request.user, "profile", None))
-
-
-def current_return_to(request):
-    return safe_same_origin_redirect_path(
-        request,
-        request.GET.get("return_to")
-        or request.GET.get("next")
-        or request.POST.get("return_to")
-        or request.POST.get("next"),
-    )
-
-
-def append_query_params(url, **params):
-    clean_params = {key: value for key, value in params.items() if value not in (None, "", [])}
-    if not clean_params:
-        return url
-    separator = "&" if "?" in url else "?"
-    return f"{url}{separator}{urlencode(clean_params)}"
-
-
-def append_return_to(url, return_to):
-    return append_query_params(url, return_to=return_to)
-
-
-def build_exam_history_url(exam, return_to=""):
-    return append_query_params(reverse("exams:student_exam_history"), exam=exam.slug, return_to=return_to)
-
-
-def build_exam_result_url(attempt, return_to=""):
-    return append_query_params(
-        reverse("exams:exam_result", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id}),
-        return_to=return_to,
-    )
 
 
 def are_exam_results_hidden_from_student(exam):
