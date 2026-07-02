@@ -1,11 +1,15 @@
+"""Consumer-app submission hadisələrinə bildiriş reciverləri.
+
+M2 (2026-07-02): sender-lər lazy "app_label.Model" string-ləri ilə verilir —
+notifications artıq istehlakçı app-ların modellərini İMPORT ETMİR (4 dövri
+modul asılılığı əridildi; bax scripts/module_deps.py). Django receiver-in
+string-sender dəstəyi rəsmi API-dir; davranış birə-birdir.
+"""
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from apps.assignments.models import Submission as AssignmentSubmission
-from apps.exams.models import ExamAttempt
-from apps.labs.models import LabSubmission
 from apps.notifications.services import notify_student_about_feedback, notify_teacher_about_submission
-from apps.projects.models import ProjectSubmission
 
 
 def _cache_previous_state(sender, instance, field_names):
@@ -29,12 +33,12 @@ def _graded_payload_changed(previous_state, instance, *, score_field="grade", fe
     )
 
 
-@receiver(pre_save, sender=AssignmentSubmission)
+@receiver(pre_save, sender="assignments.Submission")
 def _cache_assignment_submission_state(sender, instance, **kwargs):
     _cache_previous_state(sender, instance, ("status", "grade", "feedback"))
 
 
-@receiver(post_save, sender=AssignmentSubmission)
+@receiver(post_save, sender="assignments.Submission")
 def _notify_assignment_submission_events(sender, instance, created, **kwargs):
     previous_state = getattr(instance, "_notification_previous_state", {})
 
@@ -46,12 +50,12 @@ def _notify_assignment_submission_events(sender, instance, created, **kwargs):
         notify_student_about_feedback(task=instance.assignment, student=instance.user, task_kind="assignment")
 
 
-@receiver(pre_save, sender=ProjectSubmission)
+@receiver(pre_save, sender="projects.ProjectSubmission")
 def _cache_project_submission_state(sender, instance, **kwargs):
     _cache_previous_state(sender, instance, ("status", "grade", "feedback"))
 
 
-@receiver(post_save, sender=ProjectSubmission)
+@receiver(post_save, sender="projects.ProjectSubmission")
 def _notify_project_submission_events(sender, instance, created, **kwargs):
     previous_state = getattr(instance, "_notification_previous_state", {})
 
@@ -63,12 +67,12 @@ def _notify_project_submission_events(sender, instance, created, **kwargs):
         notify_student_about_feedback(task=instance.project, student=instance.student, task_kind="project")
 
 
-@receiver(pre_save, sender=LabSubmission)
+@receiver(pre_save, sender="labs.LabSubmission")
 def _cache_lab_submission_state(sender, instance, **kwargs):
     _cache_previous_state(sender, instance, ("status", "score", "feedback"))
 
 
-@receiver(post_save, sender=LabSubmission)
+@receiver(post_save, sender="labs.LabSubmission")
 def _notify_lab_submission_events(sender, instance, created, **kwargs):
     previous_state = getattr(instance, "_notification_previous_state", {})
 
@@ -89,12 +93,12 @@ def _notify_lab_submission_events(sender, instance, created, **kwargs):
         )
 
 
-@receiver(pre_save, sender=ExamAttempt)
+@receiver(pre_save, sender="exams.ExamAttempt")
 def _cache_exam_attempt_state(sender, instance, **kwargs):
     _cache_previous_state(sender, instance, ("status",))
 
 
-@receiver(post_save, sender=ExamAttempt)
+@receiver(post_save, sender="exams.ExamAttempt")
 def _notify_exam_attempt_events(sender, instance, created, **kwargs):
     if created:
         return

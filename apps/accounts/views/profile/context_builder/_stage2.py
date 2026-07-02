@@ -1,7 +1,8 @@
 """build_profile_response — stage 2 (god-file refaktoru, FAZA 4)."""
 
-from django.core.paginator import Paginator
 from django.urls import reverse
+
+from apps.accounts import profile_hooks
 
 from ..._helpers import STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH
 from .._sections.review_queue import build_pending_review_context, build_review_results_context
@@ -10,9 +11,6 @@ from .._sections.review_queue import build_pending_review_context, build_review_
 class _Stage2Mixin:
 
     def _stage_2(self):
-        from apps.blog.selectors import build_post_category_picker_options, get_post_category_tree
-        from apps.blog.services import collect_reviewable_posts, count_pending_reviewable_posts
-
         self.pending_post_approval_items = []
         self.pending_post_approval_count = 0
         self.pending_post_approval_search_query = ""
@@ -25,44 +23,31 @@ class _Stage2Mixin:
         self.pending_post_approval_pagination_query = ""
         self.pending_post_approval_total_count = 0
         if "pending-post-approvals" in self.allowed_sections and self.active_section != "pending-post-approvals":
-            self.pending_post_approval_count = count_pending_reviewable_posts(self.request.user)
+            self.pending_post_approval_count = profile_hooks.pending_posts_count(self.request.user)
         if "pending-post-approvals" in self.allowed_sections and self.active_section == "pending-post-approvals":
-            (
-                self.pending_post_approval_items,
-                self.pending_post_approval_search_query,
-                self.pending_post_approval_filter_status,
-                self.pending_post_approval_filter_group,
-                self.pending_post_approval_available_groups,
-                self.pending_post_approval_filter_organization,
-                self.pending_post_approval_available_organizations,
-            ) = collect_reviewable_posts(
-                self.request.user,
-                search=self.request.GET.get("approval_search"),
-                status=self.request.GET.get("approval_status"),
-                group_id=self.request.GET.get("approval_group"),
-                organization_id=self.request.GET.get("approval_organization"),
+            # M2 (2026-07-02): blog implementasiyası profile_hooks üzərindən
+            # (apps/blog/profile_sections.py) — davranış köhnə inline blokla eynidir.
+            _pp = profile_hooks.pending_posts_section(
+                self.request,
+                have_category_options=bool(self.post_category_root_options),
             )
-            self.pending_post_approval_total_count = len(self.pending_post_approval_items)
-            self.pending_post_approval_count = count_pending_reviewable_posts(self.request.user)
-            if not self.post_category_root_options:
-                self.post_category_tree = get_post_category_tree()
-                self.post_category_root_options, self.post_category_subcategory_options = (
-                    build_post_category_picker_options(self.post_category_tree)
-                )
-            self.pending_post_approval_page_obj = Paginator(self.pending_post_approval_items, 10).get_page(
-                self.request.GET.get("approval_page", 1)
-            )
-            self.extra = []
-            self.extra.append("section=pending-post-approvals")
-            if self.pending_post_approval_search_query:
-                self.extra.append(f"approval_search={self.pending_post_approval_search_query}")
-            if self.pending_post_approval_filter_status and self.pending_post_approval_filter_status != "pending":
-                self.extra.append(f"approval_status={self.pending_post_approval_filter_status}")
-            if self.pending_post_approval_filter_group:
-                self.extra.append(f"approval_group={self.pending_post_approval_filter_group}")
-            if self.pending_post_approval_filter_organization:
-                self.extra.append(f"approval_organization={self.pending_post_approval_filter_organization}")
-            self.pending_post_approval_pagination_query = "&".join(self.extra)
+            self.pending_post_approval_items = _pp["items"]
+            self.pending_post_approval_search_query = _pp["search_query"]
+            self.pending_post_approval_filter_status = _pp["filter_status"]
+            self.pending_post_approval_filter_group = _pp["filter_group"]
+            self.pending_post_approval_available_groups = _pp["available_groups"]
+            self.pending_post_approval_filter_organization = _pp["filter_organization"]
+            self.pending_post_approval_available_organizations = _pp["available_organizations"]
+            self.pending_post_approval_total_count = _pp["total_count"]
+            self.pending_post_approval_count = _pp["count"]
+            self.pending_post_approval_page_obj = _pp["page_obj"]
+            self.pending_post_approval_pagination_query = _pp["pagination_query"]
+            if _pp["category_options"] is not None:
+                (
+                    self.post_category_tree,
+                    self.post_category_root_options,
+                    self.post_category_subcategory_options,
+                ) = _pp["category_options"]
         self.pending_review_items = []
         self.pending_review_search_query = ""
         self.pending_review_filter_type = "all"

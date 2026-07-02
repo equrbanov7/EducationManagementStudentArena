@@ -13,7 +13,6 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.accounts.models import ProfileRole
 from apps.notifications.models import (
     InAppNotification,
     MembershipRequestRoleType,
@@ -22,6 +21,7 @@ from apps.notifications.models import (
     StudentOrganizationRequestStatus,
 )
 from apps.organizations.models import Membership
+from core.roles import ProfileRole
 
 from .constants import (
     MEMBERSHIP_REQUEST_STATUS_TITLES,
@@ -391,7 +391,11 @@ def get_exam_assigned_user_ids(exam) -> set[int]:
 
 
 def get_lab_assigned_user_ids(lab) -> set[int]:
-    from apps.courses.models import CourseMembership
+    # M2 (2026-07-02): statik import əvəzinə lazy get_model — courses↔notifications
+    # dövri asılılığı əridilir (davranış eyni).
+    from django.apps import apps as django_apps
+
+    CourseMembership = django_apps.get_model("courses", "CourseMembership")
 
     assigned_user_ids = set(lab.allowed_students.values_list("id", flat=True))
     group_names = lab.get_allowed_groups_list()

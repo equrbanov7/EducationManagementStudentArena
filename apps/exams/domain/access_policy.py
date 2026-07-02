@@ -3,8 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.accounts.models import ProfileRole
 from apps.organizations.services import organization_user_queryset, user_has_org_role
+from core.roles import ProfileRole
 
 User = get_user_model()
 

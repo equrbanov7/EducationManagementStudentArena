@@ -49,8 +49,12 @@ def _propagate_new_members_to_courses(instance, new_student_ids):
     NOTE: This function is intentionally called inside ``transaction.on_commit``
     so the M2M rows are fully committed before any DB reads here.
     """
-    from apps.assignments.models import Assignment
-    from apps.projects.models import Project
+    # M2 (2026-07-02): lazy model lookup — courses→assignments/projects
+    # import kənarlarını kəsir (AGENTS §5, pattern 2).
+    from django.apps import apps as django_apps
+
+    Assignment = django_apps.get_model("assignments", "Assignment")
+    Project = django_apps.get_model("projects", "Project")
 
     teacher = getattr(instance, "teacher", None)
 

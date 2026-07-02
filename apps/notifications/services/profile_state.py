@@ -5,8 +5,6 @@ Builds the notification-related context block for the user profile page
 (pending invites, pending join requests, leave eligibility, unread count).
 """
 
-from apps.accounts.models import ProfileRole
-from apps.accounts.policies.roles import map_org_role_to_profile_role
 from apps.notifications.models import (
     MembershipRequestRoleType,
     StudentOrganizationRequest,
@@ -14,6 +12,7 @@ from apps.notifications.models import (
 )
 from apps.organizations.models import Membership
 from core.rls import bypass_rls
+from core.roles import ProfileRole, map_org_role_to_profile_role
 
 from .constants import STUDENT_PENDING_INVITE_TITLE
 from .events import notify_org_owner_pending_approval

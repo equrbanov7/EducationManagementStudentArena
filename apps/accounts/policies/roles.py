@@ -2,82 +2,16 @@
 Role and permission policies for accounts.
 """
 
-from ..models import ProfileRole
-
-
-def is_superadmin_user(user):
-    """Return whether the user has superadmin privileges."""
-    return bool(
-        user
-        and getattr(user, "is_authenticated", False)
-        and (user.is_superuser or getattr(user, "is_superadmin", False))
-    )
-
-
-def get_user_role_level(user):
-    """Return the user's effective role level."""
-    if not user or not getattr(user, "is_authenticated", False):
-        return 0
-    if is_superadmin_user(user):
-        return 999
-    if hasattr(user, "_highest_role_level"):
-        return int(user._highest_role_level())
-
-    return 0
-
-
-def user_has_any_role(user, role_names):
-    """Return whether the user has any role from the provided set."""
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-
-    normalized = set(role_names or [])
-    if not normalized:
-        return False
-    if hasattr(user, "has_role"):
-        return any(user.has_role(role_name) for role_name in normalized)
-
-    return False
-
-
-def get_profile_role_label(role):
-    """Return the display label for a profile role."""
-    return dict(ProfileRole.CHOICES).get(role, role)
-
-
-def map_signup_role_to_profile_role(initial_role):
-    """Normalize signup roles to profile roles."""
-    role_mapping = {
-        ProfileRole.STUDENT: ProfileRole.STUDENT,
-        ProfileRole.LEAD_STUDENT: ProfileRole.LEAD_STUDENT,
-        ProfileRole.TEACHER: ProfileRole.TEACHER,
-        ProfileRole.ASSISTANT_TEACHER: ProfileRole.ASSISTANT_TEACHER,
-        ProfileRole.HR: ProfileRole.HR,
-        ProfileRole.MEMBER: ProfileRole.MEMBER,
-        ProfileRole.ORG_ADMIN: ProfileRole.ORG_ADMIN,
-        ProfileRole.ORG_OWNER: ProfileRole.ORG_OWNER,
-    }
-    return role_mapping.get(initial_role, ProfileRole.MEMBER)
-
-
-def map_org_role_to_profile_role(role):
-    """Map an organization membership role to a profile role."""
-    role_name = ProfileRole.normalize_membership_role_name(getattr(role, "name", ""))
-    if role_name == ProfileRole.MEMBER:
-        return ProfileRole.MEMBER
-    if role_name == ProfileRole.LEAD_STUDENT:
-        return ProfileRole.LEAD_STUDENT
-    if role_name == ProfileRole.STUDENT:
-        return ProfileRole.STUDENT
-    if role_name == ProfileRole.HR:
-        return ProfileRole.HR
-    if role_name in {ProfileRole.ASSISTANT_TEACHER, "assistant", "lab_assistant"}:
-        return ProfileRole.ASSISTANT_TEACHER
-    if role_name in {ProfileRole.TEACHER, "instructor", "professor", "associate_professor"}:
-        return ProfileRole.TEACHER
-    if getattr(role, "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
-        return ProfileRole.ORG_ADMIN
-    return ProfileRole.MEMBER
+# M2 (2026-07-02): pure helper-lər core.roles-a köçürülüb; import səthi qorunur.
+from core.roles import (  # noqa: F401
+    ProfileRole,
+    get_profile_role_label,
+    get_user_role_level,
+    is_superadmin_user,
+    map_org_role_to_profile_role,
+    map_signup_role_to_profile_role,
+    user_has_any_role,
+)
 
 
 def resolve_membership_role(organization, initial_role):

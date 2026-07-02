@@ -144,16 +144,12 @@ def attach_test_result_summaries(attempts):
     if not test_attempts:
         return attempts
 
-    bonus_by_attempt_id = {}
-    apply_bonus = None
-    try:
-        # Lazy import: exams servis qatını appeals-dən sərt asılı etməmək üçün.
-        from apps.appeals.services import appeal_bonus_map, apply_bonus_to_test_result
+    # M2 (2026-07-02): appeals-ə birbaşa import ƏVƏZİNƏ exams-ın öz
+    # genişlənmə nöqtəsi (score_adjustments) — appeals ready()-də qoşulur.
+    from apps.exams import score_adjustments
 
-        apply_bonus = apply_bonus_to_test_result
-        bonus_by_attempt_id = appeal_bonus_map([attempt.id for attempt in test_attempts])
-    except Exception:
-        bonus_by_attempt_id = {}
+    bonus_by_attempt_id = score_adjustments.bonus_map([attempt.id for attempt in test_attempts])
+    apply_bonus = score_adjustments.apply_bonus
 
     # Faza 4 (audit 2026-07-02): N+1 aradan qaldırıldı — bütün attempt-lərin
     # cavabları TƏK sorğu dəsti ilə (base + 2 prefetch) yığılır və
@@ -174,7 +170,7 @@ def attach_test_result_summaries(attempts):
     for attempt in test_attempts:
         result = calculate_test_attempt_result(attempt, answers=answers_by_attempt_id.get(attempt.id, []))
         bonus = bonus_by_attempt_id.get(attempt.id)
-        if bonus and apply_bonus is not None:
+        if bonus:
             result = apply_bonus(result, bonus)
         attempt.test_result = result
     return attempts

@@ -1,24 +1,5 @@
 {
-  "cycles": [
-    "accounts<->blog",
-    "accounts<->exams",
-    "accounts<->notifications",
-    "accounts<->organizations",
-    "appeals<->exams",
-    "assignments<->courses",
-    "assignments<->notifications",
-    "blog<->exams",
-    "courses<->exams",
-    "courses<->labs",
-    "courses<->notifications",
-    "courses<->organizations",
-    "courses<->projects",
-    "exams<->live_exam",
-    "exams<->notifications",
-    "exams<->organizations",
-    "labs<->notifications",
-    "notifications<->projects"
-  ],
+  "cycles": [],
   "core_to_apps": [
     "accounts",
     "audit",
@@ -36,7 +17,6 @@
       "appeals",
       "assignments",
       "audit",
-      "blog",
       "contact",
       "courses",
       "exams",
@@ -70,20 +50,12 @@
       "organizations"
     ],
     "courses": [
-      "assignments",
       "exams",
-      "labs",
       "notifications",
-      "organizations",
-      "projects"
+      "organizations"
     ],
     "exams": [
-      "accounts",
-      "appeals",
       "audit",
-      "blog",
-      "courses",
-      "live_exam",
       "notifications",
       "organizations"
     ],
@@ -98,20 +70,10 @@
       "exams"
     ],
     "notifications": [
-      "accounts",
-      "assignments",
-      "courses",
-      "exams",
-      "labs",
-      "organizations",
-      "projects"
+      "organizations"
     ],
     "organizations": [
-      "accounts",
-      "assignments",
-      "audit",
-      "courses",
-      "exams"
+      "audit"
     ],
     "projects": [
       "courses",

@@ -3,14 +3,13 @@
 Seed məntiqi mövzu üzrə mixin-lərə (`_seed_helpers/`) bölünüb; bu modul yalnız
 CLI qoşması (add_arguments) və orkestrasiyanı (handle) saxlayır."""
 
+from django.apps import apps as django_apps
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, Post
-from apps.courses.models import CourseMembership
 from apps.exams.models import StudentGroup
 from core.constants import OrganizationType
+from core.roles import ProfileRole
 
 from ._seed_helpers import CoursesSeedMixin, ExamsSeedMixin, UsersSeedMixin
 
@@ -41,6 +40,11 @@ class Command(UsersSeedMixin, CoursesSeedMixin, ExamsSeedMixin, BaseCommand):
 
         superadmin = self._ensure_user("demo_superadmin", "demo_superadmin@example.com", password)
         self._assign_profile(superadmin, None, ProfileRole.SUPERADMIN)
+
+        # M2 (2026-07-02): blog modelləri lazy — exams→blog import kənarını kəsir.
+        CourseMembership = django_apps.get_model("courses", "CourseMembership")
+        Category = django_apps.get_model("blog", "Category")
+        Post = django_apps.get_model("blog", "Post")
 
         category, _ = Category.objects.get_or_create(
             name="Demo xəbərlər",

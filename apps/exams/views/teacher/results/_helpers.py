@@ -312,24 +312,17 @@ def _attempt_effective_duration(attempt, effective_finish):
 
 
 def _appeal_bonus_map_for(attempts):
-    """Cəhdlər üçün apellyasiya bonus xəritəsi (tək sorğu). Lazy import — exams
-    view-larını appeals-dən sərt asılı etməmək üçün."""
-    try:
-        from apps.appeals.services import appeal_bonus_map
+    """Cəhdlər üçün bal-düzəliş bonus xəritəsi (M2: score_adjustments hook-u)."""
+    from apps.exams import score_adjustments
 
-        return appeal_bonus_map([att.id for att in attempts])
-    except Exception:
-        return {}
+    return score_adjustments.bonus_map([att.id for att in attempts])
 
 
 def _apply_appeal_bonus(test_result, bonus):
-    """Apellyasiya bonusunu test nəticəsinə tətbiq edir (lazy import)."""
-    try:
-        from apps.appeals.services import apply_bonus_to_test_result
+    """Bonusun test nəticəsinə tətbiqi (M2: score_adjustments hook-u)."""
+    from apps.exams import score_adjustments
 
-        return apply_bonus_to_test_result(test_result, bonus)
-    except Exception:
-        return test_result
+    return score_adjustments.apply_bonus(test_result, bonus)
 
 
 def _expire_overdue_attempts(exam, *, now=None):

@@ -8,9 +8,9 @@ from uuid import UUID
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 
-from apps.accounts.models import ProfileRole
 from core.constants import ROLE_LEVELS
 from core.rls import bypass_rls
+from core.roles import ProfileRole
 from core.utils import get_client_ip
 
 User = get_user_model()

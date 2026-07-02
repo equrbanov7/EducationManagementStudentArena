@@ -1,4 +1,3 @@
-import re
 import secrets
 
 from django.conf import settings
@@ -37,4 +36,5 @@ def send_verify_email(user, code: str, *, request=None, expires_at=None):
     message.send()
 
 
-DATA_URL_PNG_RE = re.compile(r"^data:image\/png;base64,(.+)$")
+# M2 (2026-07-02): tərif core-a köçüb; import səthi qorunur (AGENTS §1).
+from core.constants import DATA_URL_PNG_RE  # noqa: F401,E402

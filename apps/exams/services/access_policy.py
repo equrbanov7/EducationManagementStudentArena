@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.utils.translation import pgettext
 
-from apps.accounts.models import ProfileRole
+from core.roles import ProfileRole
 
 
 def is_teacher_user(user):
@@ -33,8 +33,10 @@ def can_user_access_exam(exam, user):
         return True
 
     if exam.course:
-        from apps.courses.models import CourseMembership
+        # M2 (2026-07-02): lazy lookup — exams→courses import kənarını kəsir.
+        from django.apps import apps as django_apps
 
+        CourseMembership = django_apps.get_model("courses", "CourseMembership")
         return CourseMembership.objects.filter(course=exam.course, user=user, role="student").exists()
 
     return False

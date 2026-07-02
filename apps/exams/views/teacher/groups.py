@@ -7,10 +7,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
-from apps.accounts.models import ProfileRole
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
+from core.roles import ProfileRole
 from core.tenancy import request_has_active_organization_context
 
 

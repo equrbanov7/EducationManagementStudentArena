@@ -137,7 +137,11 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------
 
     def handle(self, *args, **options):
-        from apps.accounts.models import ProfileRole, UserProfile
+        from django.apps import apps as django_apps
+
+        from core.roles import ProfileRole
+
+        UserProfile = django_apps.get_model("accounts", "UserProfile")
         from apps.organizations.models import Organization
 
         dry_run = options["dry_run"]

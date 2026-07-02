@@ -94,3 +94,19 @@ EXAM_CATEGORY_META = {
 
 # Dashboard-da çip kimi göstərilən kateqoriyalar (dizaynla eyni: Final/Midterm/Quiz).
 EXAM_CATEGORY_FILTER_ORDER = ("final", "midterm", "quiz")
+
+# ── M2 (2026-07-02): exams→live_exam import-time asılılığını kəsən lazy accessor-lar ──
+# Modul yüklənəndə live_exam import OLUNMUR; model yalnız çağırış anında tapılır.
+
+
+def get_live_session_model():
+    """live_exam.LiveSession modelini lazy qaytarır (app-registry lookup)."""
+    from django.apps import apps as django_apps
+
+    return django_apps.get_model("live_exam", "LiveSession")
+
+
+def get_live_active_states():
+    """Hələ bitməmiş (aktiv) canlı sessiya state-ləri — lobby/question/reveal."""
+    model = get_live_session_model()
+    return (model.STATE_LOBBY, model.STATE_QUESTION, model.STATE_REVEAL)

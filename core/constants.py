@@ -3,7 +3,13 @@ Core constants for EMS Arena project.
 Application-wide constants and enumerations.
 """
 
+import re
+
 from django.utils.translation import pgettext_lazy
+
+# base64 PNG data-URL formatı (şəkil yükləmə/parse üçün ümumi regex).
+# M2 (2026-07-02): apps.blog.utils-dən köçürülüb — exams→blog asılılığı yaradırdı.
+DATA_URL_PNG_RE = re.compile(r"^data:image\/png;base64,(.+)$")
 
 
 class UserRole:

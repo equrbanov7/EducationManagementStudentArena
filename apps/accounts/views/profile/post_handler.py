@@ -13,8 +13,6 @@ Behavior is identical to the original inline block — this is a pure extraction
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
-from django.db.models.deletion import ProtectedError
-from django.http import QueryDict
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -23,29 +21,12 @@ from django.utils.translation import pgettext_lazy
 from apps.audit.utils import log_action
 from core.upload_security import randomize_uploaded_filename
 
+from ... import profile_hooks
 from ...models import ProfileRole
 from ...services.profile_actions import publish_system_notification
 from .._helpers import _user_has_any_role
 
 User = get_user_model()
-
-
-def _category_section_url(*, section="category-management", edit_category=None):
-    query_params = QueryDict(mutable=True)
-    query_params["section"] = section
-    if edit_category:
-        query_params["edit_category"] = str(edit_category)
-    return f"{reverse('accounts:profile')}?{query_params.urlencode()}"
-
-
-def _load_managed_category(raw_category_id):
-    from apps.blog.models import Category
-
-    try:
-        category_id = int(str(raw_category_id or "").strip())
-    except (TypeError, ValueError):
-        return None
-    return Category.objects.select_related("parent").filter(pk=category_id).first()
 
 
 def handle_profile_post(
@@ -69,9 +50,6 @@ def handle_profile_post(
       * ``category_management_edit_form``: bound edit form or ``None``.
       * ``category_management_edit_item``: the category being edited or ``None``.
     """
-    from apps.blog.forms import CategoryManagementForm
-    from apps.blog.services import can_user_manage_categories
-
     from ...forms import CustomPasswordChangeForm
 
     category_management_create_form = None
@@ -124,71 +102,25 @@ def handle_profile_post(
         else:
             messages.error(request, _(message_key))
         return _result(redirect(f"{reverse('accounts:profile')}?section=publish-notification"))
-    elif submitted_form in {"category-create", "category-management-save", "category-management-delete"}:
-        if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(
-            request.user
-        ):
-            messages.error(request, "Bu bölməni yalnız SuperAdmin idarə edə bilər.")
-            return _result(redirect(f"{reverse('accounts:profile')}?section=profile-info"))
-
-        if submitted_form == "category-management-delete":
-            active_section = "category-management"
-            category_to_delete = _load_managed_category(request.POST.get("category_id"))
-            if category_to_delete is None:
-                messages.error(request, "Silinəcək kateqoriya tapılmadı.")
-                return _result(redirect(_category_section_url(section="category-management")))
-
-            deleted_category_name = category_to_delete.localized_full_name
-            try:
-                category_to_delete.delete()
-            except ProtectedError:
-                messages.error(
-                    request,
-                    "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur.",
-                )
-            else:
-                messages.success(request, f'"{deleted_category_name}" uğurla silindi.')
-            return _result(redirect(_category_section_url(section="category-management")))
-
-        if submitted_form == "category-create":
-            active_section = "create-category"
-            category_management_bound_form = CategoryManagementForm(request.POST)
-
-            if category_management_bound_form.is_valid():
-                saved_category = category_management_bound_form.save()
-                saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-                messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yaradıldı.')
-                return _result(redirect(_category_section_url(section="create-category")))
-
-            category_management_create_form = category_management_bound_form
-            messages.error(request, "Kateqoriya yaradılmadı. Zəhmət olmasa xətaları düzəldin.")
-        else:
-            active_section = "category-management"
-
-            submitted_category_id = request.POST.get("category_id")
-            category_management_edit_item = _load_managed_category(submitted_category_id)
-            if submitted_category_id and category_management_edit_item is None:
-                messages.error(request, "Redaktə ediləcək kateqoriya tapılmadı.")
-                return _result(redirect(_category_section_url(section="category-management")))
-
-            category_management_bound_form = CategoryManagementForm(
-                request.POST,
-                instance=category_management_edit_item,
-            )
-
-            if category_management_bound_form.is_valid():
-                saved_category = category_management_bound_form.save()
-                saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-                messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yeniləndi.')
-                return _result(redirect(_category_section_url(section="category-management")))
-
-            category_management_edit_form = category_management_bound_form
-            messages.error(request, "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin.")
-    elif submitted_form != "edit-profile":
-        target_section = request.GET.get("section") or request.POST.get("section") or active_section
-        if target_section not in allowed_sections:
-            target_section = "profile-info"
-        return _result(redirect(f"{reverse('accounts:profile')}?section={target_section}"))
+    else:
+        # M2 (2026-07-02): kateqoriya CRUD budağı blog-a köçüb —
+        # profile_hooks.category_post_actions (apps/blog/profile_sections.py).
+        # None = bu POST kateqoriyalara aid deyil → köhnə generic fallback.
+        _category_result = profile_hooks.category_post_actions(
+            request, submitted_form=submitted_form, allowed_sections=allowed_sections
+        )
+        if _category_result is not None:
+            if _category_result["response"] is not None:
+                return _result(_category_result["response"])
+            active_section = _category_result["active_section"]
+            category_management_create_form = _category_result["create_form"]
+            category_management_edit_form = _category_result["edit_form"]
+            category_management_edit_item = _category_result["edit_item"]
+        elif submitted_form != "edit-profile":
+            target_section = request.GET.get("section") or request.POST.get("section") or active_section
+            if target_section not in allowed_sections:
+                target_section = "profile-info"
+            return _result(redirect(f"{reverse('accounts:profile')}?section={target_section}"))
 
     if submitted_form == "edit-profile":
         allowed_user_fields = ["first_name", "last_name", "email"]
