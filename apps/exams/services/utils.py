@@ -5,9 +5,9 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.blog.utils import DATA_URL_PNG_RE
 from apps.exams.services.exam_definition import effective_random_question_count
 from apps.exams.services.question_bank import normalize_question_text
+from core.constants import DATA_URL_PNG_RE
 
 
 def _norm(text: str) -> str:

@@ -9,18 +9,16 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import ProfileRole
-from apps.assignments.models import Assignment
-from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType
+from core.roles import ProfileRole
 
 User = get_user_model()
 
@@ -147,6 +145,7 @@ class Command(BaseCommand):
         return membership
 
     def _ensure_course_membership(self, *, course, user, role, group_name=""):
+        CourseMembership = django_apps.get_model("courses", "CourseMembership")
         membership, _ = CourseMembership.objects.update_or_create(
             course=course,
             user=user,
@@ -218,6 +217,8 @@ class Command(BaseCommand):
         return organization
 
     def _ensure_exam_question(self, *, exam, text):
+        ExamQuestion = django_apps.get_model("exams", "ExamQuestion")
+        ExamQuestionOption = django_apps.get_model("exams", "ExamQuestionOption")
         question, _ = ExamQuestion.objects.update_or_create(
             exam=exam,
             order=1,
@@ -246,6 +247,14 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        # M2 (2026-07-02): cross-app modellər lazy — organizations→courses/exams/
+        # assignments import kənarlarını kəsir (AGENTS §5, pattern 2).
+        Course = django_apps.get_model("courses", "Course")
+        StudentGroup = django_apps.get_model("exams", "StudentGroup")
+        Assignment = django_apps.get_model("assignments", "Assignment")
+        Exam = django_apps.get_model("exams", "Exam")
+        ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
+        ExamAnswer = django_apps.get_model("exams", "ExamAnswer")
         password = self._require_password(options)
 
         owner = self._ensure_user(

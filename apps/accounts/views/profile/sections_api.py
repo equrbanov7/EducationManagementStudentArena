@@ -327,9 +327,9 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
 
     # Post-approval badge (teachers/admins with that allowed section)
     if "pending-post-approvals" in capabilities.get("allowed_sections", set()):
-        from apps.blog.services import count_pending_reviewable_posts
+        from apps.accounts import profile_hooks
 
-        payload["pending_post_approval_count"] = count_pending_reviewable_posts(request.user)
+        payload["pending_post_approval_count"] = profile_hooks.pending_posts_count(request.user)
 
     # Superadmin badges
     if capabilities.get("is_superadmin"):

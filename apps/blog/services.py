@@ -8,12 +8,11 @@ from collections import defaultdict
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from apps.accounts.models import ProfileRole
-from apps.accounts.policies import get_user_role_level, is_superadmin_user, user_has_any_role
 from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import ROLE_LEVEL_TEACHER, OrganizationType
 from core.rls import bypass_rls
+from core.roles import ProfileRole, get_user_role_level, is_superadmin_user, user_has_any_role
 
 from .models import Category, Post
 

@@ -6,11 +6,10 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
+from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, get_live_active_states, get_live_session_model
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.language_variants import available_language_options
 from apps.exams.views.shared.tenant import tenant_scoped_exams
-from apps.live_exam.models import LiveSession
 from core.tenancy import get_request_organization
 
 from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
@@ -23,14 +22,8 @@ EXTENDED_TYPE_FILTERS = {"quiz", "midterm", "final", "placement", "practice"}
 # Geriyə uyğunluq üçün köhnə adı saxlayırıq (başqa modullar import edə bilər).
 VALID_EXAM_TYPE_FILTERS = MECHANIC_TYPE_FILTERS
 # "live" virtual filtridir — DB sahəsi deyil, aktiv LiveSession-a görə hesablanır.
+# (Aktiv state-lər üçün apps.exams.constants.get_live_active_states() istifadə olunur.)
 LIVE_TYPE_FILTER = "live"
-
-# Hələ bitməmiş (aktiv) canlı sessiya state-ləri.
-LIVE_ACTIVE_STATES = (
-    LiveSession.STATE_LOBBY,
-    LiveSession.STATE_QUESTION,
-    LiveSession.STATE_REVEAL,
-)
 
 # Sıralama seçimləri — dizayndakı "Sırala" menyusuna uyğun.
 SORT_SOON = "soon"
@@ -65,7 +58,7 @@ def _user_finished_attempt_count_sq(user):
 
 def _live_session_exists_sq():
     """Per-exam Exists subquery: imtahanın aktiv (bitməmiş) canlı sessiyası varmı."""
-    return LiveSession.objects.filter(exam=OuterRef("pk"), state__in=LIVE_ACTIVE_STATES)
+    return get_live_session_model().objects.filter(exam=OuterRef("pk"), state__in=get_live_active_states())
 
 
 def _exclude_attempt_exhausted(queryset):
@@ -160,7 +153,8 @@ def _live_session_map(exam_ids):
         return {}
 
     sessions = (
-        LiveSession.objects.filter(exam_id__in=exam_ids, state__in=LIVE_ACTIVE_STATES)
+        get_live_session_model()
+        .objects.filter(exam_id__in=exam_ids, state__in=get_live_active_states())
         .annotate(player_count=Count("players"))
         .order_by("exam_id", "-created_at")
     )

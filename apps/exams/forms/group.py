@@ -8,9 +8,9 @@ from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.accounts.models import ProfileRole
 from apps.exams.models import StudentGroup
 from apps.organizations.services import organization_role_user_queryset, organization_user_queryset, user_has_org_role
+from core.roles import ProfileRole
 
 User = get_user_model()
 

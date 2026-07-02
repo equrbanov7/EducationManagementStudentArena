@@ -9,10 +9,10 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.accounts.models import ProfileRole
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
 from core.constants import OrganizationType
+from core.roles import ProfileRole
 
 User = get_user_model()
 

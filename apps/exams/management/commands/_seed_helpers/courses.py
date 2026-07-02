@@ -1,12 +1,14 @@
 """seed_group_demo_data — Kurs və kurs-məzmunu seed köməkçiləri."""
 
-from apps.courses.models import Course, CourseGroup, CourseInstructor, CourseResource, CourseTopic
+from django.apps import apps as django_apps
 
 
 class CoursesSeedMixin:
     """Kurs və kurs-məzmunu seed köməkçiləri (Command tərəfindən MRO ilə istifadə olunur)."""
 
     def _ensure_course(self, organization, teacher):
+        # M2 (2026-07-02): lazy lookup — exams→courses import kənarını kəsir.
+        Course = django_apps.get_model("courses", "Course")
         course, _ = Course.objects.get_or_create(
             owner=teacher,
             title=f"{organization.name} Demo Kursu",
@@ -28,6 +30,10 @@ class CoursesSeedMixin:
         return course
 
     def _seed_course_content(self, course, teachers, students, group_name):
+        CourseTopic = django_apps.get_model("courses", "CourseTopic")
+        CourseResource = django_apps.get_model("courses", "CourseResource")
+        CourseInstructor = django_apps.get_model("courses", "CourseInstructor")
+        CourseGroup = django_apps.get_model("courses", "CourseGroup")
         topic_specs = [
             ("Giriş və struktur", "Kursun məqsədi, qaydalar və ilkin materiallar.", 1),
             ("Əsas anlayışlar", "Mövzu üzrə baza nümunələr və izah.", 2),

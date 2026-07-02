@@ -118,10 +118,10 @@ def teacher_view_attempt(request, slug, attempt_id):
     appeal_bonus_points = 0
     appeal_corrected_qids = {}
     if exam.exam_type == "test":
-        from apps.appeals.services import appeal_score_state, effective_test_score
+        from apps.exams import score_adjustments
 
-        effective_score_info = effective_test_score(attempt)
-        _appeal_state = appeal_score_state(attempt)
+        effective_score_info = score_adjustments.effective_test_score(attempt)
+        _appeal_state = score_adjustments.score_state(attempt)
         appeal_bonus_points = _appeal_state["bonus_points"]
         appeal_corrected_qids = {qid: True for qid in _appeal_state["credited_question_ids"]}
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())

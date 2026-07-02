@@ -2,6 +2,8 @@
 
 from django.urls import reverse
 
+from apps.accounts import profile_hooks
+
 from ..._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     _append_query_params,
@@ -13,7 +15,6 @@ from ..._helpers import (
 )
 from ...account_management import build_superadmin_user_management_context
 from ...superadmin import build_superadmin_ai_settings_context
-from .._sections.category_management import build_category_management_context, build_create_category_context
 from .._sections.manage_roles import build_manage_roles_section
 from .._sections.notifications import build_notifications_context
 from .._sections.permission_editor import build_permission_editor_section
@@ -307,14 +308,14 @@ class _Stage3Mixin:
             "create-category",
             "category-management",
         }:
-            self._cc = build_create_category_context(self.category_management_create_form)
+            self._cc = profile_hooks.create_category_section(self.category_management_create_form)
             self.category_management_create_form = self._cc["category_management_create_form"]
             self.category_management_create_parent_options = self._cc["category_management_create_parent_options"]
             self.category_management_create_selected_parent_id = self._cc[
                 "category_management_create_selected_parent_id"
             ]
         if "category-management" in self.allowed_sections and self.active_section == "category-management":
-            self._cm = build_category_management_context(
+            self._cm = profile_hooks.category_management_section(
                 self.request,
                 edit_form=self.category_management_edit_form,
                 edit_item=self.category_management_edit_item,

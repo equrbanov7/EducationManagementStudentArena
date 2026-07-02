@@ -15,22 +15,18 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.generic import DetailView
 
-from apps.assignments.models import Submission
+from apps.courses import dashboard_sources
 from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
 from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.exams.services.language_variants import available_language_options
-from apps.labs.models import LabAssignment, LabSubmission
-from apps.projects.models import ProjectSubmission
 from core.helpers import (
     ASSIGNED_TASK_FILTER_CHOICES,
-    REVIEW_EDIT_LOCK_WINDOW,
     _safe_same_origin_redirect_path,
     _tenant_scoped_courses,
 )
@@ -161,112 +157,31 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context["members"] = []
 
         # ═══════════════════════════════════════════════════════════════════
-        # 4. SƏRBƏST İŞLƏR (Assignments)
+        # 4-6. TASK BÖLMƏLƏRİ (assignments / projects / labs)
         # ───────────────────────────────────────────────────────────────────
-        # Müəllim: Bütün assignment-ları görür
-        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
+        # M2 (2026-07-02): hər task modulu öz bölmə kontekstini
+        # dashboard_sources registry-si ilə verir (AppConfig.ready()-də
+        # qeydiyyat) — courses artıq task modellərini import etmir.
         # ═══════════════════════════════════════════════════════════════════
-        if context["can_manage_course"]:
-            # MÜƏLLİM - bütün assignment-lar
-            context["assignments"] = course.assignments.all().order_by("-created_at")
-            context["assignments_with_user_data"] = []
-
-        elif context["is_student"]:
-            # TƏLƏBƏ - arxivlənmişlər istisna (status != 'inactive' filter)
-            assignments_qs = (
-                course.assignments.filter(assigned_students=user).exclude(status="inactive").order_by("-created_at")
+        context.update(
+            {
+                "assignments": [],
+                "assignments_with_user_data": [],
+                "projects": [],
+                "projects_with_user_data": [],
+                "labs": [],
+                "labs_with_user_data": [],
+            }
+        )
+        context.update(
+            dashboard_sources.build_context(
+                course=course,
+                user=user,
+                membership=membership,
+                can_manage=context["can_manage_course"],
+                is_student=context["is_student"],
             )
-
-            # Batch-fetch submission counts for this user across all assignments
-            # to avoid N+1 queries (one query instead of one per assignment).
-            assignment_ids = list(assignments_qs.values_list("id", flat=True))
-            submission_counts_qs = (
-                Submission.objects.filter(assignment_id__in=assignment_ids, user=user)
-                .values("assignment_id")
-                .annotate(count=Count("id"))
-            )
-            submission_count_by_assignment = {row["assignment_id"]: row["count"] for row in submission_counts_qs}
-
-            # Hər assignment üçün user-specific məlumat hazırla
-            assignments_with_user_data = []
-            for a in assignments_qs:
-                user_attempts = submission_count_by_assignment.get(a.id, 0)
-                is_deadline_passed = a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
-                is_active = a.status in {"active", "published"}
-                can_submit = user_attempts < a.max_attempts and not is_deadline_passed and is_active
-                attempts_left = a.max_attempts - user_attempts
-
-                assignments_with_user_data.append(
-                    {
-                        "assignment": a,
-                        "user_attempts": user_attempts,
-                        "can_submit": can_submit,
-                        "attempts_left": attempts_left,
-                        "is_deadline_passed": is_deadline_passed,
-                    }
-                )
-
-            context["assignments"] = assignments_qs
-            context["assignments_with_user_data"] = assignments_with_user_data
-        else:
-            context["assignments"] = []
-            context["assignments_with_user_data"] = []
-
-        # ═══════════════════════════════════════════════════════════════════
-        # 5. KURS İŞLƏRİ (Projects)
-        # ───────────────────────────────────────────────────────────────────
-        # Müəllim: Bütün project-ləri görür
-        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
-        # ═══════════════════════════════════════════════════════════════════
-        if context["can_manage_course"]:
-            # MÜƏLLİM - bütün project-lər
-            context["projects"] = course.projects.all().order_by("-created_at")
-            context["projects_with_user_data"] = []
-
-        elif context["is_student"]:
-            # TƏLƏBƏ - arxivlənmişlər istisna
-            try:
-                projects_qs = (
-                    course.projects.filter(assigned_students=user).exclude(status="archived").order_by("-created_at")
-                )
-
-                # Batch-fetch submission counts for this user across all projects
-                # to avoid N+1 queries (one query instead of one per project).
-                project_ids = list(projects_qs.values_list("id", flat=True))
-                project_submission_counts_qs = (
-                    ProjectSubmission.objects.filter(project_id__in=project_ids, student=user)
-                    .values("project_id")
-                    .annotate(count=Count("id"))
-                )
-                project_submission_count = {row["project_id"]: row["count"] for row in project_submission_counts_qs}
-
-                # Hər project üçün user-specific məlumat hazırla
-                projects_with_user_data = []
-                for p in projects_qs:
-                    user_attempts = project_submission_count.get(p.id, 0)
-                    is_deadline_passed = p.is_deadline_passed
-                    is_active = p.status == "active"
-                    can_submit = user_attempts < p.max_attempts and not is_deadline_passed and is_active
-                    attempts_left = p.max_attempts - user_attempts
-
-                    projects_with_user_data.append(
-                        {
-                            "project": p,
-                            "user_attempts": user_attempts,
-                            "can_submit": can_submit,
-                            "attempts_left": attempts_left,
-                            "is_deadline_passed": is_deadline_passed,
-                        }
-                    )
-
-                context["projects"] = projects_qs
-                context["projects_with_user_data"] = projects_with_user_data
-            except Exception:
-                context["projects"] = []
-                context["projects_with_user_data"] = []
-        else:
-            context["projects"] = []
-            context["projects_with_user_data"] = []
+        )
 
         # ═══════════════════════════════════════════════════════════════════
         # 7. İMTAHANLAR
@@ -356,130 +271,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         else:
             context["course_exams"] = []
             context["exams_with_data"] = []
-
-        # ═══════════════════════════════════════════════════════════════════
-        # 6. LAB İŞLƏRİ
-        # ───────────────────────────────────────────────────────────────────
-        # Müəllim: Bütün lab-ları görür
-        # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
-        # ═══════════════════════════════════════════════════════════════════
-
-        if context["can_manage_course"]:
-            # MÜƏLLİM - bütün lab-lar
-            context["labs"] = course.labs.all().order_by("-created_at")
-            context["labs_with_user_data"] = []
-
-        elif context["is_student"]:
-            # TƏLƏBƏ - yalnız özünə təyin olunmuş lab-ları görür
-
-            # Tələbənin qrup adını al
-            student_group = ""
-            if membership and hasattr(membership, "group_name"):
-                student_group = membership.group_name or ""
-
-            labs_with_user_data = []
-
-            # Fetch all published labs with their M2M allowed_students pre-loaded
-            # in a single query to avoid per-lab allowed_student lookups (N+1).
-            published_labs = list(
-                course.labs.filter(status="published").prefetch_related("allowed_students").order_by("-created_at")
-            )
-
-            # Batch-fetch LabAssignments for this student across all labs.
-            lab_ids = [lab.id for lab in published_labs]
-            lab_assignments_by_lab = {
-                la.lab_id: la for la in LabAssignment.objects.filter(lab_id__in=lab_ids, student=user)
-            }
-
-            # Batch-fetch LabSubmissions for all LabAssignments belonging to this student.
-            student_assignment_ids = [la.id for la in lab_assignments_by_lab.values()]
-            submissions_by_assignment: dict[int, list] = defaultdict(list)
-            for sub in LabSubmission.objects.filter(assignment_id__in=student_assignment_ids).order_by("-submitted_at"):
-                submissions_by_assignment[sub.assignment_id].append(sub)
-
-            # Published olan lab-ları yoxla
-            for lab in published_labs:
-
-                # This lab assigned to the student?
-                is_assigned = False
-
-                # Allowed students - use pre-fetched M2M (no extra query per lab)
-                allowed_student_ids = {s.id for s in lab.allowed_students.all()}
-
-                # Allowed groups - vergüllə ayrılmış qrup adları
-                allowed_group_names = []
-                if lab.allowed_groups and lab.allowed_groups.strip():
-                    for g in lab.allowed_groups.split(","):
-                        g = g.strip()
-                        if g:
-                            allowed_group_names.append(g)
-
-                # ƏSAS MƏNTİQ:
-                # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
-                # 2. Əgər student ID siyahısında varsa → görür
-                # 3. Əgər qrup siyahısında varsa → görür
-
-                has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
-
-                if not has_any_filter:
-                    is_assigned = False
-                else:
-                    # Filtr var - yoxla
-                    # Student ID ilə yoxla
-                    if user.id in allowed_student_ids:
-                        is_assigned = True
-
-                    # Qrup adı ilə yoxla
-                    if not is_assigned and student_group and student_group in allowed_group_names:
-                        is_assigned = True
-
-                # Əgər təyin olunmayıbsa, skip et
-                if not is_assigned:
-                    continue
-
-                # Use pre-fetched LabAssignment and LabSubmissions.
-                assignment = lab_assignments_by_lab.get(lab.id)
-
-                submissions_list: list = []
-                attempt_count = 0
-                has_submitted = False
-                latest_submission = None
-
-                if assignment:
-                    submissions_list = submissions_by_assignment.get(assignment.id, [])
-                    attempt_count = len(submissions_list)
-                    has_submitted = attempt_count > 0
-                    latest_submission = submissions_list[0] if has_submitted else None
-
-                max_attempts = lab.max_attempts or 1
-                can_submit = (attempt_count < max_attempts) and lab.is_open
-                can_show_grade = bool(
-                    latest_submission
-                    and latest_submission.status == "graded"
-                    and latest_submission.graded_at
-                    and timezone.now() >= latest_submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-                )
-
-                labs_with_user_data.append(
-                    {
-                        "lab": lab,
-                        "has_submitted": has_submitted,
-                        "submission": latest_submission,
-                        "submissions": submissions_list,
-                        "attempt_count": attempt_count,
-                        "max_attempts": max_attempts,
-                        "attempts_left": max_attempts - attempt_count,
-                        "can_submit": can_submit,
-                        "can_show_grade": can_show_grade,
-                    }
-                )
-
-            context["labs"] = []
-            context["labs_with_user_data"] = labs_with_user_data
-
-        else:
-            context["labs"] = []
-            context["labs_with_user_data"] = []
 
         # ═══════════════════════════════════════════════════════════════════
         # 7. FORMALAR VƏ MODAL ÜÇÜN DATA (Yalnız owner üçün)

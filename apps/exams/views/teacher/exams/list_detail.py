@@ -10,10 +10,10 @@ from django.urls import reverse
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_GET
 
+from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
-from apps.live_exam.models import LiveSession
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
@@ -31,9 +31,6 @@ from ._shared import (
     _resolve_selected_superadmin_organization,
     _restore_superadmin_profile_organization,
     _teacher_profile_my_exams_url,
-)
-from .constants import (
-    LIVE_ACTIVE_STATES,
 )
 
 
@@ -261,7 +258,8 @@ def teacher_exam_detail(request, slug):
     profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
     exam_back_label = pgettext("exams.template.teacher_exam_detail", "action_back")
     active_live_session = (
-        LiveSession.objects.filter(exam=exam, host_user=request.user, state__in=LIVE_ACTIVE_STATES)
+        get_live_session_model()
+        .objects.filter(exam=exam, host_user=request.user, state__in=get_live_active_states())
         .order_by("-created_at", "-id")
         .first()
     )

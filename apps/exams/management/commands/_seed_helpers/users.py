@@ -1,10 +1,11 @@
 """seed_group_demo_data — İstifadəçi/təşkilat/üzvlük seed köməkçiləri."""
 
+from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 
-from apps.accounts.models import ProfileRole, UserProfile
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType
+from core.roles import ProfileRole
 
 User = get_user_model()
 
@@ -27,6 +28,7 @@ class UsersSeedMixin:
         return user
 
     def _assign_profile(self, user, organization, role):
+        UserProfile = django_apps.get_model("accounts", "UserProfile")
         profile, _ = UserProfile.objects.get_or_create(user=user)
         profile.organization = organization
         profile.organization_type = organization.org_type if organization else OrganizationType.INDIVIDUAL

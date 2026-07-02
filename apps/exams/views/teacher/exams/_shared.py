@@ -10,7 +10,6 @@ from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.courses.models import CourseMembership
 from apps.exams.models import Exam
 from apps.exams.views.shared.tenant import get_active_organization, tenant_scoped_exams
 from apps.organizations.models import Organization
@@ -248,6 +247,10 @@ def _get_requested_course_for_exam(request):
     if course.owner_id == request.user.id:
         return course
 
+    # M2 (2026-07-02): lazy lookup — exams→courses import kənarını kəsir.
+    from django.apps import apps as django_apps
+
+    CourseMembership = django_apps.get_model("courses", "CourseMembership")
     membership_exists = CourseMembership.objects.filter(
         course=course,
         user=request.user,

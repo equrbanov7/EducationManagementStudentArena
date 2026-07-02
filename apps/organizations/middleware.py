@@ -23,8 +23,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.utils.functional import SimpleLazyObject
 
-from apps.accounts.models import ProfileRole
 from core.rls import apply_rls_request_context, bypass_rls, reset_rls_context
+from core.roles import ProfileRole
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .services import ensure_owner_membership, is_tenant_accessible_organization

@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.urls import reverse
 
+from apps.accounts import profile_hooks
 from apps.courses.models import Course
 from apps.exams.models import Exam, StudentGroup
 from apps.notifications.services import build_profile_notification_state, get_unread_count
@@ -28,7 +29,6 @@ from ..._helpers import (
 )
 from .._sections.exams import build_my_exams_context
 from .._sections.groups import build_groups_context
-from .._sections.posts import build_posts_context
 from .._sections.question_bank import build_question_bank_context
 from .._sections.unit_exams import build_unit_exams_context
 from ..contact_inbox import handle_contact_reply_post
@@ -166,7 +166,7 @@ class _Stage1Mixin:
         self.question_bank_back_url = self._qb_ctx["question_bank_back_url"]
         self.question_bank_language_choices = self._qb_ctx["question_bank_language_choices"]
         self.question_bank_default_type_choices = self._qb_ctx["question_bank_default_type_choices"]
-        self._posts_ctx = build_posts_context(
+        self._posts_ctx = profile_hooks.posts_section(
             self.request, capabilities=self.capabilities, active_section=self.active_section
         )
         self.user_posts = self._posts_ctx["user_posts"]

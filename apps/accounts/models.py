@@ -14,6 +14,10 @@ from django.utils import timezone
 from django.utils.crypto import constant_time_compare, salted_hmac
 
 from core.constants import OrganizationType
+
+# M2 (2026-07-02): ProfileRole core.roles-a köçürülüb (dövri asılılıq kökü idi).
+# Köhnə `from apps.accounts.models import ProfileRole` import səthi qorunur (AGENTS §1).
+from core.roles import ProfileRole  # noqa: F401
 from core.utils import get_auth_otp_expiry_seconds, get_auth_otp_max_attempts
 
 
@@ -188,110 +192,6 @@ class EmailOTP(models.Model):
                 return otp
 
         return None
-
-
-class ProfileRole:
-    """Role constants for UserProfile.role field."""
-
-    SUPERADMIN = "superadmin"
-    ORG_OWNER = "org_owner"
-    ORG_ADMIN = "org_admin"
-    MEMBER = "member"
-    HR = "hr"
-    TEACHER = "teacher"
-    ASSISTANT_TEACHER = "assistant_teacher"
-    LEAD_STUDENT = "lead_student"
-    STUDENT = "student"
-
-    CHOICES = [
-        (SUPERADMIN, "Super Admin"),
-        (ORG_OWNER, "Təşkilat Sahibi"),
-        (ORG_ADMIN, "Təşkilat Admini"),
-        (MEMBER, "Üzv"),
-        (HR, "HR"),
-        (TEACHER, "Müəllim"),
-        (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
-        (LEAD_STUDENT, "Baş Tələbə"),
-        (STUDENT, "Tələbə"),
-    ]
-
-    # Level mapping for hierarchy checks
-    LEVELS = {
-        SUPERADMIN: 100,
-        ORG_OWNER: 90,
-        ORG_ADMIN: 80,
-        MEMBER: 20,
-        HR: 65,
-        TEACHER: 60,
-        ASSISTANT_TEACHER: 55,
-        LEAD_STUDENT: 30,
-        STUDENT: 10,
-    }
-
-    ROLE_NAME_NORMALIZATION = {
-        "deputy_director": "vice_director",
-        "chair_head": "department_head",
-        "section_head": "department_head",
-    }
-
-    MEMBERSHIP_ROLE_ALIASES = {
-        MEMBER: {MEMBER},
-        STUDENT: {STUDENT},
-        LEAD_STUDENT: {LEAD_STUDENT, STUDENT},
-        HR: {HR},
-        TEACHER: {TEACHER},
-        "instructor": {TEACHER, "instructor"},
-        "professor": {TEACHER, "professor"},
-        "associate_professor": {TEACHER, "associate_professor"},
-        ASSISTANT_TEACHER: {ASSISTANT_TEACHER},
-        "assistant": {ASSISTANT_TEACHER, "assistant"},
-        "lab_assistant": {ASSISTANT_TEACHER, "lab_assistant"},
-        "exam_center": {"exam_center"},
-        "tutor": {"tutor"},
-    }
-
-    # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.
-    # Bunların səlahiyyəti rol permission-ları ilə müəyyən olunur (məs. imtahan
-    # mərkəzi yalnız imtahan sahəsini idarə edir, üzv/struktur idarəetməsi yox).
-    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "hr"}
-
-    ADMIN_EQUIVALENT_ROLE_NAMES = {
-        ORG_ADMIN,
-        ORG_OWNER,
-        "rector",
-        "vice_rector",
-        "dean",
-        "vice_dean",
-        "department_head",
-        "director",
-        "vice_director",
-        "manager",
-        "senior_instructor",
-    }
-
-    @classmethod
-    def normalize_membership_role_name(cls, role_name):
-        normalized = (role_name or "").strip().lower()
-        return cls.ROLE_NAME_NORMALIZATION.get(normalized, normalized)
-
-    @classmethod
-    def aliases_for_membership_role(cls, role_name, *, level=0, is_org_owner=False):
-        normalized = cls.normalize_membership_role_name(role_name)
-        aliases = set()
-
-        if normalized:
-            aliases.add(normalized)
-            aliases.update(cls.MEMBERSHIP_ROLE_ALIASES.get(normalized, set()))
-
-        if is_org_owner:
-            aliases.update({cls.ORG_OWNER, cls.ORG_ADMIN})
-
-        if normalized not in cls.ADMIN_ALIAS_EXEMPT_ROLE_NAMES and (
-            normalized in cls.ADMIN_EQUIVALENT_ROLE_NAMES or level >= cls.LEVELS.get(cls.ORG_ADMIN, 80)
-        ):
-            aliases.add(cls.ORG_ADMIN)
-
-        return aliases
 
 
 class UserProfile(models.Model):

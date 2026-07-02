@@ -176,8 +176,9 @@ DATABASE_URL="sqlite://" pytest <dəyişdirilən sahənin testləri> --no-migrat
 Cross-modul asılılıqlar `scripts/module_deps.py` ilə qorunur (CI: `_lint.yml`
 → "Module boundary gate"). Qayda:
 
-- **YENİ dövri (qarşılıqlı) modul cütü yaratmaq QADAĞANDIR.** Mövcud 18 cüt
-  `scripts/module_deps_baseline.json`-da dondurulub — sayı yalnız azala bilər.
+- **YENİ dövri (qarşılıqlı) modul cütü yaratmaq QADAĞANDIR.** M2 (2026-07-02)
+  ilə bütün 18 tarixi cüt əridilib — baseline
+  (`scripts/module_deps_baseline.json`) SIFIRDIR və sıfır qalmalıdır.
 - **`core/` YENİ app modullarına import edə bilməz** (shared-kernel təmizliyi;
   mövcud lazy-import istisnaları baseline-dadır və tədricən registry pattern-i
   ilə əridiləcək).
@@ -185,6 +186,23 @@ Cross-modul asılılıqlar `scripts/module_deps.py` ilə qorunur (CI: `_lint.yml
   modulun servis/selector fasadını çağırın (hədəf: hər modulda `public.py`).
 - Dövr sağaldıqda `python scripts/module_deps.py --update` ilə baseline-i
   KİÇİLDİN (böyütmə yalnız PR-da açıq əsaslandırma ilə).
+
+Dövr əritmək üçün təsdiqlənmiş 4 pattern (M2):
+
+1. **Lazy signal sender**: `@receiver(post_save, sender="app_label.Model")` —
+   model importu tam silinir (nümunə: `apps/notifications/signals.py`).
+2. **Lazy model lookup**: `django_apps.get_model("app_label", "Model")` yalnız
+   funksiya gövdəsində (nümunə: `apps/notifications/services/events.py`).
+3. **Hook/registry genişlənmə nöqtəsi**: aşağı modul neytral default-lu hook
+   modulu saxlayır, yuxarı modul `AppConfig.ready()`-də öz implementasiyasını
+   `register()` edir (nümunələr: `apps/exams/score_adjustments.py` ←
+   `apps/appeals/apps.py`; provider-list variantı
+   `apps/courses/dashboard_sources.py` ← assignments/projects/labs
+   `course_dashboard.py` provider-ləri). Optional inteqrasiyalar üçün ideal —
+   try/except import blokları lazımsızlaşır.
+4. **Lazy accessor funksiyası**: modul-səviyyə sabit əvəzinə çağırış anında
+   həll olunan funksiya (nümunə: `apps/exams/constants.py` →
+   `get_live_session_model()` / `get_live_active_states()`).
 
 Yoxlama: `python scripts/module_deps.py --check` (hesabat üçün arqumentsiz).
 
