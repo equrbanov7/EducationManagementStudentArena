@@ -167,3 +167,52 @@ black --check . && isort --check-only --profile black .
 flake8 .
 DATABASE_URL="sqlite://" pytest <dəyişdirilən sahənin testləri> --no-migrations -p no:cacheprovider
 ```
+
+
+---
+
+## 5. Modul sərhədləri — M1 ratchet gate (MƏCBURİ)
+
+Cross-modul asılılıqlar `scripts/module_deps.py` ilə qorunur (CI: `_lint.yml`
+→ "Module boundary gate"). Qayda:
+
+- **YENİ dövri (qarşılıqlı) modul cütü yaratmaq QADAĞANDIR.** Mövcud 18 cüt
+  `scripts/module_deps_baseline.json`-da dondurulub — sayı yalnız azala bilər.
+- **`core/` YENİ app modullarına import edə bilməz** (shared-kernel təmizliyi;
+  mövcud lazy-import istisnaları baseline-dadır və tədricən registry pattern-i
+  ilə əridiləcək).
+- Başqa modulun datasına ehtiyac olduqda birbaşa model importu ƏVƏZİNƏ həmin
+  modulun servis/selector fasadını çağırın (hədəf: hər modulda `public.py`).
+- Dövr sağaldıqda `python scripts/module_deps.py --update` ilə baseline-i
+  KİÇİLDİN (böyütmə yalnız PR-da açıq əsaslandırma ilə).
+
+Yoxlama: `python scripts/module_deps.py --check` (hesabat üçün arqumentsiz).
+
+---
+
+## 6. Rol-əsaslı view skeleti (F-plan konvensiyası)
+
+Təqdimat qatı ROL qovluqlarına bölünür, domen qatı (models/services) feature
+modulunda rol-suz qalır. Etalon: `apps/exams/views/{student,teacher,shared}`.
+
+```
+apps/<modul>/views/
+├── shared/     # rollar-arası ortaq (api, tenant helper-lər)
+├── student/
+├── teacher/
+├── org_admin/  # owner/admin/dekan/kafedra
+└── superadmin/
+```
+
+Qaydalar:
+1. URL adları/yolları DƏYİŞMİR — `views/__init__.py` fasadı bütün mövcud
+   import səthini qoruyur (bölmə 1-dəki paket-çevirmə pattern-i).
+2. Alt-modul adı `endpoints.py` (AGENTS §1 toqquşma qaydası); köçürülən fayl
+   öz adını saxlaya bilər (məs. `teacher/crud.py`).
+3. Relative importlar mənbə faylın YENİ dərinliyinə görə bump olunur:
+   views/ içindəki fayl üçün +1 (`..models` → `...models`), app-kökündəki
+   köhnə views.py-dən views/<rol>/-a keçəndə +2 (`.constants` →
+   `...constants`); `._helpers` → `..shared._helpers`.
+4. Templates/static güzgü prinsipi: `templates/<modul>/{student,teacher,...}`.
+5. Hər modul ayrıca PR: `manage.py check` + modul testləri + bu faylın §4
+   yoxlama siyahısı MÜTLƏQ.

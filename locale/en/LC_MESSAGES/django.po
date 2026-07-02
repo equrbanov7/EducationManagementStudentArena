@@ -29495,6 +29495,34 @@ msgctxt "core.errors.csrf"
 msgid "Return to the verification page"
 msgstr "Return to the verification page"
 
+msgctxt "labs.view.message"
+msgid "bulk_delete_select_at_least_one"
+msgstr "Select at least one submission to delete."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_none_found"
+msgstr "The selected submissions were not found."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_success"
+msgstr "{count} submissions deleted."
+
+msgctxt "labs.view.message"
+msgid "grading_window_expired"
+msgstr "The review window has expired. Changes are no longer possible."
+
+msgctxt "labs.view.message"
+msgid "unexpected_error_try_again"
+msgstr "An unexpected error occurred. Please try again."
+
+msgctxt "labs.view.label"
+msgid "anonymous_student"
+msgstr "Anonymous student"
+
+msgctxt "labs.view.label"
+msgid "anonymous_view"
+msgstr "Anonymous view"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Student role cannot be selected manually."

@@ -1,81 +1,55 @@
 """
-Labs Views - Main Export File
-Bütün view-ların re-export edilməsi
+labs/views/__init__.py — FASAD.
+
+F2 rol-skeleti (2026-07-02, AGENTS §6): fayllar views/{student,teacher,shared}/
+qovluqlarına köçürülüb; submissions.py rol üzrə bölünüb (student: autosave/submit,
+teacher: siyahı/qiymətləndirmə). Mövcud import səthi dəyişmir.
 """
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# BLOCK CRUD
-# ═══════════════════════════════════════════════════════════════════════════════
-from .blocks import (
+from .shared import api_get_groups, api_get_students
+from .student import auto_save_answer, lab_detail, my_lab_answers, submit_lab
+from .teacher import (
     create_block,
+    create_lab,
+    create_question,
     delete_block,
+    delete_lab,
+    delete_question,
+    delete_submissions,
     edit_block,
+    edit_lab,
+    edit_question,
+    grade_submission_page,
+    import_questions,
+    lab_submissions,
     manage_blocks,
+    preview_randomization,
+    publish_lab,
+    submission_answers,
     update_questions_per_student,
 )
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# LAB CRUD
-# ═══════════════════════════════════════════════════════════════════════════════
-from .crud import create_lab, delete_lab, edit_lab, publish_lab
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# PREVIEW
-# ═══════════════════════════════════════════════════════════════════════════════
-from .preview import preview_randomization
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# QUESTION CRUD
-# ═══════════════════════════════════════════════════════════════════════════════
-from .questions import create_question, delete_question, edit_question, import_questions
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# STUDENT VIEWS
-# ═══════════════════════════════════════════════════════════════════════════════
-from .student import api_get_groups, api_get_students, lab_detail, my_lab_answers
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SUBMISSIONS & GRADING
-# ═══════════════════════════════════════════════════════════════════════════════
-from .submissions import (
-    auto_save_answer,
-    delete_submissions,
-    grade_submission_page,
-    lab_submissions,
-    submission_answers,
-    submit_lab,
-)
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# __all__ - Export ediləcək bütün funksiyalar
-# ═══════════════════════════════════════════════════════════════════════════════
 __all__ = [
-    # Lab CRUD
     "create_lab",
     "edit_lab",
     "delete_lab",
     "publish_lab",
-    # Block CRUD
     "manage_blocks",
     "create_block",
     "edit_block",
     "delete_block",
     "update_questions_per_student",
-    # Question CRUD
     "create_question",
     "edit_question",
     "delete_question",
     "import_questions",
-    # Submissions & Grading
     "lab_submissions",
     "delete_submissions",
     "grade_submission_page",
     "auto_save_answer",
     "submit_lab",
     "submission_answers",
-    # Preview
     "preview_randomization",
-    # Student Views
     "lab_detail",
     "my_lab_answers",
     "api_get_groups",

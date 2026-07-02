@@ -1,0 +1,128 @@
+{
+  "cycles": [
+    "accounts<->blog",
+    "accounts<->exams",
+    "accounts<->notifications",
+    "accounts<->organizations",
+    "appeals<->exams",
+    "assignments<->courses",
+    "assignments<->notifications",
+    "blog<->exams",
+    "courses<->exams",
+    "courses<->labs",
+    "courses<->notifications",
+    "courses<->organizations",
+    "courses<->projects",
+    "exams<->live_exam",
+    "exams<->notifications",
+    "exams<->organizations",
+    "labs<->notifications",
+    "notifications<->projects"
+  ],
+  "core_to_apps": [
+    "accounts",
+    "audit",
+    "blog",
+    "courses",
+    "exams",
+    "labs",
+    "live_exam",
+    "organizations",
+    "projects",
+    "trial_exams"
+  ],
+  "edges": {
+    "accounts": [
+      "appeals",
+      "assignments",
+      "audit",
+      "blog",
+      "contact",
+      "courses",
+      "exams",
+      "labs",
+      "notifications",
+      "organizations",
+      "projects",
+      "task_submission_core",
+      "trial_exams"
+    ],
+    "ai_assistant": [
+      "courses",
+      "exams",
+      "organizations"
+    ],
+    "appeals": [
+      "audit",
+      "exams",
+      "notifications"
+    ],
+    "assignments": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "blog": [
+      "accounts",
+      "audit",
+      "exams",
+      "notifications",
+      "organizations"
+    ],
+    "courses": [
+      "assignments",
+      "exams",
+      "labs",
+      "notifications",
+      "organizations",
+      "projects"
+    ],
+    "exams": [
+      "accounts",
+      "appeals",
+      "audit",
+      "blog",
+      "courses",
+      "live_exam",
+      "notifications",
+      "organizations"
+    ],
+    "labs": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "live_exam": [
+      "accounts",
+      "audit",
+      "exams"
+    ],
+    "notifications": [
+      "accounts",
+      "assignments",
+      "courses",
+      "exams",
+      "labs",
+      "organizations",
+      "projects"
+    ],
+    "organizations": [
+      "accounts",
+      "assignments",
+      "audit",
+      "courses",
+      "exams"
+    ],
+    "projects": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "task_submission_core": [
+      "courses"
+    ],
+    "trial_exams": [
+      "notifications"
+    ]
+  }
+}

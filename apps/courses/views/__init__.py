@@ -1,68 +1,46 @@
 """
-courses/views/__init__.py
-──────────────────────────
-Re-exports all views for backward compatibility with URLs.
+courses/views/__init__.py — FASAD.
 
-This allows the existing urls.py to continue working with:
-    from . import views
-    views.CreateCourseView.as_view()
+F3 rol-skeleti (2026-07-02, AGENTS §6): fayllar views/{student,teacher,shared}/
+qovluqlarına köçürülüb; membership.py rol üzrə bölünüb (StudentCoursesView →
+student/). Mövcud import səthi dəyişmir.
 """
 
-# ═══════════════════════════════════════════════════════════════
-# CRUD Views
-# ═══════════════════════════════════════════════════════════════
-from .crud import CreateCourseView, DeleteCourseView, EditCourseView, MyCoursesListView, update_course_status
-
-# ═══════════════════════════════════════════════════════════════
-# Dashboard
-# ═══════════════════════════════════════════════════════════════
-from .dashboard import CourseDashboardView
-
-# ═══════════════════════════════════════════════════════════════
-# Membership
-# ═══════════════════════════════════════════════════════════════
-from .membership import (
+from .shared import CourseDashboardView
+from .student import StudentCoursesView
+from .teacher import (
     AddMembersBulkView,
     AddMemberView,
+    AddResourceView,
+    AddTopicView,
     AvailableStudentsView,
     CourseMembersView,
+    CreateCourseView,
+    DeleteCourseView,
     DeleteGroupFromCourseView,
     DeleteMemberView,
-    StudentCoursesView,
+    DeleteResourceView,
+    DeleteTopicView,
+    EditCourseView,
+    EditTopicView,
+    MyCoursesListView,
     link_exam_to_course,
     unlink_exam_from_course,
+    update_course_status,
 )
 
-# ═══════════════════════════════════════════════════════════════
-# Resources
-# ═══════════════════════════════════════════════════════════════
-from .resources import AddResourceView, DeleteResourceView
-
-# ═══════════════════════════════════════════════════════════════
-# Topics
-# ═══════════════════════════════════════════════════════════════
-from .topics import AddTopicView, DeleteTopicView, EditTopicView
-
-# ═══════════════════════════════════════════════════════════════
-# __all__ - Explicit exports
-# ═══════════════════════════════════════════════════════════════
 __all__ = [
-    # CRUD
     "CreateCourseView",
     "EditCourseView",
     "DeleteCourseView",
     "MyCoursesListView",
     "update_course_status",
-    # Dashboard
     "CourseDashboardView",
-    # Topics
     "AddTopicView",
     "EditTopicView",
     "DeleteTopicView",
-    # Resources
     "AddResourceView",
     "DeleteResourceView",
-    # Membership
     "CourseMembersView",
     "AvailableStudentsView",
     "AddMemberView",

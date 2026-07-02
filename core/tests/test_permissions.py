@@ -6,7 +6,7 @@ Covers:
 * ``core.permissions.ensure_request_permission`` – raises PermissionDenied.
 * ``core.permissions.teacher_required`` / ``student_required`` – removed decorators.
 * ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` / ``OwnerRequiredMixin`` – removed mixins.
-* ``apps.courses.views._helpers.IsTeacherMixin`` – removed local mixin.
+* ``apps.courses.views.shared._helpers.IsTeacherMixin`` – removed local mixin.
 * ``apps.organizations.decorators`` FBV decorators – removed (hard-fail).
 """
 
@@ -391,7 +391,7 @@ class IsTeacherMixinRemovedTest(TestCase):
         from django.http import HttpResponse
         from django.views import View
 
-        from apps.courses.views._helpers import IsTeacherMixin
+        from apps.courses.views.shared._helpers import IsTeacherMixin
 
         class _CourseView(IsTeacherMixin, View):
             def get(self, request, *args, **kwargs):

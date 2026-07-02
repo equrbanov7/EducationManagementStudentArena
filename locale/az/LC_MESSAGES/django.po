@@ -29011,6 +29011,34 @@ msgctxt "core.errors.csrf"
 msgid "Return to the verification page"
 msgstr "Təsdiq səhifəsinə qayıt"
 
+msgctxt "labs.view.message"
+msgid "bulk_delete_select_at_least_one"
+msgstr "Silmək üçün ən azı bir cavab seçin."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_none_found"
+msgstr "Seçilən cavablar tapılmadı."
+
+msgctxt "labs.view.message"
+msgid "bulk_delete_success"
+msgstr "{count} cavab silindi."
+
+msgctxt "labs.view.message"
+msgid "grading_window_expired"
+msgstr "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil."
+
+msgctxt "labs.view.message"
+msgid "unexpected_error_try_again"
+msgstr "Gözlənilməz xəta baş verdi. Yenidən cəhd edin."
+
+msgctxt "labs.view.label"
+msgid "anonymous_student"
+msgstr "Anonim tələbə"
+
+msgctxt "labs.view.label"
+msgid "anonymous_view"
+msgstr "Anonim görünüş"
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Qeydiyyat zamanı tələbə rolu əl ilə seçilə bilməz."

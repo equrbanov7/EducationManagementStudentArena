@@ -87,3 +87,6 @@ jobs:
           }
           echo "✅ Module size budget check passed!"
           echo "::endgroup::"
+      - name: 🧱 Module boundary gate (M1)
+        run: python scripts/module_deps.py --check
+
