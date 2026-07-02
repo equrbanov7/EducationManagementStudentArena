@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-
 {% block title %}{{ assignment.title }}{% endblock %}
 
 {% block extraCss %}
@@ -8,6 +7,11 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width: 200px; }
+</style>
+
 <div class="container py-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4 assignment-header">
@@ -114,7 +118,7 @@
                                 {% if sub.file %}
                                 <a href="{{ sub.file.url }}" target="_blank" class="text-primary text-decoration-none fw-medium d-flex align-items-center">
                                     <i class="fa-solid fa-file-lines fs-5 me-2 text-primary-blue"></i> 
-                                    <span class="text-truncate" style="max-width: 200px;">{{ sub.file.name|cut:"assignments/submissions/" }}</span>
+                                    <span class="text-truncate c3-1">{{ sub.file.name|cut:"assignments/submissions/" }}</span>
                                 </a>
                                 {% else %}
                                 <span class="text-muted"><i class="fa-solid fa-minus"></i></span>

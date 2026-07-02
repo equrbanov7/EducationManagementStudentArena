@@ -199,7 +199,26 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
     return result
 
 
-def get_post_category_tree(*, category_queryset=None):
+# P10 (2026-07-03): default kateqoriya ağacı bir çox səhifədə (profil bölmələri,
+# post formaları) sorğulanır. Category QLOBALDIR (tenant-scoped deyil — bax
+# models.py qeydi), ona görə tək açarla keşlənməsi təhlükəsizdir. Custom
+# queryset verilən çağırışlar (məs. category-management annotasiyalı ağacı)
+# keşdən YAN KEÇİR. locmem/redis hər get-də pickle-copy qaytardığı üçün
+# çağıranların ağac üzərindəki mutasiyaları keşə sızmır.
+CATEGORY_TREE_CACHE_KEY = "ems:blog:category_tree:v1"
+CATEGORY_TREE_CACHE_TTL = 300  # signal-invalidasiya əsasdır, TTL ehtiyat tordur
+
+
+def invalidate_category_tree_cache():
+    from django.core.cache import cache
+
+    try:
+        cache.delete(CATEGORY_TREE_CACHE_KEY)
+    except Exception:
+        pass
+
+
+def _build_post_category_tree(category_queryset):
     categories = _load_categories(category_queryset)
     if not categories:
         return []
@@ -211,6 +230,27 @@ def get_post_category_tree(*, category_queryset=None):
         root_category.child_categories = list(children_by_parent.get(root_category.id, []))
 
     return root_categories
+
+
+def get_post_category_tree(*, category_queryset=None):
+    if category_queryset is not None:
+        return _build_post_category_tree(category_queryset)
+
+    from django.core.cache import cache
+
+    try:
+        cached = cache.get(CATEGORY_TREE_CACHE_KEY)
+    except Exception:
+        cached = None
+    if cached is not None:
+        return cached
+
+    tree = _build_post_category_tree(None)
+    try:
+        cache.set(CATEGORY_TREE_CACHE_KEY, tree, CATEGORY_TREE_CACHE_TTL)
+    except Exception:
+        pass
+    return tree
 
 
 def build_post_category_picker_options(category_tree):

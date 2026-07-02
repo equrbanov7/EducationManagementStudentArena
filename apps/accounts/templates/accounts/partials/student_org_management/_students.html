@@ -1,4 +1,9 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { width: 44px; }
+</style>
+
 <div class="section-card">
     <div class="section-title">
         <i class="fas fa-users"></i> {% trans "students_title" context "accounts.student_org" %}
@@ -131,7 +136,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width: 44px;"></th>
+                        <th class="c3-1"></th>
                         <th>{% trans "col_user" context "accounts.student_org" %}</th>
                         <th>{% trans "col_username" context "accounts.student_org" %}</th>
                         <th>{% trans "col_email" context "accounts.student_org" %}</th>

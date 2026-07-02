@@ -1,4 +1,10 @@
 {% load i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { font-size: 2rem; color: #ccc; }
+  .c3-2 { margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600; }
+</style>
+
 <div class="accordion-item">
     <h2 class="accordion-header" id="examHeading">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
@@ -126,7 +132,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fas fa-file-alt c3-1"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam_in_course" context "exams.partial.exam_section" %}</p>
                         <div class="mt-3">
                             {% if is_owner %}
@@ -282,14 +288,14 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                        <i class="fas fa-file-alt c3-1"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam_assigned_to_student" context "exams.partial.exam_section" %}</p>
                     </div>
                 {% endif %}
             
             {% else %}
                 <div class="alert alert-light text-center py-4">
-                    <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                    <i class="fas fa-file-alt c3-1"></i>
                     <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam" context "exams.partial.exam_section" %}</p>
                 </div>
             {% endif %}
@@ -373,7 +379,7 @@
                    maxlength="6"
                    inputmode="numeric"
                    placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}">
-            <div id="courseExamCodeError" style="margin-top:.4rem;color:#b91c1c;font-size:.84rem;font-weight:600;" hidden></div>
+            <div id="courseExamCodeError" class="c3-2" hidden></div>
         </form>
 
         <div class="assigned-exam-info-actions">

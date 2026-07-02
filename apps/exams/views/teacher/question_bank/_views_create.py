@@ -13,7 +13,6 @@ from apps.exams.models import QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
 from apps.exams.services.language_variants import ensure_default_variant
-from apps.exams.services.parsing import extract_text_from_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._helpers import (
@@ -25,21 +24,12 @@ from ._helpers import (
     _question_bank_title_context,
     _resolve_question_bank_navigation,
     _sync_written_block_questions,
-    logger,
 )
 
 
 @login_required
 @require_POST
 def ai_generate_question_bank(request, slug):
-    # `generate_question_bank_text` testlərdə bu paketin yolu ilə string-patch
-    # olunur (patch("...question_bank.generate_question_bank_text")). Paket
-    # bölündüyü üçün patch fasad (__init__) namespace-inə dəyir; ona görə adı
-    # call-time fasaddan həll edirik ki, mock təsirli olsun.
-    from apps.exams.views.teacher import question_bank as _qb_facade
-
-    generate_question_bank_text = _qb_facade.generate_question_bank_text
-
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
 
@@ -55,48 +45,31 @@ def ai_generate_question_bank(request, slug):
             status=400,
         )
 
-    source_text = (request.POST.get("source_text") or "").strip()
-    uploaded = request.FILES.get("source_file") or request.FILES.get("ai_source_file")
-    if uploaded:
-        try:
-            extracted_text = extract_text_from_upload(uploaded)
-        except Exception as exc:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "error": pgettext("exams.view.question_bank.message", "file_read_failed").format(error=exc),
-                },
-                status=400,
-            )
-        source_text = "\n\n".join(part for part in [source_text, extracted_text] if part.strip())
+    # P4 (2026-07-02): generasiya worker-də icra olunur (fayl-çıxarma daxil);
+    # eager/sinxron halda cavab köhnə forma ilə birə-birdir.
+    from apps.exams.views.teacher.extract_jobs import start_ai_generation_job
 
     ai_exam_type = "written" if exam.exam_type == "coding" else exam.exam_type
-    try:
-        result = generate_question_bank_text(
-            exam_title=exam.title,
-            exam_type=ai_exam_type,
-            prompt_text=request.POST.get("prompt", ""),
-            source_text=source_text,
-            question_count=request.POST.get("question_count") or 5,
-            difficulty=request.POST.get("difficulty") or "medium",
-            block_name=request.POST.get("block_name") or "",
-            language_code=request.LANGUAGE_CODE,
-            user_id=request.user.pk,
-        )
-    except Exception:
-        logger.exception("AI question bank endpoint failed for exam %s", exam.pk)
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": pgettext(
-                    "exams.view.question_bank.ai.error",
-                    "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın.",
-                ),
-            },
-            status=500,
-        )
-    status = 200 if result.get("ok") else 400
-    return JsonResponse(result, status=status)
+    payload = {
+        "exam_title": exam.title,
+        "exam_type": ai_exam_type,
+        "prompt_text": request.POST.get("prompt", ""),
+        "source_text": (request.POST.get("source_text") or "").strip(),
+        "question_count": request.POST.get("question_count") or 5,
+        "difficulty": request.POST.get("difficulty") or "medium",
+        "block_name": request.POST.get("block_name") or "",
+        "language_code": request.LANGUAGE_CODE,
+        "user_id": request.user.pk,
+    }
+    return start_ai_generation_job(
+        request,
+        payload=payload,
+        uploaded=request.FILES.get("source_file") or request.FILES.get("ai_source_file"),
+        service_error_message=pgettext(
+            "exams.view.question_bank.ai.error",
+            "AI sual yaratma alınmadı. Bir az sonra yenidən yoxlayın.",
+        ),
+    )
 
 
 @login_required

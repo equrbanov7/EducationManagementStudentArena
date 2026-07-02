@@ -1,6 +1,11 @@
 {% load i18n %}
 
 
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { background:#fceaea;color:#a32d2d;border:1px solid #e24b4a; }
+</style>
+
 <div class="pr-filter-card">
     <form method="get" class="js-auto-filter-form" data-auto-filter-form>
         {% if embedded_in_profile %}
@@ -89,9 +94,8 @@
                         {{ item.title }}
                         <span class="pr-badge pr-badge-type">{{ item.type_label }}</span>
                         {% if item.supervision_removed %}
-                            <span class="pr-badge pr-badge-proctor"
-                                  title="Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
-                                  style="background:#fceaea;color:#a32d2d;border:1px solid #e24b4a;">
+                            <span class="pr-badge pr-badge-proctor c3-1"
+                                  title="Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb">
                                 <i class="fas fa-shield-alt me-1"></i>Nəzarətçi atıb
                             </span>
                         {% endif %}

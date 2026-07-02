@@ -1,4 +1,9 @@
 {% load static i18n %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { color:var(--danger,#e74c3c); }
+</style>
+
 {% comment %}
 Sual Bankı siyahısının native profil gövdəsi.
 Ayrıca ``question_bank_list.html`` səhifəsi silinib; görünən siyahı burada render olunur.
@@ -35,7 +40,7 @@ Kontekst:
             {% if qbl_create_next %}<input type="hidden" name="next" value="{{ qbl_create_next }}">{% endif %}
 
             <div class="qb-field">
-                <label class="qb-field__label" for="bankName">{% trans "Bankın adı" %} <span style="color:var(--danger,#e74c3c)">*</span></label>
+                <label class="qb-field__label c3-1" for="bankName">{% trans "Bankın adı" %} <span>*</span></label>
                 <input type="text" class="qb-input" id="bankName" name="name" required
                        placeholder="{% trans 'məs. Verilənlər strukturu — 1-ci kurs' %}">
                 <span class="qb-field__hint">{% trans "Bankı tanımaq üçün ad. İmtahan adı deyil." %}</span>

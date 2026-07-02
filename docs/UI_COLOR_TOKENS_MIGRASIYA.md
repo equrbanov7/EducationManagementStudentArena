@@ -116,7 +116,10 @@ hər sprintdə eyni 4 qayda tətbiq olunur.
 Qalıq bölgüsü:
 
 - **167** — EMAIL (qanuni)
-- **119** — MİKRO-STATİK (opsional gələcək iş)
+- **119** — MİKRO-STATİK — ✅ **C3 (2026-07-03) ilə TAMAMLANDI**: hamısı fayl-lokal
+  `c3-N` klasslarına köçürüldü (extends-şablonlarda blok daxilində `<style>`,
+  partiallarda fraqment-daxili `<style>`; display-li 11 atribut JS-TOGGLE olduğu
+  üçün qaydaya uyğun saxlanıldı). 352 şablon compile: 0 xəta, dublikat-class: 0.
 - **39** — JS-TOGGLE display (qanuni — qayda 3)
 - **21** — DİNAMİK (qanuni — şablon dəyəri)
 

@@ -102,7 +102,8 @@ function renderAiBlockPanel(uniqueID, defaultTitle) {
         <div class="ai-block-panel"
              data-ai-question-form
              data-ai-context="written"
-             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
+             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}"
+             data-extract-url="{% url 'exams:start_text_extraction' %}">
             <div class="ai-block-panel__head">
                 <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
                 <div>

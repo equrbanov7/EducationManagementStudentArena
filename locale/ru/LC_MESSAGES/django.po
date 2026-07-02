@@ -29461,6 +29461,56 @@ msgctxt "labs.view.label"
 msgid "anonymous_view"
 msgstr "Анонимный режим"
 
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarılır..."
+msgstr "Извлекается текст из файла..."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayldan mətn çıxarıla bilmədi."
+msgstr "Не удалось извлечь текст из файла."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."
+msgstr "Извлечение текста заняло слишком много времени. Повторите попытку."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_required"
+msgstr "Файл не выбран."
+
+msgctxt "exams.view.extract_job.error"
+msgid "file_too_large"
+msgstr "Файл слишком большой (лимит 45MB)."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_title"
+msgstr "Экспорт готовится"
+
+msgctxt "exams.template.export_waiting"
+msgid "export_preparing_body"
+msgstr ""
+"Загрузка начнётся автоматически, как только файл будет готов. Не закрывайте "
+"страницу."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_failed_body"
+msgstr "Экспорт не удался. Повторите попытку."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_timeout_body"
+msgstr "Экспорт занял слишком много времени. Повторите попытку позже."
+
+msgctxt "exams.template.export_waiting"
+msgid "export_back_link"
+msgstr "Назад"
+
+msgctxt "exams.view.export_job.error"
+msgid "export_failed"
+msgstr "Экспорт не удался. Повторите попытку позже."
+
+msgctxt "exams.view.export_job.error"
+msgid "empty_export"
+msgstr "Не найдено активных вопросов для экспорта."
+
 #~ msgctxt "accounts.form.register.error"
 #~ msgid "signup_student_role_not_allowed"
 #~ msgstr "Роль студента нельзя выбирать вручную."

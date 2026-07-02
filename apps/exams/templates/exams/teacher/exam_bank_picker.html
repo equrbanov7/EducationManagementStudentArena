@@ -3,7 +3,12 @@
 {% block title %}Bankdan sual əlavə et — {{ exam.title }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 1040px;">
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { max-width: 1040px; }
+</style>
+
+<div class="container py-4 c3-1">
 
     <div class="d-flex justify-content-between align-items-start mb-3">
         <div>

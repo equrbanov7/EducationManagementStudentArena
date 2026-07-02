@@ -293,6 +293,10 @@
         .btn-lg-modern { width: 100%; }
         .current-image-wrapper img, .preview-wrapper img { max-height: 200px; width: 100%; }
     }
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { color: var(--edit-primary); }
+  .c3-2 { background: var(--edit-primary); }
 </style>
 {% endblock %}
 
@@ -306,7 +310,7 @@
                         <i class="fas fa-pen-to-square"></i>
                     </div>
                     <h2 class="header-title">
-                        {% trans "header_edit_course" context "courses.edit_page" %}: <span style="color: var(--edit-primary);">{{ course.title }}</span>
+                        {% trans "header_edit_course" context "courses.edit_page" %}: <span class="c3-1">{{ course.title }}</span>
                     </h2>
                 </div>
                 
@@ -356,7 +360,7 @@
 
                                     <div id="imagePreviewBlock" class="preview-wrapper" style="display: none;">
                                         <img id="previewImg" src="#" alt="{% trans 'alt_new_preview' context 'courses.edit_page' %}">
-                                        <span class="image-label-tag" style="background: var(--edit-primary);">{% trans "label_new_selection" context "courses.edit_page" %}</span>
+                                        <span class="image-label-tag c3-2">{% trans "label_new_selection" context "courses.edit_page" %}</span>
                                     </div>
                                 </div>
 

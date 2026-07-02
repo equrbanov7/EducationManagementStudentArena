@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n %}
-
 {% block title %}{{ exam.title }} - {% trans "Practical Coding Exam" context "exams.template.coding_exam" %}{% endblock %}
 
 {% block ai_assistant %}{% endblock %}
@@ -19,6 +18,12 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { margin-top:0.75rem; }
+  .c3-2 { max-width:100%;max-height:320px;border-radius:8px; }
+</style>
+
 {{ initial_files|json_script:"coding-initial-files" }}
 {{ starter_files|json_script:"coding-starter-files" }}
 {{ visible_test_cases|json_script:"coding-visible-test-cases" }}
@@ -98,13 +103,13 @@
                 <div class="coding-question-label" id="codingQuestionLabel">{% trans "label_question" context "exams.template.take_exam" %} 1</div>
                 <div class="coding-question-text" id="codingQuestionText">{{ coding_question.problem_statement|linebreaks }}</div>
                 {% if coding_question.question.image %}
-                    <div class="question-media" id="codingQuestionImage" style="margin-top:0.75rem;">
-                        <img src="{{ coding_question.question.image.url }}" alt="" style="max-width:100%;max-height:320px;border-radius:8px;">
+                    <div class="question-media c3-1" id="codingQuestionImage">
+                        <img src="{{ coding_question.question.image.url }}" alt="" class="c3-2">
                     </div>
                 {% endif %}
                 {% if coding_question.question.video %}
-                    <div class="question-media" id="codingQuestionVideo" style="margin-top:0.75rem;">
-                        <video controls preload="metadata" playsinline style="max-width:100%;max-height:320px;border-radius:8px;">
+                    <div class="question-media c3-1" id="codingQuestionVideo">
+                        <video controls preload="metadata" playsinline class="c3-2">
                             <source src="{{ coding_question.question.video.url }}">
                         </video>
                     </div>

@@ -30,6 +30,9 @@
 .lr-empty{text-align:center;padding:64px 20px;color:#6b7280}
 .lr-empty i{font-size:3rem;margin-bottom:14px;display:block;color:#d1d5db}
 .lr-empty p{font-size:1rem;margin:0}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { font-size:.78rem; }
 </style>
 {% endblock %}
 
@@ -72,7 +75,7 @@
                 </div>
             </div>
             <a href="{% url 'liveExam:teacher_live_session_detail' exam.slug s.pin %}{% if live_results_navigation_query %}?{{ live_results_navigation_query }}{% endif %}" class="lr-card__link">
-                <i class="fas fa-chart-bar"></i> {% trans "action_view_detailed_stats" context "liveExam.template.results" %} <i class="fas fa-arrow-right" style="font-size:.78rem"></i>
+                <i class="fas fa-chart-bar c3-1"></i> {% trans "action_view_detailed_stats" context "liveExam.template.results" %} <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         {% endfor %}

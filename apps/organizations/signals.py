@@ -9,7 +9,7 @@ from core.cache import invalidate_signup_lookup_cache
 from core.rls import bypass_rls
 
 from .default_roles import get_default_roles_for_org_type
-from .models import Country, Organization, Role
+from .models import Country, Membership, Organization, Role
 
 
 @receiver(post_save, sender=Organization)
@@ -53,3 +53,20 @@ def invalidate_signup_lookup_on_organization_change(sender, instance, **kwargs):
 @receiver([post_save, post_delete], sender=Country)
 def invalidate_signup_lookup_on_country_change(sender, instance, **kwargs):
     invalidate_signup_lookup_cache()
+
+
+# ── Org-switcher keş invalidasiyası (P9) ──────────────────────────────────────
+# Navbar org-switcher siyahısı 60s keşlənir (middleware). Üzvlük dəyişən kimi
+# həmin istifadəçinin keşini dərhal sil ki, switcher köhnə siyahı göstərməsin.
+
+
+@receiver([post_save, post_delete], sender=Membership)
+def invalidate_org_switcher_on_membership_change(sender, instance, **kwargs):
+    from django.core.cache import cache
+
+    from .middleware import OrganizationMiddleware
+
+    try:
+        cache.delete(OrganizationMiddleware.org_switcher_cache_key(instance.user_id))
+    except Exception:
+        pass

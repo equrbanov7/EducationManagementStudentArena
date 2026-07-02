@@ -50,13 +50,13 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addAsnGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'assignment.modals' %}">
-                            <div id="addAsnGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <div id="addAsnGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="addAsnGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_students" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="addAsnStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'assignment.modals' %}">
-                            <div id="addAsnStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <div id="addAsnStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "assignment.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="addAsnStudentCount">0</span></small>
@@ -122,13 +122,13 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_groups" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editAsnGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'assignment.modals' %}">
-                            <div id="editAsnGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <div id="editAsnGroupList" class="border rounded c3-1"></div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="editAsnGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">{% trans "label_allowed_students" context "assignment.modals" %}</label>
                             <input type="text" class="form-control mb-2" id="editAsnStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'assignment.modals' %}">
-                            <div id="editAsnStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <div id="editAsnStudentList" class="border rounded c3-1">
                                 <p class="text-muted text-center py-3">{% trans "select_group_first" context "assignment.modals" %}</p>
                             </div>
                             <small class="text-muted">{% trans "selected_count" context "assignment.modals" %}: <span id="editAsnStudentCount">0</span></small>
@@ -153,6 +153,9 @@
 .asn-chk-row input{width:18px;height:18px;margin-right:10px;flex-shrink:0}
 .asn-chk-row label{margin:0;flex:1;cursor:pointer;font-weight:500}
 .asn-chk-row .badge{margin-left:auto;flex-shrink:0}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { max-height:250px;overflow-y:auto; }
 </style>
 
 <script nonce="{{ request.csp_nonce }}">

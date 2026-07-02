@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n %}
-
 {% block title %}{% trans "page_title" context "exams.template.supervision_monitor" %}{% endblock %}
 
 {% block extraCss %}
@@ -8,6 +7,14 @@
 {% endblock %}
 
 {% block content %}
+{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
+<style>
+  .c3-1 { flex:1;min-width:200px; }
+  .c3-2 { font-size:0.72rem; }
+  .c3-3 { white-space:nowrap;color:var(--sm-text-muted); }
+  .c3-4 { opacity:0.5;cursor:not-allowed; }
+</style>
+
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner">
         <i class="fas fa-circle-notch fa-spin"></i>
@@ -52,7 +59,7 @@
 
     {# Filters #}
     <form method="get" class="filter-bar" id="monitorFilterForm">
-        <div class="filter-group" style="flex:1;min-width:200px;">
+        <div class="filter-group c3-1">
             <input type="text" name="q" id="monitorSearchInput" placeholder="{% trans 'filter_search_placeholder' context 'exams.template.supervision_monitor' %}" value="{{ search_query }}">
         </div>
         <div class="filter-group">
@@ -123,7 +130,7 @@
                 <div class="exam-card-titles">
                     <p class="exam-card-title" title="{{ exam.title }}">{{ exam.title }}</p>
                     <span class="exam-card-sub">
-                        <i class="fas fa-users" style="font-size:0.72rem;"></i>
+                        <i class="fas fa-users c3-2"></i>
                         {{ card.attempt_count }} {% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}
                     </span>
                 </div>
@@ -179,7 +186,7 @@
                                     {{ attempt.get_supervision_status_display }}
                                 </span>
                             </td>
-                            <td style="white-space:nowrap;color:var(--sm-text-muted);">{{ attempt.started_at|date:"d.m.Y H:i" }}</td>
+                            <td class="c3-3">{{ attempt.started_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 <a href="{% url 'exams:supervision_detail' attempt.id %}" class="btn-action btn-detail" data-nav="1" title="{% trans 'action_details' context 'exams.template.supervision_monitor' %}">
                                     <i class="fas fa-eye"></i> {% trans "action_details" context "exams.template.supervision_monitor" %}
@@ -189,7 +196,7 @@
                                 <div class="action-cell">
                                 {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" %}
                                     {% if attempt.is_finished or attempt.is_resume_time_expired %}
-                                    <button class="btn-action btn-resume" disabled title="{% trans 'action_terminated' context 'exams.template.supervision_monitor' %}" style="opacity:0.5;cursor:not-allowed;">
+                                    <button class="btn-action btn-resume c3-4" disabled title="{% trans 'action_terminated' context 'exams.template.supervision_monitor' %}">
                                         <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_monitor" %}
                                     </button>
                                     {% else %}

@@ -23,6 +23,12 @@ from .teacher.exams import (
     toggle_exam_archive,
     toggle_exam_results_visibility,
 )
+from .teacher.extract_jobs import (
+    export_job_download,
+    export_job_waiting,
+    start_text_extraction,
+    text_extraction_status,
+)
 
 # ═══════════════════════════════════════════════════════════════
 # TEACHER VIEWS
@@ -85,6 +91,10 @@ from .teacher.supervision import (
 # __all__ - Export ediləcək bütün funksiyalar
 # ═══════════════════════════════════════════════════════════════
 __all__ = [
+    "start_text_extraction",
+    "export_job_waiting",
+    "export_job_download",
+    "text_extraction_status",
     # Shared
     "exam_code_check",
     # Teacher - Groups
