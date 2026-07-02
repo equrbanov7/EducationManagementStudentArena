@@ -385,7 +385,7 @@ class RemovedOrgDecoratorsTest(TestCase):
 
 
 class IsTeacherMixinRemovedTest(TestCase):
-    """IsTeacherMixin in courses.views._helpers raises ImproperlyConfigured."""
+    """IsTeacherMixin in courses.views.shared._helpers raises ImproperlyConfigured."""
 
     def test_is_teacher_mixin_raises_improperly_configured(self):
         from django.http import HttpResponse
