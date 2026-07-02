@@ -2,6 +2,7 @@
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.utils.translation import pgettext
 
 from ....models import ProfileRole
 from ..constants import STUDENT_ORG_MANAGEMENT_MIN_LEVEL
@@ -9,6 +10,46 @@ from ._pagination import _mgmt_section_pagination
 from ._queries import _mgmt_section_queries
 
 User = get_user_model()
+
+
+def _staff_management_script_data():
+    return {
+        "i18n": {
+            "addSelectedUsers": pgettext("staff.management", "Add selected users to the organization"),
+            "addSelectedUsersCount": pgettext(
+                "staff.management",
+                "Add selected users to the organization ({count} selected)",
+            ),
+            "selectAtLeastOneStudent": pgettext("staff.management", "Select at least 1 student"),
+            "selectAtLeastOneUser": pgettext("staff.management", "Select at least 1 user"),
+            "studentRole": pgettext("membership_request.role", "Student"),
+            "thisUser": pgettext("staff.management", "This user"),
+            "withdrawSelectedInvites": pgettext(
+                "staff.management",
+                "Please confirm that you want to withdraw the selected invites.",
+            ),
+            "selectedInvites": pgettext("staff.management", "Selected invites:"),
+            "selectInviteFirst": pgettext("staff.management", "Please select at least one invite first."),
+            "confirmButtonDisabled": pgettext(
+                "staff.management",
+                "The confirm button is disabled in this state.",
+            ),
+            "confirmAddSelected": pgettext(
+                "staff.management",
+                "Please confirm that you want to add the selected user(s) to the organization.",
+            ),
+            "confirmAddSingle": pgettext(
+                "staff.management",
+                "Please confirm that you want to add this user to the organization.",
+            ),
+            "selectedUsers": pgettext("staff.management", "Selected users:"),
+            "confirmInviteSelected": pgettext(
+                "staff.management",
+                "Please confirm that you want to invite the selected user(s).",
+            ),
+            "confirmInviteSingle": pgettext("staff.management", "Please confirm that you want to invite this user."),
+        },
+    }
 
 
 def _build_student_org_management_section(
@@ -140,6 +181,7 @@ def _build_student_org_management_section(
         "staff_invites_pagination_query": "",
         "organizations_page_param": "organization_page",
         "organizations_pagination_query": "",
+        "staff_management_script_data": _staff_management_script_data(),
     }
 
     if organization is None:

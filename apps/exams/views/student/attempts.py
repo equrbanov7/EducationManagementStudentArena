@@ -34,6 +34,7 @@ from ._helpers import (
     ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
 )
+from .script_data import take_exam_script_data
 
 
 def _attempt_answers_queryset(attempt, *, question_ids=None):
@@ -589,5 +590,6 @@ def take_exam(request, slug, attempt_id):
         "exam_autosave_jitter_ms": settings.EXAM_AUTOSAVE_JITTER_MS,
         "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
         "marked_question_ids_json": json.dumps(getattr(attempt, "marked_question_ids", None) or []),
+        "take_exam_script_data": take_exam_script_data(remaining_seconds),
     }
     return render(request, "exams/student/take_exam.html", context)

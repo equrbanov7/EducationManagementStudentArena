@@ -228,7 +228,14 @@
 {% block extraJs %}
 {# register_wizard dropdown-ları data-bs-toggle işlədir — bundle yalnız burada lazımdır #}
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'accounts/js/register_wizard.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/state.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/ui.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/step1.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/step2.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/step3.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/draft.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/submit.js' %}?v=20260621-csrf-retry"></script>
+<script src="{% static 'accounts/js/register_wizard/register_wizard.entry.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script nonce="{{ request.csp_nonce }}">
