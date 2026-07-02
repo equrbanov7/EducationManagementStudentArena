@@ -266,3 +266,11 @@
 @media (prefers-reduced-motion: reduce) {
     .ems-cc *, .ems-cc *::before, .ems-cc *::after { transition: none !important; animation: none !important; }
 }
+
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02): my_courses inline → klass ═══ */
+.mc-title { font-weight: 800; color: var(--ems-neutral-900); }
+.mc-subtitle { font-size: 15px; }
+.mc-btn--auto { width: auto; padding: 12px 24px; }
+.mc-empty-title { font-weight: 800; color: var(--ems-neutral-900); margin-bottom: 12px; }
+.mc-empty-text { color: var(--ems-neutral-500); max-width: 480px; margin: 0 auto 24px; }
+.mc-btn--auto-lg { width: auto; padding: 14px 28px; display: inline-block; }

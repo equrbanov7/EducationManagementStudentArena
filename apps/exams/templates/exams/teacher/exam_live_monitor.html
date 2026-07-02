@@ -79,18 +79,18 @@
                 <div class="legend">
                     <span><i class="sw s-finished"></i> {% trans "legend_finished" context "exams.template.exam_live_monitor" %}</span>
                     <span><i class="sw s-progress"></i> {% trans "legend_in_progress" context "exams.template.exam_live_monitor" %}</span>
-                    <span><i class="sw" style="background:#f59e0b"></i> {% trans "legend_vio_low" context "exams.template.exam_live_monitor" %}</span>
-                    <span><i class="sw" style="background:#ea580c"></i> {% trans "legend_vio_mid" context "exams.template.exam_live_monitor" %}</span>
-                    <span><i class="sw" style="background:#dc2626"></i> {% trans "legend_vio_high" context "exams.template.exam_live_monitor" %}</span>
-                    <span><i class="sw" style="background:#7f1d1d"></i> {% trans "legend_removed" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw sw--low"></i> {% trans "legend_vio_low" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw sw--mid"></i> {% trans "legend_vio_mid" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw sw--high"></i> {% trans "legend_vio_high" context "exams.template.exam_live_monitor" %}</span>
+                    <span><i class="sw sw--removed"></i> {% trans "legend_removed" context "exams.template.exam_live_monitor" %}</span>
                     <span><i class="sw s-none"></i> {% trans "legend_not_entered" context "exams.template.exam_live_monitor" %}</span>
                 </div>
             </div>
             <div class="panel-body">
                 <div class="student-map" id="studentMap"></div>
                 <div class="map-empty" id="mapEmpty" style="display:none;">
-                    <i class="fas fa-users-slash" style="font-size:2rem;opacity:0.4;"></i>
-                    <p style="margin-top:0.75rem;">{% trans "map_empty" context "exams.template.exam_live_monitor" %}</p>
+                    <i class="fas fa-users-slash map-empty__icon"></i>
+                    <p class="map-empty__text">{% trans "map_empty" context "exams.template.exam_live_monitor" %}</p>
                 </div>
             </div>
             <div class="map-foot">
@@ -151,18 +151,18 @@
 
 {# Confirmation modal #}
 <div class="lv-overlay" id="confirmOverlay">
-    <div class="lv-modal" style="max-width:450px;">
+    <div class="lv-modal lv-modal--sm">
         <div class="lv-modal-head">
             <div>
                 <div class="mh-title" id="confirmTitle">{% trans "confirm_title" context "exams.template.exam_live_monitor" %}</div>
             </div>
             <button type="button" class="lv-close" id="confirmClose">&times;</button>
         </div>
-        <div class="lv-modal-body" style="text-align:center;padding:1.5rem;">
-            <p id="confirmMessage" style="font-size:0.95rem;color:#333;margin:0;"></p>
+        <div class="lv-modal-body lv-modal-body--center">
+            <p id="confirmMessage" class="lv-confirm-msg"></p>
         </div>
-        <div class="lv-modal-foot" style="justify-content:center;">
-            <button type="button" class="btn-act" id="confirmCancel" style="background:#f0f0f0;color:#333;"><i class="fas fa-times"></i> {% trans "btn_cancel" context "exams.template.exam_live_monitor" %}</button>
+        <div class="lv-modal-foot lv-modal-foot--center">
+            <button type="button" class="btn-act btn-act--neutral" id="confirmCancel"><i class="fas fa-times"></i> {% trans "btn_cancel" context "exams.template.exam_live_monitor" %}</button>
             <button type="button" class="btn-act" id="confirmOk"></button>
         </div>
     </div>

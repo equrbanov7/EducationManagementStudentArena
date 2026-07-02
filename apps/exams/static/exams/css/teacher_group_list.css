@@ -592,3 +592,8 @@
         padding: 14px;
     }
 }
+
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02) ═══
+   Daimi-gizli widget wrapper-ləri (searchable-multi-select xam selectləri) və
+   JS-submit forması üçün. JS bunları heç vaxt göstərmir. */
+.tgl-hidden { display: none; }

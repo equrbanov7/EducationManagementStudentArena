@@ -126,3 +126,21 @@
     .sd-header{flex-direction:column}
     .sd-filter-grid{grid-template-columns:1fr}
 }
+
+/* ═══ Faza 6.4 Sprint-2 (2026-07-02): inline style → klass ═══ */
+.sd-filter-field--full { grid-column: 1 / -1; }
+.sd-check-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.sd-check-label { display: flex; align-items: center; gap: 4px; font-size: 0.84rem; cursor: pointer; }
+.sd-filter-actions--spaced { margin-top: 14px; }
+.sd-card__value-sub { font-size: 0.55em; opacity: 0.7; }
+.sd-col-index { width: 50px; }
+.sd-col-accuracy { min-width: 180px; }
+.sd-num--index { font-weight: 700; color: var(--ems-neutral-500); }
+.sd-num--primary { font-weight: 600; color: var(--ems-primary-700); }
+.sd-num--secondary { font-weight: 600; color: var(--ems-neutral-500); }
+.sd-num--correct { color: var(--ems-success-600); font-weight: 600; }
+.sd-num--incorrect { color: var(--ems-danger); font-weight: 600; }
+.sd-bar__text--green { color: var(--ems-success-600); }
+.sd-bar__text--blue { color: var(--ems-primary-700); }
+.sd-bar__text--red { color: var(--ems-danger); }
+.sd-ai-placeholder { color: var(--ems-gray-500); font-style: italic; }

@@ -21,11 +21,11 @@
             <strong>{{ exam_creator_display }}</strong>
         </p>
         {% if attempt.supervision_status == "removed" %}
-        <div class="proctor-flag" role="alert" style="margin-top:0.75rem;display:flex;align-items:flex-start;gap:0.6rem;background:#fceaea;border:1px solid #e24b4a;border-left:4px solid #a32d2d;border-radius:8px;padding:0.7rem 0.9rem;color:#791f1f;max-width:720px;">
-            <i class="fas fa-shield-alt" style="margin-top:2px;color:#a32d2d;"></i>
+        <div class="proctor-flag" role="alert">
+            <i class="fas fa-shield-alt"></i>
             <div>
-                <strong style="display:block;color:#a32d2d;">Nəzarətçi tərəfindən dayandırılıb</strong>
-                <span style="font-size:0.9rem;">
+                <strong class="proctor-flag__title">Nəzarətçi tərəfindən dayandırılıb</strong>
+                <span class="proctor-flag__note">
                     Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb.
                     Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan
                     avtomatik tamamlanıb. Qeyd olunan {{ attempt.supervision_violation_count }} pozuntu
@@ -111,12 +111,12 @@
                         {# ---- SUALIN MEDİASI (şəkil / video) ---- #}
                         {% if q.image %}
                             <div class="question-media mb-2">
-                                <img src="{{ q.image.url }}" alt="" class="img-fluid rounded" style="max-height:300px;">
+                                <img src="{{ q.image.url }}" alt="" class="img-fluid rounded tca-media-capped">
                             </div>
                         {% endif %}
                         {% if q.video %}
                             <div class="question-media mb-2">
-                                <video controls preload="metadata" playsinline class="img-fluid rounded" style="max-height:300px;">
+                                <video controls preload="metadata" playsinline class="img-fluid rounded tca-media-capped">
                                     <source src="{{ q.video.url }}">
                                 </video>
                             </div>
@@ -133,12 +133,12 @@
                                value="{{ q.points }}">
                         
                         {# ---- GİZLİ FEEDBACK TEXTAREA ---- #}
-                        <textarea style="display:none;"
+                        <textarea class="tca-hidden"
                                   id="hidden_feedback_{{ q.id }}"
                                   name="feedback_{{ q.id }}">{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
 
                         {# ---- JS ÜÇÜN MƏLUMAT STORAGE ---- #}
-                        <div class="data-store" style="display:none;"
+                        <div class="data-store tca-hidden"
                              data-q-text="{{ q.text|escape }}"
                              data-ans-text="{% if ans %}{{ ans.text_answer|escape }}{% else %}{% endif %}"
                              data-has-answer="{% if item.has_answer_content %}1{% else %}0{% endif %}"
@@ -263,7 +263,7 @@
                             <i class="fas fa-paint-brush"></i>
                             {% trans "label_paint_answer" context "exams.template.teacher_check_attempt" %}
                             {% if ans.paint_updated_at %}
-                                <small style="opacity:.7; font-weight:400;">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
+                                <small class="tca-paint-date">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
                             {% endif %}
                                 </h4>
 

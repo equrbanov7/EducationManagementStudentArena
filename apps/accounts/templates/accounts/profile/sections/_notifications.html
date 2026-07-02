@@ -191,8 +191,7 @@
                     {% elif notification.notification_type == 'approval' %}<i class="fas fa-user-check text-primary"></i>
                     {% else %}<i class="fas fa-bell text-secondary"></i>{% endif %}
                 </div>
-                <div class="profile-notif-body js-notif-open"
-                     style="cursor:pointer;"
+                <div class="profile-notif-body js-notif-open notif-item--clickable"
                      data-notif-id="{{ notification.pk }}"
                      data-notif-title="{{ notification.title|default:''|escape }}"
                      data-notif-message="{{ notification.message|default:''|escape }}"
@@ -218,7 +217,7 @@
                     <div class="profile-notif-meta text-muted small mt-1">
                         <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} {% trans "ago" context "profile.notifications" %}
                         {% if not notification.is_read %}
-                        <span class="badge bg-primary notif-new-badge ms-2" style="font-size:.65rem;">{% trans "new_badge" context "profile.notifications" %}</span>
+                        <span class="badge bg-primary notif-new-badge ms-2">{% trans "new_badge" context "profile.notifications" %}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -272,8 +271,8 @@
          aria-labelledby="profileNotifDeleteConfirmLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header" style="border-bottom-color: #dc3545;">
-                    <h5 class="modal-title" id="profileNotifDeleteConfirmLabel" style="color:#dc3545;">
+                <div class="modal-header notif-modal-head--danger">
+                    <h5 class="modal-title notif-modal-title--danger" id="profileNotifDeleteConfirmLabel">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         {% trans "Silməyi təsdiqləyin" %}
                     </h5>
@@ -313,7 +312,7 @@
                     <div id="profileNotifModalImage" class="mb-3" style="display:none">
                         <img id="profileNotifModalImageEl" src="" alt="">
                     </div>
-                    <div id="profileNotifModalMessage" class="mb-3" style="white-space: pre-line;"></div>
+                    <div id="profileNotifModalMessage" class="mb-3 notif-modal-msg"></div>
                     <div id="profileNotifModalLink"></div>
                 </div>
                 <div class="modal-footer">

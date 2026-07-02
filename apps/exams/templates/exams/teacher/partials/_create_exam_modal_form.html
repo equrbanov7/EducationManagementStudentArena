@@ -110,19 +110,19 @@
                                                autocomplete="off"
                                                value="{{ value }}"
                                                {% if selected_exam_type == value %}checked{% endif %}>
-                                        <label class="ew-typecard" for="createExamTypeOption_{{ forloop.counter }}"
-                                               {% if value == "test" %}style="--tc:#0284C7;--tc-soft:#E0F2FE;"{% elif value == "coding" %}style="--tc:#7C3AED;--tc-soft:#F2ECFE;"{% else %}style="--tc:#BE3455;--tc-soft:#FCE7EE;"{% endif %}>
+                                        <label class="ew-typecard {% if value == "test" %}ew-tc--test{% elif value == "coding" %}ew-tc--coding{% else %}ew-tc--written{% endif %}"
+                                               for="createExamTypeOption_{{ forloop.counter }}">
                                             <span class="ew-tc-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
                                             {% if value == "test" %}
-                                                <span class="ew-tc-ic" style="background:#E0F2FE;color:#075985;"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-ic ew-tc-ic--sky"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
                                                 <span class="ew-tc-name">{{ label|capfirst }}</span>
                                                 <span class="ew-tc-desc">{% trans "type_desc_test" context "exams.wizard" %}</span>
                                             {% elif value == "coding" %}
-                                                <span class="ew-tc-ic" style="background:#F2ECFE;color:#5B21B6;"><i class="fas fa-code" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-ic ew-tc-ic--violet"><i class="fas fa-code" aria-hidden="true"></i></span>
                                                 <span class="ew-tc-name">{{ label|capfirst }}</span>
                                                 <span class="ew-tc-desc">{% trans "type_desc_coding" context "exams.wizard" %}</span>
                                             {% else %}
-                                                <span class="ew-tc-ic" style="background:#FCE7EE;color:#9F1239;"><i class="fas fa-pen-fancy" aria-hidden="true"></i></span>
+                                                <span class="ew-tc-ic ew-tc-ic--rose"><i class="fas fa-pen-fancy" aria-hidden="true"></i></span>
                                                 <span class="ew-tc-name">{{ label|capfirst }}</span>
                                                 <span class="ew-tc-desc">{% trans "type_desc_written" context "exams.wizard" %}</span>
                                             {% endif %}
@@ -176,7 +176,7 @@
 
                         <div class="form-group form-group-full">
                             <div class="ew-fsec">
-                                <span class="ew-fs-ic" style="background:#EEF2FF;color:#1E40AF;"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
+                                <span class="ew-fs-ic ew-fs-ic--indigo"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
                                 <h4>{% trans "section_schedule" context "exams.wizard" %}</h4>
                                 <span class="ew-fs-rule"></span>
                             </div>
@@ -208,7 +208,7 @@
 
                         <div class="form-group form-group-full">
                             <div class="ew-fsec">
-                                <span class="ew-fs-ic" style="background:#F2ECFE;color:#5B21B6;"><i class="fas fa-layer-group" aria-hidden="true"></i></span>
+                                <span class="ew-fs-ic ew-fs-ic--violet"><i class="fas fa-layer-group" aria-hidden="true"></i></span>
                                 <h4>{% trans "section_distribution" context "exams.wizard" %}</h4>
                                 <span class="ew-fs-rule"></span>
                             </div>
@@ -281,7 +281,7 @@
 
                         <div class="form-group form-group-full">
                             <div class="create-exam-modal-section-title">
-                                <h4><i class="fas fa-users" style="color:#198754;"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
+                                <h4><i class="fas fa-users ew-icon-green"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
                                 <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
                             </div>
                         </div>
@@ -355,10 +355,10 @@
                                     </div>
                                 </div>
 
-                                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none; background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff;">
-                                    <h4 id="modalSupervisionTemplateInfoTitle" style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333;"></h4>
-                                    <p id="modalSupervisionTemplateInfoDesc" style="font-size: 0.85rem; color: #555; margin-bottom: 0.75rem;"></p>
-                                    <ul id="modalSupervisionTemplateInfoFeatures" style="font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0;"></ul>
+                                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none;">
+                                    <h4 id="modalSupervisionTemplateInfoTitle"></h4>
+                                    <p id="modalSupervisionTemplateInfoDesc"></p>
+                                    <ul id="modalSupervisionTemplateInfoFeatures"></ul>
                                 </div>
 
                                 <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
@@ -467,8 +467,8 @@
                 </section>
 
                 {# Reference: live (Kahoot-style) exam is started from the exam detail. #}
-                <div class="ew-callout" style="background:rgba(15,118,110,0.07);border-color:rgba(15,118,110,0.22);">
-                    <i class="fas fa-bolt" aria-hidden="true" style="color:#0f766e;"></i>
+                <div class="ew-callout ew-callout--teal">
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
                     <span>{% trans "tip_live_after_create" context "exams.wizard" %}</span>
                 </div>
             </div>
@@ -486,7 +486,7 @@
                 <div class="ew-foot-right">
                     <button type="button" class="ew-btn ew-btn--primary" data-ew-next>
                         {% trans "nav_next" context "exams.wizard" %}
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(180deg);"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ew-arrow-flip"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
                     </button>
                     <button type="submit" class="ew-btn ew-btn--primary modal-confirm-btn" data-ew-submit hidden>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>

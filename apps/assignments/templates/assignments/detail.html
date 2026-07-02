@@ -102,6 +102,17 @@
         margin: 0 auto 1rem auto;
         border: 4px solid var(--green-light);
     }
+
+    /* Faza 6.4 Sprint-3 (2026-07-02): aşağıdakı klasslar bu şablondakı
+       inline style atributlarını əvəz edir. */
+    .as-text-dark { color: var(--blue-dark); }
+    .as-ic { color: var(--blue-primary); }
+    .as-alert-info { background-color: var(--blue-very-light); color: var(--blue-dark); }
+    .as-heading-caps { color: var(--blue-dark); letter-spacing: 1px; }
+    .as-score-circle--empty { background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280; }
+    .as-badge-soft { background-color: var(--blue-very-light); color: var(--blue-primary); }
+    .as-badge-green { background-color: var(--green-primary); }
+    .as-feedback { background-color: var(--blue-very-light); font-size: 0.85rem; }
 </style>
 
 <div class="container mt-5 mb-5">
@@ -109,13 +120,13 @@
         <div class="col-lg-8">
             
             <div class="card card-modern p-4 mb-4">
-                <h2 class="fw-bold mb-3" style="color: var(--blue-dark);">{{ assignment.title }}</h2>
+                <h2 class="fw-bold mb-3 as-text-dark">{{ assignment.title }}</h2>
                 <p class="text-secondary lh-lg mb-4">{{ assignment.description }}</p>
 
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="info-badge">
-                            <i class="bi bi-calendar-event fs-5" style="color: var(--blue-primary);"></i>
+                            <i class="bi bi-calendar-event fs-5 as-ic"></i>
                             <div>
                                 <small class="d-block text-muted">{% trans "label_duration" context "assignment.legacy.detail" %}</small>
                                 <strong class="mb-0">{{ assignment.deadline|date:"d.m.Y H:i" }}</strong>
@@ -129,7 +140,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="info-badge">
-                            <i class="bi bi-repeat fs-5" style="color: var(--blue-primary);"></i>
+                            <i class="bi bi-repeat fs-5 as-ic"></i>
                             <div>
                                 <small class="d-block text-muted">{% trans "label_attempts" context "assignment.legacy.detail" %}</small>
                                 <strong class="mb-0">{{ submissions.count }} / {{ assignment.max_attempts }}</strong>
@@ -141,8 +152,8 @@
 
             {% if current_submission %}
             <div class="card card-modern p-4 mb-4">
-                <h5 class="fw-bold mb-4" style="color: var(--blue-dark);">
-                    <i class="bi bi-pencil-square me-2" style="color: var(--blue-primary);"></i>
+                <h5 class="fw-bold mb-4 as-text-dark">
+                    <i class="bi bi-pencil-square me-2 as-ic"></i>
                     {% trans "draft_answer_title" context "assignment.legacy.detail" %}
                 </h5>
                 
@@ -168,8 +179,8 @@
                 </form>
             </div>
             {% elif can_submit %}
-            <div class="alert alert-info rounded-4 border-0 d-flex align-items-center p-4 shadow-sm" style="background-color: var(--blue-very-light); color: var(--blue-dark);">
-                <i class="bi bi-info-circle-fill fs-3 me-3" style="color: var(--blue-primary);"></i>
+            <div class="alert alert-info rounded-4 border-0 d-flex align-items-center p-4 shadow-sm as-alert-info">
+                <i class="bi bi-info-circle-fill fs-3 me-3 as-ic"></i>
                 <div>{% trans "start_new_attempt_info" context "assignment.legacy.detail" %}</div>
             </div>
             {% else %}
@@ -184,7 +195,7 @@
         <div class="col-lg-4">
             
             <div class="card card-modern p-4 mb-4 text-center">
-                <h6 class="text-uppercase fw-bold mb-4" style="color: var(--blue-dark); letter-spacing: 1px;">
+                <h6 class="text-uppercase fw-bold mb-4 as-heading-caps">
                     {% trans "current_score" context "assignment.legacy.detail" %}
                 </h6>
                 
@@ -195,7 +206,7 @@
                         </div>
                         <p class="text-muted fw-medium mb-0">Əla nəticə!</p>
                     {% else %}
-                        <div class="score-circle" style="background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280;">
+                        <div class="score-circle as-score-circle--empty">
                             <i class="bi bi-hourglass-split"></i>
                         </div>
                         <p class="text-muted fw-medium mb-0">{% trans "waiting" context "assignment.legacy.detail" %}</p>
@@ -205,7 +216,7 @@
 
             {% if submissions %}
             <div class="card card-modern p-4">
-                <h6 class="fw-bold mb-4" style="color: var(--blue-dark);">
+                <h6 class="fw-bold mb-4 as-text-dark">
                     <i class="bi bi-clock-history me-2"></i>{% trans "previous_answers_title" context "assignment.legacy.detail" %}
                 </h6>
                 
@@ -213,10 +224,10 @@
                     {% for submission in submissions %}
                     <div class="history-item {% if submission.status == 'graded' %}graded{% endif %}">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold" style="color: var(--blue-dark);">
+                            <span class="fw-bold as-text-dark">
                                 {% trans "attempt_label" context "assignment.legacy.detail" %} {{ submission.attempt_number }}
                             </span>
-                            <span class="badge rounded-pill" style="background-color: var(--blue-very-light); color: var(--blue-primary);">
+                            <span class="badge rounded-pill as-badge-soft">
                                 {{ submission.get_status_display }}
                             </span>
                         </div>
@@ -231,15 +242,15 @@
 
                         {% if submission.status == 'graded' %}
                             <div class="mb-2">
-                                <span class="badge" style="background-color: var(--green-primary);">
+                                <span class="badge as-badge-green">
                                     Nəticə: {{ submission.score }}/{{ submission.max_score }}
                                 </span>
                             </div>
                         {% endif %}
 
                         {% if submission.feedback %}
-                        <div class="mt-2 p-3 rounded-3" style="background-color: var(--blue-very-light); font-size: 0.85rem;">
-                            <strong style="color: var(--blue-dark);"><i class="bi bi-chat-left-text me-1"></i>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong><br>
+                        <div class="mt-2 p-3 rounded-3 as-feedback">
+                            <strong class="as-text-dark"><i class="bi bi-chat-left-text me-1"></i>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong><br>
                             <span class="text-secondary">{{ submission.feedback }}</span>
                         </div>
                         {% endif %}

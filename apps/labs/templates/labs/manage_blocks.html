@@ -38,13 +38,13 @@
         <div class="col-md-3">
             <div class="stat-card blue">
                 <h3 class="fw-bold text-dark-blue mb-1">{{ blocks|length }}</h3>
-                <span class="text-muted fw-medium text-uppercase small" style="letter-spacing: 0.5px;">{% trans "stat_blocks" context "labs.template.manage_blocks" %}</span>
+                <span class="text-muted fw-medium text-uppercase small lab-label-caps">{% trans "stat_blocks" context "labs.template.manage_blocks" %}</span>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card blue">
                 <h3 class="fw-bold text-dark-blue mb-1">{{ lab.total_questions }}</h3>
-                <span class="text-muted fw-medium text-uppercase small" style="letter-spacing: 0.5px;">{% trans "stat_total_questions" context "labs.template.manage_blocks" %}</span>
+                <span class="text-muted fw-medium text-uppercase small lab-label-caps">{% trans "stat_total_questions" context "labs.template.manage_blocks" %}</span>
             </div>
         </div>
         <div class="col-md-3">
@@ -52,10 +52,10 @@
                 <h3 class="fw-bold text-primary-green mb-1">
                     {% if lab.questions_per_student > 0 %}{{ lab.questions_per_student }}{% else %}{% trans "label_all" context "labs.template.manage_blocks" %}{% endif %}
                 </h3>
-                <span class="text-muted fw-medium text-uppercase small" style="letter-spacing: 0.5px;">{% trans "stat_per_student" context "labs.template.manage_blocks" %}</span>
+                <span class="text-muted fw-medium text-uppercase small lab-label-caps">{% trans "stat_per_student" context "labs.template.manage_blocks" %}</span>
                 <form method="post" action="{% url 'labs:update_questions_per_student' lab.id %}" class="mt-2 d-flex gap-2 align-items-center">
                     {% csrf_token %}
-                    <input type="number" name="questions_per_student" min="0" value="{{ lab.questions_per_student }}" class="form-control form-control-sm" style="max-width: 96px;">
+                    <input type="number" name="questions_per_student" min="0" value="{{ lab.questions_per_student }}" class="form-control form-control-sm lab-input-xs">
                     <button type="submit" class="btn btn-sm btn-outline-success">
                         {% trans "action_save" context "labs.template.manage_blocks" %}
                     </button>
@@ -73,7 +73,7 @@
                         <i class="fa-solid fa-file-lines"></i> {% trans "status_draft" context "labs.template.manage_blocks" %}
                     {% endif %}
                 </span>
-                <span class="text-muted fw-medium text-uppercase small mt-2" style="letter-spacing: 0.5px;">Status</span>
+                <span class="text-muted fw-medium text-uppercase small mt-2 lab-label-caps">Status</span>
             </div>
         </div>
     </div>
@@ -184,9 +184,9 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="card border-0 shadow-sm rounded-4 text-center py-5 mt-4" style="background-color: var(--light-blue);">
+    <div class="card border-0 shadow-sm rounded-4 text-center py-5 mt-4 lab-card--blue">
         <div class="card-body">
-            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-4" style="width: 80px; height: 80px;">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-4 lab-empty-ic">
                 <i class="fas fa-cubes fa-2x text-primary-blue"></i>
             </div>
             <h4 class="fw-bold text-dark-blue mb-2">{% trans "empty_no_blocks_yet" context "labs.template.manage_blocks" %}</h4>

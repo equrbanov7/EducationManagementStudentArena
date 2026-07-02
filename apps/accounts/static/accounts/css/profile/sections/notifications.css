@@ -315,3 +315,10 @@
         max-height: 180px; /* ~3 items on mobile */
     }
 }
+
+/* ═══ Faza 6.4 Sprint-4 (2026-07-02): inline → klass ═══ */
+.notif-item--clickable { cursor: pointer; }
+.notif-new-badge { font-size: 0.65rem; }
+.notif-modal-head--danger { border-bottom-color: #dc3545; }
+.notif-modal-title--danger { color: #dc3545; }
+.notif-modal-msg { white-space: pre-line; }

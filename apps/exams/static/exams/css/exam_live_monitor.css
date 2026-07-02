@@ -267,3 +267,16 @@
 @media (max-width: 600px) {
     .student-map { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); }
 }
+
+/* ═══ Faza 6.4 Sprint-2 (2026-07-02): inline style → klass ═══ */
+.sw--low { background: var(--ems-warning-500); }
+.sw--mid { background: #ea580c; }
+.sw--high { background: var(--ems-danger); }
+.sw--removed { background: #7f1d1d; }
+.map-empty__icon { font-size: 2rem; opacity: 0.4; }
+.map-empty__text { margin-top: 0.75rem; }
+.lv-modal--sm { max-width: 450px; }
+.lv-modal-body--center { text-align: center; padding: 1.5rem; }
+.lv-confirm-msg { font-size: 0.95rem; color: #333; margin: 0; }
+.lv-modal-foot--center { justify-content: center; }
+.btn-act--neutral { background: #f0f0f0; color: #333; }

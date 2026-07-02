@@ -6,6 +6,7 @@
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20260607-picker">
 <link rel="stylesheet" href="{% static 'exams/css/create_question_bank.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/create_question_bank_addons.css' %}?v=20260702-1">
 {% endblock %}
 
 {% block content %} 
@@ -25,14 +26,14 @@
 
     {% if messages %}
         {% for message in messages %}
-            <div style="padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; margin-bottom: 20px;">
+            <div class="qb-warning-box">
                 {{ message }}
             </div> 
         {% endfor %}
     {% endif %}
 
-    <div class="bank-header" style="text-align: center; margin-bottom: 30px;">
-        <h2>{{ exam.title }} <span style="color:#6c5ce7">{{ question_bank_heading }}</span></h2>
+    <div class="bank-header qb-bank-header">
+        <h2>{{ exam.title }} <span class="qb-heading-accent">{{ question_bank_heading }}</span></h2>
     </div>
 
     <form method="post" action="{% url 'exams:process_question_bank' exam.slug %}" id="bankForm">
@@ -54,7 +55,7 @@
                    min="0"
                    value="{{ exam.random_question_count|default:0 }}"
                    placeholder="{% trans 'placeholder_all_questions' context 'exams.template.create_question_bank' %}">
-            <small style="color:grey">
+            <small class="qb-hint">
                 {% trans "help_total_question_count" context "exams.template.create_question_bank" %}
             </small>
         </div>
@@ -68,7 +69,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <small style="color:grey">
+            <small class="qb-hint">
                 {% trans "Bu bölmələrdəki suallar tələbə həmin dili seçəndə görünəcək." %}
             </small>
         </div>
@@ -315,11 +316,11 @@
 
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
-        <div style="font-size: 40px; color: #ff7675; margin-bottom: 10px;">
+        <div class="qb-empty-ic">
             <i class="fas fa-exclamation-circle"></i>
         </div>
         <h3>{% trans "confirm_title" context "exams.template.create_question_bank" %}</h3>
-        <p style="color: #636e72;">
+        <p class="qb-empty-text">
             {% trans "confirm_delete_block_message" context "exams.template.create_question_bank" %}
         </p>
         <div class="modal-buttons">

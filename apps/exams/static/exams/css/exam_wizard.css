@@ -393,3 +393,23 @@
 @media (prefers-reduced-motion: reduce) {
   .exam-wizard .ew-panel.is-active { animation: none; }
 }
+
+/* ═══ Faza 6.4 Sprint-2 (2026-07-02): _create_exam_modal_form inline → klass ═══ */
+/* İmtahan tipi kartlarının rəng qamması (əvvəl inline --tc custom-props idi) */
+.ew-tc--test { --tc: #0284C7; --tc-soft: #E0F2FE; }
+.ew-tc--coding { --tc: #7C3AED; --tc-soft: #F2ECFE; }
+.ew-tc--written { --tc: #BE3455; --tc-soft: #FCE7EE; }
+.ew-tc-ic--sky { background: #E0F2FE; color: #075985; }
+.ew-tc-ic--violet { background: #F2ECFE; color: #5B21B6; }
+.ew-tc-ic--rose { background: #FCE7EE; color: #9F1239; }
+.ew-fs-ic--indigo { background: #EEF2FF; color: #1E40AF; }
+.ew-fs-ic--violet { background: #F2ECFE; color: #5B21B6; }
+.ew-icon-green { color: #198754; }
+.ew-callout--teal { background: rgba(15, 118, 110, 0.07); border-color: rgba(15, 118, 110, 0.22); }
+.ew-callout--teal > i { color: var(--ems-success-strong); }
+.ew-arrow-flip { transform: rotate(180deg); }
+/* Supervision şablon-info paneli: atributlardakı statik stillər descendant-larla */
+.supervision-template-info { background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff; }
+.supervision-template-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
+.supervision-template-info p { font-size: 0.85rem; color: #555; margin-bottom: 0.75rem; }
+.supervision-template-info ul { font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0; }

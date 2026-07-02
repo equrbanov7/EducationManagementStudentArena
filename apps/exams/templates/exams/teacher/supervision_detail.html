@@ -82,6 +82,13 @@
     .confirm-box .btn-confirm-primary { padding:0.5rem 1.25rem; border-radius:8px; border:none; background:#007bff; color:#fff; cursor:pointer; font-size:0.9rem; }
 
     @media (max-width: 768px) { .student-info { grid-template-columns: 1fr; } }
+
+    /* Faza 6.4 Sprint-4: inline style əvəzləmələri */
+    .sup-value--danger { color: #dc3545; }
+    .sup-actions-label { color: #666; font-size: 0.9rem; }
+    .btn-resume-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sup-timeline-h { font-size: 1.2rem; margin-bottom: 1rem; }
+    .sup-empty { color: #999; text-align: center; padding: 2rem; }
 </style>
 {% endblock %}
 
@@ -114,7 +121,7 @@
         </div>
         <div class="info-item">
             <div class="info-label">{% trans "label_violation_count" context "exams.template.supervision_detail" %}</div>
-            <div class="info-value" style="{% if attempt.supervision_violation_count >= 3 %}color:#dc3545;{% endif %}">
+            <div class="info-value {% if attempt.supervision_violation_count >= 3 %}sup-value--danger{% endif %}">
                 {{ attempt.supervision_violation_count }}
                 {% if config %} / {{ config.max_fullscreen_violations }}{% endif %}
             </div>
@@ -131,10 +138,10 @@
 
     {# Action Bar #}
     <div class="action-bar">
-        <span style="color:#666;font-size:0.9rem;"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
+        <span class="sup-actions-label"><i class="fas fa-gavel"></i> {% trans "label_teacher_actions" context "exams.template.supervision_detail" %}:</span>
         {% if attempt.supervision_status == "locked" or attempt.supervision_status == "removed" or attempt.supervision_status == "warned" %}
             {% if attempt.is_finished or attempt.is_resume_time_expired %}
-            <button class="btn btn-resume-action" disabled style="opacity:0.5;cursor:not-allowed;" title="{% trans 'action_terminated' context 'exams.template.supervision_detail' %}">
+            <button class="btn btn-resume-action" disabled title="{% trans 'action_terminated' context 'exams.template.supervision_detail' %}">
                 <i class="fas fa-ban"></i> {% trans "action_terminated" context "exams.template.supervision_detail" %}
             </button>
             {% else %}
@@ -157,7 +164,7 @@
     </div>
 
     {# Incident Timeline #}
-    <h2 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fas fa-stream"></i> {% trans "heading_timeline" context "exams.template.supervision_detail" %}</h2>
+    <h2 class="sup-timeline-h"><i class="fas fa-stream"></i> {% trans "heading_timeline" context "exams.template.supervision_detail" %}</h2>
 
     <div class="timeline">
         {% for incident in incidents %}
@@ -189,7 +196,7 @@
             </div>
         </div>
         {% empty %}
-        <p style="color: #999; text-align: center; padding: 2rem;">{% trans "empty_no_incidents" context "exams.template.supervision_detail" %}</p>
+        <p class="sup-empty">{% trans "empty_no_incidents" context "exams.template.supervision_detail" %}</p>
         {% endfor %}
     </div>
 
