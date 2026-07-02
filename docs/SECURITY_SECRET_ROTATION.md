@@ -40,19 +40,19 @@ Köhnə açarlar git tarixində qalıb — onlar **revoke (ləğv)** olunmalıd�
 |---|---|---|
 | `GITHUB_TOKEN` | github.com → Settings → Developer settings → Personal access tokens | Köhnə `github_pat_11ARUS...` token-ini **Revoke** et |
 | `BREVO_SMTP_KEY` | app.brevo.com → SMTP & API → SMTP açarları | Köhnə açarı **sil**, yeni yarat, `.env`-də `ROTATE-ME-...` yerinə yaz |
-| `GEMINI_API_KEY` | aistudio.google.com → Get API key | Köhnə `AIzaSyBvg...` açarını **sil**, yeni yarat, `.env`-də yaz |
+| `GEMINI_API_KEY` | aistudio.google.com → Get API key | Köhnə `AIza...` açarını **sil**, yeni yarat, `.env`-də yaz |
 
 ### 2. Production-da yeni secret-ləri tətbiq et
 
 Production serverində (`/opt/emsarena/app/.env`) eyni yeni dəyərləri yaz. CI/CD
-`sync-env-overrides.sh` istifadə edirsə (`_deploy-linode.yml` → `ENV_OVERRIDES`
-secret-i), GitHub repo Settings → Secrets → `ENV_OVERRIDES`-i yenilə.
+QEYD (2026-07-02): CI-dən avtomatik deploy (`_deploy-linode.yml`) silinib —
+sirlər birbaşa serverdəki `.env` faylında yenilənir.
 
 **Vacib:** `POSTGRES_PASSWORD` dəyişdikdə mövcud PostgreSQL istifadəçisinin
 parolu da DB-də yenilənməlidir:
 
 ```sql
-ALTER USER emsarena_user WITH PASSWORD 'RU3cy7tCSAB6z1rLTBsnnp5sNEQ';
+ALTER USER emsarena_user WITH PASSWORD 'YENI_GUCLU_PAROL_BURA';
 ```
 
 ### 3. Git tarixini təmizlə (secret-ləri tarixdən sil)

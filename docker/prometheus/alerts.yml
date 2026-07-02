@@ -1,0 +1,96 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Prometheus alert qaydaları (Faza 1, audit 2026-07-02)
+# Yoxlama: promtool check rules docker/prometheus/alerts.yml
+# Metrik mənbələri:
+#   http_requests_total / http_request_duration_seconds — core/metrics.py
+#   pg_*   — postgres_exporter        node_* — node_exporter
+# ═══════════════════════════════════════════════════════════════════════════
+groups:
+  - name: emsarena-availability
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Monitorinq hədəfi əlçatmazdır: {{ $labels.job }}"
+          description: "{{ $labels.instance }} ({{ $labels.job }}) 3 dəqiqədir scrape-ə cavab vermir."
+
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL əlçatmazdır"
+          description: "postgres_exporter verilənlər bazasına qoşula bilmir (pg_up == 0)."
+
+  - name: emsarena-http
+    rules:
+      - alert: High5xxRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            / sum(rate(http_requests_total[5m])) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 5xx nisbəti yüksəkdir (>2%)"
+          description: "Son 5 dəqiqədə sorğuların {{ $value | humanizePercentage }}-i 5xx qaytarır."
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 gecikmə 2 saniyəni keçir"
+          description: "10 dəqiqədir p95 latency {{ $value }}s səviyyəsindədir."
+
+      # İmtahan autosave/submit yolunda server xətaları — imtahan bütövlüyü
+      # üçün kritik siqnal. path etiketi MetricsMiddleware tərəfindən
+      # normalizə olunur: /exams/<slug>/attempt/<id>/
+      - alert: ExamAttemptServerErrors
+        expr: |
+          sum(rate(http_requests_total{method="POST",
+            path=~".*/attempt/<id>/.*", status_code=~"5.."}[10m])) > 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "İmtahan cavab yazma (autosave/submit) 5xx qaytarır"
+          description: "Son 10 dəqiqədə imtahan attempt POST sorğularında server xətaları davam edir."
+
+  - name: emsarena-resources
+    rules:
+      - alert: PgConnectionsHigh
+        expr: sum(pg_stat_activity_count) > 170
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL bağlantıları limitə yaxınlaşır"
+          description: "Aktiv bağlantı sayı {{ $value }} (max_connections=200-ün 85%-i keçilib)."
+
+      - alert: HostDiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}
+            / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}) < 0.15
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host diskində yer azalır (<15%)"
+          description: "Kök faylsistemində boş yer {{ $value | humanizePercentage }} qalıb. Docker log/backup rotasiyasını yoxlayın."
+
+      - alert: HostMemoryHigh
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.92
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host yaddaş istifadəsi yüksəkdir (>92%)"
+          description: "10 dəqiqədir yaddaş istifadəsi {{ $value | humanizePercentage }} səviyyəsindədir (Redis/postgres OOM riski)."

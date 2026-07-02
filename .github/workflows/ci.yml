@@ -205,24 +205,3 @@ jobs:
           fi
 
           echo "✅ All core jobs passed! (Docker-dependent jobs are advisory)"
-
-  # ── 10. Production deploy (main only) ──────────────────────────────────
-  deploy-production:
-    needs: ci-success
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/_deploy-linode.yml
-    with:
-      ssh-host: "172.104.154.170"
-      ssh-username: "root"
-      app-dir: "/opt/emsarena/app"
-      venv-dir: "/opt/emsarena/venv"
-      service-name: "emsarena.service"
-      app-base-url: "http://127.0.0.1"
-      healthcheck-host: "emsarena.com"
-      deploy-timeout-seconds: "300"
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-      ENV_OVERRIDES: ${{ secrets.ENV_OVERRIDES }}

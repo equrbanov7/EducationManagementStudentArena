@@ -9,6 +9,7 @@
 .env.development
 # Allow the shared example file so developers have a reference
 !.env.example
+!.env.production.example
 
 # =========================
 # Python bytecode & cache

@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Alertmanager konfiqurasiya TEMPLATE-i (Faza 1)
+#
+# Bu fayl git-də saxlanır və SİRR DAŞIMIR. __PLACEHOLDER__ dəyərləri konteyner
+# start olarkən docker-compose.prod.yml-dəki alertmanager servisi tərəfindən
+# .env dəyişənlərindən (BREVO_SMTP_LOGIN/BREVO_SMTP_KEY/ALERT_EMAIL_TO...)
+# sed ilə doldurulur və nəticə /tmp/alertmanager.yml kimi istifadə olunur.
+#
+# QEYD: dəyərlərdə '|' və '&' simvolları olmamalıdır (sed əvəzləmə qaydası).
+# ═══════════════════════════════════════════════════════════════════════════
+global:
+  smtp_smarthost: "__SMTP_HOST__:__SMTP_PORT__"
+  smtp_from: "__ALERT_FROM__"
+  smtp_auth_username: "__SMTP_USER__"
+  smtp_auth_password: "__SMTP_PASS__"
+  smtp_require_tls: true
+
+route:
+  receiver: email-ops
+  group_by: ["alertname"]
+  group_wait: 30s
+  group_interval: 5m
+  # Həll olunmamış alert 4 saatdan bir təkrar xatırladılır.
+  repeat_interval: 4h
+  routes:
+    # Kritik alertlər daha tez-tez təkrarlanır.
+    - receiver: email-ops
+      matchers:
+        - severity = "critical"
+      repeat_interval: 1h
+
+receivers:
+  - name: email-ops
+    email_configs:
+      - to: "__ALERT_TO__"
+        send_resolved: true
+
+inhibit_rules:
+  # Hədəf tamamilə əlçatmaz olanda (TargetDown) həmin job-un digər
+  # alertlərini səssizləşdir — dublikat bildiriş yağışının qarşısını alır.
+  - source_matchers:
+      - alertname = "TargetDown"
+    target_matchers:
+      - severity =~ "warning|critical"
+    equal: ["job"]
