@@ -36,7 +36,7 @@ User = get_user_model()
 def student_org_invitation_action(request):
     """Allow students to accept or reject pending organization invitations."""
     from apps.organizations.models import Membership
-    from apps.organizations.services import create_audit_log
+    from apps.organizations.public import create_audit_log
     from core.rls import bypass_rls
 
     if request.method != "POST":

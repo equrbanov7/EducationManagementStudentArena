@@ -21,7 +21,7 @@ from django.core.files.images import get_image_dimensions
 from django.core.files.storage import default_storage
 
 from apps.notifications.models import NotificationType
-from apps.notifications.services import create_notification_for_users
+from apps.notifications.public import create_notification_for_users
 from core.upload_security import (
     IMAGE_ALLOWED_EXTENSIONS,
     randomize_uploaded_filename,

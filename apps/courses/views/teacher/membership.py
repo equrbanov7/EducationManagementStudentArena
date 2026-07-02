@@ -28,8 +28,8 @@ from django.views.decorators.http import require_POST
 from django.views.generic import View
 
 from apps.courses.models import CourseMembership
-from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam, StudentGroup
+from apps.exams.public import without_disabled_practical_exams
 from core.permissions import request_has_permission
 from core.tenancy import get_request_organization, scoped_by_organization
 
@@ -156,7 +156,7 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                 status=403,
             )
 
-        from apps.notifications.services import notify_course_membership_assigned
+        from apps.notifications.public import notify_course_membership_assigned
 
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
@@ -226,7 +226,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
                 {"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403
             )
 
-        from apps.notifications.services import notify_course_membership_assigned
+        from apps.notifications.public import notify_course_membership_assigned
 
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
@@ -388,7 +388,7 @@ def link_exam_to_course(request, pk):
     course = _get_owner_course_or_404(request, pk)
 
     try:
-        from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+        from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
 
         data = json.loads(request.body)
         exam_id = data.get("exam_id")

@@ -8,9 +8,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from apps.exams.models import Exam
-from apps.exams.services.access_policy import is_teacher_user
+from apps.exams.public import is_teacher_user
 from apps.live_exam.models import LiveSession
 from apps.live_exam.services import finish_session
 from core.constants import AuditAction

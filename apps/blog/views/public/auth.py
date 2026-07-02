@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
 
 from apps.accounts.models import EmailOTP
-from apps.accounts.services import issue_email_otp, purge_stale_pending_registration
+from apps.accounts.public import issue_email_otp, purge_stale_pending_registration
 from core.utils import get_auth_otp_expiry_seconds
 
 from ...forms import RegisterForm

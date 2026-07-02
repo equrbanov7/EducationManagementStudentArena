@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from django.shortcuts import get_object_or_404
 
 from apps.assignments.models import Assignment, AssignmentSubmission
-from apps.task_submission_core.navigation import (
+from apps.task_submission_core.public import (
     build_student_task_back_url,
     build_teacher_review_back_url,
     student_return_to,

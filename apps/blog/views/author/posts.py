@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from core.constants import AuditAction
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 

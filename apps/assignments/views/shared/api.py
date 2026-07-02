@@ -16,7 +16,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 
 from apps.courses.models import CourseMembership
-from apps.task_submission_core.access import can_user_access_course_roster
+from apps.task_submission_core.public import can_user_access_course_roster
 
 from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
 

@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from apps.live_exam.domain.session import (
     build_question_phase_times,
     clear_question_phase_override,

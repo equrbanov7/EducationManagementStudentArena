@@ -6,8 +6,8 @@ scope course/exam querysets to the request's organization (tenant isolation).
 """
 
 from apps.courses.models import Course
-from apps.exams.features import without_disabled_practical_exams
 from apps.exams.models import Exam
+from apps.exams.public import without_disabled_practical_exams
 from core.tenancy import get_request_organization, scoped_by_organization
 
 from ...queries import get_assigned_courses_for_user, get_assigned_exams_for_user

@@ -18,7 +18,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
-from apps.notifications.services import notify_org_admins_of_new_request
+from apps.notifications.public import notify_org_admins_of_new_request
 from core.constants import OrganizationType
 
 from ...models import UserProfile

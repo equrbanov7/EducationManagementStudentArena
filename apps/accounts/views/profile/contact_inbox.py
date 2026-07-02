@@ -18,9 +18,9 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from apps.contact.models import ContactMessage
-from apps.contact.services import send_reply_to_contact
+from apps.contact.public import send_reply_to_contact
 from apps.trial_exams.models import TrialExamRequest
-from apps.trial_exams.services import send_reply_to_trial_request
+from apps.trial_exams.public import send_reply_to_trial_request
 
 logger = logging.getLogger(__name__)
 

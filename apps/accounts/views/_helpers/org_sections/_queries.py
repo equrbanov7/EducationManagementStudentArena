@@ -30,7 +30,7 @@ def _mgmt_section_queries(
     sent_invite_search,
     teacher_staff_search,
 ):
-    from apps.organizations.scoping import get_unit_scope
+    from apps.organizations.public import get_unit_scope
 
     unit_scope = get_unit_scope(request.user, organization, request=request)
     scoped_unit_ids = None

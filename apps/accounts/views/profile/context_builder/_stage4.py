@@ -258,13 +258,14 @@ class _Stage4Mixin:
             )
         )
         if self.active_section == "my-appeals" and "my-appeals" in self.allowed_sections:
-            from apps.appeals.views import build_my_appeals_context
+            from apps.appeals.public import build_my_appeals_context
 
             self.context.update(
                 build_my_appeals_context(self.request, list_action=reverse("accounts:profile"), section="my-appeals")
             )
         if self.active_section == "manage-appeals" and "manage-appeals" in self.allowed_sections:
-            from apps.appeals.views import _can_open_appeal_management, build_manage_appeals_context
+            from apps.appeals.public import build_manage_appeals_context
+            from apps.appeals.views import _can_open_appeal_management
 
             if _can_open_appeal_management(self.request):
                 self.context.update(

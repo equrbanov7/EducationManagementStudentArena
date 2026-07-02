@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.accounts.models import ProfileRole
-from apps.organizations.services import get_active_memberships
+from apps.organizations.public import get_active_memberships
 from core.constants import ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR, ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN, ROLE_LEVELS
 
 User = get_user_model()

@@ -7,7 +7,7 @@ from django.urls import reverse
 from apps.accounts import profile_hooks
 from apps.courses.models import Course
 from apps.exams.models import Exam, StudentGroup
-from apps.notifications.services import build_profile_notification_state, get_unread_count
+from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 
 from ....forms import CustomPasswordChangeForm

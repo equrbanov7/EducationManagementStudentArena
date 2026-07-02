@@ -16,7 +16,7 @@ def build_permission_editor_section(
     capabilities,
 ):
     from apps.organizations.models import Role
-    from apps.organizations.permissions import PERMISSION_CATEGORIES
+    from apps.organizations.public import PERMISSION_CATEGORIES
 
     selected_permission_role_id = request.GET.get("role")
     section.update(
@@ -50,7 +50,7 @@ def build_permission_editor_section(
         # Delegasiya olunmuş icazələr (grant:<perm> girişlərinin suffix-ləri) —
         # template-də "Delegasiya" toggle-ının vəziyyətini göstərmək üçün.
         if selected_permission_role is not None:
-            from apps.organizations.permissions import is_grant_entry, strip_grant_prefix
+            from apps.organizations.public import is_grant_entry, strip_grant_prefix
 
             section["delegated_permissions"] = {
                 strip_grant_prefix(perm)

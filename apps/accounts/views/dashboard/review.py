@@ -17,7 +17,7 @@ from apps.assignments.models import Submission
 from apps.courses.models import Course
 from apps.labs.models import LabAnswer, LabSubmission
 from apps.projects.models import ProjectSubmission
-from apps.task_submission_core.review import resolve_identity_window as resolve_submission_identity_window
+from apps.task_submission_core.public import resolve_identity_window as resolve_submission_identity_window
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,

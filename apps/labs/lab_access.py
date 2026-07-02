@@ -1,8 +1,11 @@
 from django.core.exceptions import PermissionDenied
 
 from apps.courses.models import CourseMembership
-from apps.task_submission_core.access import can_user_access_course_roster
-from apps.task_submission_core.review import resolve_identity_window, resolve_recheck_window
+from apps.task_submission_core.public import (
+    can_user_access_course_roster,
+    resolve_identity_window,
+    resolve_recheck_window,
+)
 
 from .models import LabSubmission
 

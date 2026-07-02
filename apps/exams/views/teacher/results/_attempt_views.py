@@ -261,7 +261,7 @@ def teacher_check_attempt(request, slug, attempt_id):
 
         total_score = 0
         any_score = False
-        from apps.notifications.services import notify_student_about_feedback
+        from apps.notifications.public import notify_student_about_feedback
 
         for a in answers_qs:
             q = a.question

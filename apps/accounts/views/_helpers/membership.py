@@ -124,7 +124,7 @@ def _ensure_profile_admin_membership(user, organization):
     This prevents false-negative `role.assign` errors for valid tenant admins.
     """
     from apps.organizations.models import Membership
-    from apps.organizations.services import ensure_owner_membership
+    from apps.organizations.public import ensure_owner_membership
 
     if _is_superadmin_user(user):
         return

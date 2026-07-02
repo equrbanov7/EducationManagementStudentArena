@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from django.utils import timezone
 
-from apps.task_submission_core.services import parse_score_value
+from apps.task_submission_core.public import parse_score_value
 
 
 def parse_decimal_input(raw_value):

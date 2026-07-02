@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 
-from apps.audit.utils import log_action
+from apps.audit.public import log_action
 from core.upload_security import randomize_uploaded_filename
 
 from ... import profile_hooks

@@ -31,10 +31,81 @@ from functools import wraps
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.utils.translation import pgettext
 
-from apps.organizations.permissions import has_permission
 from core.tenancy import request_has_active_organization_context
 
 logger = logging.getLogger(__name__)
+
+# ── M3 (2026-07-02): permission-string uyğunlaşdırma məntiqi organizations-dan
+# core-a köçürülüb (core→organizations kənarını kəsir); organizations.permissions
+# geriyə-uyğun re-export saxlayır. Pure string əməliyyatlarıdır.
+
+# This map is kept ONLY as a transitional safety net so that any role data
+# that somehow still carries a legacy spelling keeps working. Once it is
+# confirmed in production that no legacy spellings remain (e.g. a DB audit),
+# this map and the alias-handling branches below can be deleted outright.
+PERMISSION_PREFIX_ALIASES = {
+    "grade": "grading",
+    "grading": "grade",
+    "course": "courses",
+    "courses": "course",
+    "exam": "exams",
+    "exams": "exam",
+    "member": "members",
+    "members": "member",
+    "role": "roles",
+    "roles": "role",
+}
+
+
+def _permission_variants(permission: str) -> set[str]:
+    variants = {permission}
+    if "." not in permission:
+        return variants
+
+    prefix, suffix = permission.split(".", 1)
+    alias_prefix = PERMISSION_PREFIX_ALIASES.get(prefix)
+    if alias_prefix:
+        variants.add(f"{alias_prefix}.{suffix}")
+    return variants
+
+
+def _wildcard_variants(prefix: str) -> set[str]:
+    variants = {f"{prefix}.*"}
+    alias_prefix = PERMISSION_PREFIX_ALIASES.get(prefix)
+    if alias_prefix:
+        variants.add(f"{alias_prefix}.*")
+    return variants
+
+
+def has_permission(user_permissions: list[str], required_permission: str) -> bool:
+    """
+    Check if a user has a specific permission.
+    Supports wildcard permissions (e.g., '*' for all, 'course.*' for all course permissions).
+    Also tolerates the legacy `grading.*` prefix when checking `grade.*` permissions.
+
+    Args:
+        user_permissions: List of permission strings the user has
+        required_permission: The permission string to check for
+
+    Returns:
+        True if user has the permission, False otherwise
+    """
+    if not user_permissions:
+        return False
+
+    if "*" in user_permissions:
+        return True
+
+    if _permission_variants(required_permission).intersection(user_permissions):
+        return True
+
+    if "." in required_permission:
+        prefix = required_permission.split(".", 1)[0]
+        if _wildcard_variants(prefix).intersection(user_permissions):
+            return True
+
+    return False
+
 
 _REMOVED_MSG = (
     "{name} has been removed because it bypassed the organization RBAC model "
@@ -106,7 +177,7 @@ def request_has_permission(request, permission: str) -> bool:
         memberships = list(getattr(request, "org_memberships", []) or [])
         if not memberships:
             try:
-                from apps.audit.utils import log_superadmin_cross_org_action
+                from core.audit import log_superadmin_cross_org_action
 
                 log_superadmin_cross_org_action(
                     request,

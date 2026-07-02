@@ -92,7 +92,10 @@ def _resolve_profile_fallback_org(user, resolved_profile):
     if _is_tenant_accessible_organization(profile_org):
         return profile_org
 
-    from apps.organizations.models import Membership, Organization
+    from django.apps import apps as django_apps
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    Organization = django_apps.get_model("organizations", "Organization")
 
     with bypass_rls():
         candidate_ids = set(
@@ -143,7 +146,9 @@ def restore_request_organization_from_profile(request, *, profile=None, allow_mu
     if not _is_tenant_accessible_organization(fallback_org):
         return False
 
-    from apps.organizations.models import Membership
+    from django.apps import apps as django_apps
+
+    Membership = django_apps.get_model("organizations", "Membership")
 
     with bypass_rls():
         memberships = list(

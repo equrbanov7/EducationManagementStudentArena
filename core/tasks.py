@@ -100,31 +100,9 @@ def send_audit_log_async(*, action, user=None, organization=None, obj=None, **kw
         defer(send_audit_log_async,
               action=AuditAction.UPDATE, user=request.user, obj=session)
     """
-    from apps.audit.utils import log_action  # avoid circular import at module load
+    from core.audit import log_action
 
     log_action(action=action, user=user, organization=organization, obj=obj, **kwargs)
-
-
-def warm_session_settings_cache(session_pk: int) -> None:
-    """
-    Pre-load session settings into the cache after session creation.
-
-    Avoids a cold-cache penalty on the first API poll from the host.
-    """
-    try:
-        from apps.live_exam.models import LiveSession
-        from apps.live_exam.session_settings import get_session_settings
-        from core.rls import bypass_rls
-        from core.rls_pooling import rls_worker_atomic
-
-        # System cache warmer receives only a session PK, so it must look up any
-        # tenant's live session under bypass; rls_worker_atomic makes it SET LOCAL
-        # when transaction-scoped RLS is enabled.
-        with rls_worker_atomic(), bypass_rls():
-            session = LiveSession.objects.select_related("exam").get(pk=session_pk)
-            get_session_settings(session)
-    except Exception:
-        logger.exception("warm_session_settings_cache failed for session %s", session_pk)
 
 
 def export_exam_results_csv(*, exam_pk: int, recipient_email: str) -> None:

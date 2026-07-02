@@ -244,7 +244,9 @@ def send_new_post_notification_email(
     This replaces the synchronous ``send_new_post_notification`` signal
     handler in ``apps/blog/signals.py``.
     """
-    from apps.blog.models import Post
+    from django.apps import apps as django_apps
+
+    Post = django_apps.get_model("blog", "Post")
 
     try:
         post = Post.objects.get(pk=post_pk)

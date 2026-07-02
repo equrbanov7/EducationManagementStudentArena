@@ -62,7 +62,7 @@ def statistics_export_csv(request):
         # Unit scoping (Faza 2): dekan/kafedra müdürü export-da da yalnız öz
         # alt-ağacının datasını görür — dashboard ilə eyni cache açarı işlədilir.
         from apps.organizations.models import OrgUnit
-        from apps.organizations.scoping import get_unit_scope
+        from apps.organizations.public import get_unit_scope
 
         unit_scope = get_unit_scope(request.user, org, request=request)
         if unit_scope.is_unit_scoped:
@@ -98,7 +98,7 @@ def statistics_export_csv(request):
         tutor_scoped_ids = None
         if capabilities.get("is_tutor") and org:
             from apps.organizations.models import OrgUnit
-            from apps.organizations.scoping import get_unit_scope
+            from apps.organizations.public import get_unit_scope
 
             unit_scope = get_unit_scope(request.user, org, request=request)
             if unit_scope.is_unit_scoped:

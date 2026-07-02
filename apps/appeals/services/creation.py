@@ -111,7 +111,7 @@ def _notify_teacher_new_appeal(appeal, *, item_count):
     try:
         from django.urls import reverse
 
-        from apps.notifications.services import create_notification
+        from apps.notifications.public import create_notification
 
         teacher = appeal.exam.author
         if teacher is None or teacher.pk == appeal.student_id:

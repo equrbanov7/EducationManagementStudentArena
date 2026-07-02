@@ -114,7 +114,7 @@ def _notify_superadmins(request_obj: TrialExamRequest) -> None:
     from django.contrib.auth import get_user_model
 
     from apps.notifications.models import NotificationType
-    from apps.notifications.services.crud import create_notification_for_users
+    from apps.notifications.public import create_notification_for_users
 
     User = get_user_model()
     admins = list(User.objects.filter(is_superuser=True, is_active=True))

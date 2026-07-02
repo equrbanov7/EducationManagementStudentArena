@@ -79,7 +79,7 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
 
     try:
         from apps.notifications.models import NotificationType
-        from apps.notifications.services import create_notification_for_users
+        from apps.notifications.public import create_notification_for_users
 
         if author_requires_superadmin_post_review(instance.author):
             reviewers = _get_superadmin_reviewers()
@@ -120,7 +120,7 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
 
     try:
         from apps.notifications.models import NotificationType
-        from apps.notifications.services import create_notification
+        from apps.notifications.public import create_notification
 
         if current_status == Post.ApprovalStatus.APPROVED:
             create_notification(

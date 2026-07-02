@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
-from apps.organizations.services import is_tenant_accessible_organization
+from apps.organizations.public import is_tenant_accessible_organization
 from core.tenancy import restore_request_organization_from_profile
 
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY

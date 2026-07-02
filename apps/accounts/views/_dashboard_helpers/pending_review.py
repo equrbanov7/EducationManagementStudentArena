@@ -10,14 +10,11 @@ from django.utils import timezone
 from apps.assignments.models import Submission
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.review_visibility import (
-    resolve_exam_attempt_name_visibility,
-    resolve_exam_attempt_review_window_seconds,
-)
+from apps.exams.public import resolve_exam_attempt_name_visibility, resolve_exam_attempt_review_window_seconds
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
-from apps.task_submission_core.review import resolve_identity_window as resolve_submission_identity_window
-from apps.task_submission_core.review import resolve_recheck_window as resolve_submission_recheck_window
+from apps.task_submission_core.public import resolve_identity_window as resolve_submission_identity_window
+from apps.task_submission_core.public import resolve_recheck_window as resolve_submission_recheck_window
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,

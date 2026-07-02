@@ -1,0 +1,68 @@
+"""exams modulunun PUBLIC API fasadı (M3-B, 2026-07-02).
+
+Digər modullar imtahan datası/xidmətləri üçün YALNIZ bu fasadı istifadə
+etməlidir (AGENTS §5). Genişlənmə nöqtəsi: apps.exams.score_adjustments
+(bal düzəlişləri — appeals ready()-də qeydiyyat). Modellərə (Exam,
+ExamAttempt, StudentGroup...) ehtiyac olduqda ORM əlaqələri və ya
+django_apps.get_model istifadə edin.
+"""
+
+from apps.exams.constants import (  # noqa: F401
+    DEFAULT_EXAM_LANGUAGE,
+    EXAM_LANGUAGE_CHOICES,
+    get_live_active_states,
+    get_live_session_model,
+)
+from apps.exams.domain.ai_config import (  # noqa: F401
+    get_ai_config,
+)
+from apps.exams.features import (  # noqa: F401
+    without_disabled_practical_exams,
+)
+from apps.exams.services.access_policy import (  # noqa: F401
+    is_teacher_user,
+)
+from apps.exams.services.ai_summary import (  # noqa: F401
+    generate_exam_statistics_summary,
+)
+from apps.exams.services.grading import (  # noqa: F401
+    calculate_attempt_score,
+)
+from apps.exams.services.language_variants import (  # noqa: F401
+    available_language_options,
+)
+from apps.exams.services.question_bank_attach import (  # noqa: F401
+    accessible_banks,
+)
+from apps.exams.services.result_calculation import (  # noqa: F401
+    calculate_test_attempt_result,
+)
+from apps.exams.services.review_visibility import (  # noqa: F401
+    resolve_exam_attempt_name_visibility,
+    resolve_exam_attempt_review_window_seconds,
+)
+from apps.exams.services.teacher_dashboard import (  # noqa: F401
+    build_teacher_exam_dashboard,
+)
+from apps.exams.views.shared.tenant import (  # noqa: F401
+    tenant_scoped_exams,
+)
+
+__all__ = [
+    "DEFAULT_EXAM_LANGUAGE",
+    "EXAM_LANGUAGE_CHOICES",
+    "accessible_banks",
+    "available_language_options",
+    "build_teacher_exam_dashboard",
+    "calculate_attempt_score",
+    "calculate_test_attempt_result",
+    "generate_exam_statistics_summary",
+    "get_ai_config",
+    "get_live_active_states",
+    "get_live_session_model",
+    "is_teacher_user",
+    "resolve_exam_attempt_name_visibility",
+    "resolve_exam_attempt_review_window_seconds",
+    "tenant_scoped_exams",
+    "without_disabled_practical_exams",
+]

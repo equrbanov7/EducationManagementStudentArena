@@ -179,11 +179,17 @@ Cross-modul asılılıqlar `scripts/module_deps.py` ilə qorunur (CI: `_lint.yml
 - **YENİ dövri (qarşılıqlı) modul cütü yaratmaq QADAĞANDIR.** M2 (2026-07-02)
   ilə bütün 18 tarixi cüt əridilib — baseline
   (`scripts/module_deps_baseline.json`) SIFIRDIR və sıfır qalmalıdır.
-- **`core/` YENİ app modullarına import edə bilməz** (shared-kernel təmizliyi;
-  mövcud lazy-import istisnaları baseline-dadır və tədricən registry pattern-i
-  ilə əridiləcək).
-- Başqa modulun datasına ehtiyac olduqda birbaşa model importu ƏVƏZİNƏ həmin
-  modulun servis/selector fasadını çağırın (hədəf: hər modulda `public.py`).
+- **`core/` HEÇ BİR app modulunu import edə bilməz** (shared-kernel təmizliyi).
+  M3 (2026-07-02) ilə bütün core→apps kənarları əridilib (baseline: 0). App
+  datası lazımdırsa `django_apps.get_model()` və ya hook registry işlədin
+  (nümunələr: `core/audit.py`, `core/auth_otp.py`).
+- Başqa modulun funksionallığına ehtiyac olduqda birbaşa servis-daxili import
+  ƏVƏZİNƏ modulun `public.py` fasadını çağırın. M3-B (2026-07-02) ilə fasadlar
+  MÖVCUDDUR: accounts, appeals, audit, contact, courses, exams, notifications,
+  organizations, task_submission_core, trial_exams. Yeni cross-modul istehlak
+  YALNIZ `apps.<modul>.public` üzərindən getməlidir; fasadda çatışmayan adı
+  fasada əlavə edib istifadə edin. Modellər üçün ORM əlaqələri /
+  `django_apps.get_model` qalır (fasadlar model re-export etmir).
 - Dövr sağaldıqda `python scripts/module_deps.py --update` ilə baseline-i
   KİÇİLDİN (böyütmə yalnız PR-da açıq əsaslandırma ilə).
 

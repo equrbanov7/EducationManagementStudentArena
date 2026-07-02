@@ -19,12 +19,12 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
-from apps.task_submission_core.review import (
+from apps.task_submission_core.public import (
     annotate_teacher_review_state,
+    apply_grade,
     apply_submission_filters,
     build_pagination_query,
 )
-from apps.task_submission_core.services import apply_grade
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 

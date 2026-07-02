@@ -4,9 +4,9 @@ import logging
 
 from django.db import transaction
 
-from apps.notifications.services import notify_member_removed_from_organization
+from apps.notifications.public import notify_member_removed_from_organization
 from apps.organizations.models import Membership
-from apps.organizations.services import create_audit_log
+from apps.organizations.public import create_audit_log
 from core.constants import OrganizationType
 
 from ....models import ProfileRole, UserProfile

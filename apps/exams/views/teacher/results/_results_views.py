@@ -72,7 +72,7 @@ def teacher_exam_results(request, slug):
         attempt_id = request.POST.get("attempt_id")
         score_raw = request.POST.get("teacher_score", "").strip()
         feedback = request.POST.get("teacher_feedback", "").strip()
-        from apps.notifications.services import notify_student_about_feedback
+        from apps.notifications.public import notify_student_about_feedback
 
         selected_attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 

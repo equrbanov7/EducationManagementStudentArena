@@ -11,43 +11,14 @@ from typing import List, Set
 # organizations.0006 rewrites every existing Role.permissions row to the
 # canonical spelling.
 #
-# This map is kept ONLY as a transitional safety net so that any role data
-# that somehow still carries a legacy spelling keeps working. Once it is
-# confirmed in production that no legacy spellings remain (e.g. a DB audit),
-# this map and the alias-handling branches below can be deleted outright.
-PERMISSION_PREFIX_ALIASES = {
-    "grade": "grading",
-    "grading": "grade",
-    "course": "courses",
-    "courses": "course",
-    "exam": "exams",
-    "exams": "exam",
-    "member": "members",
-    "members": "member",
-    "role": "roles",
-    "roles": "role",
-}
-
-
-def _permission_variants(permission: str) -> Set[str]:
-    variants = {permission}
-    if "." not in permission:
-        return variants
-
-    prefix, suffix = permission.split(".", 1)
-    alias_prefix = PERMISSION_PREFIX_ALIASES.get(prefix)
-    if alias_prefix:
-        variants.add(f"{alias_prefix}.{suffix}")
-    return variants
-
-
-def _wildcard_variants(prefix: str) -> Set[str]:
-    variants = {f"{prefix}.*"}
-    alias_prefix = PERMISSION_PREFIX_ALIASES.get(prefix)
-    if alias_prefix:
-        variants.add(f"{alias_prefix}.*")
-    return variants
-
+# M3 (2026-07-02): permission-matching core.permissions-a köçürülüb;
+# import səthi qorunur (AGENTS §1).
+from core.permissions import (  # noqa: F401
+    PERMISSION_PREFIX_ALIASES,
+    _permission_variants,
+    _wildcard_variants,
+    has_permission,
+)
 
 # Permission definitions by category
 PERMISSION_CATEGORIES = {
@@ -136,36 +107,6 @@ def get_all_permissions() -> List[str]:
     for category_perms in PERMISSION_CATEGORIES.values():
         all_perms.extend(category_perms)
     return all_perms
-
-
-def has_permission(user_permissions: List[str], required_permission: str) -> bool:
-    """
-    Check if a user has a specific permission.
-    Supports wildcard permissions (e.g., '*' for all, 'course.*' for all course permissions).
-    Also tolerates the legacy `grading.*` prefix when checking `grade.*` permissions.
-
-    Args:
-        user_permissions: List of permission strings the user has
-        required_permission: The permission string to check for
-
-    Returns:
-        True if user has the permission, False otherwise
-    """
-    if not user_permissions:
-        return False
-
-    if "*" in user_permissions:
-        return True
-
-    if _permission_variants(required_permission).intersection(user_permissions):
-        return True
-
-    if "." in required_permission:
-        prefix = required_permission.split(".", 1)[0]
-        if _wildcard_variants(prefix).intersection(user_permissions):
-            return True
-
-    return False
 
 
 def get_permissions_for_category(category: str) -> List[str]:
