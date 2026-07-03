@@ -7,6 +7,8 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from core.rls_pooling import rls_worker_atomic
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def ensure_user_profile(sender, instance, created, update_fields=None, **kwargs):
@@ -32,4 +34,5 @@ def ensure_user_profile(sender, instance, created, update_fields=None, **kwargs)
 
     from apps.accounts.models import UserProfile
 
-    UserProfile.objects.get_or_create(user=instance)
+    with rls_worker_atomic():
+        UserProfile.objects.get_or_create(user=instance)

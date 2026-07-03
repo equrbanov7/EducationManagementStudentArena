@@ -216,6 +216,35 @@ with rls_worker_atomic():
 > transaction davranışı dəyişmir; flaq-on altında düzgünlük **staging-də**
 > Channels + Celery cross-tenant testləri ilə təsdiqlənməlidir.
 
+### 6.1 Request-xarici audit statusu (2026-07-04)
+
+Bu mərhələdə DB-yə toxunan request-xarici entrypoint-lər `rls_worker_atomic()`
+ilə sarınıb:
+
+- Celery / thread-pool: `core/email_tasks.py`, `core/tasks.py`,
+  `apps/exams/tasks.py`.
+- Channels/live exam: `apps/live_exam/auth.py`, `apps/live_exam/cache.py`,
+  `apps/live_exam/consumers.py`.
+- Signal side-effect-ləri: `apps/accounts/signals.py`,
+  `apps/audit/signals.py`, `apps/blog/signals.py`,
+  `apps/courses/signals.py`, `apps/notifications/signals.py`,
+  `apps/organizations/signals.py`.
+- Maintenance/seed command-ları: `purge_notifications`,
+  `backfill_admin_memberships`, `create_sample_orgs`, `seed_ci_e2e_user`,
+  `seed_ci_e2e_scenario`, `seed_group_demo_data`.
+
+Audit qeydi: `apps/exams/consumers.py` ORM/`database_sync_to_async` çağırışı
+etmir; yalnız channel-layer group subscribe/send edir, ona görə sarğı tələb
+olunmadı. `apps/accounts/management/commands/create_roles.py` də DB-yə toxunmayan
+deprecated no-op command-dır.
+
+Hardening qeydi: tək-tenant signal yolları RLS-i söndürmür; mümkün olan yerlərdə
+`set_rls_tenant(<object org>)` istifadə olunur (`courses.signals`,
+`notifications.signals`, `organizations.signals`). `bypass_rls()` yalnız qəsdən
+system-wide/global işlərdə saxlanılıb: purge/seed/backfill command-ları,
+`apps/exams/tasks.py` sweep/export task-ları və blog reviewer/subscriber
+siqnalları.
+
 ## 7. Test planı (MÜTLƏQ — flaq açılmadan əvvəl)
 
 1. **Cross-tenant izolyasiya (Postgres + transaction mode):** A tenant-ı B-nin

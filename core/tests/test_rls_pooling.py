@@ -5,6 +5,7 @@ inteqrasiya (PostgreSQL + transaction pooling) ayrıca staging testləri tələb
 (bax: docs/FAZA2_3B_TRANSACTION_POOLING.md).
 """
 
+from contextlib import contextmanager
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -130,3 +131,23 @@ def test_worker_atomic_is_noop_when_flag_off():
         with rls_worker_atomic():
             pass
     m_atomic.assert_not_called()
+
+
+def test_threadpool_audit_task_wraps_db_work_for_transaction_pooling():
+    from core.tasks import send_audit_log_async
+
+    entered = {"atomic": 0}
+
+    @contextmanager
+    def recording_atomic():
+        entered["atomic"] += 1
+        yield
+
+    with (
+        patch("core.rls_pooling.rls_worker_atomic", recording_atomic),
+        patch("core.audit.log_action") as log_action,
+    ):
+        send_audit_log_async(action="create")
+
+    assert entered == {"atomic": 1}
+    log_action.assert_called_once_with(action="create", user=None, organization=None, obj=None)

@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
@@ -206,6 +208,42 @@ class NotificationEventFlowTests(TestCase):
                 title__icontains="Yeni müəllim müraciəti",
             ).exists()
         )
+
+    def test_assignment_submission_signal_uses_tenant_scope_for_transaction_pooling(self):
+        from apps.assignments.models import Submission
+        from apps.courses.models import Course
+        from apps.notifications.signals import _notify_assignment_submission_events
+
+        course = Course.objects.create(
+            owner=self.teacher,
+            title="Signal Scoped Course",
+            status="published",
+            organization=self.organization,
+        )
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Signal Scoped Assignment",
+            created_by=self.teacher,
+            start_date=timezone.now(),
+        )
+        submission = Submission(assignment=assignment, user=self.student, status="submitted")
+        entered = {"atomic": 0}
+
+        @contextmanager
+        def recording_atomic():
+            entered["atomic"] += 1
+            yield
+
+        with (
+            patch("apps.notifications.signals.rls_worker_atomic", recording_atomic),
+            patch("apps.notifications.signals.set_rls_tenant") as set_rls_tenant,
+            patch("apps.notifications.signals.notify_teacher_about_submission") as notify_teacher,
+        ):
+            _notify_assignment_submission_events(Submission, submission, created=True)
+
+        self.assertEqual(entered["atomic"], 1)
+        set_rls_tenant.assert_called_once_with(self.organization.id)
+        notify_teacher.assert_called_once_with(task=assignment, student=self.student, task_kind="assignment")
 
     def test_assignment_create_submit_and_grade_flow_creates_notifications(self):
         from apps.courses.models import Course

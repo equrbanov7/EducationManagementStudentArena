@@ -8,6 +8,9 @@ backend in tests, so no real messages are sent.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
@@ -77,6 +80,24 @@ class SendVerificationOtpEmailTaskTest(TestCase):
             otp_code in alt_body for alt_body, _ in getattr(message, "alternatives", [])
         )
         self.assertTrue(body_contains_code)
+
+    def test_task_wraps_db_work_for_transaction_pooling(self):
+        from core.email_tasks import send_verification_otp_email
+
+        entered = {"atomic": 0}
+
+        @contextmanager
+        def recording_atomic():
+            entered["atomic"] += 1
+            yield
+
+        with patch("core.email_tasks.rls_worker_atomic", recording_atomic):
+            send_verification_otp_email.delay(
+                user_pk=self.user.pk,
+                code="123456",
+            )
+
+        self.assertGreaterEqual(entered["atomic"], 1)
 
 
 @override_settings(

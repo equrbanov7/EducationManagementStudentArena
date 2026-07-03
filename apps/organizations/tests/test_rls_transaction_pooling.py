@@ -14,7 +14,7 @@ import pytest
 
 from apps.organizations.models import Organization, OrgUnit
 from core.constants import OrganizationType
-from core.rls import set_rls_bypass, set_rls_tenant
+from core.rls import apply_rls_request_context, reset_rls_context, set_rls_bypass, set_rls_tenant
 from core.rls_pooling import RLSTransactionGuard, reset_txn_flags, rls_worker_atomic
 
 pytestmark = [pytest.mark.postgres, pytest.mark.django_db(transaction=True)]
@@ -111,6 +111,19 @@ def _run_guarded_request(*, user_id: int, org_id: int | None):
     return names, tenant_before_query, tenant_during_query
 
 
+def _run_session_scoped_request(*, user_id: int, org_id: int | None):
+    apply_rls_request_context(user_id=user_id, org_id=org_id, bypass=False, local=False)
+    try:
+        with transaction.atomic():
+            with connection.cursor() as cur:
+                cur.execute("SET LOCAL ROLE rls_app_role")
+            names = list(OrgUnit.objects.order_by("name").values_list("name", flat=True))
+            tenant_during_query = _current_setting("app.current_org_id")
+    finally:
+        reset_rls_context(local=False)
+    return names, tenant_during_query
+
+
 @override_settings(RLS_TRANSACTION_SCOPED=True)
 def test_reused_connection_gets_fresh_tenant_context(two_org_units):
     """Request A then request B on one connection must not leak tenant state."""
@@ -127,6 +140,23 @@ def test_reused_connection_gets_fresh_tenant_context(two_org_units):
     assert names_b == ["Tenant B Unit"]
     assert during_b == str(org_b.pk)
     assert "Tenant A Unit" not in names_b
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=False)
+def test_session_scoped_requests_reset_before_connection_reuse(two_org_units):
+    """Flag-off fallback still resets one request before the next tenant runs."""
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    names_a, during_a = _run_session_scoped_request(user_id=org_a.owner_id, org_id=org_a.pk)
+    assert names_a == ["Tenant A Unit"]
+    assert during_a == str(org_a.pk)
+    assert _current_setting("app.current_org_id") == ""
+
+    names_b, during_b = _run_session_scoped_request(user_id=org_b.owner_id, org_id=org_b.pk)
+    assert names_b == ["Tenant B Unit"]
+    assert during_b == str(org_b.pk)
+    assert "Tenant A Unit" not in names_b
+    assert _current_setting("app.current_org_id") == ""
 
 
 @override_settings(RLS_TRANSACTION_SCOPED=True)

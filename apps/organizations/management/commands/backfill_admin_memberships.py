@@ -33,6 +33,9 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -136,6 +139,8 @@ class Command(BaseCommand):
     # Main handler
     # ------------------------------------------------------------------
 
+    @rls_worker_atomic()
+    @bypass_rls()
     def handle(self, *args, **options):
         from django.apps import apps as django_apps
 

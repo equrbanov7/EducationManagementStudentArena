@@ -12,6 +12,8 @@ from django.db import transaction
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
 from core.constants import OrganizationType
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -149,6 +151,8 @@ class Command(BaseCommand):
         return membership
 
     @transaction.atomic
+    @rls_worker_atomic()
+    @bypass_rls()
     def handle(self, *args, **options):
         username = options["username"]
         password = options["password"]

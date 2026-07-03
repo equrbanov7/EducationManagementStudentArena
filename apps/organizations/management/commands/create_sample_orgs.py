@@ -7,6 +7,8 @@ from django.core.management.base import BaseCommand
 
 from apps.organizations.models import Membership, Organization, OrgUnit
 from core.constants import OrganizationType
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 User = get_user_model()
 
@@ -22,6 +24,8 @@ class Command(BaseCommand):
             help="Username of the organization owner",
         )
 
+    @rls_worker_atomic()
+    @bypass_rls()
     def handle(self, *args, **options):
         username = options["username"]
 

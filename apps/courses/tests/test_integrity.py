@@ -6,7 +6,9 @@ for courses, organizations, memberships, and audit logs to ensure data-loss
 risks are detectable and audit data is preserved as expected.
 """
 
+from contextlib import contextmanager
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
@@ -16,7 +18,7 @@ from django.utils import timezone
 from apps.assignments.models import Assignment
 from apps.audit.models import AuditLog
 from apps.courses.models import Course
-from apps.exams.models import Exam
+from apps.exams.models import Exam, StudentGroup
 from apps.labs.models import Lab
 from apps.organizations.models import Membership, Organization, Role
 from apps.organizations.signals import create_default_roles
@@ -126,6 +128,47 @@ class CourseDeletionCascadeTest(TestCase):
         other_lab = _make_lab(other_course, self.owner, "Other Lab")
         self.course.delete()
         self.assertTrue(Lab.objects.filter(pk=other_lab.pk).exists())
+
+
+class StudentGroupSignalTransactionPoolingTest(TestCase):
+    def test_on_commit_sync_sets_tenant_inside_worker_transaction(self):
+        owner = User.objects.create_user(username="group_owner", email="group_owner@test.com", password="pass")
+        org = Organization.objects.create(
+            name="Group Signal Org",
+            slug="group-signal-org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+        )
+        Membership.objects.create(
+            user=owner,
+            organization=org,
+            role=org.roles.get(name="teacher"),
+            is_active=True,
+        )
+        group = StudentGroup.objects.create(organization=org, teacher=owner, name="Signal Group")
+        entered = {"atomic": 0}
+
+        @contextmanager
+        def recording_atomic():
+            entered["atomic"] += 1
+            yield
+
+        with (
+            patch("apps.courses.signals.rls_worker_atomic", recording_atomic),
+            patch("apps.courses.signals.set_rls_tenant") as set_rls_tenant,
+            self.captureOnCommitCallbacks(execute=True),
+        ):
+            from apps.courses.signals import sync_group_students_to_course_memberships
+
+            sync_group_students_to_course_memberships(
+                sender=StudentGroup.students.through,
+                instance=group,
+                action="post_clear",
+                pk_set=set(),
+            )
+
+        self.assertEqual(entered["atomic"], 1)
+        set_rls_tenant.assert_called_once_with(org.id)
 
 
 class OrganizationDeletionCascadeTest(TestCase):
