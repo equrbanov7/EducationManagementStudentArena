@@ -4,7 +4,7 @@
 
     ns.register(function installCreateExamModal(ctx) {
         function createExamModalLoadingMarkup() {
-            return '<div class="create-exam-modal-loading">Form yüklənir...</div>';
+            return gettext('<div class="create-exam-modal-loading">Form yüklənir...</div>');
         }
 
         function buildCreateExamModalUrl(createExamUrl) {
@@ -231,7 +231,7 @@
                 var originalSubmitText = submitBtn ? submitBtn.innerHTML : "";
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.textContent = "Yaradılır...";
+                    submitBtn.textContent = gettext("Yaradılır...");
                 }
 
                 try {
@@ -278,11 +278,11 @@
                     }
 
                     var html = await response.text();
-                    ctx.createExamModalBody.innerHTML = html || '<div class="create-exam-modal-error">Form yenilənmədi. Yenidən cəhd edin.</div>';
+                    ctx.createExamModalBody.innerHTML = html || gettext('<div class="create-exam-modal-error">Form yenilənmədi. Yenidən cəhd edin.</div>');
                     bindCreateExamModalForm();
                 } catch (error) {
                     if (ctx.createExamModalBody) {
-                        ctx.createExamModalBody.innerHTML = '<div class="create-exam-modal-error">Xəta baş verdi. Yenidən cəhd edin.</div>';
+                        ctx.createExamModalBody.innerHTML = gettext('<div class="create-exam-modal-error">Xəta baş verdi. Yenidən cəhd edin.</div>');
                     }
                 } finally {
                     ctx.createExamSubmitInFlight = false;
@@ -341,7 +341,7 @@
                 ) {
                     return;
                 }
-                ctx.createExamModalBody.innerHTML = '<div class="create-exam-modal-error">Form yüklənmədi. Yenidən cəhd edin.</div>';
+                ctx.createExamModalBody.innerHTML = gettext('<div class="create-exam-modal-error">Form yüklənmədi. Yenidən cəhd edin.</div>');
             } finally {
                 if (ctx.createExamModal.dataset.createExamToken === loadToken) {
                     ctx.createExamModal.dataset.createExamLoading = "0";

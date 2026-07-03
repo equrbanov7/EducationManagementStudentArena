@@ -45,7 +45,7 @@
             {% endif %}
             <div class="results-filter-field results-filter-field--wide">
                 <label class="results-filter-label" for="resultsFilterSearchInput">
-                    Tələbə və ya cavab mətni axtar
+                    {% trans 'Tələbə və ya cavab mətni axtar' %}
                 </label>
                 <input type="text"
                        id="resultsFilterSearchInput"
@@ -53,7 +53,7 @@
                        value="{{ search_query }}"
                        class="form-control js-filter-resettable js-auto-filter-search"
                        autocomplete="off"
-                       placeholder="Tələbə və ya cavab mətni axtar">
+                       placeholder="{% trans 'Tələbə və ya cavab mətni axtar' %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterStatusSelect">
@@ -64,32 +64,32 @@
                         class="form-select js-auto-filter js-filter-resettable"
                         data-reset-value="all">
                     <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
-                        Bütün statuslar
+                        {% trans 'Bütün statuslar' %}
                     </option>
                     <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>
-                        Təqdim edilib
+                        {% trans 'Təqdim edilib' %}
                     </option>
                     <option value="grading" {% if status_filter == 'grading' %}selected{% endif %}>
-                        Yoxlanır
+                        {% trans 'Yoxlanır' %}
                     </option>
                     <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
-                        Qiymətləndirilib
+                        {% trans 'Qiymətləndirilib' %}
                     </option>
                     <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>
-                        Geri qaytarılıb
+                        {% trans 'Geri qaytarılıb' %}
                     </option>
                 </select>
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateFromInput">
-                    Başlanğıc tarix
+                    {% trans 'Başlanğıc tarix' %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateFromInput"
                        name="date_from"
                        value="{{ date_from }}"
                        class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="Başlanğıc tarix">
+                       aria-label="{% trans 'Başlanğıc tarix' %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateToInput">
@@ -103,26 +103,26 @@
                        aria-label="Son tarix">
             </div>
             <button type="submit" class="btn results-filter-submit">
-                <i class="fa-solid fa-filter me-1"></i> Tətbiq et
+                <i class="fa-solid fa-filter me-1"></i> {% trans 'Tətbiq et' %}
             </button>
             <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
-                <i class="fa-solid fa-eraser me-1"></i> Seçimi sıfırla
+                <i class="fa-solid fa-eraser me-1"></i> {% trans 'Seçimi sıfırla' %}
             </button>
         </form>
     </div>
 
     {% if can_delete_submissions %}
         <div class="results-toolbar">
-            <span class="selected-counter">Seçilib: <span id="selectedAssignmentCount">0</span></span>
+            <span class="selected-counter">{% trans 'Seçilib:' %} <span id="selectedAssignmentCount">0</span></span>
             <div class="results-toolbar__actions">
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllAssignmentsBtn">
-                    <i class="fa-solid fa-check-double"></i> Hamısını seç
+                    <i class="fa-solid fa-check-double"></i> {% trans 'Hamısını seç' %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--clear" id="clearAssignmentsBtn">
-                    <i class="fa-solid fa-eraser"></i> Seçimi sıfırla
+                    <i class="fa-solid fa-eraser"></i> {% trans 'Seçimi sıfırla' %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--delete" id="deleteSelectedAssignmentsBtn">
-                    <i class="fa-solid fa-trash"></i> Seçilənləri sil
+                    <i class="fa-solid fa-trash"></i> {% trans 'Seçilənləri sil' %}
                 </button>
             </div>
         </div>
@@ -184,7 +184,7 @@
                         </td>
                         <td>
                             <div class="results-action-buttons">
-                                <button class="btn btn-sm {% if submission.review_action_label == 'Yenidən yoxla' %}btn-outline-warning{% elif submission.review_action_label == 'Bax' %}btn-outline-secondary{% else %}btn-outline-primary{% endif %} view-submission-btn"
+                                <button class="btn btn-sm {% if submission.review_action_code == 'recheck' %}btn-outline-warning{% elif submission.review_action_code == 'view' %}btn-outline-secondary{% else %}btn-outline-primary{% endif %} view-submission-btn"
                                         data-bs-toggle="modal"
                                         data-bs-target="#submissionModal"
                                         data-id="{{ submission.id }}"
@@ -195,10 +195,11 @@
                                         data-grade="{{ submission.grade_input_value }}"
                                         data-feedback="{{ submission.feedback }}"
                                         data-can-edit="{% if submission.can_edit_review %}1{% else %}0{% endif %}"
+                                        data-action-code="{{ submission.review_action_code }}"
                                         data-action-label="{{ submission.review_action_label }}"
                                         data-countdown-seconds="{{ submission.review_countdown_seconds }}"
                                         data-countdown-mode="{{ submission.review_countdown_mode }}">
-                                    <i class="fa-solid {% if submission.review_action_label == 'Bax' %}fa-eye{% elif submission.review_action_label == 'Yenidən yoxla' %}fa-rotate-right{% else %}fa-clipboard-check{% endif %}"></i>
+                                    <i class="fa-solid {% if submission.review_action_code == 'view' %}fa-eye{% elif submission.review_action_code == 'recheck' %}fa-rotate-right{% else %}fa-clipboard-check{% endif %}"></i>
                                     {{ submission.review_action_label }}
                                 </button>
                                 {% if submission.review_countdown_mode == 'recheck' and submission.review_countdown_seconds %}
@@ -211,7 +212,7 @@
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger js-single-delete-assignment-submission"
                                             data-submission-id="{{ submission.id }}">
-                                        <i class="fa-solid fa-trash"></i> Sil
+                                        <i class="fa-solid fa-trash"></i> {% trans 'Sil' %}
                                     </button>
                                 {% endif %}
                             </div>
@@ -256,15 +257,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title"><i class="fa-solid fa-trash me-2"></i> Seçilən cavabları sil</h5>
+                    <h5 class="modal-title"><i class="fa-solid fa-trash me-2"></i> {% trans 'Seçilən cavabları sil' %}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    Bu seçim geri qaytarılmır. Seçilmiş sərbəst iş cavabları silinəcək.
+                    {% trans 'Bu seçim geri qaytarılmır. Seçilmiş sərbəst iş cavabları silinəcək.' %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteAssignmentsBtn">Silməni təsdiqlə</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Bağla' %}</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteAssignmentsBtn">{% trans 'Silməni təsdiqlə' %}</button>
                 </div>
             </div>
         </div>
@@ -353,13 +354,13 @@ const reviewI18n = {
     unknownError: "{% trans 'unknown_error' context 'assignment.review_submissions' %}",
     serverError: "{% trans 'server_error' context 'assignment.review_submissions' %}",
     gradeSubmit: "{% trans 'grade_submit' context 'assignment.review_submissions' %}",
-    reviewLocked: "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür.",
-    identityWindow: "Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra görünəcək.",
-    recheckWindow: "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır.",
-    reviewNow: "Yoxla və yadda saxla",
-    reviewAgain: "Yenidən yoxla və yadda saxla",
-    confirmTitle: "Qiymətləndirməni təsdiqləyin",
-    confirmMessage: "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
+    reviewLocked: "{% trans 'Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür.' %}",
+    identityWindow: "{% trans 'Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra görünəcək.' %}",
+    recheckWindow: "{% trans 'Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır.' %}",
+    reviewNow: "{% trans 'Yoxla və yadda saxla' %}",
+    reviewAgain: "{% trans 'Yenidən yoxla və yadda saxla' %}",
+    confirmTitle: "{% trans 'Qiymətləndirməni təsdiqləyin' %}",
+    confirmMessage: "{% trans 'Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?' %}"
 };
 
 function parseIntegerGrade(rawValue) {
@@ -419,7 +420,7 @@ function openSubmission(button) {
     const grade = button.dataset.grade;
     const feedback = button.dataset.feedback;
     const canEdit = button.dataset.canEdit === '1';
-    const actionLabel = button.dataset.actionLabel;
+    const actionCode = button.dataset.actionCode;
     const countdownMode = button.dataset.countdownMode;
 
     const gradeInput = document.getElementById('grade-input');
@@ -437,7 +438,7 @@ function openSubmission(button) {
     feedbackInput.disabled = !canEdit;
     submitButton.classList.toggle('d-none', !canEdit);
     submitButton.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + (
-        actionLabel === 'Yenidən yoxla' ? reviewI18n.reviewAgain : reviewI18n.reviewNow
+        actionCode === 'recheck' ? reviewI18n.reviewAgain : reviewI18n.reviewNow
     );
 
     reviewNote.className = 'alert d-none';

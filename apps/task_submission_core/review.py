@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
@@ -184,9 +185,14 @@ def annotate_teacher_review_state(submissions, *, student_attr, current_time=Non
             f"@{student.username}" if submission.can_view_student_identity else "Anonim görünüş"
         )
         submission.grade_input_value = format_input_number(submission.grade)
-        submission.review_action_label = (
-            "Yenidən yoxla" if in_recheck_window else ("Bax" if submission.status == "graded" else "Yoxla")
+        submission.review_action_code = (
+            "recheck" if in_recheck_window else ("view" if submission.status == "graded" else "review")
         )
+        submission.review_action_label = {
+            "recheck": pgettext("task_submission.review.action", "Yenidən yoxla"),
+            "view": pgettext("task_submission.review.action", "Bax"),
+            "review": pgettext("task_submission.review.action", "Yoxla"),
+        }[submission.review_action_code]
         submission.review_action_variant = (
             "warning" if in_recheck_window else ("secondary" if submission.status == "graded" else "primary")
         )

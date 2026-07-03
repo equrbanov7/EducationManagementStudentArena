@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!studentListContainer) return;
 
     if (!users || users.length === 0) {
-      studentListContainer.innerHTML = `<div class="p-3 text-center text-muted">İstifadəçi tapılmadı.</div>`;
+      studentListContainer.innerHTML = `<div class="p-3 text-center text-muted">${gettext("İstifadəçi tapılmadı.")}</div>`;
       return;
     }
 
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (studentSearchInput) studentSearchInput.value = '';
     if (studentCounter) studentCounter.innerText = '0';
 
-    studentListContainer.innerHTML = `<div class="p-3 text-center text-muted">Yüklənir...</div>`;
+    studentListContainer.innerHTML = `<div class="p-3 text-center text-muted">${gettext("Yüklənir...")}</div>`;
 
     try {
       const resp = await fetch(availableStudentsUrl, {
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await resp.json();
 
       if (!resp.ok || !data.success) {
-        studentListContainer.innerHTML = `<div class="p-3 text-center text-danger">Xəta baş verdi.</div>`;
+        studentListContainer.innerHTML = `<div class="p-3 text-center text-danger">${gettext("Xəta baş verdi.")}</div>`;
         return;
       }
 
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     } catch (err) {
       console.error(err);
-      studentListContainer.innerHTML = `<div class="p-3 text-center text-danger">Şəbəkə xətası.</div>`;
+      studentListContainer.innerHTML = `<div class="p-3 text-center text-danger">${gettext("Şəbəkə xətası.")}</div>`;
     }
   }
 
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const userIds = formData.getAll('user_ids');
 
       if (!userIds || userIds.length === 0) {
-        alert('Ən azı bir tələbə seçin!');
+        alert(gettext('Ən azı bir tələbə seçin!'));
         return;
       }
 
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-          alert(`✅ ${result.message || 'Tələbələr əlavə olundu'}`);
+          alert(`✅ ${result.message || gettext("Tələbələr əlavə olundu")}`);
 
           // modal close
           closeBootstrapModal(studentModal);
@@ -292,11 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
           // location.reload();
 
         } else {
-          alert('❌ ' + (result.error || 'Xəta baş verdi'));
+          alert('❌ ' + (result.error || gettext('Xəta baş verdi')));
         }
       } catch (error) {
         console.error('Network error:', error);
-        alert('❌ Server xətası. Yenidən cəhd edin.');
+        alert(gettext('❌ Server xətası. Yenidən cəhd edin.'));
       } finally {
         hide(studentLoader);
         setSubmitDisabled(studentForm, false);
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const groupIds = formData.getAll('group_ids');
 
       if (!groupIds || groupIds.length === 0) {
-        alert('Ən azı bir qrup seçin!');
+        alert(gettext('Ən azı bir qrup seçin!'));
         return;
       }
 
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-          alert(`✅ ${result.message || 'Qruplar əlavə olundu'}`);
+          alert(`✅ ${result.message || gettext("Qruplar əlavə olundu")}`);
 
           closeBootstrapModal(groupModal);
 
@@ -341,11 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
           location.reload();
 
         } else {
-          alert('❌ ' + (result.error || 'Xəta baş verdi'));
+          alert('❌ ' + (result.error || gettext('Xəta baş verdi')));
         }
       } catch (error) {
         console.error(error);
-        alert('❌ Xəta baş verdi.');
+        alert(gettext('❌ Xəta baş verdi.'));
       } finally {
         hide(groupLoader);
         setSubmitDisabled(groupForm, false);
@@ -354,4 +354,3 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 });
-

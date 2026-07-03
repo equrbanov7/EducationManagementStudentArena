@@ -29,9 +29,9 @@
 
   /* AI text — səhifə dilinə görə */
   var AI_TXT = {
-    az:{ btn:'AI ilə doldur', hint:'Sahələri AI ilə doldur' },
+    az:{ btn:gettext('AI ilə doldur'), hint:gettext('Sahələri AI ilə doldur') },
     ru:{ btn:'Заполнить с ИИ', hint:'Заполнить поля с ИИ' },
-    tr:{ btn:'AI ile doldur', hint:'Alanları AI ile doldur' },
+    tr:{ btn:'AI ile doldur', hint:gettext('Alanları AI ile doldur') },
     en:{ btn:'Fill with AI', hint:'Let AI fill the fields' }
   };
 

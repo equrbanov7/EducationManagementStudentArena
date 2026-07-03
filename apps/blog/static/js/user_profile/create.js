@@ -6,7 +6,7 @@
   function showCreateError(ctx, message) {
     if (!ctx.createFormError) return;
     ctx.createFormError.hidden = false;
-    ctx.createFormError.textContent = message || "Xəta baş verdi.";
+    ctx.createFormError.textContent = message || gettext("Xəta baş verdi.");
   }
 
   function hideCreateError(ctx) {
@@ -89,11 +89,11 @@
               .flat()
               .join(" ")) ||
           data.message ||
-          "Post yaradılmadı.";
+          gettext("Post yaradılmadı.");
         showCreateError(ctx, errorText);
       } catch (error) {
         console.error("Error:", error);
-        showCreateError(ctx, "Əlaqə xətası baş verdi.");
+        showCreateError(ctx, gettext("Əlaqə xətası baş verdi."));
       }
     });
   }

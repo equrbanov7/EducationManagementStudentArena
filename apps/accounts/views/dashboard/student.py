@@ -33,22 +33,30 @@ def student_dashboard(request):
     # Get enrolled courses
     enrolled_courses = _assigned_courses_queryset(request, request.user)[:6]
 
+    now = timezone.now()
+
     # Get pending assignments
     pending_assignments = (
         Assignment.objects.filter(
             course__in=enrolled_courses,
             assigned_students=request.user,
-            due_date__gte=timezone.now(),
+            due_date__gte=now,
             status__in=["published", "active"],
         )
         .distinct()
         .order_by("due_date")[:5]
     )
+    pending_assignments = list(pending_assignments)
+    for assignment in pending_assignments:
+        days_until_deadline = (assignment.due_date - now).total_seconds() / 86400
+        assignment.deadline_badge_variant = (
+            "urgent" if days_until_deadline <= 1 else "soon" if days_until_deadline <= 3 else "normal"
+        )
 
     # Get upcoming exams
     upcoming_exams = (
         _assigned_exams_queryset(request, request.user, active_only=True)
-        .filter(start_datetime__gte=timezone.now())
+        .filter(start_datetime__gte=now)
         .order_by("start_datetime")[:5]
     )
 

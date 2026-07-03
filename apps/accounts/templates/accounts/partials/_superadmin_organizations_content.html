@@ -13,17 +13,17 @@
 {% if organization_access_rows %}
 <div class="section-card">
     <div class="section-title">
-        <i class="fas fa-id-badge"></i> Mənim təşkilat girişlərim
+        <i class="fas fa-id-badge"></i> {% trans 'Mənim təşkilat girişlərim' %}
     </div>
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Təşkilat</th>
-                    <th>Rollarım</th>
+                    <th>{% trans 'Təşkilat' %}</th>
+                    <th>{% trans 'Rollarım' %}</th>
                     <th>Status</th>
-                    <th>Üzv sayı</th>
-                    <th>Keçidlər</th>
+                    <th>{% trans 'Üzv sayı' %}</th>
+                    <th>{% trans 'Keçidlər' %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +42,7 @@
                     </td>
                     <td>
                         {% if org_access.is_current %}
-                        <span class="role-badge role-success">Aktiv təşkilat</span>
+                        <span class="role-badge role-success">{% trans 'Aktiv təşkilat' %}</span>
                         {% else %}
                         <span class="role-badge">{{ org_access.status_label }}</span>
                         {% endif %}
@@ -51,7 +51,7 @@
                     <td>
                         <div class="d-flex flex-wrap gap-2">
                             <a href="{{ org_access.dashboard_url }}" class="btn btn-outline-secondary btn-sm">Panel</a>
-                            <a href="{{ org_access.members_url }}" class="btn btn-outline-secondary btn-sm">Üzvlər</a>
+                            <a href="{{ org_access.members_url }}" class="btn btn-outline-secondary btn-sm">{% trans 'Üzvlər' %}</a>
                             <a href="{{ org_access.roles_url }}" class="btn btn-outline-secondary btn-sm">Rollar</a>
                             {% if not org_access.is_current %}
                             <a href="{{ org_access.switch_url }}" class="btn btn-primary btn-sm">Aktiv et</a>
@@ -93,7 +93,7 @@
                         {% if organization.status == "suspended" %}
                             <span class="role-badge role-danger">{% trans "status_suspended" context "profile.superadmin_orgs" %}</span>
                         {% elif organization.status == "pending" %}
-                            <span class="role-badge role-warning">Gözləyir</span>
+                            <span class="role-badge role-warning">{% trans 'Gözləyir' %}</span>
                         {% elif organization.is_active %}
                             <span class="role-badge role-success">{% trans "status_active" context "profile.superadmin_orgs" %}</span>
                         {% else %}
@@ -116,12 +116,12 @@
                             {% if organization.status == "pending" %}
                                 <div class="d-flex flex-column gap-2">
                                     <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
-                                        <i class="fas fa-check"></i> Təsdiqlə
+                                        <i class="fas fa-check"></i> {% trans 'Təsdiqlə' %}
                                     </button>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control" name="reason" placeholder="Rədd etmə səbəbi (opsional)">
+                                        <input type="text" class="form-control" name="reason" placeholder="{% trans 'Rədd etmə səbəbi (opsional)' %}">
                                         <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-times"></i> Rədd et
+                                            <i class="fas fa-times"></i> {% trans 'Rədd et' %}
                                         </button>
                                     </div>
                                 </div>

@@ -70,10 +70,10 @@
                         {% if show_review_data and submission.score is not None %}
                         <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">{{ submission.score }}/{{ lab.max_score }}</span>
                         {% elif show_review_data %}
-                        <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">Qiymətləndirilib</span>
+                        <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">{% trans 'Qiymətləndirilib' %}</span>
                         {% else %}
                         <span class="badge bg-white text-secondary border border-secondary px-3 py-2 ms-3 rounded-pill">
-                            Nəticə:
+                            {% trans 'Nəticə:' %}
                             <span data-review-countdown="{{ review_available_in_seconds }}">--:--:--</span>
                         </span>
                         {% endif %}
@@ -82,7 +82,7 @@
                     {% endif %}
                 </div>
                 <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4">
-                    <i class="fas fa-eye me-2"></i> Cavablarım
+                    <i class="fas fa-eye me-2"></i> {% trans 'Cavablarım' %}
                 </a>
             </div>
         </div>
@@ -264,7 +264,7 @@
                                     <i class="fas fa-cloud-upload-alt fs-4"></i>
                                 </div>
                                 <h6 class="fw-bold text-dark-blue mb-1">{% trans "action_add_file" context "labs.template.lab_detail" %}</h6>
-                                <span class="text-muted small">Maksimum fayl ölçüsü 10MB</span>
+                                <span class="text-muted small">{% trans 'Maksimum fayl ölçüsü 10MB' %}</span>
                             </div>
                             
                             <div class="file-preview d-none mb-3" id="preview-{{ question.id }}">
@@ -329,7 +329,7 @@
                         {% blocktrans trimmed context "labs.template.lab_detail" with attempt_count=attempt_count max_attempts=lab.max_attempts %}notice_attempts_exhausted {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
                     </p>
                     <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4 py-2">
-                        <i class="fas fa-eye me-2"></i> Cavablarım
+                        <i class="fas fa-eye me-2"></i> {% trans 'Cavablarım' %}
                     </a>
                 </div>
                 

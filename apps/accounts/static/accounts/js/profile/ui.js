@@ -302,10 +302,10 @@
 
             slugInput.value = slug || "";
             if (titleEl) {
-                titleEl.textContent = "Giriş Kodu";
+                titleEl.textContent = gettext("Giriş Kodu");
             }
             if (textEl) {
-                textEl.innerHTML = '<strong>"' + (examTitle || "") + '"</strong> imtahanına keçid üçün kodu yazın.';
+                textEl.innerHTML = '<strong>"' + (examTitle || "") + gettext('"</strong> imtahanına keçid üçün kodu yazın.');
             }
             codeInput.value = "";
 

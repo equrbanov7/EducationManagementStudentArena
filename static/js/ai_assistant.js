@@ -24,14 +24,14 @@
 
     const chatUrl = panel.dataset.chatUrl || "/api/ai-assistant/chat/";
     const quotaUrl = panel.dataset.quotaUrl || "/api/ai-assistant/quota/";
-    const limitLabel = panel.dataset.limitLabel || "Sorğular";
-    const loadingLabel = panel.dataset.loadingLabel || "yüklənir...";
+    const limitLabel = panel.dataset.limitLabel || gettext("Sorğular");
+    const loadingLabel = panel.dataset.loadingLabel || gettext("yüklənir...");
     const uiText = {
-        greeting: panel.dataset.greeting || "Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?",
-        limitDisabled: panel.dataset.limitDisabledMessage || "AI sorğu limiti hazırda aktiv deyil.",
-        sendFailed: panel.dataset.sendFailedMessage || "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin.",
-        genericError: panel.dataset.genericErrorMessage || "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
-        networkError: panel.dataset.networkErrorMessage || "Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin.",
+        greeting: panel.dataset.greeting || gettext("Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"),
+        limitDisabled: panel.dataset.limitDisabledMessage || gettext("AI sorğu limiti hazırda aktiv deyil."),
+        sendFailed: panel.dataset.sendFailedMessage || gettext("Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."),
+        genericError: panel.dataset.genericErrorMessage || gettext("Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."),
+        networkError: panel.dataset.networkErrorMessage || gettext("Şəbəkə xətası. Zəhmət olmasa yenidən cəhd edin."),
     };
     const storageKey = panel.dataset.storageKey || "emsa.aiAssistant.v2.global";
     const historyTtlMs = Number(panel.dataset.historyTtlMs) || (15 * 60 * 1000);

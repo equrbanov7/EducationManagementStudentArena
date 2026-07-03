@@ -102,7 +102,7 @@
                                         <span class="text-dark fw-medium">{{ answer.answer_file.name|filename|default:file_name_fallback }}</span>
                                     </div>
                                     <a href="{{ answer.answer_file.url }}" target="_blank" rel="noopener" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
-                                        <i class="fas fa-download me-2"></i> Yüklə
+                                        <i class="fas fa-download me-2"></i> {% trans 'Yüklə' %}
                                     </a>
                                 </div>
                                 {% endif %}
@@ -117,7 +117,7 @@
                                 <div class="mt-4">
                                     <span class="score-badge shadow-sm">
                                         <i class="fas fa-star text-warning me-2"></i>
-                                        <span class="me-1">Qiymət:</span>
+                                        <span class="me-1">{% trans 'Qiymət:' %}</span>
                                         <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}</strong>
                                     </span>
                                 </div>
@@ -151,7 +151,7 @@
                             <span class="text-dark fw-medium">{{ submission_file.name|filename|default:file_name_fallback }}</span>
                         </div>
                         <a href="{{ submission_file.url }}" target="_blank" rel="noopener" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
-                            <i class="fas fa-download me-2"></i> Yüklə
+                            <i class="fas fa-download me-2"></i> {% trans 'Yüklə' %}
                         </a>
                     </div>
                     {% endif %}

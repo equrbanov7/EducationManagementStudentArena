@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if 'create-category' in allowed_sections %}
 <section class="profile-section-panel profile-section--create-category {% if active_section == 'create-category' %}is-active{% endif %}"
          data-profile-section-panel="create-category">
@@ -9,13 +10,13 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
                     <div>
                         <span class="category-management-eyebrow">SuperAdmin</span>
-                        <h3 class="category-management-title mb-2">Yeni kateqoriya və ya alt kateqoriya yarat</h3>
+                        <h3 class="category-management-title mb-2">{% trans 'Yeni kateqoriya və ya alt kateqoriya yarat' %}</h3>
                         <p class="text-muted mb-0">
-                            4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent seçilərsə alt kateqoriya yaradılır.
+                            {% trans '4 dil sahəsi məcburidir. Parent boş qalarsa əsas kateqoriya, parent seçilərsə alt kateqoriya yaradılır.' %}
                         </p>
                     </div>
                     <a href="{{ profile_base_url }}?section=category-management" class="btn btn-outline-secondary">
-                        Kateqoriyaları idarə et
+                        {% trans 'Kateqoriyaları idarə et' %}
                     </a>
                 </div>
 

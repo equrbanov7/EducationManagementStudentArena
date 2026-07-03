@@ -8,7 +8,7 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
          data-profile-section-panel="unit-exams">
     <div class="section-card">
         <div class="section-title">
-            <i class="fas fa-university"></i> Bölmə imtahanları
+            <i class="fas fa-university"></i> {% trans 'Bölmə imtahanları' %}
             {% if unit_exams_total_count %}
             <span class="sidebar-menu-badge">{{ unit_exams_total_count }}</span>
             {% endif %}
@@ -16,7 +16,7 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
 
         <p class="settings-note">
             <i class="fas fa-circle-info"></i>
-            Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).
+            {% trans 'Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).' %}
         </p>
 
         <form method="get" action="{{ profile_base_url }}" class="d-flex gap-2 mb-3">
@@ -25,7 +25,7 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
                    name="unit_exam_q"
                    class="form-control"
                    value="{{ unit_exams_search_query }}"
-                   placeholder="İmtahan, müəllif və ya kurs axtar">
+                   placeholder="{% trans 'İmtahan, müəllif və ya kurs axtar' %}">
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fas fa-search"></i> Axtar
             </button>
@@ -36,12 +36,12 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
             <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>İmtahan</th>
-                        <th>Növ</th>
-                        <th>Müəllif</th>
+                        <th>{% trans 'İmtahan' %}</th>
+                        <th>{% trans 'Növ' %}</th>
+                        <th>{% trans 'Müəllif' %}</th>
                         <th>Kurs</th>
-                        <th>Başlama</th>
-                        <th>Cəhdlər</th>
+                        <th>{% trans 'Başlama' %}</th>
+                        <th>{% trans 'Cəhdlər' %}</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -68,7 +68,7 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
         </div>
 
         {% if unit_exams_page_obj.paginator.num_pages > 1 %}
-        <nav class="pagination-wrap" aria-label="Səhifələmə">
+        <nav class="pagination-wrap" aria-label="{% trans 'Səhifələmə' %}">
             <ul class="pagination">
                 {% if unit_exams_page_obj.has_previous %}
                 <li class="page-item">
@@ -92,9 +92,9 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
             <i class="fas fa-file-alt"></i>
             <p>
                 {% if unit_exams_search_query %}
-                Axtarışa uyğun imtahan tapılmadı.
+                {% trans 'Axtarışa uyğun imtahan tapılmadı.' %}
                 {% else %}
-                Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib.
+                {% trans 'Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib.' %}
                 {% endif %}
             </p>
         </div>

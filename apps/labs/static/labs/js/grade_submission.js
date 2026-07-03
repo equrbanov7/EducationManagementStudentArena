@@ -108,8 +108,8 @@
             }
 
             window.openActionConfirmModal({
-                title: 'Qiymətləndirməni təsdiqləyin',
-                message: 'Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?',
+                title: gettext('Qiymətləndirməni təsdiqləyin'),
+                message: gettext('Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?'),
                 confirmLabel: submitButton.textContent.trim(),
                 confirmButtonClass: 'btn btn-success',
                 onConfirm: function () {

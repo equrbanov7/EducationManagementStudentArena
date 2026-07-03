@@ -2,13 +2,13 @@
 {% with s=org_members_section %}
 <div class="org-management org-management--members">
     {% if not s.organization %}
-        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+        <div class="org-management__empty">{% trans 'Aktiv təşkilat tapılmadı.' %}</div>
     {% else %}
     <div class="org-management__header">
         <div>
-            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
-            <h1>Struktur üzvləri</h1>
-            <p class="org-management__subtitle">Üzvlər aktiv təşkilat və unit scope-a görə süzülür.</p>
+            <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
+            <h1>{% trans 'Struktur üzvləri' %}</h1>
+            <p class="org-management__subtitle">{% trans 'Üzvlər aktiv təşkilat və unit scope-a görə süzülür.' %}</p>
         </div>
     </div>
 

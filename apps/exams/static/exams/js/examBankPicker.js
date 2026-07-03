@@ -61,7 +61,7 @@
 
     function setBodyLoading() {
       body.innerHTML =
-        '<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>';
+        gettext('<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>');
     }
 
     // ── Açılış: tam modal gövdəsi ──
@@ -79,7 +79,7 @@
         .catch(function () {
           if (token !== modalToken) return;
           body.innerHTML =
-            '<div class="bankpicker-empty"><i class="fas fa-triangle-exclamation"></i><p>Yüklənmə xətası. Yenidən cəhd edin.</p></div>';
+            gettext('<div class="bankpicker-empty"><i class="fas fa-triangle-exclamation"></i><p>Yüklənmə xətası. Yenidən cəhd edin.</p></div>');
         });
     }
 
@@ -97,7 +97,7 @@
       params.content = "1";
       params.page = "1";
       holder.innerHTML =
-        '<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>';
+        gettext('<div class="bankpicker-loading"><span class="bankpicker-spinner" aria-hidden="true"></span> Yüklənir...</div>');
       fetch(buildUrl(params), { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
         .then(function (r) { return r.text(); })
         .then(function (html) {
@@ -108,7 +108,7 @@
         .catch(function () {
           if (token !== contentToken) return;
           holder.innerHTML =
-            '<div class="bankpicker-empty"><i class="fas fa-triangle-exclamation"></i><p>Yüklənmə xətası.</p></div>';
+            gettext('<div class="bankpicker-empty"><i class="fas fa-triangle-exclamation"></i><p>Yüklənmə xətası.</p></div>');
         });
     }
 
@@ -174,7 +174,7 @@
     function updateCount() {
       var n = selectAllMatching ? Math.max(0, currentTotal - excludedIds.size) : selectedIds.size;
       var label = body.querySelector("[data-picker-selected-count]");
-      if (label) label.textContent = n + " seçilib";
+      if (label) label.textContent = n + gettext(" seçilib");
       var attach = body.querySelector("[data-picker-attach]");
       if (attach) attach.disabled = n === 0;
     }
@@ -322,13 +322,13 @@
           } else {
             button.disabled = false;
             button.classList.remove("is-loading");
-            window.alert((data && data.error) || "Xəta baş verdi.");
+            window.alert((data && data.error) || gettext("Xəta baş verdi."));
           }
         })
         .catch(function () {
           button.disabled = false;
           button.classList.remove("is-loading");
-          window.alert("Şəbəkə xətası. Yenidən cəhd edin.");
+          window.alert(gettext("Şəbəkə xətası. Yenidən cəhd edin."));
         });
     }
   });

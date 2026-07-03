@@ -218,7 +218,7 @@
     var balanceValues;
 
     if (ctx.role === "student") {
-      balanceLabels = ["Orta bal", "Keçid", "Yoxlanma", "Vaxtında"];
+      balanceLabels = ["Orta bal", gettext("Keçid"), "Yoxlanma", gettext("Vaxtında")];
       balanceValues = [
         ctx.data.summary.avg_score || 0,
         ctx.data.summary.pass_rate || 0,
@@ -226,7 +226,7 @@
         u.pct(ctx.data.summary.on_time_count || 0, (ctx.data.summary.on_time_count || 0) + (ctx.data.summary.late_count || 0))
       ];
     } else {
-      balanceLabels = ["İmtahan yoxlama", "Tapşırıq yoxlama", "Lab yoxlama", "Layihə yoxlama", "Təqdimetmə"];
+      balanceLabels = [gettext("İmtahan yoxlama"), gettext("Tapşırıq yoxlama"), "Lab yoxlama", gettext("Layihə yoxlama"), gettext("Təqdimetmə")];
       balanceValues = [
         u.pct(ctx.data.summary.checked_attempts || 0, ctx.data.summary.total_attempts || 0),
         u.pct(ctx.data.summary.assignment_graded || 0, ctx.data.summary.assignment_total || 0),
@@ -272,8 +272,8 @@
           labels: orgRows.map(function (item) { return u.truncateLabel(item.name); }),
           datasets: [
             { type: "bar", label: "Kurs", data: orgRows.map(function (item) { return item.courses; }), backgroundColor: ctx.CHART_PALETTE[0] },
-            { type: "bar", label: "İmtahan", data: orgRows.map(function (item) { return item.exams; }), backgroundColor: ctx.CHART_PALETTE[1] },
-            { type: "line", label: "Cəhd", data: orgRows.map(function (item) { return item.attempts; }), borderColor: ctx.CHART_PALETTE[3], backgroundColor: "rgba(220,53,69,0.14)", tension: 0.3, yAxisID: "y1" }
+            { type: "bar", label: gettext("İmtahan"), data: orgRows.map(function (item) { return item.exams; }), backgroundColor: ctx.CHART_PALETTE[1] },
+            { type: "line", label: gettext("Cəhd"), data: orgRows.map(function (item) { return item.attempts; }), borderColor: ctx.CHART_PALETTE[3], backgroundColor: "rgba(220,53,69,0.14)", tension: 0.3, yAxisID: "y1" }
           ]
         },
         options: detailOptions(false)
@@ -285,7 +285,7 @@
           labels: teacherRows.map(function (item) { return u.truncateLabel(item.name); }),
           datasets: [
             { type: "bar", label: "Kurs", data: teacherRows.map(function (item) { return item.course_count; }), backgroundColor: ctx.CHART_PALETTE[0] },
-            { type: "bar", label: "İmtahan", data: teacherRows.map(function (item) { return item.exam_count; }), backgroundColor: ctx.CHART_PALETTE[1] },
+            { type: "bar", label: gettext("İmtahan"), data: teacherRows.map(function (item) { return item.exam_count; }), backgroundColor: ctx.CHART_PALETTE[1] },
             { type: "line", label: "Orta bal %", data: teacherRows.map(function (item) { return item.avg_score; }), borderColor: ctx.CHART_PALETTE[4], backgroundColor: "rgba(13,202,240,0.14)", tension: 0.3, yAxisID: "y1" }
           ]
         },
@@ -297,9 +297,9 @@
         data: {
           labels: courseRows.map(function (item) { return u.truncateLabel(item.title); }),
           datasets: [
-            { type: "bar", label: "Cəhd", data: courseRows.map(function (item) { return item.attempt_count; }), backgroundColor: ctx.CHART_PALETTE[0] },
+            { type: "bar", label: gettext("Cəhd"), data: courseRows.map(function (item) { return item.attempt_count; }), backgroundColor: ctx.CHART_PALETTE[0] },
             { type: "line", label: "Orta bal %", data: courseRows.map(function (item) { return item.avg_score; }), borderColor: ctx.CHART_PALETTE[1], backgroundColor: "rgba(25,135,84,0.14)", tension: 0.3, yAxisID: "y1" },
-            { type: "line", label: "Keçid %", data: courseRows.map(function (item) { return item.pass_rate; }), borderColor: ctx.CHART_PALETTE[2], backgroundColor: "rgba(255,193,7,0.14)", tension: 0.3, yAxisID: "y1" }
+            { type: "line", label: gettext("Keçid %"), data: courseRows.map(function (item) { return item.pass_rate; }), borderColor: ctx.CHART_PALETTE[2], backgroundColor: "rgba(255,193,7,0.14)", tension: 0.3, yAxisID: "y1" }
           ]
         },
         options: detailOptions(true)

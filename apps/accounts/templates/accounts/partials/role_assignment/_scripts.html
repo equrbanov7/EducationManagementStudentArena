@@ -25,7 +25,19 @@ document.addEventListener("DOMContentLoaded", function () {
     var modalInstance = window.bootstrap ? new window.bootstrap.Modal(actionModal) : null;
     var pendingOperation = null;
     var submitInFlight = false;
-    var confirmDefaultLabel = confirmBtn ? (confirmBtn.textContent || "Təsdiqlə").trim() : "Təsdiqlə";
+    var roleAssignmentI18n = {
+        confirm: "{% trans 'Təsdiqlə' %}",
+        noMembership: "{% trans 'Üzvlük yoxdur' %}",
+        attachLead: "{% trans 'İstifadəçini təşkilata əlavə etməyi təsdiqləyin.' %}",
+        updateLead: "{% trans 'İstifadəçinin rolunu yeniləməyi təsdiqləyin.' %}",
+        genericError: "{% trans 'Xəta baş verdi. Yenidən cəhd edin.' %}",
+        prepareError: "{% trans 'Əməliyyat təsdiqi hazırlanmadı.' %}",
+        completeError: "{% trans 'Əməliyyat tamamlanmadı.' %}",
+        adding: "{% trans 'Əlavə olunur...' %}",
+        updating: "{% trans 'Yenilənir...' %}",
+        success: "{% trans 'Əməliyyat uğurla tamamlandı.' %}",
+    };
+    var confirmDefaultLabel = confirmBtn ? (confirmBtn.textContent || roleAssignmentI18n.confirm).trim() : roleAssignmentI18n.confirm;
 
     if (!modalInstance || !confirmBtn) {
         return;
@@ -89,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         if (!operation.oldRole && actionName === "attach_user") {
-            operation.oldRole = "Üzvlük yoxdur";
+            operation.oldRole = roleAssignmentI18n.noMembership;
         }
 
         operation.isValid = Boolean(
@@ -117,8 +129,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (leadNode) {
             leadNode.textContent = operation.action === "attach_user"
-                ? "İstifadəçini təşkilata əlavə etməyi təsdiqləyin."
-                : "İstifadəçinin rolunu yeniləməyi təsdiqləyin.";
+                ? roleAssignmentI18n.attachLead
+                : roleAssignmentI18n.updateLead;
         }
         if (fullNameNode) {
             fullNameNode.textContent = operation.fullName;
@@ -199,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function showToast(type, message) {
-        var text = normalizeText(message) || "Xəta baş verdi. Yenidən cəhd edin.";
+        var text = normalizeText(message) || roleAssignmentI18n.genericError;
         if (type === "success" && typeof window.notifySuccess === "function") {
             window.notifySuccess(text);
             return;
@@ -219,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json().catch(function () {
             return {
                 success: false,
-                message: fallbackErrorMessage || "Xəta baş verdi. Yenidən cəhd edin."
+                message: fallbackErrorMessage || roleAssignmentI18n.genericError
             };
         });
     }
@@ -250,9 +262,9 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: payload.toString()
         });
-        var data = await parseJsonResponse(response, "Əməliyyat təsdiqi hazırlanmadı.");
+        var data = await parseJsonResponse(response, roleAssignmentI18n.prepareError);
         if (!response.ok || !data.success || !normalizeText(data.operation_token)) {
-            throw new Error(data.message || "Əməliyyat təsdiqi hazırlanmadı.");
+            throw new Error(data.message || roleAssignmentI18n.prepareError);
         }
         return data.operation_token;
     }
@@ -294,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: payload.toString()
         });
-        return parseJsonResponse(response, "Əməliyyat tamamlanmadı.");
+        return parseJsonResponse(response, roleAssignmentI18n.completeError);
     }
 
     document.querySelectorAll(".js-role-assignment-action-confirm").forEach(function (button) {
@@ -328,18 +340,18 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!pendingOperation || !pendingOperation.isValid || submitInFlight) {
                 return;
             }
-            var inFlightLabel = pendingOperation.action === "attach_user" ? "Əlavə olunur..." : "Yenilənir...";
+            var inFlightLabel = pendingOperation.action === "attach_user" ? roleAssignmentI18n.adding : roleAssignmentI18n.updating;
             setConfirmLoading(true, inFlightLabel);
 
             try {
                 var operationToken = await prepareOperationToken(pendingOperation);
                 var submitResult = await submitPreparedOperation(operationToken, pendingOperation);
                 if (!submitResult.success) {
-                    showToast("error", submitResult.message || "Əməliyyat tamamlanmadı.");
+                    showToast("error", submitResult.message || roleAssignmentI18n.completeError);
                     return;
                 }
 
-                showToast("success", submitResult.message || "Əməliyyat uğurla tamamlandı.");
+                showToast("success", submitResult.message || roleAssignmentI18n.success);
                 modalInstance.hide();
 
                 var redirectUrl = normalizeText(submitResult.redirect_url);
@@ -351,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     window.location.reload();
                 }, 420);
             } catch (error) {
-                showToast("error", error && error.message ? error.message : "Xəta baş verdi. Yenidən cəhd edin.");
+                showToast("error", error && error.message ? error.message : roleAssignmentI18n.genericError);
             } finally {
                 setConfirmLoading(false, confirmDefaultLabel);
             }
@@ -386,4 +398,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-

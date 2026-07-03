@@ -51,13 +51,13 @@
             <input
                 type="search"
                 class="form-control"
-                placeholder="İcazə axtar (məs: view, edit, member)"
+                placeholder="{% trans 'İcazə axtar (məs: view, edit, member)' %}"
                 autocomplete="off"
                 data-permission-search>
             <button type="button"
                     class="permission-editor-search-clear"
                     data-permission-search-clear
-                    aria-label="Axtarışı təmizlə"
+                    aria-label="{% trans 'Axtarışı təmizlə' %}"
                     hidden>
                 <i class="fas fa-times"></i>
             </button>
@@ -69,40 +69,40 @@
         </button>
     </div>
 
-    <div class="permission-editor-guide" role="note" aria-label="İstifadə qaydası">
+    <div class="permission-editor-guide" role="note" aria-label="{% trans 'İstifadə qaydası' %}">
         <div class="permission-editor-guide-title">
             <i class="fas fa-circle-info"></i>
-            <span data-permission-guide-title>Bu bölmə nə üçündür?</span>
+            <span data-permission-guide-title>{% trans 'Bu bölmə nə üçündür?' %}</span>
         </div>
         <p class="permission-editor-guide-text" data-permission-guide-text>
-            Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz.
+            {% trans 'Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz.' %}
         </p>
         <ul class="permission-editor-guide-list">
             <li>
                 <span class="permission-editor-guide-step">1</span>
-                <span data-permission-guide-step="1">Bölməni açın (məs: Təşkilat, Üzvlər)</span>
+                <span data-permission-guide-step="1">{% trans 'Bölməni açın (məs: Təşkilat, Üzvlər)' %}</span>
             </li>
             <li>
                 <span class="permission-editor-guide-step">2</span>
-                <span data-permission-guide-step="2">“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün</span>
+                <span data-permission-guide-step="2">{% trans '“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün' %}</span>
             </li>
             <li>
                 <span class="permission-editor-guide-step">3</span>
-                <span data-permission-guide-step="3">Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin</span>
+                <span data-permission-guide-step="3">{% trans 'Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin' %}</span>
             </li>
         </ul>
-        <div class="permission-editor-mini-legend" aria-label="Qısa izah">
+        <div class="permission-editor-mini-legend" aria-label="{% trans 'Qısa izah' %}">
             <div class="permission-legend-item permission-legend-item--active">
                 <i class="fas fa-check-circle" aria-hidden="true"></i>
-                <span data-permission-legend="active">Aktiv: icazə açıqdır, funksiya işləyir.</span>
+                <span data-permission-legend="active">{% trans 'Aktiv: icazə açıqdır, funksiya işləyir.' %}</span>
             </div>
             <div class="permission-legend-item permission-legend-item--inactive">
                 <i class="fas fa-minus-circle" aria-hidden="true"></i>
-                <span data-permission-legend="inactive">Deaktiv: icazə bağlıdır, funksiya məhduddur.</span>
+                <span data-permission-legend="inactive">{% trans 'Deaktiv: icazə bağlıdır, funksiya məhduddur.' %}</span>
             </div>
             <div class="permission-legend-item permission-legend-item--bulk">
                 <i class="fas fa-layer-group" aria-hidden="true"></i>
-                <span data-permission-legend="bulk">Bulk: birdən çox icazəni eyni anda dəyişir.</span>
+                <span data-permission-legend="bulk">{% trans 'Bulk: birdən çox icazəni eyni anda dəyişir.' %}</span>
             </div>
         </div>
     </div>
@@ -111,14 +111,14 @@
         <div class="info-label"
              data-permission-active-count
              data-count="{{ actor_permissions|length }}">
-            Aktiv icazələr: {{ actor_permissions|length }}
+            {% blocktrans with count=actor_permissions|length %}Aktiv icazələr: {{ count }}{% endblocktrans %}
         </div>
         <div class="role-badges">
             {% for perm in actor_permissions %}
             <span class="role-badge permission-active-badge"
                   data-active-permission-badge
                   data-permission-key="{{ perm|lower }}">
-                {% if perm == "*" %}Bütün icazələr (*){% else %}{{ perm }}{% endif %}
+                {% if perm == "*" %}{% trans 'Bütün icazələr (*)' %}{% else %}{{ perm }}{% endif %}
             </span>
             {% empty %}
             <span class="text-muted">{% trans "permissions_not_found" context "profile.permission_editor" %}</span>
@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    <p class="permission-editor-empty" data-permission-empty hidden>Nəticə tapılmadı.</p>
+    <p class="permission-editor-empty" data-permission-empty hidden>{% trans 'Nəticə tapılmadı.' %}</p>
 
     <div class="permission-modules" data-permission-modules>
         {% for category, perms in permission_categories.items %}
@@ -137,56 +137,56 @@
                     <span class="permission-module-title-wrap">
                         <span class="permission-module-title" data-permission-module-title>
                         {% if category == "organization" %}
-                        Təşkilat
+                        {% trans 'Təşkilat' %}
                         {% elif category == "structure" %}
                         Struktur
                         {% elif category == "members" %}
-                        Üzvlər
+                        {% trans 'Üzvlər' %}
                         {% elif category == "roles" %}
                         Rollar
                         {% elif category == "courses" %}
                         Kurslar
                         {% elif category == "grading" %}
-                        Qiymətləndirmə
+                        {% trans 'Qiymətləndirmə' %}
                         {% elif category == "exams" %}
-                        İmtahanlar
+                        {% trans 'İmtahanlar' %}
                         {% elif category == "appeal" %}
                         Apellyasiya
                         {% elif category == "analytics" %}
                         Analitika
                         {% elif category == "qa" %}
-                        Keyfiyyət
+                        {% trans 'Keyfiyyət' %}
                         {% elif category == "audit" %}
-                        Audit jurnalı
+                        {% trans 'Audit jurnalı' %}
                         {% else %}
                         {{ category|title }}
                         {% endif %}
                         </span>
                         <span class="permission-module-subtitle" data-permission-module-subtitle>
                         {% if category == "organization" %}
-                        Təşkilat ayarları və idarəetmə əməliyyatları
+                        {% trans 'Təşkilat ayarları və idarəetmə əməliyyatları' %}
                         {% elif category == "structure" %}
-                        Fakültə, şöbə və struktur vahidləri
+                        {% trans 'Fakültə, şöbə və struktur vahidləri' %}
                         {% elif category == "members" %}
-                        İstifadəçilər və üzvlüklə bağlı əməliyyatlar
+                        {% trans 'İstifadəçilər və üzvlüklə bağlı əməliyyatlar' %}
                         {% elif category == "roles" %}
-                        Rol təyini və rol səviyyələri
+                        {% trans 'Rol təyini və rol səviyyələri' %}
                         {% elif category == "courses" %}
-                        Kurs yaradılması və kurs idarəetməsi
+                        {% trans 'Kurs yaradılması və kurs idarəetməsi' %}
                         {% elif category == "grading" %}
-                        Qiymətləndirmə və nəticə axınları
+                        {% trans 'Qiymətləndirmə və nəticə axınları' %}
                         {% elif category == "exams" %}
-                        İmtahan idarəetməsi və nəzarət
+                        {% trans 'İmtahan idarəetməsi və nəzarət' %}
                         {% elif category == "appeal" %}
-                        Apellyasiya müraciətləri
+                        {% trans 'Apellyasiya müraciətləri' %}
                         {% elif category == "analytics" %}
-                        Analitik hesabat və göstəricilər
+                        {% trans 'Analitik hesabat və göstəricilər' %}
                         {% elif category == "qa" %}
-                        Keyfiyyət yoxlaması əməliyyatları
+                        {% trans 'Keyfiyyət yoxlaması əməliyyatları' %}
                         {% elif category == "audit" %}
-                        Tarixçə və audit log baxışı
+                        {% trans 'Tarixçə və audit log baxışı' %}
                         {% else %}
-                        Bu bölmə üçün icazələr
+                        {% trans 'Bu bölmə üçün icazələr' %}
                         {% endif %}
                         </span>
                     </span>
@@ -200,16 +200,16 @@
             <div class="permission-module-body">
                 <div class="permission-module-toolbar">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-module-select-all>
-                        Hamısını seç
+                        {% trans 'Hamısını seç' %}
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-module-deselect-all>
-                        Seçimi sıfırla
+                        {% trans 'Seçimi sıfırla' %}
                     </button>
                     <button type="button" class="btn btn-sm btn-success" data-module-bulk-add disabled>
-                        Seçilənləri əlavə et
+                        {% trans 'Seçilənləri əlavə et' %}
                     </button>
                     <button type="button" class="btn btn-sm btn-danger" data-module-bulk-remove disabled>
-                        Seçilənləri sil
+                        {% trans 'Seçilənləri sil' %}
                     </button>
                 </div>
 
@@ -233,7 +233,7 @@
                          data-permission-active="{% if perm in selected_role.permissions or '*' in selected_role.permissions %}1{% else %}0{% endif %}"
                          data-permission-key="{{ perm|lower }}">
                         <div class="permission-row-main">
-                            <label class="permission-select-wrap" aria-label="Permission seç">
+                            <label class="permission-select-wrap" aria-label="{% trans 'Permission seç' %}">
                                 <input type="checkbox"
                                        class="permission-select-checkbox"
                                        value="{{ perm }}"
@@ -272,7 +272,7 @@
                                     {% if perm in selected_role.permissions or '*' in selected_role.permissions %}
                                     <i class="fas fa-minus-circle"></i> Sil
                                     {% else %}
-                                    <i class="fas fa-plus-circle"></i> Əlavə et
+                                    <i class="fas fa-plus-circle"></i> {% trans 'Əlavə et' %}
                                     {% endif %}
                                 </button>
                             </form>
@@ -292,14 +292,14 @@
                                 <input type="hidden" name="action" value="revoke_delegation">
                                 <button type="submit"
                                         class="btn btn-sm permission-action-btn permission-action-btn--remove"
-                                        title="Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al.">
-                                    <i class="fas fa-share-alt"></i> Delegasiyanı al
+                                        title="{% trans 'Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al.' %}">
+                                    <i class="fas fa-share-alt"></i> {% trans 'Delegasiyanı al' %}
                                 </button>
                                 {% else %}
                                 <input type="hidden" name="action" value="grant_delegation">
                                 <button type="submit"
                                         class="btn btn-sm permission-action-btn permission-action-btn--add"
-                                        title="Bu rola icazəni daha aşağı rollara paylamaq hüququ ver.">
+                                        title="{% trans 'Bu rola icazəni daha aşağı rollara paylamaq hüququ ver.' %}">
                                     <i class="fas fa-share-alt"></i> Delegasiya et
                                 </button>
                                 {% endif %}

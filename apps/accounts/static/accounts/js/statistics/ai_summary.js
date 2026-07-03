@@ -29,8 +29,8 @@
 
         if (aiMeta) {
           aiMeta.innerHTML =
-            '<span class="stats-ai-meta__pill">Cari filtrlər tətbiq olunur</span>' +
-            '<span class="stats-ai-meta__pill">AI cavabı hazırlanır</span>';
+            gettext('<span class="stats-ai-meta__pill">Cari filtrlər tətbiq olunur</span>') +
+            gettext('<span class="stats-ai-meta__pill">AI cavabı hazırlanır</span>');
         }
 
         var params = new URLSearchParams(window.location.search);
@@ -46,7 +46,7 @@
             if (json.ok && json.summary) {
               aiBody.innerHTML = '<div class="ai-summary-content">' + ns.utils.markdownToHtml(json.summary) + "</div>";
               if (aiMeta) {
-                var metaParts = ['<span class="stats-ai-meta__pill">Filtr üzrə AI xülasə</span>'];
+                var metaParts = [gettext('<span class="stats-ai-meta__pill">Filtr üzrə AI xülasə</span>')];
                 if (json.remaining !== undefined) {
                   metaParts.push(
                     '<span class="stats-ai-meta__pill">' +
@@ -55,7 +55,7 @@
                   );
                 }
                 if (json.cached) {
-                  metaParts.push('<span class="stats-ai-meta__pill stats-ai-meta__pill--success">Keşdən cavab</span>');
+                  metaParts.push(gettext('<span class="stats-ai-meta__pill stats-ai-meta__pill--success">Keşdən cavab</span>'));
                 }
                 aiMeta.innerHTML = metaParts.join("");
               }
@@ -65,7 +65,7 @@
                 (json.error || i18n.ai_not_received || "AI summary could not be received.") +
                 "</div>";
               if (aiMeta) {
-                aiMeta.innerHTML = '<span class="stats-ai-meta__pill stats-ai-meta__pill--warning">AI xülasə alınmadı</span>';
+                aiMeta.innerHTML = gettext('<span class="stats-ai-meta__pill stats-ai-meta__pill--warning">AI xülasə alınmadı</span>');
               }
             }
           })
@@ -75,7 +75,7 @@
               (i18n.ai_error || "An error occurred during the AI request.") +
               "</div>";
             if (aiMeta) {
-              aiMeta.innerHTML = '<span class="stats-ai-meta__pill stats-ai-meta__pill--danger">AI xətası</span>';
+              aiMeta.innerHTML = gettext('<span class="stats-ai-meta__pill stats-ai-meta__pill--danger">AI xətası</span>');
             }
           })
           .finally(function () {

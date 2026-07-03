@@ -36,10 +36,10 @@
 
         var minLen = parseInt(form.getAttribute("data-min") || "30", 10) || 30;
         var i18n = {
-            needOne: form.getAttribute("data-i18n-need-one") || "Ən azı bir sual seçin.",
-            chooseReason: form.getAttribute("data-i18n-choose-reason") || "Səbəb tipini seçin.",
-            tooShort: form.getAttribute("data-i18n-too-short") || "Daha {n} simvol yazın.",
-            selected: form.getAttribute("data-i18n-selected") || "{n} sual seçildi"
+            needOne: form.getAttribute("data-i18n-need-one") || gettext("Ən azı bir sual seçin."),
+            chooseReason: form.getAttribute("data-i18n-choose-reason") || gettext("Səbəb tipini seçin."),
+            tooShort: form.getAttribute("data-i18n-too-short") || gettext("Daha {n} simvol yazın."),
+            selected: form.getAttribute("data-i18n-selected") || gettext("{n} sual seçildi")
         };
 
         var cards = Array.prototype.slice.call(form.querySelectorAll("[data-appeal-card]"));

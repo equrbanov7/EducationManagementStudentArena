@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}Post İdarəetmə - EMSArena{% endblock %}
+{% block title %}{% trans 'Post İdarəetmə' %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
@@ -13,7 +13,7 @@
     <div class="profile-main profile-main--results">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-newspaper"></i> Post İdarəetmə (Superadmin)
+                <i class="fas fa-newspaper"></i> {% trans 'Post İdarəetmə (Superadmin)' %}
             </h1>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.common" %}
@@ -24,55 +24,55 @@
             <form method="get" class="post-mgmt-filters">
                 <div class="post-mgmt-filters__row">
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-q">Axtar</label>
-                        <input type="text" id="filter-q" name="q" value="{{ search_query }}" class="form-control" placeholder="Başlıq, müəllif, məzmun...">
+                        <label for="filter-q">{% trans 'Axtar' %}</label>
+                        <input type="text" id="filter-q" name="q" value="{{ search_query }}" class="form-control" placeholder="{% trans 'Başlıq, müəllif, məzmun...' %}">
                     </div>
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-org">Təşkilat</label>
+                        <label for="filter-org">{% trans 'Təşkilat' %}</label>
                         <select id="filter-org" name="org" class="form-control">
-                            <option value="">Hamısı</option>
+                            <option value="">{% trans 'Hamısı' %}</option>
                             {% for org in organizations %}
                                 <option value="{{ org.id }}" {% if org_filter == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-role">Rol</label>
+                        <label for="filter-role">{% trans 'Rol' %}</label>
                         <select id="filter-role" name="role" class="form-control">
-                            <option value="">Hamısı</option>
+                            <option value="">{% trans 'Hamısı' %}</option>
                             {% for value, label in role_choices %}
                                 <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-status">Status</label>
+                        <label for="filter-status">{% trans 'Status' %}</label>
                         <select id="filter-status" name="status" class="form-control">
-                            <option value="">Hamısı</option>
-                            <option value="published" {% if status_filter == "published" %}selected{% endif %}>Yayımlanmış</option>
-                            <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>Qaralama</option>
-                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Təsdiq gözləyir</option>
-                            <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>Düzəliş tələb olunur</option>
+                            <option value="">{% trans 'Hamısı' %}</option>
+                            <option value="published" {% if status_filter == "published" %}selected{% endif %}>{% trans 'Yayımlanmış' %}</option>
+                            <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>{% trans 'Qaralama' %}</option>
+                            <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>{% trans 'Təsdiq gözləyir' %}</option>
+                            <option value="needs_changes" {% if status_filter == "needs_changes" %}selected{% endif %}>{% trans 'Düzəliş tələb olunur' %}</option>
                         </select>
                     </div>
                 </div>
                 <div class="post-mgmt-filters__row">
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-date-from">Tarixdən</label>
+                        <label for="filter-date-from">{% trans 'Tarixdən' %}</label>
                         <input type="date" id="filter-date-from" name="date_from" value="{{ date_from }}" class="form-control">
                     </div>
                     <div class="post-mgmt-filters__field">
-                        <label for="filter-date-to">Tarixə qədər</label>
+                        <label for="filter-date-to">{% trans 'Tarixə qədər' %}</label>
                         <input type="date" id="filter-date-to" name="date_to" value="{{ date_to }}" class="form-control">
                     </div>
                     <div class="post-mgmt-filters__actions">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrə et</button>
-                        <a href="{% url 'accounts:superadmin_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Sıfırla</a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> {% trans 'Filtrə et' %}</button>
+                        <a href="{% url 'accounts:superadmin_post_management' %}" class="btn btn-secondary"><i class="fas fa-times"></i> {% trans 'Sıfırla' %}</a>
                     </div>
                 </div>
             </form>
 
-            <p class="post-mgmt-count">{{ total_count }} post tapıldı</p>
+            <p class="post-mgmt-count">{% blocktrans with count=total_count %}{{ count }} post tapıldı{% endblocktrans %}</p>
         </div>
 
         {% if posts %}
@@ -81,11 +81,11 @@
                 <table class="post-mgmt-table">
                     <thead>
                         <tr>
-                            <th>Başlıq</th>
-                            <th>Müəllif</th>
+                            <th>{% trans 'Başlıq' %}</th>
+                            <th>{% trans 'Müəllif' %}</th>
                             <th>Status</th>
                             <th>Tarix</th>
-                            <th>Əməliyyatlar</th>
+                            <th>{% trans 'Əməliyyatlar' %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,11 +97,11 @@
                             <td>{{ post.author.get_full_name|default:post.author.username }}</td>
                             <td>
                                 {% if post.is_published %}
-                                    <span class="post-status-badge status-published"><i class="fas fa-check-circle"></i> Yayımlanmış</span>
+                                    <span class="post-status-badge status-published"><i class="fas fa-check-circle"></i> {% trans 'Yayımlanmış' %}</span>
                                 {% elif post.requires_approval and post.approval_status == "pending" %}
-                                    <span class="post-status-badge status-awaiting"><i class="fas fa-hourglass-half"></i> Gözləyir</span>
+                                    <span class="post-status-badge status-awaiting"><i class="fas fa-hourglass-half"></i> {% trans 'Gözləyir' %}</span>
                                 {% elif post.requires_approval and post.approval_status == "needs_changes" %}
-                                    <span class="post-status-badge status-needs-changes"><i class="fas fa-pen"></i> Düzəliş</span>
+                                    <span class="post-status-badge status-needs-changes"><i class="fas fa-pen"></i> {% trans 'Düzəliş' %}</span>
                                 {% else %}
                                     <span class="post-status-badge status-draft"><i class="fas fa-pencil-alt"></i> Qaralama</span>
                                 {% endif %}
@@ -129,23 +129,23 @@
         {% else %}
         <div class="empty-state section-card">
             <i class="fas fa-newspaper"></i>
-            <p>Heç bir post tapılmadı.</p>
+            <p>{% trans 'Heç bir post tapılmadı.' %}</p>
         </div>
         {% endif %}
 
         <!-- Delete Modal -->
         <div id="saDeleteModal" class="modal-overlay">
             <div class="modal-content">
-                <h3><i class="fas fa-exclamation-triangle"></i> Post Silinməsi</h3>
-                <p><span id="saDeletePostTitle" class="post-mgmt-modal-title"></span> postu silinəcək.</p>
+                <h3><i class="fas fa-exclamation-triangle"></i> {% trans 'Post Silinməsi' %}</h3>
+                <p><span id="saDeletePostTitle" class="post-mgmt-modal-title"></span> {% trans 'postu silinəcək.' %}</p>
                 <form id="saDeleteForm" method="post">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="saDeleteReason">Silinmə səbəbi (məcburi)</label>
+                        <label for="saDeleteReason">{% trans 'Silinmə səbəbi (məcburi)' %}</label>
                         <textarea id="saDeleteReason" name="reason" class="form-control" rows="3" required></textarea>
                     </div>
                     <div class="modal-buttons">
-                        <button type="button" id="saDeleteCancel" class="modal-cancel-btn">Ləğv et</button>
+                        <button type="button" id="saDeleteCancel" class="modal-cancel-btn">{% trans 'Ləğv et' %}</button>
                         <button type="submit" class="modal-confirm-btn delete-btn">Sil</button>
                     </div>
                 </form>

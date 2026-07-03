@@ -1,3 +1,4 @@
+{% load i18n %}
 
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
 <style>
@@ -7,9 +8,9 @@
 <div class="profile-alert profile-alert--warning" role="alert" style="background:#fff8e1;border-left:4px solid #f59e0b;color:#92400e;display:flex;align-items:flex-start;gap:0.75rem;padding:0.9rem 1.1rem;margin-bottom:0.75rem;border-radius:0.375rem;">
     <i class="fas fa-hourglass-half c3-1"></i>
     <div>
-        <strong>Təşkilat təsdiqi gözlənilir.</strong>
-        Təşkilatınız hələ superadmin tərəfindən təsdiqlənməyib.
-        Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə bilərsiniz — əməliyyat funksiyaları aktiv deyil.
+        <strong>{% trans 'Təşkilat təsdiqi gözlənilir.' %}</strong>
+        {% trans 'Təşkilatınız hələ superadmin tərəfindən təsdiqlənməyib.' %}
+        {% trans 'Təsdiq alınana qədər sistemdən yalnız baxış rejimində istifadə edə bilərsiniz — əməliyyat funksiyaları aktiv deyil.' %}
     </div>
 </div>
 {% endif %}

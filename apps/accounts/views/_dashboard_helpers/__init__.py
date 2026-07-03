@@ -27,6 +27,7 @@ from .formatters import (
     _normalize_pending_review_type,
     _normalize_submission_date_order,
     _resolve_teacher_review_action,
+    _resolve_teacher_review_action_code,
     _standard_item_type_meta,
     _user_display_name,
 )
@@ -42,6 +43,7 @@ __all__ = [
     "_normalize_pending_review_type",
     "_normalize_submission_date_order",
     "_resolve_teacher_review_action",
+    "_resolve_teacher_review_action_code",
     "_standard_item_type_meta",
     "_user_display_name",
     "_collect_assigned_tasks",

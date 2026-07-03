@@ -69,7 +69,7 @@
         // gözləmədən saxlamaq olsun); yaratmada yalnız son addımda.
         var editing = form.getAttribute("data-editing") === "1";
 
-        var stepWord = i18n("step", "Addım");
+        var stepWord = i18n("step", gettext("Addım"));
 
         function setTitleFor(index) {
             var panel = panels[index];
@@ -125,7 +125,7 @@
             }
             var titleInput = form.querySelector('[name="title"]');
             if (titleInput && !titleInput.value.trim()) {
-                markInvalid(titleInput, i18n("titleRequired", "İmtahan adı mütləqdir."));
+                markInvalid(titleInput, i18n("titleRequired", gettext("İmtahan adı mütləqdir.")));
                 titleInput.focus();
                 return false;
             }
@@ -202,7 +202,7 @@
             var list = errBox.querySelector("[data-ew-errlist]");
             var head = errBox.querySelector("[data-ew-errcount]");
             if (head) {
-                head.textContent = i18n("errorsTitle", "Zəhmət olmasa aşağıdakı xətaları düzəldin:");
+                head.textContent = i18n("errorsTitle", gettext("Zəhmət olmasa aşağıdakı xətaları düzəldin:"));
             }
             if (list) {
                 list.innerHTML = "";

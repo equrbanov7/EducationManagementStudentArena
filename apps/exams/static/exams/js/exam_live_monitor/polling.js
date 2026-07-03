@@ -14,8 +14,8 @@
   function startPolling(ctx) {
     ctx.polling = true;
     u.$("pollStatus").classList.remove("is-paused");
-    u.$("pollStatusText").textContent = u.t(ctx, "poll_auto_refresh", "Avtomatik yenilənir");
-    u.$("togglePollBtn").innerHTML = '<i class="fas fa-pause"></i> ' + u.t(ctx, "btn_pause_poll", "Dayandır");
+    u.$("pollStatusText").textContent = u.t(ctx, "poll_auto_refresh", gettext("Avtomatik yenilənir"));
+    u.$("togglePollBtn").innerHTML = '<i class="fas fa-pause"></i> ' + u.t(ctx, "btn_pause_poll", gettext("Dayandır"));
     clearInterval(ctx.pollTimer);
     ctx.pollTimer = setInterval(ctx.fetchData, ctx.POLL_INTERVAL);
   }
@@ -23,7 +23,7 @@
   function stopPolling(ctx) {
     ctx.polling = false;
     u.$("pollStatus").classList.add("is-paused");
-    u.$("pollStatusText").textContent = u.t(ctx, "poll_paused", "Dayandırılıb");
+    u.$("pollStatusText").textContent = u.t(ctx, "poll_paused", gettext("Dayandırılıb"));
     u.$("togglePollBtn").innerHTML = '<i class="fas fa-play"></i> ' + u.t(ctx, "btn_continue_poll", "Davam et");
     clearInterval(ctx.pollTimer);
   }

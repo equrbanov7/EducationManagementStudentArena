@@ -35,23 +35,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Azərbaycanca defolt mətnlər (i18n override edə bilər)
   var TXT = {
-    cancel: i18n.cancel || "İmtina",
-    deleteTitle: i18n.confirmDeleteTitle || "Silməyi təsdiqlə",
-    deactivateTitle: i18n.confirmDeactivateTitle || "Deaktiv etməyi təsdiqlə",
-    activateTitle: i18n.confirmActivateTitle || "Aktiv etməyi təsdiqlə",
-    okDelete: i18n.okDelete || "Bəli, sil",
-    okDeactivate: i18n.okDeactivate || "Bəli, deaktiv et",
-    okActivate: i18n.okActivate || "Bəli, aktiv et",
-    bulkDelete: i18n.bulkDeleteBody || "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?",
-    bulkDeactivate: i18n.bulkDeactivateBody || "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?",
-    bulkActivate: i18n.bulkActivateBody || "Seçilmiş {count} sual aktiv ediləcək. Davam edək?",
-    singleDelete: i18n.deleteQuestionBody || "Bu sual silinəcək: {question}",
-    singleDeactivate: i18n.singleDeactivateBody || "Bu sual deaktiv ediləcək. Davam edək?",
-    singleActivate: i18n.singleActivateBody || "Bu sual aktiv ediləcək. Davam edək?",
-    deleteAllTitle: i18n.deleteAllTitle || "Sual bankını sil",
-    deleteAllBody: i18n.deleteAllBody || "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?",
-    languageDeleteTitle: i18n.languageDeleteTitle || "Dil üzrə sil",
-    languageDeleteBody: i18n.languageDeleteBody || "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?",
+    cancel: i18n.cancel || gettext("İmtina"),
+    deleteTitle: i18n.confirmDeleteTitle || gettext("Silməyi təsdiqlə"),
+    deactivateTitle: i18n.confirmDeactivateTitle || gettext("Deaktiv etməyi təsdiqlə"),
+    activateTitle: i18n.confirmActivateTitle || gettext("Aktiv etməyi təsdiqlə"),
+    okDelete: i18n.okDelete || gettext("Bəli, sil"),
+    okDeactivate: i18n.okDeactivate || gettext("Bəli, deaktiv et"),
+    okActivate: i18n.okActivate || gettext("Bəli, aktiv et"),
+    bulkDelete: i18n.bulkDeleteBody || gettext("Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"),
+    bulkDeactivate: i18n.bulkDeactivateBody || gettext("Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"),
+    bulkActivate: i18n.bulkActivateBody || gettext("Seçilmiş {count} sual aktiv ediləcək. Davam edək?"),
+    singleDelete: i18n.deleteQuestionBody || gettext("Bu sual silinəcək: {question}"),
+    singleDeactivate: i18n.singleDeactivateBody || gettext("Bu sual deaktiv ediləcək. Davam edək?"),
+    singleActivate: i18n.singleActivateBody || gettext("Bu sual aktiv ediləcək. Davam edək?"),
+    deleteAllTitle: i18n.deleteAllTitle || gettext("Sual bankını sil"),
+    deleteAllBody: i18n.deleteAllBody || gettext("Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"),
+    languageDeleteTitle: i18n.languageDeleteTitle || gettext("Dil üzrə sil"),
+    languageDeleteBody: i18n.languageDeleteBody || gettext("Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"),
   };
 
   var checkboxes = Array.prototype.slice.call(document.querySelectorAll(".question-checkbox"));
@@ -151,8 +151,8 @@ document.addEventListener("DOMContentLoaded", function () {
   consumePaginationScrollFlag();
 
   function selectedCountText(count) {
-    if (count === 0) return i18n.selectedCountZero || "0 seçilib";
-    return (i18n.selectedCount || "{count} seçilib").replace("{count}", String(count));
+    if (count === 0) return i18n.selectedCountZero || gettext("0 seçilib");
+    return (i18n.selectedCount || gettext("{count} seçilib")).replace("{count}", String(count));
   }
 
   function syncCardState(checkbox) {
@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       var count = selectedCount();
       if (count === 0) {
-        openConfirm({ variant: "info", title: TXT.deleteTitle, body: i18n.selectAtLeastOne || "Ən azı bir sual seçin.", okLabel: "OK", onConfirm: null });
+        openConfirm({ variant: "info", title: TXT.deleteTitle, body: i18n.selectAtLeastOne || gettext("Ən azı bir sual seçin."), okLabel: "OK", onConfirm: null });
         return;
       }
 
@@ -259,15 +259,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   function getQuestionModalLoadingMarkup() {
-    return '<div class="create-exam-modal-loading">' + (i18n.loadingForm || "Yüklənir...") + "</div>";
+    return '<div class="create-exam-modal-loading">' + (i18n.loadingForm || gettext("Yüklənir...")) + "</div>";
   }
   function getQuestionModalErrorMarkup() {
-    return '<div class="create-exam-modal-error">' + (i18n.submitError || "Yenidən cəhd edin.") + "</div>";
+    return '<div class="create-exam-modal-error">' + (i18n.submitError || gettext("Yenidən cəhd edin.")) + "</div>";
   }
   function applyQuestionModalMode(mode) {
     var isEdit = mode === "edit";
     if (questionModalTitle) {
-      questionModalTitle.textContent = isEdit ? (i18n.questionEditTitle || "Sualı redaktə et") : (i18n.questionCreateTitle || "Sual əlavə et");
+      questionModalTitle.textContent = isEdit ? (i18n.questionEditTitle || gettext("Sualı redaktə et")) : (i18n.questionCreateTitle || gettext("Sual əlavə et"));
     }
     if (questionModalHeader) {
       questionModalHeader.classList.remove(

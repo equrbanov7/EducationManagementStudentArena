@@ -12,7 +12,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h1 class="mb-2">My Questions</h1>
-      <p class="text-muted mb-0">Yaratdığınız suallar burada görünür.</p>
+      <p class="text-muted mb-0">{% trans 'Yaratdığınız suallar burada görünür.' %}</p>
     </div>
     <a href="{% url 'create_question' %}" class="btn btn-primary">Create Question</a>
   </div>
@@ -29,7 +29,7 @@
     </div>
   {% else %}
     <div class="alert alert-light border">
-      Hələ sual yaratmamısınız.
+      {% trans 'Hələ sual yaratmamısınız.' %}
     </div>
   {% endif %}
 </div>

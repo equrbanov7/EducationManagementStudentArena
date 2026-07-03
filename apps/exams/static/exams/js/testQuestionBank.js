@@ -368,13 +368,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const f = input.files[0];
       const ext = (f.name.split(".").pop() || "").toLowerCase();
       if (FORBIDDEN_EXT.includes(ext)) {
-        alert("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin.");
+        alert(gettext("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin."));
         input.value = "";
         clearFileState();
         return false;
       }
       if (f.size > MAX_FILE_BYTES) {
-        alert("Fayl ölçüsü 45MB-dan böyükdür.");
+        alert(gettext("Fayl ölçüsü 45MB-dan böyükdür."));
         input.value = "";
         clearFileState();
         return false;
@@ -414,8 +414,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (r) { return r.json(); })
         .then(function (json) {
           if (json.status === "success") return json;
-          if (json.status === "failed") throw new Error(json.error || "Fayldan mətn çıxarıla bilmədi.");
-          if (attempt >= 240) throw new Error("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.");
+          if (json.status === "failed") throw new Error(json.error || gettext("Fayldan mətn çıxarıla bilmədi."));
+          if (attempt >= 240) throw new Error(gettext("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."));
           return new Promise(function (res) { setTimeout(res, 2500); }).then(function () {
             return pollExtractJob(statusUrl, attempt + 1);
           });
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (submitter) {
         if (!submitter.dataset.defaultLabel) submitter.dataset.defaultLabel = submitter.innerHTML;
         submitter.disabled = true;
-        submitter.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Mətn çıxarılır...';
+        submitter.innerHTML = gettext('<i class="fas fa-circle-notch fa-spin"></i> Mətn çıxarılır...');
       }
 
       return fetch(extractUrl, {
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
           return r.text().then(function (body) {
             let json = {};
             try { json = body ? JSON.parse(body) : {}; } catch (e) { json = {}; }
-            if (!r.ok || !json.ok) throw new Error(json.error || "Fayldan mətn çıxarıla bilmədi.");
+            if (!r.ok || !json.ok) throw new Error(json.error || gettext("Fayldan mətn çıxarıla bilmədi."));
             return json;
           });
         })
@@ -519,7 +519,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 submitter.innerHTML = submitter.dataset.defaultLabel;
                 submitter.disabled = false;
               }
-              window.alert(error.message || "Fayldan mətn çıxarıla bilmədi.");
+              window.alert(error.message || gettext("Fayldan mətn çıxarıla bilmədi."));
             });
           return;
         }
@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", function () {
             submitter.dataset.defaultLabel = submitter.innerHTML;
           }
           submitter.disabled = true;
-          submitter.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Yüklənir...';
+          submitter.innerHTML = gettext('<i class="fas fa-circle-notch fa-spin"></i> Yüklənir...');
         }
         form.querySelectorAll('button[type="submit"]').forEach(function (button) {
           if (button !== submitter) button.disabled = true;
@@ -547,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const fab = document.createElement("button");
       fab.type = "button";
       fab.className = "scroll-top-fab";
-      fab.setAttribute("aria-label", "Yuxarı qayıt");
+      fab.setAttribute("aria-label", gettext("Yuxarı qayıt"));
       fab.innerHTML = '<i class="fas fa-arrow-up"></i>';
       document.body.appendChild(fab);
 

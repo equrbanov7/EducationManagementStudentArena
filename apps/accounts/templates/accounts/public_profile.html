@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{{ display_name }} | Profil{% endblock %}
 
@@ -26,11 +26,11 @@
                 </div>
 
                 <div class="public-profile-hero__copy">
-                    <span class="public-profile-eyebrow">Açıq profil</span>
+                    <span class="public-profile-eyebrow">{% trans 'Açıq profil' %}</span>
                     <h1 class="public-profile-title">{{ display_name }}</h1>
                     <p class="public-profile-subtitle">
-                        Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür.
-                        Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir.
+                        {% trans 'Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür.' %}
+                        {% trans 'Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir.' %}
                     </p>
 
                     <div class="public-profile-meta">
@@ -54,7 +54,7 @@
 
             <div class="public-profile-hero__stats">
                 <article class="public-stat-card">
-                    <span class="public-stat-card__label">Açıq postlar</span>
+                    <span class="public-stat-card__label">{% trans 'Açıq postlar' %}</span>
                     <strong class="public-stat-card__value">{{ published_posts_count }}</strong>
                 </article>
                 <article class="public-stat-card">
@@ -75,23 +75,23 @@
                         type="search"
                         name="q"
                         value="{{ search_query }}"
-                        placeholder="Məqalə axtar..."
-                        aria-label="Məqalə axtar"
+                        placeholder="{% trans 'Məqalə axtar...' %}"
+                        aria-label="{% trans 'Məqalə axtar' %}"
                     >
                 </label>
-                <button type="submit" class="public-search-form__button">Axtar</button>
+                <button type="submit" class="public-search-form__button">{% trans 'Axtar' %}</button>
             </form>
 
             {% if search_query or selected_category %}
                 <div class="public-active-filters">
                     {% if search_query %}
-                        <span class="public-chip">Sorğu: {{ search_query }}</span>
+                        <span class="public-chip">{% blocktrans with query=search_query %}Sorğu: {{ query }}{% endblocktrans %}</span>
                     {% endif %}
                     {% if selected_category %}
-                        <span class="public-chip">Kateqoriya: {{ selected_category }}</span>
+                        <span class="public-chip">{% blocktrans with category=selected_category %}Kateqoriya: {{ category }}{% endblocktrans %}</span>
                     {% endif %}
                     <a href="{% url 'accounts:public_profile' profile_user.username %}" class="public-reset-link">
-                        Filtrləri sıfırla
+                        {% trans 'Filtrləri sıfırla' %}
                     </a>
                 </div>
             {% endif %}
@@ -102,8 +102,8 @@
                 <section class="public-section-card">
                     <div class="public-section-card__header">
                         <div>
-                            <h2>Paylaşımlar</h2>
-                            <p>Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir.</p>
+                            <h2>{% trans 'Paylaşımlar' %}</h2>
+                            <p>{% trans 'Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir.' %}</p>
                         </div>
                     </div>
 
@@ -149,7 +149,7 @@
                                                 {{ profile_user.username }}
                                             </span>
                                             <a href="{% url 'article_detail' post.slug %}" class="public-post-card__link">
-                                                Oxumağa davam et
+                                                {% trans 'Oxumağa davam et' %}
                                             </a>
                                         </div>
                                     </div>
@@ -163,12 +163,12 @@
                             <div class="public-empty-state__icon">
                                 <i class="far fa-newspaper" aria-hidden="true"></i>
                             </div>
-                            <h3>Göstəriləcək açıq paylaşım tapılmadı</h3>
+                            <h3>{% trans 'Göstəriləcək açıq paylaşım tapılmadı' %}</h3>
                             <p>
                                 {% if search_query or selected_category %}
-                                    Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın.
+                                    {% trans 'Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın.' %}
                                 {% else %}
-                                    Bu istifadəçi hələ açıq post paylaşmayıb.
+                                    {% trans 'Bu istifadəçi hələ açıq post paylaşmayıb.' %}
                                 {% endif %}
                             </p>
                         </div>
@@ -179,15 +179,15 @@
             <aside class="public-profile-sidebar">
                 <section class="public-section-card public-section-card--sidebar">
                     <div class="public-section-card__header">
-                        <h2>Açıq məlumatlar</h2>
+                        <h2>{% trans 'Açıq məlumatlar' %}</h2>
                     </div>
                     <dl class="public-profile-facts">
                         <div class="public-profile-facts__row">
-                            <dt>İstifadəçi adı</dt>
+                            <dt>{% trans 'İstifadəçi adı' %}</dt>
                             <dd>@{{ profile_user.username }}</dd>
                         </div>
                         <div class="public-profile-facts__row">
-                            <dt>Qoşulma tarixi</dt>
+                            <dt>{% trans 'Qoşulma tarixi' %}</dt>
                             <dd>{{ profile_user.date_joined|date:"d M Y" }}</dd>
                         </div>
                         {% if profile_location %}
@@ -202,7 +202,7 @@
                 {% if profile_bio %}
                     <section class="public-section-card public-section-card--sidebar">
                         <div class="public-section-card__header">
-                            <h2>Haqqında</h2>
+                            <h2>{% trans 'Haqqında' %}</h2>
                         </div>
                         <div class="public-profile-bio">{{ profile_bio|linebreaksbr }}</div>
                     </section>

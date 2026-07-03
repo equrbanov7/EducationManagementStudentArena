@@ -18,9 +18,9 @@
     // i18n strings are read from data-* on the error element when present,
     // with safe Azerbaijani fallbacks.
     var MSG = {
-        type: "Yalnız PDF formatı qəbul olunur.",
-        size: "Fayl ölçüsü 25 MB-dan çox ola bilməz.",
-        required: "Zəhmət olmasa sualları PDF formatında yükləyin."
+        type: gettext("Yalnız PDF formatı qəbul olunur."),
+        size: gettext("Fayl ölçüsü 25 MB-dan çox ola bilməz."),
+        required: gettext("Zəhmət olmasa sualları PDF formatında yükləyin.")
     };
 
     function formatSize(bytes) {

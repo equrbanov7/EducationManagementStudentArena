@@ -2,7 +2,7 @@
 <div class="section-card pending-review-results-card">
     <div class="section-title">
         <i class="fas fa-table"></i>
-        Dəyərləndirilmiş nəticələr ({{ evaluated_review_total_count|default:0 }})
+        {% trans 'Dəyərləndirilmiş nəticələr (' %}{{ evaluated_review_total_count|default:0 }})
     </div>
 
     <div class="pr-filter-card">
@@ -38,7 +38,7 @@
                     <select name="evaluated_group"
                             class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                             data-bootstrap-select>
-                        <option value="">Bütün qruplar</option>
+                        <option value="">{% trans 'Bütün qruplar' %}</option>
                         {% for group_name in evaluated_review_available_groups %}
                             <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
                                 {{ group_name }}
@@ -51,8 +51,8 @@
                     <select name="evaluated_submitted_order"
                             class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                             data-bootstrap-select>
-                        <option value="newest" {% if evaluated_review_submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
-                        <option value="oldest" {% if evaluated_review_submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
+                        <option value="newest" {% if evaluated_review_submitted_order == 'newest' %}selected{% endif %}>{% trans 'Ən son göndərilən' %}</option>
+                        <option value="oldest" {% if evaluated_review_submitted_order == 'oldest' %}selected{% endif %}>{% trans 'Ən tez göndərilən' %}</option>
                     </select>
                 </div>
             </div>
@@ -71,14 +71,14 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Tələbə</th>
-                        <th>Tapşırıq</th>
-                        <th>Növ</th>
+                        <th>{% trans 'Tələbə' %}</th>
+                        <th>{% trans 'Tapşırıq' %}</th>
+                        <th>{% trans 'Növ' %}</th>
                         <th>Qrup</th>
-                        <th>Nəticə</th>
-                        <th>Müəllim</th>
-                        <th>Qiymətləndirilib</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans 'Nəticə' %}</th>
+                        <th>{% trans 'Müəllim' %}</th>
+                        <th>{% trans 'Qiymətləndirilib' %}</th>
+                        <th>{% trans 'Əməliyyat' %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +134,7 @@
     {% else %}
         <div class="empty-state">
             <i class="fas fa-chart-line"></i>
-            <p>Dəyərləndirilmiş nəticə tapılmadı.</p>
+            <p>{% trans 'Dəyərləndirilmiş nəticə tapılmadı.' %}</p>
         </div>
     {% endif %}
 </div>

@@ -71,7 +71,7 @@
         <h2>
             {% trans "Müştəri mesajı" %}
             {% if message.reply_delivery_status == "sent" %}
-                <span class="reply-status-pill reply-status-pill--sent">✓ Artıq cavablandı: {{ message.reply_sent_at|date:"d.m.Y H:i" }}</span>
+                <span class="reply-status-pill reply-status-pill--sent">{% blocktrans with sent_at=message.reply_sent_at|date:"d.m.Y H:i" %}✓ Artıq cavablandı: {{ sent_at }}{% endblocktrans %}</span>
             {% elif message.reply_delivery_status == "pending" %}
                 <span class="reply-status-pill reply-status-pill--pending">{% trans "Göndərilir" %}</span>
             {% elif message.reply_delivery_status == "failed" %}

@@ -162,7 +162,7 @@
                     
                     <div class="mb-4">
                         <label class="form-label fw-semibold text-secondary">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
-                        <textarea name="text_answer" class="form-control form-control-custom" rows="6" required placeholder="Cavabınızı buraya yazın...">{{ current_submission.text_answer }}</textarea>
+                        <textarea name="text_answer" class="form-control form-control-custom" rows="6" required placeholder="{% trans 'Cavabınızı buraya yazın...' %}">{{ current_submission.text_answer }}</textarea>
                     </div>
 
                     <div class="mb-4">
@@ -204,7 +204,7 @@
                         <div class="score-circle">
                             {{ last_sub.score }}/{{ last_sub.max_score }}
                         </div>
-                        <p class="text-muted fw-medium mb-0">Əla nəticə!</p>
+                        <p class="text-muted fw-medium mb-0">{% trans 'Əla nəticə!' %}</p>
                     {% else %}
                         <div class="score-circle as-score-circle--empty">
                             <i class="bi bi-hourglass-split"></i>
@@ -243,7 +243,7 @@
                         {% if submission.status == 'graded' %}
                             <div class="mb-2">
                                 <span class="badge as-badge-green">
-                                    Nəticə: {{ submission.score }}/{{ submission.max_score }}
+                                    {% blocktrans with score=submission.score max_score=submission.max_score %}Nəticə: {{ score }}/{{ max_score }}{% endblocktrans %}
                                 </span>
                             </div>
                         {% endif %}
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // UX improvement: Button loading state
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Göndərilir...';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> {% trans "Göndərilir..." %}';
             submitBtn.disabled = true;
 
             const formData = new FormData(this);
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                alert("Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın.");
+                alert("{% trans 'Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın.' %}");
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
             });

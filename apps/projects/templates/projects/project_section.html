@@ -159,7 +159,7 @@
                                 {% if item.user_attempts > 0 %}
                                     <a href="{% url 'projects:my_submissions' p.id %}?return_to={{ profile_return_url|urlencode }}"
                                        class="btn btn-sm btn-outline-info">
-                                        <i class="fa-solid fa-list-check"></i> Cavablarım ({{ item.user_attempts }})
+                                        <i class="fa-solid fa-list-check"></i> {% trans 'Cavablarım (' %}{{ item.user_attempts }})
                                     </a>
                                 {% endif %}
 

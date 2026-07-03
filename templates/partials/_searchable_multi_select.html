@@ -23,11 +23,11 @@
     </div>
 
     <div id="{{ container_id }}_list" class="custom-list-container">
-        <div class="loading-text">Yüklənir...</div>
+        <div class="loading-text">{% trans 'Yüklənir...' %}</div>
     </div>
 
     <div class="selection-counter">
-        Seçilib: <span id="{{ container_id }}_count">0</span>
+        {% trans 'Seçilib:' %} <span id="{{ container_id }}_count">0</span>
     </div>
 
     <div style="display: none;">
@@ -48,6 +48,7 @@
         counterId: "{{ container_id }}_count"
     };
     const studentGroupLabel = "{{ student_group_label|escapejs }}";
+    const noDataText = "{% trans 'Məlumat tapılmadı.' %}";
 
     function initSearchableMultiSelect(cfg) {
         const hiddenSelect = document.getElementById(cfg.selectId);
@@ -62,7 +63,7 @@
             const options = Array.from(hiddenSelect.options);
 
             if (options.length === 0) {
-                container.innerHTML = '<div class="loading-text">Məlumat tapılmadı.</div>';
+                container.innerHTML = `<div class="loading-text">${noDataText}</div>`;
                 return;
             }
 

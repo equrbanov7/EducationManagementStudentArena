@@ -49,7 +49,7 @@
                 <select name="pr_group"
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                         data-bootstrap-select>
-                    <option value="">Bütün qruplar</option>
+                    <option value="">{% trans 'Bütün qruplar' %}</option>
                     {% for group_name in pending_review_available_groups %}
                         <option value="{{ group_name }}" {% if pending_review_filter_group == group_name %}selected{% endif %}>
                             {{ group_name }}
@@ -62,8 +62,8 @@
                 <select name="submitted_order"
                         class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                         data-bootstrap-select>
-                    <option value="oldest" {% if pending_review_submitted_order == 'oldest' %}selected{% endif %}>Ən tez göndərilən</option>
-                    <option value="newest" {% if pending_review_submitted_order == 'newest' %}selected{% endif %}>Ən son göndərilən</option>
+                    <option value="oldest" {% if pending_review_submitted_order == 'oldest' %}selected{% endif %}>{% trans 'Ən tez göndərilən' %}</option>
+                    <option value="newest" {% if pending_review_submitted_order == 'newest' %}selected{% endif %}>{% trans 'Ən son göndərilən' %}</option>
                 </select>
             </div>
 
@@ -95,22 +95,25 @@
                         <span class="pr-badge pr-badge-type">{{ item.type_label }}</span>
                         {% if item.supervision_removed %}
                             <span class="pr-badge pr-badge-proctor c3-1"
-                                  title="Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb">
-                                <i class="fas fa-shield-alt me-1"></i>Nəzarətçi atıb
+                                  title="{% trans 'Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb' %}">
+                                <i class="fas fa-shield-alt me-1"></i>{% trans 'Nəzarətçi atıb' %}
                             </span>
                         {% endif %}
                         {% if item.is_recheck and item.review_window_seconds_left > 0 %}
-                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-redo me-1"></i>Yenidən yoxla</span>
+                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-redo me-1"></i>{% trans 'Yenidən yoxla' %}</span>
                         {% elif not item.can_view_student_identity and item.review_window_seconds_left > 0 %}
-                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-user-secret me-1"></i>Anonim</span>
+                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-user-secret me-1"></i>{% trans 'Anonim' %}</span>
                         {% endif %}
                     </h4>
                     
                     <div class="pr-item-meta">
-                        <strong><i class="fas fa-user-graduate me-1 text-primary"></i>{{ item.student_display|default:"Anonim tələbə" }}</strong>
+                        <strong>
+                            <i class="fas fa-user-graduate me-1 text-primary"></i>
+                            {% if item.student_display %}{{ item.student_display }}{% else %}{% trans 'Anonim tələbə' %}{% endif %}
+                        </strong>
                         {% if item.creator_display %}
                             <span class="pr-item-meta-divider">•</span>
-                            <span><i class="fas fa-chalkboard-teacher me-1 text-primary"></i>Müəllim: {{ item.creator_display }}</span>
+                            <span><i class="fas fa-chalkboard-teacher me-1 text-primary"></i>{% trans 'Müəllim:' %} {{ item.creator_display }}</span>
                         {% endif %}
                         <span class="pr-item-meta-divider">•</span>
                         <span>{{ item.course_title|default:"-" }}</span>
@@ -122,7 +125,7 @@
                         
                         {% if item.submitted_at %}
                             <span class="pr-item-meta-divider">•</span>
-                            <span><i class="far fa-paper-plane me-1"></i>Göndərilib: {{ item.submitted_at|date:"d.m.Y H:i" }}</span>
+                            <span><i class="far fa-paper-plane me-1"></i>{% trans 'Göndərilib:' %} {{ item.submitted_at|date:"d.m.Y H:i" }}</span>
                         {% endif %}
                         
                         <span class="pr-item-meta-divider">•</span>
@@ -146,7 +149,7 @@
                             <i class="fas fa-hourglass-half"></i>
                             <span data-review-queue-countdown
                                   data-seconds="{{ item.review_window_seconds_left }}">
-                                Yenidən yoxlama vaxtı hesablanır...
+                                {% trans 'Yenidən yoxlama vaxtı hesablanır...' %}
                             </span>
                         </div>
                     {% endif %}
@@ -154,12 +157,12 @@
 
                 <div class="pr-item-action">
                     <a href="{{ item.action_url }}" class="pr-btn-review">
-                        {% if item.action_label == 'Yenidən yoxla' %}
-                            <i class="fas fa-search"></i> Yenidən yoxla
-                        {% elif item.action_label == 'Bax' %}
-                            <i class="fas fa-eye"></i> Bax
+                        {% if item.action_code == 'recheck' %}
+                            <i class="fas fa-search"></i> {% trans 'Yenidən yoxla' %}
+                        {% elif item.action_code == 'view' %}
+                            <i class="fas fa-eye"></i> {% trans 'Bax' %}
                         {% else %}
-                            <i class="fas fa-check-double"></i> Yoxla
+                            <i class="fas fa-check-double"></i> {% trans 'Yoxla' %}
                         {% endif %}
                     </a>
                 </div>
@@ -175,7 +178,7 @@
 {% else %}
     <div class="pr-empty-state">
         <i class="fas fa-clipboard-check"></i>
-        <h4 class="mb-2 text-dark">Gözləyən yoxlama yoxdur</h4>
+        <h4 class="mb-2 text-dark">{% trans 'Gözləyən yoxlama yoxdur' %}</h4>
         <p class="mb-0">{% trans "empty_not_found" context "profile.pending_review" %}</p>
     </div>
 {% endif %}
@@ -235,17 +238,17 @@
 
             function render() {
                 if (secondsLeft <= 0) {
-                    node.textContent = "Vaxt bitdi.";
+                    node.textContent = "{% trans 'Vaxt bitdi.' %}";
                     shouldReload = true;
                     return;
                 }
                 var minutes = Math.floor(secondsLeft / 60);
                 var seconds = secondsLeft % 60;
                 if (node.textContent.indexOf("Anonim") !== -1) {
-                    node.textContent = "Anonimliyin bitməsinə qalan vaxt: " + minutes + " dəq " + seconds + " san.";
+                    node.textContent = "{% trans 'Anonimliyin bitməsinə qalan vaxt:' %} " + minutes + " {% trans 'dəq' %} " + seconds + " {% trans 'san.' %}";
                     return;
                 }
-                node.textContent = "Yenidən yoxlama üçün qalan vaxt: " + minutes + " dəq " + seconds + " san.";
+                node.textContent = "{% trans 'Yenidən yoxlama üçün qalan vaxt:' %} " + minutes + " {% trans 'dəq' %} " + seconds + " {% trans 'san.' %}";
             }
 
             render();

@@ -15,7 +15,7 @@
         data-history-back
     >
         <i class="fas fa-arrow-left" aria-hidden="true"></i>
-        Geri qayıt
+        {% trans 'Geri qayıt' %}
     </a>
 
     <article class="article-container">
@@ -34,7 +34,7 @@
                 {% if post.author %}
                     <span><a href="{% url 'accounts:public_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
                 {% endif %}
-                <span><i class="far fa-eye"></i> {{ post.view_count|compact_number }} baxış</span>
+                <span><i class="far fa-eye"></i> {% blocktrans with count=post.view_count|compact_number %}{{ count }} baxış{% endblocktrans %}</span>
                 {% if post.average_rating %}
                     <span>• <i class="fas fa-star"></i> {{ post.average_rating|floatformat:1 }} / 5</span>
                 {% endif %}

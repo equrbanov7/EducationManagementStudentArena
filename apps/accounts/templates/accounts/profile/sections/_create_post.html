@@ -27,7 +27,7 @@
             {% csrf_token %}
             {% if post_creation_requires_approval %}
                 <div class="approval-notice">
-                    Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.
+                    {% trans 'Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.' %}
                 </div>
             {% endif %}
 
@@ -69,16 +69,16 @@
             <div class="form-group">
                 <label for="createImage">{% trans "label_upload_image" context "profile.posts" %}</label>
                 <input type="file" id="createImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
-                <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
+                <small class="image-format-help">{% trans 'Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).' %}</small>
             </div>
 
             {% if post_creation_requires_approval %}
                 <div class="form-group">
                     <div class="approval-lock-row">
                         <i class="fas fa-lock"></i>
-                        <span>Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək.</span>
+                        <span>{% trans 'Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək.' %}</span>
                     </div>
-                    <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
+                    <small class="approval-help-text">{% trans '“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.' %}</small>
                 </div>
             {% else %}
                 <div class="form-group form-check publish-toggle">

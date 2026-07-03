@@ -81,7 +81,7 @@ function initRegisterWizardPrivacyAndSubmit() {
             if (privacyClientError) {
                 privacyClientError.textContent = tr(
                     "privacy_policy_required",
-                    "Davam etmək üçün məxfilik siyasətini qəbul edin."
+                    gettext("Davam etmək üçün məxfilik siyasətini qəbul edin.")
                 );
                 privacyClientError.hidden = false;
             }

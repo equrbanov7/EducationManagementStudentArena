@@ -1,10 +1,11 @@
+{% load i18n %}
 {% if 'pending-post-approvals' in allowed_sections %}
 <section class="profile-section-panel profile-section--pending-post-approvals {% if active_section == 'pending-post-approvals' %}is-active{% endif %}"
          data-profile-section-panel="pending-post-approvals">
     <div class="section-card pending-post-approvals-card">
         <div class="section-title">
             <i class="fas fa-user-check"></i>
-            Postların idarəetməsi ({{ pending_post_approval_total_count|default:pending_post_approval_count }})
+            {% trans 'Postların idarəetməsi (' %}{{ pending_post_approval_total_count|default:pending_post_approval_count }})
         </div>
 
         <div class="pr-filter-card">
@@ -16,7 +17,7 @@
                         type="text"
                         name="approval_search"
                         value="{{ pending_post_approval_search_query }}"
-                        placeholder="Post, tələbə və məzmun üzrə axtar"
+                        placeholder="{% trans 'Post, tələbə və məzmun üzrə axtar' %}"
                         class="pr-form-control{% if pending_post_approval_available_organizations %} pr-filter-search-full{% endif %}"
                     >
 
@@ -24,10 +25,10 @@
                         <select name="approval_status"
                                 class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                                 data-bootstrap-select>
-                            <option value="pending" {% if pending_post_approval_filter_status == 'pending' %}selected{% endif %}>Təsdiq gözləyən</option>
-                            <option value="needs_changes" {% if pending_post_approval_filter_status == 'needs_changes' %}selected{% endif %}>Düzəliş tələb olunan</option>
-                            <option value="approved" {% if pending_post_approval_filter_status == 'approved' %}selected{% endif %}>Təsdiqlənənlər</option>
-                            <option value="all" {% if pending_post_approval_filter_status == 'all' %}selected{% endif %}>Hamısı</option>
+                            <option value="pending" {% if pending_post_approval_filter_status == 'pending' %}selected{% endif %}>{% trans 'Təsdiq gözləyən' %}</option>
+                            <option value="needs_changes" {% if pending_post_approval_filter_status == 'needs_changes' %}selected{% endif %}>{% trans 'Düzəliş tələb olunan' %}</option>
+                            <option value="approved" {% if pending_post_approval_filter_status == 'approved' %}selected{% endif %}>{% trans 'Təsdiqlənənlər' %}</option>
+                            <option value="all" {% if pending_post_approval_filter_status == 'all' %}selected{% endif %}>{% trans 'Hamısı' %}</option>
                         </select>
                     </div>
 
@@ -36,7 +37,7 @@
                         <select name="approval_organization"
                                 class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                                 data-bootstrap-select>
-                            <option value="">Bütün təşkilatlar</option>
+                            <option value="">{% trans 'Bütün təşkilatlar' %}</option>
                             {% for organization in pending_post_approval_available_organizations %}
                                 <option value="{{ organization.id }}" {% if pending_post_approval_filter_organization == organization.id|stringformat:'s' %}selected{% endif %}>
                                     {{ organization.name }}
@@ -50,7 +51,7 @@
                         <select name="approval_group"
                                 class="form-select bootstrap-single-select__native js-bootstrap-single-select"
                                 data-bootstrap-select>
-                            <option value="">Bütün qruplar</option>
+                            <option value="">{% trans 'Bütün qruplar' %}</option>
                             {% for group in pending_post_approval_available_groups %}
                                 <option value="{{ group.id }}" {% if pending_post_approval_filter_group == group.id|stringformat:'s' %}selected{% endif %}>
                                     {{ group.name }}
@@ -160,28 +161,28 @@
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     <input type="hidden" name="action" class="js-form-action" value="">
                                     <label class="pending-post-feedback-label" for="feedback_{{ item.post.id }}">
-                                        Feedback (müsbət və ya düzəliş üçün)
+                                        {% trans 'Feedback (müsbət və ya düzəliş üçün)' %}
                                     </label>
                                     <textarea id="feedback_{{ item.post.id }}"
                                               name="feedback"
                                               rows="3"
                                               class="form-control"
-                                              placeholder="Rəyini yaz..."></textarea>
+                                              placeholder="{% trans 'Rəyini yaz...' %}"></textarea>
 
                                     <div class="pending-post-buttons">
                                         <button type="button"
                                                 class="btn btn-outline-warning btn-sm js-post-action-btn"
                                                 data-action="needs_changes"
-                                                data-confirm-title="Düzəliş istənilsin?"
-                                                data-confirm-msg="Bu posta düzəliş tələbi göndəriləcək.">
-                                            <i class="fas fa-pen"></i> Düzəliş istə
+                                                data-confirm-title="{% trans 'Düzəliş istənilsin?' %}"
+                                                data-confirm-msg="{% trans 'Bu posta düzəliş tələbi göndəriləcək.' %}">
+                                            <i class="fas fa-pen"></i> {% trans 'Düzəliş istə' %}
                                         </button>
                                         <button type="button"
                                                 class="btn btn-review-view btn-sm js-post-action-btn"
                                                 data-action="approve"
-                                                data-confirm-title="Post təsdiqlənsin?"
-                                                data-confirm-msg="Post təsdiqlənib paylaşılacaq.">
-                                            <i class="fas fa-check"></i> Təsdiqlə və paylaş
+                                                data-confirm-title="{% trans 'Post təsdiqlənsin?' %}"
+                                                data-confirm-msg="{% trans 'Post təsdiqlənib paylaşılacaq.' %}">
+                                            <i class="fas fa-check"></i> {% trans 'Təsdiqlə və paylaş' %}
                                         </button>
                                     </div>
                                 </form>
@@ -197,13 +198,13 @@
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     <input type="hidden" name="action" value="delete">
                                     <label class="pending-post-feedback-label" for="del_reason_{{ item.post.id }}">
-                                        Silmə səbəbi <span class="text-danger">*</span>
+                                        {% trans 'Silmə səbəbi' %} <span class="text-danger">*</span>
                                     </label>
                                     <textarea id="del_reason_{{ item.post.id }}"
                                               name="feedback"
                                               rows="2"
                                               class="form-control pending-post-moderate-reason"
-                                              placeholder="Niyə silirsiniz? Tələbəyə izah edin..."
+                                              placeholder="{% trans 'Niyə silirsiniz? Tələbəyə izah edin...' %}"
                                               aria-required="true"
                                               required></textarea>
                                     <div class="pending-post-buttons">
@@ -211,9 +212,9 @@
                                         <button type="button"
                                                 class="btn btn-outline-danger btn-sm js-post-action-btn"
                                                 data-action="delete"
-                                                data-confirm-title="Post silinsin?"
-                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
-                                            <i class="fas fa-trash"></i> Sil
+                                                data-confirm-title="{% trans 'Post silinsin?' %}"
+                                                data-confirm-msg="{% trans 'Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.' %}">
+                                            <i class="fas fa-trash"></i> {% trans 'Sil' %}
                                         </button>
                                     </div>
                                 </form>
@@ -223,7 +224,7 @@
                                 {# ===== Approved + published: deactivate / delete ===== #}
                                 <div class="pending-post-approved-note">
                                     <i class="fas fa-circle-check"></i>
-                                    Bu post artıq təsdiqlənib və paylaşılıb.
+                                    {% trans 'Bu post artıq təsdiqlənib və paylaşılıb.' %}
                                 </div>
                                 <form method="post"
                                       action="{% url 'teacher_moderate_post' item.post.id %}"
@@ -233,13 +234,13 @@
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     <input type="hidden" name="action" class="js-form-action" value="">
                                     <label class="pending-post-feedback-label" for="moderate_reason_{{ item.post.id }}">
-                                        Səbəb <span class="text-danger">*</span> (məcburi — tələbəyə bildiriş göndəriləcək)
+                                        {% trans 'Səbəb' %} <span class="text-danger">*</span> {% trans '(məcburi — tələbəyə bildiriş göndəriləcək)' %}
                                     </label>
                                     <textarea id="moderate_reason_{{ item.post.id }}"
                                               name="feedback"
                                               rows="3"
                                               class="form-control pending-post-moderate-reason"
-                                              placeholder="Niyə deaktiv edirsiz / silirsiniz? Tələbəyə izah edin..."
+                                              placeholder="{% trans 'Niyə deaktiv edirsiz / silirsiniz? Tələbəyə izah edin...' %}"
                                               aria-required="true"
                                               required></textarea>
                                     <div class="pending-post-buttons">
@@ -248,14 +249,14 @@
                                                 class="btn btn-outline-warning btn-sm js-post-action-btn"
                                                 data-action="deactivate"
                                                 data-confirm-title="Post deaktiv edilsin?"
-                                                data-confirm-msg="Post gizlədiləcək. Tələbə görə bilməyəcək, lakin silinməyəcək.">
+                                                data-confirm-msg="{% trans 'Post gizlədiləcək. Tələbə görə bilməyəcək, lakin silinməyəcək.' %}">
                                             <i class="fas fa-eye-slash"></i> Deaktiv et
                                         </button>
                                         <button type="button"
                                                 class="btn btn-outline-danger btn-sm js-post-action-btn"
                                                 data-action="delete"
                                                 data-confirm-title="Post silinsin?"
-                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
+                                                data-confirm-msg="{% trans 'Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.' %}">
                                             <i class="fas fa-trash"></i> Sil
                                         </button>
                                     </div>
@@ -265,7 +266,7 @@
                                 {# ===== Approved + deactivated: reactivate / delete ===== #}
                                 <div class="pending-post-deactivated-note">
                                     <i class="fas fa-eye-slash"></i>
-                                    Bu post deaktivdir — gizlədilib, tələbə görə bilmir.
+                                    {% trans 'Bu post deaktivdir — gizlədilib, tələbə görə bilmir.' %}
                                 </div>
 
                                 {# Reactivate: no mandatory feedback #}
@@ -282,7 +283,7 @@
                                                 class="btn btn-outline-success btn-sm js-post-action-btn"
                                                 data-action="reactivate"
                                                 data-confirm-title="Post aktiv edilsin?"
-                                                data-confirm-msg="Post yenidən paylaşılacaq. Tələbə görə biləcək.">
+                                                data-confirm-msg="{% trans 'Post yenidən paylaşılacaq. Tələbə görə biləcək.' %}">
                                             <i class="fas fa-eye"></i> Aktiv et
                                         </button>
                                     </div>
@@ -297,13 +298,13 @@
                                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                     <input type="hidden" name="action" value="delete">
                                     <label class="pending-post-feedback-label" for="deact_del_reason_{{ item.post.id }}">
-                                        Silmə səbəbi <span class="text-danger">*</span>
+                                        {% trans 'Silmə səbəbi' %} <span class="text-danger">*</span>
                                     </label>
                                     <textarea id="deact_del_reason_{{ item.post.id }}"
                                               name="feedback"
                                               rows="2"
                                               class="form-control pending-post-moderate-reason"
-                                              placeholder="Niyə silirsiniz? Tələbəyə izah edin..."
+                                              placeholder="{% trans 'Niyə silirsiniz? Tələbəyə izah edin...' %}"
                                               aria-required="true"
                                               required></textarea>
                                     <div class="pending-post-buttons">
@@ -311,7 +312,7 @@
                                                 class="btn btn-outline-danger btn-sm js-post-action-btn"
                                                 data-action="delete"
                                                 data-confirm-title="Post silinsin?"
-                                                data-confirm-msg="Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.">
+                                                data-confirm-msg="{% trans 'Bu post silinəcək. Bu əməliyyat geri qaytarıla bilməz.' %}">
                                             <i class="fas fa-trash"></i> Sil
                                         </button>
                                     </div>
@@ -330,7 +331,7 @@
         <div class="section-card">
             <div class="empty-state">
                 <i class="fas fa-check-circle"></i>
-                <p>Filtrə uyğun post tapılmadı.</p>
+                <p>{% trans 'Filtrə uyğun post tapılmadı.' %}</p>
             </div>
         </div>
     {% endif %}
@@ -341,11 +342,11 @@
     {% endcomment %}
     <div id="postActionConfirmModal" class="modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="postActionConfirmTitle">
         <div class="modal-content">
-            <h3 id="postActionConfirmTitle" class="modal-title">Əminsiniz?</h3>
+            <h3 id="postActionConfirmTitle" class="modal-title">{% trans 'Əminsiniz?' %}</h3>
             <p id="postActionConfirmMsg" class="modal-body-text"></p>
             <div class="modal-buttons">
-                <button id="postActionConfirmCancel" class="modal-cancel-btn" type="button">Ləğv et</button>
-                <button id="postActionConfirmOk" class="modal-confirm-btn" type="button">Təsdiqlə</button>
+                <button id="postActionConfirmCancel" class="modal-cancel-btn" type="button">{% trans 'Ləğv et' %}</button>
+                <button id="postActionConfirmOk" class="modal-confirm-btn" type="button">{% trans 'Təsdiqlə' %}</button>
             </div>
         </div>
     </div>
@@ -454,7 +455,7 @@
             if (!form) return;
 
             var action = btn.dataset.action || "";
-            var confirmTitle = btn.dataset.confirmTitle || "Əminsiniz?";
+            var confirmTitle = btn.dataset.confirmTitle || "{% trans 'Əminsiniz?' %}";
             var confirmMsg = btn.dataset.confirmMsg || "";
             var postTitle = (form.dataset.postTitle || "").trim();
             var fullMsg = postTitle ? '"' + postTitle + '"\n' + confirmMsg : confirmMsg;
@@ -470,7 +471,7 @@
                         var errDiv = document.createElement("div");
                         errDiv.className = "invalid-feedback moderate-reason-error";
                         errDiv.style.display = "block";
-                        errDiv.textContent = "Zəhmət olmasa səbəbi yazın.";
+                        errDiv.textContent = "{% trans 'Zəhmət olmasa səbəbi yazın.' %}";
                         reasonField.parentNode.insertBefore(errDiv, reasonField.nextSibling);
                     }
                     return;

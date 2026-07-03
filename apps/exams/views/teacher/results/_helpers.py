@@ -209,7 +209,8 @@ def _parse_filter_date(raw_value):
 def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_seconds, identity_window_seconds):
     if attempt.exam.exam_type == "test":
         return {
-            "label": "Bax",
+            "code": "view",
+            "label": pgettext("exams.teacher.results.action", "Bax"),
             "url_name": "exams:teacher_view_attempt",
             "countdown_seconds": 0,
             "countdown_mode": "",
@@ -218,20 +219,23 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_secon
     if attempt.checked_by_teacher:
         if review_window_seconds:
             return {
-                "label": "Yenidən yoxla",
+                "code": "recheck",
+                "label": pgettext("exams.teacher.results.action", "Yenidən yoxla"),
                 "url_name": "exams:teacher_check_attempt",
                 "countdown_seconds": review_window_seconds,
                 "countdown_mode": "recheck",
             }
         return {
-            "label": "Bax",
+            "code": "view",
+            "label": pgettext("exams.teacher.results.action", "Bax"),
             "url_name": "exams:teacher_view_attempt",
             "countdown_seconds": 0,
             "countdown_mode": "",
         }
 
     return {
-        "label": "Yoxla",
+        "code": "review",
+        "label": pgettext("exams.teacher.results.action", "Yoxla"),
         "url_name": "exams:teacher_check_attempt",
         "countdown_seconds": identity_window_seconds if not can_view_name else 0,
         "countdown_mode": "identity" if not can_view_name and identity_window_seconds else "",

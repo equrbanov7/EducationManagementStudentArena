@@ -43,25 +43,25 @@
 
     {% if is_recheck_window %}
     <div class="review-window-banner">
-        <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+        <strong>{% trans 'Yenidən yoxlama pəncərəsi aktivdir.' %}</strong>
         <span>
-            Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+            {% trans 'Tələbə adı bu müddətdə gizlidir. Qalan vaxt:' %}
             <span data-review-countdown="{{ review_window_seconds_left }}">--:--:--</span>
         </span>
     </div>
     {% elif is_pregrade_anonymous_window %}
     <div class="review-window-banner">
-        <strong>Anonim yoxlama pəncərəsi aktivdir.</strong>
+        <strong>{% trans 'Anonim yoxlama pəncərəsi aktivdir.' %}</strong>
         <span>
-            Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+            {% trans 'Tələbə adı bu müddətdə gizlidir. Qalan vaxt:' %}
             <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
         </span>
     </div>
     {% elif is_locked %}
     <div class="review-window-banner review-window-banner--locked">
-        <strong>Yoxlama bağlanıb.</strong>
+        <strong>{% trans 'Yoxlama bağlanıb.' %}</strong>
         <span>
-            Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal və rəy dəyişdirilə bilməz.
+            {% trans 'Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal və rəy dəyişdirilə bilməz.' %}
         </span>
     </div>
     {% endif %}
@@ -144,7 +144,7 @@
             <div class="card shadow-sm sticky-top c3-3">
                 <div class="card-header {% if is_locked %}bg-secondary{% else %}bg-success{% endif %} text-white">
                     <i class="fas {% if is_locked %}fa-eye{% else %}fa-star{% endif %} me-2"></i>
-                    <strong>{% if is_locked %}Baxış{% else %}{% trans "heading_grading" context "labs.template.grade_submission" %}{% endif %}</strong>
+                    <strong>{% if is_locked %}{% trans 'Baxış' %}{% else %}{% trans "heading_grading" context "labs.template.grade_submission" %}{% endif %}</strong>
                 </div>
                 <div class="card-body">
                     <form method="POST" id="gradeForm">
@@ -180,7 +180,7 @@
                             </button>
                             {% endif %}
                             <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary">
-                                {% if is_locked %}Bağla{% else %}{% trans "action_cancel" context "labs.template.grade_submission" %}{% endif %}
+                                {% if is_locked %}{% trans 'Bağla' %}{% else %}{% trans "action_cancel" context "labs.template.grade_submission" %}{% endif %}
                             </a>
                         </div>
                     </form>

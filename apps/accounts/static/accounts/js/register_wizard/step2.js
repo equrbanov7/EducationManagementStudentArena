@@ -95,38 +95,38 @@ function updateCreateFieldsCopy(orgType) {
     if (orgType === "university") {
         organizationNameLabel.textContent = tr(
             "label_university_manual",
-            "Universitet adı (Siyahıda yoxdur / Digər)"
+            gettext("Universitet adı (Siyahıda yoxdur / Digər)")
         );
-        organizationNameInput.placeholder = tr("placeholder_university_manual", "Universitet adını daxil edin...");
+        organizationNameInput.placeholder = tr("placeholder_university_manual", gettext("Universitet adını daxil edin..."));
         orgIdentifierLabel.textContent = tr("label_university_identifier", "Universitet kodu / identifikatoru");
-        orgIdentifierHelp.textContent = tr("help_identifier_required", "Universitet üçün bu sahə məcburidir.");
+        orgIdentifierHelp.textContent = tr("help_identifier_required", gettext("Universitet üçün bu sahə məcburidir."));
     } else if (orgType === "school") {
-        organizationNameLabel.textContent = tr("label_school_manual", "Məktəb adı (Siyahıda yoxdur / Digər)");
+        organizationNameLabel.textContent = tr("label_school_manual", gettext("Məktəb adı (Siyahıda yoxdur / Digər)"));
         organizationNameInput.placeholder = tr(
             "placeholder_school_manual",
-            "Məktəb siyahıda yoxdursa adını daxil edin..."
+            gettext("Məktəb siyahıda yoxdursa adını daxil edin...")
         );
-        orgIdentifierLabel.textContent = tr("label_school_identifier", "Məktəb kodu / identifikatoru");
-        orgIdentifierHelp.textContent = tr("help_identifier_required", "Məktəb üçün bu sahə məcburidir.");
+        orgIdentifierLabel.textContent = tr("label_school_identifier", gettext("Məktəb kodu / identifikatoru"));
+        orgIdentifierHelp.textContent = tr("help_identifier_required", gettext("Məktəb üçün bu sahə məcburidir."));
     } else if (orgType === "course_center") {
         organizationNameLabel.textContent = tr(
             "label_course_center_manual",
-            "Kurs mərkəzi adı (Siyahıda yoxdur / Digər)"
+            gettext("Kurs mərkəzi adı (Siyahıda yoxdur / Digər)")
         );
         organizationNameInput.placeholder = tr(
             "placeholder_course_center_manual",
-            "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
+            gettext("Kurs mərkəzi siyahıda yoxdursa adını daxil edin...")
         );
-        orgIdentifierLabel.textContent = tr("label_course_center_identifier", "Kurs mərkəzi kodu / identifikatoru");
-        orgIdentifierHelp.textContent = tr("help_identifier_required", "Kurs mərkəzi üçün bu sahə məcburidir.");
+        orgIdentifierLabel.textContent = tr("label_course_center_identifier", gettext("Kurs mərkəzi kodu / identifikatoru"));
+        orgIdentifierHelp.textContent = tr("help_identifier_required", gettext("Kurs mərkəzi üçün bu sahə məcburidir."));
     } else {
         organizationNameLabel.textContent = tr(
             "label_institution_manual_default",
-            "Müəssisə adı (Siyahıda yoxdur / Digər)"
+            gettext("Müəssisə adı (Siyahıda yoxdur / Digər)")
         );
-        organizationNameInput.placeholder = tr("placeholder_search_default", "Müəssisə axtar...");
-        orgIdentifierLabel.textContent = tr("label_identifier_default", "Rəsmi identifikator / kod");
-        orgIdentifierHelp.textContent = tr("help_identifier_required", "Bu sahə məcburidir.");
+        organizationNameInput.placeholder = tr("placeholder_search_default", gettext("Müəssisə axtar..."));
+        orgIdentifierLabel.textContent = tr("label_identifier_default", gettext("Rəsmi identifikator / kod"));
+        orgIdentifierHelp.textContent = tr("help_identifier_required", gettext("Bu sahə məcburidir."));
     }
 
     if (licenseIdentifierLabel) {
@@ -143,7 +143,7 @@ function updateCreateFieldsCopy(orgType) {
     if (licenseIdentifierHelp) {
         licenseIdentifierHelp.textContent = tr(
             "help_license_identifier_required",
-            "Lisenziya identifikatoru məcburidir."
+            gettext("Lisenziya identifikatoru məcburidir.")
         );
     }
 }
@@ -224,21 +224,21 @@ function updateAutoRoleInfoText(isIndividual, isStudentJoinMode, isTeacherJoinMo
     if (isIndividual) {
         autoRoleInfoText.textContent = tr(
             "auto_role_info_owner",
-            "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
+            gettext("Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq.")
         );
     } else if (isStudentJoinMode) {
         autoRoleInfoText.textContent =
-            tr("auto_role_info_student_join", "Email təsdiqindən sonra təşkilata tələbə kimi qoşulacaqsınız.");
+            tr("auto_role_info_student_join", gettext("Email təsdiqindən sonra təşkilata tələbə kimi qoşulacaqsınız."));
     } else if (isTeacherJoinMode) {
         autoRoleInfoText.textContent =
-            tr("auto_role_info_teacher_join", "Email təsdiqindən sonra təşkilata müəllim kimi qoşulacaqsınız (təsdiq gözlənilir).");
+            tr("auto_role_info_teacher_join", gettext("Email təsdiqindən sonra təşkilata müəllim kimi qoşulacaqsınız (təsdiq gözlənilir)."));
     } else if (isStaffJoinMode) {
         autoRoleInfoText.textContent =
-            tr("auto_role_info_staff_join", "Email təsdiqindən sonra təşkilata işçi kimi qoşulacaqsınız (təsdiq gözlənilir).");
+            tr("auto_role_info_staff_join", gettext("Email təsdiqindən sonra təşkilata işçi kimi qoşulacaqsınız (təsdiq gözlənilir)."));
     } else {
         autoRoleInfoText.textContent = tr(
             "auto_role_info_org",
-            "Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq."
+            gettext("Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq.")
         );
     }
 }

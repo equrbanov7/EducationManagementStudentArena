@@ -25,7 +25,7 @@ function hideOrganizationSelectedChip() {
 function showOrganizationSearchError(message) {
     if (!organizationSearchError) return;
     organizationSearchError.textContent =
-        message || tr("choose_organization_from_list", "Zəhmət olmasa siyahıdan təşkilat seçin.");
+        message || tr("choose_organization_from_list", gettext("Zəhmət olmasa siyahıdan təşkilat seçin."));
     organizationSearchError.hidden = false;
     if (organizationSearchInput) organizationSearchInput.setAttribute("aria-invalid", "true");
 }
@@ -161,7 +161,7 @@ function renderOrganizationSearchList(searchText) {
     if (!options.length) {
         var empty = document.createElement("div");
         empty.className = "register-search-empty";
-        empty.textContent = tr("no_results", "Nəticə tapılmadı");
+        empty.textContent = tr("no_results", gettext("Nəticə tapılmadı"));
         organizationSearchList.appendChild(empty);
         organizationSearchList.hidden = false;
         return;
@@ -218,33 +218,33 @@ function updateStudentJoinCopy(orgType) {
     var selectedCountry = (countrySelect ? countrySelect.value : "").toUpperCase();
 
     if (orgType === "university") {
-        if (step3Title) step3Title.textContent = tr("choose_university", "Universitet seçin");
+        if (step3Title) step3Title.textContent = tr("choose_university", gettext("Universitet seçin"));
         organizationSearchLabel.textContent = tr("label_search_university", "Universitet axtar");
         organizationSearchInput.placeholder = tr("placeholder_search_university", "Universitet axtar...");
         studentJoinHint.textContent =
             selectedCountry === "AZ"
-                ? tr("hint_university_az", "Azərbaycandakı universitetləri siyahıdan seçə bilərsiniz.")
-                : tr("hint_university_global", "Ölkənizə uyğun universitet siyahısından seçim edin.");
+                ? tr("hint_university_az", gettext("Azərbaycandakı universitetləri siyahıdan seçə bilərsiniz."))
+                : tr("hint_university_global", gettext("Ölkənizə uyğun universitet siyahısından seçim edin."));
     } else if (orgType === "school") {
-        if (step3Title) step3Title.textContent = tr("choose_school", "Məktəb seçin");
-        organizationSearchLabel.textContent = tr("label_search_school", "Məktəb axtar (ad və ya nömrə)");
+        if (step3Title) step3Title.textContent = tr("choose_school", gettext("Məktəb seçin"));
+        organizationSearchLabel.textContent = tr("label_search_school", gettext("Məktəb axtar (ad və ya nömrə)"));
         organizationSearchInput.placeholder = tr(
             "placeholder_search_school",
-            "Məktəb adı və ya nömrəsi axtar..."
+            gettext("Məktəb adı və ya nömrəsi axtar...")
         );
-        studentJoinHint.textContent = tr("hint_school", "Məktəbinizi siyahıdan seçin və ya əl ilə daxil edin.");
+        studentJoinHint.textContent = tr("hint_school", gettext("Məktəbinizi siyahıdan seçin və ya əl ilə daxil edin."));
     } else if (orgType === "course_center") {
-        if (step3Title) step3Title.textContent = tr("choose_course_center", "Kurs mərkəzi seçin");
-        organizationSearchLabel.textContent = tr("label_search_course_center", "Kurs mərkəzi axtar");
-        organizationSearchInput.placeholder = tr("placeholder_search_course_center", "Kurs mərkəzi axtar...");
+        if (step3Title) step3Title.textContent = tr("choose_course_center", gettext("Kurs mərkəzi seçin"));
+        organizationSearchLabel.textContent = tr("label_search_course_center", gettext("Kurs mərkəzi axtar"));
+        organizationSearchInput.placeholder = tr("placeholder_search_course_center", gettext("Kurs mərkəzi axtar..."));
         studentJoinHint.textContent = tr(
             "hint_course_center",
-            "Kurs mərkəzini siyahıdan seçin və ya əl ilə daxil edin."
+            gettext("Kurs mərkəzini siyahıdan seçin və ya əl ilə daxil edin.")
         );
     } else {
-        if (step3Title) step3Title.textContent = tr("choose_institution", "Təşkilat seçin");
-        organizationSearchLabel.textContent = tr("label_search_default", "Müəssisə axtar");
-        organizationSearchInput.placeholder = tr("placeholder_search_default", "Müəssisə axtar...");
+        if (step3Title) step3Title.textContent = tr("choose_institution", gettext("Təşkilat seçin"));
+        organizationSearchLabel.textContent = tr("label_search_default", gettext("Müəssisə axtar"));
+        organizationSearchInput.placeholder = tr("placeholder_search_default", gettext("Müəssisə axtar..."));
         studentJoinHint.textContent = "";
     }
 }

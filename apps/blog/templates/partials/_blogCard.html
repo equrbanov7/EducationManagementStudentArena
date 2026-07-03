@@ -30,7 +30,7 @@
                     <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}
                 </span>
                 <span class="card-views">
-                    <i class="far fa-eye"></i> {{ post.view_count|compact_number }} baxış
+                    <i class="far fa-eye"></i> {% blocktrans with count=post.view_count|compact_number %}{{ count }} baxış{% endblocktrans %}
                 </span>
             </div>
             <a href="{% url 'article_detail' post.slug %}" class="read-more">{% trans "read_more" context "blog.partial.blog_card" %} →</a>

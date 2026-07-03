@@ -36,11 +36,11 @@
           ns.modal.hideModal(ctx.deleteModal);
           location.reload();
         } else {
-          alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
+          alert(gettext("Xəta baş verdi: ") + (data.message || gettext("Naməlum xəta")));
         }
       } catch (error) {
         console.error("Error:", error);
-        alert("Əlaqə xətası baş verdi");
+        alert(gettext("Əlaqə xətası baş verdi"));
       }
     });
   }

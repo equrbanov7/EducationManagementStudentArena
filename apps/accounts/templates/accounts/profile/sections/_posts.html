@@ -16,9 +16,9 @@
                             <div class="post-controls">
                                 <span class="post-status-badge {% if post.requires_approval and post.approval_status == 'pending' %}status-awaiting{% elif post.requires_approval and post.approval_status == 'needs_changes' %}status-needs-changes{% elif post.is_published %}status-published{% else %}status-draft{% endif %}">
                                     {% if post.requires_approval and post.approval_status == 'pending' %}
-                                        <i class="fas fa-hourglass-half"></i> Müəllim təsdiqi gözləyir
+                                        <i class="fas fa-hourglass-half"></i> {% trans 'Müəllim təsdiqi gözləyir' %}
                                     {% elif post.requires_approval and post.approval_status == 'needs_changes' %}
-                                        <i class="fas fa-pen"></i> Düzəliş tələb olunur
+                                        <i class="fas fa-pen"></i> {% trans 'Düzəliş tələb olunur' %}
                                     {% elif post.is_published %}
                                         <i class="fas fa-check-circle"></i> {% trans "published" context "profile.posts" %}
                                     {% else %}
@@ -67,9 +67,9 @@
                                             {% if post.approval_logs.all %}
                                                 {{ post.approval_logs.all.0.feedback|default:""|truncatechars:70 }}
                                             {% elif post.approval_status == 'pending' %}
-                                                Müəllim baxışı gözlənilir.
+                                                {% trans 'Müəllim baxışı gözlənilir.' %}
                                             {% else %}
-                                                Hələ feedback yoxdur.
+                                                {% trans 'Hələ feedback yoxdur.' %}
                                             {% endif %}
                                         </span>
                                         <span class="post-feedback-chevron" aria-hidden="true">
@@ -82,8 +82,8 @@
                                                 <div class="post-feedback-entry">
                                                     <div class="post-feedback-entry-header">
                                                         <span class="post-feedback-entry-action {% if log.action == 'approved' %}feedback-approved{% elif log.action == 'needs_changes' %}feedback-needs-changes{% else %}feedback-info{% endif %}">
-                                                            {% if log.action == 'approved' %}<i class="fas fa-check-circle"></i> Təsdiqləndi
-                                                            {% elif log.action == 'needs_changes' %}<i class="fas fa-pen"></i> Düzəliş tələb olundu
+                                                            {% if log.action == 'approved' %}<i class="fas fa-check-circle"></i> {% trans 'Təsdiqləndi' %}
+                                                            {% elif log.action == 'needs_changes' %}<i class="fas fa-pen"></i> {% trans 'Düzəliş tələb olundu' %}
                                                             {% else %}<i class="fas fa-comment"></i> Feedback
                                                             {% endif %}
                                                         </span>
@@ -95,11 +95,11 @@
                                                 </div>
                                             {% endfor %}
                                         {% elif post.approval_status == 'needs_changes' %}
-                                            Müəllim "düzəliş tələb olunur" seçib, amma əlavə mətn yazmayıb.
+                                            {% trans 'Müəllim "düzəliş tələb olunur" seçib, amma əlavə mətn yazmayıb.' %}
                                         {% elif post.approval_status == 'pending' %}
-                                            Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.
+                                            {% trans 'Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.' %}
                                         {% else %}
-                                            Bu post üçün hələ feedback paylaşılmayıb.
+                                            {% trans 'Bu post üçün hələ feedback paylaşılmayıb.' %}
                                         {% endif %}
                                     </div>
                                 </details>

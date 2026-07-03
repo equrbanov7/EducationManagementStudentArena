@@ -76,10 +76,10 @@
                 0: "cu",
                 1: "ci",
                 2: "ci",
-                3: "cü",
-                4: "cü",
+                3: gettext("cü"),
+                4: gettext("cü"),
                 5: "ci",
-                6: "cı",
+                6: gettext("cı"),
                 7: "ci",
                 8: "ci",
                 9: "cu"
@@ -111,7 +111,7 @@
             }
             singleAnswerWarning.textContent =
                 root.dataset.singleAnswerWarningMessage ||
-                "Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır.";
+                gettext("Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır.");
             setHidden(singleAnswerWarning, false);
         }
 

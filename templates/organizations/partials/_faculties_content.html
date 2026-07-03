@@ -2,19 +2,19 @@
 {% with s=org_faculties_section %}
 <div class="org-management org-management--faculties">
     {% if not s.organization %}
-        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+        <div class="org-management__empty">{% trans 'Aktiv təşkilat tapılmadı.' %}</div>
     {% else %}
     <div class="org-management__header">
         <div>
-            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
-            <h1>Fakültələr</h1>
+            <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
+            <h1>{% trans 'Fakültələr' %}</h1>
             <p class="org-management__subtitle">
-                Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur.
+                {% trans 'Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur.' %}
             </p>
         </div>
-        <div class="org-management__metrics" aria-label="Fakültə statistikası">
-            <span><strong>{{ s.faculty_total_count }}</strong> fakültə</span>
-            <span><strong>{{ s.kafedra_total_count }}</strong> kafedra</span>
+        <div class="org-management__metrics" aria-label="{% trans 'Fakültə statistikası' %}">
+            <span><strong>{{ s.faculty_total_count }}</strong> {% trans 'fakültə' %}</span>
+            <span>{% blocktrans with count=s.kafedra_total_count %}<strong>{{ count }}</strong> kafedra{% endblocktrans %}</span>
         </div>
     </div>
 
@@ -34,32 +34,32 @@
               {% if s.embedded_in_profile %}data-profile-ajax-form="1" data-section="org-faculties"{% endif %}>
             {% if s.embedded_in_profile %}<input type="hidden" name="section" value="org-faculties">{% endif %}
             <label>
-                <span>Axtarış</span>
+                <span>{% trans 'Axtarış' %}</span>
                 <input type="search"
                        name="faculty_search"
                        maxlength="120"
-                       placeholder="Ad və ya kod üzrə axtar"
+                       placeholder="{% trans 'Ad və ya kod üzrə axtar' %}"
                        value="{{ s.search_query }}">
             </label>
             <label>
-                <span>Sıralama</span>
+                <span>{% trans 'Sıralama' %}</span>
                 <div class="bootstrap-single-select">
                     <select class="form-select bootstrap-single-select__native" name="faculty_sort" data-bootstrap-select>
                         <option value="name" {% if s.sort_value == "name" %}selected{% endif %}>Ad (A–Z)</option>
                         <option value="-name" {% if s.sort_value == "-name" %}selected{% endif %}>Ad (Z–A)</option>
-                        <option value="newest" {% if s.sort_value == "newest" %}selected{% endif %}>Ən yeni</option>
-                        <option value="oldest" {% if s.sort_value == "oldest" %}selected{% endif %}>Ən köhnə</option>
+                        <option value="newest" {% if s.sort_value == "newest" %}selected{% endif %}>{% trans 'Ən yeni' %}</option>
+                        <option value="oldest" {% if s.sort_value == "oldest" %}selected{% endif %}>{% trans 'Ən köhnə' %}</option>
                     </select>
                 </div>
             </label>
-            <button type="submit" class="org-management__submit">Tətbiq et</button>
+            <button type="submit" class="org-management__submit">{% trans 'Tətbiq et' %}</button>
         </form>
         {% if s.can_create %}
         <button type="button"
                 class="org-management__submit org-management__create-btn"
                 data-bs-toggle="modal"
                 data-bs-target="#facultyCreateModal">
-            <i class="fas fa-plus"></i> Yeni fakültə
+            <i class="fas fa-plus"></i> {% trans 'Yeni fakültə' %}
         </button>
         {% endif %}
     </div>
@@ -69,12 +69,12 @@
             <table class="org-management__table">
                 <thead>
                     <tr>
-                        <th>Fakültə</th>
-                        <th>Kod</th>
-                        <th>Kafedra</th>
-                        <th>Rəhbər (dekan)</th>
-                        <th>Yaradılıb</th>
-                        {% if s.can_edit or s.can_delete or s.can_assign_head %}<th class="org-management__actions-col">Əməliyyatlar</th>{% endif %}
+                        <th>{% trans 'Fakültə' %}</th>
+                        <th>{% trans 'Kod' %}</th>
+                        <th>{% trans 'Kafedra' %}</th>
+                        <th>{% trans 'Rəhbər (dekan)' %}</th>
+                        <th>{% trans 'Yaradılıb' %}</th>
+                        {% if s.can_edit or s.can_delete or s.can_assign_head %}<th class="org-management__actions-col">{% trans 'Əməliyyatlar' %}</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -95,7 +95,7 @@
                                 {% if faculty.head %}
                                     {{ faculty.head.get_full_name|default:faculty.head.username }}
                                 {% else %}
-                                    <span class="org-management__muted-cell">Təyin edilməyib</span>
+                                    <span class="org-management__muted-cell">{% trans 'Təyin edilməyib' %}</span>
                                 {% endif %}
                             </td>
                             <td>{{ faculty.created_at|date:"SHORT_DATE_FORMAT" }}</td>
@@ -105,7 +105,7 @@
                                     {% if s.can_assign_head %}
                                     <button type="button"
                                             class="org-management__icon-btn js-org-unit-head"
-                                            title="Rəhbər təyin et"
+                                            title="{% trans 'Rəhbər təyin et' %}"
                                             data-unit-id="{{ faculty.id }}"
                                             data-unit-name="{{ faculty.name }}"
                                             data-head-id="{{ faculty.head_id|default:'' }}"
@@ -116,7 +116,7 @@
                                     {% if s.can_edit %}
                                     <button type="button"
                                             class="org-management__icon-btn js-org-unit-edit"
-                                            title="Redaktə et"
+                                            title="{% trans 'Redaktə et' %}"
                                             data-unit-id="{{ faculty.id }}"
                                             data-unit-name="{{ faculty.name }}"
                                             data-unit-code="{{ faculty.code }}"
@@ -127,7 +127,7 @@
                                     {% if s.can_delete %}
                                     <button type="button"
                                             class="org-management__icon-btn org-management__icon-btn--danger js-org-unit-delete"
-                                            title="Sil"
+                                            title="{% trans 'Sil' %}"
                                             data-unit-id="{{ faculty.id }}"
                                             data-unit-name="{{ faculty.name }}"
                                             data-modal-target="#facultyDeleteModal">
@@ -144,13 +144,13 @@
             {% include "partials/_pagination.html" with page_obj=s.faculties_page_obj page_param="faculty_page" extra_query=s.pagination_query %}
         {% elif s.search_query %}
             <div class="org-management__empty">
-                <h3>Nəticə tapılmadı</h3>
-                <p>“{{ s.search_query }}” axtarışına uyğun fakültə yoxdur.</p>
+                <h3>{% trans 'Nəticə tapılmadı' %}</h3>
+                <p>{% blocktrans with query=s.search_query %}“{{ query }}” axtarışına uyğun fakültə yoxdur.{% endblocktrans %}</p>
             </div>
         {% else %}
             <div class="org-management__empty">
-                <h3>Hələ fakültə yaradılmayıb</h3>
-                {% if s.can_create %}<p>“Yeni fakültə” düyməsi ilə ilk fakültəni yaradın.</p>{% endif %}
+                <h3>{% trans 'Hələ fakültə yaradılmayıb' %}</h3>
+                {% if s.can_create %}<p>{% trans '“Yeni fakültə” düyməsi ilə ilk fakültəni yaradın.' %}</p>{% endif %}
             </div>
         {% endif %}
     </div>
@@ -168,25 +168,25 @@
                     {% csrf_token %}
                     <input type="hidden" name="action" value="create">
                     <div class="modal-header">
-                        <h5 class="modal-title">Yeni fakültə yarat</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                        <h5 class="modal-title">{% trans 'Yeni fakültə yarat' %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
                     </div>
                     <div class="modal-body org-management__form org-management__form--modal">
                         <label>
-                            <span>Fakültə adı <em>*</em></span>
+                            <span>{% trans 'Fakültə adı' %} <em>*</em></span>
                             <input type="text" name="name" maxlength="255" required
-                                   placeholder="Məs: İnformasiya texnologiyaları fakültəsi"
+                                   placeholder="{% trans 'Məs: İnformasiya texnologiyaları fakültəsi' %}"
                                    value="{% if s.form_values.action == 'create' %}{{ s.form_values.name }}{% endif %}">
                         </label>
                         <label>
-                            <span>Kod (opsional)</span>
-                            <input type="text" name="code" maxlength="50" placeholder="Məs: ITF"
+                            <span>{% trans 'Kod (opsional)' %}</span>
+                            <input type="text" name="code" maxlength="50" placeholder="{% trans 'Məs: ITF' %}"
                                    value="{% if s.form_values.action == 'create' %}{{ s.form_values.code }}{% endif %}">
                         </label>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
-                        <button type="submit" class="org-management__submit">Fakültə yarat</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans 'İmtina' %}</button>
+                        <button type="submit" class="org-management__submit">{% trans 'Fakültə yarat' %}</button>
                     </div>
                 </form>
             </div>
@@ -207,22 +207,22 @@
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Fakültəni redaktə et</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                        <h5 class="modal-title">{% trans 'Fakültəni redaktə et' %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
                     </div>
                     <div class="modal-body org-management__form org-management__form--modal">
                         <label>
-                            <span>Fakültə adı <em>*</em></span>
+                            <span>{% trans 'Fakültə adı' %} <em>*</em></span>
                             <input type="text" name="name" maxlength="255" required data-org-field="name">
                         </label>
                         <label>
-                            <span>Kod (opsional)</span>
+                            <span>{% trans 'Kod (opsional)' %}</span>
                             <input type="text" name="code" maxlength="50" data-org-field="code">
                         </label>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
-                        <button type="submit" class="org-management__submit">Yadda saxla</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans 'İmtina' %}</button>
+                        <button type="submit" class="org-management__submit">{% trans 'Yadda saxla' %}</button>
                     </div>
                 </form>
             </div>
@@ -243,16 +243,16 @@
                     <input type="hidden" name="action" value="assign_head">
                     <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Rəhbər (dekan) təyin et</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                        <h5 class="modal-title">{% trans 'Rəhbər (dekan) təyin et' %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
                     </div>
                     <div class="modal-body org-management__form org-management__form--modal">
-                        <p class="org-management__muted">Fakültə: <strong data-org-field="unit_name"></strong></p>
+                        <p class="org-management__muted">{% trans 'Fakültə:' %} <strong data-org-field="unit_name"></strong></p>
                         <label>
-                            <span>Rəhbər</span>
+                            <span>{% trans 'Rəhbər' %}</span>
                             <div class="bootstrap-single-select">
                                 <select class="form-select bootstrap-single-select__native" name="head_user" data-bootstrap-select data-org-field="head_user">
-                                    <option value="">Rəhbərsiz (təyinatı sil)</option>
+                                    <option value="">{% trans 'Rəhbərsiz (təyinatı sil)' %}</option>
                                     {% for candidate in s.head_candidates %}
                                         <option value="{{ candidate.user_id }}">{{ candidate.full_name }} — {{ candidate.role_label }}</option>
                                     {% endfor %}
@@ -261,8 +261,8 @@
                         </label>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
-                        <button type="submit" class="org-management__submit">Təyin et</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans 'İmtina' %}</button>
+                        <button type="submit" class="org-management__submit">{% trans 'Təyin et' %}</button>
                     </div>
                 </form>
             </div>
@@ -283,20 +283,20 @@
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="unit_id" value="" data-org-field="unit_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Fakültəni sil</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                        <h5 class="modal-title">{% trans 'Fakültəni sil' %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
                     </div>
                     <div class="modal-body">
                         <p class="org-management__danger-text">
-                            <strong data-org-field="unit_name"></strong> fakültəsini silmək istədiyinizə əminsiniz?
+                            {% blocktrans %}<strong data-org-field="unit_name"></strong> fakültəsini silmək istədiyinizə əminsiniz?{% endblocktrans %}
                         </p>
                         <p class="org-management__muted">
-                            Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz.
+                            {% trans 'Aktiv kafedrası və ya üzv təyinatı olan fakültə silinə bilməz.' %}
                         </p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İmtina</button>
-                        <button type="submit" class="org-management__submit org-management__submit--danger">Sil</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans 'İmtina' %}</button>
+                        <button type="submit" class="org-management__submit org-management__submit--danger">{% trans 'Sil' %}</button>
                     </div>
                 </form>
             </div>

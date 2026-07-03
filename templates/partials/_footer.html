@@ -11,7 +11,7 @@
 
             {# Brand column #}
             <div class="ems-footer__brand">
-                <a href="{{ home_url }}" class="ems-footer__logo" aria-label="EMSArena ana səhifə">
+                <a href="{{ home_url }}" class="ems-footer__logo" aria-label="{% trans 'EMSArena ana səhifə' %}">
                     <img src="{% static 'brand/logo-horizontal.png' %}"
                          alt="EMSArena"
                          class="ems-footer__logo-img"
@@ -92,7 +92,7 @@
                     </li>
                     <li class="ems-footer__contact-item">
                         <i class="fas fa-location-dot" aria-hidden="true"></i>
-                        <span>Bakı, Azərbaycan</span>
+                        <span>{% trans 'Bakı, Azərbaycan' %}</span>
                     </li>
                 </ul>
                 <a href="{{ contact_url }}" class="ems-footer__cta">

@@ -1,3 +1,4 @@
+{% load i18n %}
 <button type="button"
         class="btn btn-outline-primary btn-sm js-edit-post pending-post-edit-btn"
         data-post-id="{{ post.pk }}"
@@ -17,6 +18,6 @@
         data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
         data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
         data-moderator-edit="true"
-        title="Postu redaktə et">
-    <i class="fas fa-edit"></i> Redaktə et
+        title="{% trans 'Postu redaktə et' %}">
+    <i class="fas fa-edit"></i> {% trans 'Redaktə et' %}
 </button>

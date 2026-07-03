@@ -55,21 +55,21 @@
                 <span class="ter-stat-icon"><i class="fas fa-users"></i></span>
                 <div>
                     <div class="ter-stat-value">{{ review_stats.total }}</div>
-                    <div class="ter-stat-label">İştirakçı</div>
+                    <div class="ter-stat-label">{% trans 'İştirakçı' %}</div>
                 </div>
             </div>
             <div class="ter-stat ter-stat--graded">
                 <span class="ter-stat-icon"><i class="fas fa-check-circle"></i></span>
                 <div>
                     <div class="ter-stat-value">{{ review_stats.graded }}</div>
-                    <div class="ter-stat-label">Yoxlanıb</div>
+                    <div class="ter-stat-label">{% trans 'Yoxlanıb' %}</div>
                 </div>
             </div>
             <div class="ter-stat ter-stat--pending">
                 <span class="ter-stat-icon"><i class="fas fa-hourglass-half"></i></span>
                 <div>
                     <div class="ter-stat-value">{{ review_stats.pending }}</div>
-                    <div class="ter-stat-label">Gözləyir</div>
+                    <div class="ter-stat-label">{% trans 'Gözləyir' %}</div>
                 </div>
             </div>
             <div class="ter-stat ter-stat--max">
@@ -84,7 +84,7 @@
         <div class="ter-header-actions">
             <a href="{{ export_xlsx_url }}" class="ter-action-btn ter-action-btn--export">
                 <i class="fas fa-file-excel"></i>
-                <span>Excel-ə yüklə</span>
+                <span>{% trans 'Excel-ə yüklə' %}</span>
             </a>
         </div>
     </div>
@@ -122,7 +122,7 @@
                             class="form-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
                             data-bootstrap-select
                             data-reset-value="all">
-                        <option value="all" {% if not group_filter %}selected{% endif %}>Bütün qruplar</option>
+                        <option value="all" {% if not group_filter %}selected{% endif %}>{% trans 'Bütün qruplar' %}</option>
                         {% for grp in available_groups %}
                             <option value="{{ grp.id }}" {% if group_filter == grp.id|stringformat:"s" %}selected{% endif %}>{{ grp.name }}</option>
                         {% endfor %}
@@ -265,7 +265,7 @@
                         </th>
                         <th class="ter-th-left">
                             <a href="?{{ sort_base_query }}&sort_by=username&sort_dir={% if sort_by == 'username' and sort_dir == 'asc' %}desc{% elif sort_by == 'username' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
-                                <span>İstifadəçi adı</span>
+                                <span>{% trans 'İstifadəçi adı' %}</span>
                                 {% if sort_by == "username" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
                                 {% elif sort_by == "username" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
                                 {% else %}<i class="fas fa-sort"></i>{% endif %}
@@ -273,7 +273,7 @@
                         </th>
                         <th class="ter-th-left">
                             <a href="?{{ sort_base_query }}&sort_by=email&sort_dir={% if sort_by == 'email' and sort_dir == 'asc' %}desc{% elif sort_by == 'email' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link">
-                                <span>E-poçt</span>
+                                <span>{% trans 'E-poçt' %}</span>
                                 {% if sort_by == "email" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
                                 {% elif sort_by == "email" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
                                 {% else %}<i class="fas fa-sort"></i>{% endif %}
@@ -288,23 +288,23 @@
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=correct&sort_dir={% if sort_by == 'correct' and sort_dir == 'asc' %}desc{% elif sort_by == 'correct' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="Düzgün / Verilmiş sual">
-                                <span>Düzgün / Sual</span>
+                            <a href="?{{ sort_base_query }}&sort_by=correct&sort_dir={% if sort_by == 'correct' and sort_dir == 'asc' %}desc{% elif sort_by == 'correct' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="{% trans 'Düzgün / Verilmiş sual' %}">
+                                <span>{% trans 'Düzgün / Sual' %}</span>
                                 {% if sort_by == "correct" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
                                 {% elif sort_by == "correct" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
                                 {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=wrong&sort_dir={% if sort_by == 'wrong' and sort_dir == 'asc' %}desc{% elif sort_by == 'wrong' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="Səhv / Verilmiş sual">
-                                <span>Səhv / Sual</span>
+                            <a href="?{{ sort_base_query }}&sort_by=wrong&sort_dir={% if sort_by == 'wrong' and sort_dir == 'asc' %}desc{% elif sort_by == 'wrong' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="{% trans 'Səhv / Verilmiş sual' %}">
+                                <span>{% trans 'Səhv / Sual' %}</span>
                                 {% if sort_by == "wrong" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
                                 {% elif sort_by == "wrong" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
                                 {% else %}<i class="fas fa-sort"></i>{% endif %}
                             </a>
                         </th>
                         {% if exam.exam_type == 'test' %}
-                            <th>Cavabsız</th>
+                            <th>{% trans 'Cavabsız' %}</th>
                             <th>Bal</th>
                             <th>Faiz</th>
                         {% endif %}
@@ -335,7 +335,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="?{{ sort_base_query }}&sort_by=duration&sort_dir={% if sort_by == 'duration' and sort_dir == 'asc' %}desc{% elif sort_by == 'duration' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="saat:dəq:san">
+                            <a href="?{{ sort_base_query }}&sort_by=duration&sort_dir={% if sort_by == 'duration' and sort_dir == 'asc' %}desc{% elif sort_by == 'duration' and sort_dir == 'desc' %}{% else %}asc{% endif %}" class="ter-sort-link" title="{% trans 'saat:dəq:san' %}">
                                 <span>{% trans "col_duration" context "exams.template.teacher_exam_results" %}</span>
                                 {% if sort_by == "duration" and sort_dir == "asc" %}<i class="fas fa-sort-up"></i>
                                 {% elif sort_by == "duration" and sort_dir == "desc" %}<i class="fas fa-sort-down"></i>
@@ -394,7 +394,7 @@
                                 <td class="ter-num">
                                     <strong>{{ item.test_result.score_display }} / {{ item.test_result.max_score_display }}</strong>
                                     {% if item.appeal_bonus %}
-                                        <span class="ter-badge ter-badge--info" title="Apellyasiya ilə +{{ item.appeal_bonus|floatformat:"-2" }} bal əlavə olunub">+{{ item.appeal_bonus|floatformat:"-2" }}</span>
+                                        <span class="ter-badge ter-badge--info" title="{% blocktrans with bonus=item.appeal_bonus|floatformat:"-2" %}Apellyasiya ilə +{{ bonus }} bal əlavə olunub{% endblocktrans %}">+{{ item.appeal_bonus|floatformat:"-2" }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="ter-num ter-num--accent"><strong>{{ item.test_result.percentage_display }}%</strong></td>
@@ -410,7 +410,7 @@
                                 {% if item.effective_finish %}
                                     {{ item.effective_finish|date:"d.m.Y H:i" }}
                                     {% if item.finish_inferred %}
-                                        <span class="ter-date-tag" title="Tələbə imtahanı bitirməyib — müddət bitmə vaxtı göstərilir">avto</span>
+                                        <span class="ter-date-tag" title="{% trans 'Tələbə imtahanı bitirməyib — müddət bitmə vaxtı göstərilir' %}">avto</span>
                                     {% endif %}
                                 {% else %}
                                     <span class="ter-muted">—</span>
@@ -426,10 +426,10 @@
                             <td class="ter-action-cell">
                                 <div class="ter-action-stack">
                                     <a href="{{ item.action_url }}" class="ter-btn ter-btn--sm
-                                        {% if item.action_label == 'Bax' %}ter-btn--info
-                                        {% elif item.action_label == 'Yenidən yoxla' %}ter-btn--warning
+                                        {% if item.action_code == 'view' %}ter-btn--info
+                                        {% elif item.action_code == 'recheck' %}ter-btn--warning
                                         {% else %}ter-btn--warning{% endif %}">
-                                        <i class="fas {% if item.action_label == 'Bax' %}fa-eye{% elif item.action_label == 'Yenidən yoxla' %}fa-edit{% else %}fa-clipboard-check{% endif %}"></i>
+                                        <i class="fas {% if item.action_code == 'view' %}fa-eye{% elif item.action_code == 'recheck' %}fa-edit{% else %}fa-clipboard-check{% endif %}"></i>
                                         {{ item.action_label }}
                                     </a>
                                     {% if item.countdown_seconds %}

@@ -1,16 +1,16 @@
 {% load i18n %}
 <div class="info-card section-card">
     <div class="section-title role-concept-heading">
-        <span><i class="fas fa-user-cog"></i> Rolları idarə et</span>
+        <span><i class="fas fa-user-cog"></i> {% trans 'Rolları idarə et' %}</span>
         <button type="button"
                 class="btn btn-link btn-sm role-concept-info-btn"
                 data-bs-toggle="modal"
                 data-bs-target="#manageRolesInfoModal"
-                aria-label="Rolları idarə et haqqında">
+                aria-label="{% trans 'Rolları idarə et haqqında' %}">
             <i class="fas fa-circle-question"></i>
         </button>
     </div>
-    <p class="role-concept-subtitle mb-3">Profil rolları (multi-role / checkbox)</p>
+    <p class="role-concept-subtitle mb-3">{% trans 'Profil rolları (multi-role / checkbox)' %}</p>
     <p class="manage-roles-summary mb-0">
         {% trans "summary_line_1" context "profile.manage_roles" %}
         {% trans "summary_line_2" context "profile.manage_roles" %}
@@ -63,7 +63,7 @@
                 <button type="button"
                         class="manage-roles-search-clear"
                         data-standard-search-clear
-                        aria-label="Axtarışı təmizlə"
+                        aria-label="{% trans 'Axtarışı təmizlə' %}"
                         hidden>
                     <i class="fas fa-times"></i>
                 </button>
@@ -177,13 +177,13 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="manageRolesInfoModalLabel">Bu rol nə edir?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                <h5 class="modal-title" id="manageRolesInfoModalLabel">{% trans 'Bu rol nə edir?' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-2"><strong>Rolları idarə et</strong> istifadəçinin profil rollarını idarə edir.</p>
-                <p class="mb-2">Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli işləyir.</p>
-                <p class="mb-0"><strong>Primary</strong> ən yüksək səviyyəli profil roludur və əsas rol kimi göstərilir.</p>
+                <p class="mb-2"><strong>{% trans 'Rolları idarə et' %}</strong> {% trans 'istifadəçinin profil rollarını idarə edir.' %}</p>
+                <p class="mb-2">{% trans 'Burada birdən çox rol seçilə bilər (checkbox), yəni multi-role modeli işləyir.' %}</p>
+                <p class="mb-0"><strong>Primary</strong> {% trans 'ən yüksək səviyyəli profil roludur və əsas rol kimi göstərilir.' %}</p>
             </div>
         </div>
     </div>

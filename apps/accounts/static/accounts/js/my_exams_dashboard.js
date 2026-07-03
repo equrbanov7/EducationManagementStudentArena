@@ -373,7 +373,7 @@
             closeAllMenus();
             var code = btn.getAttribute("data-code") || "";
             copyText(code).then(function () {
-                showToast(i18n("codeCopied", "Kod kopyalandı") + ": " + code);
+                showToast(i18n("codeCopied", gettext("Kod kopyalandı")) + ": " + code);
             });
         });
 

@@ -92,9 +92,9 @@
                                 {% endif %}
                                 {% if data.attempt.supervision_status == "removed" %}
                                     <span class="badge-proctor-flag"
-                                          title="Bu cəhd imtahan nəzarəti tərəfindən pozuntuya görə dayandırılıb"
+                                          title="{% trans 'Bu cəhd imtahan nəzarəti tərəfindən pozuntuya görə dayandırılıb' %}"
                                           style="display:inline-flex;align-items:center;gap:0.3rem;background:#fceaea;color:#a32d2d;border:1px solid #e24b4a;border-radius:12px;padding:0.15rem 0.6rem;font-size:0.78rem;font-weight:600;margin-left:0.35rem;">
-                                        <i class="fas fa-shield-alt"></i> Nəzarətçi atıb
+                                        <i class="fas fa-shield-alt"></i> {% trans 'Nəzarətçi atıb' %}
                                     </span>
                                 {% endif %}
                             </div>

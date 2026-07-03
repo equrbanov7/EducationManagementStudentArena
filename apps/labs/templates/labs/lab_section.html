@@ -145,7 +145,7 @@
                                     <a href="{% url 'labs:my_lab_answers' lab.id %}?return_to={{ profile_return_url|urlencode }}" 
                                        class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-list-check"></i>
-                                        Cavablarım ({{ item.attempt_count }})
+                                        {% trans 'Cavablarım (' %}{{ item.attempt_count }})
                                     </a>
                                     
                                     {% if item.attempts_left > 0 and lab.is_open %}
