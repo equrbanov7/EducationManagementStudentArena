@@ -102,8 +102,8 @@ class _Stage3Mixin:
             or "permission-editor" in self.allowed_sections
             or "student-organization-management" in self.allowed_sections
         ):
-            from apps.organizations.permissions import has_permission
             from apps.organizations.public import get_user_org_role_level
+            from core.permissions import has_permission
 
             self.management_org = _get_active_organization(self.request)
             if self.management_org:

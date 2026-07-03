@@ -197,7 +197,7 @@ def _role_capabilities(user, profile):
     teacher_can_invite_members = False
     teacher_has_student_org_access = False
     if is_teacher and not is_org_admin and not is_superadmin and active_organization:
-        from apps.organizations.permissions import has_permission as _has_permission
+        from core.permissions import has_permission as _has_permission
 
         actor_perms, _ = _collect_actor_permissions(user, active_organization)
         teacher_can_manage_students = _has_permission(list(actor_perms), "member.student_manage")
@@ -349,7 +349,7 @@ def _role_capabilities(user, profile):
     # imtahan mərkəzi, HR) üçün link. Faktiki icazə audit.views-də yenidən yoxlanılır.
     can_view_audit = is_superadmin or is_owner_of_active_org
     if not can_view_audit and active_organization is not None:
-        from apps.organizations.permissions import has_permission as _audit_has_permission
+        from core.permissions import has_permission as _audit_has_permission
 
         _audit_actor_perms, _ = _collect_actor_permissions(user, active_organization)
         can_view_audit = _audit_has_permission(list(_audit_actor_perms), "audit.view")

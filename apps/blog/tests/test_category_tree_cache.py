@@ -4,7 +4,7 @@ from django.core.cache import cache
 
 import pytest
 
-from apps.blog.models import Category
+from apps.blog.models import Category, Post
 from apps.blog.selectors import get_post_category_tree
 
 pytestmark = pytest.mark.django_db
@@ -19,6 +19,9 @@ def _locmem_cache(settings):
             "LOCATION": "p10-test",
         }
     }
+    Post.objects.update(category=None)
+    Category.objects.update(parent=None)
+    Category.objects.all().delete()
     cache.clear()
     yield
     cache.clear()

@@ -77,7 +77,7 @@ def permission_is_grantable(permission, effective_permissions, grantable_permiss
     """
     Return whether the permission can be granted by the acting user.
     """
-    from apps.organizations.permissions import has_permission
+    from core.permissions import has_permission
 
     effective_list = list(effective_permissions)
     grantable_list = list(grantable_permissions)

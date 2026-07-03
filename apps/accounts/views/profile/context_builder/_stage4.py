@@ -265,7 +265,7 @@ class _Stage4Mixin:
             )
         if self.active_section == "manage-appeals" and "manage-appeals" in self.allowed_sections:
             from apps.appeals.public import build_manage_appeals_context
-            from apps.appeals.views import _can_open_appeal_management
+            from apps.appeals.public import can_open_appeal_management as _can_open_appeal_management
 
             if _can_open_appeal_management(self.request):
                 self.context.update(

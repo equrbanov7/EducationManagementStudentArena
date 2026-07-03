@@ -10,8 +10,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 
 from apps.accounts.models import ProfileRole
-from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
+from apps.exams.public import StudentGroupForm
 
 
 def build_groups_context(

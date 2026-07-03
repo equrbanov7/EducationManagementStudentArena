@@ -4,6 +4,8 @@
 # PostgreSQL server. It intentionally avoids the repository .env contract by
 # using AGENT_* variables with safe local defaults.
 
+name: emsarena-agent
+
 services:
   postgres:
     image: postgres:16-alpine

@@ -50,8 +50,8 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
 
     def run(self):
         from apps.organizations.models import Membership
-        from apps.organizations.permissions import has_permission as _has_org_permission
         from apps.organizations.public import create_audit_log, get_user_org_role_level
+        from core.permissions import has_permission as _has_org_permission
 
         self.org = _get_active_organization(self.request)
         self.is_superadmin = _is_superadmin_user(self.request.user)

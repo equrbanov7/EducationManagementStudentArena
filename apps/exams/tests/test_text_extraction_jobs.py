@@ -293,6 +293,7 @@ class TestExportJobs:
 
     def test_pending_job_redirects_to_waiting_page(self, teacher_client, teacher, org, exam, settings, monkeypatch):
         settings.EXPORT_SYNC_MAX_ROWS = -1
+        settings.JOB_WORKER_PICKUP_TIMEOUT = 0  # watchdog söndürülür — real-broker pending ssenarisi
         # delay-i no-op et → job pending qalır → waiting səhifəsinə redirect
         from apps.exams import tasks as exams_tasks
 
@@ -348,3 +349,94 @@ class TestExportJobs:
                 organization=other_org,
                 params={"exam_id": exam.pk, "filters": {}},
             )
+
+
+class TestWorkerDeadFallback:
+    """Codex blocking fix: broker sağ, worker ölü → pickup-watchdog inline icra."""
+
+    @pytest.fixture(autouse=True)
+    def _fast_watchdog(self, settings):
+        settings.JOB_WORKER_PICKUP_TIMEOUT = 0.1
+
+    @pytest.fixture
+    def _dead_worker(self, monkeypatch):
+        # delay uğurla "qəbul edir" (broker sağ) amma heç nə icra olunmur (worker ölü)
+        from apps.exams import tasks as exams_tasks
+
+        monkeypatch.setattr(exams_tasks.run_text_extraction_job, "delay", lambda *a, **kw: None)
+        monkeypatch.setattr(exams_tasks.run_ai_generation_job, "delay", lambda *a, **kw: None)
+        monkeypatch.setattr(exams_tasks.run_export_job, "delay", lambda *a, **kw: None)
+
+    def test_extract_falls_back_to_sync(self, teacher_client, _dead_worker):
+        resp = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == TextExtractionJob.STATUS_SUCCESS
+        assert "Sual metni" in data["text"]
+
+    def test_ai_falls_back_to_classic_response(self, teacher_client, teacher, org, _dead_worker, monkeypatch):
+        from apps.exams.models import Exam
+        from apps.exams.views.teacher import question_bank as qb_facade
+
+        exam = Exam.objects.create(title="Dead Worker Exam", exam_type="test", author=teacher, organization=org)
+        monkeypatch.setattr(
+            qb_facade,
+            "generate_question_bank_text",
+            lambda **kw: {"ok": True, "text": "1. S", "question_count": 1, "remaining": 9, "limit": 10},
+        )
+        resp = teacher_client.post(
+            reverse("exams:ai_generate_question_bank", args=[exam.slug]),
+            {"prompt": "x", "question_count": "1", "difficulty": "easy"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        # Codex-in tələb etdiyi davranış: 202 YOX, klassik sinxron cavab
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["ok"] is True and data["text"] == "1. S" and data["remaining"] == 9
+
+    def test_export_falls_back_to_attachment(self, teacher_client, teacher, org, _dead_worker, settings):
+        from apps.exams.models import Exam
+
+        settings.EXPORT_SYNC_MAX_ROWS = -1
+        exam = Exam.objects.create(title="Dead Worker Export", exam_type="test", author=teacher, organization=org)
+        resp = teacher_client.get(reverse("exams:export_exam_results_xlsx", args=[exam.slug]))
+        assert resp.status_code == 200
+        assert "attachment" in resp["Content-Disposition"]
+
+
+class TestCasClaim:
+    """PENDING→PROCESSING keçidi atomikdir — ikinci icra no-op qayıdır."""
+
+    def test_second_run_is_noop(self, teacher_client, monkeypatch):
+        start = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()}).json()
+        job_id = start["job_id"]
+        assert TextExtractionJob.objects.get(pk=job_id).status == TextExtractionJob.STATUS_SUCCESS
+
+        # İkinci çağırış parse-a girməməlidir: parse partlasa belə status qayıtmalıdır
+        import apps.exams.services.parsing as parsing_facade
+
+        def boom(f):
+            raise AssertionError("ikinci icra parse-a girdi!")
+
+        monkeypatch.setattr(parsing_facade, "extract_text_from_upload", boom)
+        assert run_text_extraction_job(job_id) == TextExtractionJob.STATUS_SUCCESS
+
+
+class TestMathTokenPropagation:
+    """P3-b: stash token status meta-sına düşür (Codex smoke-da formula-suz PDF ilə görünməmişdi)."""
+
+    def test_token_reaches_status_meta(self, teacher_client, monkeypatch):
+        import apps.exams.services.import_media as import_media
+        import apps.exams.services.parsing as parsing_facade
+
+        monkeypatch.setattr(parsing_facade, "extract_text_from_upload", lambda f: "PDF mətni")
+        monkeypatch.setattr(import_media, "stash_math_images", lambda f: "tok123")
+
+        start = teacher_client.post(
+            reverse("exams:start_text_extraction"),
+            {"source_file": _upload(name="formulali.pdf", content=b"%PDF-1.4 fake"), "stash_math": "1"},
+        ).json()
+        resp = teacher_client.get(reverse("exams:text_extraction_status", kwargs={"job_id": start["job_id"]}))
+        data = resp.json()
+        assert data["status"] == TextExtractionJob.STATUS_SUCCESS
+        assert data["meta"]["math_token"] == "tok123"

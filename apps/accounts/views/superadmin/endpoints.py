@@ -31,8 +31,8 @@ User = get_user_model()
 
 def build_superadmin_ai_settings_context():
     """Return reusable context for the superadmin AI settings screen."""
-    from apps.exams.domain.ai_config import AIConfiguration
-    from apps.exams.services.ai_summary import _get_rate_limit
+    from apps.exams.models import AIConfiguration
+    from apps.exams.public import get_ai_rate_limit as _get_rate_limit
     from core.rate_limit import parse_rate
 
     config = AIConfiguration.load()
@@ -229,7 +229,7 @@ def superadmin_ai_settings(request):
     if not _is_superadmin_user(request.user):
         return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
 
-    from apps.exams.domain.ai_config import AIConfiguration
+    from apps.exams.models import AIConfiguration
 
     config = AIConfiguration.load()
     fallback_next_url = reverse("accounts:superadmin_ai_settings")

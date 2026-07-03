@@ -17,7 +17,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.models import TextExtractionJob
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.parsing import MAX_UPLOAD_BYTES, extract_text_from_upload
+from apps.exams.services.parsing import MAX_UPLOAD_BYTES
 from apps.exams.tasks import run_text_extraction_job
 from core.tenancy import get_request_organization
 from core.upload_security import randomize_uploaded_filename
@@ -34,6 +34,41 @@ def _job_payload(job):
     if job.result_meta:
         payload["meta"] = job.result_meta
     return payload
+
+
+def _ensure_job_progress(job, runner):
+    """delay() uğurlu olsa belə WORKER ölü ola bilər (broker sağ) — Codex
+    blocking finding. Qısa pickup-pəncərəsində job PENDING-dən çıxmasa task
+    funksiyası inline işlədilir; task-lardakı atomik CAS claim double-run-u
+    kəsir (worker gecikib götürsə no-op olur).
+
+    ``JOB_WORKER_PICKUP_TIMEOUT`` (saniyə, default 3.0; ``0`` → watchdog
+    SÖNÜLÜdür — məs. real-broker davranışını test edən ssenarilər üçün).
+    """
+    import time
+
+    from django.conf import settings
+
+    timeout = getattr(settings, "JOB_WORKER_PICKUP_TIMEOUT", 3.0)
+    if not timeout or timeout <= 0:
+        return job
+
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        job.refresh_from_db(fields=["status"])
+        if job.status != TextExtractionJob.STATUS_PENDING:
+            return job
+        time.sleep(0.25)
+
+    logger.error(
+        "extract_jobs: worker pickup görünmədi (%.1fs) — inline fallback (job %s). "
+        "Celery worker-in işlədiyini yoxlayın!",
+        timeout,
+        job.pk,
+    )
+    runner(str(job.pk))  # CAS: worker bu arada götürübsə no-op
+    job.refresh_from_db()
+    return job
 
 
 def start_ai_generation_job(request, *, payload, uploaded, service_error_message):
@@ -71,6 +106,9 @@ def start_ai_generation_job(request, *, payload, uploaded, service_error_message
         # (köhnə sinxron davranış).
         logger.warning("start_ai_generation_job: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
         run_ai_generation_job(str(job.pk))
+    else:
+        # Broker qəbul etsə də worker ölü ola bilər — pickup-watchdog.
+        job = _ensure_job_progress(job, run_ai_generation_job)
 
     job.refresh_from_db()
     if job.status == TextExtractionJob.STATUS_SUCCESS:
@@ -124,25 +162,20 @@ def start_text_extraction(request):
     try:
         run_text_extraction_job.delay(str(job.pk))
     except Exception:
-        # Broker əlçatan deyil — köhnə sinxron davranışa qayıdırıq ki, müəllim
-        # bloklanmasın. Job qeydini nəticə ilə yeniləyirik (audit üçün).
+        # Broker əlçatan deyil — task funksiyasını inline işlət (eyni kod yolu,
+        # eyni nəticə forması; CAS sayəsində təhlükəsizdir).
         logger.warning("start_text_extraction: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
-        try:
-            uploaded.seek(0)
-            uploaded.name = source_name
-            text = extract_text_from_upload(uploaded)
-        except Exception as exc:
-            job.status = TextExtractionJob.STATUS_FAILED
-            job.error = str(exc)
-            job.save(update_fields=["status", "error"])
-            job.file.delete(save=True)
-            return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-        job.status = TextExtractionJob.STATUS_SUCCESS
-        job.text = text
-        job.save(update_fields=["status", "text"])
-        job.file.delete(save=True)
-        return JsonResponse({"ok": True, **_job_payload(job)})
+        run_text_extraction_job(str(job.pk))
+    else:
+        # Broker qəbul etsə də worker ölü ola bilər — pickup-watchdog
+        # (Codex blocking finding). Terminal olarsa cavab dərhal klassikdir.
+        job = _ensure_job_progress(job, run_text_extraction_job)
 
+    job.refresh_from_db()
+    if job.status == TextExtractionJob.STATUS_SUCCESS:
+        return JsonResponse({"ok": True, **_job_payload(job)})
+    if job.status == TextExtractionJob.STATUS_FAILED:
+        return JsonResponse({"ok": False, **_job_payload(job)}, status=400)
     return JsonResponse({"ok": True, **_job_payload(job)}, status=202)
 
 
@@ -177,6 +210,8 @@ def start_export_job(request, *, export_name, params):
     except Exception:
         logger.warning("start_export_job: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
         run_export_job(str(job.pk))
+    else:
+        job = _ensure_job_progress(job, run_export_job)
 
     job.refresh_from_db()
     if job.status == TextExtractionJob.STATUS_SUCCESS:

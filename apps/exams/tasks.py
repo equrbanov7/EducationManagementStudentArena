@@ -63,18 +63,20 @@ def run_text_extraction_job(job_id):
     # Sistem worker-i yalnız PK alır — istənilən tenantın job-unu bypass ilə
     # oxumalıdır (warm_session_settings_cache pattern-i).
     with rls_worker_atomic(), bypass_rls():
+        # ATOMİK CLAIM (CAS): yalnız PENDING→PROCESSING keçidini qazanan icra
+        # edir — worker + inline-fallback paralel işləməsin (Codex finding:
+        # broker sağ / worker ölü ssenarisi üçün pickup-watchdog fallback-i).
+        claimed = TextExtractionJob.objects.filter(pk=job_id, status=TextExtractionJob.STATUS_PENDING).update(
+            status=TextExtractionJob.STATUS_PROCESSING, started_at=timezone.now()
+        )
         try:
             job = TextExtractionJob.objects.get(pk=job_id)
         except TextExtractionJob.DoesNotExist:
             logger.warning("run_text_extraction_job: job %s tapılmadı", job_id)
             return "missing"
-
-        if job.status not in {TextExtractionJob.STATUS_PENDING, TextExtractionJob.STATUS_PROCESSING}:
+        if not claimed:
+            # Başqa icraçı artıq götürüb (və ya bitirib) — toxunma.
             return job.status
-
-        job.status = TextExtractionJob.STATUS_PROCESSING
-        job.started_at = timezone.now()
-        job.save(update_fields=["status", "started_at"])
 
     meta = {}
     try:
@@ -147,18 +149,20 @@ def run_ai_generation_job(job_id):
     from core.rls_pooling import rls_worker_atomic
 
     with rls_worker_atomic(), bypass_rls():
+        # ATOMİK CLAIM (CAS): yalnız PENDING→PROCESSING keçidini qazanan icra
+        # edir — worker + inline-fallback paralel işləməsin (Codex finding:
+        # broker sağ / worker ölü ssenarisi üçün pickup-watchdog fallback-i).
+        claimed = TextExtractionJob.objects.filter(pk=job_id, status=TextExtractionJob.STATUS_PENDING).update(
+            status=TextExtractionJob.STATUS_PROCESSING, started_at=timezone.now()
+        )
         try:
             job = TextExtractionJob.objects.get(pk=job_id)
         except TextExtractionJob.DoesNotExist:
             logger.warning("run_ai_generation_job: job %s tapılmadı", job_id)
             return "missing"
-
-        if job.status not in {TextExtractionJob.STATUS_PENDING, TextExtractionJob.STATUS_PROCESSING}:
+        if not claimed:
+            # Başqa icraçı artıq götürüb (və ya bitirib) — toxunma.
             return job.status
-
-        job.status = TextExtractionJob.STATUS_PROCESSING
-        job.started_at = timezone.now()
-        job.save(update_fields=["status", "started_at"])
 
     payload = dict(job.payload or {})
     status = TextExtractionJob.STATUS_SUCCESS
@@ -237,18 +241,20 @@ def run_export_job(job_id):
     from core.rls_pooling import rls_worker_atomic
 
     with rls_worker_atomic(), bypass_rls():
+        # ATOMİK CLAIM (CAS): yalnız PENDING→PROCESSING keçidini qazanan icra
+        # edir — worker + inline-fallback paralel işləməsin (Codex finding:
+        # broker sağ / worker ölü ssenarisi üçün pickup-watchdog fallback-i).
+        claimed = TextExtractionJob.objects.filter(pk=job_id, status=TextExtractionJob.STATUS_PENDING).update(
+            status=TextExtractionJob.STATUS_PROCESSING, started_at=timezone.now()
+        )
         try:
             job = TextExtractionJob.objects.select_related("organization", "user").get(pk=job_id)
         except TextExtractionJob.DoesNotExist:
             logger.warning("run_export_job: job %s tapılmadı", job_id)
             return "missing"
-
-        if job.status not in {TextExtractionJob.STATUS_PENDING, TextExtractionJob.STATUS_PROCESSING}:
+        if not claimed:
+            # Başqa icraçı artıq götürüb (və ya bitirib) — toxunma.
             return job.status
-
-        job.status = TextExtractionJob.STATUS_PROCESSING
-        job.started_at = timezone.now()
-        job.save(update_fields=["status", "started_at"])
 
         payload = dict(job.payload or {})
         try:

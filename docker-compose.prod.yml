@@ -56,7 +56,7 @@ x-app-env: &app-env
   APP_VERSION: ${APP_VERSION:-unknown}
   DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
   DATABASE_CONN_MAX_AGE: ${DATABASE_CONN_MAX_AGE:-0}
-  REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD}@redis:6379/0}
+  REDIS_URL: ${DOCKER_REDIS_URL:-redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379/0}
   SECRET_KEY: ${SECRET_KEY}
   ALLOWED_HOSTS: ${ALLOWED_HOSTS}
   SITE_URL: ${SITE_URL}
@@ -221,7 +221,11 @@ services:
           cpus: "${PGBOUNCER_CPU_LIMIT:-0.5}"
           memory: ${PGBOUNCER_MEM_LIMIT:-256M}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB} && pg_isready -h postgres -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -241,7 +245,7 @@ services:
     image: redis:7-alpine
     container_name: emsarena-redis
     environment:
-      REDISCLI_AUTH: ${REDIS_PASSWORD}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
       - redis_data:/data
     command:
@@ -249,7 +253,7 @@ services:
       - --appendonly
       - "yes"
       - --requirepass
-      - ${REDIS_PASSWORD}
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -282,7 +286,7 @@ services:
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-multiproc
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
       ADMIN_URL_PREFIX: ${ADMIN_URL_PREFIX:-manage/}
-      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS}
+      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-}
       ADMIN_LOGIN_RATE_LIMIT: ${ADMIN_LOGIN_RATE_LIMIT:-3/15m}
       ADMIN_2FA_REQUIRED: ${ADMIN_2FA_REQUIRED:-True}
       ADMIN_OTP_VERIFY_RATE_LIMIT: ${ADMIN_OTP_VERIFY_RATE_LIMIT:-5/10m}
@@ -434,7 +438,7 @@ services:
       - --path.rootfs=/host
     pid: host
     volumes:
-      - /:/host:ro,rslave
+      - /:/host:ro
     restart: unless-stopped
     logging: *default-logging
     deploy:

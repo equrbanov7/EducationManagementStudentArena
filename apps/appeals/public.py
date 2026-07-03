@@ -9,6 +9,7 @@ from apps.appeals.services import (  # noqa: F401
     appeal_bonus_map,
     apply_bonus_to_test_result,
 )
+from apps.appeals.views import _can_open_appeal_management as can_open_appeal_management  # noqa: F401
 from apps.appeals.views import (  # noqa: F401
     build_manage_appeals_context,
     build_my_appeals_context,
@@ -16,6 +17,7 @@ from apps.appeals.views import (  # noqa: F401
 
 __all__ = [
     "appeal_bonus_map",
+    "can_open_appeal_management",
     "apply_bonus_to_test_result",
     "build_manage_appeals_context",
     "build_my_appeals_context",
