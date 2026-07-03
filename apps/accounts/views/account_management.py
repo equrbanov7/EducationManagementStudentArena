@@ -353,9 +353,9 @@ def superadmin_user_management(request):
 
         if action == "block":
             if target_user == request.user:
-                messages.error(request, "Öz hesabınızı bloklaya bilməzsiniz.")
+                messages.error(request, _("Öz hesabınızı bloklaya bilməzsiniz."))
             elif _is_superadmin_user(target_user):
-                messages.error(request, "Superadmin hesabını bloklamaq olmaz.")
+                messages.error(request, _("Superadmin hesabını bloklamaq olmaz."))
             else:
                 try:
                     block_account(target_user, request=request)
@@ -365,17 +365,23 @@ def superadmin_user_management(request):
                     else:
                         messages.error(request, _("delete_account_error"))
                 else:
-                    messages.success(request, f'"{target_user.username}" hesabı müvəqqəti bloklandı.')
+                    messages.success(
+                        request,
+                        _('"{username}" hesabı müvəqqəti bloklandı.').format(username=target_user.username),
+                    )
         elif action == "unblock":
             if target_status == USER_STATUS_DELETED:
-                messages.error(request, "Silinmiş hesabı blokdan çıxarmaq üçün əvvəlcə bərpa edin.")
+                messages.error(request, _("Silinmiş hesabı blokdan çıxarmaq üçün əvvəlcə bərpa edin."))
             elif target_user == request.user:
-                messages.error(request, "Öz hesabınızın blokunu bu bölmədən aça bilməzsiniz.")
+                messages.error(request, _("Öz hesabınızın blokunu bu bölmədən aça bilməzsiniz."))
             elif _is_superadmin_user(target_user):
-                messages.error(request, "Superadmin hesabının blokunu açmaq olmaz.")
+                messages.error(request, _("Superadmin hesabının blokunu açmaq olmaz."))
             else:
                 unblock_account(target_user, request=request)
-                messages.success(request, f'"{target_user.username}" hesabının bloku açıldı.')
+                messages.success(
+                    request,
+                    _('"{username}" hesabının bloku açıldı.').format(username=target_user.username),
+                )
         elif action == "soft_delete":
             if target_user == request.user:
                 messages.error(request, _("cannot_delete_self"))
@@ -390,7 +396,10 @@ def superadmin_user_management(request):
                     else:
                         messages.error(request, _("delete_account_error"))
                 else:
-                    messages.success(request, f'"{target_user.username}" hesabı silinmişlərə göndərildi.')
+                    messages.success(
+                        request,
+                        _('"{username}" hesabı silinmişlərə göndərildi.').format(username=target_user.username),
+                    )
         elif action == "restore":
             restore_account(target_user, request=request)
             messages.success(

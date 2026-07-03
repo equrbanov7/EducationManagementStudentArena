@@ -379,7 +379,11 @@ def _structure_page_view(
             messages.success(request, notice)
             return redirect(redirect_url_name, slug=organization.slug)
         if not _is_ajax_request(request):
-            messages.error(request, form_errors.get("general") or "Əməliyyat yerinə yetirilə bilmədi.")
+            messages.error(
+                request,
+                form_errors.get("general")
+                or pgettext("organizations.views.message", "Əməliyyat yerinə yetirilə bilmədi."),
+            )
 
     context = context_builder(request, organization, form_errors=form_errors, form_values=form_values, notice=notice)
     context[context_key] = context

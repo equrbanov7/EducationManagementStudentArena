@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: EMSArena\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 20:32+0400\n"
+"POT-Creation-Date: 2026-07-03 20:59+0400\n"
 "PO-Revision-Date: 2026-02-22 23:58+0400\n"
 "Last-Translator: Codex <noreply@example.com>\n"
 "Language-Team: English\n"
@@ -8310,16 +8310,16 @@ msgstr "Incorrect password. Please enter the correct password."
 
 #: apps/accounts/views/account_management.py:316
 #: apps/accounts/views/account_management.py:364
-#: apps/accounts/views/account_management.py:389
-#: apps/accounts/views/account_management.py:411
+#: apps/accounts/views/account_management.py:395
+#: apps/accounts/views/account_management.py:420
 msgid "delete_account_last_admin"
 msgstr ""
 "You are the only admin of your organization. You cannot delete your account."
 
 #: apps/accounts/views/account_management.py:318
 #: apps/accounts/views/account_management.py:366
-#: apps/accounts/views/account_management.py:391
-#: apps/accounts/views/account_management.py:413
+#: apps/accounts/views/account_management.py:397
+#: apps/accounts/views/account_management.py:422
 msgid "delete_account_error"
 msgstr "An error occurred while deleting the account. Please try again."
 
@@ -8337,25 +8337,62 @@ msgstr "Only superadmins can access this section."
 msgid "user_not_found"
 msgstr "User not found."
 
-#: apps/accounts/views/account_management.py:381
-#: apps/accounts/views/account_management.py:402
+#: apps/accounts/views/account_management.py:356
+msgid "Öz hesabınızı bloklaya bilməzsiniz."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:358
+msgid "Superadmin hesabını bloklamaq olmaz."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:370
+#, python-brace-format
+msgid "\"{username}\" hesabı müvəqqəti bloklandı."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:374
+msgid "Silinmiş hesabı blokdan çıxarmaq üçün əvvəlcə bərpa edin."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:376
+#, fuzzy
+#| msgid "Hesabınıza daxil olub “İmtahanlar” bölməsindən başlaya bilərsiniz."
+msgid "Öz hesabınızın blokunu bu bölmədən aça bilməzsiniz."
+msgstr "Log in to your account and start from the “Exams” section."
+
+#: apps/accounts/views/account_management.py:378
+msgid "Superadmin hesabının blokunu açmaq olmaz."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:383
+#, python-brace-format
+msgid "\"{username}\" hesabının bloku açıldı."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:387
+#: apps/accounts/views/account_management.py:411
 msgid "cannot_delete_self"
 msgstr "You cannot delete your own account."
 
-#: apps/accounts/views/account_management.py:383
-#: apps/accounts/views/account_management.py:404
+#: apps/accounts/views/account_management.py:389
+#: apps/accounts/views/account_management.py:413
 msgid "cannot_delete_superadmin"
 msgstr "Superadmin accounts cannot be deleted."
 
-#: apps/accounts/views/account_management.py:398
+#: apps/accounts/views/account_management.py:401
+#, python-brace-format
+msgid "\"{username}\" hesabı silinmişlərə göndərildi."
+msgstr ""
+
+#: apps/accounts/views/account_management.py:407
 msgid "user_restored_success"
 msgstr "User \"%(username)s\" has been successfully restored."
 
-#: apps/accounts/views/account_management.py:417
+#: apps/accounts/views/account_management.py:426
 msgid "user_hard_deleted_success"
 msgstr "User \"%(username)s\" has been permanently deleted."
 
-#: apps/accounts/views/account_management.py:420
+#: apps/accounts/views/account_management.py:429
 msgid "unknown_action"
 msgstr "Unknown action."
 
@@ -8813,6 +8850,18 @@ msgctxt "accounts.role_assignment.message"
 msgid "teacher_or_higher_only"
 msgstr "Teacher or higher only"
 
+#: apps/accounts/views/roles/_assignment_flow/flow.py:255
+#, python-brace-format
+msgctxt "accounts.role_assignment.message"
+msgid "Uğurla əlavə edildi: {user} → {role}."
+msgstr ""
+
+#: apps/accounts/views/roles/_assignment_flow/flow.py:318
+#, python-brace-format
+msgctxt "accounts.role_assignment.message"
+msgid "Uğurla yeniləndi: {user} → {role}."
+msgstr ""
+
 #: apps/accounts/views/roles/manage.py:47
 msgctxt "accounts.manage_roles.message"
 msgid "admin_only"
@@ -8913,27 +8962,128 @@ msgctxt "accounts.permission_editor.message"
 msgid "Əməliyyat üçün ən azı bir permission seçin."
 msgstr ""
 
-#: apps/accounts/views/roles/permissions.py:196
+#: apps/accounts/views/roles/permissions.py:190
+#, fuzzy, python-brace-format
+#| msgctxt "appeals.template"
+#| msgid "{n} sual seçildi"
+msgctxt "accounts.permission_editor.message"
+msgid "{count} permission əlavə edildi."
+msgstr "{n} question(s) selected"
+
+#: apps/accounts/views/roles/permissions.py:197
+#, fuzzy, python-brace-format
+#| msgctxt "appeals.template"
+#| msgid "{n} sual seçildi"
+msgctxt "accounts.permission_editor.message"
+msgid "{count} permission silindi."
+msgstr "{n} question(s) selected"
+
+#: apps/accounts/views/roles/permissions.py:200
 msgctxt "accounts.permission_editor.message"
 msgid "unknown_action"
 msgstr "Unknown action"
 
-#: apps/accounts/views/superadmin/endpoints.py:179
+#: apps/accounts/views/superadmin/endpoints.py:57
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid "Təşkilatınız təsdiqləndi: {org}"
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:61
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid ""
+"\"{org}\" təşkilatı superadmin tərəfindən təsdiqləndi. İndi bütün "
+"funksiyalardan istifadə edə bilərsiniz."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:66
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid "Təşkilat müraciəti rədd edildi: {org}"
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:69
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid "\"{org}\" təşkilatı superadmin tərəfindən rədd edildi."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:73
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid "{message} Səbəb: {reason}"
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:102
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid "Yeni təşkilat müraciəti: {org}"
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:107
+#, python-brace-format
+msgctxt "accounts.superadmin_orgs.notification"
+msgid ""
+"\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:143
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Bu təşkilat artıq gözləmə vəziyyətində deyil."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:155
+#, python-format
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" təşkilatı uğurla təsdiqləndi."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:167
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Bu əməliyyat mövcud vəziyyətdə tətbiq oluna bilməz."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:189
+#, python-format
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" təşkilatı rədd edildi."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:210
 msgctxt "accounts.superadmin_orgs.message"
 msgid "organization_suspended"
 msgstr "Organization suspended"
 
-#: apps/accounts/views/superadmin/endpoints.py:198
+#: apps/accounts/views/superadmin/endpoints.py:229
 msgctxt "accounts.superadmin_orgs.message"
 msgid "organization_unsuspended"
 msgstr "Organization unsuspended"
 
-#: apps/accounts/views/superadmin/endpoints.py:219
+#: apps/accounts/views/superadmin/endpoints.py:238
+msgctxt "accounts.superadmin_orgs.message"
+msgid "Naməlum review visibility feature seçildi."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:251
+#, python-format
+msgctxt "accounts.superadmin_orgs.message"
+msgid "\"%(organization_name)s\" üçün %(feature)s anonimliyi söndürüldü."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:256
+#, python-format
+msgctxt "accounts.superadmin_orgs.message"
+msgid ""
+"\"%(organization_name)s\" üçün %(feature)s anonimliyi yenidən aktiv edildi."
+msgstr ""
+
+#: apps/accounts/views/superadmin/endpoints.py:263
 msgctxt "accounts.superadmin_orgs.message"
 msgid "unknown_action"
 msgstr "Unknown action"
 
-#: apps/accounts/views/superadmin/endpoints.py:263
+#: apps/accounts/views/superadmin/endpoints.py:307
 msgctxt "accounts.superadmin_ai.message"
 msgid "ai_settings_saved"
 msgstr "AI settings saved successfully."
@@ -11969,6 +12119,49 @@ msgctxt "blog.category.message"
 msgid "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin."
 msgstr ""
 
+#: apps/blog/signals.py:95
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "Yeni post təsdiq gözləyir: {title}"
+msgstr ""
+
+#: apps/blog/signals.py:97
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "{author} tərəfindən \"{title}\" başlıqlı post təsdiq üçün göndərildi."
+msgstr ""
+
+#: apps/blog/signals.py:131
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "Postunuz təsdiqləndi: {title}"
+msgstr ""
+
+#: apps/blog/signals.py:133
+#, python-brace-format
+msgctxt "blog.notification"
+msgid ""
+"\"{title}\" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı."
+msgstr ""
+
+#: apps/blog/signals.py:142
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "\"{title}\" başlıqlı postunuzda düzəliş tələb olunur."
+msgstr ""
+
+#: apps/blog/signals.py:145
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "{message} Müəllim rəyi: {feedback}"
+msgstr ""
+
+#: apps/blog/signals.py:150
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "Post düzəliş tələb edir: {title}"
+msgstr ""
+
 #: apps/blog/templates/blog/about.html:19
 #: ⁨apps/blog/templates/blog/about.html 5.py⁩:19
 msgid "EMSArena ilə tanış olun"
@@ -12715,8 +12908,16 @@ msgctxt "blog.post_form_page"
 msgid "submit"
 msgstr "Create post"
 
+#: apps/blog/utils.py:24
+#, fuzzy
+#| msgctxt "exams.template.teacher_questions_bank"
+#| msgid "Silməyi təsdiqlə"
+msgctxt "accounts.email.subject"
+msgid "Email təsdiqi"
+msgstr "Confirm deletion"
+
 #: apps/blog/views/author/posts.py:37 apps/blog/views/author/posts.py:141
-#: apps/blog/views/moderator/posts.py:105
+#: apps/blog/views/moderator/posts.py:107
 msgctxt "blog.permission"
 msgid "no_permission"
 msgstr "You do not have permission for this action."
@@ -12856,10 +13057,117 @@ msgctxt "post_management.error"
 msgid "invalid_action"
 msgstr "Select a valid reaction."
 
-#: apps/blog/views/moderator/posts.py:116
+#: apps/blog/views/moderator/posts.py:30
+msgctxt "blog.moderation.message"
+msgid "Bu postu təsdiqləmək üçün icazəniz yoxdur."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:37 apps/blog/views/moderator/posts.py:150
+msgctxt "blog.moderation.message"
+msgid "Yanlış əməliyyat seçildi."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:41
+msgctxt "blog.moderation.message"
+msgid "Düzəliş istəyi üçün feedback yazın."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:66
+msgctxt "blog.moderation.message"
+msgid "Post təsdiqləndi və paylaşıldı."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:87
+msgctxt "blog.moderation.message"
+msgid "Feedback göndərildi. Post düzəliş gözləyir."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:118
+#: apps/blog/views/moderator/posts.py:202
 msgctxt "blog.post.message"
 msgid "deleted"
 msgstr "Post '{title}' was deleted."
+
+#: apps/blog/views/moderator/posts.py:144
+msgctxt "blog.moderation.message"
+msgid "Bu postu idarə etmək üçün icazəniz yoxdur."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:155
+msgctxt "blog.moderation.message"
+msgid "Zəhmət olmasa əməliyyatın səbəbini yazın."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:190
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "Postunuz silindi: {title}"
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:192
+#, python-brace-format
+msgctxt "blog.notification"
+msgid ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}"
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:228
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "Postunuz yenidən aktiv edildi: {title}"
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:232
+#, python-brace-format
+msgctxt "blog.notification"
+msgid "\"{title}\" başlıqlı postunuz idarəçi tərəfindən yenidən paylaşıldı."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:243
+#, python-brace-format
+msgctxt "blog.post.message"
+msgid "\"{title}\" postu yenidən aktiv edildi və paylaşıldı."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:253
+#, fuzzy, python-brace-format
+#| msgctxt "appeals.template"
+#| msgid "{n} sual seçildi"
+msgctxt "blog.post.message"
+msgid "\"{title}\" postu aktiv edildi."
+msgstr "{n} question(s) selected"
+
+#: apps/blog/views/moderator/posts.py:280
+#, fuzzy, python-brace-format
+#| msgctxt "appeals.template"
+#| msgid "{n} sual seçildi"
+msgctxt "blog.notification"
+msgid "Postunuz deaktiv edildi: {title}"
+msgstr "{n} question(s) selected"
+
+#: apps/blog/views/moderator/posts.py:283
+#, python-brace-format
+msgctxt "blog.notification"
+msgid ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib "
+"— düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:298
+#, python-brace-format
+msgctxt "blog.moderation.message"
+msgid ""
+"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə "
+"düzəliş edib yenidən göndərə bilər."
+msgstr ""
+
+#: apps/blog/views/moderator/posts.py:308
+#, fuzzy, python-brace-format
+#| msgctxt "appeals.template"
+#| msgid "{n} sual seçildi"
+msgctxt "blog.post.message"
+msgid "\"{title}\" postu deaktiv edildi."
+msgstr "{n} question(s) selected"
 
 #: apps/blog/views/public/auth.py:51
 msgctxt "blog.verify.message"
@@ -29069,12 +29377,17 @@ msgstr "Scope unit must belong to the same organization as the membership."
 #: apps/organizations/views/org_admin/endpoints.py:35
 #: apps/organizations/views/org_admin/endpoints.py:74
 #: apps/organizations/views/org_admin/endpoints.py:84
-#: apps/organizations/views/org_admin/endpoints.py:136
-#: apps/organizations/views/org_admin/endpoints.py:151
-#: apps/organizations/views/org_admin/endpoints.py:168
+#: apps/organizations/views/org_admin/endpoints.py:140
+#: apps/organizations/views/org_admin/endpoints.py:155
+#: apps/organizations/views/org_admin/endpoints.py:172
 msgctxt "organizations.views.message"
 msgid "no_org_access"
 msgstr "You don't have access to this organization."
+
+#: apps/organizations/structure_views/_shared.py:385
+msgctxt "organizations.views.message"
+msgid "Əməliyyat yerinə yetirilə bilmədi."
+msgstr ""
 
 #: apps/organizations/unit_types.py:12 core/constants.py:213
 msgctxt "organizations.unit_type"
@@ -29184,12 +29497,17 @@ msgctxt "organizations.views.message"
 msgid "switched_to_org"
 msgstr "Switched to {organization}"
 
-#: apps/organizations/views/org_admin/endpoints.py:181
+#: apps/organizations/views/org_admin/endpoints.py:109
+msgctxt "organizations.views.message"
+msgid "Struktur bölməsi yaradıla bilmədi."
+msgstr ""
+
+#: apps/organizations/views/org_admin/endpoints.py:185
 msgctxt "organizations.views.message"
 msgid "no_settings_access"
 msgstr "You don't have permission to access settings."
 
-#: apps/organizations/views/org_admin/endpoints.py:193
+#: apps/organizations/views/org_admin/endpoints.py:197
 msgctxt "organizations.views.message"
 msgid "settings_updated"
 msgstr "Settings updated successfully."

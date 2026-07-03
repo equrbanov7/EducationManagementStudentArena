@@ -186,12 +186,16 @@ def permission_editor(request):
                 before_count = len(role_permissions_set)
                 role_permissions_set.update(selected_permissions)
                 changed_count = len(role_permissions_set) - before_count
-                result_message = f"{changed_count} permission əlavə edildi."
+                result_message = pgettext(
+                    "accounts.permission_editor.message", "{count} permission əlavə edildi."
+                ).format(count=changed_count)
             else:
                 before_count = len(role_permissions_set)
                 role_permissions_set.difference_update(selected_permissions)
                 changed_count = before_count - len(role_permissions_set)
-                result_message = f"{changed_count} permission silindi."
+                result_message = pgettext(
+                    "accounts.permission_editor.message", "{count} permission silindi."
+                ).format(count=changed_count)
         else:
             messages.error(request, pgettext_lazy("accounts.permission_editor.message", "unknown_action"))
             return _safe_redirect()
