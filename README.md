@@ -161,6 +161,11 @@ black --check .
  
 ------------
 
+# Running i18 file
+python manage.py makemessages -a -i 'venv/*' -i '.venv/*' -i 'staticfiles/*' -i 'htmlcov/*' -i 'output/*' -i 'node_modules/*' -i 'media/*' -i 'logs/*' -i 'backups/*' -i 'static/vendor/*'
+
+python manage.py compilemessages -l az -l en -l ru -l tr -i 'venv/*' -i '.venv/*' -i 'staticfiles/*' -i 'htmlcov/*' -i 'output/*' -i 'node_modules/*' -i 'media/*' -i 'logs/*' -i 'backups/*'
+
 ### **5. Set Up Environment Variables**
 
 Create a `.env` file in the project root:

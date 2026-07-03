@@ -12,6 +12,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.notifications.models import StudentOrganizationRequestStatus
 from core.constants import OrganizationType
@@ -65,12 +66,18 @@ def student_org_invitation_action(request):
         if action == "accept":
             organization = invite_membership.organization
             if organization.is_suspended:
-                messages.error(request, "Təşkilat hazırda aktiv deyil.")
+                messages.error(request, pgettext("accounts.org.message", "Təşkilat hazırda aktiv deyil."))
                 return redirect(back_url)
 
             profile, _ = UserProfile.objects.get_or_create(user=request.user)
             if profile.organization and profile.organization != organization:
-                messages.error(request, "Əvvəlcə mövcud təşkilatdan çıxın, sonra yeni dəvəti qəbul edin.")
+                messages.error(
+                    request,
+                    pgettext(
+                        "accounts.org.message",
+                        "Əvvəlcə mövcud təşkilatdan çıxın, sonra yeni dəvəti qəbul edin.",
+                    ),
+                )
                 return redirect(back_url)
 
             membership_role = invite_membership.role or _resolve_membership_role(
@@ -78,7 +85,7 @@ def student_org_invitation_action(request):
                 _profile_role_for_membership_request_type(invite_role_type),
             )
             if membership_role is None:
-                messages.error(request, "Təşkilatda uyğun üzvlük rolu tapılmadı.")
+                messages.error(request, pgettext("accounts.org.message", "Təşkilatda uyğun üzvlük rolu tapılmadı."))
                 return redirect(back_url)
 
             with transaction.atomic():
@@ -152,7 +159,12 @@ def student_org_invitation_action(request):
                 new_values={"status": "accepted"},
                 request=request,
             )
-            messages.success(request, f"{organization.name} təşkilatına {invite_role_label} kimi qoşuldunuz.")
+            messages.success(
+                request,
+                pgettext("accounts.org.message", "{org} təşkilatına {role} kimi qoşuldunuz.").format(
+                    org=organization.name, role=invite_role_label
+                ),
+            )
             return redirect(back_url)
 
         if action == "reject":
@@ -169,8 +181,13 @@ def student_org_invitation_action(request):
                 new_values={"status": "rejected"},
                 request=request,
             )
-            messages.info(request, f"{organization.name} tərəfindən göndərilən {invite_role_label} dəvəti rədd edildi.")
+            messages.info(
+                request,
+                pgettext("accounts.org.message", "{org} tərəfindən göndərilən {role} dəvəti rədd edildi.").format(
+                    org=organization.name, role=invite_role_label
+                ),
+            )
             return redirect(back_url)
 
-    messages.error(request, "Naməlum əməliyyat.")
+    messages.error(request, pgettext("accounts.org.message", "Naməlum əməliyyat."))
     return redirect(back_url)

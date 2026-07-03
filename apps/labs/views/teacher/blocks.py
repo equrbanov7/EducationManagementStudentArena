@@ -144,5 +144,5 @@ def update_questions_per_student(request, pk):
     for assignment in lab.assignments.all():
         assignment.assign_questions()
 
-    messages.success(request, "Tələbə başına sual sayı yeniləndi.")
+    messages.success(request, pgettext("labs.blocks.message", "Tələbə başına sual sayı yeniləndi."))
     return redirect("labs:manage_blocks", pk=lab.id)

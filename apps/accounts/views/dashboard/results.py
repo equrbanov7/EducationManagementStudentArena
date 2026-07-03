@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.assignments.models import Submission
 from apps.exams.models import ExamAttempt
@@ -66,7 +66,13 @@ def my_result_detail(request, item_type, item_id):
             exam__in=_tenant_scoped_exams(request),
         )
         if attempt.exam.results_hidden_from_students:
-            messages.info(request, "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib.")
+            messages.info(
+                request,
+                pgettext(
+                    "accounts.my_results.message",
+                    "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib.",
+                ),
+            )
             return redirect(back_url)
         if (
             attempt.exam.exam_type != "test"
@@ -76,7 +82,10 @@ def my_result_detail(request, item_type, item_id):
         ):
             messages.info(
                 request,
-                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+                pgettext(
+                    "accounts.my_results.message",
+                    "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(back_url)
         return redirect("exams:exam_result", slug=attempt.exam.slug, attempt_id=attempt.id)
@@ -95,7 +104,10 @@ def my_result_detail(request, item_type, item_id):
         ):
             messages.info(
                 request,
-                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+                pgettext(
+                    "accounts.my_results.message",
+                    "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(back_url)
 
@@ -132,7 +144,10 @@ def my_result_detail(request, item_type, item_id):
         ):
             messages.info(
                 request,
-                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+                pgettext(
+                    "accounts.my_results.message",
+                    "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(back_url)
 
@@ -189,7 +204,10 @@ def my_result_detail(request, item_type, item_id):
         ):
             messages.info(
                 request,
-                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+                pgettext(
+                    "accounts.my_results.message",
+                    "Nəticə hələ yekunlaşmayıb. {minutes} dəqiqə tamam olduqdan sonra görünəcək.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(back_url)
 

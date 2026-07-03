@@ -9,7 +9,7 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.http import HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
@@ -65,7 +65,13 @@ def register_view(request):
                     form.cleaned_data.get("email"),
                     exc.retry_after,
                 )
-                messages.error(request, "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.")
+                messages.error(
+                    request,
+                    pgettext(
+                        "accounts.auth.message",
+                        "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.",
+                    ),
+                )
                 response = render(
                     request,
                     "accounts/register.html",
@@ -184,7 +190,13 @@ def verify_code_view(request):
                 user, organization, _requested_organization, _profile = finalize_pending_registration(email)
             except Exception:
                 logger.exception("Failed to finalize pending registration for %s after OTP verification", email)
-                messages.error(request, "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin.")
+                messages.error(
+                    request,
+                    pgettext(
+                        "accounts.auth.message",
+                        "OTP təsdiqləndi, amma hesab yaradılarkən xəta baş verdi. Yenidən cəhd edin.",
+                    ),
+                )
                 return redirect("accounts:register")
             if is_tenant_accessible_organization(organization):
                 request.session["active_organization"] = organization.slug
@@ -285,7 +297,12 @@ def resend_code_view(request):
                 enforce_cooldown=True,
             )
     except OTPResendCooldownError as exc:
-        messages.error(request, f"Yeni OTP kodu üçün {exc.retry_after} saniyə gözləyin.")
+        messages.error(
+            request,
+            pgettext("accounts.auth.message", "Yeni OTP kodu üçün {seconds} saniyə gözləyin.").format(
+                seconds=exc.retry_after
+            ),
+        )
         response = render(
             request,
             "accounts/verify_code.html",
@@ -298,7 +315,13 @@ def resend_code_view(request):
         response.headers["Retry-After"] = str(exc.retry_after)
         return response
     except OTPRateLimitError as exc:
-        messages.error(request, "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.")
+        messages.error(
+                    request,
+                    pgettext(
+                        "accounts.auth.message",
+                        "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.",
+                    ),
+                )
         response = render(
             request,
             "accounts/verify_code.html",

@@ -69,7 +69,7 @@ def exam_questions_word_export(request, slug):
     language = (request.GET.get("language") or "").strip().lower() or None
     payload = exam_questions_payload(exam, language=language)
     if not payload:
-        messages.warning(request, "Export üçün sual tapılmadı.")
+        messages.warning(request, pgettext("exams.question_bank.message", "Export üçün sual tapılmadı."))
         return redirect("exams:test_question_bank", slug=exam.slug)
 
     subtitle_parts = [f"Sual sayı: {len(payload)}"]

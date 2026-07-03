@@ -183,3 +183,13 @@ backups/
 * 2.po
 * 2.html
 * 2.py
+# Django makemessages yarımçıq qalanda templatize temp faylları arta bilər:
+# "<template>.html.py", "<template>.html 3.py", "<template>.txt 4.py" və s.
+*.html.py
+*.txt.py
+* [0-9]*.css
+* [0-9]*.js
+* [0-9]*.mo
+* [0-9]*.po
+* [0-9]*.html
+* [0-9]*.py
