@@ -9,6 +9,8 @@ from django.db import transaction
 
 from apps.exams.models import StudentGroup
 from core.constants import OrganizationType
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
 
 from ._seed_helpers import CoursesSeedMixin, ExamsSeedMixin, UsersSeedMixin
@@ -34,6 +36,8 @@ class Command(UsersSeedMixin, CoursesSeedMixin, ExamsSeedMixin, BaseCommand):
         )
 
     @transaction.atomic
+    @rls_worker_atomic()
+    @bypass_rls()
     def handle(self, *args, **options):
         password = options["password"]
         students_per_org = max(3, options["students_per_org"])

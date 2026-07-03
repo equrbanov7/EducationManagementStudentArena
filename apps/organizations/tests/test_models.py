@@ -299,23 +299,27 @@ class OrgUnitModelTest(TestCase):
 
 
 class OrganizationDefaultRoleSignalTest(TestCase):
-    def test_create_default_roles_uses_rls_bypass(self):
+    def test_create_default_roles_uses_transaction_pooling_safe_tenant_scope(self):
         user = User.objects.create_user(username="signaluser", email="signal@test.com", password="testpass123")
-        entered = {"count": 0}
+        entered = {"atomic": 0}
 
         @contextmanager
-        def recording_bypass():
-            entered["count"] += 1
+        def recording_atomic():
+            entered["atomic"] += 1
             yield
 
-        with patch("apps.organizations.signals.bypass_rls", recording_bypass):
+        with (
+            patch("apps.organizations.signals.rls_worker_atomic", recording_atomic),
+            patch("apps.organizations.signals.set_rls_tenant") as set_rls_tenant,
+        ):
             org = Organization.objects.create(
                 name="Signal School",
                 org_type=OrganizationType.SCHOOL,
                 owner=user,
             )
 
-        self.assertEqual(entered["count"], 1)
+        self.assertEqual(entered, {"atomic": 1})
+        set_rls_tenant.assert_called_once_with(org.pk)
         self.assertTrue(org.roles.filter(name="teacher").exists())
 
 

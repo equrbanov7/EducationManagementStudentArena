@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import timedelta
 from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -61,3 +63,24 @@ class PurgeNotificationsCommandTest(TestCase):
         self._run("--read-days", "365", "--commit")
         self.assertFalse(InAppNotification.objects.filter(pk=read_old.pk).exists())
         self.assertTrue(InAppNotification.objects.filter(pk=read_recent.pk).exists())
+
+    def test_command_wraps_sweep_for_transaction_pooling(self):
+        entered = {"atomic": 0, "bypass": 0}
+
+        @contextmanager
+        def recording_atomic():
+            entered["atomic"] += 1
+            yield
+
+        @contextmanager
+        def recording_bypass():
+            entered["bypass"] += 1
+            yield
+
+        with (
+            patch("apps.notifications.management.commands.purge_notifications.rls_worker_atomic", recording_atomic),
+            patch("apps.notifications.management.commands.purge_notifications.bypass_rls", recording_bypass),
+        ):
+            self._run()
+
+        self.assertEqual(entered, {"atomic": 1, "bypass": 1})

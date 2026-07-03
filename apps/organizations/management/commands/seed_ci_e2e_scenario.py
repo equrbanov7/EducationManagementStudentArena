@@ -18,6 +18,8 @@ from django.utils import timezone
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -246,6 +248,8 @@ class Command(BaseCommand):
         return question
 
     @transaction.atomic
+    @rls_worker_atomic()
+    @bypass_rls()
     def handle(self, *args, **options):
         # M2 (2026-07-02): cross-app modellər lazy — organizations→courses/exams/
         # assignments import kənarlarını kəsir (AGENTS §5, pattern 2).

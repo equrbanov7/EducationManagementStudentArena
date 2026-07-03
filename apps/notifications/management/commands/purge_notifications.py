@@ -37,6 +37,7 @@ from django.utils import timezone
 
 from apps.notifications.models import InAppNotification
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -82,7 +83,7 @@ class Command(BaseCommand):
 
         # Maintenance runs outside any request, so no RLS tenant context is set;
         # bypass RLS so the sweep can see and delete rows across every tenant.
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             soft_qs = InAppNotification.objects.filter(
                 deleted_at__isnull=False,
                 deleted_at__lt=now - timedelta(days=soft_days),
@@ -123,10 +124,11 @@ class Command(BaseCommand):
         """Delete matching rows in bounded batches to avoid a single huge lock."""
         deleted = 0
         while True:
-            batch_ids = list(queryset.values_list("pk", flat=True)[:batch_size])
-            if not batch_ids:
-                break
-            with transaction.atomic():
-                InAppNotification.objects.filter(pk__in=batch_ids).delete()
+            with rls_worker_atomic(), bypass_rls():
+                batch_ids = list(queryset.values_list("pk", flat=True)[:batch_size])
+                if not batch_ids:
+                    break
+                with transaction.atomic():
+                    InAppNotification.objects.filter(pk__in=batch_ids).delete()
             deleted += len(batch_ids)
         return deleted

@@ -101,8 +101,10 @@ def send_audit_log_async(*, action, user=None, organization=None, obj=None, **kw
               action=AuditAction.UPDATE, user=request.user, obj=session)
     """
     from core.audit import log_action
+    from core.rls_pooling import rls_worker_atomic
 
-    log_action(action=action, user=user, organization=organization, obj=obj, **kwargs)
+    with rls_worker_atomic():
+        log_action(action=action, user=user, organization=organization, obj=obj, **kwargs)
 
 
 def export_exam_results_csv(*, exam_pk: int, recipient_email: str) -> None:

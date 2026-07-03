@@ -6,6 +6,9 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
+
 from .models import Category, Post, Subscriber
 from .selectors import invalidate_blog_listing_cache
 from .services import author_requires_superadmin_post_review
@@ -20,15 +23,16 @@ logger = logging.getLogger(__name__)
 
 @receiver(pre_save, sender=Post)
 def _cache_post_approval_state(sender, instance, **kwargs):
-    if not instance.pk:
-        instance._previous_approval_status = None
-        return
-    try:
-        instance._previous_approval_status = (
-            Post.objects.filter(pk=instance.pk).values_list("approval_status", flat=True).first()
-        )
-    except Exception:
-        instance._previous_approval_status = None
+    with rls_worker_atomic(), bypass_rls():
+        if not instance.pk:
+            instance._previous_approval_status = None
+            return
+        try:
+            instance._previous_approval_status = (
+                Post.objects.filter(pk=instance.pk).values_list("approval_status", flat=True).first()
+            )
+        except Exception:
+            instance._previous_approval_status = None
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -65,43 +69,44 @@ def _get_superadmin_reviewers():
 @receiver(post_save, sender=Post)
 def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
     """Notify the post's reviewer(s) when approval_status transitions to PENDING."""
-    if not instance.requires_approval:
-        return
-
-    current_status = instance.approval_status
-    previous_status = getattr(instance, "_previous_approval_status", None)
-
-    # Trigger when: newly created as PENDING, or re-submitted (status changed to PENDING).
-    if current_status != Post.ApprovalStatus.PENDING:
-        return
-    if not created and previous_status == Post.ApprovalStatus.PENDING:
-        # No transition — already was PENDING; avoid duplicate notifications.
-        return
-
-    try:
-        from apps.notifications.models import NotificationType
-        from apps.notifications.public import create_notification_for_users
-
-        if author_requires_superadmin_post_review(instance.author):
-            reviewers = _get_superadmin_reviewers()
-        else:
-            reviewers = _get_reviewers_for_post(instance)
-        if not reviewers:
+    with rls_worker_atomic(), bypass_rls():
+        if not instance.requires_approval:
             return
 
-        author_name = (instance.author.get_full_name() or "").strip() or instance.author.username
-        create_notification_for_users(
-            recipients=reviewers,
-            title=pgettext("blog.notification", "Yeni post təsdiq gözləyir: {title}").format(title=instance.title),
-            message=pgettext(
-                "blog.notification", '{author} tərəfindən "{title}" başlıqlı post təsdiq üçün göndərildi.'
-            ).format(author=author_name, title=instance.title),
-            link=reverse("accounts:profile") + "?section=pending-post-approvals",
-            notification_type=NotificationType.APPROVAL,
-            metadata={"post_id": instance.pk, "author_id": instance.author_id},
-        )
-    except Exception:
-        logger.exception("Failed to notify teachers about pending post pk=%s", instance.pk)
+        current_status = instance.approval_status
+        previous_status = getattr(instance, "_previous_approval_status", None)
+
+        # Trigger when: newly created as PENDING, or re-submitted (status changed to PENDING).
+        if current_status != Post.ApprovalStatus.PENDING:
+            return
+        if not created and previous_status == Post.ApprovalStatus.PENDING:
+            # No transition — already was PENDING; avoid duplicate notifications.
+            return
+
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.public import create_notification_for_users
+
+            if author_requires_superadmin_post_review(instance.author):
+                reviewers = _get_superadmin_reviewers()
+            else:
+                reviewers = _get_reviewers_for_post(instance)
+            if not reviewers:
+                return
+
+            author_name = (instance.author.get_full_name() or "").strip() or instance.author.username
+            create_notification_for_users(
+                recipients=reviewers,
+                title=pgettext("blog.notification", "Yeni post təsdiq gözləyir: {title}").format(title=instance.title),
+                message=pgettext(
+                    "blog.notification", '{author} tərəfindən "{title}" başlıqlı post təsdiq üçün göndərildi.'
+                ).format(author=author_name, title=instance.title),
+                link=reverse("accounts:profile") + "?section=pending-post-approvals",
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_id": instance.pk, "author_id": instance.author_id},
+            )
+        except Exception:
+            logger.exception("Failed to notify teachers about pending post pk=%s", instance.pk)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -112,65 +117,70 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Post)
 def notify_author_on_approval_decision(sender, instance, created, **kwargs):
     """Notify the post author when their post is approved or returned for changes."""
-    if created or not instance.requires_approval:
-        return
+    with rls_worker_atomic(), bypass_rls():
+        if created or not instance.requires_approval:
+            return
 
-    current_status = instance.approval_status
-    previous_status = getattr(instance, "_previous_approval_status", None)
+        current_status = instance.approval_status
+        previous_status = getattr(instance, "_previous_approval_status", None)
 
-    if current_status == previous_status:
-        return
+        if current_status == previous_status:
+            return
 
-    try:
-        from apps.notifications.models import NotificationType
-        from apps.notifications.public import create_notification
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.public import create_notification
 
-        if current_status == Post.ApprovalStatus.APPROVED:
-            create_notification(
-                recipient=instance.author,
-                title=pgettext("blog.notification", "Postunuz təsdiqləndi: {title}").format(title=instance.title),
-                message=pgettext(
-                    "blog.notification", '"{title}" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.'
-                ).format(title=instance.title),
-                link=reverse("article_detail", kwargs={"slug": instance.slug}),
-                notification_type=NotificationType.APPROVAL,
-                metadata={"post_id": instance.pk},
-            )
-        elif current_status == Post.ApprovalStatus.NEEDS_CHANGES:
-            feedback = (instance.approval_feedback or "").strip()
-            message = pgettext("blog.notification", '"{title}" başlıqlı postunuzda düzəliş tələb olunur.').format(
-                title=instance.title
-            )
-            if feedback:
-                message = pgettext("blog.notification", "{message} Müəllim rəyi: {feedback}").format(
-                    message=message, feedback=feedback
+            if current_status == Post.ApprovalStatus.APPROVED:
+                create_notification(
+                    recipient=instance.author,
+                    title=pgettext("blog.notification", "Postunuz təsdiqləndi: {title}").format(title=instance.title),
+                    message=pgettext(
+                        "blog.notification",
+                        '"{title}" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.',
+                    ).format(title=instance.title),
+                    link=reverse("article_detail", kwargs={"slug": instance.slug}),
+                    notification_type=NotificationType.APPROVAL,
+                    metadata={"post_id": instance.pk},
                 )
-            create_notification(
-                recipient=instance.author,
-                title=pgettext("blog.notification", "Post düzəliş tələb edir: {title}").format(title=instance.title),
-                message=message,
-                link=reverse("accounts:profile") + "?section=posts",
-                notification_type=NotificationType.APPROVAL,
-                metadata={"post_id": instance.pk, "feedback": feedback},
-            )
-    except Exception:
-        logger.exception("Failed to notify post author about approval decision pk=%s", instance.pk)
+            elif current_status == Post.ApprovalStatus.NEEDS_CHANGES:
+                feedback = (instance.approval_feedback or "").strip()
+                message = pgettext("blog.notification", '"{title}" başlıqlı postunuzda düzəliş tələb olunur.').format(
+                    title=instance.title
+                )
+                if feedback:
+                    message = pgettext("blog.notification", "{message} Müəllim rəyi: {feedback}").format(
+                        message=message, feedback=feedback
+                    )
+                create_notification(
+                    recipient=instance.author,
+                    title=pgettext("blog.notification", "Post düzəliş tələb edir: {title}").format(
+                        title=instance.title
+                    ),
+                    message=message,
+                    link=reverse("accounts:profile") + "?section=posts",
+                    notification_type=NotificationType.APPROVAL,
+                    metadata={"post_id": instance.pk, "feedback": feedback},
+                )
+        except Exception:
+            logger.exception("Failed to notify post author about approval decision pk=%s", instance.pk)
 
 
 @receiver(post_save, sender=Post)
 def send_new_post_notification(sender, instance, created, **kwargs):
-    if created and instance.is_published:
-        active_subscribers = list(Subscriber.objects.filter(is_active=True).values_list("email", flat=True))
+    with rls_worker_atomic(), bypass_rls():
+        if created and instance.is_published:
+            active_subscribers = list(Subscriber.objects.filter(is_active=True).values_list("email", flat=True))
 
-        if not active_subscribers:
-            return
+            if not active_subscribers:
+                return
 
-        from core.email_tasks import send_new_post_notification_email
+            from core.email_tasks import send_new_post_notification_email
 
-        send_new_post_notification_email.delay(
-            post_pk=instance.pk,
-            subscriber_emails=active_subscribers,
-        )
+            send_new_post_notification_email.delay(
+                post_pk=instance.pk,
+                subscriber_emails=active_subscribers,
+            )
 
 
 @receiver(post_save, sender=Post)

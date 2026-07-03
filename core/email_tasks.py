@@ -31,6 +31,8 @@ from django.utils.html import strip_tags
 
 from celery import shared_task
 
+from core.rls_pooling import rls_worker_atomic
+
 logger = logging.getLogger(__name__)
 
 
@@ -99,49 +101,50 @@ def send_account_otp_email(
     """
     Send a purpose-specific OTP email asynchronously.
     """
-    user = None
-    resolved_name = recipient_name
-    if user_pk:
-        from django.contrib.auth import get_user_model
+    with rls_worker_atomic():
+        user = None
+        resolved_name = recipient_name
+        if user_pk:
+            from django.contrib.auth import get_user_model
 
-        User = get_user_model()
+            User = get_user_model()
+            try:
+                user = User.objects.get(pk=user_pk)
+            except User.DoesNotExist:
+                logger.warning("send_account_otp_email: user %s not found, continuing without user object", user_pk)
+            else:
+                resolved_name = resolved_name or user.get_full_name().strip() or user.username
+
+        context = {
+            "user": user,
+            "recipient_name": resolved_name or recipient_email,
+            "email": recipient_email,
+            "headline": _otp_headline_for_purpose(purpose),
+            "otp_intro_action": _otp_intro_for_purpose(purpose),
+            "cta_label": _otp_cta_for_purpose(purpose),
+            "purpose": purpose,
+            "code": code,
+            "verification_link": verification_link,
+            "otp_expiry_minutes": otp_expiry_minutes,
+            "expires_at": expires_at,
+        }
+        template_prefix = _otp_template_prefix_for_purpose(purpose)
+        text_body = render_to_string(f"{template_prefix}.txt", context)
+        html_body = render_to_string(f"{template_prefix}.html", context)
+
         try:
-            user = User.objects.get(pk=user_pk)
-        except User.DoesNotExist:
-            logger.warning("send_account_otp_email: user %s not found, continuing without user object", user_pk)
-        else:
-            resolved_name = resolved_name or user.get_full_name().strip() or user.username
-
-    context = {
-        "user": user,
-        "recipient_name": resolved_name or recipient_email,
-        "email": recipient_email,
-        "headline": _otp_headline_for_purpose(purpose),
-        "otp_intro_action": _otp_intro_for_purpose(purpose),
-        "cta_label": _otp_cta_for_purpose(purpose),
-        "purpose": purpose,
-        "code": code,
-        "verification_link": verification_link,
-        "otp_expiry_minutes": otp_expiry_minutes,
-        "expires_at": expires_at,
-    }
-    template_prefix = _otp_template_prefix_for_purpose(purpose)
-    text_body = render_to_string(f"{template_prefix}.txt", context)
-    html_body = render_to_string(f"{template_prefix}.html", context)
-
-    try:
-        message = EmailMultiAlternatives(
-            subject=_otp_subject_for_purpose(purpose),
-            body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient_email],
-        )
-        message.attach_alternative(html_body, "text/html")
-        message.send()
-        logger.info("Purpose-specific OTP email sent to %s for purpose %s", recipient_email, purpose)
-    except Exception as exc:
-        logger.exception("Failed to send purpose-specific OTP email to %s: %s", recipient_email, exc)
-        raise
+            message = EmailMultiAlternatives(
+                subject=_otp_subject_for_purpose(purpose),
+                body=text_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[recipient_email],
+            )
+            message.attach_alternative(html_body, "text/html")
+            message.send()
+            logger.info("Purpose-specific OTP email sent to %s for purpose %s", recipient_email, purpose)
+        except Exception as exc:
+            logger.exception("Failed to send purpose-specific OTP email to %s: %s", recipient_email, exc)
+            raise
 
 
 @shared_task(
@@ -163,25 +166,26 @@ def send_verification_otp_email(
 ) -> None:
     """Backward-compatible Celery task for signup verification OTP emails."""
 
-    from django.contrib.auth import get_user_model
+    with rls_worker_atomic():
+        from django.contrib.auth import get_user_model
 
-    User = get_user_model()
-    try:
-        user = User.objects.get(pk=user_pk)
-    except User.DoesNotExist:
-        logger.warning("send_verification_otp_email: user %s not found, skipping", user_pk)
-        return
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=user_pk)
+        except User.DoesNotExist:
+            logger.warning("send_verification_otp_email: user %s not found, skipping", user_pk)
+            return
 
-    send_account_otp_email.run(
-        user_pk=user_pk,
-        recipient_email=user.email,
-        recipient_name=user.get_full_name().strip() or user.username,
-        purpose="signup",
-        code=code,
-        expires_at=expires_at,
-        verification_link=verification_link,
-        otp_expiry_minutes=otp_expiry_minutes,
-    )
+        send_account_otp_email.run(
+            user_pk=user_pk,
+            recipient_email=user.email,
+            recipient_name=user.get_full_name().strip() or user.username,
+            purpose="signup",
+            code=code,
+            expires_at=expires_at,
+            verification_link=verification_link,
+            otp_expiry_minutes=otp_expiry_minutes,
+        )
 
 
 @shared_task(
@@ -206,23 +210,24 @@ def send_template_email_async(
 
     Drop-in async equivalent of ``core.utils.send_template_email``.
     """
-    html_message = render_to_string(template_name, context)
-    plain_message = strip_tags(html_message)
-    sender = from_email or settings.DEFAULT_FROM_EMAIL
+    with rls_worker_atomic():
+        html_message = render_to_string(template_name, context)
+        plain_message = strip_tags(html_message)
+        sender = from_email or settings.DEFAULT_FROM_EMAIL
 
-    try:
-        message = EmailMultiAlternatives(
-            subject=subject,
-            body=plain_message,
-            from_email=sender,
-            to=recipient_list,
-        )
-        message.attach_alternative(html_message, "text/html")
-        message.send()
-        logger.info("Template email '%s' sent to %d recipient(s)", subject, len(recipient_list))
-    except Exception as exc:
-        logger.exception("Failed to send template email '%s': %s", subject, exc)
-        raise
+        try:
+            message = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_message,
+                from_email=sender,
+                to=recipient_list,
+            )
+            message.attach_alternative(html_message, "text/html")
+            message.send()
+            logger.info("Template email '%s' sent to %d recipient(s)", subject, len(recipient_list))
+        except Exception as exc:
+            logger.exception("Failed to send template email '%s': %s", subject, exc)
+            raise
 
 
 @shared_task(
@@ -244,38 +249,39 @@ def send_new_post_notification_email(
     This replaces the synchronous ``send_new_post_notification`` signal
     handler in ``apps/blog/signals.py``.
     """
-    from django.apps import apps as django_apps
+    with rls_worker_atomic():
+        from django.apps import apps as django_apps
 
-    Post = django_apps.get_model("blog", "Post")
+        Post = django_apps.get_model("blog", "Post")
 
-    try:
-        post = Post.objects.get(pk=post_pk)
-    except Post.DoesNotExist:
-        logger.warning("send_new_post_notification_email: post %s not found, skipping", post_pk)
-        return
+        try:
+            post = Post.objects.get(pk=post_pk)
+        except Post.DoesNotExist:
+            logger.warning("send_new_post_notification_email: post %s not found, skipping", post_pk)
+            return
 
-    if not subscriber_emails:
-        return
+        if not subscriber_emails:
+            return
 
-    context = {"post": post}
-    html_message = render_to_string("accounts/emails/new_post_notification.html", context)
-    plain_message = strip_tags(html_message)
+        context = {"post": post}
+        html_message = render_to_string("accounts/emails/new_post_notification.html", context)
+        plain_message = strip_tags(html_message)
 
-    try:
-        message = EmailMultiAlternatives(
-            subject=f"Yeni post: {post.title}",
-            body=plain_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[settings.DEFAULT_FROM_EMAIL],
-            bcc=subscriber_emails,
-        )
-        message.attach_alternative(html_message, "text/html")
-        message.send()
-        logger.info(
-            "New-post notification for post %s sent to %d subscriber(s)",
-            post_pk,
-            len(subscriber_emails),
-        )
-    except Exception as exc:
-        logger.exception("Failed to send new-post notification for post %s: %s", post_pk, exc)
-        raise
+        try:
+            message = EmailMultiAlternatives(
+                subject=f"Yeni post: {post.title}",
+                body=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.DEFAULT_FROM_EMAIL],
+                bcc=subscriber_emails,
+            )
+            message.attach_alternative(html_message, "text/html")
+            message.send()
+            logger.info(
+                "New-post notification for post %s sent to %d subscriber(s)",
+                post_pk,
+                len(subscriber_emails),
+            )
+        except Exception as exc:
+            logger.exception("Failed to send new-post notification for post %s: %s", post_pk, exc)
+            raise

@@ -6,7 +6,8 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from core.cache import invalidate_signup_lookup_cache
-from core.rls import bypass_rls
+from core.rls import set_rls_tenant
+from core.rls_pooling import rls_worker_atomic
 
 from .default_roles import get_default_roles_for_org_type
 from .models import Country, Membership, Organization, Role
@@ -18,7 +19,8 @@ def create_default_roles(sender, instance, created, **kwargs):
     Automatically create default roles when a new organization is created.
     """
     if created:
-        with bypass_rls():
+        with rls_worker_atomic():
+            set_rls_tenant(instance.pk)
             # Get default role templates for this organization type
             role_templates = get_default_roles_for_org_type(instance.org_type)
 
