@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.db.models import Q
 
-from apps.exams.domain.access_policy import StudentGroup
+from apps.exams.models import StudentGroup
 
 from .._helpers import PENDING_REVIEW_STATUS_CHOICES, PENDING_REVIEW_TYPE_CHOICES
 from .constants import SUBMISSION_DATE_ORDER_CHOICES

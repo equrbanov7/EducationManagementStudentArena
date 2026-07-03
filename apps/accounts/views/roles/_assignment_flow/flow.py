@@ -34,8 +34,8 @@ class _RoleAssignmentFlow(_AuditMixin, _PredicatesMixin, _ResolversMixin):
 
     def __init__(self, request):
         from apps.organizations.models import Membership, Role
-        from apps.organizations.permissions import has_permission
         from apps.organizations.public import create_audit_log, get_user_org_role_level
+        from core.permissions import has_permission
 
         self.request = request
         self.Membership = Membership

@@ -29,8 +29,8 @@ User = get_user_model()
 def permission_editor(request):
     """Organization-scoped permission editor with add/remove enforcement."""
     from apps.organizations.models import Role
-    from apps.organizations.permissions import has_permission
     from apps.organizations.public import create_audit_log, get_all_permissions, get_user_org_role_level
+    from core.permissions import has_permission
 
     org = _get_active_organization(request)
     if not org:

@@ -210,6 +210,14 @@ Dövr əritmək üçün təsdiqlənmiş 4 pattern (M2):
    həll olunan funksiya (nümunə: `apps/exams/constants.py` →
    `get_live_session_model()` / `get_live_active_states()`).
 
+QƏRAR (C4, 2026-07-03): accounts-dakı profil dashboard aqreqatorları
+(`views/_dashboard_helpers/*` — pending/evaluated review, results, badges)
+QƏSDƏN accounts-da qalır — hər biri exams+assignments+labs+projects datasını
+BİRLƏŞDİRİR; onları hər hansı content-app-a köçürmək yanlış-istiqamətli
+kənarlar yaradar. accounts→X birtərəfli kənarları bu hub üçün legitimdir;
+şərt: istehlak yalnız `apps.<app>.public` + `apps.<app>.models` səthlərindən
+getsin (dərin domain/servis yolları QADAĞANDIR).
+
 Yoxlama: `python scripts/module_deps.py --check` (hesabat üçün arqumentsiz).
 
 ---
