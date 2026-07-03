@@ -314,9 +314,9 @@ class _RoleAssignmentFlow(_AuditMixin, _PredicatesMixin, _ResolversMixin):
                 ),
                 request=self.request,
             )
-            success_message = pgettext(
-                "accounts.role_assignment.message", "Uğurla yeniləndi: {user} → {role}."
-            ).format(user=target_membership.user.username, role=target_role.display_name)
+            success_message = pgettext("accounts.role_assignment.message", "Uğurla yeniləndi: {user} → {role}.").format(
+                user=target_membership.user.username, role=target_role.display_name
+            )
             if self._wants_json_response():
                 return JsonResponse({"success": True, "message": success_message, "redirect_url": self.next_url})
             messages.success(self.request, success_message)

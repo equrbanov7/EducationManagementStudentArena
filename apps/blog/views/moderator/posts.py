@@ -26,9 +26,7 @@ def review_post(request, post_id):
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id, requires_approval=True)
 
     if not can_user_review_post(request.user, post):
-        raise PermissionDenied(
-            pgettext("blog.moderation.message", "Bu postu təsdiqləmək üçün icazəniz yoxdur.")
-        )
+        raise PermissionDenied(pgettext("blog.moderation.message", "Bu postu təsdiqləmək üçün icazəniz yoxdur."))
 
     action = (request.POST.get("action") or "").strip().lower()
     feedback = (request.POST.get("feedback") or "").strip()
@@ -225,9 +223,7 @@ def teacher_moderate_post(request, post_id):
 
             create_notification(
                 recipient=post.author,
-                title=pgettext("blog.notification", "Postunuz yenidən aktiv edildi: {title}").format(
-                    title=post.title
-                ),
+                title=pgettext("blog.notification", "Postunuz yenidən aktiv edildi: {title}").format(title=post.title),
                 message=pgettext(
                     "blog.notification", '"{title}" başlıqlı postunuz idarəçi tərəfindən yenidən paylaşıldı.'
                 ).format(title=post.title),
@@ -250,9 +246,7 @@ def teacher_moderate_post(request, post_id):
             return JsonResponse(
                 {
                     "success": True,
-                    "message": pgettext("blog.post.message", '"{title}" postu aktiv edildi.').format(
-                        title=post.title
-                    ),
+                    "message": pgettext("blog.post.message", '"{title}" postu aktiv edildi.').format(title=post.title),
                     "is_published": post.is_published,
                 }
             )

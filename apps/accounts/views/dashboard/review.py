@@ -121,12 +121,12 @@ def pending_review_detail(request, item_type, item_id):
         if request.method == "POST":
             if is_locked:
                 messages.error(
-                request,
-                pgettext(
-                    "accounts.review.message",
-                    "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
-                ),
-            )
+                    request,
+                    pgettext(
+                        "accounts.review.message",
+                        "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
+                    ),
+                )
                 return redirect(redirect_url)
 
             feedback = (request.POST.get("feedback") or "").strip()
@@ -138,9 +138,9 @@ def pending_review_detail(request, item_type, item_id):
 
             if score < 0 or score > max_score:
                 messages.error(
-                request,
-                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
-            )
+                    request,
+                    pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+                )
                 return redirect(redirect_url)
 
             submission.grade = score
@@ -206,12 +206,12 @@ def pending_review_detail(request, item_type, item_id):
         if request.method == "POST":
             if is_locked:
                 messages.error(
-                request,
-                pgettext(
-                    "accounts.review.message",
-                    "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
-                ),
-            )
+                    request,
+                    pgettext(
+                        "accounts.review.message",
+                        "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
+                    ),
+                )
                 return redirect(redirect_url)
 
             feedback = (request.POST.get("feedback") or "").strip()
@@ -223,9 +223,9 @@ def pending_review_detail(request, item_type, item_id):
 
             if score < 0 or score > max_score:
                 messages.error(
-                request,
-                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
-            )
+                    request,
+                    pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+                )
                 return redirect(redirect_url)
 
             submission.grade = score

@@ -138,9 +138,9 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
             )
         elif current_status == Post.ApprovalStatus.NEEDS_CHANGES:
             feedback = (instance.approval_feedback or "").strip()
-            message = pgettext(
-                "blog.notification", '"{title}" başlıqlı postunuzda düzəliş tələb olunur.'
-            ).format(title=instance.title)
+            message = pgettext("blog.notification", '"{title}" başlıqlı postunuzda düzəliş tələb olunur.').format(
+                title=instance.title
+            )
             if feedback:
                 message = pgettext("blog.notification", "{message} Müəllim rəyi: {feedback}").format(
                     message=message, feedback=feedback

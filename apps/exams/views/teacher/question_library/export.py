@@ -70,14 +70,17 @@ def question_bank_word_export(request, bank_id):
         messages.warning(request, pgettext("exams.view.bank.message", "Export üçün aktiv sual tapılmadı."))
         return redirect("exams:question_bank_detail", bank_id=bank.id)
 
-    subtitle_parts = [f"Sual sayı: {len(payload)}"]
+    subtitle_parts = [pgettext("exams.export", "Sual sayı: %(count)s") % {"count": len(payload)}]
     if bank.subject:
-        subtitle_parts.insert(0, f"Fənn: {bank.subject}")
+        subtitle_parts.insert(
+            0,
+            pgettext("exams.export", "Fənn: %(subject)s") % {"subject": bank.subject},
+        )
     if language:
-        subtitle_parts.append(f"Dil: {language.upper()}")
+        subtitle_parts.append(pgettext("exams.export", "Dil: %(language)s") % {"language": language.upper()})
 
     buffer = build_questions_docx(
-        title=f"Sual bankı — {bank.name}",
+        title=pgettext("exams.export", "Sual bankı — %(name)s") % {"name": bank.name},
         subtitle=" · ".join(subtitle_parts),
         questions=payload,
     )

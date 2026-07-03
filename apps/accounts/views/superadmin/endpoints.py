@@ -53,25 +53,25 @@ def _notify_org_owner_of_approval(org, approved_by, *, approved: bool, reason: s
     """Send an in-app notification to the organization owner about approval outcome."""
     try:
         if approved:
-            title = pgettext(
-                "accounts.superadmin_orgs.notification", "Təşkilatınız təsdiqləndi: {org}"
-            ).format(org=org.name)
+            title = pgettext("accounts.superadmin_orgs.notification", "Təşkilatınız təsdiqləndi: {org}").format(
+                org=org.name
+            )
             message = pgettext(
                 "accounts.superadmin_orgs.notification",
                 '"{org}" təşkilatı superadmin tərəfindən təsdiqləndi. '
                 "İndi bütün funksiyalardan istifadə edə bilərsiniz.",
             ).format(org=org.name)
         else:
-            title = pgettext(
-                "accounts.superadmin_orgs.notification", "Təşkilat müraciəti rədd edildi: {org}"
-            ).format(org=org.name)
+            title = pgettext("accounts.superadmin_orgs.notification", "Təşkilat müraciəti rədd edildi: {org}").format(
+                org=org.name
+            )
             message = pgettext(
                 "accounts.superadmin_orgs.notification", '"{org}" təşkilatı superadmin tərəfindən rədd edildi.'
             ).format(org=org.name)
             if reason:
-                message = pgettext(
-                    "accounts.superadmin_orgs.notification", "{message} Səbəb: {reason}"
-                ).format(message=message, reason=reason)
+                message = pgettext("accounts.superadmin_orgs.notification", "{message} Səbəb: {reason}").format(
+                    message=message, reason=reason
+                )
 
         create_notification(
             recipient=org.owner,
@@ -99,9 +99,7 @@ def _notify_superadmins_of_pending_org(org):
             reverse("accounts:profile"),
             section="superadmin-organizations",
         )
-        title = pgettext("accounts.superadmin_orgs.notification", "Yeni təşkilat müraciəti: {org}").format(
-            org=org.name
-        )
+        title = pgettext("accounts.superadmin_orgs.notification", "Yeni təşkilat müraciəti: {org}").format(org=org.name)
         message = pgettext(
             "accounts.superadmin_orgs.notification",
             '"{org}" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}.',

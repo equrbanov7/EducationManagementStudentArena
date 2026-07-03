@@ -31717,6 +31717,257 @@ msgctxt "accounts.view_as"
 msgid "exit_view"
 msgstr "Выйти"
 
+# --- Export documents ---
+#, python-format
+msgctxt "exams.export"
+msgid "Sual sayı: %(count)s"
+msgstr "Количество вопросов: %(count)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Fənn: %(subject)s"
+msgstr "Предмет: %(subject)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Dil: %(language)s"
+msgstr "Язык: %(language)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual bankı — %(name)s"
+msgstr "Банк вопросов — %(name)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "İmtahan sualları — %(title)s"
+msgstr "Вопросы экзамена — %(title)s"
+
+msgctxt "exams.export"
+msgid ""
+"Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı "
+"redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
+msgstr ""
+"Примечание: правильные ответы отмечены символом * в начале варианта. Вы "
+"можете отредактировать этот файл и повторно импортировать его через массовую "
+"загрузку."
+
+msgctxt "exams.export"
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgctxt "exams.export"
+msgid "Problemlər"
+msgstr "Проблемы"
+
+msgctxt "exams.export"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "exams.export"
+msgid "Hesabat vaxtı"
+msgstr "Время отчета"
+
+msgctxt "exams.export"
+msgid "Parse olunan sual sayı"
+msgstr "Количество разобранных вопросов"
+
+msgctxt "exams.export"
+msgid "Mənbədə END_QUESTION blokları"
+msgstr "Блоки END_QUESTION в источнике"
+
+msgctxt "exams.export"
+msgid "Dolu mənbə blokları"
+msgstr "Непустые блоки источника"
+
+msgctxt "exams.export"
+msgid "Boş mənbə blokları"
+msgstr "Пустые блоки источника"
+
+msgctxt "exams.export"
+msgid "Yoxdur"
+msgstr "Нет"
+
+msgctxt "exams.export"
+msgid "Parse olunmayan dolu blok sayı"
+msgstr "Количество непустых блоков, которые не разобраны"
+
+msgctxt "exams.export"
+msgid "Yazılı görünən ən böyük sual nömrəsi"
+msgstr "Наибольший видимый номер вопроса"
+
+msgctxt "exams.export"
+msgid "Ən böyük nömrə ilə parse sayı fərqi"
+msgstr "Разница между наибольшим номером и количеством разобранных"
+
+msgctxt "exams.export"
+msgid "Nömrəsi görünməyən bloklar"
+msgstr "Блоки без видимого номера"
+
+msgctxt "exams.export"
+msgid "Yazılı nömrələrdə boşluqlar"
+msgstr "Пропуски в написанных номерах"
+
+msgctxt "exams.export"
+msgid "Təkrar yazılı nömrələr"
+msgstr "Повторяющиеся написанные номера"
+
+msgctxt "exams.export"
+msgid "Xətalı sual sayı"
+msgstr "Количество вопросов с ошибками"
+
+msgctxt "exams.export"
+msgid "Xəbərdarlıq sayı"
+msgstr "Количество предупреждений"
+
+msgctxt "exams.export"
+msgid "Dublikat sual sayı"
+msgstr "Количество дубликатов вопросов"
+
+msgctxt "exams.export"
+msgid "Variant problemi"
+msgstr "Проблема с вариантами"
+
+msgctxt "exams.export"
+msgid "Uzunluq balansı"
+msgstr "Баланс длины"
+
+msgctxt "exams.export"
+msgid "Təmiz sual sayı"
+msgstr "Количество чистых вопросов"
+
+msgctxt "exams.export"
+msgid "Sahə"
+msgstr "Поле"
+
+msgctxt "exams.export"
+msgid "Dəyər"
+msgstr "Значение"
+
+msgctxt "exams.export"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "exams.export"
+msgid "Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."
+msgstr "Столбец Feedback содержит текст исправления, готовый к отправке преподавателю."
+
+msgctxt "exams.export"
+msgid "Feedback qeydləri müəllimə göndərmək üçün hazır düzəliş mətnidir."
+msgstr "Заметки Feedback содержат текст исправления, готовый к отправке преподавателю."
+
+msgctxt "exams.export"
+msgid "Sual sıra #"
+msgstr "Порядковый № вопроса"
+
+msgctxt "exams.export"
+msgid "Mənbə nömrəsi"
+msgstr "Номер в источнике"
+
+msgctxt "exams.export"
+msgid "Səviyyə"
+msgstr "Уровень"
+
+msgctxt "exams.export"
+msgid "Problem növü"
+msgstr "Тип проблемы"
+
+msgctxt "exams.export"
+msgid "Problem izahı"
+msgstr "Описание проблемы"
+
+msgctxt "exams.export"
+msgid "Bağlı sual/ref"
+msgstr "Связанный вопрос/ссылка"
+
+msgctxt "exams.export"
+msgid "Feedback"
+msgstr "Feedback"
+
+msgctxt "exams.export"
+msgid "Sual mətni"
+msgstr "Текст вопроса"
+
+msgctxt "exams.export"
+msgid "Düz cavab"
+msgstr "Правильный ответ"
+
+msgctxt "exams.export"
+msgid "Test ümumi"
+msgstr "Общий тест"
+
+msgctxt "exams.export"
+msgid "Problem yoxdur"
+msgstr "Проблем нет"
+
+msgctxt "exams.export"
+msgid "Import edilmiş suallarda xəbərdarlıq tapılmadı."
+msgstr "В импортированных вопросах предупреждения не найдены."
+
+msgctxt "exams.export"
+msgid "Düzəliş tələb olunmur."
+msgstr "Исправление не требуется."
+
+#, python-format
+msgctxt "exams.export"
+msgid "%(title)s - problem hesabatı"
+msgstr "%(title)s - отчет о проблемах"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Hesabat vaxtı: %(datetime)s"
+msgstr "Время отчета: %(datetime)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Səviyyə: %(severity)s"
+msgstr "Уровень: %(severity)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Problem növü: %(type)s"
+msgstr "Тип проблемы: %(type)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Problem: %(problem)s"
+msgstr "Проблема: %(problem)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Feedback: %(feedback)s"
+msgstr "Feedback: %(feedback)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual #%(number)s"
+msgstr "Вопрос №%(number)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Mənbə nömrəsi: %(number)s"
+msgstr "Номер в источнике: %(number)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Bağlı sual/ref: %(reference)s"
+msgstr "Связанный вопрос/ссылка: %(reference)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual mətni: %(text)s"
+msgstr "Текст вопроса: %(text)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Variantlar: %(options)s"
+msgstr "Варианты: %(options)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Düz cavab: %(answer)s"
+msgstr "Правильный ответ: %(answer)s"
+
 #~ msgctxt "profile.my_exams"
 #~ msgid "title"
 #~ msgstr "Мои экзамены"

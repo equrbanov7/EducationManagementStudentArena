@@ -31616,6 +31616,256 @@ msgctxt "accounts.view_as"
 msgid "exit_view"
 msgstr "Çık"
 
+# --- Export documents ---
+#, python-format
+msgctxt "exams.export"
+msgid "Sual sayı: %(count)s"
+msgstr "Soru sayısı: %(count)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Fənn: %(subject)s"
+msgstr "Ders: %(subject)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Dil: %(language)s"
+msgstr "Dil: %(language)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual bankı — %(name)s"
+msgstr "Soru bankası — %(name)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "İmtahan sualları — %(title)s"
+msgstr "Sınav soruları — %(title)s"
+
+msgctxt "exams.export"
+msgid ""
+"Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı "
+"redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
+msgstr ""
+"Not: doğru cevaplar seçeneğin başındaki * işaretiyle belirtilmiştir. Bu "
+"dosyayı düzenleyip toplu yükleme ile tekrar içe aktarabilirsiniz."
+
+msgctxt "exams.export"
+msgid "Xülasə"
+msgstr "Özet"
+
+msgctxt "exams.export"
+msgid "Problemlər"
+msgstr "Sorunlar"
+
+msgctxt "exams.export"
+msgid "İmtahan"
+msgstr "Sınav"
+
+msgctxt "exams.export"
+msgid "Hesabat vaxtı"
+msgstr "Rapor zamanı"
+
+msgctxt "exams.export"
+msgid "Parse olunan sual sayı"
+msgstr "Ayrıştırılan soru sayısı"
+
+msgctxt "exams.export"
+msgid "Mənbədə END_QUESTION blokları"
+msgstr "Kaynaktaki END_QUESTION blokları"
+
+msgctxt "exams.export"
+msgid "Dolu mənbə blokları"
+msgstr "Dolu kaynak blokları"
+
+msgctxt "exams.export"
+msgid "Boş mənbə blokları"
+msgstr "Boş kaynak blokları"
+
+msgctxt "exams.export"
+msgid "Yoxdur"
+msgstr "Yok"
+
+msgctxt "exams.export"
+msgid "Parse olunmayan dolu blok sayı"
+msgstr "Ayrıştırılmayan dolu blok sayısı"
+
+msgctxt "exams.export"
+msgid "Yazılı görünən ən böyük sual nömrəsi"
+msgstr "Yazılı görünen en büyük soru numarası"
+
+msgctxt "exams.export"
+msgid "Ən böyük nömrə ilə parse sayı fərqi"
+msgstr "En büyük numara ile ayrıştırma sayısı farkı"
+
+msgctxt "exams.export"
+msgid "Nömrəsi görünməyən bloklar"
+msgstr "Numarası görünmeyen bloklar"
+
+msgctxt "exams.export"
+msgid "Yazılı nömrələrdə boşluqlar"
+msgstr "Yazılı numaralarda boşluklar"
+
+msgctxt "exams.export"
+msgid "Təkrar yazılı nömrələr"
+msgstr "Tekrarlanan yazılı numaralar"
+
+msgctxt "exams.export"
+msgid "Xətalı sual sayı"
+msgstr "Hatalı soru sayısı"
+
+msgctxt "exams.export"
+msgid "Xəbərdarlıq sayı"
+msgstr "Uyarı sayısı"
+
+msgctxt "exams.export"
+msgid "Dublikat sual sayı"
+msgstr "Yinelenen soru sayısı"
+
+msgctxt "exams.export"
+msgid "Variant problemi"
+msgstr "Seçenek sorunu"
+
+msgctxt "exams.export"
+msgid "Uzunluq balansı"
+msgstr "Uzunluk dengesi"
+
+msgctxt "exams.export"
+msgid "Təmiz sual sayı"
+msgstr "Temiz soru sayısı"
+
+msgctxt "exams.export"
+msgid "Sahə"
+msgstr "Alan"
+
+msgctxt "exams.export"
+msgid "Dəyər"
+msgstr "Değer"
+
+msgctxt "exams.export"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "exams.export"
+msgid "Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."
+msgstr "Feedback sütunu öğretmene gönderilmeye hazır düzeltme metnidir."
+
+msgctxt "exams.export"
+msgid "Feedback qeydləri müəllimə göndərmək üçün hazır düzəliş mətnidir."
+msgstr "Feedback notları öğretmene gönderilmeye hazır düzeltme metnidir."
+
+msgctxt "exams.export"
+msgid "Sual sıra #"
+msgstr "Soru sıra #"
+
+msgctxt "exams.export"
+msgid "Mənbə nömrəsi"
+msgstr "Kaynak numarası"
+
+msgctxt "exams.export"
+msgid "Səviyyə"
+msgstr "Seviye"
+
+msgctxt "exams.export"
+msgid "Problem növü"
+msgstr "Sorun türü"
+
+msgctxt "exams.export"
+msgid "Problem izahı"
+msgstr "Sorun açıklaması"
+
+msgctxt "exams.export"
+msgid "Bağlı sual/ref"
+msgstr "Bağlı soru/ref"
+
+msgctxt "exams.export"
+msgid "Feedback"
+msgstr "Feedback"
+
+msgctxt "exams.export"
+msgid "Sual mətni"
+msgstr "Soru metni"
+
+msgctxt "exams.export"
+msgid "Düz cavab"
+msgstr "Doğru cevap"
+
+msgctxt "exams.export"
+msgid "Test ümumi"
+msgstr "Test geneli"
+
+msgctxt "exams.export"
+msgid "Problem yoxdur"
+msgstr "Sorun yok"
+
+msgctxt "exams.export"
+msgid "Import edilmiş suallarda xəbərdarlıq tapılmadı."
+msgstr "İçe aktarılan sorularda uyarı bulunmadı."
+
+msgctxt "exams.export"
+msgid "Düzəliş tələb olunmur."
+msgstr "Düzeltme gerekmiyor."
+
+#, python-format
+msgctxt "exams.export"
+msgid "%(title)s - problem hesabatı"
+msgstr "%(title)s - sorun raporu"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Hesabat vaxtı: %(datetime)s"
+msgstr "Rapor zamanı: %(datetime)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Səviyyə: %(severity)s"
+msgstr "Seviye: %(severity)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Problem növü: %(type)s"
+msgstr "Sorun türü: %(type)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Problem: %(problem)s"
+msgstr "Sorun: %(problem)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Feedback: %(feedback)s"
+msgstr "Feedback: %(feedback)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual #%(number)s"
+msgstr "Soru #%(number)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Mənbə nömrəsi: %(number)s"
+msgstr "Kaynak numarası: %(number)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Bağlı sual/ref: %(reference)s"
+msgstr "Bağlı soru/ref: %(reference)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Sual mətni: %(text)s"
+msgstr "Soru metni: %(text)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Variantlar: %(options)s"
+msgstr "Seçenekler: %(options)s"
+
+#, python-format
+msgctxt "exams.export"
+msgid "Düz cavab: %(answer)s"
+msgstr "Doğru cevap: %(answer)s"
+
 #~ msgctxt "profile.my_exams"
 #~ msgid "title"
 #~ msgstr "Sınavlarım"

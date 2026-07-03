@@ -402,7 +402,7 @@
 .ew-tc-ic--sky { background: #E0F2FE; color: #075985; }
 .ew-tc-ic--violet { background: #F2ECFE; color: #5B21B6; }
 .ew-tc-ic--rose { background: #FCE7EE; color: #9F1239; }
-.ew-fs-ic--indigo { background: #EEF2FF; color: #1E40AF; }
+.ew-fs-ic--indigo { background: #EEF2FF; color: var(--ems-primary-800); }
 .ew-fs-ic--violet { background: #F2ECFE; color: #5B21B6; }
 .ew-icon-green { color: #198754; }
 .ew-callout--teal { background: rgba(15, 118, 110, 0.07); border-color: rgba(15, 118, 110, 0.22); }

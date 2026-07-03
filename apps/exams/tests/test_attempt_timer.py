@@ -41,6 +41,7 @@ class ExamAttemptTimerExpiryTest(TestCase):
             author=self.teacher,
             is_active=True,
             total_duration_minutes=self.DURATION_MINUTES,
+            organization=self.org,
         )
 
     def _new_attempt(self, status="in_progress"):

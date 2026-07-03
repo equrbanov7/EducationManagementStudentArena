@@ -40,7 +40,9 @@ class LiveAnswerIntegrityTest(TestCase):
             is_active=True,
         )
 
-        self.exam = Exam.objects.create(title="Live Integrity", author=self.teacher, is_active=True)
+        self.exam = Exam.objects.create(
+            title="Live Integrity", author=self.teacher, is_active=True, organization=self.org
+        )
         self.q = ExamQuestion.objects.create(exam=self.exam, text="Q1", order=1, points=1000)
         self.correct = ExamQuestionOption.objects.create(question=self.q, text="ok", is_correct=True)
         self.wrong = ExamQuestionOption.objects.create(question=self.q, text="bad", is_correct=False)
