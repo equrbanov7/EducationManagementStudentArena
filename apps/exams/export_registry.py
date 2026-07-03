@@ -9,6 +9,8 @@ Yeni export əlavə etmək: builder yaz → `_BUILDERS`-ə ad ver → view-da
 `start_export_job(request, export_name=..., params=...)` çağır.
 """
 
+from django.utils.translation import pgettext
+
 DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
@@ -45,14 +47,17 @@ def _build_bank_word(*, user, organization, params):
     if not payload:
         raise ValueError("empty_export")
 
-    subtitle_parts = [f"Sual sayı: {len(payload)}"]
+    subtitle_parts = [pgettext("exams.export", "Sual sayı: %(count)s") % {"count": len(payload)}]
     if bank.subject:
-        subtitle_parts.insert(0, f"Fənn: {bank.subject}")
+        subtitle_parts.insert(
+            0,
+            pgettext("exams.export", "Fənn: %(subject)s") % {"subject": bank.subject},
+        )
     if language:
-        subtitle_parts.append(f"Dil: {language.upper()}")
+        subtitle_parts.append(pgettext("exams.export", "Dil: %(language)s") % {"language": language.upper()})
 
     buffer = build_questions_docx(
-        title=f"Sual bankı — {bank.name}",
+        title=pgettext("exams.export", "Sual bankı — %(name)s") % {"name": bank.name},
         subtitle=" · ".join(subtitle_parts),
         questions=payload,
     )

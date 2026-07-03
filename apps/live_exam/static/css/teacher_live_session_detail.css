@@ -179,7 +179,7 @@
 
 /* ═══ Sprint-3: JS innerHTML şablonlarındakı inline stillər → klass ═══ */
 .sd-ai-loading { display: flex; align-items: center; gap: 10px; color: #6366f1; font-weight: 600; font-size: 0.9rem; }
-.sd-ai-quota { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 6px; font-size: 13px; color: #1e40af; }
+.sd-ai-quota { margin-top: 12px; padding: 8px 12px; background: #f0f9ff; border-radius: 6px; font-size: 13px; color: var(--ems-primary-800); }
 .sd-ai-cached { color: var(--ems-success-600); }
 .sd-ai-error { color: var(--ems-danger); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; }
 .sd-ai-error--plain { color: var(--ems-danger); font-weight: 600; }

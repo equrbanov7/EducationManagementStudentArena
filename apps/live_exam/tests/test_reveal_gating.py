@@ -25,6 +25,8 @@ from django.utils import timezone
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -32,7 +34,14 @@ User = get_user_model()
 class LiveRevealGatingTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("reveal_teacher", "reveal@example.com", "StrongPass123!")
-        self.exam = Exam.objects.create(title="Reveal Exam", author=self.teacher, is_active=True)
+        self.org = Organization.objects.create(
+            name="Reveal Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.exam = Exam.objects.create(title="Reveal Exam", author=self.teacher, is_active=True, organization=self.org)
         self.question = ExamQuestion.objects.create(exam=self.exam, text="Q1", order=1, points=1000)
         self.correct = ExamQuestionOption.objects.create(question=self.question, text="correct", is_correct=True)
         self.wrong = ExamQuestionOption.objects.create(question=self.question, text="wrong", is_correct=False)
@@ -43,9 +52,7 @@ class LiveRevealGatingTest(TestCase):
         self.session.save(update_fields=["selected_question_ids", "question_ends_at"])
 
         # One player who answered correctly — enough to populate `results`.
-        self.player = LivePlayer.objects.create(
-            session=self.session, nickname="P1", client_id="client-1", score=1000
-        )
+        self.player = LivePlayer.objects.create(session=self.session, nickname="P1", client_id="client-1", score=1000)
         LiveAnswer.objects.create(
             session=self.session,
             player=self.player,

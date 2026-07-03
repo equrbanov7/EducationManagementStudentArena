@@ -20,6 +20,8 @@ Performans: suallar `prefetch_related("options")` ilə gəlir — option-lar
 
 from io import BytesIO
 
+from django.utils.translation import pgettext
+
 OPTION_LABELS = "ABCDEFGH"
 
 
@@ -51,8 +53,11 @@ def build_questions_docx(*, title, questions, subtitle=""):
     if subtitle:
         doc.add_paragraph(subtitle)
     doc.add_paragraph(
-        "Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. "
-        "Bu faylı redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
+        pgettext(
+            "exams.export",
+            "Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. "
+            "Bu faylı redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz.",
+        )
     )
 
     for index, question in enumerate(questions, start=1):

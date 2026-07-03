@@ -5,6 +5,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import pgettext
 
 from ._helpers import (
     _format_int_list,
@@ -13,6 +14,19 @@ from ._helpers import (
     _question_bank_warning_label,
     _warning_reference_text,
 )
+
+_EXCEL_SHEET_FORBIDDEN_CHARS = frozenset(":\\/?*[]")
+
+
+def _tx(message):
+    return pgettext("exams.export", message)
+
+
+def _excel_sheet_title(message):
+    title = _tx(message)
+    title = "".join(" " if char in _EXCEL_SHEET_FORBIDDEN_CHARS else char for char in title)
+    title = " ".join(title.split()).strip("'")
+    return (title or message)[:31]
 
 
 def _build_question_bank_report_xlsx(
@@ -48,8 +62,8 @@ def _build_question_bank_report_xlsx(
 
     wb = Workbook()
     ws_summary = wb.active
-    ws_summary.title = "Xülasə"
-    ws_problems = wb.create_sheet("Problemlər")
+    ws_summary.title = _excel_sheet_title("Xülasə")
+    ws_problems = wb.create_sheet(_excel_sheet_title("Problemlər"))
 
     header_fill = PatternFill("solid", fgColor="1F4E78")
     header_font = Font(color="FFFFFF", bold=True)
@@ -57,27 +71,51 @@ def _build_question_bank_report_xlsx(
     wrap = Alignment(wrap_text=True, vertical="top")
 
     summary_rows = [
-        ("İmtahan", exam.title),
-        ("Hesabat vaxtı", timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")),
-        ("Parse olunan sual sayı", len(parsed)),
-        ("Mənbədə END_QUESTION blokları", diagnostics["source_block_count"]),
-        ("Dolu mənbə blokları", diagnostics["nonempty_block_count"]),
-        ("Boş mənbə blokları", _format_int_list(diagnostics["empty_blocks"]) or "Yoxdur"),
-        ("Parse olunmayan dolu blok sayı", diagnostics["dropped_nonempty_block_count"]),
-        ("Yazılı görünən ən böyük sual nömrəsi", diagnostics["max_declared_number"] or ""),
-        ("Ən böyük nömrə ilə parse sayı fərqi", diagnostics["gap_from_max_declared"] or 0),
-        ("Nömrəsi görünməyən bloklar", _format_int_list(diagnostics["no_visible_number_blocks"]) or "Yoxdur"),
-        ("Yazılı nömrələrdə boşluqlar", _format_int_list(diagnostics["missing_numbers"]) or "Yoxdur"),
-        ("Təkrar yazılı nömrələr", _format_int_list(diagnostics["duplicate_numbers"]) or "Yoxdur"),
-        ("Xətalı sual sayı", error_count),
-        ("Xəbərdarlıq sayı", warning_count),
-        ("Dublikat sual sayı", duplicate_count),
-        ("Variant problemi", (category_counts or {}).get("structure", 0)),
-        ("Uzunluq balansı", (category_counts or {}).get("balance", 0)),
-        ("Təmiz sual sayı", (category_counts or {}).get("clean", 0)),
+        (_tx("İmtahan"), exam.title),
+        (
+            _tx("Hesabat vaxtı"),
+            timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M"),
+        ),
+        (_tx("Parse olunan sual sayı"), len(parsed)),
+        (_tx("Mənbədə END_QUESTION blokları"), diagnostics["source_block_count"]),
+        (_tx("Dolu mənbə blokları"), diagnostics["nonempty_block_count"]),
+        (
+            _tx("Boş mənbə blokları"),
+            _format_int_list(diagnostics["empty_blocks"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Parse olunmayan dolu blok sayı"),
+            diagnostics["dropped_nonempty_block_count"],
+        ),
+        (
+            _tx("Yazılı görünən ən böyük sual nömrəsi"),
+            diagnostics["max_declared_number"] or "",
+        ),
+        (
+            _tx("Ən böyük nömrə ilə parse sayı fərqi"),
+            diagnostics["gap_from_max_declared"] or 0,
+        ),
+        (
+            _tx("Nömrəsi görünməyən bloklar"),
+            _format_int_list(diagnostics["no_visible_number_blocks"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Yazılı nömrələrdə boşluqlar"),
+            _format_int_list(diagnostics["missing_numbers"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Təkrar yazılı nömrələr"),
+            _format_int_list(diagnostics["duplicate_numbers"]) or _tx("Yoxdur"),
+        ),
+        (_tx("Xətalı sual sayı"), error_count),
+        (_tx("Xəbərdarlıq sayı"), warning_count),
+        (_tx("Dublikat sual sayı"), duplicate_count),
+        (_tx("Variant problemi"), (category_counts or {}).get("structure", 0)),
+        (_tx("Uzunluq balansı"), (category_counts or {}).get("balance", 0)),
+        (_tx("Təmiz sual sayı"), (category_counts or {}).get("clean", 0)),
     ]
 
-    ws_summary.append(["Sahə", "Dəyər"])
+    ws_summary.append([_tx("Sahə"), _tx("Dəyər")])
     for cell in ws_summary[1]:
         cell.fill = header_fill
         cell.font = header_font
@@ -85,7 +123,12 @@ def _build_question_bank_report_xlsx(
         ws_summary.append(row)
 
     ws_summary.append([])
-    ws_summary.append(["Qeyd", "Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."])
+    ws_summary.append(
+        [
+            _tx("Qeyd"),
+            _tx("Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."),
+        ]
+    )
     ws_summary.cell(row=ws_summary.max_row, column=1).font = section_font
 
     for row in ws_summary.iter_rows():
@@ -95,20 +138,20 @@ def _build_question_bank_report_xlsx(
     ws_summary.column_dimensions["B"].width = 86
 
     problem_headers = [
-        "Sual sıra #",
-        "Mənbə nömrəsi",
-        "Səviyyə",
-        "Problem növü",
-        "Problem izahı",
-        "Bağlı sual/ref",
-        "Feedback",
-        "Sual mətni",
+        _tx("Sual sıra #"),
+        _tx("Mənbə nömrəsi"),
+        _tx("Səviyyə"),
+        _tx("Problem növü"),
+        _tx("Problem izahı"),
+        _tx("Bağlı sual/ref"),
+        _tx("Feedback"),
+        _tx("Sual mətni"),
         "A",
         "B",
         "C",
         "D",
         "E",
-        "Düz cavab",
+        _tx("Düz cavab"),
     ]
     ws_problems.append(problem_headers)
     for cell in ws_problems[1]:
@@ -121,7 +164,7 @@ def _build_question_bank_report_xlsx(
         warning_type = warning.get("type")
         ws_problems.append(
             [
-                "Test ümumi",
+                _tx("Test ümumi"),
                 "",
                 warning.get("severity", "warning"),
                 _question_bank_warning_label(warning_type),
@@ -172,10 +215,10 @@ def _build_question_bank_report_xlsx(
                 "",
                 "",
                 "info",
-                "Problem yoxdur",
-                "Import edilmiş suallarda xəbərdarlıq tapılmadı.",
+                _tx("Problem yoxdur"),
+                _tx("Import edilmiş suallarda xəbərdarlıq tapılmadı."),
                 "",
-                "Düzəliş tələb olunmur.",
+                _tx("Düzəliş tələb olunmur."),
                 "",
                 "",
                 "",
@@ -233,49 +276,75 @@ def _build_question_bank_report_docx(
     diagnostics = _question_bank_source_diagnostics(raw_text, parsed)
 
     doc = Document()
-    doc.add_heading(f"{exam.title} - problem hesabatı", level=1)
-    doc.add_paragraph(timezone.localtime(timezone.now()).strftime("Hesabat vaxtı: %Y-%m-%d %H:%M"))
+    doc.add_heading(
+        _tx("%(title)s - problem hesabatı") % {"title": exam.title},
+        level=1,
+    )
+    doc.add_paragraph(
+        _tx("Hesabat vaxtı: %(datetime)s") % {"datetime": timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")}
+    )
 
-    doc.add_heading("Xülasə", level=2)
+    doc.add_heading(_tx("Xülasə"), level=2)
     summary_rows = [
-        ("Parse olunan sual sayı", len(parsed)),
-        ("Mənbədə END_QUESTION blokları", diagnostics["source_block_count"]),
-        ("Dolu mənbə blokları", diagnostics["nonempty_block_count"]),
-        ("Boş mənbə blokları", _format_int_list(diagnostics["empty_blocks"]) or "Yoxdur"),
-        ("Parse olunmayan dolu blok sayı", diagnostics["dropped_nonempty_block_count"]),
-        ("Yazılı görünən ən böyük sual nömrəsi", diagnostics["max_declared_number"] or ""),
-        ("Ən böyük nömrə ilə parse sayı fərqi", diagnostics["gap_from_max_declared"] or 0),
-        ("Nömrəsi görünməyən bloklar", _format_int_list(diagnostics["no_visible_number_blocks"]) or "Yoxdur"),
-        ("Yazılı nömrələrdə boşluqlar", _format_int_list(diagnostics["missing_numbers"]) or "Yoxdur"),
-        ("Təkrar yazılı nömrələr", _format_int_list(diagnostics["duplicate_numbers"]) or "Yoxdur"),
-        ("Xətalı sual sayı", error_count),
-        ("Xəbərdarlıq sayı", warning_count),
-        ("Dublikat sual sayı", duplicate_count),
-        ("Variant problemi", (category_counts or {}).get("structure", 0)),
-        ("Uzunluq balansı", (category_counts or {}).get("balance", 0)),
-        ("Təmiz sual sayı", (category_counts or {}).get("clean", 0)),
+        (_tx("Parse olunan sual sayı"), len(parsed)),
+        (_tx("Mənbədə END_QUESTION blokları"), diagnostics["source_block_count"]),
+        (_tx("Dolu mənbə blokları"), diagnostics["nonempty_block_count"]),
+        (
+            _tx("Boş mənbə blokları"),
+            _format_int_list(diagnostics["empty_blocks"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Parse olunmayan dolu blok sayı"),
+            diagnostics["dropped_nonempty_block_count"],
+        ),
+        (
+            _tx("Yazılı görünən ən böyük sual nömrəsi"),
+            diagnostics["max_declared_number"] or "",
+        ),
+        (
+            _tx("Ən böyük nömrə ilə parse sayı fərqi"),
+            diagnostics["gap_from_max_declared"] or 0,
+        ),
+        (
+            _tx("Nömrəsi görünməyən bloklar"),
+            _format_int_list(diagnostics["no_visible_number_blocks"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Yazılı nömrələrdə boşluqlar"),
+            _format_int_list(diagnostics["missing_numbers"]) or _tx("Yoxdur"),
+        ),
+        (
+            _tx("Təkrar yazılı nömrələr"),
+            _format_int_list(diagnostics["duplicate_numbers"]) or _tx("Yoxdur"),
+        ),
+        (_tx("Xətalı sual sayı"), error_count),
+        (_tx("Xəbərdarlıq sayı"), warning_count),
+        (_tx("Dublikat sual sayı"), duplicate_count),
+        (_tx("Variant problemi"), (category_counts or {}).get("structure", 0)),
+        (_tx("Uzunluq balansı"), (category_counts or {}).get("balance", 0)),
+        (_tx("Təmiz sual sayı"), (category_counts or {}).get("clean", 0)),
     ]
     summary_table = doc.add_table(rows=1, cols=2)
     summary_table.style = "Table Grid"
-    summary_table.rows[0].cells[0].text = "Sahə"
-    summary_table.rows[0].cells[1].text = "Dəyər"
+    summary_table.rows[0].cells[0].text = _tx("Sahə")
+    summary_table.rows[0].cells[1].text = _tx("Dəyər")
     for label, value in summary_rows:
         cells = summary_table.add_row().cells
         cells[0].text = str(label)
         cells[1].text = str(value)
 
-    doc.add_paragraph("Feedback qeydləri müəllimə göndərmək üçün hazır düzəliş mətnidir.")
-    doc.add_heading("Problemlər", level=2)
+    doc.add_paragraph(_tx("Feedback qeydləri müəllimə göndərmək üçün hazır düzəliş mətnidir."))
+    doc.add_heading(_tx("Problemlər"), level=2)
 
     problem_count = 0
     for warning in test_level_warnings:
         warning_type = warning.get("type")
         paragraph = doc.add_paragraph()
-        paragraph.add_run("Test ümumi").bold = True
-        paragraph.add_run(f"\nSəviyyə: {warning.get('severity', 'warning')}")
-        paragraph.add_run(f"\nProblem növü: {_question_bank_warning_label(warning_type)}")
-        paragraph.add_run(f"\nProblem: {warning.get('msg', '')}")
-        paragraph.add_run(f"\nFeedback: {_question_bank_feedback(warning_type)}")
+        paragraph.add_run(_tx("Test ümumi")).bold = True
+        paragraph.add_run("\n" + _tx("Səviyyə: %(severity)s") % {"severity": warning.get("severity", "warning")})
+        paragraph.add_run("\n" + _tx("Problem növü: %(type)s") % {"type": _question_bank_warning_label(warning_type)})
+        paragraph.add_run("\n" + _tx("Problem: %(problem)s") % {"problem": warning.get("msg", "")})
+        paragraph.add_run("\n" + _tx("Feedback: %(feedback)s") % {"feedback": _question_bank_feedback(warning_type)})
         problem_count += 1
 
     for idx, q in enumerate(parsed, start=1):
@@ -283,28 +352,34 @@ def _build_question_bank_report_docx(
         for warning in q.get("warnings") or []:
             warning_type = warning.get("type")
             paragraph = doc.add_paragraph()
-            paragraph.add_run(f"Sual #{idx}").bold = True
+            paragraph.add_run(_tx("Sual #%(number)s") % {"number": idx}).bold = True
             if q.get("q_no"):
-                paragraph.add_run(f" | Mənbə nömrəsi: {q.get('q_no')}")
-            paragraph.add_run(f"\nSəviyyə: {warning.get('severity', 'warning')}")
-            paragraph.add_run(f"\nProblem növü: {_question_bank_warning_label(warning_type)}")
-            paragraph.add_run(f"\nProblem: {warning.get('msg', '')}")
+                paragraph.add_run(" | " + _tx("Mənbə nömrəsi: %(number)s") % {"number": q.get("q_no")})
+            paragraph.add_run("\n" + _tx("Səviyyə: %(severity)s") % {"severity": warning.get("severity", "warning")})
+            paragraph.add_run(
+                "\n" + _tx("Problem növü: %(type)s") % {"type": _question_bank_warning_label(warning_type)}
+            )
+            paragraph.add_run("\n" + _tx("Problem: %(problem)s") % {"problem": warning.get("msg", "")})
             reference = _warning_reference_text(warning)
             if reference:
-                paragraph.add_run(f"\nBağlı sual/ref: {reference}")
-            paragraph.add_run(f"\nFeedback: {_question_bank_feedback(warning_type)}")
-            paragraph.add_run(f"\nSual mətni: {q.get('text', '')}")
+                paragraph.add_run("\n" + _tx("Bağlı sual/ref: %(reference)s") % {"reference": reference})
             paragraph.add_run(
-                "\nVariantlar: " + "; ".join(f"{label}) {opts.get(label, '')}" for label in "ABCDE" if opts.get(label))
+                "\n" + _tx("Feedback: %(feedback)s") % {"feedback": _question_bank_feedback(warning_type)}
             )
-            paragraph.add_run(f"\nDüz cavab: {', '.join(q.get('correct') or [])}")
+            paragraph.add_run("\n" + _tx("Sual mətni: %(text)s") % {"text": q.get("text", "")})
+            paragraph.add_run(
+                "\n"
+                + _tx("Variantlar: %(options)s")
+                % {"options": "; ".join(f"{label}) {opts.get(label, '')}" for label in "ABCDE" if opts.get(label))}
+            )
+            paragraph.add_run("\n" + _tx("Düz cavab: %(answer)s") % {"answer": ", ".join(q.get("correct") or [])})
             problem_count += 1
 
     if problem_count == 0:
         paragraph = doc.add_paragraph()
-        paragraph.add_run("Problem yoxdur").bold = True
-        paragraph.add_run("\nImport edilmiş suallarda xəbərdarlıq tapılmadı.")
-        paragraph.add_run("\nFeedback: Düzəliş tələb olunmur.")
+        paragraph.add_run(_tx("Problem yoxdur")).bold = True
+        paragraph.add_run("\n" + _tx("Import edilmiş suallarda xəbərdarlıq tapılmadı."))
+        paragraph.add_run("\n" + _tx("Feedback: %(feedback)s") % {"feedback": _tx("Düzəliş tələb olunmur.")})
 
     output = BytesIO()
     doc.save(output)

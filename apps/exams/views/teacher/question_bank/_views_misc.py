@@ -72,12 +72,12 @@ def exam_questions_word_export(request, slug):
         messages.warning(request, pgettext("exams.question_bank.message", "Export üçün sual tapılmadı."))
         return redirect("exams:test_question_bank", slug=exam.slug)
 
-    subtitle_parts = [f"Sual sayı: {len(payload)}"]
+    subtitle_parts = [pgettext("exams.export", "Sual sayı: %(count)s") % {"count": len(payload)}]
     if language:
-        subtitle_parts.append(f"Dil: {language.upper()}")
+        subtitle_parts.append(pgettext("exams.export", "Dil: %(language)s") % {"language": language.upper()})
 
     buffer = build_questions_docx(
-        title=f"İmtahan sualları — {exam.title}",
+        title=pgettext("exams.export", "İmtahan sualları — %(title)s") % {"title": exam.title},
         subtitle=" · ".join(subtitle_parts),
         questions=payload,
     )

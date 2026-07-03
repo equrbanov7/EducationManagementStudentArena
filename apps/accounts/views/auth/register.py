@@ -316,12 +316,12 @@ def resend_code_view(request):
         return response
     except OTPRateLimitError as exc:
         messages.error(
-                    request,
-                    pgettext(
-                        "accounts.auth.message",
-                        "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.",
-                    ),
-                )
+            request,
+            pgettext(
+                "accounts.auth.message",
+                "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin.",
+            ),
+        )
         response = render(
             request,
             "accounts/verify_code.html",
