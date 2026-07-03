@@ -5,6 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.signing import TimestampSigner
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
@@ -20,7 +21,7 @@ def send_verify_email(user, code: str, *, request=None, expires_at=None):
     verification_url = build_absolute_url(reverse("accounts:verify_email_link"), request=request)
     link = f"{verification_url}?token={token}"
 
-    subject = "Email təsdiqi"
+    subject = pgettext("accounts.email.subject", "Email təsdiqi")
     context = {
         "user": user,
         "code": code,

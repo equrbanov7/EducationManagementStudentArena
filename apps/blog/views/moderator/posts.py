@@ -26,17 +26,19 @@ def review_post(request, post_id):
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id, requires_approval=True)
 
     if not can_user_review_post(request.user, post):
-        raise PermissionDenied("Bu postu təsdiqləmək üçün icazəniz yoxdur.")
+        raise PermissionDenied(
+            pgettext("blog.moderation.message", "Bu postu təsdiqləmək üçün icazəniz yoxdur.")
+        )
 
     action = (request.POST.get("action") or "").strip().lower()
     feedback = (request.POST.get("feedback") or "").strip()
 
     if action not in {"approve", "needs_changes"}:
-        messages.error(request, "Yanlış əməliyyat seçildi.")
+        messages.error(request, pgettext("blog.moderation.message", "Yanlış əməliyyat seçildi."))
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
     if action == "needs_changes" and not feedback:
-        messages.error(request, "Düzəliş istəyi üçün feedback yazın.")
+        messages.error(request, pgettext("blog.moderation.message", "Düzəliş istəyi üçün feedback yazın."))
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
     if action == "approve":
@@ -61,7 +63,7 @@ def review_post(request, post_id):
             action=PostApprovalLog.Action.APPROVED,
             feedback=feedback,
         )
-        messages.success(request, "Post təsdiqləndi və paylaşıldı.")
+        messages.success(request, pgettext("blog.moderation.message", "Post təsdiqləndi və paylaşıldı."))
     else:
         post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
         post.is_published = False
@@ -82,7 +84,7 @@ def review_post(request, post_id):
             action=PostApprovalLog.Action.NEEDS_CHANGES,
             feedback=feedback,
         )
-        messages.info(request, "Feedback göndərildi. Post düzəliş gözləyir.")
+        messages.info(request, pgettext("blog.moderation.message", "Feedback göndərildi. Post düzəliş gözləyir."))
 
     next_url = (request.POST.get("next") or "").strip()
     if next_url and url_has_allowed_host_and_scheme(
@@ -139,21 +141,22 @@ def teacher_moderate_post(request, post_id):
     post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
 
     if not can_user_moderate_post(request.user, post):
-        raise PermissionDenied("Bu postu idarə etmək üçün icazəniz yoxdur.")
+        raise PermissionDenied(pgettext("blog.moderation.message", "Bu postu idarə etmək üçün icazəniz yoxdur."))
 
     action = (request.POST.get("action") or "").strip().lower()
     feedback = (request.POST.get("feedback") or "").strip()
 
     if action not in {"delete", "deactivate", "reactivate"}:
-        messages.error(request, "Yanlış əməliyyat seçildi.")
+        messages.error(request, pgettext("blog.moderation.message", "Yanlış əməliyyat seçildi."))
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
     # Feedback is mandatory for delete and deactivate so the student knows the reason.
     if action in {"delete", "deactivate"} and not feedback:
-        messages.error(request, "Zəhmət olmasa əməliyyatın səbəbini yazın.")
+        reason_required_msg = pgettext("blog.moderation.message", "Zəhmət olmasa əməliyyatın səbəbini yazın.")
+        messages.error(request, reason_required_msg)
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         if is_ajax:
-            return JsonResponse({"success": False, "error": "Zəhmət olmasa əməliyyatın səbəbini yazın."}, status=400)
+            return JsonResponse({"success": False, "error": reason_required_msg}, status=400)
         next_url = (request.POST.get("next") or "").strip()
         if next_url and url_has_allowed_host_and_scheme(
             next_url,
@@ -184,8 +187,10 @@ def teacher_moderate_post(request, post_id):
 
             create_notification(
                 recipient=post_author,
-                title=f"Postunuz silindi: {post_title}",
-                message=(f'"{post_title}" başlıqlı postunuz idarəçi tərəfindən silindi. ' f"Səbəb: {feedback}"),
+                title=pgettext("blog.notification", "Postunuz silindi: {title}").format(title=post_title),
+                message=pgettext(
+                    "blog.notification", '"{title}" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}'
+                ).format(title=post_title, reason=feedback),
                 link=f"{reverse('accounts:profile')}?section=posts",
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_title": post_title, "feedback": feedback},
@@ -194,11 +199,12 @@ def teacher_moderate_post(request, post_id):
             logger.exception("Failed to notify author about post deletion title=%s", post_title)
 
         post.delete()
-        messages.success(request, f'"{post_title}" postu silindi.')
+        deleted_msg = pgettext("blog.post.message", "deleted").format(title=post_title)
+        messages.success(request, deleted_msg)
 
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         if is_ajax:
-            return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
+            return JsonResponse({"success": True, "message": deleted_msg})
 
         return _redirect_next()
 
@@ -219,8 +225,12 @@ def teacher_moderate_post(request, post_id):
 
             create_notification(
                 recipient=post.author,
-                title=f"Postunuz yenidən aktiv edildi: {post.title}",
-                message=f'"{post.title}" başlıqlı postunuz idarəçi tərəfindən yenidən paylaşıldı.',
+                title=pgettext("blog.notification", "Postunuz yenidən aktiv edildi: {title}").format(
+                    title=post.title
+                ),
+                message=pgettext(
+                    "blog.notification", '"{title}" başlıqlı postunuz idarəçi tərəfindən yenidən paylaşıldı.'
+                ).format(title=post.title),
                 link=reverse("article_detail", kwargs={"slug": post.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": post.pk},
@@ -228,14 +238,21 @@ def teacher_moderate_post(request, post_id):
         except Exception:
             logger.exception("Failed to notify author about post reactivation pk=%s", post.pk)
 
-        messages.success(request, f'"{post.title}" postu yenidən aktiv edildi və paylaşıldı.')
+        messages.success(
+            request,
+            pgettext("blog.post.message", '"{title}" postu yenidən aktiv edildi və paylaşıldı.').format(
+                title=post.title
+            ),
+        )
 
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         if is_ajax:
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{post.title}" postu aktiv edildi.',
+                    "message": pgettext("blog.post.message", '"{title}" postu aktiv edildi.').format(
+                        title=post.title
+                    ),
                     "is_published": post.is_published,
                 }
             )
@@ -260,12 +277,13 @@ def teacher_moderate_post(request, post_id):
 
         create_notification(
             recipient=post.author,
-            title=f"Postunuz deaktiv edildi: {post.title}",
-            message=(
-                f'"{post.title}" başlıqlı postunuz idarəçi tərəfindən gizlədildi. '
-                f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
-                f"Rəy: {feedback}"
-            ),
+            title=pgettext("blog.notification", "Postunuz deaktiv edildi: {title}").format(title=post.title),
+            message=pgettext(
+                "blog.notification",
+                '"{title}" başlıqlı postunuz idarəçi tərəfindən gizlədildi. '
+                "Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
+                "Rəy: {reason}",
+            ).format(title=post.title, reason=feedback),
             link=f"{reverse('accounts:profile')}?section=posts",
             notification_type=NotificationType.APPROVAL,
             metadata={"post_id": post.pk, "feedback": feedback},
@@ -275,8 +293,11 @@ def teacher_moderate_post(request, post_id):
 
     messages.info(
         request,
-        f'"{post.title}" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — '
-        f"tələbə düzəliş edib yenidən göndərə bilər.",
+        pgettext(
+            "blog.moderation.message",
+            '"{title}" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — '
+            "tələbə düzəliş edib yenidən göndərə bilər.",
+        ).format(title=post.title),
     )
 
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
@@ -284,7 +305,7 @@ def teacher_moderate_post(request, post_id):
         return JsonResponse(
             {
                 "success": True,
-                "message": f'"{post.title}" postu deaktiv edildi.',
+                "message": pgettext("blog.post.message", '"{title}" postu deaktiv edildi.').format(title=post.title),
                 "is_published": post.is_published,
             }
         )

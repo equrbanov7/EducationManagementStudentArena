@@ -11,7 +11,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.notifications.models import NotificationType
 from apps.notifications.public import create_notification
@@ -53,16 +53,25 @@ def _notify_org_owner_of_approval(org, approved_by, *, approved: bool, reason: s
     """Send an in-app notification to the organization owner about approval outcome."""
     try:
         if approved:
-            title = f"Təşkilatınız təsdiqləndi: {org.name}"
-            message = (
-                f'"{org.name}" təşkilatı superadmin tərəfindən təsdiqləndi. '
-                "İndi bütün funksiyalardan istifadə edə bilərsiniz."
-            )
+            title = pgettext(
+                "accounts.superadmin_orgs.notification", "Təşkilatınız təsdiqləndi: {org}"
+            ).format(org=org.name)
+            message = pgettext(
+                "accounts.superadmin_orgs.notification",
+                '"{org}" təşkilatı superadmin tərəfindən təsdiqləndi. '
+                "İndi bütün funksiyalardan istifadə edə bilərsiniz.",
+            ).format(org=org.name)
         else:
-            title = f"Təşkilat müraciəti rədd edildi: {org.name}"
-            message = f'"{org.name}" təşkilatı superadmin tərəfindən rədd edildi.'
+            title = pgettext(
+                "accounts.superadmin_orgs.notification", "Təşkilat müraciəti rədd edildi: {org}"
+            ).format(org=org.name)
+            message = pgettext(
+                "accounts.superadmin_orgs.notification", '"{org}" təşkilatı superadmin tərəfindən rədd edildi.'
+            ).format(org=org.name)
             if reason:
-                message += f" Səbəb: {reason}"
+                message = pgettext(
+                    "accounts.superadmin_orgs.notification", "{message} Səbəb: {reason}"
+                ).format(message=message, reason=reason)
 
         create_notification(
             recipient=org.owner,
@@ -90,8 +99,13 @@ def _notify_superadmins_of_pending_org(org):
             reverse("accounts:profile"),
             section="superadmin-organizations",
         )
-        title = f"Yeni təşkilat müraciəti: {org.name}"
-        message = f'"{org.name}" adlı yeni təşkilat superadmin təsdiqi gözləyir. ' f"Növ: {org.get_org_type_display()}."
+        title = pgettext("accounts.superadmin_orgs.notification", "Yeni təşkilat müraciəti: {org}").format(
+            org=org.name
+        )
+        message = pgettext(
+            "accounts.superadmin_orgs.notification",
+            '"{org}" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}.',
+        ).format(org=org.name, org_type=org.get_org_type_display())
 
         for superadmin in superadmins:
             create_notification(
@@ -124,7 +138,10 @@ def superadmin_organizations(request):
         if action == "approve":
             # Approve a pending organization: set status to active.
             if organization.status != "pending":
-                messages.warning(request, "Bu təşkilat artıq gözləmə vəziyyətində deyil.")
+                messages.warning(
+                    request,
+                    pgettext_lazy("accounts.superadmin_orgs.message", "Bu təşkilat artıq gözləmə vəziyyətində deyil."),
+                )
             else:
                 organization.status = "active"
                 organization.is_active = True
@@ -133,13 +150,23 @@ def superadmin_organizations(request):
                 _notify_org_owner_of_approval(organization, request.user, approved=True)
                 messages.success(
                     request,
-                    f'"{organization.name}" təşkilatı uğurla təsdiqləndi.',
+                    pgettext_lazy(
+                        "accounts.superadmin_orgs.message",
+                        '"%(organization_name)s" təşkilatı uğurla təsdiqləndi.',
+                    )
+                    % {"organization_name": organization.name},
                 )
 
         elif action == "reject":
             # Reject and deactivate a pending organization.
             if organization.status not in {"pending", "active"}:
-                messages.warning(request, "Bu əməliyyat mövcud vəziyyətdə tətbiq oluna bilməz.")
+                messages.warning(
+                    request,
+                    pgettext_lazy(
+                        "accounts.superadmin_orgs.message",
+                        "Bu əməliyyat mövcud vəziyyətdə tətbiq oluna bilməz.",
+                    ),
+                )
             else:
                 organization.status = "suspended"
                 organization.is_active = False
@@ -157,7 +184,11 @@ def superadmin_organizations(request):
                 _notify_org_owner_of_approval(organization, request.user, approved=False, reason=reason)
                 messages.success(
                     request,
-                    f'"{organization.name}" təşkilatı rədd edildi.',
+                    pgettext_lazy(
+                        "accounts.superadmin_orgs.message",
+                        '"%(organization_name)s" təşkilatı rədd edildi.',
+                    )
+                    % {"organization_name": organization.name},
                 )
 
         elif action == "suspend":
@@ -202,18 +233,31 @@ def superadmin_organizations(request):
             feature_name = (request.POST.get("feature_name") or "").strip() or "written_exam"
             feature_config = REVIEW_VISIBILITY_FEATURES.get(feature_name)
             if feature_config is None:
-                messages.error(request, "Naməlum review visibility feature seçildi.")
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.superadmin_orgs.message", "Naməlum review visibility feature seçildi."),
+                )
                 return redirect(next_url)
 
             reveal_enabled = request.POST.get("enabled") == "1"
             organization.set_review_identity_reveal_enabled(feature_name, reveal_enabled)
             organization.save(update_fields=["settings", "updated_at"])
+            feature_label = feature_config["short_label"].lower()
+            # Ayrı tam mesajlar (şərti "söndürüldü/yenidən aktiv edildi" cümlə
+            # daxilinə yerləşdirilmir — tərcümə oluna bilməsi üçün).
+            if reveal_enabled:
+                anonymity_msg = pgettext_lazy(
+                    "accounts.superadmin_orgs.message",
+                    '"%(organization_name)s" üçün %(feature)s anonimliyi söndürüldü.',
+                )
+            else:
+                anonymity_msg = pgettext_lazy(
+                    "accounts.superadmin_orgs.message",
+                    '"%(organization_name)s" üçün %(feature)s anonimliyi yenidən aktiv edildi.',
+                )
             messages.success(
                 request,
-                (
-                    f'"{organization.name}" üçün {feature_config["short_label"].lower()} anonimliyi '
-                    f'{"söndürüldü" if reveal_enabled else "yenidən aktiv edildi"}.'
-                ),
+                anonymity_msg % {"organization_name": organization.name, "feature": feature_label},
             )
         else:
             messages.error(request, pgettext_lazy("accounts.superadmin_orgs.message", "unknown_action"))

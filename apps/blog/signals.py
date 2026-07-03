@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from .models import Category, Post, Subscriber
 from .selectors import invalidate_blog_listing_cache
@@ -91,8 +92,10 @@ def notify_teachers_on_post_pending(sender, instance, created, **kwargs):
         author_name = (instance.author.get_full_name() or "").strip() or instance.author.username
         create_notification_for_users(
             recipients=reviewers,
-            title=f"Yeni post təsdiq gözləyir: {instance.title}",
-            message=f'{author_name} tərəfindən "{instance.title}" başlıqlı post təsdiq üçün göndərildi.',
+            title=pgettext("blog.notification", "Yeni post təsdiq gözləyir: {title}").format(title=instance.title),
+            message=pgettext(
+                "blog.notification", '{author} tərəfindən "{title}" başlıqlı post təsdiq üçün göndərildi.'
+            ).format(author=author_name, title=instance.title),
             link=reverse("accounts:profile") + "?section=pending-post-approvals",
             notification_type=NotificationType.APPROVAL,
             metadata={"post_id": instance.pk, "author_id": instance.author_id},
@@ -125,20 +128,26 @@ def notify_author_on_approval_decision(sender, instance, created, **kwargs):
         if current_status == Post.ApprovalStatus.APPROVED:
             create_notification(
                 recipient=instance.author,
-                title=f"Postunuz təsdiqləndi: {instance.title}",
-                message=f'"{instance.title}" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.',
+                title=pgettext("blog.notification", "Postunuz təsdiqləndi: {title}").format(title=instance.title),
+                message=pgettext(
+                    "blog.notification", '"{title}" başlıqlı postunuz müəllim tərəfindən təsdiqləndi və paylaşıldı.'
+                ).format(title=instance.title),
                 link=reverse("article_detail", kwargs={"slug": instance.slug}),
                 notification_type=NotificationType.APPROVAL,
                 metadata={"post_id": instance.pk},
             )
         elif current_status == Post.ApprovalStatus.NEEDS_CHANGES:
             feedback = (instance.approval_feedback or "").strip()
-            message = f'"{instance.title}" başlıqlı postunuzda düzəliş tələb olunur.'
+            message = pgettext(
+                "blog.notification", '"{title}" başlıqlı postunuzda düzəliş tələb olunur.'
+            ).format(title=instance.title)
             if feedback:
-                message = f"{message} Müəllim rəyi: {feedback}"
+                message = pgettext("blog.notification", "{message} Müəllim rəyi: {feedback}").format(
+                    message=message, feedback=feedback
+                )
             create_notification(
                 recipient=instance.author,
-                title=f"Post düzəliş tələb edir: {instance.title}",
+                title=pgettext("blog.notification", "Post düzəliş tələb edir: {title}").format(title=instance.title),
                 message=message,
                 link=reverse("accounts:profile") + "?section=posts",
                 notification_type=NotificationType.APPROVAL,

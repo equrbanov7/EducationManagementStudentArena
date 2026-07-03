@@ -103,7 +103,11 @@ def organization_structure(request, slug):
             messages.success(request, notice)
             return redirect("organizations:structure", slug=organization.slug)
         if not _is_ajax_request(request):
-            messages.error(request, form_errors.get("general") or "Struktur bölməsi yaradıla bilmədi.")
+            messages.error(
+                request,
+                form_errors.get("general")
+                or pgettext("organizations.views.message", "Struktur bölməsi yaradıla bilmədi."),
+            )
 
     context = build_organization_structure_context(
         request,
