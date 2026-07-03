@@ -159,7 +159,7 @@ black .
 isort --check --profile black .
 black --check . 
  
-----------
+------------
 
 ### **5. Set Up Environment Variables**
 
