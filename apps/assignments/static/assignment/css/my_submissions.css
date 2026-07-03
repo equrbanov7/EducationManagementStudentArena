@@ -7,7 +7,7 @@
     
     --primary-green: var(--ems-success);
     --dark-green: var(--ems-success-600);
-    --light-green: #ecfdf5;
+    --light-green: var(--ems-emerald-50);
 }
 
 /* Ümumi Mətn Rəngləri */

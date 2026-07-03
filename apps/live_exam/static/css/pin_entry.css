@@ -1,14 +1,14 @@
 :root {
-    --pin-bg-1: #081427;
-    --pin-bg-2: #0b2a52;
-    --pin-bg-3: #0f4c81;
+    --pin-bg-1: var(--ems-navy-900);
+    --pin-bg-2: var(--ems-navy-800);
+    --pin-bg-3: var(--ems-navy-700);
     --pin-bg-4: var(--ems-primary-600);
     --pin-surface: rgba(11, 42, 82, 0.5);
     --pin-surface-strong: rgba(255, 255, 255, 0.92);
     --pin-line: rgba(255, 255, 255, 0.14);
     --pin-text: #f8f7ff;
     --pin-muted: rgba(237, 233, 254, 0.8);
-    --pin-accent: #38bdf8;
+    --pin-accent: var(--ems-sky-400);
     --pin-accent-strong: var(--ems-primary-700);
     --pin-secondary: #93c5fd;
     --pin-shadow: 0 28px 80px rgba(8, 23, 55, 0.4);

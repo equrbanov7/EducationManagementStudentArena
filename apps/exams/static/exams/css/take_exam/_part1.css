@@ -3,7 +3,7 @@
     --exam-blue-strong: var(--ems-primary-700);
     --exam-blue-soft: var(--ems-primary-100);
     --exam-green: var(--ems-success);
-    --exam-green-soft: #d1fae5;
+    --exam-green-soft: var(--ems-emerald-100);
     --exam-red: var(--ems-danger-500);
     --exam-red-strong: var(--ems-danger);
     --exam-red-soft: var(--ems-danger-100);
@@ -11,7 +11,7 @@
     --exam-amber-soft: var(--ems-warning-100);
     --exam-bg: var(--ems-neutral-50);
     --exam-card: var(--ems-neutral-0);
-    --exam-text: #1e293b;
+    --exam-text: var(--ems-slate-800);
     --exam-muted: var(--ems-neutral-500);
     --exam-border: var(--ems-neutral-200);
     --exam-border-strong: var(--ems-neutral-300);

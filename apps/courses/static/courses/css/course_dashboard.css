@@ -6,7 +6,7 @@
 
    :root {
     --primary-color: var(--ems-primary-600);
-    --secondary-color: #0ea5e9;
+    --secondary-color: var(--ems-sky-500);
     --success-color: #28a745;
     --danger-color: #dc3545;
     --warning-color: #ffc107;

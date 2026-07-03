@@ -5,12 +5,12 @@
    tokens can be reused across hero, sections and CTA blocks. */
 
 :root {
-    --ems-blue-900: #1e3a8a;
+    --ems-blue-900: var(--ems-blue-900);
     --ems-blue-800: var(--ems-primary-800);
     --ems-blue-700: var(--ems-primary-700);
     --ems-blue-600: var(--ems-primary-600);
     --ems-teal-700: var(--ems-success-strong);
-    --ems-teal-500: #14b8a6;
+    --ems-teal-500: var(--ems-teal-500);
     --ems-green-500: var(--ems-success);
     --ems-bg: var(--ems-neutral-50);
     --ems-surface: var(--ems-neutral-0);

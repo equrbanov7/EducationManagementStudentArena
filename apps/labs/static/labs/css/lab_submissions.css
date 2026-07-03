@@ -4,7 +4,7 @@
     --primary-color: var(--ems-primary-600);
     --primary-light: var(--ems-primary-50);
     --secondary-text: var(--ems-neutral-500);
-    --dark-text: #1e293b;
+    --dark-text: var(--ems-slate-800);
     --border-color: var(--ems-neutral-200);
     --card-bg: var(--ems-neutral-0);
     --bg-body: var(--ems-neutral-100);

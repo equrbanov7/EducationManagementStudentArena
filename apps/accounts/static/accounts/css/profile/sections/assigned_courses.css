@@ -2,8 +2,8 @@
 :root {
     --emerald-primary: var(--ems-success);
     --emerald-hover: var(--ems-success-600);
-    --emerald-light: #d1fae5;
-    --emerald-border: #a7f3d0;
+    --emerald-light: var(--ems-emerald-100);
+    --emerald-border: var(--ems-emerald-200);
 }
 
 /* Xüsusi Rəng Klassları */
