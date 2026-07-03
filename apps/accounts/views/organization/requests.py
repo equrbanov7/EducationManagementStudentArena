@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.notifications.models import (
     StudentOrganizationRequest,
@@ -84,7 +85,7 @@ def student_organization_request(request):
                         )
 
             if target_request is None:
-                messages.error(request, "Ləğv ediləcək aktiv müraciət tapılmadı.")
+                messages.error(request, pgettext("accounts.org.message", "Ləğv ediləcək aktiv müraciət tapılmadı."))
                 return redirect(next_url)
 
             _set_student_org_request_status(
@@ -94,21 +95,38 @@ def student_organization_request(request):
                 responded_by=request.user,
             )
             _sync_profile_pending_request_snapshot(profile)
-            messages.success(request, f"{target_request.organization.name} üçün müraciət ləğv edildi.")
+            messages.success(
+                request,
+                pgettext("accounts.org.message", "{org} üçün müraciət ləğv edildi.").format(
+                    org=target_request.organization.name
+                ),
+            )
             return redirect(next_url)
 
         if "student-organization-request" not in capabilities["allowed_sections"]:
-            messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
+            messages.error(
+                request,
+                pgettext(
+                    "accounts.org.message",
+                    "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.",
+                ),
+            )
             return redirect("accounts:profile")
 
         if action == "submit_request":
             if profile.organization_id:
-                messages.error(request, "Hazırda təşkilata bağlısınız. Yeni müraciət üçün əvvəlcə çıxış edin.")
+                messages.error(
+                    request,
+                    pgettext(
+                        "accounts.org.message",
+                        "Hazırda təşkilata bağlısınız. Yeni müraciət üçün əvvəlcə çıxış edin.",
+                    ),
+                )
                 return redirect(next_url)
 
             organization_id = (request.POST.get("organization_id") or "").strip()
             if not organization_id:
-                messages.error(request, "Müraciət üçün bir təşkilat seçin.")
+                messages.error(request, pgettext("accounts.org.message", "Müraciət üçün bir təşkilat seçin."))
                 return redirect(next_url)
 
             target_org = (
@@ -121,7 +139,9 @@ def student_organization_request(request):
                 .first()
             )
             if target_org is None:
-                messages.error(request, "Seçilən təşkilat tapılmadı və ya aktiv deyil.")
+                messages.error(
+                    request, pgettext("accounts.org.message", "Seçilən təşkilat tapılmadı və ya aktiv deyil.")
+                )
                 return redirect(next_url)
 
             # The student may not belong to any org yet, so RLS would
@@ -134,14 +154,22 @@ def student_organization_request(request):
                     title=STUDENT_PENDING_INVITE_TITLE,
                 ).exists()
             if existing_pending_invite:
-                messages.info(request, "Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz.")
+                messages.info(
+                    request,
+                    pgettext(
+                        "accounts.org.message",
+                        "Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz.",
+                    ),
+                )
                 return redirect(next_url)
 
             request_message = (request.POST.get("request_message") or "").strip()
             if len(request_message) > STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH:
                 messages.error(
                     request,
-                    f"Müraciət mesajı maksimum {STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH} simvol ola bilər.",
+                    pgettext("accounts.org.message", "Müraciət mesajı maksimum {max} simvol ola bilər.").format(
+                        max=STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH
+                    ),
                 )
                 return redirect(next_url)
 
@@ -221,15 +249,23 @@ def student_organization_request(request):
 
             messages.success(
                 request,
-                f"{target_org.name} üçün {request_role_label} müraciətiniz göndərildi və təsdiq gözləyir.",
+                pgettext(
+                    "accounts.org.message", "{org} üçün {role} müraciətiniz göndərildi və təsdiq gözləyir."
+                ).format(org=target_org.name, role=request_role_label),
             )
             return redirect(next_url)
 
-        messages.error(request, "Naməlum əməliyyat.")
+        messages.error(request, pgettext("accounts.org.message", "Naməlum əməliyyat."))
         return redirect(next_url)
 
     if "student-organization-request" not in capabilities["allowed_sections"]:
-        messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
+        messages.error(
+            request,
+            pgettext(
+                "accounts.org.message",
+                "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.",
+            ),
+        )
         return redirect("accounts:profile")
 
     return _render_profile_section(request, "student-organization-request")

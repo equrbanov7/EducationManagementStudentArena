@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from core.constants import OrganizationType
 
@@ -32,13 +33,16 @@ def student_leave_organization(request):
     reason = (request.POST.get("leave_reason") or "").strip()
     back_url = _resolve_next_url(request, f"{reverse('accounts:profile')}?section=profile-info")
     if not reason:
-        messages.error(request, "Təşkilatdan çıxmaq üçün səbəb qeyd etmək məcburidir.")
+        messages.error(
+            request,
+            pgettext("accounts.org.message", "Təşkilatdan çıxmaq üçün səbəb qeyd etmək məcburidir."),
+        )
         return redirect(back_url)
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     organization = profile.organization
     if organization is None:
-        messages.error(request, "Hazırda bağlı olduğunuz təşkilat yoxdur.")
+        messages.error(request, pgettext("accounts.org.message", "Hazırda bağlı olduğunuz təşkilat yoxdur."))
         return redirect(back_url)
 
     active_membership = (
@@ -79,7 +83,13 @@ def student_leave_organization(request):
         )
     )
     if not can_leave_org:
-        messages.error(request, "Bu əməliyyat yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
+        messages.error(
+            request,
+            pgettext(
+                "accounts.org.message",
+                "Bu əməliyyat yalnız tələbə, müəllim və staff hesabları üçün aktivdir.",
+            ),
+        )
         return redirect(back_url)
 
     with transaction.atomic():
@@ -120,5 +130,8 @@ def student_leave_organization(request):
         reason=reason,
         request=request,
     )
-    messages.success(request, f"{organization.name} təşkilatından ayrıldınız.")
+    messages.success(
+        request,
+        pgettext("accounts.org.message", "{org} təşkilatından ayrıldınız.").format(org=organization.name),
+    )
     return redirect(back_url)

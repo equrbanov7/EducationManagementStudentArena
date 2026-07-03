@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from .._helpers import (
     _collect_actor_permissions,
@@ -133,18 +133,31 @@ def permission_editor(request):
                     )
                     return _safe_redirect()
                 if selected_permission not in role_permissions_set:
-                    messages.error(request, "Delegasiya üçün əvvəlcə icazənin özü rola əlavə olunmalıdır.")
+                    messages.error(
+                        request,
+                        pgettext(
+                            "accounts.permission_editor.message",
+                            "Delegasiya üçün əvvəlcə icazənin özü rola əlavə olunmalıdır.",
+                        ),
+                    )
                     return _safe_redirect()
                 role_permissions_set.add(delegation_entry)
-                result_message = f"'{selected_permission}' üçün delegasiya hüququ verildi."
+                result_message = pgettext(
+                    "accounts.permission_editor.message", "'{permission}' üçün delegasiya hüququ verildi."
+                ).format(permission=selected_permission)
             else:  # revoke_delegation
                 role_permissions_set.discard(delegation_entry)
-                result_message = f"'{selected_permission}' üçün delegasiya hüququ geri alındı."
+                result_message = pgettext(
+                    "accounts.permission_editor.message", "'{permission}' üçün delegasiya hüququ geri alındı."
+                ).format(permission=selected_permission)
         elif action in {"bulk_add", "bulk_remove"}:
             selected_permissions = [perm for perm in request.POST.getlist("permissions") if perm]
             selected_permissions = list(dict.fromkeys(selected_permissions))
             if not selected_permissions:
-                messages.error(request, "Əməliyyat üçün ən azı bir permission seçin.")
+                messages.error(
+                    request,
+                    pgettext("accounts.permission_editor.message", "Əməliyyat üçün ən azı bir permission seçin."),
+                )
                 return _safe_redirect()
 
             invalid_permissions = [perm for perm in selected_permissions if perm not in all_permissions]

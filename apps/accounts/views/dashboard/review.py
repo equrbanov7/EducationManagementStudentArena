@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.assignments.models import Submission
 from apps.courses.models import Course
@@ -120,18 +120,27 @@ def pending_review_detail(request, item_type, item_id):
 
         if request.method == "POST":
             if is_locked:
-                messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+                messages.error(
+                request,
+                pgettext(
+                    "accounts.review.message",
+                    "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
+                ),
+            )
                 return redirect(redirect_url)
 
             feedback = (request.POST.get("feedback") or "").strip()
             try:
                 score = _parse_decimal_score(request.POST.get("score"))
             except InvalidOperation:
-                messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+                messages.error(request, pgettext("accounts.review.message", "Bal düzgün rəqəm formatında olmalıdır."))
                 return redirect(redirect_url)
 
             if score < 0 or score > max_score:
-                messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+                messages.error(
+                request,
+                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+            )
                 return redirect(redirect_url)
 
             submission.grade = score
@@ -143,7 +152,10 @@ def pending_review_detail(request, item_type, item_id):
             submission.save(update_fields=["grade", "feedback", "status", "graded_by", "graded_at"])
             messages.success(
                 request,
-                f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+                pgettext(
+                    "accounts.review.message",
+                    "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(redirect_url)
 
@@ -193,18 +205,27 @@ def pending_review_detail(request, item_type, item_id):
 
         if request.method == "POST":
             if is_locked:
-                messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+                messages.error(
+                request,
+                pgettext(
+                    "accounts.review.message",
+                    "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
+                ),
+            )
                 return redirect(redirect_url)
 
             feedback = (request.POST.get("feedback") or "").strip()
             try:
                 score = _parse_decimal_score(request.POST.get("score"))
             except InvalidOperation:
-                messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+                messages.error(request, pgettext("accounts.review.message", "Bal düzgün rəqəm formatında olmalıdır."))
                 return redirect(redirect_url)
 
             if score < 0 or score > max_score:
-                messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+                messages.error(
+                request,
+                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+            )
                 return redirect(redirect_url)
 
             submission.grade = score
@@ -216,7 +237,10 @@ def pending_review_detail(request, item_type, item_id):
             submission.save(update_fields=["grade", "feedback", "status", "graded_by", "graded_at"])
             messages.success(
                 request,
-                f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+                pgettext(
+                    "accounts.review.message",
+                    "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+                ).format(minutes=REVIEW_EDIT_WINDOW_MINUTES),
             )
             return redirect(redirect_url)
 
@@ -287,7 +311,13 @@ def pending_review_detail(request, item_type, item_id):
 
     if request.method == "POST":
         if is_locked:
-            messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+            messages.error(
+                request,
+                pgettext(
+                    "accounts.review.message",
+                    "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.",
+                ),
+            )
             return redirect(redirect_url)
 
         feedback = (request.POST.get("feedback") or "").strip()
@@ -312,13 +342,16 @@ def pending_review_detail(request, item_type, item_id):
 
             entered_total = _parse_decimal_score(request.POST.get("score"))
         except InvalidOperation:
-            messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+            messages.error(request, pgettext("accounts.review.message", "Bal düzgün rəqəm formatında olmalıdır."))
             return redirect(redirect_url)
 
         score = entered_total if (not has_posted_answer_scores or entered_total != auto_total) else auto_total
 
         if score < 0 or score > max_score:
-            messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+            messages.error(
+                request,
+                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+            )
             return redirect(redirect_url)
 
         submission.score = score

@@ -16,6 +16,7 @@ from django.db.models import Count, ProtectedError, Q
 from django.http import HttpResponseBadRequest, QueryDict
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.blog.forms import CategoryManagementForm
 from apps.blog.models import Category, Post
@@ -363,13 +364,13 @@ def category_post_actions(request, *, submitted_form, allowed_sections):
     if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(
         request.user
     ):
-        messages.error(request, "Bu bölməni yalnız SuperAdmin idarə edə bilər.")
+        messages.error(request, pgettext("blog.category.message", "Bu bölməni yalnız SuperAdmin idarə edə bilər."))
         return _result(response=redirect(f"{reverse('accounts:profile')}?section=profile-info"))
 
     if submitted_form == "category-management-delete":
         category_to_delete = _load_managed_category(request.POST.get("category_id"))
         if category_to_delete is None:
-            messages.error(request, "Silinəcək kateqoriya tapılmadı.")
+            messages.error(request, pgettext("blog.category.message", "Silinəcək kateqoriya tapılmadı."))
             return _result(response=redirect(_category_section_url(section="category-management")))
 
         deleted_category_name = category_to_delete.localized_full_name
@@ -378,10 +379,16 @@ def category_post_actions(request, *, submitted_form, allowed_sections):
         except ProtectedError:
             messages.error(
                 request,
-                "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur.",
+                pgettext(
+                    "blog.category.message",
+                    "Bu kateqoriyanı silmək olmur. Ona bağlı alt kateqoriya və ya post mövcuddur.",
+                ),
             )
         else:
-            messages.success(request, f'"{deleted_category_name}" uğurla silindi.')
+            messages.success(
+                request,
+                pgettext("blog.category.message", '"{name}" uğurla silindi.').format(name=deleted_category_name),
+            )
         return _result(response=redirect(_category_section_url(section="category-management")))
 
     if submitted_form == "category-create":
@@ -389,29 +396,43 @@ def category_post_actions(request, *, submitted_form, allowed_sections):
 
         if bound_form.is_valid():
             saved_category = bound_form.save()
-            saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-            messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yaradıldı.')
+            # Ayrı-ayrı tam mesajlar (söz sırası dillərə görə dəyişdiyi üçün
+            # "{label} ..." kompozisiyasından qaçılır).
+            if saved_category.parent_id:
+                created_msg = pgettext("blog.category.message", 'Alt kateqoriya "{name}" uğurla yaradıldı.')
+            else:
+                created_msg = pgettext("blog.category.message", 'Kateqoriya "{name}" uğurla yaradıldı.')
+            messages.success(request, created_msg.format(name=saved_category.localized_full_name))
             return _result(response=redirect(_category_section_url(section="create-category")))
 
-        messages.error(request, "Kateqoriya yaradılmadı. Zəhmət olmasa xətaları düzəldin.")
+        messages.error(
+            request,
+            pgettext("blog.category.message", "Kateqoriya yaradılmadı. Zəhmət olmasa xətaları düzəldin."),
+        )
         return _result(active_section="create-category", create_form=bound_form)
 
     # category-management-save
     submitted_category_id = request.POST.get("category_id")
     edit_item = _load_managed_category(submitted_category_id)
     if submitted_category_id and edit_item is None:
-        messages.error(request, "Redaktə ediləcək kateqoriya tapılmadı.")
+        messages.error(request, pgettext("blog.category.message", "Redaktə ediləcək kateqoriya tapılmadı."))
         return _result(response=redirect(_category_section_url(section="category-management")))
 
     bound_form = CategoryManagementForm(request.POST, instance=edit_item)
 
     if bound_form.is_valid():
         saved_category = bound_form.save()
-        saved_label = "Alt kateqoriya" if saved_category.parent_id else "Kateqoriya"
-        messages.success(request, f'{saved_label} "{saved_category.localized_full_name}" uğurla yeniləndi.')
+        if saved_category.parent_id:
+            updated_msg = pgettext("blog.category.message", 'Alt kateqoriya "{name}" uğurla yeniləndi.')
+        else:
+            updated_msg = pgettext("blog.category.message", 'Kateqoriya "{name}" uğurla yeniləndi.')
+        messages.success(request, updated_msg.format(name=saved_category.localized_full_name))
         return _result(response=redirect(_category_section_url(section="category-management")))
 
-    messages.error(request, "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin.")
+    messages.error(
+        request,
+        pgettext("blog.category.message", "Kateqoriya yadda saxlanmadı. Zəhmət olmasa xətaları düzəldin."),
+    )
     return _result(active_section="category-management", edit_form=bound_form, edit_item=edit_item)
 
 

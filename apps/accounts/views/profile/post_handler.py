@@ -78,7 +78,7 @@ def handle_profile_post(
         randomize_uploaded_filename(uploaded_avatar)
         profile.avatar = uploaded_avatar
         profile.save(update_fields=["avatar", "updated_at"])
-        messages.success(request, "Profil şəkli uğurla yeniləndi.")
+        messages.success(request, _("Profil şəkli uğurla yeniləndi."))
         return _result(redirect(f"{reverse('accounts:profile')}?section=profile-info"))
 
     if submitted_form == "change-password":
@@ -86,14 +86,14 @@ def handle_profile_post(
         if password_change_form.is_valid():
             user = password_change_form.save()
             update_session_auth_hash(request, user)
-            messages.success(request, "Şifrə uğurla yeniləndi.")
+            messages.success(request, _("Şifrə uğurla yeniləndi."))
             return _result(redirect(f"{reverse('accounts:profile')}?section=change-password"))
 
-        messages.error(request, "Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin.")
+        messages.error(request, _("Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin."))
         active_section = "change-password"
     elif submitted_form == "publish-notification":
         if "publish-notification" not in allowed_sections:
-            messages.error(request, "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur.")
+            messages.error(request, _("Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur."))
             return _result(redirect(f"{reverse('accounts:profile')}?section=profile-info"))
         # Validation + fan-out lives in services.profile_actions (FAZA 8).
         ok, message_key = publish_system_notification(request=request, capabilities=capabilities)
