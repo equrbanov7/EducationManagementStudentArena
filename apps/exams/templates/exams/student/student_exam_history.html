@@ -2,7 +2,7 @@
 {% load static i18n %}
 
 {% block title %}
-{% if exam %}{{ exam.title }} - {% endif %}Mənim cavablarım
+{% if exam %}{{ exam.title }} - {% endif %}{% trans 'Mənim cavablarım' %}
 {% endblock %}
 
 {% block extraCss %}
@@ -23,7 +23,7 @@
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner">
         <i class="fas fa-circle-notch fa-spin"></i>
-        <p>Yüklənir...</p>
+        <p>{% trans 'Yüklənir...' %}</p>
     </div>
 </div>
 <div class="container py-5">
@@ -40,12 +40,12 @@
                     </li>
                     <li class="breadcrumb-item active text-primary-blue" aria-current="page">{{ exam.title }}</li>
                     {% else %}
-                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">İmtahanlar</li>
+                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">{% trans 'İmtahanlar' %}</li>
                     {% endif %}
                 </ol>
             </nav>
             <h2 class="mb-0 fw-bold text-dark-blue">
-                <i class="fa-solid fa-list-check text-primary-blue me-2"></i> Mənim cavablarım
+                <i class="fa-solid fa-list-check text-primary-blue me-2"></i> {% trans 'Mənim cavablarım' %}
             </h2>
         </div>
         <a href="{{ back_url }}" class="btn btn-outline-secondary rounded-3 fw-medium">
@@ -61,7 +61,7 @@
                     {{ history_attempt_count }}
                     <span class="fs-5 text-muted fw-normal">/ {% if exam.max_attempts_per_user %}{{ exam.max_attempts_per_user }}{% else %}&infin;{% endif %}</span>
                 </h2>
-                <span class="text-muted fw-medium text-uppercase small history-tracking-label">İstifadə olunmuş cəhd</span>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">{% trans 'İstifadə olunmuş cəhd' %}</span>
             </div>
         </div>
         <div class="{% if history_max_score is not None %}col-md-3{% else %}col-md-4{% endif %}">
@@ -69,7 +69,7 @@
                 <h2 class="fw-bold mb-1 {% if history_attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
                     {% if history_attempts_left is None %}&infin;{% else %}{{ history_attempts_left }}{% endif %}
                 </h2>
-                <span class="text-muted fw-medium text-uppercase small history-tracking-label">Qalan cəhd</span>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">{% trans 'Qalan cəhd' %}</span>
             </div>
         </div>
         {% if history_max_score is not None %}
@@ -88,7 +88,7 @@
                     {% if exam.is_after_end %}
                         <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> Bitib</span>
                     {% elif exam.is_before_start %}
-                        <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-start"></i> Planlanıb</span>
+                        <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-start"></i> {% trans 'Planlanıb' %}</span>
                     {% elif exam.is_active %}
                         <span class="status-badge status-active"><i class="fa-solid fa-lock-open"></i> Aktiv</span>
                     {% else %}
@@ -102,7 +102,7 @@
                     {% elif exam.end_datetime %}
                         {{ exam.end_datetime|date:"d.m.Y H:i" }}
                     {% else %}
-                        Məhdudiyyətsiz
+                        {% trans 'Məhdudiyyətsiz' %}
                     {% endif %}
                 </span>
             </div>
@@ -117,7 +117,7 @@
             {% if back_url %}<input type="hidden" name="return_to" value="{{ back_url }}">{% endif %}
             <i class="fas fa-search search-icon"></i>
             <input type="text" name="q" class="form-control" id="historySearchInput"
-                   placeholder="İmtahan adına görə axtar..."
+                   placeholder="{% trans 'İmtahan adına görə axtar...' %}"
                    value="{{ search_query }}" autocomplete="off">
         </form>
     </div>
@@ -126,8 +126,8 @@
     <div class="card card-modern border-0">
         <div class="table-modern-header d-flex align-items-center">
             <i class="fa-solid fa-inbox me-2"></i>
-            {% if exam %}Göndərdiyim cavablar{% else %}İmtahan cəhdlərim{% endif %}
-            <span class="ms-auto text-muted small">{{ page_obj.paginator.count }} nəticə</span>
+            {% if exam %}{% trans 'Göndərdiyim cavablar' %}{% else %}{% trans 'İmtahan cəhdlərim' %}{% endif %}
+            <span class="ms-auto text-muted small">{% blocktrans with count=page_obj.paginator.count %}{{ count }} nəticə{% endblocktrans %}</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -137,12 +137,12 @@
                             {% if exam %}
                             <th width="6%">#</th>
                             {% else %}
-                            <th width="24%">İmtahan</th>
+                            <th width="24%">{% trans 'İmtahan' %}</th>
                             {% endif %}
-                            <th width="28%">Göndərilmə tarixi</th>
+                            <th width="28%">{% trans 'Göndərilmə tarixi' %}</th>
                             <th width="22%">Status</th>
-                            <th width="24%">Qiymət</th>
-                            <th width="20%" class="text-end">Əməliyyat</th>
+                            <th width="24%">{% trans 'Qiymət' %}</th>
+                            <th width="20%" class="text-end">{% trans 'Əməliyyat' %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -161,7 +161,7 @@
                                     {% else %}
                                         {% trans "type_written" context "exams.template.student_exam_history" %}
                                     {% endif %}
-                                    · Cəhd #{{ attempt.attempt_number }}
+                                    · {% blocktrans with number=attempt.attempt_number %}Cəhd #{{ number }}{% endblocktrans %}
                                 </div>
                             </td>
                             {% endif %}
@@ -171,16 +171,16 @@
                                     {{ attempt.started_at|date:"d.m.Y H:i" }}
                                 </div>
                                 {% if exam %}
-                                <div class="small text-muted mt-1">Cəhd #{{ attempt.attempt_number }}</div>
+                                <div class="small text-muted mt-1">{% blocktrans with number=attempt.attempt_number %}Cəhd #{{ number }}{% endblocktrans %}</div>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if attempt.exam.exam_type == 'test' or attempt.checked_by_teacher %}
-                                    <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> Qiymətləndirildi</span>
+                                    <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> {% trans 'Qiymətləndirildi' %}</span>
                                 {% elif attempt.status == 'expired' %}
                                     <span class="status-badge status-expired"><i class="fa-solid fa-hourglass-end"></i> Vaxt bitdi</span>
                                 {% else %}
-                                    <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> Yoxlanılır</span>
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> {% trans 'Yoxlanılır' %}</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -221,7 +221,7 @@
                                 </button>
                                 {% else %}
                                 <button type="button" class="btn btn-sm btn-outline-secondary px-3" disabled>
-                                    <i class="fa-solid fa-hourglass-half me-1"></i> Gözləyir
+                                    <i class="fa-solid fa-hourglass-half me-1"></i> {% trans 'Gözləyir' %}
                                 </button>
                                 {% endif %}
                             </td>
@@ -243,10 +243,10 @@
             </div>
         </div>
         {% if search_query %}
-        <h4 class="fw-bold text-dark-blue mb-2">"{{ search_query }}" üçün nəticə tapılmadı</h4>
-        <p class="text-muted mb-0">Axtarış sorğusunu dəyişdirməyə çalışın.</p>
+	        <h4 class="fw-bold text-dark-blue mb-2">{% blocktrans with query=search_query %}"{{ query }}" üçün nəticə tapılmadı{% endblocktrans %}</h4>
+        <p class="text-muted mb-0">{% trans 'Axtarış sorğusunu dəyişdirməyə çalışın.' %}</p>
         {% else %}
-        <h4 class="fw-bold text-dark-blue mb-2">Hələ nəticə yoxdur</h4>
+        <h4 class="fw-bold text-dark-blue mb-2">{% trans 'Hələ nəticə yoxdur' %}</h4>
         <p class="text-muted mb-0">
             {% trans "empty_no_exam_attempt" context "exams.template.student_exam_history" %}
         </p>

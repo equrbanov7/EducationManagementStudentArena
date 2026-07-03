@@ -134,8 +134,8 @@
                         {{ card.attempt_count }} {% trans "stat_flagged_students" context "exams.template.supervision_monitor" %}
                     </span>
                 </div>
-                <a href="{% url 'exams:exam_live_monitor' exam.id %}" class="btn-live-monitor" data-nav="1" title="Canlı izlə">
-                    <i class="fas fa-tower-broadcast"></i> Canlı izlə
+                <a href="{% url 'exams:exam_live_monitor' exam.id %}" class="btn-live-monitor" data-nav="1" title="{% trans 'Canlı izlə' %}">
+                    <i class="fas fa-tower-broadcast"></i> {% trans 'Canlı izlə' %}
                 </a>
                 <i class="fas fa-chevron-down exam-card-toggle"></i>
             </div>

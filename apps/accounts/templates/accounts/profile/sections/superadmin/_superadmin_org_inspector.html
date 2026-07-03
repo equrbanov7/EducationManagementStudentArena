@@ -8,28 +8,28 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
          data-profile-section-panel="superadmin-org-inspector">
     <div class="section-card">
         <div class="section-title">
-            <i class="fas fa-search"></i> Təşkilat məlumatları
+            <i class="fas fa-search"></i> {% trans 'Təşkilat məlumatları' %}
         </div>
 
         {% if not superadmin_org_inspector_section.is_allowed %}
-        <p class="settings-note"><i class="fas fa-circle-info"></i> Bu bölmə yalnız superadmin üçündür.</p>
+        <p class="settings-note"><i class="fas fa-circle-info"></i> {% trans 'Bu bölmə yalnız superadmin üçündür.' %}</p>
         {% else %}
 
         <form method="get" action="{{ profile_base_url }}" class="d-flex flex-wrap gap-2 mb-3 align-items-end">
             <input type="hidden" name="section" value="superadmin-org-inspector">
             <div>
-                <label class="info-label" for="inspectOrgSearch">Təşkilat axtar</label>
+                <label class="info-label" for="inspectOrgSearch">{% trans 'Təşkilat axtar' %}</label>
                 <input type="search"
                        id="inspectOrgSearch"
                        name="inspect_org_search"
                        class="form-control"
                        value="{{ superadmin_org_inspector_section.org_search }}"
-                       placeholder="Ad və ya slug">
+                       placeholder="{% trans 'Ad və ya slug' %}">
             </div>
             <div>
-                <label class="info-label" for="inspectOrgSelect">Təşkilat</label>
+                <label class="info-label" for="inspectOrgSelect">{% trans 'Təşkilat' %}</label>
                 <select name="inspect_org" id="inspectOrgSelect" class="form-select">
-                    <option value="">— Təşkilat seçin —</option>
+                    <option value="">{% trans '— Təşkilat seçin —' %}</option>
                     {% for org in superadmin_org_inspector_section.organizations %}
                     <option value="{{ org.id }}"
                             {% if superadmin_org_inspector_section.selected_org and superadmin_org_inspector_section.selected_org.id == org.id %}selected{% endif %}>
@@ -48,22 +48,22 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
         <div class="d-flex flex-wrap gap-2 mb-3">
             <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=exams"
                class="btn btn-sm {% if section_data.active_tab == 'exams' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
-               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
-                İmtahanlar <span class="sidebar-menu-badge">{{ section_data.counts.exams }}</span>
+               data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}">
+                {% trans 'İmtahanlar' %} <span class="sidebar-menu-badge">{{ section_data.counts.exams }}</span>
             </a>
             <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=results"
                class="btn btn-sm {% if section_data.active_tab == 'results' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
-               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
-                Nəticələr <span class="sidebar-menu-badge">{{ section_data.counts.results }}</span>
+               data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}">
+                {% trans 'Nəticələr' %} <span class="sidebar-menu-badge">{{ section_data.counts.results }}</span>
             </a>
             <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=banks"
                class="btn btn-sm {% if section_data.active_tab == 'banks' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
-               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
-                Sual bankları <span class="sidebar-menu-badge">{{ section_data.counts.banks }}</span>
+               data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}">
+                {% trans 'Sual bankları' %} <span class="sidebar-menu-badge">{{ section_data.counts.banks }}</span>
             </a>
             <a href="{{ profile_base_url }}?{{ section_data.tab_query_base }}&inspect_tab=courses"
                class="btn btn-sm {% if section_data.active_tab == 'courses' %}btn-primary{% else %}btn-outline-secondary{% endif %} js-profile-section-link"
-               data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}">
+               data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}">
                 Kurslar <span class="sidebar-menu-badge">{{ section_data.counts.courses }}</span>
             </a>
         </div>
@@ -73,13 +73,13 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
             <table class="table align-middle">
                 <thead>
                     {% if section_data.active_tab == 'exams' %}
-                    <tr><th>İmtahan</th><th>Növ</th><th>Müəllif</th><th>Cəhdlər</th><th>Yaradılma</th><th>Status</th></tr>
+                    <tr><th>{% trans 'İmtahan' %}</th><th>{% trans 'Növ' %}</th><th>{% trans 'Müəllif' %}</th><th>{% trans 'Cəhdlər' %}</th><th>{% trans 'Yaradılma' %}</th><th>Status</th></tr>
                     {% elif section_data.active_tab == 'results' %}
-                    <tr><th>Tələbə</th><th>İmtahan</th><th>Status</th><th>Düz / Səhv</th><th>Başlama</th></tr>
+                    <tr><th>{% trans 'Tələbə' %}</th><th>{% trans 'İmtahan' %}</th><th>Status</th><th>{% trans 'Düz / Səhv' %}</th><th>{% trans 'Başlama' %}</th></tr>
                     {% elif section_data.active_tab == 'banks' %}
-                    <tr><th>Bank</th><th>Fənn</th><th>Sual sayı</th><th>Sahib</th><th>Yaradılma</th></tr>
+                    <tr><th>Bank</th><th>{% trans 'Fənn' %}</th><th>{% trans 'Sual sayı' %}</th><th>Sahib</th><th>{% trans 'Yaradılma' %}</th></tr>
                     {% else %}
-                    <tr><th>Kurs</th><th>Müəllim</th><th>Üzvlər</th><th>Status</th><th>Yaradılma</th></tr>
+                    <tr><th>Kurs</th><th>{% trans 'Müəllim' %}</th><th>{% trans 'Üzvlər' %}</th><th>Status</th><th>{% trans 'Yaradılma' %}</th></tr>
                     {% endif %}
                 </thead>
                 <tbody>
@@ -124,12 +124,12 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
         </div>
 
         {% if section_data.page_obj.paginator.num_pages > 1 %}
-        <nav class="pagination-wrap" aria-label="Səhifələmə">
+        <nav class="pagination-wrap" aria-label="{% trans 'Səhifələmə' %}">
             <ul class="pagination">
                 {% if section_data.page_obj.has_previous %}
                 <li class="page-item">
                     <a class="page-link js-profile-section-link"
-                       data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}"
+                       data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}"
                        href="{{ profile_base_url }}?{{ section_data.pagination_query }}&inspect_page={{ section_data.page_obj.previous_page_number }}">&laquo;</a>
                 </li>
                 {% endif %}
@@ -139,7 +139,7 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
                 {% if section_data.page_obj.has_next %}
                 <li class="page-item">
                     <a class="page-link js-profile-section-link"
-                       data-section="superadmin-org-inspector" data-title="Təşkilat məlumatları" data-source-url="{{ profile_base_url }}"
+                       data-section="superadmin-org-inspector" data-title="{% trans 'Təşkilat məlumatları' %}" data-source-url="{{ profile_base_url }}"
                        href="{{ profile_base_url }}?{{ section_data.pagination_query }}&inspect_page={{ section_data.page_obj.next_page_number }}">&raquo;</a>
                 </li>
                 {% endif %}
@@ -150,12 +150,12 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
         {% else %}
         <div class="empty-state">
             <i class="fas fa-inbox"></i>
-            <p>Bu tabda məlumat yoxdur.</p>
+            <p>{% trans 'Bu tabda məlumat yoxdur.' %}</p>
         </div>
         {% endif %}
         {% endwith %}
         {% else %}
-        <p class="settings-note"><i class="fas fa-circle-info"></i> Başlamaq üçün yuxarıdan təşkilat seçin.</p>
+        <p class="settings-note"><i class="fas fa-circle-info"></i> {% trans 'Başlamaq üçün yuxarıdan təşkilat seçin.' %}</p>
         {% endif %}
 
         {% endif %}

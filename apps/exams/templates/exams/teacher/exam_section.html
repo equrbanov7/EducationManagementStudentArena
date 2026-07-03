@@ -106,7 +106,7 @@
                             <div class="btn-group btn-group-sm gap-2">
                                 <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
                                    class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-eye"></i> Detallı imtahana bax
+                                    <i class="fas fa-eye"></i> {% trans 'Detallı imtahana bax' %}
                                 </a>
                                 <a href="{% url 'exams:teacher_exam_results' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
                                    class="btn btn-sm btn-outline-success">
@@ -228,7 +228,7 @@
                                 {% if item.last_attempt %}
                                     <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}" 
                                        class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-chart-bar"></i> Cavablarım ({{ item.attempt_count }})
+                                        <i class="fas fa-chart-bar"></i> {% trans 'Cavablarım (' %}{{ item.attempt_count }})
                                     </a>
                                     
                                     {% if item.can_start and item.attempts_left != 0 %}

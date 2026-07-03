@@ -34,7 +34,7 @@
 
         button.disabled = busy;
         button.innerHTML = busy
-            ? '<i class="fas fa-circle-notch fa-spin"></i> ' + t("generating", "Yaradılır...")
+            ? '<i class="fas fa-circle-notch fa-spin"></i> ' + t("generating", gettext("Yaradılır..."))
             : button.dataset.defaultLabel;
     }
 
@@ -101,13 +101,13 @@
     function insertGeneratedText(panel, generatedText, insertMode) {
         var target = findTarget(panel);
         if (!target) {
-            setStatus(panel, t("targetMissing", "Mətn sahəsi tapılmadı."), "error");
+            setStatus(panel, t("targetMissing", gettext("Mətn sahəsi tapılmadı.")), "error");
             return;
         }
 
         var text = (generatedText || "").trim();
         if (!text) {
-            setStatus(panel, t("emptyResponse", "AI boş cavab qaytardı."), "error");
+            setStatus(panel, t("emptyResponse", gettext("AI boş cavab qaytardı.")), "error");
             return;
         }
 
@@ -147,7 +147,7 @@
                     throw new Error(json.error || meta.error || failFallback);
                 }
                 if (attempt >= EXTRACT_POLL_MAX) {
-                    throw new Error(t("extractTimeout", "Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."));
+                    throw new Error(t("extractTimeout", gettext("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.")));
                 }
                 return new Promise(function (resolve) {
                     setTimeout(resolve, EXTRACT_POLL_MS);
@@ -158,7 +158,7 @@
     }
 
     function pollExtraction(statusUrl, attempt) {
-        return pollJob(statusUrl, attempt, t("extractFailed", "Fayldan mətn çıxarıla bilmədi.")).then(function (json) {
+        return pollJob(statusUrl, attempt, t("extractFailed", gettext("Fayldan mətn çıxarıla bilmədi."))).then(function (json) {
             return json.text || "";
         });
     }
@@ -172,7 +172,7 @@
 
         var fd = new FormData();
         fd.append("source_file", file);
-        setStatus(panel, t("extracting", "Fayldan mətn çıxarılır..."), "loading");
+        setStatus(panel, t("extracting", gettext("Fayldan mətn çıxarılır...")), "loading");
 
         return fetch(extractUrl, {
             method: "POST",
@@ -189,7 +189,7 @@
                     var json = {};
                     try { json = body ? JSON.parse(body) : {}; } catch (e) { json = {}; }
                     if (!response.ok || !json.ok) {
-                        throw new Error(json.error || t("extractFailed", "Fayldan mətn çıxarıla bilmədi."));
+                        throw new Error(json.error || t("extractFailed", gettext("Fayldan mətn çıxarıla bilmədi.")));
                     }
                     return json;
                 });
@@ -203,7 +203,7 @@
                     var prev = String(formData.get("source_text") || "").trim();
                     formData.set("source_text", prev ? prev + "\n\n" + text : text);
                     formData.delete("source_file");
-                    setStatus(panel, t("loading", "Gemini 2.5 Pro sualları hazırlayır..."), "loading");
+                    setStatus(panel, t("loading", gettext("Gemini 2.5 Pro sualları hazırlayır...")), "loading");
                     return formData;
                 });
             });
@@ -212,7 +212,7 @@
     function handleGenerate(panel) {
         var url = panel.getAttribute("data-ai-url");
         if (!url) {
-            setStatus(panel, t("endpointMissing", "AI endpoint tapılmadı."), "error");
+            setStatus(panel, t("endpointMissing", gettext("AI endpoint tapılmadı.")), "error");
             return;
         }
 
@@ -222,12 +222,12 @@
         var sourceText = String(formData.get("source_text") || "").trim();
 
         if (!prompt && !hasSourceFile && !sourceText) {
-            setStatus(panel, t("emptyInput", "Prompt yazın və ya fayl yükləyin."), "error");
+            setStatus(panel, t("emptyInput", gettext("Prompt yazın və ya fayl yükləyin.")), "error");
             return;
         }
 
         setBusy(panel, true);
-        setStatus(panel, t("loading", "Gemini 2.5 Pro sualları hazırlayır..."), "loading");
+        setStatus(panel, t("loading", gettext("Gemini 2.5 Pro sualları hazırlayır...")), "loading");
 
         extractFileTextIfNeeded(panel, formData).then(function (preparedFormData) {
         return fetch(url, {
@@ -244,10 +244,10 @@
                     try {
                         json = body ? JSON.parse(body) : {};
                     } catch (error) {
-                        throw new Error(t("generateFailed", "AI sual yaratma alınmadı."));
+                        throw new Error(t("generateFailed", gettext("AI sual yaratma alınmadı.")));
                     }
                     if (!response.ok || !json.ok) {
-                        throw new Error(json.error || t("generateFailed", "AI sual yaratma alınmadı."));
+                        throw new Error(json.error || t("generateFailed", gettext("AI sual yaratma alınmadı.")));
                     }
                     return json;
                 });
@@ -259,7 +259,7 @@
                     return pollJob(
                         extractUrl + json.job_id + "/",
                         0,
-                        t("generateFailed", "AI sual yaratma alınmadı.")
+                        t("generateFailed", gettext("AI sual yaratma alınmadı."))
                     ).then(function (done) {
                         var meta = done.meta || {};
                         return {
@@ -278,23 +278,23 @@
                 var count = json.question_count || 0;
                 var quota = "";
                 if (json.remaining !== undefined && json.limit !== undefined) {
-                    quota = " " + t("remainingRequests", "Qalan sorğu") + ": " + json.remaining + "/" + json.limit + ".";
+                    quota = " " + t("remainingRequests", gettext("Qalan sorğu")) + ": " + json.remaining + "/" + json.limit + ".";
                 }
                 setStatus(
                     panel,
-                    t("readyTemplate", "{count} sual hazırdır. Önizləmə ilə yoxlayın.")
+                    t("readyTemplate", gettext("{count} sual hazırdır. Önizləmə ilə yoxlayın."))
                         .replace("{count}", String(count)) + quota,
                     "success"
                 );
             })
             .catch(function (error) {
-                setStatus(panel, error.message || t("generateFailed", "AI sual yaratma alınmadı."), "error");
+                setStatus(panel, error.message || t("generateFailed", gettext("AI sual yaratma alınmadı.")), "error");
             })
             .finally(function () {
                 setBusy(panel, false);
             });
         }).catch(function (error) {
-            setStatus(panel, error.message || t("extractFailed", "Fayldan mətn çıxarıla bilmədi."), "error");
+            setStatus(panel, error.message || t("extractFailed", gettext("Fayldan mətn çıxarıla bilmədi.")), "error");
             setBusy(panel, false);
         });
     }
@@ -314,7 +314,7 @@
             input.addEventListener("change", function () {
                 var fileName = input.files && input.files[0] ? input.files[0].name : "";
                 if (!fileNameEl) return;
-                fileNameEl.textContent = fileName || t("noFileSelected", "Fayl seçilməyib");
+                fileNameEl.textContent = fileName || t("noFileSelected", gettext("Fayl seçilməyib"));
                 fileNameEl.classList.toggle("has-file", Boolean(fileName));
                 fileNameEl.title = fileName || "";
             });

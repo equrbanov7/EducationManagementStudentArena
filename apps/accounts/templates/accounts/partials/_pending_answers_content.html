@@ -71,7 +71,7 @@
                                 <span class="pending-item-timer"
                                       data-pending-answer-countdown
                                       data-seconds="{{ item.review_window_seconds_left }}">
-                                    Qalan vaxt hesablanır...
+                                    {% trans 'Qalan vaxt hesablanır...' %}
                                 </span>
                             </div>
                         {% endif %}
@@ -134,14 +134,14 @@
         nodes.forEach(function (node) {
             var secondsLeft = parseInt(node.getAttribute("data-seconds"), 10);
             if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
-                node.textContent = "Yoxlama yekunlaşmaq üzrədir.";
+                node.textContent = "{% trans 'Yoxlama yekunlaşmaq üzrədir.' %}";
                 return;
             }
 
             function render() {
                 var minutes = Math.floor(secondsLeft / 60);
                 var seconds = secondsLeft % 60;
-                node.textContent = "Nəticə " + minutes + " dəq " + seconds + " san sonra açılacaq.";
+                node.textContent = "{% trans 'Nəticə' %} " + minutes + " {% trans 'dəq' %} " + seconds + " {% trans 'san sonra açılacaq.' %}";
             }
 
             render();

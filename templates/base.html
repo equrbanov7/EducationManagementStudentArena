@@ -9,7 +9,8 @@
     Title precedence: a child template's title block wins; otherwise
     a view-supplied `seo_title`; otherwise the default brand title.
     {% endcomment %}
-    <title>{% block title %}{% firstof seo_title "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" %}{% endblock %}</title>
+    {% trans "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" as default_seo_title %}
+    <title>{% block title %}{% firstof seo_title default_seo_title %}{% endblock %}</title>
 
     {% comment %}
     SEO: meta tags, favicons, manifest, Open Graph / Twitter, hreflang and
@@ -84,7 +85,7 @@
                             class="app-toast__close"
                             data-toast-dismiss
                             data-bs-dismiss="alert"
-                            aria-label="Bağla">
+                            aria-label="{% trans 'Bağla' %}">
                         <i class="fas fa-xmark" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -105,6 +106,8 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script src="{% url 'javascript-catalog' %}"></script>
 
     <!-- Sənin JS-lərin -->
     <!-- Universal AJAX-safe init + event delegation (EMSReady / EMSDelegate).

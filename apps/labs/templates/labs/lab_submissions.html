@@ -16,21 +16,21 @@
 
     <div class="results-summary mb-4">
         <div class="results-summary__row">
-            <span class="results-summary__label">Kurs:</span>
+            <span class="results-summary__label">{% trans 'Kurs:' %}</span>
             <strong>{{ lab.course.title }}</strong>
         </div>
         <div class="results-summary__row">
-            <span class="results-summary__label">Status:</span>
+            <span class="results-summary__label">{% trans 'Status:' %}</span>
             <span class="results-summary__pill results-summary__pill--{% if lab.status == 'published' %}success{% elif lab.status == 'draft' %}neutral{% else %}warning{% endif %}">
                 {{ lab.get_status_display|default:lab.status|upper }}
             </span>
         </div>
         <div class="results-summary__row">
-            <span class="results-summary__label">Nəticələr:</span>
-            <strong>Cəmi {{ stats.total }}</strong>,
-            <span>gözləyən {{ stats.pending }}</span>,
-            <span>qiymətləndirilib {{ stats.graded }}</span>,
-            <span>gecikmiş {{ stats.late }}</span>
+            <span class="results-summary__label">{% trans 'Nəticələr:' %}</span>
+            <strong>{% blocktrans with total=stats.total %}Cəmi {{ total }}{% endblocktrans %}</strong>,
+            <span>{% blocktrans with pending=stats.pending %}gözləyən {{ pending }}{% endblocktrans %}</span>,
+            <span>{% blocktrans with graded=stats.graded %}qiymətləndirilib {{ graded }}{% endblocktrans %}</span>,
+            <span>{% blocktrans with late=stats.late %}gecikmiş {{ late }}{% endblocktrans %}</span>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
             {% endif %}
             <div class="results-filter-field results-filter-field--wide">
                 <label class="results-filter-label" for="resultsFilterSearchInput">
-                    İstifadəçi və ya cavab axtar
+                    {% trans 'İstifadəçi və ya cavab axtar' %}
                 </label>
                 <input type="text"
                        id="resultsFilterSearchInput"
@@ -52,7 +52,7 @@
                        value="{{ search_query }}"
                        class="form-control js-filter-resettable js-auto-filter-search"
                        autocomplete="off"
-                       placeholder="İstifadəçi və ya cavab axtar">
+                       placeholder="{% trans 'İstifadəçi və ya cavab axtar' %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterStatusSelect">
@@ -75,7 +75,7 @@
                         {% trans "status_graded" context "labs.template.lab_submissions" %}
                     </option>
                     <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>
-                        Qaytarılıb
+                        {% trans 'Qaytarılıb' %}
                     </option>
                 </select>
             </div>
@@ -97,14 +97,14 @@
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateFromInput">
-                    Başlanğıc tarix
+                    {% trans 'Başlanğıc tarix' %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateFromInput"
                        name="date_from"
                        value="{{ date_from }}"
                        class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="Başlanğıc tarix">
+                       aria-label="{% trans 'Başlanğıc tarix' %}">
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateToInput">
@@ -118,26 +118,26 @@
                        aria-label="Son tarix">
             </div>
             <button type="submit" class="btn results-filter-submit">
-                <i class="fas fa-filter me-1"></i> Tətbiq et
+                <i class="fas fa-filter me-1"></i> {% trans 'Tətbiq et' %}
             </button>
             <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
-                <i class="fas fa-eraser me-1"></i> Seçimi sıfırla
+                <i class="fas fa-eraser me-1"></i> {% trans 'Seçimi sıfırla' %}
             </button>
         </form>
     </div>
 
     {% if can_delete_submissions %}
         <div class="results-toolbar">
-            <span class="selected-counter">Seçilib: <span id="selectedLabCount">0</span></span>
+            <span class="selected-counter">{% trans 'Seçilib:' %} <span id="selectedLabCount">0</span></span>
             <div class="results-toolbar__actions">
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllLabsBtn">
-                    <i class="fas fa-check-double"></i> Hamısını seç
+                    <i class="fas fa-check-double"></i> {% trans 'Hamısını seç' %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--clear" id="clearLabsBtn">
-                    <i class="fas fa-eraser"></i> Seçimi sıfırla
+                    <i class="fas fa-eraser"></i> {% trans 'Seçimi sıfırla' %}
                 </button>
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--delete" id="deleteSelectedLabsBtn">
-                    <i class="fas fa-trash"></i> Seçilənləri sil
+                    <i class="fas fa-trash"></i> {% trans 'Seçilənləri sil' %}
                 </button>
             </div>
         </div>
@@ -213,7 +213,7 @@
                                     {% if sub.in_recheck_window %}
                                         <div>
                                             <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-edit"></i> Yenidən yoxla
+                                                <i class="fas fa-edit"></i> {% trans 'Yenidən yoxla' %}
                                             </a>
                                             <div class="countdown-timer mt-2">
                                                 <i class="fas fa-clock"></i>
@@ -260,7 +260,7 @@
 
     <div class="results-page-actions">
         <a href="{{ back_url }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Geri qayıt
+            <i class="fas fa-arrow-left"></i> {% trans 'Geri qayıt' %}
         </a>
     </div>
 </div>
@@ -285,15 +285,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i> Seçilən lab cavablarını sil</h5>
+                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i> {% trans 'Seçilən lab cavablarını sil' %}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    Bu seçim geri qaytarılmır. Seçilmiş lab işi cavabları silinəcək.
+                    {% trans 'Bu seçim geri qaytarılmır. Seçilmiş lab işi cavabları silinəcək.' %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteLabsBtn">Silməni təsdiqlə</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Bağla' %}</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteLabsBtn">{% trans 'Silməni təsdiqlə' %}</button>
                 </div>
             </div>
         </div>

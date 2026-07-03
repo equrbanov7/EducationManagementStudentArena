@@ -38,7 +38,7 @@
     }
 
     if (ctx.editApprovalNotice) {
-      ctx.editApprovalNotice.textContent = "Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.";
+      ctx.editApprovalNotice.textContent = gettext("Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.");
       ctx.editApprovalNotice.hidden = !requiresApproval || isModeratorEdit;
     }
 
@@ -210,11 +210,11 @@
           ns.modal.hideModal(ctx.editModal);
           location.reload();
         } else {
-          alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
+          alert(gettext("Xəta baş verdi: ") + (data.message || gettext("Naməlum xəta")));
         }
       } catch (error) {
         console.error("Error:", error);
-        alert("Əlaqə xətası baş verdi");
+        alert(gettext("Əlaqə xətası baş verdi"));
       }
     });
   }

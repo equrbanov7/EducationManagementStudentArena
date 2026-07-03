@@ -58,11 +58,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=superadmin-org-inspector"
                data-section="superadmin-org-inspector"
-               data-title="Təşkilat məlumatları"
+               data-title="{% trans 'Təşkilat məlumatları' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-org-inspector' %}active{% endif %}">
                 <i class="fas fa-search sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Təşkilat məlumatları</span>
+                <span class="sidebar-menu-text">{% trans 'Təşkilat məlumatları' %}</span>
             </a>
         </li>
         {% endif %}
@@ -70,11 +70,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=superadmin-org-features"
                data-section="superadmin-org-features"
-               data-title="Təşkilat özəllikləri"
+               data-title="{% trans 'Təşkilat özəllikləri' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-org-features' %}active{% endif %}">
                 <i class="fas fa-sliders-h sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Təşkilat özəllikləri</span>
+                <span class="sidebar-menu-text">{% trans 'Təşkilat özəllikləri' %}</span>
             </a>
         </li>
         <li class="sidebar-menu-item">

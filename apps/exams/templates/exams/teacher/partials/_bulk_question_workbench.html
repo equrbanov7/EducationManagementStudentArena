@@ -32,6 +32,10 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 ================================================================================
 {% endcomment %}
 
+{% trans "Suallar bankına bax" as default_wb_picker_label %}
+{% trans "Seçilmişləri yadda saxla" as default_wb_save_label %}
+{% trans "Geri" as default_wb_back_label %}
+
 <div class="bulk-page-wrapper"
      data-workbench-key="{{ wb_workbench_key|default:'workbench' }}"
      {% if parsed and request.method == 'POST' %}data-auto-scroll-preview="true"{% endif %}>
@@ -48,7 +52,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 {% if wb_back_url %}
                 <a href="{{ wb_back_url }}" class="page-header-link page-header-link--secondary">
                     <i class="fas fa-arrow-left"></i>
-                    {{ wb_back_label|default:_("Geri") }}
+                    {{ wb_back_label|default:default_wb_back_label }}
                 </a>
                 {% endif %}
                 {% if wb_picker_url %}
@@ -56,7 +60,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         data-bank-picker-open
                         data-picker-url="{{ wb_picker_url }}">
                     <i class="fas fa-book-bookmark"></i>
-                    {{ wb_picker_label|default:_("Suallar bankına bax") }}
+                    {{ wb_picker_label|default:default_wb_picker_label }}
                 </button>
                 {% endif %}
                 {% if wb_secondary_url %}
@@ -182,7 +186,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 </div>
             </label>
 
-            <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+            <div class="ai-insert-toggle" aria-label="{% trans 'AI mətn yerləşdirmə rejimi' %}">
                 <label>
                     <input type="radio" name="insert_mode" value="append" checked>
                     <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
@@ -349,26 +353,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     <textarea name="raw_text" class="custom-editor" id="testRawEditor" data-ai-question-target
                         data-placeholder-test="{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini' %}"
                         data-placeholder-written="{% trans '1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin.' %}"
-                        placeholder="{% if wb_format == 'written' %}1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.{% else %}Nümunə 1 (Standart - A düzgündür):
-1. Data Science əsasən nə ilə məşğul olur?
-A) Məlumatların analizi və qərar vermə
-B) Kompüter təmiri
-C) Oyun hazırlamaq
-D) İnternet qurmaq
-
-Nümunə 2 (* ilə işarələ):
-2. Python əsasən harada istifadə olunur?
-A) Avtomobil təmiri
-*B) Veb və backend inkişafı
-C) Musiqi ifası
-D) Printer yığılması
-
-Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):
-3. CI/CD nəyi avtomatlaşdırır?
-• Sənəd yazılışını
-√ Build və yerləşdirmə prosesini
-• Müştəri dəstəyini
-• Dizayn prosesini{% endif %}">{{ raw_text }}</textarea>
+                        placeholder="{% if wb_format == 'written' %}{% trans '1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.' %}{% else %}{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini' %}{% endif %}">{{ raw_text }}</textarea>
                 </div>
             </main>
         </form>
@@ -570,7 +555,7 @@ Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):
 
             <div class="sticky-footer">
                 <button class="save-btn" type="submit">
-                    <i class="fas fa-cloud"></i> {{ wb_save_label|default:_("Seçilmişləri yadda saxla") }}
+                            <i class="fas fa-cloud"></i> {{ wb_save_label|default:default_wb_save_label }}
                 </button>
             </div>
         </form>

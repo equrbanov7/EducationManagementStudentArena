@@ -193,10 +193,10 @@
                         {% endif %}
                         {% else %}
                         <strong class="text-dark-blue d-block mb-2">
-                            <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> Yoxlama tamamlanıb
+                            <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> {% trans 'Yoxlama tamamlanıb' %}
                         </strong>
                         <div class="text-secondary">
-                            Qiymət və müəllim rəyi görünəcək:
+                            {% trans 'Qiymət və müəllim rəyi görünəcək:' %}
                             <span class="fw-semibold" data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
                         </div>
                         {% endif %}
@@ -220,7 +220,7 @@
             </div>
         </div>
         <h4 class="fw-bold text-dark-blue mb-2">{% trans "empty_title" context "assignment.my_submissions" %}</h4>
-        <p class="text-muted mb-4">Hələ heç bir tapşırıq cavabı göndərməmisiniz.</p>
+        <p class="text-muted mb-4">{% trans 'Hələ heç bir tapşırıq cavabı göndərməmisiniz.' %}</p>
         
         {% if can_submit %}
         <a href="{{ detail_url }}" class="btn btn-gradient-primary btn-lg px-4 rounded-pill shadow-sm">

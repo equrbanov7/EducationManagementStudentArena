@@ -90,8 +90,8 @@
             setAssignedExamCodeError("");
             if (assignedExamInfoStartBtn) {
                 assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
-                    ? "Kodu təsdiqlə və başla"
-                    : "İmtahana başla";
+                    ? gettext("Kodu təsdiqlə və başla")
+                    : gettext("İmtahana başla");
                 assignedExamInfoStartBtn.disabled = false;
             }
             assignedExamCodeSubmitInFlight = false;
@@ -126,7 +126,7 @@
 
             var codeValue = (assignedExamAccessCodeInput.value || "").trim();
             if (!codeValue) {
-                setAssignedExamCodeError("İmtahan kodu tələb olunur.");
+                setAssignedExamCodeError(gettext("İmtahan kodu tələb olunur."));
                 assignedExamAccessCodeInput.focus();
                 return;
             }
@@ -155,16 +155,16 @@
                         window.location.href = payload.redirect_url || assignedExamModalStartUrl || window.location.href;
                         return;
                     }
-                    setAssignedExamCodeError(payload.error || "İmtahana başlamaq mümkün olmadı.");
+                    setAssignedExamCodeError(payload.error || gettext("İmtahana başlamaq mümkün olmadı."));
                     return;
                 }
                 if (response.redirected && response.url) {
                     window.location.href = response.url;
                     return;
                 }
-                setAssignedExamCodeError("İmtahana başlamaq mümkün olmadı.");
+                setAssignedExamCodeError(gettext("İmtahana başlamaq mümkün olmadı."));
             } catch (error) {
-                setAssignedExamCodeError("İmtahana başlamaq mümkün olmadı.");
+                setAssignedExamCodeError(gettext("İmtahana başlamaq mümkün olmadı."));
             } finally {
                 assignedExamCodeSubmitInFlight = false;
                 if (assignedExamInfoStartBtn) {

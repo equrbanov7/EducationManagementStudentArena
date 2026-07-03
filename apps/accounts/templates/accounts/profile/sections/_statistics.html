@@ -24,7 +24,7 @@
           </span>
           <h4 class="stats-ai-hero__title mb-2">{% trans "ai_analysis" context "profile.statistics" %}</h4>
           <p class="stats-ai-hero__lead mb-0">
-            Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik tövsiyələri bir yerdə göstər.
+            {% trans 'Filtrlənmiş statistika üzrə qısa xülasə, zəif nöqtələr və praktik tövsiyələri bir yerdə göstər.' %}
           </p>
         </div>
         <div class="stats-ai-hero__actions">
@@ -42,8 +42,8 @@
         </div>
       </div>
       <div class="stats-ai-meta" id="statsAiSummaryMeta">
-        <span class="stats-ai-meta__pill">Cari filtrlərə əsasən analiz olunur</span>
-        <span class="stats-ai-meta__pill">Qısa xülasə + tövsiyə</span>
+        <span class="stats-ai-meta__pill">{% trans 'Cari filtrlərə əsasən analiz olunur' %}</span>
+        <span class="stats-ai-meta__pill">{% trans 'Qısa xülasə + tövsiyə' %}</span>
       </div>
       <div class="stats-ai-shell" id="statsAiSummaryBody">
         {% if statistics_data and statistics_data.summary %}
@@ -54,7 +54,8 @@
           <div>
             <div class="stats-ai-placeholder__title">{% trans "ai_analysis" context "profile.statistics" %}</div>
             <div class="stats-ai-placeholder__text">
-              {% trans "btn_ai_summary" context "profile.statistics" %} düyməsinə bas və hazır filtr üzrə xülasəni burada gör.
+              {% trans "btn_ai_summary" context "profile.statistics" as ai_summary_button %}
+              {% blocktrans with button=ai_summary_button %}{{ button }} düyməsinə bas və hazır filtr üzrə xülasəni burada gör.{% endblocktrans %}
             </div>
           </div>
         </div>
@@ -159,7 +160,7 @@
         <div class="card-header">
           <h6 class="mb-0">
             <i class="fas fa-layer-group me-1"></i>
-            {% if role_capabilities.is_superadmin %}Təşkilat fəaliyyəti{% elif role_capabilities.is_org_admin or statistics_unit_layout %}Müəllim yükü{% else %}Kurs performansı{% endif %}
+            {% if role_capabilities.is_superadmin %}{% trans 'Təşkilat fəaliyyəti' %}{% elif role_capabilities.is_org_admin or statistics_unit_layout %}{% trans 'Müəllim yükü' %}{% else %}{% trans 'Kurs performansı' %}{% endif %}
           </h6>
         </div>
         <div class="card-body">
@@ -206,7 +207,7 @@
               <th class="stats-sortable" data-sort="courses">{% trans "card_courses" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="exams">{% trans "card_exams" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
-              <th>Aç</th>
+              <th>{% trans 'Aç' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -294,7 +295,7 @@
               <th>{% trans "card_exams" context "profile.statistics" %}</th>
               <th>{% trans "table_attempts" context "profile.statistics" %}</th>
               <th>{% trans "card_assignments" context "profile.statistics" %}</th>
-              <th>Aç</th>
+              <th>{% trans 'Aç' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -339,7 +340,7 @@
               <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="pass">{% trans "table_pass_pct" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
-              <th>Aç</th>
+              <th>{% trans 'Aç' %}</th>
             </tr>
           </thead>
           <tbody>
@@ -383,7 +384,7 @@
               <th class="stats-sortable" data-sort="attempts">{% trans "table_attempts" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="avg">{% trans "card_avg_score" context "profile.statistics" %}</th>
               <th class="stats-sortable" data-sort="pass">{% trans "table_pass_pct" context "profile.statistics" %}</th>
-              <th>Aç</th>
+              <th>{% trans 'Aç' %}</th>
             </tr>
           </thead>
           <tbody>

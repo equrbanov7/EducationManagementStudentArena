@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 – Giriş Qadağandır | EMSArena</title>
+    <title>{% trans '403 – Giriş Qadağandır | EMSArena' %}</title>
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
@@ -23,29 +23,29 @@
                 <div class="error-copy">
                     <div class="error-kicker">
                         <i class="fas fa-lock"></i>
-                        İcazə məhduddur
+                        {% trans 'İcazə məhduddur' %}
                     </div>
-                    <h1 id="error-title" class="error-title">Bu səhifəyə giriş qadağandır</h1>
+                    <h1 id="error-title" class="error-title">{% trans 'Bu səhifəyə giriş qadağandır' %}</h1>
                     <p class="error-description">
-                        Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.
-                        Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.
+                        {% trans 'Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.' %}
+                        {% trans 'Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.' %}
                     </p>
                     <div class="error-meta">
-                        <span class="error-pill"><i class="fas fa-user-check"></i> Hesabınızı yenidən yoxlayın</span>
-                        <span class="error-pill"><i class="fas fa-building-shield"></i> Təşkilat icazələri tətbiq oluna bilər</span>
+                        <span class="error-pill"><i class="fas fa-user-check"></i> {% trans 'Hesabınızı yenidən yoxlayın' %}</span>
+                        <span class="error-pill"><i class="fas fa-building-shield"></i> {% trans 'Təşkilat icazələri tətbiq oluna bilər' %}</span>
                     </div>
                     <div class="error-actions">
                         <a href="/" class="error-btn error-btn-primary">
                             <i class="fas fa-house"></i>
-                            Ana səhifəyə qayıt
+                            {% trans 'Ana səhifəyə qayıt' %}
                         </a>
                         <a href="{% firstof request.META.HTTP_REFERER '/' %}" class="error-btn error-btn-secondary">
                             <i class="fas fa-arrow-left"></i>
-                            Əvvəlki səhifəyə dön
+                            {% trans 'Əvvəlki səhifəyə dön' %}
                         </a>
                     </div>
                     <p class="error-footer-note">
-                        Giriş hüququ sizdə olmalıdırsa, sistem administratoru ilə paylaşın.
+                        {% trans 'Giriş hüququ sizdə olmalıdırsa, sistem administratoru ilə paylaşın.' %}
                     </p>
                 </div>
 
@@ -57,7 +57,7 @@
                         </div>
                         <div>
                             <div class="error-code">403</div>
-                            <div class="error-code-caption">Sorğu tanındı, amma bu resursa girişə icazə verilmədi.</div>
+                            <div class="error-code-caption">{% trans 'Sorğu tanındı, amma bu resursa girişə icazə verilmədi.' %}</div>
                         </div>
                     </div>
                 </div>

@@ -90,10 +90,7 @@
                                 {{ assignment.course.title }}
                             </div>
                             {% if assignment.deadline %}
-                            <span class="deadline-badge 
-                                {% if assignment.deadline|timeuntil == '1 gün' %}urgent
-                                {% elif assignment.deadline|timeuntil == '3 gün' %}soon
-                                {% else %}normal{% endif %}">
+                            <span class="deadline-badge {{ assignment.deadline_badge_variant|default:'normal' }}">
                                 <i class="fas fa-clock me-1"></i>{{ assignment.deadline|date:"d M" }}
                             </span>
                             {% endif %}

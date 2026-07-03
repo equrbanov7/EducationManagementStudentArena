@@ -53,7 +53,7 @@
         var deleteBody = document.getElementById("deleteBankBody");
         var name = btn.getAttribute("data-name") || "";
         if (deleteBody) {
-          deleteBody.textContent = "\"" + name + "\" bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?";
+          deleteBody.textContent = "\"" + name + gettext("\" bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?");
         }
 
         var modalEl = document.getElementById("deleteBankModal");

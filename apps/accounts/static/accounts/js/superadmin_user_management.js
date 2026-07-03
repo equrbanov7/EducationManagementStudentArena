@@ -10,10 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        var title = trigger.getAttribute("data-modal-title") || "Hesabı sil";
+        var title = trigger.getAttribute("data-modal-title") || gettext("Hesabı sil");
         var description =
             trigger.getAttribute("data-modal-description") ||
-            "Seçilmiş istifadəçi hesabı üçün bu əməliyyat tətbiq ediləcək.";
+            gettext("Seçilmiş istifadəçi hesabı üçün bu əməliyyat tətbiq ediləcək.");
         var username = trigger.getAttribute("data-username") || "";
         var userId = trigger.getAttribute("data-user-id") || "";
         var action = trigger.getAttribute("data-action") || "soft_delete";

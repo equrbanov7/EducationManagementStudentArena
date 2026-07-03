@@ -43,12 +43,12 @@
                 <input type="search"
                        name="results_search"
                        value="{{ my_results_search_query }}"
-                       placeholder="Nəticə axtar..."
+                       placeholder="{% trans 'Nəticə axtar...' %}"
                        autocomplete="off">
                 {% if my_results_search_query %}
                 <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}"
                    class="results-section-search-clear"
-                   aria-label="Axtarışı təmizlə">
+                   aria-label="{% trans 'Axtarışı təmizlə' %}">
                     <i class="fas fa-times" aria-hidden="true"></i>
                 </a>
                 {% endif %}
@@ -137,7 +137,7 @@
             <p>{% trans "empty_description" context "profile.results" %}</p>
             {% if my_results_search_query %}
                 <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}" class="btn-teal results-section-empty-clear">
-                    <i class="fas fa-times" aria-hidden="true"></i> Filtri təmizlə
+                    <i class="fas fa-times" aria-hidden="true"></i> {% trans 'Filtri təmizlə' %}
                 </a>
             {% endif %}
         </div>

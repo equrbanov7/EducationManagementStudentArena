@@ -25,13 +25,13 @@
         return;
       }
       ctx.tip.innerHTML = '<div class="tip-name">' + u.esc(s.name) + '</div>' +
-        '<div class="tip-row"><span>Cavablanıb</span><b>' + s.answered + " / " + s.total_questions + '</b></div>' +
-        '<div class="tip-row"><span>Qalıb</span><b>' + Math.max(0, s.total_questions - s.answered) + '</b></div>' +
-        '<div class="tip-row"><span>Tərəqqi</span><b>' + s.progress_pct + '%</b></div>' +
+        gettext('<div class="tip-row"><span>Cavablanıb</span><b>') + s.answered + " / " + s.total_questions + '</b></div>' +
+        gettext('<div class="tip-row"><span>Qalıb</span><b>') + Math.max(0, s.total_questions - s.answered) + '</b></div>' +
+        gettext('<div class="tip-row"><span>Tərəqqi</span><b>') + s.progress_pct + '%</b></div>' +
         '<div class="tip-row"><span>Pozuntu</span><b>' + s.violation_count + '</b></div>' +
         '<div class="tip-row"><span>Status</span><b>' + u.esc(ctx.STATUS_LABELS[s.supervision_status] || s.supervision_status) + '</b></div>' +
-        (s.is_finished ? '<div class="tip-row"><span>Nəticə</span><b>' + u.esc(u.scoreText(s)) + '</b></div>' : '') +
-        '<div class="tip-row"><span>Başlama</span><b>' + u.esc(u.fmtDateTime(s.started_at)) + '</b></div>';
+        (s.is_finished ? gettext('<div class="tip-row"><span>Nəticə</span><b>') + u.esc(u.scoreText(s)) + '</b></div>' : '') +
+        gettext('<div class="tip-row"><span>Başlama</span><b>') + u.esc(u.fmtDateTime(s.started_at)) + '</b></div>';
       ctx.tip.classList.add("show");
     });
     u.$("studentMap").addEventListener("mousemove", function (e) {
@@ -60,7 +60,7 @@
 
   function renderCodeFiles(ctx, files) {
     if (!files || !files.length) {
-      return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+      return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", gettext("Hələ cavab yoxdur"))) + '</span>';
     }
     return '<div class="code-files">' + files.map(function (f, i) {
       var empty = !(f.content || "").trim();
@@ -69,7 +69,7 @@
       return '<div class="code-file' + (open ? " open" : "") + '" data-codefile>' +
         '<button type="button" class="code-file-head" data-codetoggle>' +
         '<i class="fab ' + fileIcon(f.name) + '"></i> <span class="cf-name">' + u.esc(f.name) + '</span>' +
-        '<span class="cf-meta">' + (empty ? u.esc(u.t(ctx, "file_empty", "boş")) : (lines + " " + u.t(ctx, "lines", "sətir"))) + '</span>' +
+        '<span class="cf-meta">' + (empty ? u.esc(u.t(ctx, "file_empty", gettext("boş"))) : (lines + " " + u.t(ctx, "lines", gettext("sətir")))) + '</span>' +
         '<i class="fas fa-chevron-down cf-caret"></i></button>' +
         '<pre class="code-file-body"><code>' + u.esc(f.content || "") + '</code></pre>' +
         '</div>';
@@ -93,8 +93,8 @@
       var icon = o.is_correct ? '<i class="fas fa-check-circle" style="color:#16a34a"></i>' : (o.is_selected ? '<i class="fas fa-times-circle" style="color:#dc2626"></i>' : '<i class="far fa-circle" style="color:#94a3b8"></i>');
       var lbl = o.label ? '<b>' + u.esc(o.label) + ')</b> ' : '';
       var tags = [];
-      if (o.is_selected) tags.push('<span class="opt-tag opt-picked">' + u.esc(u.t(ctx, "picked_option", "Seçilib")) + '</span>');
-      if (o.is_correct) tags.push('<span class="opt-tag opt-key">' + u.esc(u.t(ctx, "correct_option", "Düz")) + '</span>');
+      if (o.is_selected) tags.push('<span class="opt-tag opt-picked">' + u.esc(u.t(ctx, "picked_option", gettext("Seçilib"))) + '</span>');
+      if (o.is_correct) tags.push('<span class="opt-tag opt-key">' + u.esc(u.t(ctx, "correct_option", gettext("Düz"))) + '</span>');
       return '<div class="ans-option-item ' + cls + '">' + icon + '<span class="opt-text">' + lbl + u.esc(o.text) + '</span>' + (tags.length ? '<span class="opt-tags">' + tags.join("") + '</span>' : '') + '</div>';
     }).join("") + '</div>';
   }
@@ -102,13 +102,13 @@
   function renderOneAnswer(ctx, a, idx) {
     var kindBadge = {
       test: { label: u.t(ctx, "kind_test", "Test"), cls: "type-test" },
-      written: { label: u.t(ctx, "kind_written", "Yazılı"), cls: "type-written" },
-      paint: { label: u.t(ctx, "kind_paint", "Çəkim"), cls: "type-paint" },
+      written: { label: u.t(ctx, "kind_written", gettext("Yazılı")), cls: "type-written" },
+      paint: { label: u.t(ctx, "kind_paint", gettext("Çəkim")), cls: "type-paint" },
       coding: { label: u.t(ctx, "kind_coding", "Praktiki"), cls: "type-coding" }
     };
     var badgeDef = kindBadge[a.kind] || kindBadge.written;
     var badge = '<span class="ans-type-badge ' + badgeDef.cls + '">' + u.esc(badgeDef.label) + '</span>';
-    var statusChip = a.is_answered ? '<span class="ans-status answered"><i class="fas fa-circle-check"></i> ' + u.esc(u.t(ctx, "answered_chip", "Cavablanıb")) + '</span>' : '<span class="ans-status pending"><i class="fas fa-circle"></i> ' + u.esc(u.t(ctx, "unanswered_chip", "Boş")) + '</span>';
+    var statusChip = a.is_answered ? '<span class="ans-status answered"><i class="fas fa-circle-check"></i> ' + u.esc(u.t(ctx, "answered_chip", gettext("Cavablanıb"))) + '</span>' : '<span class="ans-status pending"><i class="fas fa-circle"></i> ' + u.esc(u.t(ctx, "unanswered_chip", gettext("Boş"))) + '</span>';
     var body = "";
     if (a.kind === "coding") {
       body = renderCodeFiles(ctx, a.files);
@@ -141,12 +141,12 @@
       }).join("") + '</div>';
       var pickedWrong = a.selected_options.some(function (o) { return !o.is_correct; });
       if (pickedWrong && a.correct_options && a.correct_options.length) {
-        body += '<div class="ans-correct-hint"><i class="fas fa-key"></i> ' + u.esc(u.t(ctx, "correct_answer", "Düzgün cavab")) + ': ' +
+        body += '<div class="ans-correct-hint"><i class="fas fa-key"></i> ' + u.esc(u.t(ctx, "correct_answer", gettext("Düzgün cavab"))) + ': ' +
           a.correct_options.map(function (o) { return (o.label ? u.esc(o.label) + ") " : "") + u.esc(o.text); }).join(", ") + '</div>';
       }
       return body;
     }
-    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", gettext("Hələ cavab yoxdur"))) + '</span>';
   }
 
   function renderPaintAnswer(ctx, a) {
@@ -154,12 +154,12 @@
       return '<div class="ans-media"><a href="' + u.esc(a.paint_image_url) + '" target="_blank" rel="noopener"><img src="' + u.esc(a.paint_image_url) + '" alt="" loading="lazy" /></a></div>';
     }
     if (a.has_paint) {
-      return '<span class="pill"><i class="fas fa-paint-brush"></i> ' + u.esc(u.t(ctx, "paint_answer", "Çəkim cavabı verilib")) + '</span>';
+      return '<span class="pill"><i class="fas fa-paint-brush"></i> ' + u.esc(u.t(ctx, "paint_answer", gettext("Çəkim cavabı verilib"))) + '</span>';
     }
     if (a.text_answer) {
       return '<div class="ans-text-block">' + u.esc(a.text_answer) + '</div>';
     }
-    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", gettext("Hələ cavab yoxdur"))) + '</span>';
   }
 
   function renderWrittenAnswer(ctx, a) {
@@ -171,13 +171,13 @@
         return '<span class="pill"><i class="fas fa-paperclip"></i> ' + u.esc(fn) + '</span>';
       }).join(" ") + '</div>';
     }
-    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", "Hələ cavab yoxdur")) + '</span>';
+    return '<span class="ans-empty">' + u.esc(u.t(ctx, "no_answers_yet", gettext("Hələ cavab yoxdur"))) + '</span>';
   }
 
   function renderAnswers(ctx, d) {
     var answers = d.answers || [];
     if (!answers.length) {
-      return '<div class="side-empty">' + u.esc(u.t(ctx, "no_answers_yet", "Hələ heç bir suala cavab verilməyib.")) + '</div>';
+      return '<div class="side-empty">' + u.esc(u.t(ctx, "no_answers_yet", gettext("Hələ heç bir suala cavab verilməyib."))) + '</div>';
     }
     return answers.map(function (a, idx) { return renderOneAnswer(ctx, a, idx); }).join("");
   }
@@ -193,10 +193,10 @@
       var sVal, sLabel;
       if (d.teacher_score != null && d.checked_by_teacher) {
         sVal = d.teacher_score;
-        sLabel = u.t(ctx, "teacher_score_label", "Müəllim balı");
+        sLabel = u.t(ctx, "teacher_score_label", gettext("Müəllim balı"));
       } else {
         sVal = d.score_percent != null ? d.score_percent + "%" : "—";
-        sLabel = d.checked_by_teacher ? u.t(ctx, "teacher_score_label", "Qiymət") : u.t(ctx, "auto_score_label", "Avtomatik nəticə");
+        sLabel = d.checked_by_teacher ? u.t(ctx, "teacher_score_label", gettext("Qiymət")) : u.t(ctx, "auto_score_label", gettext("Avtomatik nəticə"));
       }
       scoreBlock = '<div class="mon-metric"><div class="mm-v" style="color:#16a34a">' + sVal + '</div><div class="mm-l">' + u.esc(sLabel) + '</div></div>';
     }
@@ -204,35 +204,35 @@
       return '<div class="inc-item"><i class="fas fa-circle" style="font-size:0.5rem;color:#dc3545"></i> ' +
         u.esc(e.event_display || ctx.EVENT_LABELS[e.event_type] || e.event_type) +
         '<span class="inc-time">' + u.timeAgo(e.timestamp) + '</span></div>';
-    }).join("") : '<div class="side-empty">' + u.esc(u.t(ctx, "no_violations", "Pozuntu qeydə alınmayıb.")) + '</div>';
-    var startedRow = '<div class="mon-meta-row"><i class="fas fa-calendar-day"></i> ' + u.esc(u.t(ctx, "exam_date_label", "İmtahan tarixi")) + ': <b>' + u.esc(u.fmtDateTime(d.started_at)) + '</b>' +
-      (d.finished_at ? ' &nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> ' + u.esc(u.t(ctx, "finished_at_label", "Bitmə")) + ': <b>' + u.esc(u.fmtDateTime(d.finished_at)) + '</b>' : '') + '</div>';
+    }).join("") : '<div class="side-empty">' + u.esc(u.t(ctx, "no_violations", gettext("Pozuntu qeydə alınmayıb."))) + '</div>';
+    var startedRow = '<div class="mon-meta-row"><i class="fas fa-calendar-day"></i> ' + u.esc(u.t(ctx, "exam_date_label", gettext("İmtahan tarixi"))) + ': <b>' + u.esc(u.fmtDateTime(d.started_at)) + '</b>' +
+      (d.finished_at ? ' &nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> ' + u.esc(u.t(ctx, "finished_at_label", gettext("Bitmə"))) + ': <b>' + u.esc(u.fmtDateTime(d.finished_at)) + '</b>' : '') + '</div>';
     u.$("modalBody").innerHTML =
-      '<div class="mon-note"><i class="fas fa-eye"></i> ' + u.esc(u.t(ctx, "monitor_note", "Bu, yalnız izləmə rejimidir — tələbə bloklanmır.")) + '</div>' +
+      '<div class="mon-note"><i class="fas fa-eye"></i> ' + u.esc(u.t(ctx, "monitor_note", gettext("Bu, yalnız izləmə rejimidir — tələbə bloklanmır."))) + '</div>' +
       startedRow + '<div class="mon-grid">' +
-      '<div class="mon-metric"><div class="mm-v">' + d.answered + '/' + d.total_questions + '</div><div class="mm-l">' + u.esc(u.t(ctx, "answered_label", "Cavablanıb")) + '</div></div>' +
-      '<div class="mon-metric"><div class="mm-v">' + Math.max(0, d.total_questions - d.answered) + '</div><div class="mm-l">' + u.esc(u.t(ctx, "remaining_label", "Qalıb")) + '</div></div>' +
+      '<div class="mon-metric"><div class="mm-v">' + d.answered + '/' + d.total_questions + '</div><div class="mm-l">' + u.esc(u.t(ctx, "answered_label", gettext("Cavablanıb"))) + '</div></div>' +
+      '<div class="mon-metric"><div class="mm-v">' + Math.max(0, d.total_questions - d.answered) + '</div><div class="mm-l">' + u.esc(u.t(ctx, "remaining_label", gettext("Qalıb"))) + '</div></div>' +
       '<div class="mon-metric"><div class="mm-v" style="color:#dc3545">' + d.violation_count + '</div><div class="mm-l">' + u.esc(u.t(ctx, "violations_label", "Pozuntu")) + '</div></div>' +
       scoreBlock + '</div><div class="mon-section-title">' + u.esc(u.t(ctx, "current_answers", "Cari cavablar")) + '</div>' + renderAnswers(ctx, d) +
-      '<div class="mon-section-title">' + u.esc(u.t(ctx, "violation_log", "Pozuntu jurnalı")) + '</div>' + incHtml;
+      '<div class="mon-section-title">' + u.esc(u.t(ctx, "violation_log", gettext("Pozuntu jurnalı"))) + '</div>' + incHtml;
     var finished = d.is_finished;
     var canResume = (d.supervision_status === "locked" || d.supervision_status === "removed") && !finished;
     u.$("modalResumeBtn").style.display = canResume ? "inline-flex" : "none";
     u.$("modalPauseBtn").style.display = !finished && d.supervision_status !== "locked" && d.supervision_status !== "removed" ? "inline-flex" : "none";
     u.$("modalStopBtn").style.display = !finished ? "inline-flex" : "none";
-    u.$("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " " + u.t(ctx, "questions_answered", "sual cavablanıb");
+    u.$("modalAnswerCount").textContent = (d.answered || 0) + "/" + (d.total_questions || 0) + " " + u.t(ctx, "questions_answered", gettext("sual cavablanıb"));
   }
 
   function openModal(ctx, attemptId) {
     ctx.currentAttempt = attemptId;
     ctx.modal.classList.add("show");
-    u.$("modalBody").innerHTML = '<div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>Yüklənir…</p></div>';
+    u.$("modalBody").innerHTML = gettext('<div class="modal-loading"><i class="fas fa-circle-notch fa-spin"></i><p>Yüklənir…</p></div>');
     ["modalResumeBtn", "modalPauseBtn", "modalStopBtn"].forEach(function (b) { u.$(b).style.display = "none"; });
     fetch(ctx.SNAPSHOT_BASE + attemptId + "/", { headers: { "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { return r.json(); })
       .then(function (d) { renderModal(ctx, d); })
       .catch(function () {
-        u.$("modalBody").innerHTML = '<div class="modal-loading">Məlumat yüklənmədi.</div>';
+        u.$("modalBody").innerHTML = gettext('<div class="modal-loading">Məlumat yüklənmədi.</div>');
       });
   }
 

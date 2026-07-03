@@ -45,85 +45,85 @@
   function pick(o) { return o[L] || o.az || o.en; }
 
   var T = {
-    title: { az:'AI Kurs Köməkçisi', ru:'AI помощник курса', tr:'AI Kurs Asistanı', en:'AI Course Assistant' },
-    sub: { az:'Hər addımı siz təsdiqləyirsiniz', ru:'Вы подтверждаете каждый шаг', tr:'Her adımı siz onaylarsınız', en:'You approve every step' },
-    mStep: { az:'Addım-addım', ru:'Пошагово', tr:'Adım adım', en:'Step by step' },
+    title: { az:gettext('AI Kurs Köməkçisi'), ru:'AI помощник курса', tr:gettext('AI Kurs Asistanı'), en:'AI Course Assistant' },
+    sub: { az:gettext('Hər addımı siz təsdiqləyirsiniz'), ru:'Вы подтверждаете каждый шаг', tr:gettext('Her adımı siz onaylarsınız'), en:'You approve every step' },
+    mStep: { az:gettext('Addım-addım'), ru:'Пошагово', tr:gettext('Adım adım'), en:'Step by step' },
     mPlan: { az:'Tam plan', ru:'Весь план', tr:'Tam plan', en:'Full plan' },
-    promptLbl: { az:'Hansı kursu qurmaq istəyirsiniz?', ru:'Какой курс построить?', tr:'Hangi kursu kurmak istersiniz?', en:'Which course do you want to build?' },
-    promptPh: { az:'Məs: “Veb texnologiyaları, 2-ci kurs, 14 həftə. Praktiki yönümlü.”', ru:'Напр: «Веб-технологии, 2 курс, 14 недель»', tr:'Örn: “Web teknolojileri, 2. sınıf, 14 hafta”', en:'e.g. “Web technologies, 2nd year, 14 weeks”' },
-    examples: { az:'NÜMUNƏLƏR', ru:'ПРИМЕРЫ', tr:'ÖRNEKLER', en:'EXAMPLES' },
-    note: { az:'AI mövzulardan tutmuş qruplara kimi hər şeyi təklif edir. Heç nə avtomatik tətbiq olunmur — hər addımı siz təsdiqləyirsiniz.', ru:'ИИ предложит всё — от тем до групп. Ничего не применяется без вашего подтверждения.', tr:'AI konulardan gruplara kadar her şeyi önerir. Hiçbir şey otomatik uygulanmaz.', en:'AI proposes everything from topics to groups. Nothing is applied without your approval.' },
-    generate: { az:'Yarat', ru:'Создать', tr:'Oluştur', en:'Generate' },
-    genT: { az:'AI kursu hazırlayır…', ru:'ИИ готовит курс…', tr:'AI kursu hazırlıyor…', en:'AI is preparing the course…' },
-    genS: { az:'Sillabus, resurslar və tapşırıqlar planlanır', ru:'Планируются программа, ресурсы и задания', tr:'Müfredat, kaynaklar ve görevler planlanıyor', en:'Planning syllabus, resources and tasks' },
-    approve: { az:'Təsdiqlə və davam et', ru:'Подтвердить и далее', tr:'Onayla ve devam et', en:'Approve and continue' },
-    skip: { az:'Keç', ru:'Пропустить', tr:'Atla', en:'Skip' },
-    applied: { az:'Təsdiqləndi', ru:'Подтверждено', tr:'Onaylandı', en:'Approved' },
-    planReady: { az:'Plan hazırdır', ru:'План готов', tr:'Plan hazır', en:'Plan ready' },
-    planReadyS: { az:'element təklif olunur', ru:'предложенных элементов', tr:'önerilen öğe', en:'items suggested' },
-    applyAll: { az:'Hamısını qəbul et', ru:'Принять всё', tr:'Hepsini uygula', en:'Accept all' },
-    stepOf: { az:'Addım', ru:'Шаг', tr:'Adım', en:'Step' },
-    confirmQ: { az:'aşağıdakıları təsdiqləyim?', ru:'подтвердить ниже?', tr:'aşağıdakileri onaylayayım mı?', en:'approve the items below?' },
-    doneT: { az:'Plan hazırdır 🎓', ru:'План готов 🎓', tr:'Plan hazır 🎓', en:'Plan ready 🎓' },
-    doneS: { az:'AI təklifləri seçdiniz. İndi bölmələrdən “Əlavə et” ilə onları kursa daxil edə bilərsiniz.', ru:'Вы выбрали предложения ИИ. Теперь добавьте их через «Добавить».', tr:'AI önerilerini seçtiniz. Şimdi “Ekle” ile kursa ekleyin.', en:'You selected the AI suggestions. Now add them to the course via the section “Add” buttons.' },
-    sections: { az:'bölmə', ru:'разделов', tr:'bölüm', en:'sections' },
-    items: { az:'element', ru:'элементов', tr:'öğe', en:'items' },
-    viewCourse: { az:'Kursa qayıt', ru:'К курсу', tr:'Kursa dön', en:'Back to course' },
+    promptLbl: { az:gettext('Hansı kursu qurmaq istəyirsiniz?'), ru:'Какой курс построить?', tr:'Hangi kursu kurmak istersiniz?', en:'Which course do you want to build?' },
+    promptPh: { az:gettext('Məs: “Veb texnologiyaları, 2-ci kurs, 14 həftə. Praktiki yönümlü.”'), ru:'Напр: «Веб-технологии, 2 курс, 14 недель»', tr:gettext('Örn: “Web teknolojileri, 2. sınıf, 14 hafta”'), en:'e.g. “Web technologies, 2nd year, 14 weeks”' },
+    examples: { az:gettext('NÜMUNƏLƏR'), ru:'ПРИМЕРЫ', tr:gettext('ÖRNEKLER'), en:'EXAMPLES' },
+    note: { az:gettext('AI mövzulardan tutmuş qruplara kimi hər şeyi təklif edir. Heç nə avtomatik tətbiq olunmur — hər addımı siz təsdiqləyirsiniz.'), ru:'ИИ предложит всё — от тем до групп. Ничего не применяется без вашего подтверждения.', tr:gettext('AI konulardan gruplara kadar her şeyi önerir. Hiçbir şey otomatik uygulanmaz.'), en:'AI proposes everything from topics to groups. Nothing is applied without your approval.' },
+    generate: { az:'Yarat', ru:'Создать', tr:gettext('Oluştur'), en:'Generate' },
+    genT: { az:gettext('AI kursu hazırlayır…'), ru:'ИИ готовит курс…', tr:gettext('AI kursu hazırlıyor…'), en:'AI is preparing the course…' },
+    genS: { az:gettext('Sillabus, resurslar və tapşırıqlar planlanır'), ru:'Планируются программа, ресурсы и задания', tr:gettext('Müfredat, kaynaklar ve görevler planlanıyor'), en:'Planning syllabus, resources and tasks' },
+    approve: { az:gettext('Təsdiqlə və davam et'), ru:'Подтвердить и далее', tr:'Onayla ve devam et', en:'Approve and continue' },
+    skip: { az:gettext('Keç'), ru:'Пропустить', tr:'Atla', en:'Skip' },
+    applied: { az:gettext('Təsdiqləndi'), ru:'Подтверждено', tr:gettext('Onaylandı'), en:'Approved' },
+    planReady: { az:gettext('Plan hazırdır'), ru:'План готов', tr:gettext('Plan hazır'), en:'Plan ready' },
+    planReadyS: { az:gettext('element təklif olunur'), ru:'предложенных элементов', tr:gettext('önerilen öğe'), en:'items suggested' },
+    applyAll: { az:gettext('Hamısını qəbul et'), ru:'Принять всё', tr:'Hepsini uygula', en:'Accept all' },
+    stepOf: { az:gettext('Addım'), ru:'Шаг', tr:gettext('Adım'), en:'Step' },
+    confirmQ: { az:gettext('aşağıdakıları təsdiqləyim?'), ru:'подтвердить ниже?', tr:gettext('aşağıdakileri onaylayayım mı?'), en:'approve the items below?' },
+    doneT: { az:gettext('Plan hazırdır 🎓'), ru:'План готов 🎓', tr:gettext('Plan hazır 🎓'), en:'Plan ready 🎓' },
+    doneS: { az:gettext('AI təklifləri seçdiniz. İndi bölmələrdən “Əlavə et” ilə onları kursa daxil edə bilərsiniz.'), ru:'Вы выбрали предложения ИИ. Теперь добавьте их через «Добавить».', tr:gettext('AI önerilerini seçtiniz. Şimdi “Ekle” ile kursa ekleyin.'), en:'You selected the AI suggestions. Now add them to the course via the section “Add” buttons.' },
+    sections: { az:gettext('bölmə'), ru:'разделов', tr:gettext('bölüm'), en:'sections' },
+    items: { az:'element', ru:'элементов', tr:gettext('öğe'), en:'items' },
+    viewCourse: { az:gettext('Kursa qayıt'), ru:'К курсу', tr:gettext('Kursa dön'), en:'Back to course' },
     secLabel: {
-      topics:{az:'Mövzular',ru:'Темы',tr:'Konular',en:'Topics'},
+      topics:{az:gettext('Mövzular'),ru:'Темы',tr:'Konular',en:'Topics'},
       resources:{az:'Resurslar',ru:'Ресурсы',tr:'Kaynaklar',en:'Resources'},
-      assignments:{az:'Sərbəst işlər',ru:'Задания',tr:'Ödevler',en:'Assignments'},
-      labs:{az:'Lab işləri',ru:'Лабораторные',tr:'Laboratuvarlar',en:'Labs'},
-      exams:{az:'İmtahanlar',ru:'Экзамены',tr:'Sınavlar',en:'Exams'},
-      members:{az:'Üzvlər',ru:'Участники',tr:'Üyeler',en:'Members'}
+      assignments:{az:gettext('Sərbəst işlər'),ru:'Задания',tr:gettext('Ödevler'),en:'Assignments'},
+      labs:{az:gettext('Lab işləri'),ru:'Лабораторные',tr:'Laboratuvarlar',en:'Labs'},
+      exams:{az:gettext('İmtahanlar'),ru:'Экзамены',tr:gettext('Sınavlar'),en:'Exams'},
+      members:{az:gettext('Üzvlər'),ru:'Участники',tr:gettext('Üyeler'),en:'Members'}
     }
   };
 
   var EXAMPLES = {
-    az: ['Veb texnologiyaları · 2-ci kurs · 14 həftə', 'Verilənlər bazası (SQL) · praktiki', 'Python proqramlaşdırma · başlanğıc'],
+    az: [gettext('Veb texnologiyaları · 2-ci kurs · 14 həftə'), gettext('Verilənlər bazası (SQL) · praktiki'), gettext('Python proqramlaşdırma · başlanğıc')],
     ru: ['Веб-технологии · 2 курс · 14 недель', 'Базы данных (SQL) · практика', 'Python · начинающие'],
-    tr: ['Web teknolojileri · 2. sınıf · 14 hafta', 'Veritabanı (SQL) · pratik', 'Python · başlangıç'],
+    tr: [gettext('Web teknolojileri · 2. sınıf · 14 hafta'), gettext('Veritabanı (SQL) · pratik'), gettext('Python · başlangıç')],
     en: ['Web technologies · 2nd year · 14 weeks', 'Databases (SQL) · practical', 'Python · beginner']
   };
 
   var PLAN = {
-    topics: { count:8, label:{az:'8 mövzu (14 həftəlik sillabus)',ru:'8 тем (14 недель)',tr:'8 konu (14 hafta)',en:'8 topics (14-week syllabus)'}, items:[
-      {t:'Giriş: veb texnologiyalarına baxış', s:'1-ci həftə'},
-      {t:'HTML5 — semantik struktur və formalar', s:'2–3-cü həftə'},
-      {t:'CSS əsasları: seçicilər və qutu modeli', s:'4-cü həftə'},
-      {t:'Flexbox və Grid ilə layout', s:'5–6-cı həftə'},
-      {t:'Responsiv dizayn və media-sorğular', s:'7-ci həftə'},
-      {t:'JavaScript əsasları', s:'8–10-cu həftə'},
-      {t:'DOM manipulyasiyası və hadisələr', s:'11–12-ci həftə'},
-      {t:'Fetch API və əsas backend əlaqəsi', s:'13–14-cü həftə'}
+    topics: { count:8, label:{az:gettext('8 mövzu (14 həftəlik sillabus)'),ru:'8 тем (14 недель)',tr:'8 konu (14 hafta)',en:'8 topics (14-week syllabus)'}, items:[
+      {t:gettext('Giriş: veb texnologiyalarına baxış'), s:gettext('1-ci həftə')},
+      {t:gettext('HTML5 — semantik struktur və formalar'), s:gettext('2–3-cü həftə')},
+      {t:gettext('CSS əsasları: seçicilər və qutu modeli'), s:gettext('4-cü həftə')},
+      {t:gettext('Flexbox və Grid ilə layout'), s:gettext('5–6-cı həftə')},
+      {t:gettext('Responsiv dizayn və media-sorğular'), s:gettext('7-ci həftə')},
+      {t:gettext('JavaScript əsasları'), s:gettext('8–10-cu həftə')},
+      {t:gettext('DOM manipulyasiyası və hadisələr'), s:gettext('11–12-ci həftə')},
+      {t:gettext('Fetch API və əsas backend əlaqəsi'), s:gettext('13–14-cü həftə')}
     ]},
-    resources: { count:5, label:{az:'5 resurs təklifi',ru:'5 ресурсов',tr:'5 kaynak',en:'5 resources'}, items:[
-      {t:'MDN Web Docs — HTML referansı', s:'Link'},
-      {t:'Flexbox Froggy — interaktiv məşq', s:'Link'},
-      {t:'Mühazirə slaydları — CSS layout', s:'PDF'},
-      {t:'Video: JavaScript 100 dəqiqədə', s:'Video'},
-      {t:'Nümunə kod deposu (starter)', s:'Link'}
+    resources: { count:5, label:{az:gettext('5 resurs təklifi'),ru:'5 ресурсов',tr:'5 kaynak',en:'5 resources'}, items:[
+      {t:gettext('MDN Web Docs — HTML referansı'), s:'Link'},
+      {t:gettext('Flexbox Froggy — interaktiv məşq'), s:'Link'},
+      {t:gettext('Mühazirə slaydları — CSS layout'), s:'PDF'},
+      {t:gettext('Video: JavaScript 100 dəqiqədə'), s:'Video'},
+      {t:gettext('Nümunə kod deposu (starter)'), s:'Link'}
     ]},
-    assignments: { count:3, label:{az:'3 sərbəst iş',ru:'3 задания',tr:'3 ödev',en:'3 assignments'}, items:[
-      {t:'Şəxsi portfolio (HTML + CSS)', s:'Fərdi · 100 xal'},
-      {t:'Responsiv menyu komponenti', s:'Fərdi · 50 xal'},
-      {t:'JavaScript kalkulyator', s:'Cüt iş · 80 xal'}
+    assignments: { count:3, label:{az:gettext('3 sərbəst iş'),ru:'3 задания',tr:gettext('3 ödev'),en:'3 assignments'}, items:[
+      {t:gettext('Şəxsi portfolio (HTML + CSS)'), s:gettext('Fərdi · 100 xal')},
+      {t:'Responsiv menyu komponenti', s:gettext('Fərdi · 50 xal')},
+      {t:'JavaScript kalkulyator', s:gettext('Cüt iş · 80 xal')}
     ]},
     labs: { count:1, label:{az:'1 lab (3 blok, 9 sual)',ru:'1 лаб. (3 блока)',tr:'1 lab (3 blok)',en:'1 lab (3 blocks, 9 q.)'}, items:[
       {t:'Lab 1 — Semantik HTML auditi', s:'3 blok · 9 sual · 100 xal'},
       {t:'Blok A — Struktur', s:'3 sual', muted:true},
-      {t:'Blok B — Əlçatanlıq (a11y)', s:'3 sual', muted:true},
+      {t:gettext('Blok B — Əlçatanlıq (a11y)'), s:'3 sual', muted:true},
       {t:'Blok C — Formalar', s:'3 sual', muted:true}
     ]},
-    exams: { count:1, label:{az:'1 imtahan (Midterm, 6 sual)',ru:'1 экзамен',tr:'1 sınav',en:'1 exam (Midterm)'}, items:[
-      {t:'HTML/CSS Midterm', s:'Test · 6 sual · 60 dəq'},
-      {t:'Semantik etiketlərin rolu?', s:'Çoxseçimli', muted:true},
-      {t:'Box-model qatları?', s:'Çoxseçimli', muted:true},
-      {t:'Flex vs Grid — fərq?', s:'Çoxseçimli', muted:true}
+    exams: { count:1, label:{az:'1 imtahan (Midterm, 6 sual)',ru:'1 экзамен',tr:gettext('1 sınav'),en:'1 exam (Midterm)'}, items:[
+      {t:'HTML/CSS Midterm', s:gettext('Test · 6 sual · 60 dəq')},
+      {t:gettext('Semantik etiketlərin rolu?'), s:gettext('Çoxseçimli'), muted:true},
+      {t:gettext('Box-model qatları?'), s:gettext('Çoxseçimli'), muted:true},
+      {t:gettext('Flex vs Grid — fərq?'), s:gettext('Çoxseçimli'), muted:true}
     ]},
-    members: { count:2, label:{az:'2 qrup təyini',ru:'2 группы',tr:'2 grup',en:'2 groups'}, items:[
-      {t:'Veb-2026-A qrupu', s:'24 tələbə'},
-      {t:'Veb-2026-B qrupu', s:'21 tələbə'}
+    members: { count:2, label:{az:gettext('2 qrup təyini'),ru:'2 группы',tr:'2 grup',en:'2 groups'}, items:[
+      {t:'Veb-2026-A qrupu', s:gettext('24 tələbə')},
+      {t:'Veb-2026-B qrupu', s:gettext('21 tələbə')}
     ]}
   };
 

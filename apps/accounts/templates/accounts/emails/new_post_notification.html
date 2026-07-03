@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="az">
   <head>
@@ -13,13 +14,13 @@
             <tr>
               <td style="background:linear-gradient(135deg,#1e293b,#0ea5e9);padding:28px 32px;color:#ffffff;">
                 <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">EMSArena</div>
-                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">Yeni post yayımlandı</h1>
+                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">{% trans 'Yeni post yayımlandı' %}</h1>
               </td>
             </tr>
             <tr>
               <td style="padding:32px;">
                 <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam,</p>
-                <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">EMSArena blogunda yeni bir post yayımlandı:</p>
+                <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">{% trans 'EMSArena blogunda yeni bir post yayımlandı:' %}</p>
 
                 <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #bae6fd;border-radius:16px;background:#f0f9ff;">
                   <h2 style="margin:0 0 8px;font-size:20px;color:#0f172a;">{{ post.title }}</h2>
@@ -37,7 +38,7 @@
                 </table>
 
                 <p style="margin:0;font-size:13px;color:#64748b;line-height:1.7;">
-                  Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.
+                  {% trans 'Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.' %}
                 </p>
               </td>
             </tr>

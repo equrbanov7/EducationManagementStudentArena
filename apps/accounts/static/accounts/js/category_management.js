@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var categoryId = trigger.getAttribute("data-category-id") || "";
         var parentId = trigger.getAttribute("data-parent-id") || "";
-        var categoryLabel = trigger.getAttribute("data-category-label") || "Kateqoriyanı redaktə et";
+        var categoryLabel = trigger.getAttribute("data-category-label") || gettext("Kateqoriyanı redaktə et");
 
         if (editIdField) {
             editIdField.value = categoryId;
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
             editSortOrderField.value = trigger.getAttribute("data-sort-order") || "0";
         }
         if (editTitle) {
-            editTitle.textContent = "Kateqoriyanı redaktə et: " + categoryLabel;
+            editTitle.textContent = gettext("Kateqoriyanı redaktə et: ") + categoryLabel;
         }
     }
 
@@ -188,8 +188,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (label) {
                 label.textContent = isExpanded
-                    ? (button.dataset.collapsedLabel || "Alt kateqoriyaları göstər")
-                    : (button.dataset.expandedLabel || "Alt kateqoriyaları gizlət");
+                    ? (button.dataset.collapsedLabel || gettext("Alt kateqoriyaları göstər"))
+                    : (button.dataset.expandedLabel || gettext("Alt kateqoriyaları gizlət"));
             }
 
             if (icon) {
@@ -231,12 +231,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            var categoryLabel = trigger.getAttribute("data-category-label") || "Bu kateqoriyanı";
-            var categoryType = trigger.getAttribute("data-category-type") || "kateqoriyanı";
+            var categoryLabel = trigger.getAttribute("data-category-label") || gettext("Bu kateqoriyanı");
+            var categoryType = trigger.getAttribute("data-category-type") || gettext("kateqoriyanı");
 
             if (deleteModalText) {
                 deleteModalText.textContent =
-                    '"' + categoryLabel + '" ' + categoryType + " silmək istədiyinizə əminsiniz?";
+                    '"' + categoryLabel + '" ' + categoryType + gettext(" silmək istədiyinizə əminsiniz?");
             }
 
             showModal(deleteModal);

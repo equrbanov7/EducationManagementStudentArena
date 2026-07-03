@@ -46,37 +46,37 @@
 
     {% if is_recheck_window %}
     <div class="review-window-banner">
-      <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+      <strong>{% trans 'Yenidən yoxlama pəncərəsi aktivdir.' %}</strong>
       <span>
-        Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+        {% trans 'Tələbə adı bu müddətdə gizlidir. Qalan vaxt:' %}
         <span data-review-countdown="{{ review_window_seconds_left }}">--:--:--</span>
       </span>
     </div>
     {% elif is_pregrade_anonymous_window %}
     <div class="review-window-banner">
-      <strong>Anonim yoxlama pəncərəsi aktivdir.</strong>
+      <strong>{% trans 'Anonim yoxlama pəncərəsi aktivdir.' %}</strong>
       <span>
-        Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+        {% trans 'Tələbə adı bu müddətdə gizlidir. Qalan vaxt:' %}
         <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
       </span>
     </div>
     {% elif is_locked %}
     <div class="review-window-banner review-window-banner--locked">
-      <strong>Yoxlama bağlanıb.</strong>
-      <span>Bu cavab artıq yalnız baxış üçündür. Bal və rəy dəyişdirilə bilməz.</span>
+      <strong>{% trans 'Yoxlama bağlanıb.' %}</strong>
+      <span>{% trans 'Bu cavab artıq yalnız baxış üçündür. Bal və rəy dəyişdirilə bilməz.' %}</span>
     </div>
     {% endif %}
 
     {% if content_text %}
     <section class="pending-detail-block">
-      <h2>Cavab mətni</h2>
+      <h2>{% trans 'Cavab mətni' %}</h2>
       <div class="pending-detail-content">{{ content_text|linebreaks }}</div>
     </section>
     {% endif %}
 
     {% if attachments %}
     <section class="pending-detail-block">
-      <h2>Əlavələr</h2>
+      <h2>{% trans 'Əlavələr' %}</h2>
       <ul class="pending-file-list">
         {% for file_item in attachments %}
         <li>
@@ -92,7 +92,7 @@
 
     {% if lab_answers %}
     <section class="pending-detail-block">
-      <h2>Lab sual cavabları</h2>
+      <h2>{% trans 'Lab sual cavabları' %}</h2>
       <div class="lab-answer-list">
         {% for answer in lab_answers %}
         <article class="lab-answer-card" id="grade-answer-{{ answer.id }}">
@@ -106,9 +106,9 @@
             {% if answer.answer %}
               {{ answer.answer|striptags|truncatechars:90 }}
             {% elif answer.answer_file %}
-              Fayl əlavə edilib...
+              {% trans 'Fayl əlavə edilib...' %}
             {% else %}
-              Bu sual üçün cavab yoxdur.
+              {% trans 'Bu sual üçün cavab yoxdur.' %}
             {% endif %}
           </div>
           <div class="lab-answer-content">
@@ -119,13 +119,13 @@
               {% if answer.answer %}
               <div class="lab-answer-text">{{ answer.answer|linebreaks }}</div>
               {% elif answer.answer_file %}
-              <p class="pending-empty">Mətn cavabı yoxdur.</p>
+              <p class="pending-empty">{% trans 'Mətn cavabı yoxdur.' %}</p>
               {% else %}
-              <p class="pending-empty">Bu sual üçün cavab yoxdur.</p>
+              <p class="pending-empty">{% trans 'Bu sual üçün cavab yoxdur.' %}</p>
               {% endif %}
               {% if answer.answer_file %}
               <a class="lab-answer-file" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
-                <i class="fas fa-download"></i> Faylı aç
+                <i class="fas fa-download"></i> {% trans 'Faylı aç' %}
               </a>
               {% endif %}
             </div>
@@ -191,7 +191,7 @@
           </button>
           {% endif %}
           <a href="{{ back_url }}" class="btn-cancel">
-            {% if is_locked %}Bağla{% else %}Ləğv et{% endif %}
+            {% if is_locked %}{% trans 'Bağla' %}{% else %}{% trans 'Ləğv et' %}{% endif %}
           </a>
         </div>
       </form>
@@ -276,8 +276,8 @@
         return;
       }
       window.openActionConfirmModal({
-        title: "Qiymətləndirməni təsdiqləyin",
-        message: "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?",
+        title: "{% trans 'Qiymətləndirməni təsdiqləyin' %}",
+        message: "{% trans 'Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?' %}",
         confirmLabel: submitButton.textContent.trim(),
         confirmButtonClass: "btn btn-success",
         onConfirm: function () {

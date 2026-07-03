@@ -12,7 +12,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h1 class="mb-2">Questions</h1>
-      <p class="text-muted mb-0">Görə bildiyiniz bütün sualların siyahısı.</p>
+      <p class="text-muted mb-0">{% trans 'Görə bildiyiniz bütün sualların siyahısı.' %}</p>
     </div>
     <a href="{% url 'create_question' %}" class="btn btn-outline-primary">Create Question</a>
   </div>
@@ -36,7 +36,7 @@
     </div>
   {% else %}
     <div class="alert alert-light border">
-      Hazırda görə biləcəyiniz sual yoxdur.
+      {% trans 'Hazırda görə biləcəyiniz sual yoxdur.' %}
     </div>
   {% endif %}
 </div>

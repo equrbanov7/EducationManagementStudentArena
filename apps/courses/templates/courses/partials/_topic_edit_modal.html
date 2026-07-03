@@ -75,7 +75,7 @@
     const form = document.getElementById('topicEditForm');
 
     if (!modalEl || !form) {
-        console.error('⚠️ topicEditModal və ya topicEditForm tapılmadı!');
+        console.error("{% trans '⚠️ topicEditModal və ya topicEditForm tapılmadı!' %}");
         return;
     }
 
@@ -85,7 +85,7 @@
     
     modalEl.addEventListener('shown.bs.modal', function() {
         if (pendingTopicData) {
-            console.log('✓ Modal açıldı, data yazılır:', pendingTopicData);
+            console.log("{% trans '✓ Modal açıldı, data yazılır:' %}", pendingTopicData);
             
             document.getElementById('editTopicId').value = pendingTopicData.id || '';
             document.getElementById('editTopicTitle').value = pendingTopicData.title || '';
@@ -112,7 +112,7 @@
     // ═══════════════════════════════════════════════════════════
     
     window.editTopic = function(topicId, title, description) {
-        console.log('→ editTopic çağırıldı:', {topicId, title, description});
+        console.log("{% trans '→ editTopic çağırıldı:' %}", {topicId, title, description});
         
         // Data-nı pending storage-ə saxla
         pendingTopicData = {
@@ -173,7 +173,7 @@
             }
         })
         .catch(err => {
-            console.error('Xəta:', err);
+            console.error("{% trans 'Xəta:' %}", err);
             if (typeof notify === 'function') {
                 notify(MSG_ERROR_RETRY, 'error');
             } else {

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ item_type_label }} nəticəsi - EMSArena{% endblock %}
+{% block title %}{% blocktrans with item_type=item_type_label %}{{ item_type }} nəticəsi - EMSArena{% endblocktrans %}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/review_result_detail.css' %}">
@@ -25,29 +25,29 @@
                 <span class="value">{{ status_display }}</span>
             </article>
             <article class="review-summary-card">
-                <span class="label">Nəticə</span>
+                <span class="label">{% trans 'Nəticə' %}</span>
                 <span class="value score">{{ score_display }}</span>
             </article>
             <article class="review-summary-card">
-                <span class="label">Göndərilib</span>
+                <span class="label">{% trans 'Göndərilib' %}</span>
                 <span class="value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
             </article>
             <article class="review-summary-card">
-                <span class="label">Qiymətləndirilib</span>
+                <span class="label">{% trans 'Qiymətləndirilib' %}</span>
                 <span class="value">{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</span>
             </article>
         </section>
 
         {% if content_text %}
         <section class="review-block">
-            <h2>Cavab mətni</h2>
+            <h2>{% trans 'Cavab mətni' %}</h2>
             <div class="review-content">{{ content_text|linebreaks }}</div>
         </section>
         {% endif %}
 
         {% if attachments %}
         <section class="review-block">
-            <h2>Əlavələr</h2>
+            <h2>{% trans 'Əlavələr' %}</h2>
             <ul class="review-file-list">
                 {% for file_item in attachments %}
                 <li>
@@ -63,7 +63,7 @@
 
         {% if lab_answers %}
         <section class="review-block">
-            <h2>Lab sual cavabları</h2>
+            <h2>{% trans 'Lab sual cavabları' %}</h2>
             <div class="review-answers">
                 {% for answer in lab_answers %}
                 <article class="review-answer-card" id="review-answer-{{ answer.id }}">
@@ -77,9 +77,9 @@
                         {% if answer.answer %}
                             {{ answer.answer|striptags|truncatechars:90 }}
                         {% elif answer.answer_file %}
-                            Fayl əlavə edilib...
+                            {% trans 'Fayl əlavə edilib...' %}
                         {% else %}
-                            Bu sual üçün cavab yoxdur.
+                            {% trans 'Bu sual üçün cavab yoxdur.' %}
                         {% endif %}
                     </div>
                     <div class="review-answer-body">
@@ -88,11 +88,11 @@
                         {% endif %}
                         {% if answer.answer_file %}
                         <a class="review-file-inline" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
-                            <i class="fas fa-download"></i> Faylı aç
+                            <i class="fas fa-download"></i> {% trans 'Faylı aç' %}
                         </a>
                         {% endif %}
                         {% if not answer.answer and not answer.answer_file %}
-                        <p class="review-answer-empty">Bu sual üçün cavab yoxdur.</p>
+                        <p class="review-answer-empty">{% trans 'Bu sual üçün cavab yoxdur.' %}</p>
                         {% endif %}
                     </div>
                 </article>
@@ -102,11 +102,11 @@
         {% endif %}
 
         <section class="review-block review-feedback">
-            <h2>Müəllim rəyi</h2>
+            <h2>{% trans 'Müəllim rəyi' %}</h2>
             {% if feedback %}
             <div class="feedback-text">{{ feedback|linebreaks }}</div>
             {% else %}
-            <p class="feedback-empty">Rəy əlavə edilməyib.</p>
+            <p class="feedback-empty">{% trans 'Rəy əlavə edilməyib.' %}</p>
             {% endif %}
         </section>
     </div>

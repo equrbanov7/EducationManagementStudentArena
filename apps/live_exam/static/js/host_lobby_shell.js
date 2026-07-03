@@ -56,10 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const lang = String((typeof CONFIG !== "undefined" ? CONFIG.languageCode : "az") || "az").slice(0, 2).toLowerCase();
         const labels = {
             az: {
-                open: "Lobbi açıqdır",
+                open: gettext("Lobbi açıqdır"),
                 locked: "Lobbi kilidlidir",
-                skip: "Keç",
-                next: "Növbəti",
+                skip: gettext("Keç"),
+                next: gettext("Növbəti"),
             },
             en: {
                 open: "Lobby open",
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 next: "Далее",
             },
             tr: {
-                open: "Lobi açık",
+                open: gettext("Lobi açık"),
                 locked: "Lobi kilitli",
                 skip: "Atla",
                 next: "Sonraki",

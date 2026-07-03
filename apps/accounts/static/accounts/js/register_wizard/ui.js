@@ -159,7 +159,7 @@ function clearPrivacyErrors() {
 }
 
 function noOrganizationAffiliationLabel() {
-    return tr("no_organization_affiliation", "Hazırda heç bir təşkilata aid deyiləm");
+    return tr("no_organization_affiliation", gettext("Hazırda heç bir təşkilata aid deyiləm"));
 }
 
 function isNoOrganizationSelected() {

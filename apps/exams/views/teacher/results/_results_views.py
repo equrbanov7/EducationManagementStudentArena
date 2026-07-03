@@ -210,6 +210,7 @@ def teacher_exam_results(request, slug):
                 "real_name": real_name,
                 "can_view_name": can_view_name,
                 "seconds_remaining": review_window_seconds or identity_window_seconds or 0,
+                "action_code": action_state["code"],
                 "action_label": action_state["label"],
                 "action_url": _append_query_params(
                     reverse(action_state["url_name"], kwargs={"slug": exam.slug, "attempt_id": att.id}),

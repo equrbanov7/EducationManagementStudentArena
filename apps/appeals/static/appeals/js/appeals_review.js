@@ -36,8 +36,8 @@
         form.setAttribute("data-appeals-review-bound", "1");
 
         var i18n = {
-            needResponse: form.getAttribute("data-i18n-need-response") || "Cavab/izah mətni yazın.",
-            decisions: form.getAttribute("data-i18n-decisions") || "{n} qərar verildi"
+            needResponse: form.getAttribute("data-i18n-need-response") || gettext("Cavab/izah mətni yazın."),
+            decisions: form.getAttribute("data-i18n-decisions") || gettext("{n} qərar verildi")
         };
         var currentScore = num(form.getAttribute("data-current-score"));
         var rawMax = form.getAttribute("data-max-score");

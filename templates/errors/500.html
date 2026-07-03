@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 – Server Xətası | EMSArena</title>
+    <title>{% trans '500 – Server Xətası | EMSArena' %}</title>
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
@@ -23,29 +23,29 @@
                 <div class="error-copy">
                     <div class="error-kicker">
                         <i class="fas fa-triangle-exclamation"></i>
-                        Server xətası
+                        {% trans 'Server xətası' %}
                     </div>
-                    <h1 id="error-title" class="error-title">Sistem gözlənilməz xətaya düşdü</h1>
+                    <h1 id="error-title" class="error-title">{% trans 'Sistem gözlənilməz xətaya düşdü' %}</h1>
                     <p class="error-description">
-                        Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya əvvəlki səhifəyə qayıdaraq
-                        əməliyyatı təkrarlaya bilərsiniz.
+                        {% trans 'Bu problem adətən müvəqqəti olur. Bir az sonra yenidən cəhd edə və ya əvvəlki səhifəyə qayıdaraq' %}
+                        {% trans 'əməliyyatı təkrarlaya bilərsiniz.' %}
                     </p>
                     <div class="error-meta">
-                        <span class="error-pill"><i class="fas fa-rotate-right"></i> Bir neçə saniyə sonra yenidən yoxlayın</span>
-                        <span class="error-pill"><i class="fas fa-server"></i> Sistem hazırda cavab verə bilmir</span>
+                        <span class="error-pill"><i class="fas fa-rotate-right"></i> {% trans 'Bir neçə saniyə sonra yenidən yoxlayın' %}</span>
+                        <span class="error-pill"><i class="fas fa-server"></i> {% trans 'Sistem hazırda cavab verə bilmir' %}</span>
                     </div>
                     <div class="error-actions">
                         <a href="/" class="error-btn error-btn-primary">
                             <i class="fas fa-house"></i>
-                            Ana səhifəyə qayıt
+                            {% trans 'Ana səhifəyə qayıt' %}
                         </a>
                         <a href="{% firstof request.META.HTTP_REFERER '/' %}" class="error-btn error-btn-secondary">
                             <i class="fas fa-arrow-left"></i>
-                            Geri qayıt və yenidən cəhd et
+                            {% trans 'Geri qayıt və yenidən cəhd et' %}
                         </a>
                     </div>
                     <p class="error-footer-note">
-                        Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha tez tapa bilək.
+                        {% trans 'Problem təkrarlanarsa, vaxtı və etdiyiniz addımı paylaşın ki, səbəbi daha tez tapa bilək.' %}
                     </p>
                 </div>
 
@@ -57,7 +57,7 @@
                         </div>
                         <div>
                             <div class="error-code">500</div>
-                            <div class="error-code-caption">Server sorğunu tamamlayarkən daxili xəta ilə qarşılaşdı.</div>
+                            <div class="error-code-caption">{% trans 'Server sorğunu tamamlayarkən daxili xəta ilə qarşılaşdı.' %}</div>
                         </div>
                     </div>
                 </div>

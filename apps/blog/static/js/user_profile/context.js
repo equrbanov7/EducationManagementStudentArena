@@ -20,11 +20,11 @@
 
     var extension = getFileExtension(file.name || "");
     if (!allowedImageExtensions.has(extension)) {
-      return "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları dəstəklənir.";
+      return gettext("Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları dəstəklənir.");
     }
 
     if (file.size > maxImageSizeBytes) {
-      return "Şəkil ölçüsü maksimum 25 MB ola bilər.";
+      return gettext("Şəkil ölçüsü maksimum 25 MB ola bilər.");
     }
 
     return "";

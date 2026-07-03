@@ -8,7 +8,7 @@
              data-bs-toggle="modal"
              data-bs-target="#profileAvatarUpdateModal"
              role="button"
-             aria-label="Profil şəklini dəyiş">
+             aria-label="{% trans 'Profil şəklini dəyiş' %}">
             {% if profile.avatar %}
             <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
                  alt="Avatar"
@@ -26,11 +26,11 @@
                     class="avatar-change-btn"
                     data-bs-toggle="modal"
                     data-bs-target="#profileAvatarUpdateModal"
-                    aria-label="Profil şəklini dəyiş">
+                    aria-label="{% trans 'Profil şəklini dəyiş' %}">
                 <i class="fas fa-camera"></i>
             </button>
         </div>
-        <p class="avatar-hint mb-0">Şəklin üzərinə klik edin, böyüdülmüş önizləmə ilə dəyişin.</p>
+        <p class="avatar-hint mb-0">{% trans 'Şəklin üzərinə klik edin, böyüdülmüş önizləmə ilə dəyişin.' %}</p>
 
         <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
         <p class="user-email">{{ user.email }}</p>
@@ -57,18 +57,18 @@
         <div class="section-card mb-3">
             <div class="section-title">
                 <i class="fas fa-hourglass-half"></i>
-                <span>Təşkilat təsdiqi gözlənilir</span>
+                <span>{% trans 'Təşkilat təsdiqi gözlənilir' %}</span>
             </div>
             <div class="d-grid gap-2">
                 {% for pending_request in pending_student_join_requests %}
                 <div class="{% if not forloop.last %}pb-2 border-bottom{% endif %}">
+                    {% trans 'üzv' as default_member_role %}
                     <p class="mb-0">
-                        <strong>{{ pending_request.organization.name }}</strong> üçün
-                        {{ pending_request.role_label_lower|default:"üzv" }} müraciətiniz göndərilib və hazırda təsdiq gözləyir.
+                        {% blocktrans with org_name=pending_request.organization.name role=pending_request.role_label_lower|default:default_member_role %}<strong>{{ org_name }}</strong> üçün {{ role }} müraciətiniz göndərilib və hazırda təsdiq gözləyir.{% endblocktrans %}
                     </p>
                     {% if pending_request.message %}
                     <p class="mt-2 mb-0">
-                        <small class="text-muted"><strong>Mesajınız:</strong> {{ pending_request.message }}</small>
+                        <small class="text-muted"><strong>{% trans 'Mesajınız:' %}</strong> {{ pending_request.message }}</small>
                     </p>
                     {% endif %}
                 </div>
@@ -82,7 +82,7 @@
         <div class="section-card mb-3">
             <div class="section-title">
                 <i class="fas fa-building"></i>
-                <span>Təşkilat girişləri</span>
+                <span>{% trans 'Təşkilat girişləri' %}</span>
             </div>
             <div class="d-grid gap-3">
                 {% for org_access in organization_access_rows %}
@@ -91,7 +91,7 @@
                         <div>
                             <div class="fw-semibold">{{ org_access.organization.name }}</div>
                             <div class="text-muted small mt-1">
-                                {{ org_access.organization.get_org_type_display }} · Owner: {{ org_access.organization.owner.username }} · Üzv sayı: {{ org_access.member_count }}
+                                {% blocktrans with org_type=org_access.organization.get_org_type_display owner=org_access.organization.owner.username count=org_access.member_count %}{{ org_type }} · Owner: {{ owner }} · Üzv sayı: {{ count }}{% endblocktrans %}
                             </div>
                             <div class="text-muted small">
                                 Status: {{ org_access.status_label }}
@@ -101,12 +101,12 @@
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             {% if org_access.is_current %}
-                            <span class="role-badge role-success">Aktiv təşkilat</span>
+                            <span class="role-badge role-success">{% trans 'Aktiv təşkilat' %}</span>
                             {% else %}
                             <a href="{{ org_access.switch_url }}" class="btn btn-sm btn-outline-primary">Aktiv et</a>
                             {% endif %}
                             <a href="{{ org_access.dashboard_url }}" class="btn btn-sm btn-outline-secondary">Panel</a>
-                            <a href="{{ org_access.members_url }}" class="btn btn-sm btn-outline-secondary">Üzvlər</a>
+                            <a href="{{ org_access.members_url }}" class="btn btn-sm btn-outline-secondary">{% trans 'Üzvlər' %}</a>
                             <a href="{{ org_access.roles_url }}" class="btn btn-sm btn-outline-secondary">Rollar</a>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
                 <div class="info-value">{{ profile.organization_name|default:profile_default_org }}</div>
             </div>
             <div class="info-item info-item--full">
-                <div class="info-label"><i class="fas fa-users"></i> Qrup üzvlüyü</div>
+                <div class="info-label"><i class="fas fa-users"></i> {% trans 'Qrup üzvlüyü' %}</div>
                 <div class="info-value">
                     {% if student_member_groups %}
                     <div class="profile-group-chip-meta">{{ student_member_groups_count|default:0 }} qrup</div>
@@ -179,10 +179,10 @@
                         {% endfor %}
                     </div>
                     {% if student_member_groups_more_count > 0 %}
-                    <div class="profile-group-chip-note">+{{ student_member_groups_more_count }} əlavə qrup var</div>
+                    <div class="profile-group-chip-note">{% blocktrans with count=student_member_groups_more_count %}+{{ count }} əlavə qrup var{% endblocktrans %}</div>
                     {% endif %}
                     {% else %}
-                    <span class="text-muted">Qrup təyin edilməyib</span>
+                    <span class="text-muted">{% trans 'Qrup təyin edilməyib' %}</span>
                     {% endif %}
                 </div>
             </div>
@@ -218,17 +218,17 @@
         <div class="section-card mt-3">
             <div class="section-title">
                 <i class="fas fa-door-open"></i>
-                <span>Təşkilatdan çıx</span>
+                <span>{% trans 'Təşkilatdan çıx' %}</span>
             </div>
             <p class="text-muted mb-3">
-                Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır.
+                {% trans 'Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır.' %}
             </p>
             <button type="button"
                     class="btn btn-danger"
                     data-bs-toggle="modal"
                     data-bs-target="#studentLeaveOrgConfirmModal"
                     data-next-section="profile-info">
-                <i class="fas fa-sign-out-alt"></i> Təşkilatdan çıx
+                <i class="fas fa-sign-out-alt"></i> {% trans 'Təşkilatdan çıx' %}
             </button>
         </div>
         {% endif %}
@@ -239,8 +239,8 @@
                 <i class="fas fa-user-edit"></i> {% trans "edit_profile" context "profile.sidebar" %}
             </a>
             <a href="{{ profile_base_url }}?section=change-password" class="btn-edit-profile js-profile-section-link"
-               data-section="change-password" data-title="Şifrəni dəyiş">
-                <i class="fas fa-lock"></i> Şifrəni dəyiş
+               data-section="change-password" data-title="{% trans 'Şifrəni dəyiş' %}">
+                <i class="fas fa-lock"></i> {% trans 'Şifrəni dəyiş' %}
             </a>
             {% if 'delete-account' in allowed_sections %}
             <button type="button"
@@ -262,7 +262,7 @@
                 <input type="hidden" name="profile_form" value="update-avatar">
                 <input type="hidden" name="section" value="profile-info">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-image me-2"></i>Profil şəklini dəyiş</h5>
+                    <h5 class="modal-title"><i class="fas fa-image me-2"></i>{% trans 'Profil şəklini dəyiş' %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -282,19 +282,19 @@
                         {% endif %}
                     </div>
 
-                    <label for="profileAvatarInput" class="form-label">Yeni şəkil seçin</label>
+                    <label for="profileAvatarInput" class="form-label">{% trans 'Yeni şəkil seçin' %}</label>
                     <input id="profileAvatarInput"
                            name="avatar"
                            type="file"
                            class="form-control"
                            accept="image/*"
                            required>
-                    <div class="form-text">Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.</div>
+                    <div class="form-text">{% trans 'Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.' %}</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Şəkli yenilə
+                        <i class="fas fa-save"></i> {% trans 'Şəkli yenilə' %}
                     </button>
                 </div>
             </form>
@@ -309,24 +309,24 @@
             <form method="post" action="{% url 'accounts:student_leave_organization' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-door-open me-2"></i>Təşkilatdan çıxışı təsdiqlə</h5>
+                    <h5 class="modal-title"><i class="fas fa-door-open me-2"></i>{% trans 'Təşkilatdan çıxışı təsdiqlə' %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-2">Bu əməliyyatdan sonra təşkilat üzvlüyünüz deaktiv ediləcək.</p>
+                    <p class="mb-2">{% trans 'Bu əməliyyatdan sonra təşkilat üzvlüyünüz deaktiv ediləcək.' %}</p>
                     <input type="hidden" name="next" id="studentLeaveOrgModalNext" value="{{ profile_base_url }}?section=profile-info">
-                    <label for="studentLeaveReasonInput" class="form-label">Çıxma səbəbi</label>
+                    <label for="studentLeaveReasonInput" class="form-label">{% trans 'Çıxma səbəbi' %}</label>
                     <textarea id="studentLeaveReasonInput"
                               name="leave_reason"
                               class="form-control"
                               rows="4"
-                              placeholder="Çıxma səbəbini yazın..."
+                              placeholder="{% trans 'Çıxma səbəbini yazın...' %}"
                               required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i> Təsdiqlə və çıx
+                        <i class="fas fa-sign-out-alt"></i> {% trans 'Təsdiqlə və çıx' %}
                     </button>
                 </div>
             </form>

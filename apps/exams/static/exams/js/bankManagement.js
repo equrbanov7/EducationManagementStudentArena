@@ -31,9 +31,9 @@ document.addEventListener("DOMContentLoaded", function () {
     b.addEventListener("click", function () {
       confirmFn({
         variant: "danger",
-        title: i18n.bankDeleteTitle || "Bankı sil",
-        body: i18n.bankDeleteBody || "Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?",
-        okLabel: i18n.okDelete || "Bəli, sil",
+        title: i18n.bankDeleteTitle || gettext("Bankı sil"),
+        body: i18n.bankDeleteBody || gettext("Bütün sual bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edək?"),
+        okLabel: i18n.okDelete || gettext("Bəli, sil"),
         onConfirm: function () { if (deleteForm) deleteForm.submit(); },
       });
     });

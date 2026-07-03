@@ -78,7 +78,7 @@
 
         <div class="col-auto ms-auto">
           {% if statistics_has_active_filters %}
-          <a href="{{ statistics_reset_url }}" class="btn btn-sm btn-outline-secondary stats-filter-reset" id="statsFilterReset" title="Filterləri sıfırla">
+          <a href="{{ statistics_reset_url }}" class="btn btn-sm btn-outline-secondary stats-filter-reset" id="statsFilterReset" title="{% trans 'Filterləri sıfırla' %}">
             <i class="fas fa-times"></i>
           </a>
           {% endif %}

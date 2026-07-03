@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!submitConfirmed && typeof window.openActionConfirmModal === 'function') {
             e.preventDefault();
             window.openActionConfirmModal({
-                title: i18n.confirmTitle || 'Göndərməni təsdiqləyin',
-                message: i18n.confirmMessage || 'Bu kurs işini göndərmək istədiyinizə əminsiniz?',
-                confirmLabel: i18n.confirmSubmit || i18n.submit || 'Göndər',
+                title: i18n.confirmTitle || gettext('Göndərməni təsdiqləyin'),
+                message: i18n.confirmMessage || gettext('Bu kurs işini göndərmək istədiyinizə əminsiniz?'),
+                confirmLabel: i18n.confirmSubmit || i18n.submit || gettext('Göndər'),
                 confirmButtonClass: 'btn btn-success',
                 onConfirm: function () {
                     submitConfirmed = true;

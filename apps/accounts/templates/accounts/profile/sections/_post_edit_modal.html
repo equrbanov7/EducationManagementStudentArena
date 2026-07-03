@@ -25,7 +25,7 @@ Tələb olunan kontekst: post_category_root_options, post_category_subcategory_o
         </div>
 
         <div id="editApprovalNotice" class="approval-notice" hidden>
-            Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.
+            {% trans 'Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.' %}
         </div>
 
         <form id="editForm" enctype="multipart/form-data">
@@ -71,7 +71,7 @@ Tələb olunan kontekst: post_category_root_options, post_category_subcategory_o
             <div class="form-group">
                 <label for="editImage">{% trans "label_upload_new_image" context "profile.posts" %}</label>
                 <input type="file" id="editImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
-                <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
+                <small class="image-format-help">{% trans 'Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).' %}</small>
             </div>
 
             <div class="form-group">

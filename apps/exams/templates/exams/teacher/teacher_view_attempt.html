@@ -30,7 +30,7 @@
 
     {% if not can_view_student_identity and identity_window_seconds_left %}
         <div class="alert alert-warning">
-            Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
+            {% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}
         </div>
     {% endif %}
 
@@ -52,7 +52,7 @@
         <div class="summary-item">
             <i class="fas fa-chalkboard-teacher"></i>
             <div class="summary-content">
-                <span class="label">Yoxlayan müəllim:</span>
+                <span class="label">{% trans 'Yoxlayan müəllim:' %}</span>
                 <span class="value">{{ exam_evaluator_display }}</span>
             </div>
         </div>
@@ -85,7 +85,7 @@
         <div class="summary-item">
             <i class="far fa-clock"></i>
             <div class="summary-content">
-                <span class="label">Ümumi müddət:</span>
+                <span class="label">{% trans 'Ümumi müddət:' %}</span>
                 <span class="value">
                     {% if attempt_timing.has_duration %}
                         {{ attempt_timing.duration_seconds|format_duration }}
@@ -108,10 +108,10 @@
                             <span class="details text-muted">
                                 {{ test_result.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %},
                                 {{ test_result.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %},
-                                {{ test_result.unanswered_count }} cavabsız
+                                {% blocktrans with count=test_result.unanswered_count %}{{ count }} cavabsız{% endblocktrans %}
                             </span>
                             <span class="details text-muted">
-                                {{ test_result.delivered_count }} verilmiş sual, {{ test_result.score_display }} / {{ test_result.max_score_display }} bal
+                                {% blocktrans with delivered=test_result.delivered_count score=test_result.score_display max_score=test_result.max_score_display %}{{ delivered }} verilmiş sual, {{ score }} / {{ max_score }} bal{% endblocktrans %}
                             </span>
                             {% if appeal_bonus_points and appeal_bonus_points > 0 and effective_score_info %}
                             <span class="score badge bg-success mt-1">
@@ -151,16 +151,16 @@
                        class="form-control attempt-search-input"
                        name="q"
                        value="{{ qa_search_query }}"
-                       placeholder="Sual və ya cavab üzrə axtar"
-                       aria-label="Sual və ya cavab üzrə axtar">
-                <button type="submit" class="btn attempt-search-btn">Axtar</button>
+                       placeholder="{% trans 'Sual və ya cavab üzrə axtar' %}"
+                       aria-label="{% trans 'Sual və ya cavab üzrə axtar' %}">
+                <button type="submit" class="btn attempt-search-btn">{% trans 'Axtar' %}</button>
                 {% if qa_search_query %}
-                <a href="{{ qa_clear_search_url }}" class="btn attempt-reset-btn">Təmizlə</a>
+                <a href="{{ qa_clear_search_url }}" class="btn attempt-reset-btn">{% trans 'Təmizlə' %}</a>
                 {% endif %}
             </div>
         </form>
         <div class="attempt-search-meta">
-            Tapılan sual sayı: {{ qa_page.paginator.count }}
+            {% blocktrans with count=qa_page.paginator.count %}Tapılan sual sayı: {{ count }}{% endblocktrans %}
         </div>
     </div>
 
@@ -242,7 +242,7 @@
                             {% if item.selected_options_count == 0 %}
                                 <div class="alert alert-warning d-flex align-items-center">
                                     <i class="fas fa-exclamation-circle fa-lg me-2"></i>
-                                    <div>Cavab verilməyib (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>
+                                    <div>{% trans 'Cavab verilməyib' %} (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>
                                 </div>
                             {% elif item.answer.is_correct %}
                                 <div class="alert alert-success d-flex align-items-center">
@@ -380,7 +380,7 @@
         {% endfor %}
         {% else %}
             <div class="alert alert-info">
-                Axtarışa uyğun sual tapılmadı.
+                {% trans 'Axtarışa uyğun sual tapılmadı.' %}
             </div>
         {% endif %}
     </div>

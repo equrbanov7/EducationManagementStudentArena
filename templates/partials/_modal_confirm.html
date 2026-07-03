@@ -1,9 +1,10 @@
+{% load i18n %}
 <div id="{{ modal_id }}" class="modal-overlay">
     <div class="modal-content">
         <h3>{{ modal_title }}</h3>
         <p>{{ modal_body_text|linebreaksbr }}</p>
         <div class="modal-buttons">
-            <button id="{{ cancel_btn_id }}" class="modal-cancel-btn">Ləğv Et</button>
+            <button id="{{ cancel_btn_id }}" class="modal-cancel-btn">{% trans 'Ləğv Et' %}</button>
             <a id="{{ confirm_btn_id }}" href="{{ action_link }}" class="modal-confirm-btn {{ confirm_btn_class }}">
                 {{ confirm_text }}
             </a>

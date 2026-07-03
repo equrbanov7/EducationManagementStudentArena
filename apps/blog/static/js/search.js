@@ -82,7 +82,7 @@
                 setLoadingState(false);
             })
             .catch((error) => {
-                console.error("Xəta:", error);
+                console.error(gettext("Xəta:"), error);
                 setLoadingState(false);
             });
     }

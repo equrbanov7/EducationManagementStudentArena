@@ -7,13 +7,13 @@
                 {% trans "user_management_title" context "superadmin.users" %}
             </h2>
             <p class="user-management-subtitle">
-                {{ filtered_count }} nəticə göstərilir. Ümumi istifadəçi sayı: {{ total_count }}.
+                {% blocktrans with filtered=filtered_count total=total_count %}{{ filtered }} nəticə göstərilir. Ümumi istifadəçi sayı: {{ total }}.{% endblocktrans %}
             </p>
         </div>
         <div class="user-management-summary">
-            <span class="user-summary-pill">Aktiv: {{ active_count }}</span>
-            <span class="user-summary-pill user-summary-pill--blocked">Bloklanmış: {{ blocked_count }}</span>
-            <span class="user-summary-pill user-summary-pill--deleted">Silinmiş: {{ deleted_count }}</span>
+            <span class="user-summary-pill">{% blocktrans with count=active_count %}Aktiv: {{ count }}{% endblocktrans %}</span>
+            <span class="user-summary-pill user-summary-pill--blocked">{% blocktrans with count=blocked_count %}Bloklanmış: {{ count }}{% endblocktrans %}</span>
+            <span class="user-summary-pill user-summary-pill--deleted">{% blocktrans with count=deleted_count %}Silinmiş: {{ count }}{% endblocktrans %}</span>
         </div>
     </div>
 
@@ -33,7 +33,7 @@
         {% endif %}
         <div class="user-management-filter-grid">
             <label class="user-management-filter-field user-management-filter-field--wide">
-                <span>Axtarış</span>
+                <span>{% trans 'Axtarış' %}</span>
                 <input type="search"
                        name="user_search"
                        value="{{ search_query }}"
@@ -42,16 +42,16 @@
             <label class="user-management-filter-field">
                 <span>Rol</span>
                 <select name="user_role" class="form-select">
-                    <option value="">Hamısı</option>
+                    <option value="">{% trans 'Hamısı' %}</option>
                     {% for option in role_options %}
                     <option value="{{ option.value }}" {% if role_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
                     {% endfor %}
                 </select>
             </label>
             <label class="user-management-filter-field">
-                <span>Təşkilat</span>
+                <span>{% trans 'Təşkilat' %}</span>
                 <select name="user_org" class="form-select">
-                    <option value="">Hamısı</option>
+                    <option value="">{% trans 'Hamısı' %}</option>
                     {% for option in organization_options %}
                     <option value="{{ option.value }}" {% if organization_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
                     {% endfor %}
@@ -59,14 +59,14 @@
             </label>
             <label class="user-management-filter-field">
                 <span>Qrup / sinif</span>
-                <input type="text" name="user_group" value="{{ group_filter }}" placeholder="Məs: 11A, CS-204">
+                <input type="text" name="user_group" value="{{ group_filter }}" placeholder="{% trans 'Məs: 11A, CS-204' %}">
             </label>
             <label class="user-management-filter-field">
                 <span>Departament</span>
-                <input type="text" name="user_department" value="{{ department_filter }}" placeholder="Məs: Riyaziyyat">
+                <input type="text" name="user_department" value="{{ department_filter }}" placeholder="{% trans 'Məs: Riyaziyyat' %}">
             </label>
             <label class="user-management-filter-field">
-                <span>Sıralama</span>
+                <span>{% trans 'Sıralama' %}</span>
                 <select name="user_sort" class="form-select">
                     {% for option in sort_options %}
                     <option value="{{ option.value }}" {% if sort_filter == option.value %}selected{% endif %}>{{ option.label }}</option>
@@ -76,10 +76,10 @@
         </div>
         <div class="user-management-filter-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-filter me-1"></i> Filterlə
+                <i class="fas fa-filter me-1"></i> {% trans 'Filterlə' %}
             </button>
             <a href="{{ reset_url }}" class="btn btn-outline-secondary">
-                <i class="fas fa-rotate-left me-1"></i> Sıfırla
+                <i class="fas fa-rotate-left me-1"></i> {% trans 'Sıfırla' %}
             </a>
         </div>
     </form>
@@ -122,12 +122,13 @@
                     <td>
                         <span class="{{ row.status_badge_class }}">{{ row.status_label }}</span>
                         {% if row.deleted_at %}
-                        <div class="user-table-muted">Silinmə: {{ row.deleted_at|date:"d M Y H:i" }}</div>
+                        <div class="user-table-muted">{% blocktrans with deleted_at=row.deleted_at|date:"d M Y H:i" %}Silinmə: {{ deleted_at }}{% endblocktrans %}</div>
                         {% endif %}
                     </td>
                     <td>
-                        <div>{{ row.last_login|date:"d M Y H:i"|default:"Heç daxil olmayıb" }}</div>
-                        <div class="user-table-muted">Qeydiyyat: {{ row.date_joined|date:"d M Y" }}</div>
+                        {% trans 'Heç daxil olmayıb' as never_logged_in %}
+                        <div>{{ row.last_login|date:"d M Y H:i"|default:never_logged_in }}</div>
+                        <div class="user-table-muted">{% blocktrans with joined_at=row.date_joined|date:"d M Y" %}Qeydiyyat: {{ joined_at }}{% endblocktrans %}</div>
                     </td>
                     <td>
                         {% if row.can_block or row.can_unblock or row.can_soft_delete or row.can_restore or row.can_hard_delete %}
@@ -138,7 +139,7 @@
                                 <input type="hidden" name="next" value="{{ post_next_url }}">
                                 <input type="hidden" name="user_id" value="{{ row.user.pk }}">
                                 <input type="hidden" name="action" value="block">
-                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Müvəqqəti blokla">
+                                <button type="submit" class="btn btn-sm btn-outline-warning" title="{% trans 'Müvəqqəti blokla' %}">
                                     <i class="fas fa-ban"></i>
                                 </button>
                             </form>
@@ -150,7 +151,7 @@
                                 <input type="hidden" name="next" value="{{ post_next_url }}">
                                 <input type="hidden" name="user_id" value="{{ row.user.pk }}">
                                 <input type="hidden" name="action" value="unblock">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Bloku aç">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="{% trans 'Bloku aç' %}">
                                     <i class="fas fa-unlock"></i>
                                 </button>
                             </form>
@@ -171,15 +172,15 @@
                             {% if row.can_soft_delete %}
                             <button type="button"
                                     class="btn btn-sm btn-outline-danger js-user-management-delete-trigger"
-                                    title="Hesabı sil"
+                                    title="{% trans 'Hesabı sil' %}"
                                     data-bs-toggle="modal"
                                     data-bs-target="#superadminUserDeleteModal"
                                     data-user-id="{{ row.user.pk }}"
                                     data-username="{{ row.username }}"
                                     data-next="{{ post_next_url }}"
                                     data-action="soft_delete"
-                                    data-modal-title="Hesabı sil"
-                                    data-modal-description="Bu hesab silinmiş istifadəçilər siyahısına keçiriləcək və sonradan bərpa etmək mümkün olacaq."
+                                    data-modal-title="{% trans 'Hesabı sil' %}"
+                                    {% trans 'data-modal-description="Bu hesab silinmiş istifadəçilər siyahısına keçiriləcək və sonradan bərpa etmək mümkün olacaq."' %}
                                     data-modal-submit-label="Sil">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -195,15 +196,15 @@
                                     data-username="{{ row.username }}"
                                     data-next="{{ post_next_url }}"
                                     data-action="hard_delete"
-                                    data-modal-title="Hesabı tam sil"
-                                    data-modal-description="Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və ona bağlı qeydlər birdəfəlik silinə bilər."
+                                    data-modal-title="{% trans 'Hesabı tam sil' %}"
+                                    {% trans 'data-modal-description="Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və ona bağlı qeydlər birdəfəlik silinə bilər."' %}
                                     data-modal-submit-label="Tam sil">
                                 <i class="fas fa-user-times"></i>
                             </button>
                             {% endif %}
                         </div>
                         {% else %}
-                        <span class="user-table-muted">Məhdud</span>
+                        <span class="user-table-muted">{% trans 'Məhdud' %}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -216,7 +217,7 @@
     {% else %}
     <div class="empty-state">
         <i class="fas fa-users-slash"></i>
-        <p>Seçilmiş filterlərə uyğun istifadəçi tapılmadı.</p>
+        <p>{% trans 'Seçilmiş filterlərə uyğun istifadəçi tapılmadı.' %}</p>
     </div>
     {% endif %}
 </div>
@@ -226,7 +227,7 @@
         <form method="post" action="{% url 'accounts:superadmin_user_management' %}" class="modal-content">
             {% csrf_token %}
             <div class="modal-header">
-                <h5 class="modal-title" id="superadminUserDeleteModalLabel">Hesabı sil</h5>
+                <h5 class="modal-title" id="superadminUserDeleteModalLabel">{% trans 'Hesabı sil' %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -234,14 +235,14 @@
                 <input type="hidden" name="user_id" id="superadminUserDeleteId">
                 <input type="hidden" name="action" id="superadminUserDeleteAction">
                 <p class="mb-2">
-                    <strong id="superadminUserDeleteName"></strong> üçün seçilən əməliyyat tətbiq ediləcək.
+                    {% blocktrans %}<strong id="superadminUserDeleteName"></strong> üçün seçilən əməliyyat tətbiq ediləcək.{% endblocktrans %}
                 </p>
                 <p class="mb-0 text-muted" id="superadminUserDeleteDescription">
-                    Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq.
+                    {% trans 'Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq.' %}
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
                 <button type="submit" class="btn btn-danger" id="superadminUserDeleteSubmitLabel">Sil</button>
             </div>
         </form>

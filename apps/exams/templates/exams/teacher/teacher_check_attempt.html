@@ -13,30 +13,28 @@
     <div class="exam-header">
         <h1>{{ exam.title }} – {% trans "heading_review" context "exams.template.teacher_check_attempt" %}</h1>
         <p class="text-muted mb-0">
-            Tələbə:
+            {% trans 'Tələbə:' %}
             <strong{% if not can_view_student_identity %} class="text-warning"{% endif %}>{{ student_display }}</strong>
         </p>
         <p class="text-muted mb-0">
-            İmtahanı yaradan müəllim:
+            {% trans 'İmtahanı yaradan müəllim:' %}
             <strong>{{ exam_creator_display }}</strong>
         </p>
         {% if attempt.supervision_status == "removed" %}
         <div class="proctor-flag" role="alert">
             <i class="fas fa-shield-alt"></i>
             <div>
-                <strong class="proctor-flag__title">Nəzarətçi tərəfindən dayandırılıb</strong>
+                <strong class="proctor-flag__title">{% trans 'Nəzarətçi tərəfindən dayandırılıb' %}</strong>
                 <span class="proctor-flag__note">
-                    Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb.
-                    Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan
-                    avtomatik tamamlanıb. Qeyd olunan {{ attempt.supervision_violation_count }} pozuntu
-                    aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir.
+                    {% trans 'Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb.' %}
+                    {% blocktrans with count=attempt.supervision_violation_count %}Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan avtomatik tamamlanıb. Qeyd olunan {{ count }} pozuntu aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir.{% endblocktrans %}
                 </span>
             </div>
         </div>
         {% endif %}
         <div class="exam-timing-summary">
             <article class="exam-timing-card">
-                <span class="exam-timing-card__label">Başlayıb</span>
+                <span class="exam-timing-card__label">{% trans 'Başlayıb' %}</span>
                 <strong class="exam-timing-card__value">
                     {% if attempt_timing.started_at %}
                         {{ attempt_timing.started_at|date:"d.m.Y H:i" }}
@@ -56,7 +54,7 @@
                 </strong>
             </article>
             <article class="exam-timing-card">
-                <span class="exam-timing-card__label">Ümumi müddət</span>
+                <span class="exam-timing-card__label">{% trans 'Ümumi müddət' %}</span>
                 <strong class="exam-timing-card__value">
                     {% if attempt_timing.has_duration %}
                         {{ attempt_timing.duration_seconds|format_duration }}
@@ -68,7 +66,7 @@
         </div>
         {% if not can_view_student_identity and identity_window_seconds_left %}
             <div class="alert alert-warning mt-3 mb-0">
-                Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
+                {% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}
             </div>
         {% endif %}
     </div>

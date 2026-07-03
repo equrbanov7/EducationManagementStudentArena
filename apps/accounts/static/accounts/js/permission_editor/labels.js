@@ -18,19 +18,19 @@
 
     var MODULE_LABELS = {
         az: {
-            org: "Təşkilat",
+            org: gettext("Təşkilat"),
             unit: "Struktur",
-            member: "Üzvlər",
+            member: gettext("Üzvlər"),
             role: "Rollar",
             course: "Kurslar",
-            assignment: "Sərbəst işlər",
-            project: "Kurs işləri",
-            lab: "Lab işləri",
-            grade: "Qiymətləndirmə",
-            exam: "İmtahanlar",
+            assignment: gettext("Sərbəst işlər"),
+            project: gettext("Kurs işləri"),
+            lab: gettext("Lab işləri"),
+            grade: gettext("Qiymətləndirmə"),
+            exam: gettext("İmtahanlar"),
             appeal: "Apellyasiya",
             analytics: "Analitika",
-            qa: "Keyfiyyət",
+            qa: gettext("Keyfiyyət"),
             audit: "Audit"
         },
         en: {
@@ -67,16 +67,16 @@
         },
         tr: {
             org: "Organizasyon",
-            unit: "Yapı",
-            member: "Üyeler",
+            unit: gettext("Yapı"),
+            member: gettext("Üyeler"),
             role: "Roller",
             course: "Kurslar",
-            assignment: "Ödevler",
+            assignment: gettext("Ödevler"),
             project: "Kurs projeleri",
-            lab: "Laboratuvar çalışmaları",
-            grade: "Değerlendirme",
-            exam: "Sınavlar",
-            appeal: "İtirazlar",
+            lab: gettext("Laboratuvar çalışmaları"),
+            grade: gettext("Değerlendirme"),
+            exam: gettext("Sınavlar"),
+            appeal: gettext("İtirazlar"),
             analytics: "Analitik",
             qa: "Kalite",
             audit: "Denetim"
@@ -85,17 +85,17 @@
 
     var MODULE_SUBTITLES = {
         az: {
-            organization: "Təşkilat ayarları və idarəetmə əməliyyatları",
-            structure: "Fakültə, şöbə və struktur vahidləri",
-            members: "İstifadəçilər və üzvlüklə bağlı əməliyyatlar",
-            roles: "Rol təyini və rol səviyyələri",
-            courses: "Kurs yaradılması və kurs idarəetməsi",
-            grading: "Qiymətləndirmə və nəticə axınları",
-            exams: "İmtahan idarəetməsi və nəzarət",
-            appeal: "Apellyasiya müraciətləri",
-            analytics: "Analitik hesabat və göstəricilər",
-            qa: "Keyfiyyət yoxlaması əməliyyatları",
-            audit: "Tarixçə və audit log baxışı"
+            organization: gettext("Təşkilat ayarları və idarəetmə əməliyyatları"),
+            structure: gettext("Fakültə, şöbə və struktur vahidləri"),
+            members: gettext("İstifadəçilər və üzvlüklə bağlı əməliyyatlar"),
+            roles: gettext("Rol təyini və rol səviyyələri"),
+            courses: gettext("Kurs yaradılması və kurs idarəetməsi"),
+            grading: gettext("Qiymətləndirmə və nəticə axınları"),
+            exams: gettext("İmtahan idarəetməsi və nəzarət"),
+            appeal: gettext("Apellyasiya müraciətləri"),
+            analytics: gettext("Analitik hesabat və göstəricilər"),
+            qa: gettext("Keyfiyyət yoxlaması əməliyyatları"),
+            audit: gettext("Tarixçə və audit log baxışı")
         },
         en: {
             organization: "Organization settings and management operations",
@@ -124,47 +124,47 @@
             audit: "История изменений и аудит-лог"
         },
         tr: {
-            organization: "Organizasyon ayarları ve yönetim işlemleri",
-            structure: "Fakülte, bölüm ve yapısal birimler",
-            members: "Kullanıcı ve üyelik işlemleri",
+            organization: gettext("Organizasyon ayarları ve yönetim işlemleri"),
+            structure: gettext("Fakülte, bölüm ve yapısal birimler"),
+            members: gettext("Kullanıcı ve üyelik işlemleri"),
             roles: "Rol atama ve rol seviyeleri",
-            courses: "Kurs oluşturma ve kurs yönetimi",
-            grading: "Değerlendirme ve sonuç akışları",
-            exams: "Sınav yönetimi ve izleme",
-            appeal: "İtiraz başvuruları",
+            courses: gettext("Kurs oluşturma ve kurs yönetimi"),
+            grading: gettext("Değerlendirme ve sonuç akışları"),
+            exams: gettext("Sınav yönetimi ve izleme"),
+            appeal: gettext("İtiraz başvuruları"),
             analytics: "Analitik raporlar ve metrikler",
-            qa: "Kalite kontrol işlemleri",
-            audit: "Geçmiş ve denetim logu erişimi"
+            qa: gettext("Kalite kontrol işlemleri"),
+            audit: gettext("Geçmiş ve denetim logu erişimi")
         }
     };
 
     var ACTION_WORD_MAP = {
         az: {
-            view: "Baxış",
-            list: "Siyahı",
+            view: gettext("Baxış"),
+            list: gettext("Siyahı"),
             create: "Yaratma",
-            edit: "Redaktə",
-            update: "Yeniləmə",
-            delete: "Silmə",
+            edit: gettext("Redaktə"),
+            update: gettext("Yeniləmə"),
+            delete: gettext("Silmə"),
             settings: "Ayarlar",
-            manage: "İdarəetmə",
-            assign: "Təyin etmə",
-            revoke: "Geri çəkmə",
-            approve: "Təsdiq",
-            reject: "Rədd etmə",
-            export: "İxrac",
-            import: "İdxal",
-            publish: "Yayımlama",
-            archive: "Arxivləmə",
-            permissions: "İcazələr",
-            permission: "İcazə",
-            members: "Üzvlər",
+            manage: gettext("İdarəetmə"),
+            assign: gettext("Təyin etmə"),
+            revoke: gettext("Geri çəkmə"),
+            approve: gettext("Təsdiq"),
+            reject: gettext("Rədd etmə"),
+            export: gettext("İxrac"),
+            import: gettext("İdxal"),
+            publish: gettext("Yayımlama"),
+            archive: gettext("Arxivləmə"),
+            permissions: gettext("İcazələr"),
+            permission: gettext("İcazə"),
+            members: gettext("Üzvlər"),
             role: "Rol",
             roles: "Rollar",
-            grades: "Qiymətlər",
-            grade: "Qiymət",
-            exam: "İmtahan",
-            exams: "İmtahanlar",
+            grades: gettext("Qiymətlər"),
+            grade: gettext("Qiymət"),
+            exam: gettext("İmtahan"),
+            exams: gettext("İmtahanlar"),
             analytics: "Analitika",
             audit: "Audit"
         },
@@ -227,31 +227,31 @@
             audit: "Аудит"
         },
         tr: {
-            view: "Görüntüleme",
+            view: gettext("Görüntüleme"),
             list: "Listeleme",
-            create: "Oluşturma",
-            edit: "Düzenleme",
-            update: "Güncelleme",
+            create: gettext("Oluşturma"),
+            edit: gettext("Düzenleme"),
+            update: gettext("Güncelleme"),
             delete: "Silme",
             settings: "Ayarlar",
-            manage: "Yönetim",
+            manage: gettext("Yönetim"),
             assign: "Atama",
-            revoke: "Geri çekme",
+            revoke: gettext("Geri çekme"),
             approve: "Onaylama",
             reject: "Reddetme",
-            export: "Dışa aktarma",
-            import: "İçe aktarma",
-            publish: "Yayınlama",
-            archive: "Arşivleme",
-            permissions: "İzinler",
-            permission: "İzin",
-            members: "Üyeler",
+            export: gettext("Dışa aktarma"),
+            import: gettext("İçe aktarma"),
+            publish: gettext("Yayınlama"),
+            archive: gettext("Arşivleme"),
+            permissions: gettext("İzinler"),
+            permission: gettext("İzin"),
+            members: gettext("Üyeler"),
             role: "Rol",
             roles: "Roller",
             grades: "Notlar",
             grade: "Not",
-            exam: "Sınav",
-            exams: "Sınavlar",
+            exam: gettext("Sınav"),
+            exams: gettext("Sınavlar"),
             analytics: "Analitik",
             audit: "Denetim"
         }
@@ -259,32 +259,32 @@
 
     var UI_TEXT = {
         az: {
-            guideTitle: "Bu bölmə nə üçündür?",
-            guideText: "Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz.",
+            guideTitle: gettext("Bu bölmə nə üçündür?"),
+            guideText: gettext("Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz."),
             guideSteps: [
-                "Bölməni açın (məs: Təşkilat, Üzvlər)",
-                "“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün",
-                "Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin"
+                gettext("Bölməni açın (məs: Təşkilat, Üzvlər)"),
+                gettext("“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün"),
+                gettext("Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin")
             ],
-            legendActive: "Aktiv: icazə açıqdır, funksiya işləyir.",
-            legendInactive: "Deaktiv: icazə bağlıdır, funksiya məhduddur.",
-            legendBulk: "Bulk: birdən çox icazəni eyni anda dəyişir.",
-            allPermissionsBadge: "Bütün icazələr (*)",
-            allPermissionsDescription: "Bu rol üçün bütün icazələr aktivdir.",
+            legendActive: gettext("Aktiv: icazə açıqdır, funksiya işləyir."),
+            legendInactive: gettext("Deaktiv: icazə bağlıdır, funksiya məhduddur."),
+            legendBulk: gettext("Bulk: birdən çox icazəni eyni anda dəyişir."),
+            allPermissionsBadge: gettext("Bütün icazələr (*)"),
+            allPermissionsDescription: gettext("Bu rol üçün bütün icazələr aktivdir."),
             statusActive: "Aktiv",
             statusInactive: "Deaktiv",
-            actionAdd: "Əlavə et",
+            actionAdd: gettext("Əlavə et"),
             actionRemove: "Sil",
-            searchPlaceholder: "İcazə axtar (məs: view, edit, member)",
+            searchPlaceholder: gettext("İcazə axtar (məs: view, edit, member)"),
             searchButton: "Axtar",
-            emptyResults: "Nəticə tapılmadı.",
-            activeCount: "Aktiv icazələr: {count}",
-            toolbarSelectAll: "Hamısını seç",
-            toolbarDeselectAll: "Seçimi sıfırla",
-            toolbarBulkAdd: "Seçilənləri əlavə et",
-            toolbarBulkRemove: "Seçilənləri sil",
-            genericAction: "əməliyyat",
-            moduleSubtitleFallback: "Bu bölmə üçün icazələr"
+            emptyResults: gettext("Nəticə tapılmadı."),
+            activeCount: gettext("Aktiv icazələr: {count}"),
+            toolbarSelectAll: gettext("Hamısını seç"),
+            toolbarDeselectAll: gettext("Seçimi sıfırla"),
+            toolbarBulkAdd: gettext("Seçilənləri əlavə et"),
+            toolbarBulkRemove: gettext("Seçilənləri sil"),
+            genericAction: gettext("əməliyyat"),
+            moduleSubtitleFallback: gettext("Bu bölmə üçün icazələr")
         },
         en: {
             guideTitle: "What is this section for?",
@@ -343,32 +343,32 @@
             moduleSubtitleFallback: "Разрешения для этого модуля"
         },
         tr: {
-            guideTitle: "Bu bölüm ne içindir?",
-            guideText: "Bu rol için hangi özelliklerin açık olacağını buradan yönetirsiniz.",
+            guideTitle: gettext("Bu bölüm ne içindir?"),
+            guideText: gettext("Bu rol için hangi özelliklerin açık olacağını buradan yönetirsiniz."),
             guideSteps: [
-                "Bir modül açın (örnek: Organizasyon, Üyeler)",
-                "Etkinleştirmek için “Ekle”, kapatmak için “Sil” kullanın",
-                "Çoklu işlem için checkbox + toplu butonları kullanın"
+                gettext("Bir modül açın (örnek: Organizasyon, Üyeler)"),
+                gettext("Etkinleştirmek için “Ekle”, kapatmak için “Sil” kullanın"),
+                gettext("Çoklu işlem için checkbox + toplu butonları kullanın")
             ],
-            legendActive: "Aktif: izin açık, özellik kullanılabilir.",
-            legendInactive: "Pasif: izin kapalı, özellik kısıtlı.",
-            legendBulk: "Bulk: birden fazla izni aynı anda değiştirir.",
-            allPermissionsBadge: "Tüm izinler (*)",
-            allPermissionsDescription: "Bu rol için tüm izinler aktiftir.",
+            legendActive: gettext("Aktif: izin açık, özellik kullanılabilir."),
+            legendInactive: gettext("Pasif: izin kapalı, özellik kısıtlı."),
+            legendBulk: gettext("Bulk: birden fazla izni aynı anda değiştirir."),
+            allPermissionsBadge: gettext("Tüm izinler (*)"),
+            allPermissionsDescription: gettext("Bu rol için tüm izinler aktiftir."),
             statusActive: "Aktif",
             statusInactive: "Pasif",
             actionAdd: "Ekle",
             actionRemove: "Sil",
-            searchPlaceholder: "İzin ara (ör: view, edit, member)",
+            searchPlaceholder: gettext("İzin ara (ör: view, edit, member)"),
             searchButton: "Ara",
-            emptyResults: "Sonuç bulunamadı.",
+            emptyResults: gettext("Sonuç bulunamadı."),
             activeCount: "Aktif izinler: {count}",
-            toolbarSelectAll: "Tümünü seç",
-            toolbarDeselectAll: "Seçimi temizle",
-            toolbarBulkAdd: "Seçilenleri ekle",
-            toolbarBulkRemove: "Seçilenleri sil",
-            genericAction: "işlem",
-            moduleSubtitleFallback: "Bu modül için izinler"
+            toolbarSelectAll: gettext("Tümünü seç"),
+            toolbarDeselectAll: gettext("Seçimi temizle"),
+            toolbarBulkAdd: gettext("Seçilenleri ekle"),
+            toolbarBulkRemove: gettext("Seçilenleri sil"),
+            genericAction: gettext("işlem"),
+            moduleSubtitleFallback: gettext("Bu modül için izinler")
         }
     };
 
@@ -473,9 +473,9 @@
             return 'Разрешает действие "' + actionLabel + '" в разделе "' + moduleLabel + '".';
         }
         if (ctx.uiLang === "tr") {
-            return '"' + moduleLabel + '" bölümünde "' + actionLabel + '" işlemini yapmaya izin verir.';
+            return '"' + moduleLabel + gettext('" bölümünde "') + actionLabel + gettext('" işlemini yapmaya izin verir.');
         }
-        return '"' + moduleLabel + '" bölməsində "' + actionLabel + '" əməliyyatını etməyə icazə verir.';
+        return '"' + moduleLabel + gettext('" bölməsində "') + actionLabel + gettext('" əməliyyatını etməyə icazə verir.');
     }
 
     ns.labels = {

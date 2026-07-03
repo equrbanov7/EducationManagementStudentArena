@@ -26,6 +26,7 @@
 {% trans "Qarışıq" context "exams.template.ai_question_bank" as ai_qbank_mixed %}
 {% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" as ai_qbank_append_mode %}
 {% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" as ai_qbank_replace_mode %}
+{% trans "AI mətn yerləşdirmə rejimi" context "exams.template.ai_question_bank" as ai_qbank_insert_mode_label %}
 {% trans "AI ilə yarat" context "exams.template.ai_question_bank" as ai_qbank_generate %}
 {% trans "Yaradılır..." context "exams.template.ai_question_bank" as ai_i18n_generating %}
 {% trans "AI endpoint tapılmadı." context "exams.template.ai_question_bank" as ai_i18n_endpoint_missing %}
@@ -63,6 +64,7 @@ const I18N_QBANK = {
     aiMixed: "{{ ai_qbank_mixed|escapejs }}",
     aiAppendMode: "{{ ai_qbank_append_mode|escapejs }}",
     aiReplaceMode: "{{ ai_qbank_replace_mode|escapejs }}",
+    aiInsertModeLabel: "{{ ai_qbank_insert_mode_label|escapejs }}",
     aiGenerate: "{{ ai_qbank_generate|escapejs }}"
 };
 window.AI_QUESTION_BANK_I18N = {
@@ -141,7 +143,7 @@ function renderAiBlockPanel(uniqueID, defaultTitle) {
                     </div>
                 </label>
                 <div class="ai-block-actions">
-                    <div class="ai-insert-toggle" aria-label="AI mətn yerləşdirmə rejimi">
+                    <div class="ai-insert-toggle" aria-label="${I18N_QBANK.aiInsertModeLabel}">
                         <label>
                             <input type="radio" name="ai_insert_mode_${uniqueID}" data-ai-insert-mode value="append" checked>
                             <span>${I18N_QBANK.aiAppendMode}</span>

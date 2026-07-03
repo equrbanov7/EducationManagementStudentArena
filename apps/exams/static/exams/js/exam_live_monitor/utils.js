@@ -45,10 +45,10 @@
     }
     var diff = Math.round((Date.now() - Date.parse(iso)) / 1000);
     if (diff < 60) {
-      return diff + " san əvvəl";
+      return diff + gettext(" san əvvəl");
     }
     if (diff < 3600) {
-      return Math.floor(diff / 60) + " dəq əvvəl";
+      return Math.floor(diff / 60) + gettext(" dəq əvvəl");
     }
     var d = new Date(iso);
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
@@ -67,7 +67,7 @@
 
   function scoreText(s) {
     if (s.teacher_score != null && s.checked_by_teacher) {
-      return s.teacher_score + " bal (müəllim)";
+      return s.teacher_score + gettext(" bal (müəllim)");
     }
     if (s.score_percent != null) {
       return s.score_percent + "%";
@@ -77,34 +77,34 @@
 
   function eventLabels(ctx) {
     return {
-      fullscreen_exited: t(ctx, "event_fullscreen_exited", "Tam ekrandan çıxış"),
-      fullscreen_restored: "Tam ekran bərpa edildi",
-      tab_switched: t(ctx, "event_tab_switched", "Tab dəyişdirildi"),
-      window_blurred: t(ctx, "event_window_blurred", "Pəncərə fokusu itdi"),
-      window_focused: "Pəncərə fokusa qayıtdı",
-      copy_attempt: t(ctx, "event_copy_attempt", "Kopyalama cəhdi"),
-      paste_attempt: t(ctx, "event_paste_attempt", "Yapışdırma cəhdi"),
-      cut_attempt: "Kəsmə cəhdi",
-      right_click_attempt: t(ctx, "event_right_click", "Sağ klik cəhdi"),
-      keyboard_shortcut: t(ctx, "event_keyboard_shortcut", "Klaviatura qısayolu"),
-      text_select_attempt: "Mətn seçmə cəhdi",
-      suspicious_repeated: "Şübhəli təkrar",
-      grace_period_expired: "Möhlət bitdi",
-      auto_locked: t(ctx, "event_auto_locked", "Avtomatik kilidləndi"),
-      auto_submitted: "Avtomatik təslim",
-      resume_window_expired: "Bərpa müddəti bitdi",
-      teacher_resumed: "Müəllim bərpa etdi",
-      teacher_granted_chance: "Əlavə şans verildi"
+      fullscreen_exited: t(ctx, "event_fullscreen_exited", gettext("Tam ekrandan çıxış")),
+      fullscreen_restored: gettext("Tam ekran bərpa edildi"),
+      tab_switched: t(ctx, "event_tab_switched", gettext("Tab dəyişdirildi")),
+      window_blurred: t(ctx, "event_window_blurred", gettext("Pəncərə fokusu itdi")),
+      window_focused: gettext("Pəncərə fokusa qayıtdı"),
+      copy_attempt: t(ctx, "event_copy_attempt", gettext("Kopyalama cəhdi")),
+      paste_attempt: t(ctx, "event_paste_attempt", gettext("Yapışdırma cəhdi")),
+      cut_attempt: gettext("Kəsmə cəhdi"),
+      right_click_attempt: t(ctx, "event_right_click", gettext("Sağ klik cəhdi")),
+      keyboard_shortcut: t(ctx, "event_keyboard_shortcut", gettext("Klaviatura qısayolu")),
+      text_select_attempt: gettext("Mətn seçmə cəhdi"),
+      suspicious_repeated: gettext("Şübhəli təkrar"),
+      grace_period_expired: gettext("Möhlət bitdi"),
+      auto_locked: t(ctx, "event_auto_locked", gettext("Avtomatik kilidləndi")),
+      auto_submitted: gettext("Avtomatik təslim"),
+      resume_window_expired: gettext("Bərpa müddəti bitdi"),
+      teacher_resumed: gettext("Müəllim bərpa etdi"),
+      teacher_granted_chance: gettext("Əlavə şans verildi")
     };
   }
 
   function statusLabels(ctx) {
     return {
       active: t(ctx, "status_active", "aktiv"),
-      warned: t(ctx, "status_warned", "xəbərdarlıq"),
+      warned: t(ctx, "status_warned", gettext("xəbərdarlıq")),
       locked: t(ctx, "status_locked", "kilidli"),
-      removed: t(ctx, "status_removed", "çıxarılıb"),
-      resumed: t(ctx, "status_resumed", "bərpa olunub")
+      removed: t(ctx, "status_removed", gettext("çıxarılıb")),
+      resumed: t(ctx, "status_resumed", gettext("bərpa olunub"))
     };
   }
 

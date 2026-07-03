@@ -91,9 +91,9 @@
                             data-exam-title="{{ item.title }}"
                             data-exam-kind="{{ item.kind }}"
                             data-exam-type="{{ item.exam_type_display }}"
-                            data-exam-start="{% if item.exam_start_at %}{{ item.exam_start_at|date:'d.m.Y H:i' }}{% else %}Məhdudiyyət yoxdur (daimi){% endif %}"
-                            data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}Məhdudiyyət yoxdur (daimi){% endif %}"
-                            data-exam-duration="{% if item.exam_total_duration_minutes %}{{ item.exam_total_duration_minutes }} dəqiqə{% else %}Məhdudiyyət yoxdur{% endif %}"
+                            data-exam-start="{% if item.exam_start_at %}{{ item.exam_start_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
+                            data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
+                            data-exam-duration="{% if item.exam_total_duration_minutes %}{% blocktrans with minutes=item.exam_total_duration_minutes %}{{ minutes }} dəqiqə{% endblocktrans %}{% else %}{% trans 'Məhdudiyyət yoxdur' %}{% endif %}"
                             data-exam-note="{% if item.description %}{{ item.description|striptags|escape }}{% else %}{% endif %}"
                             data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}">
                         <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
@@ -127,28 +127,28 @@
     {% endcomment %}
     <div id="assignedExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
     <div class="assigned-exam-info-modal" role="dialog" aria-modal="true" aria-labelledby="assignedExamInfoTitle">
-        <button type="button" class="assigned-exam-info-close" id="assignedExamInfoClose" aria-label="Bağla">
+        <button type="button" class="assigned-exam-info-close" id="assignedExamInfoClose" aria-label="{% trans 'Bağla' %}">
             <i class="fas fa-times"></i>
         </button>
 
-        <h3 id="assignedExamInfoTitle" class="assigned-exam-info-title">İmtahan məlumatı</h3>
+        <h3 id="assignedExamInfoTitle" class="assigned-exam-info-title">{% trans 'İmtahan məlumatı' %}</h3>
         <p class="assigned-exam-info-subtitle" id="assignedExamInfoExamName"></p>
 
         <div class="assigned-exam-info-grid">
             <div class="assigned-exam-info-row">
-                <span class="label">Növ</span>
+                <span class="label">{% trans 'Növ' %}</span>
                 <span class="value" id="assignedExamInfoType">-</span>
             </div>
             <div class="assigned-exam-info-row">
-                <span class="label">Müddət</span>
+                <span class="label">{% trans 'Müddət' %}</span>
                 <span class="value" id="assignedExamInfoDuration">-</span>
             </div>
             <div class="assigned-exam-info-row">
-                <span class="label">Başlama vaxtı</span>
+                <span class="label">{% trans 'Başlama vaxtı' %}</span>
                 <span class="value" id="assignedExamInfoStart">-</span>
             </div>
             <div class="assigned-exam-info-row">
-                <span class="label">Son təhvil vaxtı</span>
+                <span class="label">{% trans 'Son təhvil vaxtı' %}</span>
                 <span class="value" id="assignedExamInfoEnd">-</span>
             </div>
         </div>
@@ -163,20 +163,20 @@
             <input type="hidden" name="exam_slug" id="assignedExamCodeSlug">
             <input type="hidden" name="from_section" value="assigned-exams">
             <input type="hidden" name="assigned_type" value="{{ assigned_tasks_active_filter }}">
-            <label for="assignedExamAccessCodeInput" class="assigned-exam-code-label">Giriş kodu</label>
+            <label for="assignedExamAccessCodeInput" class="assigned-exam-code-label">{% trans 'Giriş kodu' %}</label>
             <input type="text"
                    id="assignedExamAccessCodeInput"
                    name="access_code"
                    class="assigned-exam-code-input"
                    maxlength="6"
                    inputmode="numeric"
-                   placeholder="6 rəqəmli kod">
+                   placeholder="{% trans '6 rəqəmli kod' %}">
             <div class="assigned-exam-code-error" id="assignedExamCodeError" hidden></div>
         </form>
 
         <div class="assigned-exam-info-actions">
-            <button type="button" class="btn-action btn-task-secondary" id="assignedExamInfoCancelBtn">Ləğv et</button>
-            <button type="button" class="btn-action btn-task-primary" id="assignedExamInfoStartBtn">İmtahana başla</button>
+            <button type="button" class="btn-action btn-task-secondary" id="assignedExamInfoCancelBtn">{% trans 'Ləğv et' %}</button>
+            <button type="button" class="btn-action btn-task-primary" id="assignedExamInfoStartBtn">{% trans 'İmtahana başla' %}</button>
         </div>
     </div>
 </div>

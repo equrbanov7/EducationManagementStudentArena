@@ -192,10 +192,10 @@
                     <div class="submission-feedback-box">
                         <div class="review-pending-box">
                             <strong class="d-block text-dark-blue mb-2">
-                                <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> Yoxlama tamamlanıb
+                                <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> {% trans 'Yoxlama tamamlanıb' %}
                             </strong>
                             <div class="text-secondary">
-                                Qiymət və müəllim rəyi görünəcək:
+                                {% trans 'Qiymət və müəllim rəyi görünəcək:' %}
                                 <span class="fw-semibold" data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
                             </div>
                         </div>
@@ -237,7 +237,7 @@
                                                 <span class="text-dark fw-medium">{{ answer.answer_file.name|filename }}</span>
                                             </div>
                                             <a href="{{ answer.answer_file.url }}" target="_blank" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
-                                                <i class="fas fa-download me-2"></i> Yüklə
+                                                <i class="fas fa-download me-2"></i> {% trans 'Yüklə' %}
                                             </a>
                                         </div>
                                         {% endif %}
@@ -266,7 +266,7 @@
                             <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3 text-muted empty-icon-circle">
                                 <i class="fas fa-inbox fa-2x"></i>
                             </div>
-                            <h5 class="fw-bold text-dark-blue mb-2">Bu cəhd üçün cavab yoxdur</h5>
+                            <h5 class="fw-bold text-dark-blue mb-2">{% trans 'Bu cəhd üçün cavab yoxdur' %}</h5>
                             <p class="text-secondary mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
                         </div>
                         {% endfor %}
@@ -286,7 +286,7 @@
                 <i class="fa-solid fa-folder-open fa-2x text-primary-blue"></i>
             </div>
         </div>
-        <h4 class="fw-bold text-dark-blue mb-2">Bu cəhd üçün cavab yoxdur</h4>
+        <h4 class="fw-bold text-dark-blue mb-2">{% trans 'Bu cəhd üçün cavab yoxdur' %}</h4>
         <p class="text-muted mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
     </div>
     {% endif %}

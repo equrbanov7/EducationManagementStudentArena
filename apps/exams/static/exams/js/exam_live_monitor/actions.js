@@ -44,10 +44,10 @@
           ctx.fetchData();
         }
       } else {
-        toast(ctx, (res.data && res.data.error) || u.t(ctx, "toast_error", "Əməliyyat alınmadı"), "error");
+        toast(ctx, (res.data && res.data.error) || u.t(ctx, "toast_error", gettext("Əməliyyat alınmadı")), "error");
       }
     }).catch(function () {
-      toast(ctx, u.t(ctx, "toast_connection_error", "Bağlantı xətası"), "error");
+      toast(ctx, u.t(ctx, "toast_connection_error", gettext("Bağlantı xətası")), "error");
     });
   }
 
@@ -68,37 +68,37 @@
       if (!ctx.currentAttempt) return;
       showConfirm(
         ctx,
-        u.t(ctx, "confirm_stop_title", "İmtahandan uzaqlaşdır"),
-        u.t(ctx, "confirm_stop_msg", "Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək."),
-        '<i class="fas fa-ban"></i> ' + u.t(ctx, "confirm_stop_btn", "Bəli, uzaqlaşdır"),
+        u.t(ctx, "confirm_stop_title", gettext("İmtahandan uzaqlaşdır")),
+        u.t(ctx, "confirm_stop_msg", gettext("Tələbənin imtahanını birdəfəlik dayandırmaq istəyirsiniz? İmtahan dərhal təslim ediləcək və geri qaytarıla bilməyəcək.")),
+        '<i class="fas fa-ban"></i> ' + u.t(ctx, "confirm_stop_btn", gettext("Bəli, uzaqlaşdır")),
         "btn-stop2",
-        function () { postAction(ctx, ctx.STOP_BASE, ctx.currentAttempt, {}, u.t(ctx, "toast_student_removed", "Tələbə imtahandan uzaqlaşdırıldı")); }
+        function () { postAction(ctx, ctx.STOP_BASE, ctx.currentAttempt, {}, u.t(ctx, "toast_student_removed", gettext("Tələbə imtahandan uzaqlaşdırıldı"))); }
       );
     });
     u.$("modalPauseBtn").addEventListener("click", function () {
       if (!ctx.currentAttempt) return;
       showConfirm(
         ctx,
-        u.t(ctx, "confirm_pause_title", "Müvəqqəti blokla"),
-        u.t(ctx, "confirm_pause_msg", "Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz."),
-        '<i class="fas fa-lock"></i> ' + u.t(ctx, "confirm_pause_btn", "Bəli, blokla"),
+        u.t(ctx, "confirm_pause_title", gettext("Müvəqqəti blokla")),
+        u.t(ctx, "confirm_pause_msg", gettext("Tələbənin ekranı kilidlənəcək. İmtahan dayandırılmayacaq — sonradan bərpa edə bilərsiniz.")),
+        '<i class="fas fa-lock"></i> ' + u.t(ctx, "confirm_pause_btn", gettext("Bəli, blokla")),
         "btn-pause",
-        function () { postAction(ctx, ctx.LOCK_BASE, ctx.currentAttempt, {}, u.t(ctx, "toast_student_blocked", "Tələbə müvəqqəti bloklandı")); }
+        function () { postAction(ctx, ctx.LOCK_BASE, ctx.currentAttempt, {}, u.t(ctx, "toast_student_blocked", gettext("Tələbə müvəqqəti bloklandı"))); }
       );
     });
     u.$("modalResumeBtn").addEventListener("click", function () {
       if (!ctx.currentAttempt) return;
       var isManual = ctx.currentSnapshot && ctx.currentSnapshot.manual_lock;
       var msg = isManual
-        ? u.t(ctx, "confirm_resume_manual_msg", "Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək.")
-        : u.t(ctx, "confirm_resume_msg", "Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək.");
+        ? u.t(ctx, "confirm_resume_manual_msg", gettext("Tələbənin imtahana davam etməsinə icazə verilsin? Pozuntu sayı dəyişməyəcək."))
+        : u.t(ctx, "confirm_resume_msg", gettext("Tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz? Əlavə şans da veriləcək."));
       showConfirm(
         ctx,
-        u.t(ctx, "confirm_resume_title", "Bərpa et"),
+        u.t(ctx, "confirm_resume_title", gettext("Bərpa et")),
         msg,
-        '<i class="fas fa-play"></i> ' + u.t(ctx, "confirm_resume_btn", "Bəli, bərpa et"),
+        '<i class="fas fa-play"></i> ' + u.t(ctx, "confirm_resume_btn", gettext("Bəli, bərpa et")),
         "btn-resume2",
-        function () { postAction(ctx, ctx.RESUME_BASE, ctx.currentAttempt, { grant_extra_chance: !isManual }, u.t(ctx, "toast_student_resumed", "Tələbə bərpa edildi")); }
+        function () { postAction(ctx, ctx.RESUME_BASE, ctx.currentAttempt, { grant_extra_chance: !isManual }, u.t(ctx, "toast_student_resumed", gettext("Tələbə bərpa edildi"))); }
       );
     });
   }
@@ -110,11 +110,11 @@
         var aid = resumeBtn.getAttribute("data-blocked-resume");
         showConfirm(
           ctx,
-          u.t(ctx, "confirm_resume_title", "Bərpa et"),
-          u.t(ctx, "confirm_resume_msg", "Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?"),
-          '<i class="fas fa-play"></i> ' + u.t(ctx, "confirm_resume_btn", "Bəli, bərpa et"),
+          u.t(ctx, "confirm_resume_title", gettext("Bərpa et")),
+          u.t(ctx, "confirm_resume_msg", gettext("Bu tələbənin imtahana davam etməsinə icazə vermək istəyirsiniz?")),
+          '<i class="fas fa-play"></i> ' + u.t(ctx, "confirm_resume_btn", gettext("Bəli, bərpa et")),
           "btn-resume2",
-          function () { postAction(ctx, ctx.RESUME_BASE, aid, { grant_extra_chance: true }, u.t(ctx, "toast_student_resumed", "Tələbə bərpa edildi")); }
+          function () { postAction(ctx, ctx.RESUME_BASE, aid, { grant_extra_chance: true }, u.t(ctx, "toast_student_resumed", gettext("Tələbə bərpa edildi"))); }
         );
         return;
       }
@@ -123,11 +123,11 @@
         var aid2 = stopBtn.getAttribute("data-blocked-stop");
         showConfirm(
           ctx,
-          u.t(ctx, "confirm_stop_title", "İmtahandan uzaqlaşdır"),
-          u.t(ctx, "confirm_stop_msg", "Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri alına bilməz."),
-          '<i class="fas fa-ban"></i> ' + u.t(ctx, "confirm_stop_btn", "Bəli, uzaqlaşdır"),
+          u.t(ctx, "confirm_stop_title", gettext("İmtahandan uzaqlaşdır")),
+          u.t(ctx, "confirm_stop_msg", gettext("Bu tələbəni imtahandan birdəfəlik çıxarmaq istəyirsiniz? Bu əməliyyat geri alına bilməz.")),
+          '<i class="fas fa-ban"></i> ' + u.t(ctx, "confirm_stop_btn", gettext("Bəli, uzaqlaşdır")),
           "btn-stop2",
-          function () { postAction(ctx, ctx.STOP_BASE, aid2, {}, u.t(ctx, "toast_student_removed", "Tələbə imtahandan uzaqlaşdırıldı")); }
+          function () { postAction(ctx, ctx.STOP_BASE, aid2, {}, u.t(ctx, "toast_student_removed", gettext("Tələbə imtahandan uzaqlaşdırıldı"))); }
         );
       }
     });

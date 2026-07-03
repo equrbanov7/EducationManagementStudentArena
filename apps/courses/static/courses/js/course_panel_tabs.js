@@ -22,13 +22,13 @@
 
   /* bölmə təsviri (dizaynın hint mətnləri) */
   var HINTS = {
-    topics:      { az:'Kursun sillabusu və həftəlik strukturu', ru:'Программа и структура курса', en:'Syllabus and weekly structure', tr:'Müfredat ve haftalık yapı' },
-    resources:   { az:'Mühazirələr, fayllar, video və linklər', ru:'Лекции, файлы, видео и ссылки', en:'Lectures, files, videos and links', tr:'Dersler, dosyalar, video ve bağlantılar' },
-    assignments: { az:'Tələbələr üçün tapşırıqlar və təqdimatlar', ru:'Задания и сдачи для студентов', en:'Tasks and submissions for students', tr:'Öğrenciler için görevler ve teslimler' },
-    labs:        { az:'Bloklar və suallarla praktiki laboratoriyalar', ru:'Практические лаборатории с блоками', en:'Practical labs with blocks and questions', tr:'Bloklar ve sorularla pratik laboratuvarlar' },
-    exams:       { az:'Test və yazılı imtahanlar, nəzarət', ru:'Тесты и письменные экзамены', en:'Test and written exams, proctoring', tr:'Test ve yazılı sınavlar, gözetim' },
-    projects:    { az:'Genişmiqyaslı kurs layihələri', ru:'Масштабные курсовые проекты', en:'Larger course projects', tr:'Büyük ölçekli kurs projeleri' },
-    members:     { az:'Tələbələr və qruplar', ru:'Студенты и группы', en:'Students and groups', tr:'Öğrenciler ve gruplar' }
+    topics:      { az:gettext('Kursun sillabusu və həftəlik strukturu'), ru:'Программа и структура курса', en:'Syllabus and weekly structure', tr:gettext('Müfredat ve haftalık yapı') },
+    resources:   { az:gettext('Mühazirələr, fayllar, video və linklər'), ru:'Лекции, файлы, видео и ссылки', en:'Lectures, files, videos and links', tr:gettext('Dersler, dosyalar, video ve bağlantılar') },
+    assignments: { az:gettext('Tələbələr üçün tapşırıqlar və təqdimatlar'), ru:'Задания и сдачи для студентов', en:'Tasks and submissions for students', tr:gettext('Öğrenciler için görevler ve teslimler') },
+    labs:        { az:gettext('Bloklar və suallarla praktiki laboratoriyalar'), ru:'Практические лаборатории с блоками', en:'Practical labs with blocks and questions', tr:'Bloklar ve sorularla pratik laboratuvarlar' },
+    exams:       { az:gettext('Test və yazılı imtahanlar, nəzarət'), ru:'Тесты и письменные экзамены', en:'Test and written exams, proctoring', tr:gettext('Test ve yazılı sınavlar, gözetim') },
+    projects:    { az:gettext('Genişmiqyaslı kurs layihələri'), ru:'Масштабные курсовые проекты', en:'Larger course projects', tr:gettext('Büyük ölçekli kurs projeleri') },
+    members:     { az:gettext('Tələbələr və qruplar'), ru:'Студенты и группы', en:'Students and groups', tr:gettext('Öğrenciler ve gruplar') }
   };
 
   function svg(icon, size) {

@@ -16,9 +16,9 @@
     <h1 class="register-heading">{% trans "heading" context "accounts.verify_code" %}</h1>
     <p class="register-subheading">{{ email }} {% trans "code_sent_suffix" context "accounts.verify_code" %}</p>
     {% if otp_expires_at %}
-    <div class="otp-timer-banner" data-otp-expires-at="{{ otp_expires_at|date:'c' }}" data-expired-label="Kodun vaxtı bitib">
+    <div class="otp-timer-banner" data-otp-expires-at="{{ otp_expires_at|date:'c' }}" data-expired-label="{% trans 'Kodun vaxtı bitib' %}">
       <i class="fas fa-clock" aria-hidden="true"></i>
-      <span class="otp-timer-banner__label">Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.</span>
+      <span class="otp-timer-banner__label">{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}</span>
       <strong class="otp-timer-banner__value" data-otp-countdown>--:--</strong>
     </div>
     {% endif %}

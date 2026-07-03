@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Bankdan sual əlavə et — {{ exam.title }}{% endblock %}
+{% block title %}{% blocktrans with title=exam.title %}Bankdan sual əlavə et — {{ title }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü.{% endcomment %}
@@ -12,11 +13,11 @@
 
     <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-            <h1 class="h4 mb-1">Mövcud bankdan sual əlavə et</h1>
+            <h1 class="h4 mb-1">{% trans 'Mövcud bankdan sual əlavə et' %}</h1>
             <div class="text-muted small">{{ exam.title }}</div>
         </div>
         <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>İmtahana qayıt
+            <i class="fas fa-arrow-left me-1"></i>{% trans 'İmtahana qayıt' %}
         </a>
     </div>
 
@@ -27,7 +28,7 @@
                 <label class="form-label small text-muted mb-1" for="bank">Bank</label>
                 <div class="bootstrap-single-select">
                     <select class="form-select bootstrap-single-select__native" id="bank" name="bank" data-bootstrap-select>
-                        <option value="">— Bank seçin —</option>
+                        <option value="">{% trans '— Bank seçin —' %}</option>
                         {% for bank in banks %}
                         <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
                         {% endfor %}
@@ -35,14 +36,14 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <label class="form-label small text-muted mb-1" for="pickerSearch">Axtarış</label>
-                <input type="text" id="pickerSearch" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="Sual mətnində axtar">
+                <label class="form-label small text-muted mb-1" for="pickerSearch">{% trans 'Axtarış' %}</label>
+                <input type="text" id="pickerSearch" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="{% trans 'Sual mətnində axtar' %}">
             </div>
             <div class="col-md-2">
-                <label class="form-label small text-muted mb-1">Çətinlik</label>
+                <label class="form-label small text-muted mb-1">{% trans 'Çətinlik' %}</label>
                 <div class="bootstrap-single-select">
                     <select class="form-select bootstrap-single-select__native" name="difficulty" data-bootstrap-select>
-                        <option value="">Bütün çətinliklər</option>
+                        <option value="">{% trans 'Bütün çətinliklər' %}</option>
                         {% for value, label in difficulty_choices %}
                         <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -53,7 +54,7 @@
                 <label class="form-label small text-muted mb-1">Dil</label>
                 <div class="bootstrap-single-select">
                     <select class="form-select bootstrap-single-select__native" name="language" data-bootstrap-select>
-                        <option value="">Bütün dillər</option>
+                        <option value="">{% trans 'Bütün dillər' %}</option>
                         {% for code, label in language_choices %}
                         <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
@@ -61,14 +62,14 @@
                 </div>
             </div>
             <div class="col-md-1 d-grid">
-                <button type="submit" class="btn btn-outline-primary btn-sm">Göstər</button>
+                <button type="submit" class="btn btn-outline-primary btn-sm">{% trans 'Göstər' %}</button>
             </div>
         </div>
     </form>
 
     {% if selected_bank %}
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="text-muted small">Tapılan suallar: <strong>{{ total_count }}</strong>{% if total_count > 300 %} (ilk 300 göstərilir){% endif %}</div>
+        <div class="text-muted small">{% trans 'Tapılan suallar:' %} <strong>{{ total_count }}</strong>{% if total_count > 300 %} {% trans '(ilk 300 göstərilir)' %}{% endif %}</div>
     </div>
 
     {% if questions %}
@@ -92,16 +93,16 @@
 
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Seçilmişləri imtahana əlavə et
+                <i class="fas fa-plus me-1"></i>{% trans 'Seçilmişləri imtahana əlavə et' %}
             </button>
         </div>
     </form>
     {% else %}
-    <div class="text-center text-muted py-5">Filtrlərə uyğun sual tapılmadı.</div>
+    <div class="text-center text-muted py-5">{% trans 'Filtrlərə uyğun sual tapılmadı.' %}</div>
     {% endif %}
 
     {% else %}
-    <div class="alert alert-secondary">Sual əlavə etmək üçün yuxarıdan bank seçin.</div>
+    <div class="alert alert-secondary">{% trans 'Sual əlavə etmək üçün yuxarıdan bank seçin.' %}</div>
     {% endif %}
 </div>
 {% endblock %}

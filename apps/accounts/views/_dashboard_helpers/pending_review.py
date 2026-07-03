@@ -29,6 +29,7 @@ from .formatters import (
     _normalize_pending_review_type,
     _normalize_submission_date_order,
     _resolve_teacher_review_action,
+    _resolve_teacher_review_action_code,
     _standard_item_type_meta,
     _user_display_name,
 )
@@ -141,6 +142,10 @@ def _collect_pending_review_items(
                         is_graded=bool(attempt.checked_by_teacher),
                         in_recheck_window=is_recheck,
                     ),
+                    "action_code": _resolve_teacher_review_action_code(
+                        is_graded=bool(attempt.checked_by_teacher),
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -200,6 +205,10 @@ def _collect_pending_review_items(
                         is_graded=submission.status == "graded",
                         in_recheck_window=is_recheck,
                     ),
+                    "action_code": _resolve_teacher_review_action_code(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -256,6 +265,10 @@ def _collect_pending_review_items(
                         return_to=profile_return_url,
                     ),
                     "action_label": _resolve_teacher_review_action(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
+                    "action_code": _resolve_teacher_review_action_code(
                         is_graded=submission.status == "graded",
                         in_recheck_window=is_recheck,
                     ),
@@ -321,6 +334,10 @@ def _collect_pending_review_items(
                         return_to=profile_return_url,
                     ),
                     "action_label": _resolve_teacher_review_action(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
+                    "action_code": _resolve_teacher_review_action_code(
                         is_graded=submission.status == "graded",
                         in_recheck_window=is_recheck,
                     ),

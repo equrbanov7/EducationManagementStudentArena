@@ -1,9 +1,10 @@
+{% load i18n %}
 <p>Salam {{ user.get_username }},</p>
 
-<p>EMS Arena admin panelinə giriş üçün OTP kodunuz:</p>
+<p>{% trans 'EMS Arena admin panelinə giriş üçün OTP kodunuz:' %}</p>
 
 <p style="font-size: 32px; font-weight: 700; letter-spacing: 0.25em;">{{ code }}</p>
 
-<p>Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.</p>
+<p>{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}</p>
 
-<p>Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.</p>
+<p>{% trans 'Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.' %}</p>

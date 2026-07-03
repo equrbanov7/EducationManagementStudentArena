@@ -2,13 +2,13 @@
 {% with s=org_roles_section %}
 <div class="org-management org-management--roles">
     {% if not s.organization %}
-        <div class="org-management__empty">Aktiv təşkilat tapılmadı.</div>
+        <div class="org-management__empty">{% trans 'Aktiv təşkilat tapılmadı.' %}</div>
     {% else %}
     <div class="org-management__header">
         <div>
-            <p class="org-management__eyebrow">Universitet idarəetməsi</p>
-            <h1>Təşkilat rolları</h1>
-            <p class="org-management__subtitle">Rollar və icazələr aktiv təşkilat çərçivəsində göstərilir.</p>
+            <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
+            <h1>{% trans 'Təşkilat rolları' %}</h1>
+            <p class="org-management__subtitle">{% trans 'Rollar və icazələr aktiv təşkilat çərçivəsində göstərilir.' %}</p>
         </div>
     </div>
 

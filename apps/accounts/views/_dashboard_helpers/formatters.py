@@ -5,6 +5,7 @@ Small shared formatting / normalization helpers for the dashboard collectors.
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Q
+from django.utils.translation import pgettext
 
 from apps.exams.models import StudentGroup
 
@@ -47,11 +48,19 @@ def _standard_item_type_meta(raw_type):
 
 
 def _resolve_teacher_review_action(*, is_graded=False, in_recheck_window=False):
+    return {
+        "recheck": pgettext("profile.pending_review.action", "Yenidən yoxla"),
+        "view": pgettext("profile.pending_review.action", "Bax"),
+        "review": pgettext("profile.pending_review.action", "Yoxla"),
+    }[_resolve_teacher_review_action_code(is_graded=is_graded, in_recheck_window=in_recheck_window)]
+
+
+def _resolve_teacher_review_action_code(*, is_graded=False, in_recheck_window=False):
     if in_recheck_window:
-        return "Yenidən yoxla"
+        return "recheck"
     if is_graded:
-        return "Bax"
-    return "Yoxla"
+        return "view"
+    return "review"
 
 
 def _normalize_submission_date_order(value, *, default="newest"):

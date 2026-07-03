@@ -76,7 +76,7 @@
                 optionMap = Object.create(null);
 
                 if (!options.length) {
-                    listContainer.innerHTML = '<div class="create-exam-list-empty">Məlumat tapılmadı.</div>';
+                    listContainer.innerHTML = gettext('<div class="create-exam-list-empty">Məlumat tapılmadı.</div>');
                     updateCounter();
                     return;
                 }

@@ -308,11 +308,11 @@ Object.assign(ExamSupervision, {
             }
 
             var i18n = (window.SUPERVISION_ACK_I18N) || {};
-            var title = i18n.teacherLockTitle || "Müəllim tərəfindən müvəqqəti bloklandınız";
+            var title = i18n.teacherLockTitle || gettext("Müəllim tərəfindən müvəqqəti bloklandınız");
             var msg = i18n.teacherLockMsg ||
-                "Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.";
+                gettext("Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.");
             var waiting = i18n.teacherLockWaiting ||
-                "Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni bağlamayın.";
+                gettext("Müəllim imtahanı bərpa edənə qədər zəhmət olmasa gözləyin. Səhifəni bağlamayın.");
 
             var overlay = document.createElement("div");
             overlay.id = "supervision-teacher-lock-overlay";
@@ -378,7 +378,7 @@ Object.assign(ExamSupervision, {
             var lockedWait = i18n.lockedWait || "\u0130mtahan\u0131n\u0131z dayand\u0131r\u0131l\u0131b. M\u00fc\u0259llim q\u0259rar q\u0259bul ed\u0259n\u0259 q\u0259d\u0259r g\u00f6zl\u0259yin.";
             var lockedWaiting = i18n.lockedWaiting || "M\u00fc\u0259llim cavab\u0131n\u0131 g\u00f6zl\u0259yirik...";
 
-            var countdownLabel = i18n.lockedCountdownLabel || "Müəllim bərpa etməsə, imtahan avtomatik bitəcək";
+            var countdownLabel = i18n.lockedCountdownLabel || gettext("Müəllim bərpa etməsə, imtahan avtomatik bitəcək");
 
             var overlay = document.createElement("div");
             overlay.id = "supervision-locked-overlay";

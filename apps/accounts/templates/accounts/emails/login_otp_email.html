@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="az">
   <head>
@@ -18,7 +19,7 @@
             </tr>
             <tr>
               <td style="padding:32px;">
-                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam <strong>{{ recipient_name }}</strong>, {{ otp_intro_action }} üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin.</p>
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">{% blocktrans with name=recipient_name action=otp_intro_action %}Salam <strong>{{ name }}</strong>, {{ action }} üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin.{% endblocktrans %}</p>
 
                 <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #99f6e4;border-radius:16px;background:#f0fdfa;text-align:center;">
                   <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0f766e;margin-bottom:8px;">OTP kodu</div>
@@ -26,7 +27,7 @@
                 </div>
 
                 <div style="padding:16px 18px;border-radius:16px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:14px;line-height:1.7;">
-                  Kod <strong>{{ otp_expiry_minutes }} dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.
+                  {% blocktrans with minutes=otp_expiry_minutes %}Kod <strong>{{ minutes }} dəqiqə</strong> etibarlıdır. Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.{% endblocktrans %}
                 </div>
               </td>
             </tr>
