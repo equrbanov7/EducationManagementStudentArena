@@ -1,8 +1,10 @@
 """teacher exams paketi — list_detail."""
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -32,6 +34,8 @@ from ._shared import (
     _restore_superadmin_profile_organization,
     _teacher_profile_my_exams_url,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -89,8 +93,11 @@ def createAndEditExamView(request, slug=None):
     if is_editing and exam:
         try:
             supervision_config = exam.supervision_config
-        except Exception:
-            pass
+        except ObjectDoesNotExist:
+            # No supervision config row exists yet for this exam — keep the
+            # None default. Narrowed from a bare ``except Exception`` so real
+            # errors (e.g. DB failures) are no longer silently swallowed.
+            supervision_config = None
 
     selected_organization = _resolve_selected_superadmin_organization(request) if allow_organization_selection else None
     form_organization = organization or selected_organization
@@ -189,7 +196,14 @@ def createAndEditExamView(request, slug=None):
 
                 invalidate_exam_metadata_cache(exam_instance.pk)
             except Exception:
-                pass
+                # Best-effort: a stale metadata entry self-heals on its next
+                # TTL, so a cache failure must not break the save flow — but it
+                # must be visible for diagnostics instead of being swallowed.
+                logger.warning(
+                    "Exam metadata cache invalidation failed for exam %s",
+                    getattr(exam_instance, "pk", None),
+                    exc_info=True,
+                )
 
             from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
 

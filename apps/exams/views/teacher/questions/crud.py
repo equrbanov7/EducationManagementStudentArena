@@ -1,5 +1,7 @@
 """teacher questions paketi — crud."""
 
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
@@ -22,6 +24,8 @@ from ._shared import (
     _resequence_exam_questions,
     _resolve_question_bank_navigation,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -73,7 +77,13 @@ def add_exam_question(request, slug):
 
                 invalidate_exam_question_ids_cache(exam.pk)
             except Exception:
-                pass
+                # Best-effort: the cached ID list self-heals on its next TTL, so
+                # a cache failure must not break question creation — but log it.
+                logger.warning(
+                    "Exam question-ids cache invalidation failed for exam %s",
+                    exam.pk,
+                    exc_info=True,
+                )
 
             # Əgər exam tipi testdirsə → variantları yarat
             if exam.exam_type == "test":
@@ -277,7 +287,13 @@ def delete_exam_question(request, slug, question_id):
 
             invalidate_exam_question_ids_cache(exam.pk)
         except Exception:
-            pass
+            # Best-effort: the cached ID list self-heals on its next TTL, so a
+            # cache failure must not break question deletion — but log it.
+            logger.warning(
+                "Exam question-ids cache invalidation failed for exam %s",
+                exam.pk,
+                exc_info=True,
+            )
         return redirect(
             _append_navigation_query(
                 reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
