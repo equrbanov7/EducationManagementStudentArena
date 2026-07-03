@@ -166,3 +166,20 @@ actionlint
 .coverage*
 ~$*
 scripts/_*.txt
+
+# =========================
+# Remediasiya (2026-07-03) əlavələri
+# =========================
+# Verilənlər bazası dump-ları HEÇ VAXT commit olunmamalıdır (həssas məlumat:
+# PII, parol hash-ləri, tenant məlumatları). Yalnız off-site/şifrəli saxlayın.
+backups/
+*.sql
+*.sql.gz
+*.dump
+# macOS Finder dublikat artefaktları ("<ad> 2.uzantı")
+* 2.css
+* 2.js
+* 2.mo
+* 2.po
+* 2.html
+* 2.py

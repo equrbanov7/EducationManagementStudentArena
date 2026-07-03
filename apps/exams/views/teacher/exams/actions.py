@@ -1,5 +1,7 @@
 """teacher exams paketi — actions."""
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -18,6 +20,8 @@ from ._shared import (
     _safe_same_origin_redirect_path,
     _teacher_profile_my_exams_url,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -114,7 +118,13 @@ def delete_exam(request, slug):
             invalidate_exam_metadata_cache(_exam_pk)
             invalidate_exam_question_ids_cache(_exam_pk)
         except Exception:
-            pass
+            # Best-effort cache cleanup after delete: entries expire on their
+            # own TTL, so failure must not block the delete — but log it.
+            logger.warning(
+                "Exam cache invalidation failed after delete of exam %s",
+                _exam_pk,
+                exc_info=True,
+            )
         return redirect(_teacher_profile_my_exams_url())
 
     return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})
@@ -160,7 +170,13 @@ def toggle_exam_archive(request, slug):
 
         invalidate_exam_metadata_cache(exam.pk)
     except Exception:
-        pass
+        # Best-effort: stale metadata self-heals on its next TTL, so an
+        # archive toggle must not fail on cache errors — but log for visibility.
+        logger.warning(
+            "Exam metadata cache invalidation failed for exam %s",
+            exam.pk,
+            exc_info=True,
+        )
 
     messages.success(
         request,

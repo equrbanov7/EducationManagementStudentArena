@@ -602,7 +602,11 @@ services:
   piston:
     profiles:
       - coding
-    image: ghcr.io/engineer-man/piston:latest
+    # Reproduksiya olunan build üçün konkret versiya/digest-ə pin-lənməlidir.
+    # `:latest` yalnız fallback-dır; production-da PISTON_IMAGE-i .env-də
+    # digest ilə təyin edin, məs.:
+    #   PISTON_IMAGE=ghcr.io/engineer-man/piston@sha256:<digest>
+    image: ${PISTON_IMAGE:-ghcr.io/engineer-man/piston:latest}
     container_name: emsarena-piston
     restart: unless-stopped
     privileged: true
