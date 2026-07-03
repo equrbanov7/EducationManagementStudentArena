@@ -3,7 +3,7 @@
     --primary-green: var(--ems-success);
     --dark-blue: var(--ems-primary-800);
     --light-blue: var(--ems-primary-100);
-    --light-green: #d1fae5;
+    --light-green: var(--ems-emerald-100);
     --sidebar-width: 260px;
 }
 

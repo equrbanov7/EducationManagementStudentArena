@@ -78,6 +78,15 @@ jobs:
     with:
       python-version: "3.12"
 
+  # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
+  # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
+  # tenant izolyasiyasının transaction-pooling rejimində qorunmasını yoxlayır.
+  rls-txn-pool:
+    needs: lint
+    uses: ./.github/workflows/_rls-txn-pool.yml
+    with:
+      python-version: "3.11"
+
   # ── 3. Build Check (collectstatic + migration check) ───────────────────
   build:
     needs: lint
@@ -134,6 +143,7 @@ jobs:
       - lint
       - unit-tests-311
       - unit-tests-312
+      - rls-txn-pool
       - build
       - security
       - secret-scan
@@ -150,6 +160,7 @@ jobs:
           echo "Lint:             ${{ needs.lint.result }}"
           echo "Unit Tests 3.11:  ${{ needs.unit-tests-311.result }}"
           echo "Unit Tests 3.12:  ${{ needs.unit-tests-312.result }}"
+          echo "RLS Txn-Pool:     ${{ needs.rls-txn-pool.result }}"
           echo "Build:            ${{ needs.build.result }}"
           echo "Security:         ${{ needs.security.result }}"
           echo "Secret Scan:      ${{ needs.secret-scan.result }}"
@@ -166,6 +177,11 @@ jobs:
 
           if [[ "${{ needs.unit-tests-311.result }}" == "failure" || "${{ needs.unit-tests-312.result }}" == "failure" ]]; then
             echo "❌ Unit Tests failed!"
+            exit 1
+          fi
+
+          if [[ "${{ needs.rls-txn-pool.result }}" == "failure" ]]; then
+            echo "❌ RLS Transaction-Pooling Gate failed!"
             exit 1
           fi
 

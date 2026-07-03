@@ -1,0 +1,128 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: RLS Transaction-Pooling Gate
+# ═══════════════════════════════════════════════════════════════════════════
+# FAZA 4 / Task 3 (2026-07-04). Bu job `pytest -m postgres`-i
+# `RLS_TRANSACTION_SCOPED=True` altında işlədir. Məqsəd: PgBouncer
+# transaction-pooling rejimi üçün hazırlıqda olan RLS invariantının
+# regressiyasını CI-də tutmaq.
+#
+# Səhv çıxarsa: hansısa `SET LOCAL` səhv yerdə tətbiq olunur, ya da yeni
+# request-external DB yolu `rls_worker_atomic()` istifadə etmir. Fail-fast.
+#
+# NOT: default unit-tests job (`_unit-tests.yml`) bütün testləri (postgres
+# daxil) FLAQ-OFF (session pooling) davranışı ilə işlədir. Bu job flaq-ON
+# davranışını əlavə edir.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🛡️ RLS Transaction-Pooling Gate (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.11"
+
+jobs:
+  rls-txn-pool:
+    name: 🛡️ RLS -m postgres (RLS_TRANSACTION_SCOPED=True)
+    runs-on: ubuntu-latest
+
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.test"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      # FAZA 4 core gate — transaction pooling üçün SET LOCAL yolunu aç.
+      RLS_TRANSACTION_SCOPED: "True"
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ inputs.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements/test.txt
+
+      - name: 🗃️ Run migrations
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::🗃️ Database Migrations"
+          python manage.py migrate --verbosity=2
+          echo "::endgroup::"
+
+      - name: 🛡️ Run RLS + postgres tests under RLS_TRANSACTION_SCOPED=True
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::🛡️ Postgres/RLS gate (transaction-pooling ON)"
+          # Transaction-pooling yolunun izolyasiya regressiyalarını tutmaq üçün
+          # yalnız postgres markerli test paketini işlədirik. Failure = flaqın
+          # production-a keçirilməsi BLOKLANIR.
+          pytest \
+            --ds=config.settings.test \
+            --ignore=tests/e2e \
+            -m postgres \
+            -v \
+            --tb=short \
+            --timeout=300
+          echo "::endgroup::"
+
+      - name: 🔍 Verify request-external DB paths wrap rls_worker_atomic()
+        run: |
+          echo "::group::🔍 Coverage guardrail"
+          python scripts/check_worker_atomic_coverage.py --check
+          echo "::endgroup::"

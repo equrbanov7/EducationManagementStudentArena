@@ -1,8 +1,8 @@
 :root {
-    --player-bg-1: #0b2a52;
-    --player-bg-2: #0f4c81;
+    --player-bg-1: var(--ems-navy-800);
+    --player-bg-2: var(--ems-navy-700);
     --player-bg-3: var(--ems-primary-600);
-    --player-bg-4: #081427;
+    --player-bg-4: var(--ems-navy-900);
     --player-surface: rgba(255, 255, 255, 0.16);
     --player-surface-strong: rgba(255, 255, 255, 0.94);
     --player-border: rgba(255, 255, 255, 0.22);

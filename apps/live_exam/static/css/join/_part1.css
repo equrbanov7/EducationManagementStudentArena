@@ -1,7 +1,7 @@
 :root {
-    --join-bg-1: #081427;
-    --join-bg-2: #0b2a52;
-    --join-bg-3: #0f4c81;
+    --join-bg-1: var(--ems-navy-900);
+    --join-bg-2: var(--ems-navy-800);
+    --join-bg-3: var(--ems-navy-700);
     --join-bg-4: var(--ems-primary-600);
     --join-surface: rgba(255, 255, 255, 0.94);
     --join-surface-soft: rgba(255, 255, 255, 0.14);
@@ -10,7 +10,7 @@
     --join-ink: #10243f;
     --join-ink-soft: #5f7796;
     --join-shadow: 0 30px 80px rgba(8, 23, 55, 0.28);
-    --join-accent: #38bdf8;
+    --join-accent: var(--ems-sky-400);
     --join-accent-strong: var(--ems-primary-700);
     --join-accent-soft: var(--ems-primary-100);
 }

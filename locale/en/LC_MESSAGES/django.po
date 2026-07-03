@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: EMSArena\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 03:27+0400\n"
+"POT-Creation-Date: 2026-07-04 03:54+0400\n"
 "PO-Revision-Date: 2026-02-22 23:58+0400\n"
 "Last-Translator: Codex <noreply@example.com>\n"
 "Language-Team: English\n"
@@ -448,8 +448,7 @@ msgstr "You are in view-only mode — this action is not allowed."
 #: apps/accounts/middleware.py:280
 msgctxt "accounts.view_as"
 msgid "action_blocked_sensitive"
-msgstr ""
-"For security reasons this action is blocked on another user's profile."
+msgstr "For security reasons this action is blocked on another user's profile."
 
 #: apps/accounts/templates/accounts/assigned_courses.html:3
 msgctxt "accounts.assigned_courses_page"
@@ -2121,8 +2120,7 @@ msgid "Əlavə et"
 msgstr "Əlavə et"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:295
-msgid ""
-"Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
+msgid "Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
 msgstr ""
 "Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al."
 
@@ -2366,11 +2364,11 @@ msgstr ""
 #, python-format
 msgctxt "staff.management"
 msgid ""
-"Manage students in %(organization_name)s. You can review requests and active"
-" memberships."
+"Manage students in %(organization_name)s. You can review requests and active "
+"memberships."
 msgstr ""
-"Manage students in %(organization_name)s. You can review requests and active"
-" memberships."
+"Manage students in %(organization_name)s. You can review requests and active "
+"memberships."
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:30
 #, python-format
@@ -2599,11 +2597,9 @@ msgstr "Organization"
 #: apps/accounts/views/_helpers/org_sections/management.py:39
 msgctxt "staff.management"
 msgid ""
-"Please confirm that you want to add the selected user(s) to the "
-"organization."
+"Please confirm that you want to add the selected user(s) to the organization."
 msgstr ""
-"Please confirm that you want to add the selected user(s) to the "
-"organization."
+"Please confirm that you want to add the selected user(s) to the organization."
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:261
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:297
@@ -2685,23 +2681,23 @@ msgstr ""
 #, python-format
 msgctxt "profile.join_org"
 msgid ""
-"You are currently connected to <strong>%(organization_name)s</strong>. After"
-" leaving, you can submit a new request from this section or accept any "
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
 "pending invites."
 msgstr ""
-"You are currently connected to <strong>%(organization_name)s</strong>. After"
-" leaving, you can submit a new request from this section or accept any "
+"You are currently connected to <strong>%(organization_name)s</strong>. After "
+"leaving, you can submit a new request from this section or accept any "
 "pending invites."
 
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:31
 #, python-format
 msgctxt "profile.join_org"
 msgid ""
-"You currently have <strong>%(count)s</strong> organization requests awaiting"
-" approval."
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
 msgstr ""
-"You currently have <strong>%(count)s</strong> organization requests awaiting"
-" approval."
+"You currently have <strong>%(count)s</strong> organization requests awaiting "
+"approval."
 
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:41
 #: apps/accounts/templates/accounts/profile/sections/_notifications.html:27
@@ -3285,11 +3281,11 @@ msgstr "Hesabı tam sil"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:200
 msgid ""
-"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və"
-" ona bağlı qeydlər birdəfəlik silinə bilər.\""
+"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və "
+"ona bağlı qeydlər birdəfəlik silinə bilər.\""
 msgstr ""
-"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və"
-" ona bağlı qeydlər birdəfəlik silinə bilər.\""
+"data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və "
+"ona bağlı qeydlər birdəfəlik silinə bilər.\""
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:207
 msgid "Məhdud"
@@ -4713,8 +4709,7 @@ msgstr "OTP code sent!"
 #: apps/accounts/templates/accounts/password_reset_done.html:22
 msgctxt "accounts.password_reset_done_page"
 msgid "message_line_1"
-msgstr ""
-"If this email exists in our system, we sent a password reset OTP code."
+msgstr "If this email exists in our system, we sent a password reset OTP code."
 
 #: apps/accounts/templates/accounts/password_reset_done.html:24
 msgctxt "accounts.password_reset_done_page"
@@ -4908,8 +4903,8 @@ msgstr "Light Supervision Mode"
 msgctxt "exams.template.create_edit_exam"
 msgid "tpl_info_light_desc"
 msgstr ""
-"Minimal restrictions. Students take the exam more freely, only tab switching"
-" is tracked."
+"Minimal restrictions. Students take the exam more freely, only tab switching "
+"is tracked."
 
 #: apps/accounts/templates/accounts/profile.html:175
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:376
@@ -5947,8 +5942,8 @@ msgstr "Confirm Account Deletion"
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
 msgstr ""
-"Are you sure you want to delete your account? Enter your password to confirm"
-" this action."
+"Are you sure you want to delete your account? Enter your password to confirm "
+"this action."
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:39
 msgctxt "profile.delete_account"
@@ -6134,8 +6129,8 @@ msgid ""
 "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün "
 "detal səhifəsinə keçin."
 msgstr ""
-"Filter requests by status, exam, reason type, and date; open the detail page"
-" to decide."
+"Filter requests by status, exam, reason type, and date; open the detail page "
+"to decide."
 
 #: apps/accounts/templates/accounts/profile/sections/_manage_appeals.html:39
 #: apps/appeals/templates/appeals/teacher/review_appeal.html:4
@@ -6492,18 +6487,18 @@ msgctxt "profile.notifications"
 msgid "notification"
 msgstr "Notification"
 
-#: apps/accounts/templates/accounts/profile/sections/_notifications.html:502
+#: apps/accounts/templates/accounts/profile/sections/_notifications_js.html:178
 msgctxt "profile.notifications"
 msgid "go_to_link"
 msgstr "Go to link"
 
-#: apps/accounts/templates/accounts/profile/sections/_notifications.html:532
+#: apps/accounts/templates/accounts/profile/sections/_notifications_js.html:208
 msgid ""
-"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri"
-" qaytarıla bilməz."
+"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri "
+"qaytarıla bilməz."
 msgstr ""
-"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri"
-" qaytarıla bilməz."
+"Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri "
+"qaytarıla bilməz."
 
 #: apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:8
 msgid "Postların idarəetməsi ("
@@ -6794,8 +6789,7 @@ msgid "Müəllim \"düzəliş tələb olunur\" seçib, amma əlavə mətn yazmay
 msgstr "Müəllim \"düzəliş tələb olunur\" seçib, amma əlavə mətn yazmayıb."
 
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:100
-msgid ""
-"Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək."
+msgid "Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək."
 msgstr "Confirmation to be sent to the student. Shown as plain text."
 
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:102
@@ -7046,8 +7040,7 @@ msgstr "Dəvət edən:"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:38
 msgid "Əvvəlcə mövcud təşkilatdan çıxın"
-msgstr ""
-"Leave your current organization first, then accept the new invitation."
+msgstr "Leave your current organization first, then accept the new invitation."
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:39
 msgid "Qəbul et"
@@ -8136,8 +8129,7 @@ msgid "Açıq profil"
 msgstr "Açıq profil"
 
 #: apps/accounts/templates/accounts/public_profile.html:32
-msgid ""
-"Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
+msgid "Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
 msgstr ""
 "Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür."
 
@@ -8289,8 +8281,8 @@ msgctxt "accounts.register"
 msgid "privacy_modal_summary"
 msgstr ""
 "Your data is used to create your account, keep sign-in secure, manage "
-"organization membership, and run the platform's teaching features. Your data"
-" is not sold and is only shared when necessary to provide the service."
+"organization membership, and run the platform's teaching features. Your data "
+"is not sold and is only shared when necessary to provide the service."
 
 #: apps/accounts/templates/accounts/register.html:129
 msgctxt "accounts.register"
@@ -8329,8 +8321,8 @@ msgctxt "accounts.register"
 msgid "privacy_section_access_body"
 msgstr ""
 "If you join a school, university, or course center, authorized admins and "
-"teachers in that organization may see your basic profile details, membership"
-" status, and learning activity relevant to your role."
+"teachers in that organization may see your basic profile details, membership "
+"status, and learning activity relevant to your role."
 
 #: apps/accounts/templates/accounts/register.html:171
 msgctxt "accounts.register"
@@ -8341,10 +8333,10 @@ msgstr "Who data is shared with"
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_body"
 msgstr ""
-"Your information is not sold. It may be shared only with authorized managers"
-" in the organization you select, technical providers that support services "
-"such as email verification or hosting, and relevant parties when required by"
-" law."
+"Your information is not sold. It may be shared only with authorized managers "
+"in the organization you select, technical providers that support services "
+"such as email verification or hosting, and relevant parties when required by "
+"law."
 
 #: apps/accounts/templates/accounts/register.html:185
 msgctxt "accounts.register"
@@ -8393,8 +8385,7 @@ msgstr "Sign in"
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
 msgstr ""
-"For individual account, role will be set to organization admin "
-"automatically."
+"For individual account, role will be set to organization admin automatically."
 
 #: apps/accounts/templates/accounts/register.html:246
 msgctxt "accounts.register"
@@ -9053,16 +9044,15 @@ msgstr "Unknown action."
 #: apps/accounts/views/auth/register.py:72
 #: apps/accounts/views/auth/register.py:322
 msgctxt "accounts.auth.message"
-msgid ""
-"Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin."
+msgid "Bu email üçün saatlıq OTP limiti dolub. Bir az sonra yenidən cəhd edin."
 msgstr "You've reached today's request limit. Try again tomorrow."
 
 #: apps/accounts/views/auth/register.py:92
 msgctxt "accounts.auth.message"
 msgid "registration_email_send_failed"
 msgstr ""
-"Failed to send the registration email.Registration failed: we could not send"
-" the verification email. Please check your email address and try again."
+"Failed to send the registration email.Registration failed: we could not send "
+"the verification email. Please check your email address and try again."
 
 #: apps/accounts/views/auth/register.py:112
 msgctxt "accounts.auth.message"
@@ -9207,8 +9197,7 @@ msgstr "Bal 0 və {max} aralığında olmalıdır."
 #: apps/accounts/views/dashboard/review.py:242
 #, python-brace-format
 msgctxt "accounts.review.message"
-msgid ""
-"Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
+msgid "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
 msgstr ""
 "Qiymət saxlanıldı. {minutes} dəqiqə ərzində yenidən yoxlaya bilərsiniz."
 
@@ -9226,8 +9215,7 @@ msgstr "The organization is currently inactive."
 #: apps/accounts/views/organization/invitations.py:78
 msgctxt "accounts.org.message"
 msgid "Əvvəlcə mövcud təşkilatdan çıxın, sonra yeni dəvəti qəbul edin."
-msgstr ""
-"Leave your current organization first, then accept the new invitation."
+msgstr "Leave your current organization first, then accept the new invitation."
 
 #: apps/accounts/views/organization/invitations.py:88
 msgctxt "accounts.org.message"
@@ -9296,8 +9284,8 @@ msgstr ""
 msgctxt "accounts.org.message"
 msgid "Hazırda təşkilata bağlısınız. Yeni müraciət üçün əvvəlcə çıxış edin."
 msgstr ""
-"You are currently linked to an organization. Leave first before submitting a"
-" new request."
+"You are currently linked to an organization. Leave first before submitting a "
+"new request."
 
 #: apps/accounts/views/organization/requests.py:129
 msgctxt "accounts.org.message"
@@ -9314,8 +9302,8 @@ msgctxt "accounts.org.message"
 msgid ""
 "Bu təşkilatdan sizə artıq dəvət göndərilib. Profildə qəbul edə bilərsiniz."
 msgstr ""
-"This organization has already sent you an invitation. You can accept it from"
-" your profile."
+"This organization has already sent you an invitation. You can accept it from "
+"your profile."
 
 #: apps/accounts/views/organization/requests.py:170
 #, python-brace-format
@@ -9345,8 +9333,8 @@ msgstr "Change password"
 #: apps/trial_exams/admin_views.py:31
 msgid ""
 "Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
-"yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və"
-" limitsiz şəkildə verə bilərsiniz. Uğurlar!"
+"yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və "
+"limitsiz şəkildə verə bilərsiniz. Uğurlar!"
 msgstr ""
 "Hello! Based on the questions you sent, your trial exam has been created in "
 "EMSArena. Log in to your account and take it for free and without limits "
@@ -9470,8 +9458,7 @@ msgstr "You do not have permission to view this user's profile."
 msgctxt "accounts.view_as"
 msgid "started_readonly"
 msgstr ""
-"You are viewing %(name)s's profile. View-only mode — you cannot make "
-"changes."
+"You are viewing %(name)s's profile. View-only mode — you cannot make changes."
 
 #: apps/accounts/views/profile/view_as.py:203
 msgctxt "accounts.view_as"
@@ -9672,7 +9659,8 @@ msgstr "Yeni təşkilat müraciəti: {org}"
 #: apps/accounts/views/superadmin/endpoints.py:105
 #, python-brace-format
 msgctxt "accounts.superadmin_orgs.notification"
-msgid "\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
+msgid ""
+"\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
 msgstr ""
 "\"{org}\" adlı yeni təşkilat superadmin təsdiqi gözləyir. Növ: {org_type}."
 
@@ -10055,7 +10043,8 @@ msgstr "Appeal"
 #: apps/appeals/services/creation.py:125
 #, python-brace-format
 msgctxt "appeals.notification"
-msgid "{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
+msgid ""
+"{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
 msgstr ""
 "{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya göndərdi."
 
@@ -12784,8 +12773,8 @@ msgstr "Education expert · Methodologist"
 
 #: apps/blog/templates/blog/about.html:157
 msgid ""
-"Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji"
-" düzgünlüyünü təmin edirlər."
+"Müəllim və universitet təcrübəsinə malik mütəxəssislər platformanın pedaqoji "
+"düzgünlüyünü təmin edirlər."
 msgstr ""
 "Specialists with teaching and university experience ensure the platform's "
 "pedagogical quality."
@@ -13377,8 +13366,7 @@ msgctxt "blog.moderation.message"
 msgid "Bu postu təsdiqləmək üçün icazəniz yoxdur."
 msgstr "Bu postu təsdiqləmək üçün icazəniz yoxdur."
 
-#: apps/blog/views/moderator/posts.py:35
-#: apps/blog/views/moderator/posts.py:148
+#: apps/blog/views/moderator/posts.py:35 apps/blog/views/moderator/posts.py:148
 msgctxt "blog.moderation.message"
 msgid "Yanlış əməliyyat seçildi."
 msgstr "Yanlış əməliyyat seçildi."
@@ -13423,8 +13411,10 @@ msgstr "Postunuz silindi: {title}"
 #: apps/blog/views/moderator/posts.py:190
 #, python-brace-format
 msgctxt "blog.notification"
-msgid "\"{title}\" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}"
-msgstr "\"{title}\" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}"
+msgid ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}"
+msgstr ""
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən silindi. Səbəb: {reason}"
 
 #: apps/blog/views/moderator/posts.py:226
 #, python-brace-format
@@ -13460,21 +13450,21 @@ msgstr "Postunuz deaktiv edildi: {title}"
 #, python-brace-format
 msgctxt "blog.notification"
 msgid ""
-"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib"
-" — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib "
+"— düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
 msgstr ""
-"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib"
-" — düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
+"\"{title}\" başlıqlı postunuz idarəçi tərəfindən gizlədildi. Post silinməyib "
+"— düzəlişlər edib yenidən göndərə bilərsiniz. Rəy: {reason}"
 
 #: apps/blog/views/moderator/posts.py:292
 #, python-brace-format
 msgctxt "blog.moderation.message"
 msgid ""
-"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə"
-" düzəliş edib yenidən göndərə bilər."
+"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə "
+"düzəliş edib yenidən göndərə bilər."
 msgstr ""
-"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə"
-" düzəliş edib yenidən göndərə bilər."
+"\"{title}\" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — tələbə "
+"düzəliş edib yenidən göndərə bilər."
 
 #: apps/blog/views/moderator/posts.py:302
 #, python-brace-format
@@ -13548,8 +13538,8 @@ msgstr "About us – EMSArena"
 
 #: apps/blog/views/public/pages.py:136
 msgid ""
-"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız,"
-" missiyamız və platformanın imkanları haqqında məlumat."
+"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, "
+"missiyamız və platformanın imkanları haqqında məlumat."
 msgstr ""
 "EMSArena is an education management, LMS and online exam platform. Learn "
 "about our team, mission and platform capabilities."
@@ -13572,8 +13562,8 @@ msgstr "Welcome to subscription! [Your Blog Name]"
 msgctxt "blog.subscribe.email"
 msgid "plain_text_body"
 msgstr ""
-"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for"
-" the latest updates."
+"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for "
+"the latest updates."
 
 #: apps/blog/views/public/subscribe.py:71
 msgctxt "blog.subscribe.message"
@@ -14013,11 +14003,11 @@ msgstr "Is there a demo or free trial?"
 
 #: apps/contact/templates/contact/contact.html:180
 msgid ""
-"Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz."
-" Formada 'Satış / Demo' mövzusunu seçin."
+"Bəli, satış komandamızla əlaqə saxlayaraq pulsuz demo təşkil edə bilərsiniz. "
+"Formada 'Satış / Demo' mövzusunu seçin."
 msgstr ""
-"Yes. Contact our sales team to arrange a free demo. Select 'Sales / Demo' as"
-" the subject in the form."
+"Yes. Contact our sales team to arrange a free demo. Select 'Sales / Demo' as "
+"the subject in the form."
 
 #: apps/contact/templates/contact/contact.html:184
 msgid "Texniki dəstək necə alınır?"
@@ -14028,8 +14018,8 @@ msgid ""
 "Mövcud müştərilərimiz hesab daxilindən bilet aça bilər. Yeni gələnlər forma "
 "vasitəsilə 'Texniki dəstək' mövzusunu seçərək yaza bilər."
 msgstr ""
-"Existing customers can open a ticket from inside their account. New visitors"
-" can write through the form by selecting 'Technical support'."
+"Existing customers can open a ticket from inside their account. New visitors "
+"can write through the form by selecting 'Technical support'."
 
 #: apps/contact/templates/contact/contact.html:189
 msgid "Məlumatlarım təhlükəsizdir?"
@@ -14053,9 +14043,9 @@ msgid ""
 "kursları, müəllim yalnız öz qrupları, admin isə öz təşkilatı haqqında "
 "suallar verə bilər."
 msgstr ""
-"The AI assistant sees only data you are allowed to access. A student can ask"
-" about their courses, a teacher about their groups, and an admin about their"
-" organization."
+"The AI assistant sees only data you are allowed to access. A student can ask "
+"about their courses, a teacher about their groups, and an admin about their "
+"organization."
 
 #: apps/contact/templates/contact/email/contact_notification.html:5
 msgid "EMSArena – Yeni əlaqə mesajı"
@@ -14083,9 +14073,8 @@ msgstr "Message details"
 
 #: apps/contact/templates/contact/email/contact_notification.html:71
 msgid ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
+"Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</"
+"strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək."
 msgstr ""
 "The reply will go to the customer from <strong>info@</strong> or "
 "<strong>support@emsarena.com</strong>; your personal Gmail will not be "
@@ -14127,8 +14116,7 @@ msgstr "Your original message:"
 
 #: apps/contact/templates/contact/email/contact_reply.html:35
 msgid "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək."
-msgstr ""
-"You can reply directly to this message. It will come back to our team."
+msgstr "You can reply directly to this message. It will come back to our team."
 
 #: apps/contact/templates/contact/email/contact_reply.html:45
 #: apps/trial_exams/templates/trial_exams/email/trial_reply.html:43
@@ -14155,8 +14143,7 @@ msgstr "Too many messages have been sent. Please wait a little."
 msgid ""
 "Bu email ünvanından çox sayda mesaj göndərilib. Sabah yenidən cəhd edin."
 msgstr ""
-"Too many messages have been sent from this email address. Try again "
-"tomorrow."
+"Too many messages have been sent from this email address. Try again tomorrow."
 
 #: apps/contact/views.py:104
 msgid "Mesajınızı qəbul edə bilmədik. Zəhmət olmasa daha sonra cəhd edin."
@@ -14453,8 +14440,7 @@ msgstr "After Creating a Course"
 #: apps/courses/templates/courses/create_course.html:73
 msgctxt "courses.create_page"
 msgid "after_create_item_1"
-msgstr ""
-"After the course is created, you are redirected to the dashboard page."
+msgstr "After the course is created, you are redirected to the dashboard page."
 
 #: apps/courses/templates/courses/create_course.html:74
 msgctxt "courses.create_page"
@@ -14557,8 +14543,8 @@ msgstr ""
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Status Importance: You can easily work on the course by saving it in "
-"\"Draft\" mode. Don't forget to \"Publish\" when ready."
+"Status Importance: You can easily work on the course by saving it in \"Draft"
+"\" mode. Don't forget to \"Publish\" when ready."
 
 #: apps/courses/templates/courses/edit_course.html:413
 msgctxt "courses.edit_page"
@@ -15754,8 +15740,7 @@ msgstr "Enter fullscreen and continue"
 msgctxt "exams.model.attempt.field"
 msgid "supervision_locked_at"
 msgstr ""
-"Your exam has been suspended. Please wait until the teacher makes a "
-"decision."
+"Your exam has been suspended. Please wait until the teacher makes a decision."
 
 #: apps/exams/domain/attempts.py:132
 msgctxt "exams.model.attempt.field"
@@ -18230,8 +18215,8 @@ msgstr ""
 msgctxt "exams.service.parsing.error"
 msgid "file_has_macros"
 msgstr ""
-"This file type is not accepted for security reasons. Upload only PDF, TXT or"
-" image (PNG/JPG) files."
+"This file type is not accepted for security reasons. Upload only PDF, TXT or "
+"image (PNG/JPG) files."
 
 #: apps/exams/services/parsing/extraction/pipeline.py:74
 #: apps/exams/services/parsing/extraction/pipeline.py:87
@@ -18283,8 +18268,8 @@ msgstr "Content"
 #: apps/exams/services/question_word_export.py:58
 msgctxt "exams.export"
 msgid ""
-"Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı"
-" redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
+"Qeyd: düz cavablar variantın əvvəlindəki * işarəsi ilə qeyd olunub. Bu faylı "
+"redaktə edib yenidən toplu yükləmə ilə import edə bilərsiniz."
 msgstr ""
 "Note: correct answers are marked with an * at the beginning of the option. "
 "You can edit this file and import it again with bulk upload."
@@ -19376,8 +19361,8 @@ msgstr "Program input"
 #: apps/exams/templates/exams/student/take_coding_exam.html:247
 msgctxt "exams.template.coding_exam"
 msgid ""
-"One value per line. Each line is consumed by input(), Scanner, cin, or stdin"
-" in order."
+"One value per line. Each line is consumed by input(), Scanner, cin, or stdin "
+"in order."
 msgstr ""
 "Type input here. Each line will be sent to input(), Scanner, cin, or stdin."
 
@@ -19757,8 +19742,7 @@ msgstr "You have reached the maximum violation limit."
 msgctxt "exams.template.take_exam"
 msgid "supervision_locked_wait"
 msgstr ""
-"Your exam has been suspended. Please wait until the teacher makes a "
-"decision."
+"Your exam has been suspended. Please wait until the teacher makes a decision."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:495
 #: apps/exams/templates/exams/student/take_exam.html:400
@@ -19968,8 +19952,8 @@ msgstr "Enable paint answers for this section"
 msgctxt "exams.template.create_question_bank"
 msgid "help_block_enable_paint"
 msgstr ""
-"This sets paint as the default for questions in this section. If you disable"
-" paint on a specific question later, it will stay hidden for that question."
+"This sets paint as the default for questions in this section. If you disable "
+"paint on a specific question later, it will stay hidden for that question."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:134
 #: apps/exams/templates/exams/teacher/create_question_bank.html:239
@@ -20137,7 +20121,6 @@ msgstr ""
 #: apps/exams/templates/exams/teacher/create_question_bank.html:197
 #: apps/exams/templates/exams/teacher/create_question_bank.html:207
 #: apps/exams/templates/exams/teacher/partials/_create_question_bank_scripts.html:13
-#: apps/exams/views/teacher/questions/_shared.py:119
 msgctxt "exams.template.create_question_bank"
 msgid "block_default"
 msgstr "Section"
@@ -20171,8 +20154,8 @@ msgstr "Confirm deletion"
 msgctxt "exams.template.create_question_bank"
 msgid "confirm_delete_block_message"
 msgstr ""
-"This section and its questions will be removed from the bank. Do you want to"
-" continue?"
+"This section and its questions will be removed from the bank. Do you want to "
+"continue?"
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:327
 msgctxt "exams.template.create_question_bank"
@@ -21077,8 +21060,8 @@ msgstr "Preparing export"
 msgctxt "exams.template.export_waiting"
 msgid "export_preparing_body"
 msgstr ""
-"The download will start automatically once the file is ready. Keep this page"
-" open."
+"The download will start automatically once the file is ready. Keep this page "
+"open."
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:20
 msgctxt "exams.template.export_waiting"
@@ -21224,8 +21207,8 @@ msgstr "or drag it here"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:280
 msgid ""
-"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT"
-" istifadə edin."
+"Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT "
+"istifadə edin."
 msgstr ""
 "Word (.docx) files are not accepted for security reasons — use PDF or TXT "
 "instead."
@@ -21326,28 +21309,27 @@ msgstr "Variant lazım deyil — yalnız sual mətni"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:355
 msgid ""
 "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
-"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
-"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
-"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
-"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
-"yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) "
-"Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) "
-"Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz "
-"cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ "
-"Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn "
-"prosesini"
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;"
+"C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):"
+"&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;"
+"*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;"
+"&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma "
+"dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;"
+"Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/"
+"CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə "
+"prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
 msgstr ""
 "Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly "
 "deal with?&#10;A) Data analysis and decision making&#10;B) Computer "
-"repair&#10;C) Game development&#10;D) Setting up the "
-"internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly "
-"used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing "
-"music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the "
-"end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup "
-"language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: "
-"B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct "
-"answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ "
-"Build and deployment process&#10;• Customer support&#10;• Design process"
+"repair&#10;C) Game development&#10;D) Setting up the internet&#10;&#10;"
+"Example 2 (mark with *):&#10;2. Where is Python mainly used?&#10;A) Car "
+"repair&#10;*B) Web and backend development&#10;C) Playing music&#10;D) "
+"Printer assembly&#10;&#10;Example 3 (write the answer at the end):&#10;3. "
+"What is HTML?&#10;A) Programming language&#10;B) Markup language&#10;C) "
+"Operating system&#10;D) Antivirus&#10;Answer: B&#10;&#10;Example 4 (PDF/"
+"bullet format — √ marks the correct answer):&#10;4. What does CI/CD automate?"
+"&#10;• Writing documentation&#10;√ Build and deployment process&#10;• "
+"Customer support&#10;• Design process"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:356
 msgid ""
@@ -21368,25 +21350,25 @@ msgstr ""
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:357
 msgid ""
 "Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul "
-"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter "
-"təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* "
-"ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil "
-"təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer "
-"yığılması&#10;&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. "
-"CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və "
-"yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
+"olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;"
+"C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):"
+"&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;"
+"*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;"
+"&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. CI/CD nəyi "
+"avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə "
+"prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini"
 msgstr ""
 "Example 1 (Standard - A is correct):&#10;1. What does Data Science mainly "
 "deal with?&#10;A) Data analysis and decision making&#10;B) Computer "
-"repair&#10;C) Game development&#10;D) Setting up the "
-"internet&#10;&#10;Example 2 (mark with *):&#10;2. Where is Python mainly "
-"used?&#10;A) Car repair&#10;*B) Web and backend development&#10;C) Playing "
-"music&#10;D) Printer assembly&#10;&#10;Example 3 (write the answer at the "
-"end):&#10;3. What is HTML?&#10;A) Programming language&#10;B) Markup "
-"language&#10;C) Operating system&#10;D) Antivirus&#10;Answer: "
-"B&#10;&#10;Example 4 (PDF/bullet format — √ marks the correct "
-"answer):&#10;4. What does CI/CD automate?&#10;• Writing documentation&#10;√ "
-"Build and deployment process&#10;• Customer support&#10;• Design process"
+"repair&#10;C) Game development&#10;D) Setting up the internet&#10;&#10;"
+"Example 2 (mark with *):&#10;2. Where is Python mainly used?&#10;A) Car "
+"repair&#10;*B) Web and backend development&#10;C) Playing music&#10;D) "
+"Printer assembly&#10;&#10;Example 3 (write the answer at the end):&#10;3. "
+"What is HTML?&#10;A) Programming language&#10;B) Markup language&#10;C) "
+"Operating system&#10;D) Antivirus&#10;Answer: B&#10;&#10;Example 4 (PDF/"
+"bullet format — √ marks the correct answer):&#10;4. What does CI/CD automate?"
+"&#10;• Writing documentation&#10;√ Build and deployment process&#10;• "
+"Customer support&#10;• Design process"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:370
 msgctxt "exams.template.test_question_bank"
@@ -21952,8 +21934,8 @@ msgstr "Proctoring is not available for this exam."
 msgctxt "exams.wizard"
 msgid "tip_live_after_create"
 msgstr ""
-"After creating the exam, open its detail page to start a live (Kahoot-style)"
-" exam."
+"After creating the exam, open its detail page to start a live (Kahoot-style) "
+"exam."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:480
 msgctxt "exams.wizard"
@@ -22349,8 +22331,8 @@ msgstr "Enable drawing answer"
 msgctxt "exams.template.add_exam_question"
 msgid "help_enable_paint_answer"
 msgstr ""
-"For this question, the student will be able to answer with a drawing as well"
-" as text."
+"For this question, the student will be able to answer with a drawing as well "
+"as text."
 
 #: apps/exams/templates/exams/teacher/partials/_question_form.html:156
 msgctxt "exams.template.add_exam_question"
@@ -23268,8 +23250,7 @@ msgstr "Do you want to resume this student's exam?"
 msgctxt "exams.template.supervision_detail"
 msgid "confirm_grant_chance"
 msgstr ""
-"Do you want to grant this student an extra chance and allow them to "
-"continue?"
+"Do you want to grant this student an extra chance and allow them to continue?"
 
 #: apps/exams/templates/exams/teacher/supervision_detail.html:239
 msgctxt "exams.template.supervision_detail"
@@ -23496,11 +23477,9 @@ msgstr "Nəzarətçi tərəfindən dayandırılıb"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:29
 msgid ""
-"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə "
-"dayandırılıb."
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
 msgstr ""
-"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə "
-"dayandırılıb."
+"Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:30
 #, python-format
@@ -23525,11 +23504,11 @@ msgstr "General note"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:34
 #, python-format
 msgid ""
-"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-"
-"countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
+"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="
+"\"%(identity_window_seconds_left)s\">--:--:--</span>"
 msgstr ""
-"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-"
-"countdown=\"%(identity_window_seconds_left)s\">--:--:--</span>"
+"Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="
+"\"%(identity_window_seconds_left)s\">--:--:--</span>"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:81
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:295
@@ -24887,8 +24866,6 @@ msgid "title_wrong_selection"
 msgstr "Target selection"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:246
-#| msgctxt "appeals.template"
-#| msgid "Cavab seçilməyib"
 msgid "Cavab verilməyib"
 msgstr "No answer selected"
 
@@ -25799,8 +25776,6 @@ msgid "empty_no_answers_found"
 msgstr "No answers found"
 
 #: apps/labs/templates/labs/grade_submission.html:148
-#| msgctxt "appeals.choice.status"
-#| msgid "Baxılır"
 msgid "Baxış"
 msgstr "Reviewed"
 
@@ -25869,8 +25844,7 @@ msgstr "You have already submitted this lab!"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / "
-"%(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
 msgstr "%(submitted_at)s · Attempt: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:77
@@ -27200,7 +27174,8 @@ msgstr "Empty text submitted"
 #: apps/labs/views/teacher/questions.py:175
 msgctxt "labs.view.error"
 msgid "import_no_questions_found_format"
-msgstr "No questions found. Format: \"1. Question text\" or \"1) Question text\""
+msgstr ""
+"No questions found. Format: \"1. Question text\" or \"1) Question text\""
 
 #: apps/labs/views/teacher/questions.py:196
 msgctxt "labs.view.message"
@@ -29049,6 +29024,7 @@ msgstr "Delete this notification?"
 
 #: apps/notifications/templates/notifications/notification_detail.html:86
 #: apps/notifications/templates/notifications/notification_list.html:157
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:499
 msgid "Delete"
 msgstr "Delete"
 
@@ -30570,8 +30546,8 @@ msgid ""
 "əlavə etsin. Sonra istədiyin qədər təkrar həll et. Tamamilə pulsuz və "
 "limitsiz."
 msgstr ""
-"Upload your questions as a PDF — our team will add them to the system during"
-" the day. Then practice as many times as you like. Completely free and "
+"Upload your questions as a PDF — our team will add them to the system during "
+"the day. Then practice as many times as you like. Completely free and "
 "unlimited."
 
 #: apps/trial_exams/templates/trial_exams/trial_exam_request.html:34
@@ -30725,8 +30701,7 @@ msgstr "Individual"
 #: core/middleware.py:342
 msgctxt "core.middleware.request_queue.message"
 msgid "Server is busy processing previous requests. Please try again shortly."
-msgstr ""
-"Server is busy processing previous requests. Please try again shortly."
+msgstr "Server is busy processing previous requests. Please try again shortly."
 
 #: core/permissions.py:204
 msgctxt "core.permission.error"
@@ -31018,8 +30993,7 @@ msgid "Keçid dəyişmiş, silinmiş və ya yanlış daxil edilmiş ola bilər."
 msgstr "Keçid dəyişmiş, silinmiş və ya yanlış daxil edilmiş ola bilər."
 
 #: templates/errors/404.html:31
-msgid ""
-"Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
+msgid "Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
 msgstr ""
 "Bir addım geri dönə və ya əsas səhifədən yolunuza davam edə bilərsiniz."
 
@@ -31029,11 +31003,11 @@ msgstr "Change the filters and try again."
 
 #: templates/errors/404.html:48
 msgid ""
-"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni"
-" yoxlayın."
+"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni "
+"yoxlayın."
 msgstr ""
-"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni"
-" yoxlayın."
+"Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni "
+"yoxlayın."
 
 #: templates/errors/404.html:60
 msgid "İstənilən resurs serverdə tapılmadı və ya artıq əlçatan deyil."
@@ -31870,11 +31844,10 @@ msgstr "loading..."
 #: templates/partials/_ai_assistant.html:78
 msgctxt "ai_assistant.greeting"
 msgid ""
-"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
-" bilərəm?"
+"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə "
+"bilərəm?"
 msgstr ""
-"Hello! I am EMSArena AI. I am ready to answer your questions. How can I "
-"help?"
+"Hello! I am EMSArena AI. I am ready to answer your questions. How can I help?"
 
 #: templates/partials/_ai_assistant.html:79
 msgctxt "ai_assistant.error"
@@ -31922,8 +31895,8 @@ msgstr "Home"
 
 #: templates/partials/_footer.html:21
 msgid ""
-"Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və"
-" kurs mərkəzləri üçün modern LMS həlli."
+"Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və "
+"kurs mərkəzləri üçün modern LMS həlli."
 msgstr ""
 "Education management and online exam platform. A modern LMS for "
 "universities, schools and training centres."
@@ -32167,2672 +32140,1921 @@ msgctxt "accounts.view_as"
 msgid "exit_view"
 msgstr "Exit"
 
-#~ msgctxt "exams.export"
-#~ msgid "Xülasə"
-#~ msgstr "Summary"
+#: venv/lib/python3.11/site-packages/click/_termui_impl.py:191
+#, fuzzy
+#| msgid "Ad"
+msgid "d"
+msgstr "Name"
 
-#~ msgctxt "exams.export"
-#~ msgid "Problemlər"
-#~ msgstr "Problems"
+#: venv/lib/python3.11/site-packages/click/_termui_impl.py:693
+#, python-brace-format
+msgid "{editor}: Editing failed"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "İmtahan"
-#~ msgstr "Exam"
+#: venv/lib/python3.11/site-packages/click/_termui_impl.py:697
+#, python-brace-format
+msgid "{editor}: Editing failed: {e}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Parse olunan sual sayı"
-#~ msgstr "Parsed question count"
+#: venv/lib/python3.11/site-packages/click/_winconsole.py:156
+#: venv/lib/python3.11/site-packages/click/_winconsole.py:173
+#, python-brace-format
+msgid "Windows error: {error}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Mənbədə END_QUESTION blokları"
-#~ msgstr "END_QUESTION blocks in source"
+#: venv/lib/python3.11/site-packages/click/core.py:98
+#, fuzzy
+#| msgctxt "blog.post.message"
+#| msgid "created"
+msgid "deprecated"
+msgstr "Post created successfully."
 
-#~ msgctxt "exams.export"
-#~ msgid "Dolu mənbə blokları"
-#~ msgstr "Non-empty source blocks"
+#: venv/lib/python3.11/site-packages/click/core.py:1209
+#: venv/lib/python3.11/site-packages/typer/core.py:622
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:91
+#, fuzzy
+#| msgctxt "profile.publish_notification"
+#| msgid "optional"
+msgid "Options"
+msgstr "optional"
 
-#~ msgctxt "exams.export"
-#~ msgid "Boş mənbə blokları"
-#~ msgstr "Empty source blocks"
+#: venv/lib/python3.11/site-packages/click/core.py:1284
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Yoxdur"
-#~ msgstr "None"
+#: venv/lib/python3.11/site-packages/click/core.py:1300
+msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Parse olunmayan dolu blok sayı"
-#~ msgstr "Non-empty blocks not parsed"
+#: venv/lib/python3.11/site-packages/click/core.py:1487
+#: venv/lib/python3.11/site-packages/typer/core.py:245
+msgid "Aborted!"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Yazılı görünən ən böyük sual nömrəsi"
-#~ msgstr "Largest visible written question number"
+#: venv/lib/python3.11/site-packages/click/core.py:1861
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:92
+#, fuzzy
+#| msgid "Komanda"
+msgid "Commands"
+msgstr "Team"
 
-#~ msgctxt "exams.export"
-#~ msgid "Ən böyük nömrə ilə parse sayı fərqi"
-#~ msgstr "Difference between largest number and parsed count"
+#: venv/lib/python3.11/site-packages/click/core.py:1892
+msgid "Missing command."
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Nömrəsi görünməyən bloklar"
-#~ msgstr "Blocks without a visible number"
+#: venv/lib/python3.11/site-packages/click/core.py:2404
+msgid "Value must be an iterable."
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Yazılı nömrələrdə boşluqlar"
-#~ msgstr "Gaps in written numbers"
+#: venv/lib/python3.11/site-packages/click/core.py:2427
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Təkrar yazılı nömrələr"
-#~ msgstr "Duplicate written numbers"
+#: venv/lib/python3.11/site-packages/click/core.py:2624
+msgid ""
+"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Xətalı sual sayı"
-#~ msgstr "Question count with errors"
+#: venv/lib/python3.11/site-packages/click/core.py:3025
+#, python-brace-format
+msgid "Name '{name}' defined twice"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Xəbərdarlıq sayı"
-#~ msgstr "Warning count"
+#: venv/lib/python3.11/site-packages/click/core.py:3041
+msgid "Boolean option {decl!r} cannot use the same flag for true/false."
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Dublikat sual sayı"
-#~ msgstr "Duplicate question count"
+#: venv/lib/python3.11/site-packages/click/core.py:3060
+msgid "Could not determine name for option with declarations {decls!r}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Variant problemi"
-#~ msgstr "Option issue"
+#: venv/lib/python3.11/site-packages/click/core.py:3067
+#, python-brace-format
+msgid ""
+"No options defined but a name was passed ({name}). Did you mean to declare "
+"an argument instead? Did you mean to pass '--{name}'?"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Uzunluq balansı"
-#~ msgstr "Length balance"
+#: venv/lib/python3.11/site-packages/click/core.py:3144
+#: venv/lib/python3.11/site-packages/typer/core.py:539
+#, python-brace-format
+msgid "env var: {var}"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Təmiz sual sayı"
-#~ msgstr "Clean question count"
+#: venv/lib/python3.11/site-packages/click/core.py:3147
+#: venv/lib/python3.11/site-packages/typer/core.py:361
+#: venv/lib/python3.11/site-packages/typer/core.py:560
+#, fuzzy, python-brace-format
+#| msgid "Default format"
+msgid "default: {default}"
+msgstr "Default format"
 
-#~ msgctxt "exams.export"
-#~ msgid "Sahə"
-#~ msgstr "Field"
+#: venv/lib/python3.11/site-packages/click/core.py:3211
+#: venv/lib/python3.11/site-packages/typer/core.py:110
+msgid "(dynamic)"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Dəyər"
-#~ msgstr "Value"
+#: venv/lib/python3.11/site-packages/click/core.py:3503
+#, python-brace-format
+msgid ""
+"Arguments take exactly one parameter declaration, got {length}: {decls}."
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Qeyd"
-#~ msgstr "Note"
+#: venv/lib/python3.11/site-packages/click/decorators.py:399
+msgid "Do you want to continue?"
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."
-#~ msgstr ""
-#~ "The Feedback column contains correction text ready to send to the teacher."
+#: venv/lib/python3.11/site-packages/click/decorators.py:400
+msgid "Confirm the action without prompting."
+msgstr ""
 
-#~ msgctxt "exams.export"
-#~ msgid "Feedback qeydləri müəllimə göndərmək üçün hazır düzəliş mətnidir."
-#~ msgstr "Feedback notes are correction text ready to send to the teacher."
-
-#~ msgctxt "exams.export"
-#~ msgid "Sual sıra #"
-#~ msgstr "Question sequence #"
-
-#~ msgctxt "exams.export"
-#~ msgid "Mənbə nömrəsi"
-#~ msgstr "Source number"
-
-#~ msgctxt "exams.export"
-#~ msgid "Səviyyə"
-#~ msgstr "Level"
-
-#~ msgctxt "exams.export"
-#~ msgid "Problem növü"
-#~ msgstr "Problem type"
-
-#~ msgctxt "exams.export"
-#~ msgid "Problem izahı"
-#~ msgstr "Problem explanation"
-
-#~ msgctxt "exams.export"
-#~ msgid "Bağlı sual/ref"
-#~ msgstr "Related question/ref"
-
-#~ msgctxt "exams.export"
-#~ msgid "Feedback"
-#~ msgstr "Feedback"
-
-#~ msgctxt "exams.export"
-#~ msgid "Düz cavab"
-#~ msgstr "Correct answer"
-
-#~ msgctxt "exams.export"
-#~ msgid "Test ümumi"
-#~ msgstr "Overall test"
-
-#~ msgctxt "exams.export"
-#~ msgid "Problem yoxdur"
-#~ msgstr "No problems"
-
-#~ msgctxt "exams.export"
-#~ msgid "Import edilmiş suallarda xəbərdarlıq tapılmadı."
-#~ msgstr "No warnings were found in the imported questions."
-
+#: venv/lib/python3.11/site-packages/click/decorators.py:465
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "%(title)s - problem hesabatı"
-#~ msgstr "%(title)s - problem report"
+msgid "%(prog)s, version %(version)s"
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/click/decorators.py:522
+msgid "Show the version and exit."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/decorators.py:548
+msgid "Show this message and exit."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:29
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Did you mean one of: {possibilities}?)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:59
+#: venv/lib/python3.11/site-packages/click/exceptions.py:102
+#: venv/lib/python3.11/site-packages/click/termui.py:228
+#, fuzzy, python-brace-format
+#| msgctxt "exams.model.coding_submission.field"
+#| msgid "error_message"
+msgid "Error: {message}"
+msgstr "Message"
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:93
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:143
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:145
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:203
+#, fuzzy
+#| msgid "Assignment"
+msgid "Missing argument"
+msgstr "Assignment"
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:205
+#, fuzzy
+#| msgctxt "exams.service.parsing.warning"
+#| msgid "missing_option"
+msgid "Missing option"
+msgstr "Option {option} was not found."
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:207
+msgid "Missing parameter"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:209
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:216
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:235
+msgid "No such option {name!r}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:265
+msgid "No such command {name!r}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:321
+#, fuzzy
+#| msgctxt "assignment.detail"
+#| msgid "unknown_error"
+msgid "unknown error"
+msgstr "Unknown error"
+
+#: venv/lib/python3.11/site-packages/click/exceptions.py:328
+msgid "Could not open file {filename!r}: {message}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/formatting.py:162
+#, fuzzy
+#| msgctxt "profile.notifications"
+#| msgid "message"
+msgid "Usage:"
+msgstr "Message"
+
+#: venv/lib/python3.11/site-packages/click/parser.py:145
+#, python-brace-format
+msgid "Invalid start character for option ({option})"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:203
+msgid "Argument {name!r} takes {nargs} values."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:382
+msgid "Option {name!r} does not take a value."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/parser.py:445
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/shell_completion.py:337
+msgid "Shell completion is not supported for Bash versions older than 4.4."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/shell_completion.py:344
+msgid "Couldn't detect Bash version, shell completion is not supported."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:212
+#, fuzzy
+#| msgid "Send confirmation"
+msgid "Repeat for confirmation"
+msgstr "Open notifications"
+
+#: venv/lib/python3.11/site-packages/click/termui.py:239
+msgid "Error: The two entered values do not match."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:293
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "Program input"
+msgid "Error: invalid input"
+msgstr "Program input"
+
+#: venv/lib/python3.11/site-packages/click/termui.py:675
+#: venv/lib/python3.11/site-packages/click/termui.py:681
+msgid "Unknown color {colour!r}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/termui.py:930
+msgid "Press any key to continue..."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:364
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:401
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:407
+#, python-brace-format
+msgid "Choice({choices})"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:493
+msgid "{value!r} does not match the format {format}."
+msgid_plural "{value!r} does not match the formats {formats}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:515
+msgid "{value!r} is not a valid {number_type}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:580
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:762
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:788
+msgid "{value!r} is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:998
+#, fuzzy
+#| msgctxt "assignment.my_submissions"
+#| msgid "file"
+msgid "file"
+msgstr "File"
+
+#: venv/lib/python3.11/site-packages/click/types.py:1000
+#, fuzzy
+#| msgctxt "organizations.unit_type"
+#| msgid "directorate"
+msgid "directory"
+msgstr "Directorate"
+
+#: venv/lib/python3.11/site-packages/click/types.py:1002
+msgid "path"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1048
+msgid "{name} {filename!r} does not exist."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1057
+msgid "{name} {filename!r} is a file."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1065
+msgid "{name} {filename!r} is a directory."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1074
+msgid "{name} {filename!r} is not readable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1083
+msgid "{name} {filename!r} is not writable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1092
+msgid "{name} {filename!r} is not executable."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/click/types.py:1164
+#, python-brace-format
+msgid "{len_type} values are required, but {len_value} was given."
+msgid_plural "{len_type} values are required, but {len_value} were given."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/click/utils.py:345
+#: venv/lib/python3.11/site-packages/click/utils.py:366
+#, python-brace-format
+msgid "Unknown standard stream '{name}'"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/contrib/messages/apps.py:16
+#, fuzzy
+#| msgctxt "staff.management"
+#| msgid "Message"
+msgid "Messages"
+msgstr "Message"
+
+#: venv/lib/python3.11/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/contrib/staticfiles/apps.py:9
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "Main File"
+msgid "Static Files"
+msgstr "Main File"
+
+#: venv/lib/python3.11/site-packages/django/contrib/syndication/apps.py:7
+#, fuzzy
+#| msgctxt "nav"
+#| msgid "education"
+msgid "Syndication"
+msgstr "Education"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.11/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:153
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:774
+msgid "Enter a valid URL."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:200
+msgid "Enter a valid integer."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:211
+msgid "Enter a valid email address."
+msgstr ""
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.11/site-packages/django/core/validators.py:289
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:297
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:309
+#: venv/lib/python3.11/site-packages/django/core/validators.py:318
+#: venv/lib/python3.11/site-packages/django/core/validators.py:332
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2220
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Hesabat vaxtı: %(datetime)s"
-#~ msgstr "Report time: %(datetime)s"
+msgid "Enter a valid %(protocol)s address."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:311
+msgid "IPv4"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:320
+#: venv/lib/python3.11/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:334
+msgid "IPv4 or IPv6"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:381
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Səviyyə: %(severity)s"
-#~ msgstr "Level: %(severity)s"
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:416
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Problem növü: %(type)s"
-#~ msgstr "Problem type: %(type)s"
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:425
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Problem: %(problem)s"
-#~ msgstr "Problem: %(problem)s"
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:434
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Feedback: %(feedback)s"
-#~ msgstr "Feedback: %(feedback)s"
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:441
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Mənbə nömrəsi: %(number)s"
-#~ msgstr "Source number: %(number)s"
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:473
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Bağlı sual/ref: %(reference)s"
-#~ msgstr "Related question/ref: %(reference)s"
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:491
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Variantlar: %(options)s"
-#~ msgstr "Options: %(options)s"
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
 
+#: venv/lib/python3.11/site-packages/django/core/validators.py:514
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:365
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:404
+msgid "Enter a number."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:516
 #, python-format
-#~ msgctxt "exams.export"
-#~ msgid "Düz cavab: %(answer)s"
-#~ msgstr "Correct answer: %(answer)s"
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgctxt "profile.my_exams"
-#~ msgid "title"
-#~ msgstr "My exams"
-
-#~ msgctxt "profile.my_exams"
-#~ msgid "exam"
-#~ msgstr "Exam"
-
-#~ msgctxt "profile.my_exams"
-#~ msgid "active_status"
-#~ msgstr "Active"
-
-#~ msgctxt "profile.my_exams"
-#~ msgid "inactive_status"
-#~ msgstr "Inactive"
-
-#~ msgctxt "profile.statistics"
-#~ msgid "card_live_exam"
-#~ msgstr "Live exam"
-
-#~ msgctxt "profile.statistics"
-#~ msgid "live_total_answers"
-#~ msgstr "Total answers"
-
-#~ msgctxt "profile.statistics"
-#~ msgid "live_correct"
-#~ msgstr "Correct"
-
-#~ msgctxt "profile.statistics"
-#~ msgid "live_accuracy"
-#~ msgstr "Accuracy"
-
-#~ msgctxt "courses.dashboard"
-#~ msgid "status_archived"
-#~ msgstr "Archived"
-
-#~ msgctxt "courses.create_page"
-#~ msgid "field_status"
-#~ msgstr "Status"
-
-#~ msgctxt "courses.create_page"
-#~ msgid "status_draft"
-#~ msgstr "Draft"
-
-#~ msgctxt "courses.create_page"
-#~ msgid "help_status_draft"
-#~ msgstr "Students don't see (prep)"
-
-#~ msgctxt "courses.create_page"
-#~ msgid "status_published"
-#~ msgstr "Released"
-
-#~ msgctxt "courses.create_page"
-#~ msgid "help_status_published"
-#~ msgstr "Students See (live)"
-
-#~ msgctxt "courses.partial.create_modal_form"
-#~ msgid "help_description"
-#~ msgstr ""
-#~ "Briefly write the purpose of the course and who will benefit from this "
-#~ "course."
-
-#~ msgctxt "courses.partial.create_modal_form"
-#~ msgid "help_cover"
-#~ msgstr "If you do not upload an image, the system will use the default cover."
-
-#~ msgctxt "courses.partial.create_modal_form"
-#~ msgid "alt_cover_preview"
-#~ msgstr "Course cover preview"
-
-# Added for appeal/result redesign
-#~ msgctxt "exams.template.student_exam_result"
-#~ msgid "label_points"
-#~ msgstr "Points"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "filter_all_types"
-#~ msgstr "All types"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "filter_test"
-#~ msgstr "Test"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "filter_written"
-#~ msgstr "Written"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "filter_practical"
-#~ msgstr "Practical"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "action_search"
-#~ msgstr "Search"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "action_reset"
-#~ msgstr "Reset"
-
+#: venv/lib/python3.11/site-packages/django/core/validators.py:521
 #, python-format
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "label_duration_minutes_short %(minutes)s"
-#~ msgstr "%(minutes)s min"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "empty_no_exam_found"
-#~ msgstr "No exams found."
-
-#~ msgctxt "exams.template.test_question_bank"
-#~ msgid "section_upload_file"
-#~ msgstr "Upload file"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "supervision_section_title"
-#~ msgstr "Exam Supervision"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "supervision_section_help"
-#~ msgstr "Anti-cheating and exam supervision settings"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "eyebrow"
-#~ msgstr "EXAMS"
-
-#~ msgctxt "exams.dashboard"
-#~ msgid "filter_search"
-#~ msgstr "Search"
-
-#~ msgctxt "nav"
-#~ msgid "create_live_exam_hint"
-#~ msgstr "After creating an exam, open its detail page to start a live exam"
-
-# --- EMSArena navbar redesign (2026-06-17) ---
-#~ msgctxt "nav"
-#~ msgid "my_exams"
-#~ msgstr "My Exams"
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "signup_student_role_not_allowed"
-#~ msgstr "Student role cannot be selected manually."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "institution_required"
-#~ msgstr "Please select an institution."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "institution_country_mismatch"
-#~ msgstr "Institution does not match selected country."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "institution_type_mismatch"
-#~ msgstr "Institution does not match selected account type."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "university_identifier_required"
-#~ msgstr "An official university identifier or code is required."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "organization_identifier_required"
-#~ msgstr "An official identifier or code is required."
-
-#~ msgctxt "accounts.form.register.error"
-#~ msgid "individual_organization_required"
-#~ msgstr "Individual account does not require selecting an organization."
-
-#~ msgctxt "accounts.grading_queue_page"
-#~ msgid "view_submission_alert_template"
-#~ msgstr "A modal will open to view the submission content. ID: {id}"
-
-#~ msgctxt "accounts.manage_roles_page"
-#~ msgid "title"
-#~ msgstr "Role management"
-
-#~ msgctxt "accounts.manage_roles_page"
-#~ msgid "heading"
-#~ msgstr "Role management"
-
-#~ msgctxt "accounts.manage_roles_page"
-#~ msgid "back"
-#~ msgstr "Back"
-
-#~ msgctxt "profile.manage_roles"
-#~ msgid "info_title"
-#~ msgstr "Info title"
-
-#~ msgctxt "profile.permission_editor"
-#~ msgid "active_permissions_label"
-#~ msgstr "Active permissions label"
-
-#~ msgctxt "profile.permission_editor"
-#~ msgid "status_active"
-#~ msgstr "Status active"
-
-#~ msgctxt "profile.permission_editor"
-#~ msgid "status_inactive"
-#~ msgstr "Status inactive"
-
-#~ msgctxt "profile.permission_editor"
-#~ msgid "add"
-#~ msgstr "Add"
-
-#~ msgctxt "profile.role_assignment"
-#~ msgid "search_user_placeholder"
-#~ msgstr "Search user placeholder"
-
-#~ msgctxt "profile.role_assignment"
-#~ msgid "update"
-#~ msgstr "Update"
-
-#~ msgctxt "profile.role_assignment"
-#~ msgid "members_not_found"
-#~ msgstr "Members not found"
-
-#~ msgctxt "profile.role_assignment"
-#~ msgid "add"
-#~ msgstr "Add"
-
-#~ msgctxt "accounts.password_reset_page"
-#~ msgid "subheading"
-#~ msgstr "Enter your email and we will send you a password reset OTP code."
-
-#~ msgctxt "accounts.password_reset_done_page"
-#~ msgid "email_section_title"
-#~ msgstr "Email address"
-
-#~ msgctxt "accounts.password_reset_done_page"
-#~ msgid "otp_section_title"
-#~ msgstr "OTP code"
-
-#~ msgctxt "accounts.password_reset_done_page"
-#~ msgid "password_section_title"
-#~ msgstr "New password"
-
-#~ msgctxt "accounts.pending_review_page"
-#~ msgid "title"
-#~ msgstr "Pending review"
-
-#~ msgctxt "accounts.pending_review_page"
-#~ msgid "heading"
-#~ msgstr "Pending review"
-
-#~ msgctxt "accounts.pending_review_page"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "accounts.permission_editor_page"
-#~ msgid "title"
-#~ msgstr "Permission management"
-
-#~ msgctxt "accounts.permission_editor_page"
-#~ msgid "heading"
-#~ msgstr "Permission management"
-
-#~ msgctxt "accounts.permission_editor_page"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "profile.sidebar"
-#~ msgid "group_blog"
-#~ msgstr "Group blog"
-
-#~ msgctxt "profile.section"
-#~ msgid "blog"
-#~ msgstr "Blog"
-
-#~ msgctxt "profile.sidebar"
-#~ msgid "blog"
-#~ msgstr "Blog"
-
-#~ msgctxt "profile.assigned_tasks"
-#~ msgid "tab_courses"
-#~ msgstr "Tab courses"
-
-#~ msgctxt "profile.courses"
-#~ msgid "explore_courses"
-#~ msgstr "Explore courses"
-
-#~ msgctxt "profile.posts"
-#~ msgid "modal_create_title"
-#~ msgstr "Modal create title"
-
-#~ msgctxt "profile.posts"
-#~ msgid "option_select_category"
-#~ msgstr "Option select category"
-
-#~ msgctxt "profile.posts"
-#~ msgid "label_new_category"
-#~ msgstr "Label new category"
-
-#~ msgctxt "profile.posts"
-#~ msgid "placeholder_new_category"
-#~ msgstr "Placeholder new category"
-
-#~ msgctxt "profile.info"
-#~ msgid "user"
-#~ msgstr "User"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "profile_label"
-#~ msgstr "Profile"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "profile_suffix"
-#~ msgstr "Profile"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "subheading_posts"
-#~ msgstr "Subheading posts"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "create_post"
-#~ msgstr "Create post"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "assigned_exams"
-#~ msgstr "Assigned exams"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "my_exam_results"
-#~ msgstr "My exam results"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "my_courses"
-#~ msgstr "My courses"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "my_exams"
-#~ msgstr "My exams"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "pending_review"
-#~ msgstr "Pending review"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "new_exam"
-#~ msgstr "New exam"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "my_groups"
-#~ msgstr "My groups"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "new_course"
-#~ msgstr "New course"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "status_published"
-#~ msgstr "Status published"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "status_draft"
-#~ msgstr "Status draft"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "edit_action_title"
-#~ msgstr "Edit action"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "delete_action_title"
-#~ msgstr "Delete action"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "empty_posts"
-#~ msgstr "Empty posts"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_edit_title"
-#~ msgstr "Modal edit"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "meta_slug"
-#~ msgstr "Meta slug"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "meta_created_at"
-#~ msgstr "Meta created at"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "meta_updated_at"
-#~ msgstr "Meta updated at"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_title"
-#~ msgstr "Title"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_category"
-#~ msgstr "Category"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "category_select"
-#~ msgstr "Category select"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_excerpt"
-#~ msgstr "Excerpt"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_current_image"
-#~ msgstr "Current image"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "image_alt"
-#~ msgstr "Image alt"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "no_image"
-#~ msgstr "No image"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_new_image_optional"
-#~ msgstr "New image optional"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "field_image_url"
-#~ msgstr "Image url"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "publish_checkbox"
-#~ msgstr "Publish checkbox"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "cancel"
-#~ msgstr "Cancel"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "save"
-#~ msgstr "Save"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_delete_title"
-#~ msgstr "Modal delete"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_delete_message_prefix"
-#~ msgstr "Modal delete message prefix"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_delete_message_suffix"
-#~ msgstr "Modal delete message"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "delete_action"
-#~ msgstr "Delete action"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_unsaved_title"
-#~ msgstr "Modal unsaved"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "modal_unsaved_message"
-#~ msgstr "Modal unsaved message"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "stay"
-#~ msgstr "Stay"
-
-#~ msgctxt "accounts.public_profile_page"
-#~ msgid "discard_changes"
-#~ msgstr "Discard changes"
-
-#~ msgctxt "accounts.register"
-#~ msgid "individual_org_required_help"
-#~ msgstr ""
-#~ "Individual accounts no longer require selecting an existing organization."
-
-#~ msgctxt "accounts.register"
-#~ msgid "auto_student_role_info"
-#~ msgstr "Role is assigned automatically based on selected account type."
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "select_empty_university"
-#~ msgstr "Select university"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "select_empty_school"
-#~ msgstr "Select school"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "select_empty_course_center"
-#~ msgstr "Select course center"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "select_empty_default"
-#~ msgstr "Select institution"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "label_university"
-#~ msgstr "University"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "label_school_optional"
-#~ msgstr "School (optional)"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "label_course_center_optional"
-#~ msgstr "Course center (optional)"
-
-#~ msgctxt "accounts.register.js"
-#~ msgid "label_institution_default"
-#~ msgstr "Institution"
-
-#~ msgctxt "accounts.role_assignment_page"
-#~ msgid "title"
-#~ msgstr "Assign role"
-
-#~ msgctxt "accounts.role_assignment_page"
-#~ msgid "heading"
-#~ msgstr "Assign role"
-
-#~ msgctxt "accounts.role_assignment_page"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "accounts.superadmin_orgs_page"
-#~ msgid "title"
-#~ msgstr "Superadmin control"
-
-#~ msgctxt "accounts.superadmin_orgs_page"
-#~ msgid "heading"
-#~ msgstr "Superadmin control"
-
-#~ msgctxt "accounts.superadmin_orgs_page"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "profile.shortcut"
-#~ msgid "create_post_action"
-#~ msgstr "Create post action"
-
-#~ msgctxt "profile.shortcut"
-#~ msgid "open_blog_description"
-#~ msgstr "Open blog description"
-
-#~ msgctxt "profile.shortcut"
-#~ msgid "open_blog_action"
-#~ msgstr "Open blog action"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "assign_lower_roles_only"
-#~ msgstr "Assign lower roles only"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "missing_role_assign_permission"
-#~ msgstr "Missing role assign permission"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "user_bound_to_other_org"
-#~ msgstr "User bound to other org"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "not_allowed_to_change_user_role"
-#~ msgstr "Not allowed to change user role"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "user_added_to_org_with_role"
-#~ msgstr "User added to org with role"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "change_lower_level_users_only"
-#~ msgstr "Change lower level users only"
-
-#~ msgctxt "accounts.role_assignment.message"
-#~ msgid "role_updated_for_user"
-#~ msgstr "Role updated for user"
-
-#~ msgctxt "accounts.superadmin_orgs.message"
-#~ msgid "superadmin_only"
-#~ msgstr "Superadmin only"
-
-#~ msgctxt "accounts.auth.message"
-#~ msgid "registration_completed_request_recorded"
-#~ msgstr ""
-#~ "Registration completed, your request has been recorded.Registration "
-#~ "completed and your organization request is recorded. Verify the email code "
-#~ "to continue."
-
-#~ msgctxt "accounts.auth.message"
-#~ msgid "otp_email_send_failed"
-#~ msgstr "Failed to send verification code. Please try again."
-
-#~ msgctxt "assignment.section"
-#~ msgid "my_answers"
-#~ msgstr "My answers"
-
-#~ msgctxt "assignment.legacy.detail"
-#~ msgid "submitted_at_label"
-#~ msgstr "Sent"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "view"
-#~ msgstr "View"
-
-#~ msgctxt "assignment.message"
-#~ msgid "assignment_created_successfully"
-#~ msgstr "Assignment created successfully"
-
-#~ msgctxt "assignment.message"
-#~ msgid "assignment_updated_successfully"
-#~ msgstr "Assignment updated successfully"
-
-#~ msgctxt "assignment.message"
-#~ msgid "assignment_deleted_successfully"
-#~ msgstr "Assignment deleted successfully"
-
-#~ msgctxt "assignment.message"
-#~ msgid "deleted"
-#~ msgstr "Deleted"
-
-#~ msgctxt "assignment.message"
-#~ msgid "access_denied_for_assignment"
-#~ msgstr "Access denied for assignment"
-
-#~ msgctxt "assignment.message"
-#~ msgid "submission_not_allowed_attempts_or_deadline"
-#~ msgstr "Submission not allowed attempts or deadline"
-
-#~ msgctxt "assignment.message"
-#~ msgid "graded"
-#~ msgstr "Graded"
-
-#~ msgctxt "assignment.message"
-#~ msgid "grade_save_failed"
-#~ msgstr "Could not save grade."
-
-#~ msgctxt "blog.form.post"
-#~ msgid "new_category_label"
-#~ msgstr "New category"
-
-#~ msgctxt "blog.form.post"
-#~ msgid "new_category_placeholder"
-#~ msgstr "If it's not in the list, type a new one..."
-
-#~ msgctxt "blog.form.post"
-#~ msgid "category_empty_label"
-#~ msgstr "--- Select category ---"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "title"
-#~ msgstr "About EMSArena | Education Platform"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "hero_title"
-#~ msgstr "Education Management and Student Assessment Platform"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "hero_description"
-#~ msgstr ""
-#~ "EMSArena is a unified, scalable, and multifunctional digital education "
-#~ "ecosystem designed for universities, schools, training centers, and "
-#~ "individual instructors. We digitize the learning process and simplify "
-#~ "management."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "section_title"
-#~ msgstr "Platform Advantages and Capabilities"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_1_title"
-#~ msgstr "Unified Content Management"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_1_text"
-#~ msgstr ""
-#~ "Share and manage academic and teaching materials (lecture notes, "
-#~ "presentations, files, useful links, etc.) from a single central platform."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_2_title"
-#~ msgstr "Digitized Teaching"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_2_text"
-#~ msgstr ""
-#~ "Organize courses, topics, resources, and assignments in a unified, "
-#~ "structured way. Move the teaching process fully into a digital environment."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_3_title"
-#~ msgstr "Personalized Portals and Dashboards"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_3_text"
-#~ msgstr ""
-#~ "Dedicated dashboards for teachers, students, and administrators. Includes "
-#~ "e-journal, grading, attendance, and analytics-based performance monitoring."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_4_title"
-#~ msgstr "Multi-format Assessment"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_4_text"
-#~ msgstr ""
-#~ "Conduct tests, written, practical, and real-time (live) exams. Build "
-#~ "extensive question banks and mock exams."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_5_title"
-#~ msgstr "Multi-tenant Structure"
-
-#~ msgctxt "blog.about_page"
-#~ msgid "feature_5_text"
-#~ msgstr ""
-#~ "Multiple organizations can operate on the same platform. Each organization "
-#~ "has separate role and management rules with fully isolated data security."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "cta_text"
-#~ msgstr "Discover the future of education with EMSArena."
-
-#~ msgctxt "blog.about_page"
-#~ msgid "cta_button"
-#~ msgstr "Go to platform"
-
-#~ msgctxt "blog.category_detail_page"
-#~ msgid "back_home"
-#~ msgstr "Back to home"
-
-#~ msgctxt "blog.home_page"
-#~ msgid "title"
-#~ msgstr "Minimal Blog | Home"
-
-#~ msgctxt "blog.home_page"
-#~ msgid "pagination_prev"
-#~ msgstr "Previous"
-
-#~ msgctxt "blog.home_page"
-#~ msgid "pagination_next"
-#~ msgstr "Next"
-
-#~ msgctxt "blog.password_reset_page"
-#~ msgid "title"
-#~ msgstr "Reset password"
-
-#~ msgctxt "blog.password_reset_page"
-#~ msgid "heading"
-#~ msgstr "Forgot your password?"
-
-#~ msgctxt "blog.password_reset_page"
-#~ msgid "subheading"
-#~ msgstr "Enter your email and we will send you a password reset link."
-
-#~ msgctxt "blog.password_reset_page"
-#~ msgid "submit"
-#~ msgstr "Send link"
-
-#~ msgctxt "blog.password_reset_complete_page"
-#~ msgid "title"
-#~ msgstr "Completed"
-
-#~ msgctxt "blog.password_reset_complete_page"
-#~ msgid "heading"
-#~ msgstr "Password changed successfully!"
-
-#~ msgctxt "blog.password_reset_complete_page"
-#~ msgid "message"
-#~ msgstr ""
-#~ "Great! Your account security has been restored. You can now log in with your"
-#~ " new password."
-
-#~ msgctxt "blog.password_reset_complete_page"
-#~ msgid "login_now"
-#~ msgstr "Log in now"
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "title"
-#~ msgstr "Set new password"
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "heading_valid"
-#~ msgstr "Set a new password"
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "subheading_valid"
-#~ msgstr "Please enter a new strong password for your account."
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "submit"
-#~ msgstr "Change password"
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "heading_invalid"
-#~ msgstr "Invalid link"
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "subheading_invalid"
-#~ msgstr ""
-#~ "This link has already been used or has expired. For security reasons, links "
-#~ "are one-time only."
-
-#~ msgctxt "blog.password_reset_confirm_page"
-#~ msgid "retry"
-#~ msgstr "Request password reset again"
-
-#~ msgctxt "blog.password_reset_done_page"
-#~ msgid "title"
-#~ msgstr "Email sent"
-
-#~ msgctxt "blog.password_reset_done_page"
-#~ msgid "heading"
-#~ msgstr "Email sent!"
-
-#~ msgctxt "blog.password_reset_done_page"
-#~ msgid "message_line_1"
-#~ msgstr ""
-#~ "If this email exists in our system, we sent password reset instructions."
-
-#~ msgctxt "blog.password_reset_done_page"
-#~ msgid "message_line_2"
-#~ msgstr "Do not forget to check your spam folder."
-
-#~ msgctxt "blog.password_reset_done_page"
-#~ msgid "back_to_login"
-#~ msgstr "Back to login page"
-
-#~ msgctxt "blog.register_page"
-#~ msgid "title"
-#~ msgstr "Register"
-
-#~ msgctxt "blog.register_page"
-#~ msgid "heading"
-#~ msgstr "Create account"
-
-#~ msgctxt "blog.register_page"
-#~ msgid "subheading"
-#~ msgstr "Create a new account and start sharing your blog."
-
-#~ msgctxt "blog.register_page"
-#~ msgid "submit"
-#~ msgstr "Register"
-
-#~ msgctxt "blog.register_page"
-#~ msgid "has_account"
-#~ msgstr "Already have an account?"
-
-#~ msgctxt "blog.register_page"
-#~ msgid "login_now"
-#~ msgstr "Log in"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "title_suffix"
-#~ msgstr "Profile"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "profile_word"
-#~ msgstr "Profile"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "subheading"
-#~ msgstr "Articles created by this user"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "create_post"
-#~ msgstr "Create new post"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "assigned_exams"
-#~ msgstr "Assigned exams"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "my_exam_results"
-#~ msgstr "My exam results"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "my_courses"
-#~ msgstr "My courses"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "my_exams"
-#~ msgstr "My exams"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "pending_review"
-#~ msgstr "Pending review"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "new_exam"
-#~ msgstr "New exam"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "my_groups"
-#~ msgstr "My groups"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "new_course"
-#~ msgstr "New course"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "status_published"
-#~ msgstr "Published"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "status_draft"
-#~ msgstr "Draft"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "edit_action"
-#~ msgstr "Edit"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "delete_action"
-#~ msgstr "Delete"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "no_posts"
-#~ msgstr "This user has no posts yet."
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "edit_modal_title"
-#~ msgstr "Edit post"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "meta_slug"
-#~ msgstr "Slug:"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "meta_created"
-#~ msgstr "Created:"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "meta_updated"
-#~ msgstr "Last updated:"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_title"
-#~ msgstr "Title"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_category"
-#~ msgstr "Category"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_category_placeholder"
-#~ msgstr "Select category"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_excerpt"
-#~ msgstr "Short summary"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_content"
-#~ msgstr "Content"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_current_image"
-#~ msgstr "Current image"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "image_alt"
-#~ msgstr "Post image"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "no_image"
-#~ msgstr "No image set"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_new_image"
-#~ msgstr "Upload new image (optional)"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_image_url"
-#~ msgstr "Image URL (if no file)"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "field_publish"
-#~ msgstr "Publish article"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "cancel"
-#~ msgstr "Cancel"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "save"
-#~ msgstr "Save"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "delete_modal_title"
-#~ msgstr "Confirm deletion"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "delete_modal_message_prefix"
-#~ msgstr "Are you sure you want to delete the post titled"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "delete_modal_message_suffix"
-#~ msgstr "?"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "delete"
-#~ msgstr "Delete"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "warning_modal_title"
-#~ msgstr "Unsaved changes"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "warning_modal_message"
-#~ msgstr "Your changes were not saved. Do you want to exit without saving?"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "stay"
-#~ msgstr "Stay"
-
-#~ msgctxt "blog.user_profile_page"
-#~ msgid "discard_changes"
-#~ msgstr "Discard changes"
-
-#~ msgctxt "blog.email.new_post_notification"
-#~ msgid "heading"
-#~ msgstr "Latest update!"
-
-#~ msgctxt "blog.email.new_post_notification"
-#~ msgid "intro"
-#~ msgstr ""
-#~ "A new article has been published. Don't miss the hottest updates from AI, "
-#~ "programming, and technology."
-
-#~ msgctxt "blog.email.new_post_notification"
-#~ msgid "read_article"
-#~ msgstr "Read article"
-
-#~ msgctxt "blog.email.new_post_notification"
-#~ msgid "footer_brand"
-#~ msgstr "Minimal Blog"
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "title"
-#~ msgstr "Welcome!"
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "heading"
-#~ msgstr "Welcome!"
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "greeting_prefix"
-#~ msgstr "Hello"
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "body"
-#~ msgstr ""
-#~ "We're happy to have you among our subscribers! You will now receive the "
-#~ "latest articles, updates, and exclusive content about technology, "
-#~ "programming, and the digital world directly in your inbox."
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "cta"
-#~ msgstr "Visit blog"
-
-#~ msgctxt "blog.email.welcome_email"
-#~ msgid "thanks"
-#~ msgstr "Thanks, Minimal Blog Team"
-
-#~ msgctxt "blog.post_form_page"
-#~ msgid "or_create_new"
-#~ msgstr "- or create a new one -"
-
-#~ msgctxt "blog.post.message"
-#~ msgid "category_created"
-#~ msgstr "New category '{name}' was created."
-
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:526
 #, python-format
-#~ msgctxt "courses.partial.resource_accordion"
-#~ msgid "Resources (%(count)s)"
-#~ msgstr "Resources (%(count)s)"
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
 
-#~ msgctxt "exams.model.exam.field"
-#~ msgid "organization_id"
-#~ msgstr "Organization"
-
-#~ msgctxt "exams.model.exam.help"
-#~ msgid "organization_id"
-#~ msgstr "Organization"
-
-#~ msgctxt "exams.service.parsing.warning"
-#~ msgid "missing_option_e"
-#~ msgstr "Option E is missing (optional)."
-
-#~ msgctxt "exams.template.student_exam_result"
-#~ msgid "unit_seconds"
-#~ msgstr "seconds"
-
-#~ msgctxt "exams.template.student_exam_result"
-#~ msgid "action_back_to_history"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "heading_exam_history"
-#~ msgstr "Set new password"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "action_new_exam"
-#~ msgstr "New Course"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "col_exam_title"
-#~ msgstr "Add a new freelance job"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "col_date"
-#~ msgstr "Table date"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "col_type"
-#~ msgstr "Type"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "col_status_score"
-#~ msgstr "Closed"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "col_action"
-#~ msgstr "Table action"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "type_written_practical"
-#~ msgstr "Written / Practical"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "status_graded"
-#~ msgstr "Graded"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "status_pending_review"
-#~ msgstr "Pending"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "action_view"
-#~ msgstr "See all"
-
-#~ msgctxt "exams.template.student_exam_history"
-#~ msgid "action_wait"
-#~ msgstr "Edit"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "filter_written_practical"
-#~ msgstr "Written/Practical"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "action_cancel"
-#~ msgstr "Cancel"
-
-#~ msgctxt "exams.template.student_exam_list"
-#~ msgid "action_confirm"
-#~ msgstr "Confirm"
-
-#~ msgctxt "exams.template.take_exam"
-#~ msgid "label_question_time"
-#~ msgstr "Question"
-
-#~ msgctxt "exams.template.take_exam"
-#~ msgid "label_total_time"
-#~ msgstr "Label title"
-
-#~ msgctxt "exams.template.take_exam"
-#~ msgid "label_answered"
-#~ msgstr "Answer"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_question_text"
-#~ msgstr "Question"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_image_optional"
-#~ msgstr "Image (optional)"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_new_image"
-#~ msgstr "Selected image preview"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_video_optional"
-#~ msgstr "Video (optional)"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_new_video"
-#~ msgstr "Selected video preview"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_topic_block_subject_section"
-#~ msgstr "Topic Block (Subject/Section)"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "help_block_optional"
-#~ msgstr "Optional: Link the resource to a specific topic"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_answer_mode"
-#~ msgstr "Answer mode"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_time_limit_seconds"
-#~ msgstr "Time limit (seconds)"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_sample_correct_answer"
-#~ msgstr "Ideal answer for written/practical (optional)..."
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_option_1"
-#~ msgstr "Option 1"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_option_2"
-#~ msgstr "Option 2"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_option_3"
-#~ msgstr "Option 3"
-
-#~ msgctxt "exams.template.add_exam_question"
-#~ msgid "label_option_4"
-#~ msgstr "Option 4"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "title_edit"
-#~ msgstr "Edit Exam"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "title_create"
-#~ msgstr "Create Exam"
-
+#: venv/lib/python3.11/site-packages/django/core/validators.py:597
 #, python-format
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "subtitle_edit_exam_with_title %(exam_title)s"
-#~ msgstr "Update the exam \"%(exam_title)s\"."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "subtitle_create_exam"
-#~ msgstr "Create a new exam and configure its settings."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "description_help"
-#~ msgstr "Description"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "enable_paint"
-#~ msgstr "Enable Paint answers for written exams"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "enable_paint_help"
-#~ msgstr "Paint answer can only be enabled for written/practical exams."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_date_limits"
-#~ msgstr "Date and Time Settings"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_date_limits_help"
-#~ msgstr "Set when the exam can start and when it ends."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "badge_start"
-#~ msgstr "Start"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "start_help_1"
-#~ msgstr "If left empty, students can start at any time."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "start_help_2"
-#~ msgstr "Students cannot start before this date."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "badge_end"
-#~ msgstr "Deadline"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "end_help_1"
-#~ msgstr "Leave empty to keep it open-ended."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "end_help_2"
-#~ msgstr "Students cannot start after this date."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_time_settings"
-#~ msgstr "Duration and Attempt Settings"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_time_settings_help"
-#~ msgstr "Configure exam duration, per-question time, and attempt limit."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "total_duration_help"
-#~ msgstr "Example: 30 (minutes)"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "max_attempt_help"
-#~ msgstr "Example: 1, 2, 3..."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_access_rights"
-#~ msgstr "Access Rights"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "section_access_rights_help"
-#~ msgstr "Choose who can view and start this exam."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "is_public"
-#~ msgstr "Public for everyone?"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "is_public_help"
-#~ msgstr "Public for everyone?"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "allowed_groups"
-#~ msgstr "Allowed groups"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "search_group"
-#~ msgstr "Search group..."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "allowed_users_individual"
-#~ msgstr "Individually allowed users"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "search_student_name_or_username"
-#~ msgstr "Search for students..."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "access_help_when_none_selected"
-#~ msgstr ""
-#~ "If no group or student is selected, only teachers can access this exam."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "access_code_help"
-#~ msgstr "Example: 123456 (6 digits)"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "action_cancel"
-#~ msgstr "Cancel it"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "action_save_changes"
-#~ msgstr "Save Changes"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "action_create"
-#~ msgstr "Create Exam"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_section_title"
-#~ msgstr "Exam Supervision"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_section_help"
-#~ msgstr "Anti-cheating and exam supervision settings"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_enable_label"
-#~ msgstr "Enable Exam Supervision Mode"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_enable_help"
-#~ msgstr ""
-#~ "When enabled, students will be monitored during the exam. Tab switching, "
-#~ "fullscreen exits, copy/paste, and other actions will be tracked."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_label"
-#~ msgstr "Supervision Template"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_custom"
-#~ msgstr "Custom"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_light"
-#~ msgstr "Light"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_medium"
-#~ msgstr "Medium"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_strict"
-#~ msgstr "Strict"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_template_help"
-#~ msgstr ""
-#~ "Select a preset template to auto-configure settings, or choose Custom to "
-#~ "configure manually."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_force_fullscreen_help"
-#~ msgstr "Students must enter fullscreen mode when starting the exam."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_detect_tab_switch"
-#~ msgstr "Detect tab switching"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_detect_tab_switch_help"
-#~ msgstr "Tab changes in the browser will be recorded."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_block_copy_paste"
-#~ msgstr "Block Copy/Paste"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_block_copy_paste_help"
-#~ msgstr "Copy, Paste, and Cut operations will be blocked."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_disable_right_click_help"
-#~ msgstr "Context menu access will be disabled."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_disable_text_selection_help"
-#~ msgstr "Selecting and dragging exam text will be blocked."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_restrict_shortcuts"
-#~ msgstr "Restrict keyboard shortcuts"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_restrict_shortcuts_help"
-#~ msgstr "Ctrl+C, Ctrl+V, Ctrl+P, Ctrl+S, etc. will be blocked."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_grace_period_label"
-#~ msgstr "Recovery period (seconds)"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_grace_period_help"
-#~ msgstr "Time allowed to return after exiting fullscreen (5-60 seconds)."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_max_violations_label"
-#~ msgstr "Maximum violation count"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_max_violations_help"
-#~ msgstr "After this many violations, the selected penalty will be applied."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_violation_action_label"
-#~ msgstr "Action on violation"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_action_auto_submit"
-#~ msgstr "Auto-submit"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_action_remove_student"
-#~ msgstr "Remove student"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_recovery_policy_label"
-#~ msgstr "Recovery policy"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_recovery_no_second_chance"
-#~ msgstr "No second chance"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "supervision_recovery_teacher_controlled"
-#~ msgstr "Teacher controlled"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "title_question_bank"
-#~ msgstr "Written question bank"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "heading_question_bank"
-#~ msgstr "written question bank"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "label_total_question_count"
-#~ msgstr "Number of questions shown in the exam"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "block_existing"
-#~ msgstr "Existing section"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "label_questions"
-#~ msgstr "Questions"
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "placeholder_question_line"
-#~ msgstr ""
-#~ "Example:\n"
-#~ "1. Explain the process of photosynthesis.\n"
-#~ "2) Write the difference between mitosis and meiosis.\n"
-#~ "3. Give examples of renewable energy sources."
-
-#~ msgctxt "exams.template.create_question_bank"
-#~ msgid "block_new"
-#~ msgstr "New section"
-
-#~ msgctxt "exams.partial.exam_section"
-#~ msgid "action_view"
-#~ msgstr "Detailed view"
-
-#~ msgctxt "exams.partial.exam_section"
-#~ msgid "action_view_my_results"
-#~ msgstr "View My Results"
-
-#~ msgctxt "exams.template.teacher_check_attempt"
-#~ msgid "label_max_points"
-#~ msgstr "/ {points}"
-
-#~ msgctxt "exams.template.teacher_exam_detail"
-#~ msgid "action_back_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "exams.template.teacher_exam_detail"
-#~ msgid "action_question_bank_blocks"
-#~ msgstr "Add blocks / questions"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "page_title"
-#~ msgstr "Create a New Course"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "action_create_exam"
-#~ msgstr "Create Course"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "status_active"
-#~ msgstr "Status active"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "status_passive"
-#~ msgstr "Status active"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "unit_minutes_short"
-#~ msgstr "min"
-
-#~ msgctxt "exams.template.teacher_exam_list"
-#~ msgid "empty_no_exam"
-#~ msgstr "Empty upcoming exams"
-
-#~ msgctxt "exams.template.teacher_view_attempt"
-#~ msgid "question_label"
-#~ msgstr "Question text..."
-
-#~ msgctxt "exams.template.teacher_view_attempt"
-#~ msgid "action_back_to_results"
-#~ msgstr "My Results"
-
-#~ msgctxt "exams.template.test_question_bank"
-#~ msgid "action_view_questions_bank"
-#~ msgstr "View question bank"
-
-#~ msgctxt "exams.template.test_question_bank"
-#~ msgid "section_upload_file_desc"
-#~ msgstr "Uploaded files"
-
-#~ msgctxt "exams.template.test_question_bank"
-#~ msgid "placeholder_editor_sample"
-#~ msgstr ""
-#~ "Example 1 (Default - A is correct):\n"
-#~ "1. What does Data Science mainly do?\n"
-#~ "A) Analyze data and support decisions\n"
-#~ "B) Repair computers\n"
-#~ "C) Build random games only\n"
-#~ "D) Install internet cables\n"
-#~ "\n"
-#~ "Example 2 (Mark correct with *):\n"
-#~ "2. Where is Python mainly used?\n"
-#~ "A) Car repair\n"
-#~ "*B) Web and backend development\n"
-#~ "C) Singing songs\n"
-#~ "D) Printer assembly\n"
-#~ "\n"
-#~ "Example 3 (Write answer at the end):\n"
-#~ "3. What is HTML?\n"
-#~ "A) Programming language\n"
-#~ "B) Markup language\n"
-#~ "C) Operating system\n"
-#~ "D) Antivirus\n"
-#~ "Answer: B\n"
-#~ "\n"
-#~ "Example 4 (Multiple correct answers):\n"
-#~ "4. Which are programming languages?\n"
-#~ "A) Python\n"
-#~ "B) JavaScript\n"
-#~ "C) Word\n"
-#~ "D) Java\n"
-#~ "Answer: A,B,D"
-
-#~ msgctxt "exams.view.access.message"
-#~ msgid "no_exam_access"
-#~ msgstr "You do not have access to this exam."
-
-#~ msgctxt "exams.view.exams.permission"
-#~ msgid "delete_blocked_due_to_attempts"
-#~ msgstr "This exam already has attempts and cannot be deleted."
-
-#~ msgctxt "exams.view.question_bank.warning"
-#~ msgid "duplicate_in_import"
-#~ msgstr "Duplicate question: import #{index} matches #{previous_index}."
-
-#~ msgctxt "exams.view.question_bank.warning"
-#~ msgid "already_in_exam"
-#~ msgstr "This question already exists in the exam (import #{index})."
-
-#~ msgctxt "labs.template.lab_detail"
-#~ msgid "action_view_my_answers"
-#~ msgstr "View my answers"
-
-#~ msgctxt "labs.template.lab_detail"
-#~ msgid "action_download"
-#~ msgstr "Download"
-
-#~ msgctxt "labs.template.lab_detail"
-#~ msgid "label_attachment"
-#~ msgstr "Attachment"
-
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/core/validators.py:659
+msgid "Null characters are not allowed."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/base.py:1600
+#: venv/lib/python3.11/site-packages/django/forms/models.py:908
+#, fuzzy
+#| msgctxt "assignment.modals"
+#| msgid "add"
+msgid "and"
+msgstr "Add"
+
+#: venv/lib/python3.11/site-packages/django/db/models/base.py:1602
 #, python-format
-#~ msgctxt "labs.template.lab_section"
-#~ msgid "action_my_answers %(attempt_count)s"
-#~ msgstr "My answers (%(attempt_count)s)"
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
 
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "breadcrumb_results"
-#~ msgstr "Results"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "action_manage_blocks"
-#~ msgstr "Manage Blocks"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "stat_total_answers"
-#~ msgstr "Total answers"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "stat_pending"
-#~ msgstr "Pending"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "stat_graded"
-#~ msgstr "Graded"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "stat_late"
-#~ msgstr "Late"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "action_clear_filter"
-#~ msgstr "Clear filter"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "table_group"
-#~ msgstr "Group"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "empty_no_answers_found"
-#~ msgstr "No answers found"
-
-#~ msgctxt "labs.template.lab_submissions"
-#~ msgid "action_show_all_results"
-#~ msgstr "Show all results"
-
+#: venv/lib/python3.11/site-packages/django/db/models/constraints.py:22
 #, python-format
-#~ msgctxt "labs.template.my_lab_answers"
-#~ msgid "label_attempt %(attempt_number)s"
-#~ msgstr "Attempt %(attempt_number)s"
+msgid "Constraint “%(name)s” is violated."
+msgstr ""
 
-#~ msgctxt "labs.template.my_lab_answers"
-#~ msgid "label_submission_date"
-#~ msgstr "Submission date"
-
-#~ msgctxt "labs.template.my_lab_answers"
-#~ msgid "label_teacher_feedback"
-#~ msgstr "Teacher feedback"
-
-#~ msgctxt "labs.view.error"
-#~ msgid "error_with_details"
-#~ msgstr "Error: %(error)s"
-
-#~ msgctxt "nav"
-#~ msgid "technology"
-#~ msgstr "Technology"
-
-#~ msgctxt "nav"
-#~ msgid "education"
-#~ msgstr "Education"
-
-#~ msgctxt "nav"
-#~ msgid "subscribe"
-#~ msgstr "Subscribe"
-
-#~ msgctxt "live_exam.join"
-#~ msgid "avatar_label"
-#~ msgstr "Choose your avatar"
-
-#~ msgctxt "live_exam.join.js"
-#~ msgid "alert_select_avatar"
-#~ msgstr "Choose an avatar!"
-
-#~ msgctxt "live_exam.join.js"
-#~ msgid "button_join"
-#~ msgstr "Join Game!"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "default_player"
-#~ msgstr "Player"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "status_waiting_host"
-#~ msgstr "Teacher is starting the game"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "players_title"
-#~ msgstr "Other players"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "pin_label"
-#~ msgstr "PIN:"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "ws_connecting"
-#~ msgstr "Connecting..."
-
-#~ msgctxt "live_exam.wait_room.js"
-#~ msgid "ws_connection_error"
-#~ msgstr "Connection error"
-
-#~ msgctxt "live_exam.wait_room"
-#~ msgid "hero_copy"
-#~ msgstr ""
-#~ "Look up to the main screen and make sure your nickname appears before the "
-#~ "countdown begins."
-
-#~ msgctxt "live_exam.host_lobby"
-#~ msgid "join_info_label"
-#~ msgstr "To join:"
-
-#~ msgctxt "live_exam.host_lobby"
-#~ msgid "question_meta_placeholder"
-#~ msgstr "Question 1 / 10"
-
-#~ msgctxt "live_exam.host_lobby"
-#~ msgid "question_text_placeholder"
-#~ msgstr "Question text..."
-
-#~ msgctxt "live_exam.host_lobby"
-#~ msgid "results_panel_title"
-#~ msgstr "Results for this question"
-
-#~ msgctxt "live_exam.host_lobby"
-#~ msgid "leaderboard_title"
-#~ msgstr "Leaderboard"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "title"
-#~ msgstr "Live Player"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "connecting"
-#~ msgstr "Connecting..."
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "waiting_title"
-#~ msgstr "Get ready!"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "waiting_subtitle"
-#~ msgstr "Game starts soon..."
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "select_counter_placeholder"
-#~ msgstr "Selected: 0 / 2"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "submit_button"
-#~ msgstr "Confirm"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "leaderboard_title"
-#~ msgstr "Leaderboard"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "results_title"
-#~ msgstr "Results for this question"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "final_title"
-#~ msgstr "Game Over!"
-
-#~ msgctxt "live_exam.player_screen"
-#~ msgid "final_subtitle"
-#~ msgstr "Congratulations to all participants!"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "connection_online"
-#~ msgstr "Online"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "connection_offline"
-#~ msgstr "Offline"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "selected_counter"
-#~ msgstr "Selected: {selected} / {max}"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "question_meta"
-#~ msgstr "Question {index} / {total}"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "question_loading"
-#~ msgstr "Loading question..."
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "status_sending"
-#~ msgstr "Sending answer..."
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "status_correct"
-#~ msgstr "Correct!"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "status_wrong"
-#~ msgstr "Wrong!"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "status_not_answered"
-#~ msgstr "No answer submitted"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "points_suffix"
-#~ msgstr "pts"
-
-#~ msgctxt "live_exam.player_screen.js"
-#~ msgid "status_answer_saved"
-#~ msgstr "Answer received!"
-
-#~ msgctxt "live_exam.consumer.error"
-#~ msgid "no_token"
-#~ msgstr "No token"
-
-#~ msgctxt "live_exam.consumer.error"
-#~ msgid "bad_token"
-#~ msgstr "Bad token"
-
-#~ msgctxt "live_exam.consumer.error"
-#~ msgid "pin_mismatch"
-#~ msgstr "PIN mismatch"
-
-#~ msgctxt "organizations.structure"
-#~ msgid "heading"
-#~ msgstr "Organizational Structure"
-
-#~ msgctxt "organizations.structure"
-#~ msgid "empty_title"
-#~ msgstr "No organizational units"
-
-#~ msgctxt "organizations.structure"
-#~ msgid "empty_subtitle"
-#~ msgstr "Create units to structure your organization"
-
-#~ msgctxt "organizations.members"
-#~ msgid "heading"
-#~ msgstr "Members"
-
-#~ msgctxt "organizations.roles"
-#~ msgid "heading"
-#~ msgstr "Roles & Permissions"
-
-#~ msgctxt "organizations.roles"
-#~ msgid "permissions_label"
-#~ msgstr "Permissions:"
-
-#~ msgctxt "organizations.decorators.error"
-#~ msgid "insufficient_role_level"
-#~ msgstr "Insufficient role level. Required: {required}, Your level: {current}"
-
-#~ msgctxt "organizations.decorators.error"
-#~ msgid "required_role"
-#~ msgstr "Required role: {roles}"
-
-#~ msgctxt "projects.section"
-#~ msgid "my_submissions"
-#~ msgstr "My Submissions"
-
-#~ msgctxt "projects.review"
-#~ msgid "view"
-#~ msgstr "View"
-
-#~ msgctxt "accounts.register"
-#~ msgid "auto_role_info_student"
-#~ msgstr "For this account type, role will be set to student automatically."
-
-#~ msgctxt "accounts.register"
-#~ msgid "individual_owner_help"
-#~ msgstr ""
-#~ "For an individual account, your personal workspace is created automatically "
-#~ "and you become the admin."
-
-#~ msgctxt "accounts.register"
-#~ msgid "step_role"
-#~ msgstr "Role"
-
-#~ msgctxt "accounts.register"
-#~ msgid "auto_role_info_teacher_join"
-#~ msgstr ""
-#~ "After email verification, you will join the selected organization as a "
-#~ "teacher (pending approval)."
-
-#~ msgctxt "accounts.register"
-#~ msgid "auto_role_info_staff_join"
-#~ msgstr ""
-#~ "After email verification, you will join the selected organization as a staff"
-#~ " member (pending approval)."
-
-#~ msgctxt "accounts.register"
-#~ msgid "join_org_optional_hint"
-#~ msgstr ""
-#~ "Organization selection is optional. You can apply to join an organization "
-#~ "later from your profile."
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_search_placeholder"
-#~ msgstr "Search student or answer text..."
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_status_all"
-#~ msgstr "All statuses"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_status_submitted"
-#~ msgstr "Submitted"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_status_returned"
-#~ msgstr "Returned"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_from_date"
-#~ msgstr "Start date"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_to_date"
-#~ msgstr "End date"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "filter_submit"
-#~ msgstr "Apply"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "selected_count_label"
-#~ msgstr "Selected"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "action_select_all"
-#~ msgstr "Select all"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "action_clear"
-#~ msgstr "Clear selection"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "action_delete_selected"
-#~ msgstr "Delete selected"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "action_delete"
-#~ msgstr "Delete"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "confirm_delete_title"
-#~ msgstr "Delete submissions"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "confirm_delete_note"
-#~ msgstr "This action cannot be undone."
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "confirm_delete_submit"
-#~ msgstr "Confirm delete"
-
-#~ msgctxt "assignment.review_submissions"
-#~ msgid "delete_select_first"
-#~ msgstr "Select at least one submission to delete."
-
-#~ msgctxt "assignment.message"
-#~ msgid "select_submission_to_delete"
-#~ msgstr "Select at least one submission to delete."
-
-#~ msgctxt "assignment.message"
-#~ msgid "submission_not_found"
-#~ msgstr "Selected submissions were not found."
-
-#~ msgctxt "projects.review"
-#~ msgid "filter_search_placeholder"
-#~ msgstr "Search student or answer text..."
-
-#~ msgctxt "projects.review"
-#~ msgid "filter_status_all"
-#~ msgstr "All statuses"
-
-#~ msgctxt "projects.review"
-#~ msgid "filter_from_date"
-#~ msgstr "Start date"
-
-#~ msgctxt "projects.review"
-#~ msgid "filter_to_date"
-#~ msgstr "End date"
-
-#~ msgctxt "projects.review"
-#~ msgid "filter_submit"
-#~ msgstr "Apply"
-
-#~ msgctxt "projects.review"
-#~ msgid "selected_count_label"
-#~ msgstr "Selected"
-
-#~ msgctxt "projects.review"
-#~ msgid "action_select_all"
-#~ msgstr "Select all"
-
-#~ msgctxt "projects.review"
-#~ msgid "action_clear"
-#~ msgstr "Clear selection"
-
-#~ msgctxt "projects.review"
-#~ msgid "action_delete_selected"
-#~ msgstr "Delete selected"
-
-#~ msgctxt "projects.review"
-#~ msgid "action_delete"
-#~ msgstr "Delete"
-
-#~ msgctxt "projects.review"
-#~ msgid "confirm_delete_title"
-#~ msgstr "Delete submissions"
-
-#~ msgctxt "projects.review"
-#~ msgid "confirm_delete_body"
-#~ msgstr "Are you sure you want to delete selected submissions?"
-
-#~ msgctxt "projects.review"
-#~ msgid "confirm_delete_note"
-#~ msgstr "This action cannot be undone."
-
-#~ msgctxt "projects.review"
-#~ msgid "confirm_delete_submit"
-#~ msgstr "Confirm delete"
-
-#~ msgctxt "projects.review"
-#~ msgid "delete_select_first"
-#~ msgstr "Select at least one submission to delete."
-
-#~ msgctxt "projects.views.message"
-#~ msgid "select_submission_to_delete"
-#~ msgstr "Select at least one submission to delete."
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "action_back"
-#~ msgstr "Back"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_search_placeholder"
-#~ msgstr "Search user..."
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_status_all"
-#~ msgstr "All statuses"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_checked_yes"
-#~ msgstr "Checked"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_checked_no"
-#~ msgstr "Unchecked"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_from_date"
-#~ msgstr "Start date"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_to_date"
-#~ msgstr "End date"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "filter_submit"
-#~ msgstr "Apply"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "selected_count_label"
-#~ msgstr "Selected"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "action_clear"
-#~ msgstr "Clear selection"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "confirm_delete_title"
-#~ msgstr "Delete attempts"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "confirm_delete_body"
-#~ msgstr "Are you sure you want to delete selected attempts?"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "confirm_delete_note"
-#~ msgstr "Answers of deleted attempts will also be removed."
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "confirm_delete_submit"
-#~ msgstr "Confirm delete"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "delete_select_first"
-#~ msgstr "Select at least one attempt to delete."
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "col_block"
-#~ msgstr "Block"
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "col_status"
-#~ msgstr "Status"
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "col_actions"
-#~ msgstr "Actions"
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "label_pagination"
-#~ msgstr "Pagination"
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "pagination_prev"
-#~ msgstr "Previous"
-
-#~ msgctxt "exams.template.teacher_questions_bank"
-#~ msgid "pagination_next"
-#~ msgstr "Next"
-
-#~ msgctxt "profile.notifications"
-#~ msgid "pending_approval"
-#~ msgstr "your request is pending approval."
-
-#~ msgctxt "profile.notifications"
-#~ msgid "invite_as_student"
-#~ msgstr "has invited you as a student."
-
-#~ msgid "notif_title_required"
-#~ msgstr "Notification title cannot be empty."
-
-#~ msgid "notif_link_invalid"
-#~ msgstr "The link entered is invalid. It must start with http:// or https://."
-
-#~ msgid "notif_image_too_large"
-#~ msgstr "The image must be at most 5 MB."
-
-#~ msgid "notif_image_invalid"
-#~ msgstr "The image file is invalid."
-
-#~ msgid "notif_sent_success"
-#~ msgstr "Notification sent successfully."
-
-#~ msgid "notif_no_recipients"
-#~ msgstr "You do not have permission for these targets or no recipients found."
-
-#~ msgctxt "staff.management"
-#~ msgid "Short note (optional)"
-#~ msgstr "Short note (optional)"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Account Deletion & User Management translations
-# ═══════════════════════════════════════════════════════════════════════════
-#~ msgctxt "profile.section"
-#~ msgid "delete_account_title"
-#~ msgstr "Delete Account"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_warning"
-#~ msgstr "This action cannot be undone! Your account will be deactivated."
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_description"
-#~ msgstr "When you delete your account, the following data will be affected:"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_effect_courses"
-#~ msgstr "All your course enrollments will be cancelled"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_effect_groups"
-#~ msgstr "Your group memberships will be removed"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_effect_memberships"
-#~ msgstr "Your organization memberships will be deactivated"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_effect_notifications"
-#~ msgstr "Your notifications will be deleted"
-
-#~ msgctxt "profile.delete_account"
-#~ msgid "delete_account_button"
-#~ msgstr "Delete My Account"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to Profile"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "active_users"
-#~ msgstr "Active Users"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "col_deleted_at"
-#~ msgstr "Deleted At"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "col_joined"
-#~ msgstr "Joined"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "status_active"
-#~ msgstr "Active"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "status_deleted"
-#~ msgstr "Deleted"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "hard_delete_confirm"
-#~ msgstr ""
-#~ "Are you sure you want to permanently delete this user? This action cannot be"
-#~ " undone!"
-
-#~ msgctxt "superadmin.users"
-#~ msgid "no_deleted_users"
-#~ msgstr "No deleted users found."
-
-#~ msgctxt "superadmin.users"
-#~ msgid "no_users_found"
-#~ msgstr "No users found."
-
-#~ msgctxt "superadmin.ai_settings"
-#~ msgid "back_to_profile"
-#~ msgstr "Back to profile"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "label_type"
-#~ msgstr "Type:"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "label_status"
-#~ msgstr "Status:"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "col_user"
-#~ msgstr "User"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "col_correct"
-#~ msgstr "Correct"
-
-#~ msgctxt "exams.template.teacher_exam_results"
-#~ msgid "col_wrong"
-#~ msgstr "Wrong"
-
-#~ msgctxt "exams.template.supervision_monitor"
-#~ msgid "empty_no_violations"
-#~ msgstr "No violations recorded yet."
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "tpl_info_custom_title"
-#~ msgstr "Custom Configuration"
-
-#~ msgctxt "exams.template.create_edit_exam"
-#~ msgid "tpl_info_custom_desc"
-#~ msgstr "Manually configure all parameters."
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_custom_title"
-#~ msgstr "Custom Configuration"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_custom_desc"
-#~ msgstr "Manually configure all parameters."
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_title"
-#~ msgstr "Light Supervision Mode"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_desc"
-#~ msgstr ""
-#~ "Minimal restrictions. Students take the exam more freely, only tab switching"
-#~ " is tracked."
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_f1"
-#~ msgstr "✅ Tab switching is tracked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_f2"
-#~ msgstr "❌ Fullscreen not required"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_f3"
-#~ msgstr "❌ Copy/paste not blocked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_light_f4"
-#~ msgstr "⚙️ Max 5 violations, recovery chance given"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_title"
-#~ msgstr "Medium Supervision Mode"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_desc"
-#~ msgstr ""
-#~ "Balanced supervision. Core protection measures active, with teacher "
-#~ "oversight."
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_f1"
-#~ msgstr "✅ Fullscreen mode required"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_f2"
-#~ msgstr "✅ Tab switching tracked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_f3"
-#~ msgstr "✅ Copy/paste blocked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_f4"
-#~ msgstr "✅ Right-click disabled"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_medium_f5"
-#~ msgstr "⚙️ Max 3 violations, teacher controls recovery"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_title"
-#~ msgstr "Strict Supervision Mode"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_desc"
-#~ msgstr ""
-#~ "Highest level supervision. All protection measures active, no second chance."
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f1"
-#~ msgstr "✅ Fullscreen mode required"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f2"
-#~ msgstr "✅ Tab switching tracked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f3"
-#~ msgstr "✅ Copy/paste blocked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f4"
-#~ msgstr "✅ Right-click disabled"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f5"
-#~ msgstr "✅ Text selection blocked"
-
-#~ msgctxt "exams.template.create_exam_modal_form"
-#~ msgid "tpl_info_strict_f6"
-#~ msgstr "⚙️ Max 2 violations, auto-submitted, no second chance"
-
-#~ msgctxt "exams.template.supervision_detail"
-#~ msgid "label_violation_number"
-#~ msgstr "Violation"
-
-#~ msgctxt "profile.statistics"
-#~ msgid "filter_apply"
-#~ msgstr "Filter"
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Custom input"
-#~ msgstr "Custom input"
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Standard input"
-#~ msgstr "Standard input"
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Use this data for input(), Scanner, cin, or stdin."
-#~ msgstr "Use this data for input(), Scanner, cin, or stdin."
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Enter input data here, then run the code."
-#~ msgstr "Enter input data here, then run the code."
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Program output"
-#~ msgstr "Program output"
-
-#~ msgctxt "exams.template.coding_exam"
-#~ msgid "Execution uses the configured Docker sandbox."
-#~ msgstr "Execution uses the configured Docker sandbox."
-
-#~ msgctxt "accounts.pending_answers"
-#~ msgid "page_title"
-#~ msgstr "Pending answers"
-
-#~ msgid "contact"
-#~ msgstr "Contact"
-
-#~ msgctxt "common"
-#~ msgid "save"
-#~ msgstr "Save"
-
-#~ msgctxt "common"
-#~ msgid "close"
-#~ msgstr "Close"
-
-#~ msgctxt "common"
-#~ msgid "resend_code"
-#~ msgstr "Resend code"
-
-#~ msgctxt "admin.verify_otp"
-#~ msgid "expiry"
-#~ msgstr "The code is valid for {minutes} minutes."
-
-#~ msgctxt "accounts.pending_review_detail"
-#~ msgid "subtitle"
-#~ msgstr "Review details"
-
-#~ msgctxt "accounts.pending_review_detail"
-#~ msgid "student_answer"
-#~ msgstr "Student answer"
-
-#~ msgctxt "accounts.pending_review_detail"
-#~ msgid "exam"
-#~ msgstr "Exam"
-
-#~ msgctxt "profile.category_management"
-#~ msgid "search_ph"
-#~ msgstr "Search categories..."
-
-#~ msgctxt "profile.category_management"
-#~ msgid "search_clear"
-#~ msgstr "Clear search"
-
-#~ msgctxt "profile.category_management"
-#~ msgid "edit"
-#~ msgstr "Edit"
-
-#~ msgctxt "exams.template.student_exam_result"
-#~ msgid "appeal_center_desc_open"
-#~ msgstr ""
-#~ "The appeal window is open. The shortcut stays visible even with many "
-#~ "questions."
-
-#~ msgctxt "appeals.template"
-#~ msgid "Seçin, səbəbi yazın, göndərin"
-#~ msgstr "Select, explain, submit"
-
-#~ msgctxt "appeals.template"
-#~ msgid "Hazırkı effektiv bal"
-#~ msgstr "Current effective score"
-
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:134
 #, python-format
-#~ msgctxt "appeals.template"
-#~ msgid "Təxminən %(n)s dəqiqə ərzində qərarı dəyişə bilərsiniz."
-#~ msgstr "You can change the decision within about %(n)s minutes."
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1162
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1163
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1217
+#, fuzzy
+#| msgctxt "exams.dashboard"
+#| msgid "meta_unlimited"
+msgid "String (unlimited)"
+msgstr "Unlimited"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1326
+msgid "Comma-separated integers"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1427
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1431
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1566
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1435
+msgid "Date (without time)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1562
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1570
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1575
+msgid "Date (with time)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1702
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1704
+msgid "Decimal number"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1864
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1868
+#, fuzzy
+#| msgctxt "assignment.legacy.item"
+#| msgid "duration"
+msgid "Duration"
+msgstr "Duration"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1920
+#, fuzzy
+#| msgctxt "organizations.settings"
+#| msgid "address"
+msgid "Email address"
+msgstr "Address"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1945
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "File name"
+msgid "File path"
+msgstr "File name"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2023
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2025
+#, fuzzy
+#| msgctxt "exams.template.supervision_detail"
+#| msgid "label_violation_number"
+msgid "Floating point number"
+msgstr "Violation"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2065
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2067
+msgid "Integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Small integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2188
+#, fuzzy
+#| msgctxt "organizations.settings"
+#| msgid "address"
+msgid "IPv4 address"
+msgstr "Address"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2219
+#, fuzzy
+#| msgctxt "organizations.settings"
+#| msgid "address"
+msgid "IP address"
+msgstr "Address"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2310
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2311
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2364
+msgid "Positive big integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2379
+msgid "Positive integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2394
+msgid "Positive small integer"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2446
+msgid "Text"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2526
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2530
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2534
+#: venv/lib/python3.11/site-packages/haystack/templates/panels/haystack.html:8
+msgid "Time"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2642
+msgid "URL"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2666
+msgid "Raw binary data"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2731
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2733
+#, fuzzy
+#| msgctxt "accounts.register.js"
+#| msgid "label_university_identifier"
+msgid "Universally unique identifier"
+msgstr "University code / identifier"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/files.py:244
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "Files"
+msgid "File"
+msgstr "Files"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/files.py:420
+#, fuzzy
+#| msgctxt "exams.model.bank_question.field"
+#| msgid "image"
+msgid "Image"
+msgstr "Question image (optional)"
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:1276
+msgid "One-to-one relationship"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/db/models/fields/related.py:1383
+msgid "Many-to-many relationship"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: venv/lib/python3.11/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:94
+#, fuzzy
+#| msgctxt "exams.view.extract_job.error"
+#| msgid "file_required"
+msgid "This field is required."
+msgstr "File is required."
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:314
+msgid "Enter a whole number."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:485
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1257
+msgid "Enter a valid date."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:508
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1258
+msgid "Enter a valid time."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:535
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:569
+#, fuzzy
+#| msgctxt "live_exam.view.message"
+#| msgid "invalid_reaction"
+msgid "Enter a valid duration."
+msgstr "Select a valid reaction."
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:570
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:639
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:640
+#, fuzzy
+#| msgctxt "exams.template.teacher_exam_results"
+#| msgid "filter_status_submitted"
+msgid "No file was submitted."
+msgstr "Submitted"
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:641
+msgid "The submitted file is empty."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:643
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:648
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:716
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:879
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:965
+#: venv/lib/python3.11/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:967
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1086
+#: venv/lib/python3.11/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1087
+msgid "Enter a complete value."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1329
+msgid "Enter a valid UUID."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/fields.py:1359
+msgid "Enter a valid JSON."
+msgstr ""
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.11/site-packages/django/forms/forms.py:97
+msgid ":"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:70
+#, fuzzy, python-format
+#| msgctxt "staff.management"
+#| msgid "Please select at least one invite first."
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] "Select at least one invitation first."
+msgstr[1] "Select at least one invitation first."
+
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.11/site-packages/django/forms/formsets.py:491
+#, fuzzy
+#| msgctxt "exams.model.coding_test_case.field"
+#| msgid "order"
+msgid "Order"
+msgstr "Order"
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/utils.py:229
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:527
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "Clear"
+msgid "Clear"
+msgstr "Clear"
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:528
+#, fuzzy
+#| msgctxt "exams.template.take_exam"
+#| msgid "Current"
+msgid "Currently"
+msgstr "Current"
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:529
+msgid "Change"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:866
+msgid "Unknown"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:867
+msgid "Yes"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/forms/widgets.py:868
+msgid "No"
+msgstr ""
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:153
+#, fuzzy
+#| msgctxt "supervision.config.choice.template"
+#| msgid "light"
+msgid "midnight"
+msgstr "Weight"
+
+#: venv/lib/python3.11/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:21
+#, fuzzy
+#| msgid "Status"
+msgid "Sat"
+msgstr "Status"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:22
+#, fuzzy
+#| msgid "Student"
+msgid "Sun"
+msgstr "Student"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:25
+#, fuzzy
+#| msgctxt "exams.model.question.choice.difficulty_source"
+#| msgid "manual"
+msgid "January"
+msgstr "manual"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:27
+#, fuzzy
+#| msgctxt "accounts.my_results_page"
+#| msgid "search"
+msgid "March"
+msgstr "Search"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:33
+#, fuzzy
+#| msgctxt "courses.partial.member_accordion"
+#| msgid "empty_members"
+msgid "September"
+msgstr "No member added yet."
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:35
+#, fuzzy
+#| msgctxt "membership_request.role"
+#| msgid "Member"
+msgid "November"
+msgstr "Member"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:36
+#, fuzzy
+#| msgctxt "membership_request.role"
+#| msgid "Member"
+msgid "December"
+msgstr "Member"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:45
+#, fuzzy
+#| msgctxt "courses.form.resource.placeholder"
+#| msgid "url"
+msgid "jul"
+msgstr "https://example.com/..."
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:46
+#, fuzzy
+#| msgid "ago"
+msgid "aug"
+msgstr "ago"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:48
+#, fuzzy
+#| msgctxt "blog.email.welcome_email"
+#| msgid "cta"
+msgid "oct"
+msgstr "Visit blog"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:55
+#, fuzzy
+#| msgctxt "accounts.my_results_page"
+#| msgid "search"
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Search"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:67
+#, fuzzy
+#| msgctxt "exams.model.question.choice.difficulty_source"
+#| msgid "manual"
+msgctxt "alt. month"
+msgid "January"
+msgstr "manual"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:69
+#, fuzzy
+#| msgctxt "accounts.my_results_page"
+#| msgid "search"
+msgctxt "alt. month"
+msgid "March"
+msgstr "Search"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:75
+#, fuzzy
+#| msgctxt "courses.partial.member_accordion"
+#| msgid "empty_members"
+msgctxt "alt. month"
+msgid "September"
+msgstr "No member added yet."
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:77
+#, fuzzy
+#| msgctxt "membership_request.role"
+#| msgid "Member"
+msgctxt "alt. month"
+msgid "November"
+msgstr "Member"
+
+#: venv/lib/python3.11/site-packages/django/utils/dates.py:78
+#, fuzzy
+#| msgctxt "membership_request.role"
+#| msgid "Member"
+msgctxt "alt. month"
+msgid "December"
+msgstr "Member"
+
+#: venv/lib/python3.11/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/text.py:282
+msgid "or"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.11/site-packages/django/utils/text.py:301
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:29
+#, fuzzy
+#| msgctxt "exams.model.coding_test_case.choice.visibility"
+#| msgid "hidden"
+msgid "Forbidden"
+msgstr "Hidden"
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a rel=\"noreferrer"
+"\" …> for links to third-party sites."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:353
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:384
+#, fuzzy, python-format
+#| msgctxt "assignment.model.meta"
+#| msgid "verbose_name_plural"
+msgid "No %(verbose_name_plural)s available"
+msgstr "Verbose name plural"
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/dates.py:720
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/generic/list.py:173
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/static.py:68
+#: venv/lib/python3.11/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.11/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" rel=\"noopener"
+"\">DEBUG=True</a> is in your settings file and you have not configured any "
+"URLs."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/haystack/admin.py:124
+#, python-format
+msgid "0 of %(count)d selected"
+msgid_plural "of %(count)d selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.11/site-packages/haystack/admin.py:129
+#, fuzzy, python-format
+#| msgctxt "courses.view.message"
+#| msgid "no_student_selected"
+msgid "%(total_count)s selected"
+msgid_plural "All %(total_count)s selected"
+msgstr[0] "No student has been selected."
+msgstr[1] "No student has been selected."
+
+#: venv/lib/python3.11/site-packages/haystack/forms.py:24
+#, fuzzy
+#| msgctxt "staff.management"
+#| msgid "Search"
+msgid "Search"
+msgstr "Search"
+
+#: venv/lib/python3.11/site-packages/haystack/forms.py:102
+#, fuzzy
+#| msgctxt "staff.management"
+#| msgid "Search"
+msgid "Search In"
+msgstr "Search"
+
+#: venv/lib/python3.11/site-packages/haystack/panels.py:28
+msgid "Haystack"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/haystack/panels.py:52
+#, fuzzy
+#| msgctxt "staff.management"
+#| msgid "Search invites..."
+msgid "Search Queries"
+msgstr "Search teacher invites..."
+
+#: venv/lib/python3.11/site-packages/haystack/templates/panels/haystack.html:5
+msgid "Query"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/haystack/templates/panels/haystack.html:6
+msgid "Backend Alias"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/haystack/templates/panels/haystack.html:7
+#, fuzzy
+#| msgctxt "assignment.notification.choice.type"
+#| msgid "deadline"
+msgid "Timeline"
+msgstr "Deadline"
+
+#: venv/lib/python3.11/site-packages/haystack/templates/panels/haystack.html:9
+msgid "Kwargs"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:407
+#, python-format
+msgid "Content purported to be compressed with %s but failed to decompress."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:571
+#, python-format
+msgid "Unsupported value for qop: %s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:575
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:653
+#, python-format
+msgid "Unsupported value for algorithm: %s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:648
+msgid "The challenge doesn't contain a server nonce, or this one is empty."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:658
+#, python-format
+msgid "Unsupported value for pw-algorithm: %s."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/httplib2/__init__.py:1471
+msgid "Redirected but the response is missing a Location: header."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/isort/main.py:160
+msgid "show this help message and exit"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/kombu/transport/qpid.py:1311
+#, python-format
+msgid "Attempting to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/kombu/transport/qpid.py:1316
+#, python-format
+msgid "Connected to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/kombu/transport/qpid.py:1334
+#, python-format
+msgid "Unable to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:88
+msgid ""
+"A short code to identify the type of this package. For example: gem for a "
+"Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a "
+"Maven Jar, deb for a Debian package, etc."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:99
+msgid ""
+"Package name prefix, such as Maven groupid, Docker image owner, GitHub user "
+"or organization, etc."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:107
+#, fuzzy
+#| msgctxt "core.errors.csrf"
+#| msgid "Refresh the page"
+msgid "Name of the package."
+msgstr "Refresh the page"
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:113
+#, fuzzy
+#| msgctxt "core.errors.csrf"
+#| msgid "Refresh the page"
+msgid "Version of the package."
+msgstr "Refresh the page"
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:120
+msgid ""
+"Extra qualifying data for a package such as the name of an OS, architecture, "
+"distro, etc."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:128
+msgid "Extra subpath within a package, relative to the package root."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/packageurl/contrib/django/models.py:177
+#, python-brace-format
+msgid "Value too long for field \"{field_name}\"."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/typer/core.py:363
+#: venv/lib/python3.11/site-packages/typer/core.py:569
+#, fuzzy
+#| msgctxt "exams.form.group.error"
+#| msgid "org_required"
+msgid "required"
+msgstr "Cannot create/update a group without an active organization."
+
+#: venv/lib/python3.11/site-packages/typer/core.py:619
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:90
+#, fuzzy
+#| msgid "Assignment"
+msgid "Arguments"
+msgstr "Assignment"
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:84
+msgid "(deprecated) "
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:85
+#, fuzzy
+#| msgctxt "profile.category_management"
+#| msgid "default"
+msgid "[default: {}]"
+msgstr "Default"
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:86
+msgid "[env var: {}]"
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:88
+#, fuzzy
+#| msgctxt "exams.form.group.error"
+#| msgid "org_required"
+msgid "[required]"
+msgstr "Cannot create/update a group without an active organization."
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:93
+#, fuzzy
+#| msgctxt "exams.template.coding_exam"
+#| msgid "Errors"
+msgid "Error"
+msgstr "Errors"
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:94
+msgid "Aborted."
+msgstr ""
+
+#: venv/lib/python3.11/site-packages/typer/rich_utils.py:95
+#, python-brace-format
+msgid "Try [blue]'{command_path} {help_option}'[/] for help."
+msgstr ""

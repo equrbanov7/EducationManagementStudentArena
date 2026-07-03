@@ -1,7 +1,7 @@
 :root {
     --prd-blue-900: #11478f;
     --prd-blue-700: #1f62d8;
-    --prd-blue-100: #eaf3ff;
+    --prd-blue-100: var(--ems-blue-100-soft);
     --prd-green-700: #138c64;
     --prd-green-100: #eafaf3;
     --prd-border: #d3e4f8;

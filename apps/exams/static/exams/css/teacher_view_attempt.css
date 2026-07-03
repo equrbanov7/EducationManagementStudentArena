@@ -3,9 +3,9 @@
 :root {
     --primary-blue: #1f61d2;
     --dark-blue: #163f8c;
-    --light-blue-bg: #eaf3ff;
+    --light-blue-bg: var(--ems-blue-100-soft);
     --border-color: #c5d8f1;
-    --text-dark: #1e293b;
+    --text-dark: var(--ems-slate-800);
     --text-muted: var(--ems-neutral-500);
     --success-green: #1aa574;
     --danger-red: var(--ems-danger-500);

@@ -12,7 +12,7 @@
     --tr-muted: var(--ems-neutral-600);
     --tr-border: rgba(15, 23, 42, 0.12);
     --tr-error: var(--ems-danger);
-    --tr-success: #16a34a;
+    --tr-success: var(--ems-emerald-600);
     --tr-gradient: linear-gradient(135deg, var(--ems-primary-800) 0%, var(--ems-success-strong) 55%, var(--ems-success) 100%);
     --tr-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
     --tr-radius: 18px;

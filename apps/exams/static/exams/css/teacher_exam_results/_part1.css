@@ -9,14 +9,14 @@
     --ter-primary-soft: var(--ems-primary-50);
     --ter-accent: #6366f1;
     --ter-success: var(--ems-success);
-    --ter-success-soft: #d1fae5;
+    --ter-success-soft: var(--ems-emerald-100);
     --ter-warning: var(--ems-warning-500);
     --ter-warning-soft: var(--ems-warning-100);
     --ter-danger: var(--ems-danger-500);
     --ter-danger-soft: var(--ems-danger-100);
-    --ter-info: #0ea5e9;
+    --ter-info: var(--ems-sky-500);
     --ter-info-soft: #e0f2fe;
-    --ter-export: #16a34a;
+    --ter-export: var(--ems-emerald-600);
     --ter-export-dark: #15803d;
 
     --ter-text: var(--ems-neutral-900);

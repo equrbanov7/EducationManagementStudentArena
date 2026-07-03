@@ -1,7 +1,7 @@
 :root {
     --primary-blue: var(--ems-primary-500);
     --primary-green: var(--ems-success);
-    --dark-blue: #1e3a8a;
+    --dark-blue: var(--ems-blue-900);
     --light-blue: var(--ems-primary-50);
 
     --bg-page: var(--ems-neutral-50);

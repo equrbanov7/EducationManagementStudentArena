@@ -1,7 +1,7 @@
 :root {
     --rr-blue-900: #0f3f8f;
     --rr-blue-700: #1e5ed8;
-    --rr-blue-100: #eaf3ff;
+    --rr-blue-100: var(--ems-blue-100-soft);
     --rr-green-700: #158f63;
     --rr-green-100: #e8fbf3;
     --rr-text-900: #1f2a3a;

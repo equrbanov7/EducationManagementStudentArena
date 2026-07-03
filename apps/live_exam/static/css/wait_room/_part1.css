@@ -1,9 +1,9 @@
 :root {
-    --wait-room-bg-1: #081427;
-    --wait-room-bg-2: #0b2a52;
-    --wait-room-bg-3: #0f4c81;
+    --wait-room-bg-1: var(--ems-navy-900);
+    --wait-room-bg-2: var(--ems-navy-800);
+    --wait-room-bg-3: var(--ems-navy-700);
     --wait-room-bg-4: var(--ems-primary-600);
-    --wait-room-accent: #38bdf8;
+    --wait-room-accent: var(--ems-sky-400);
     --wait-room-accent-strong: var(--ems-primary-700);
     --wait-room-accent-soft: var(--ems-primary-100);
     --wait-room-shadow: 0 32px 90px rgba(8, 23, 55, 0.28);

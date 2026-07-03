@@ -1,7 +1,7 @@
 /* --- Rəng Dəyişənləri (Kurslar üçün Narıncı/Kəhrəba Tonları) --- */
 :root {
     --course-primary: var(--ems-warning-600);       /* Əsas narıncı */
-    --course-hover: #b45309;         /* Tünd narıncı (Hover) */
+    --course-hover: var(--ems-warning-700);         /* Tünd narıncı (Hover) */
     --course-light: var(--ems-warning-100);         /* Açıq arxa plan */
     --course-border-hover: #fde68a;  /* Border hover */
 }

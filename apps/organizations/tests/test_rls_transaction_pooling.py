@@ -185,3 +185,150 @@ def test_missing_tenant_context_fails_closed(two_org_units):
     assert before_query == ""
     assert during_query == ""
     assert names == []
+
+
+# ── FAZA 4 / Task 2 (2026-07-04) — güclənmiş izolyasiya testləri ─────────
+# Transaction pooling altında ən risk-doğuran ssenariləri açıq şəkildə yoxlayır:
+# çarpaz-tenant sızıntı simulyasiyası, bypass qorunması, uzun pool-reuse zəncirinin
+# hər addımının fresh olması.
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_five_sequential_tenants_each_isolated(two_org_units):
+    """Uzun pool-reuse zənciri: A→B→A→B→A hər addımda yalnız öz datasını görsün.
+
+    Failure mode: RLSTransactionGuard `_rls_txn_applied` bayrağını hər transaction
+    sonunda sıfırlamasa, ikinci A request-i B-nin (əvvəlki) tenant konteksti
+    ilə işləyəcək. Bu test bu regressiyanı tutmaq üçündür.
+    """
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    sequence = [org_a, org_b, org_a, org_b, org_a]
+    for idx, org in enumerate(sequence, start=1):
+        names, before, during = _run_guarded_request(user_id=org.owner_id, org_id=org.pk)
+        expected_name = "Tenant A Unit" if org.pk == org_a.pk else "Tenant B Unit"
+        forbidden_name = "Tenant B Unit" if org.pk == org_a.pk else "Tenant A Unit"
+        assert before == "", f"step {idx}: leftover context from previous txn"
+        assert during == str(org.pk), f"step {idx}: wrong tenant in guard"
+        assert names == [expected_name], f"step {idx}: {org.slug} saw {names}"
+        assert forbidden_name not in names, f"step {idx}: cross-tenant leak"
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_worker_atomic_sequence_isolates_tenants(two_org_units):
+    """Ardıcıl worker/task zənciri: A tenant-ı → B tenant-ı → A tenant-ı.
+
+    `rls_worker_atomic()` daxilində `set_rls_tenant` `SET LOCAL` (transaction
+    scope) etməlidir; transaction sonunda kontekst yox olmalıdır.
+    """
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    seen_by_tenant: list[tuple[str, list[str]]] = []
+    for org in (org_a, org_b, org_a):
+        with rls_worker_atomic():
+            _enable_rls_for_transaction()
+            set_rls_tenant(org.pk)
+            names = list(OrgUnit.objects.order_by("name").values_list("name", flat=True))
+            seen_by_tenant.append((org.slug, names))
+        # Transaction bitdi — kontekst sıfırlanmış olmalıdır.
+        assert (
+            _current_setting("app.current_org_id") == ""
+        ), f"tenant {org.slug}: session-scope context leaked past atomic block"
+
+    # A yalnız A, B yalnız B görsün.
+    assert seen_by_tenant[0] == (org_a.slug, ["Tenant A Unit"])
+    assert seen_by_tenant[1] == (org_b.slug, ["Tenant B Unit"])
+    assert seen_by_tenant[2] == (org_a.slug, ["Tenant A Unit"])
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_bypass_in_worker_atomic_does_not_persist(two_org_units):
+    """Superadmin `bypass_rls` yalnız öz worker transaction-ında qüvvədədir.
+
+    Bir sonrakı worker transaction (bypass qoyulmadan) tenant konteksti
+    yenidən deny-all olmalıdır (yəni bypass sızmamalıdır).
+    """
+    from core.rls import bypass_rls
+
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    # 1) Bypass açıq — bütün OrgUnit-ləri görsün.
+    with rls_worker_atomic():
+        _enable_rls_for_transaction()
+        with bypass_rls(local=True):
+            all_names = set(OrgUnit.objects.values_list("name", flat=True))
+    assert {"Tenant A Unit", "Tenant B Unit"}.issubset(all_names)
+
+    # 2) Növbəti worker — bypass olmadan, tenant B üçün. Yalnız B-ni görməlidir.
+    with rls_worker_atomic():
+        _enable_rls_for_transaction()
+        set_rls_tenant(org_b.pk)
+        names = list(OrgUnit.objects.order_by("name").values_list("name", flat=True))
+    assert names == ["Tenant B Unit"]
+
+    # 3) Növbəti worker — heç bir kontekst qoyma. Deny-all olmalıdır.
+    with rls_worker_atomic():
+        _enable_rls_for_transaction()
+        names = list(OrgUnit.objects.values_list("name", flat=True))
+    assert names == [], "bypass leaked into un-tenanted worker transaction"
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_cross_tenant_write_denied_under_transaction_pooling(two_org_units):
+    """Tenant A guard altında Tenant B üçün OrgUnit yaratmağa cəhd → RLS blok.
+
+    Bu, hətta guard SET LOCAL etsə də, tenant B üçün yeni obyekt yaratmaq
+    üçün gərəkli WITH CHECK-in işlədiyini yoxlayır (fail-closed WRITE).
+    """
+    from django.db import DataError, IntegrityError, ProgrammingError
+
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    with transaction.atomic():
+        _enable_rls_for_transaction()
+        guard = RLSTransactionGuard(user_id=org_a.owner_id, org_id=org_a.pk, bypass=False)
+        wrapper_cm = connection.execute_wrapper(guard)
+        wrapper_cm.__enter__()
+        try:
+            # Tenant A guard-ı altında B-nin org-una OrgUnit yaratmaq cəhdi.
+            with pytest.raises((IntegrityError, ProgrammingError, DataError)):
+                OrgUnit.objects.create(
+                    organization=org_b,
+                    name="Leaked Unit",
+                    slug="leaked-unit-cross-tenant",
+                    unit_type="faculty",
+                )
+        finally:
+            wrapper_cm.__exit__(None, None, None)
+            reset_txn_flags(connection)
+
+
+@override_settings(RLS_TRANSACTION_SCOPED=True)
+def test_txn_applied_flag_reset_between_transactions(two_org_units):
+    """`_rls_txn_applied` bayrağı hər transaction sonunda sıfırlanmalıdır.
+
+    Bu, guard-ın yeni transaction-da yenidən SET LOCAL tətbiq etməsini təmin
+    edir. Regressiya: reset olmasa, ikinci transaction öz konteksti tətbiq
+    etməyəcək və birincinin state-ini (session scope-da) miras alacaq.
+    """
+    org_a, org_b, _unit_a, _unit_b = two_org_units
+
+    # İlk transaction — bayraq açılmalı, sonra reset-də sıfırlanmalı.
+    with transaction.atomic():
+        _enable_rls_for_transaction()
+        guard = RLSTransactionGuard(user_id=org_a.owner_id, org_id=org_a.pk, bypass=False)
+        with connection.execute_wrapper(guard):
+            list(OrgUnit.objects.values_list("pk", flat=True))
+            assert getattr(connection, "_rls_txn_applied", False) is True
+    reset_txn_flags(connection)
+    assert getattr(connection, "_rls_txn_applied", False) is False
+
+    # İkinci transaction — bayraq təzədən qoyulmalı və B tenant-ının kontekstini görməli.
+    with transaction.atomic():
+        _enable_rls_for_transaction()
+        guard = RLSTransactionGuard(user_id=org_b.owner_id, org_id=org_b.pk, bypass=False)
+        with connection.execute_wrapper(guard):
+            list(OrgUnit.objects.values_list("pk", flat=True))
+            assert getattr(connection, "_rls_txn_applied", False) is True
+            assert _current_setting("app.current_org_id") == str(org_b.pk)
+    reset_txn_flags(connection)

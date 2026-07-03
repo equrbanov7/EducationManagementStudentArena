@@ -5,7 +5,7 @@
    ========================================================================= */
 
 :root {
-    --view-as-readonly: #b45309;
+    --view-as-readonly: var(--ems-warning-700);
     --view-as-readonly-bg: linear-gradient(90deg, #fffbeb, var(--ems-warning-100));
     --view-as-readonly-border: var(--ems-warning-500);
     --view-as-full: #7c2d92;

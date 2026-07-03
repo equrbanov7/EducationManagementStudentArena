@@ -2,7 +2,7 @@
 :root {
     --profile-primary: var(--ems-primary-500);
     --profile-primary-hover: var(--ems-primary-600);
-    --profile-dark: #1e293b;
+    --profile-dark: var(--ems-slate-800);
     --profile-text: var(--ems-neutral-700);
     --profile-muted: var(--ems-neutral-500);
     --profile-bg: var(--ems-neutral-50);

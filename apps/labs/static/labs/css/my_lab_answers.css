@@ -5,7 +5,7 @@
     --pale-blue: var(--ems-primary-200);
     --primary-green: var(--ems-success);
     --dark-green: var(--ems-success-600);
-    --light-green: #ecfdf5;
+    --light-green: var(--ems-emerald-50);
 }
 
 .text-dark-blue { color: var(--dark-blue) !important; }
