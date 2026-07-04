@@ -151,3 +151,26 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             # Final-exam scores + at least one resit (the barred/failing AZ students).
             self.assertGreater(FinalGrade.objects.filter(organization=org).count(), 0)
             self.assertGreater(ResitRecord.objects.filter(organization=org).count(), 0)
+
+    def test_seeds_exam_this_week_for_schedule(self):
+        from apps.exams.models import Exam
+
+        self._seed()
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            # One demo exam dated in the current week so the timetable shows the
+            # "imtahan on that day" integration; it must be linked to a course.
+            exam = Exam.objects.filter(organization=org, title__icontains="demo").first()
+            self.assertIsNotNone(exam)
+            self.assertIsNotNone(exam.course_id)
+            self.assertIsNotNone(exam.start_datetime)
+            self.assertTrue(exam.is_active)
+
+    def test_seed_is_idempotent_for_exam(self):
+        from apps.exams.models import Exam
+
+        self._seed()
+        self._seed()  # re-run must not duplicate the demo exam
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            self.assertEqual(Exam.objects.filter(organization=org, title__icontains="demo").count(), 1)

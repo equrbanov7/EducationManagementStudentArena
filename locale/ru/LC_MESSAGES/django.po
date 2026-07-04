@@ -26810,6 +26810,42 @@ msgctxt "profile.sidebar"
 msgid "my_transcript"
 msgstr "Транскрипт"
 
+msgctxt "registrar.schedule"
+msgid "Üst həftə"
+msgstr "Верхняя неделя"
+
+msgctxt "registrar.schedule"
+msgid "Alt həftə"
+msgstr "Нижняя неделя"
+
+msgctxt "registrar.schedule"
+msgid "Əvvəlki həftə"
+msgstr "Предыдущая неделя"
+
+msgctxt "registrar.schedule"
+msgid "Növbəti həftə"
+msgstr "Следующая неделя"
+
+msgctxt "registrar.schedule"
+msgid "Bu həftə"
+msgstr "Эта неделя"
+
+msgctxt "registrar.schedule"
+msgid "Bu gün"
+msgstr "Сегодня"
+
+msgctxt "registrar.schedule"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "registrar.schedule"
+msgid "bu həftə yox"
+msgstr "не на этой неделе"
+
+msgctxt "registrar.schedule"
+msgid "Hər həftə"
+msgstr "Каждую неделю"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

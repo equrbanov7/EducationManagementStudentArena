@@ -1,7 +1,8 @@
-/* Dərs cədvəli (timetable) — həftəlik gün-kartları. Token-əsaslı (--ems-*). */
+/* Dərs cədvəli (timetable) — həftəlik gün-kartları + tarixlər + üst/alt həftə +
+   həmin gün imtahanları. Token-əsaslı (--ems-*), inline CSS yox. */
 
 .schedule-page {
-    max-width: 1100px;
+    max-width: 1180px;
     margin: 0 auto;
     padding: 1.5rem 1rem 3rem;
 }
@@ -35,7 +36,63 @@
     border-radius: 999px;
 }
 
-/* Add-slot bar */
+/* ── Həftə naviqasiya paneli ──────────────────────────────────────────── */
+.schedule-weekbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0.6rem 0.85rem;
+    margin-bottom: 1.1rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+.week-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
+    background: var(--ems-neutral-50);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+.week-nav:hover { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.week-range {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.week-dates { font-weight: 700; color: var(--ems-neutral-900); font-size: 0.95rem; }
+.week-parity {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+.week-parity--odd { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.week-parity--even { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.week-today-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-primary-200);
+}
+.week-today-link:hover { background: var(--ems-primary-100); }
+
+/* ── Slot əlavə paneli ────────────────────────────────────────────────── */
 .schedule-add {
     display: flex;
     flex-wrap: wrap;
@@ -71,10 +128,10 @@
 }
 .schedule-add-btn:hover { background: var(--ems-primary-700); }
 
-/* Weekly grid — day cards */
+/* ── Həftəlik grid — gün kartları ─────────────────────────────────────── */
 .schedule-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
 }
 .schedule-day {
@@ -82,16 +139,61 @@
     border-radius: 12px;
     background: var(--ems-neutral-0);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.schedule-day.is-today {
+    border-color: var(--ems-primary-400);
+    box-shadow: 0 0 0 2px var(--ems-primary-100);
 }
 .schedule-day-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
     padding: 8px 12px;
     background: var(--ems-neutral-50);
     border-bottom: 1px solid var(--ems-neutral-100);
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--ems-neutral-700);
-    text-align: center;
+    text-align: left;
 }
+.schedule-day.is-today .schedule-day-label { background: var(--ems-primary-100); }
+.day-name { font-weight: 700; font-size: 0.85rem; color: var(--ems-neutral-800); }
+.day-date { font-size: 0.75rem; color: var(--ems-neutral-500); }
+.day-today-badge {
+    margin-left: auto;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+
+/* ── Həmin gün imtahanları ────────────────────────────────────────────── */
+.day-exams { list-style: none; margin: 0; padding: 8px 8px 0; display: flex; flex-direction: column; gap: 6px; }
+.day-exam {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 9px;
+    border-radius: 10px;
+    background: var(--ems-danger-100);
+    border-left: 3px solid var(--ems-danger-strong);
+}
+.exam-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-danger-strong);
+}
+.exam-title { font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-900); line-height: 1.2; }
+.exam-time { font-size: 0.72rem; color: var(--ems-neutral-600); }
+
+/* ── Dərs slotları ────────────────────────────────────────────────────── */
 .schedule-slots { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
 .schedule-slot {
     position: relative;
@@ -103,6 +205,10 @@
     background: var(--ems-primary-50);
     border-left: 3px solid var(--ems-primary-500);
 }
+.schedule-slot.slot-kind--odd { background: var(--ems-primary-50); border-left-color: var(--ems-primary-600); }
+.schedule-slot.slot-kind--even { background: var(--ems-warning-100); border-left-color: var(--ems-warning-800); }
+.schedule-slot.slot-other-week { opacity: 0.5; filter: grayscale(0.35); }
+
 .slot-time { font-size: 0.78rem; font-weight: 700; color: var(--ems-primary-700); }
 .slot-subject { font-size: 0.82rem; font-weight: 600; color: var(--ems-neutral-900); line-height: 1.25; }
 .slot-detail {
@@ -114,12 +220,18 @@
 }
 .slot-detail i { margin-right: 2px; }
 .slot-week {
-    background: var(--ems-warning-100);
-    color: var(--ems-warning-800);
-    padding: 0 6px;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    align-self: flex-start;
+    padding: 1px 7px;
+    border-radius: 5px;
     font-weight: 600;
+    font-size: 0.68rem;
 }
+.slot-week--odd { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.slot-week--even { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+
 .slot-del { position: absolute; top: 4px; right: 4px; }
 .slot-del button {
     background: transparent;
@@ -135,6 +247,29 @@
 
 .schedule-day-empty { padding: 1.25rem; text-align: center; color: var(--ems-neutral-300); }
 
+/* ── Açıqlama (legend) ────────────────────────────────────────────────── */
+.schedule-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ems-neutral-100);
+    font-size: 0.78rem;
+    color: var(--ems-neutral-600);
+}
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.legend-swatch--all { background: var(--ems-primary-500); }
+.legend-swatch--odd { background: var(--ems-primary-600); }
+.legend-swatch--even { background: var(--ems-warning-800); }
+.legend-swatch--exam { background: var(--ems-danger-strong); }
+
 .schedule-empty { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
 .schedule-empty i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
 .schedule-empty p { margin: 0; }
+
+@media (max-width: 560px) {
+    .schedule-weekbar { flex-wrap: wrap; }
+    .week-range { order: 3; width: 100%; }
+}

@@ -187,30 +187,50 @@ def schedule_view(request):
     if request.method == "POST":
         return _handle_add_slot(request, organization, period)
 
+    try:
+        week_offset = max(-8, min(16, int(request.GET.get("w") or 0)))
+    except (TypeError, ValueError):
+        week_offset = 0
+    week_context = schedule.build_week_context(period, offset=week_offset)
+
     record = (
         StudentAcademicRecord.objects.filter(organization=organization, student=request.user)
         .select_related("group")
         .first()
     )
     teacher_offerings = []
+    exam_author = None
+    course_ids = []
     if record and record.group and period:
         role = "student"
         owner_label = record.group.name
         slots = schedule.get_group_schedule(organization=organization, group=record.group, period=period)
+        course_ids = list(
+            CourseOffering.objects.filter(organization=organization, group=record.group, period=period).values_list(
+                "course_id", flat=True
+            )
+        )
     else:
         role = "teacher"
         owner_label = request.user.get_full_name() or request.user.username
-        slots = (
-            schedule.get_teacher_schedule(organization=organization, teacher=request.user, period=period)
-            if period
-            else []
-        )
+        exam_author = request.user
         if period:
+            slots = schedule.get_teacher_schedule(organization=organization, teacher=request.user, period=period)
             teacher_offerings = list(
                 CourseOffering.objects.filter(
                     organization=organization, instructor=request.user, period=period, is_active=True
                 ).select_related("subject", "group")
             )
+            course_ids = [off.course_id for off in teacher_offerings]
+        else:
+            slots = []
+
+    exams_by_day = schedule.get_week_exams(
+        organization=organization,
+        course_ids=course_ids,
+        monday=week_context["monday"],
+        author=exam_author,
+    )
 
     return render(
         request,
@@ -220,7 +240,8 @@ def schedule_view(request):
             "role": role,
             "owner_label": owner_label,
             "period": period,
-            "week_grid": schedule.build_week_grid(slots),
+            "week": week_context,
+            "week_days": schedule.build_week_view(slots, week_context=week_context, exams_by_day=exams_by_day),
             "teacher_offerings": teacher_offerings,
             "weekdays": schedule.WEEKDAYS,
             "week_types": WeekType.choices,
