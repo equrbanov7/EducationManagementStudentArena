@@ -18,7 +18,20 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from . import finals, gradebook, schedule
-from .models import AttendanceStatus, CourseOffering, LessonKind, ScheduleSlot, StudentAcademicRecord, WeekType
+from .forms import ProgramForm, SubjectForm
+from .models import (
+    AttendanceStatus,
+    CourseOffering,
+    LessonKind,
+    Program,
+    ScheduleSlot,
+    StudentAcademicRecord,
+    Subject,
+    WeekType,
+)
+
+# Roles that may manage the registrar catalogue (besides superuser + org owner).
+_REGISTRAR_ADMIN_ROLES = ("org_admin", "org_owner", "rector", "vice_rector", "dean")
 
 
 def _current_period(organization):
@@ -303,3 +316,99 @@ def schedule_slot_delete(request, slot_id):
         slot.delete()
         messages.success(request, _("Slot silindi."))
     return redirect(reverse("registrar:schedule"))
+
+
+# ── Registrar console (K3): web management of the academic catalogue ─────────
+#
+# Programs + subjects were previously creatable only via Django admin + seed.
+# This is the registrar/dean-facing web console. Authorisation is self-contained
+# (superuser / org owner / an admin-ish membership role) so registrar keeps no
+# static import of the accounts RBAC (which would create a module cycle).
+
+
+def _can_manage_registrar(user, organization) -> bool:
+    """Only the org owner, an admin-ish role membership, or a superuser may manage."""
+    if not getattr(user, "is_authenticated", False) or organization is None:
+        return False
+    if getattr(user, "is_superuser", False):
+        return True
+    if getattr(organization, "owner_id", None) == user.id:
+        return True
+    from django.apps import apps as django_apps
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    return Membership.objects.filter(
+        organization=organization,
+        user=user,
+        is_active=True,
+        role__name__in=_REGISTRAR_ADMIN_ROLES,
+    ).exists()
+
+
+@login_required
+def registrar_console(request):
+    """Registrar landing: the org's programs + subjects with create/edit entries."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404  # do not leak the console to unauthorised users
+
+    return render(
+        request,
+        "registrar/console.html",
+        {
+            "programs": Program.objects.filter(organization=organization).order_by("name"),
+            "subjects": Subject.objects.filter(organization=organization).order_by("code"),
+            "active_main_nav": "registrar_console",
+        },
+    )
+
+
+def _catalogue_form_view(request, *, model, form_class, template, pk, success_msg):
+    """Shared create/edit flow for a tenant-scoped catalogue model."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+
+    instance = get_object_or_404(model, pk=pk, organization=organization) if pk else None
+    if request.method == "POST":
+        form = form_class(request.POST, instance=instance, organization=organization)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.organization = organization
+            obj.save()
+            messages.success(request, success_msg)
+            return redirect(reverse("registrar:console"))
+    else:
+        form = form_class(instance=instance, organization=organization)
+
+    return render(
+        request,
+        template,
+        {"form": form, "instance": instance, "active_main_nav": "registrar_console"},
+    )
+
+
+@login_required
+def program_form_view(request, pk=None):
+    """Create or edit a Program (ixtisas)."""
+    return _catalogue_form_view(
+        request,
+        model=Program,
+        form_class=ProgramForm,
+        template="registrar/program_form.html",
+        pk=pk,
+        success_msg=_("Proqram yadda saxlanıldı."),
+    )
+
+
+@login_required
+def subject_form_view(request, pk=None):
+    """Create or edit a Subject (fənn)."""
+    return _catalogue_form_view(
+        request,
+        model=Subject,
+        form_class=SubjectForm,
+        template="registrar/subject_form.html",
+        pk=pk,
+        success_msg=_("Fənn yadda saxlanıldı."),
+    )

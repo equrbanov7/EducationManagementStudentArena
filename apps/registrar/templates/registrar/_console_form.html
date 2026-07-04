@@ -1,0 +1,20 @@
+{% load i18n %}
+{# Shared create/edit form shell for the registrar console (program / subject). #}
+<form method="post" class="console-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="console-form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+    {% for field in form %}
+    <div class="console-field {% if field.errors %}has-error{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="console-field-help">{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<div class="console-field-error">{{ field.errors|join:", " }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="console-form-actions">
+        <button type="submit" class="console-save-btn">{% trans "Yadda saxla" context "registrar.console" %}</button>
+        <a class="console-cancel-link" href="{% url 'registrar:console' %}">{% trans "Ləğv et" context "registrar.console" %}</a>
+    </div>
+</form>

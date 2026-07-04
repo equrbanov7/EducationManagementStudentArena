@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Registrar idarəetməsi" context "registrar.console" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-1">
+{% endblock %}
+
+{% block content %}
+<div class="console-page">
+    <div class="console-head">
+        <h1 class="console-title"><i class="fas fa-sitemap"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</h1>
+        <p class="console-sub">{% trans "Akademik kataloqun idarəetməsi — ixtisaslar (proqram) və fənlər." context "registrar.console" %}</p>
+    </div>
+
+    {% include "accounts/profile/_messages.html" %}
+
+    <div class="console-grid">
+        <section class="console-panel">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-graduation-cap"></i> {% trans "İxtisaslar (proqram)" context "registrar.console" %}</h2>
+                <a class="console-add-btn" href="{% url 'registrar:program_create' %}"><i class="fas fa-plus"></i> {% trans "Yeni proqram" context "registrar.console" %}</a>
+            </div>
+            {% if programs %}
+            <ul class="console-list">
+                {% for program in programs %}
+                <li class="console-item {% if not program.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:program_edit' program.id %}">
+                        <span class="console-item-code">{{ program.code }}</span>
+                        <span class="console-item-name">{{ program.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        <span>{{ program.get_degree_level_display }}</span>
+                        <span>{{ program.ects_total }} {% trans "ECTS" context "registrar.console" %}</span>
+                        <span>{% trans "qayıb" context "registrar.console" %} {{ program.absence_limit_percent }}%</span>
+                        {% if not program.is_active %}<span class="console-badge-off">{% trans "deaktiv" context "registrar.console" %}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ ixtisas yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
+
+        <section class="console-panel">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-book"></i> {% trans "Fənlər" context "registrar.console" %}</h2>
+                <a class="console-add-btn" href="{% url 'registrar:subject_create' %}"><i class="fas fa-plus"></i> {% trans "Yeni fənn" context "registrar.console" %}</a>
+            </div>
+            {% if subjects %}
+            <ul class="console-list">
+                {% for subject in subjects %}
+                <li class="console-item {% if not subject.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:subject_edit' subject.id %}">
+                        <span class="console-item-code">{{ subject.code }}</span>
+                        <span class="console-item-name">{{ subject.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        <span>{{ subject.ects }} {% trans "ECTS" context "registrar.console" %}</span>
+                        {% if not subject.is_active %}<span class="console-badge-off">{% trans "deaktiv" context "registrar.console" %}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ fənn yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

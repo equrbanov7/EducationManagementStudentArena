@@ -398,13 +398,22 @@
         </li>
         {% endif %}
 
-        {% if current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
+        {% if current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections or current_organization and role_capabilities.can_manage_registrar %}
         {% comment %}
         Universitet strukturu — rektor/admin bütün təşkilatı, dekan/kafedra müdürü
         yalnız öz alt-ağacını görür (backend-də unit scoping tətbiq olunur).
         Fakültələr və kafedralar ayrı bölmələrdə idarə olunur.
         {% endcomment %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans 'Universitet idarəetməsi' %}</span></li>
+        {% if role_capabilities.can_manage_registrar %}
+        <li class="sidebar-menu-item">
+            <a href="{% url 'registrar:console' %}"
+               class="sidebar-menu-link {% if active_main_nav == 'registrar_console' %}active{% endif %}">
+                <i class="fas fa-sitemap sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Registrar (kataloq)" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
         {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=org-faculties"

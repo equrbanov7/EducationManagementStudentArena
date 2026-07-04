@@ -26846,6 +26846,122 @@ msgctxt "registrar.schedule"
 msgid "Hər həftə"
 msgstr "Каждую неделю"
 
+msgctxt "registrar.console"
+msgid "Registrar idarəetməsi"
+msgstr "Управление реестром"
+
+msgctxt "registrar.console"
+msgid "Akademik kataloqun idarəetməsi — ixtisaslar (proqram) və fənlər."
+msgstr "Управление учебным каталогом — программы и предметы."
+
+msgctxt "registrar.console"
+msgid "İxtisaslar (proqram)"
+msgstr "Программы"
+
+msgctxt "registrar.console"
+msgid "Yeni proqram"
+msgstr "Новая программа"
+
+msgctxt "registrar.console"
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "registrar.console"
+msgid "qayıb"
+msgstr "пропуски"
+
+msgctxt "registrar.console"
+msgid "deaktiv"
+msgstr "неактивно"
+
+msgctxt "registrar.console"
+msgid "Hələ ixtisas yoxdur."
+msgstr "Пока нет программ."
+
+msgctxt "registrar.console"
+msgid "Fənlər"
+msgstr "Предметы"
+
+msgctxt "registrar.console"
+msgid "Yeni fənn"
+msgstr "Новый предмет"
+
+msgctxt "registrar.console"
+msgid "Hələ fənn yoxdur."
+msgstr "Пока нет предметов."
+
+msgctxt "registrar.console"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "registrar.console"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "registrar.console"
+msgid "Proqram redaktəsi"
+msgstr "Редактировать программу"
+
+msgctxt "registrar.console"
+msgid "redaktə"
+msgstr "редактировать"
+
+msgctxt "registrar.console"
+msgid "Yeni ixtisas (proqram)"
+msgstr "Новая программа"
+
+msgctxt "registrar.console"
+msgid "Fənn redaktəsi"
+msgstr "Редактировать предмет"
+
+msgctxt "registrar.console"
+msgid "Bu proqram kodu artıq mövcuddur."
+msgstr "Такой код программы уже существует."
+
+msgctxt "registrar.console"
+msgid "Bu fənn kodu artıq mövcuddur."
+msgstr "Такой код предмета уже существует."
+
+msgctxt "registrar.console"
+msgid "Kod"
+msgstr "Код"
+
+msgctxt "registrar.console"
+msgid "Ad"
+msgstr "Название"
+
+msgctxt "registrar.console"
+msgid "Təhsil pilləsi"
+msgstr "Уровень образования"
+
+msgctxt "registrar.console"
+msgid "İxtisas bölməsi (opsional)"
+msgstr "Специальность (необязательно)"
+
+msgctxt "registrar.console"
+msgid "Məzuniyyət ECTS yükü"
+msgstr "Нагрузка ECTS для выпуска"
+
+msgctxt "registrar.console"
+msgid "Qayıb limiti (%)"
+msgstr "Лимит пропусков (%)"
+
+msgctxt "registrar.console"
+msgid "Aktiv"
+msgstr "Активно"
+
+msgctxt "registrar.console"
+msgid "ECTS krediti"
+msgstr "Кредит ECTS"
+
+msgctxt "registrar.console"
+msgid "Təsvir"
+msgstr "Описание"
+
+msgctxt "profile.sidebar"
+msgid "Registrar (kataloq)"
+msgstr "Реестр (каталог)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"
