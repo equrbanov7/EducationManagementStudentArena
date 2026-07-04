@@ -289,6 +289,12 @@ def _role_capabilities(user, profile):
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
+            # Universitet rejimində tələbə öz akademik "Fənlərim" kabinetini görür
+            # (kredit tərəqqisi + qayıb/imtahan statusu + qrup-seçmə blokları).
+            from django.conf import settings as _dj_settings
+
+            if getattr(_dj_settings, "UNIVERSITY_MODE", True):
+                allowed_sections.add("my-subjects")
 
         if not (is_student or is_teacher or is_org_admin):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})

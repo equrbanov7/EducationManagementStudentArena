@@ -47,6 +47,7 @@ def build_section_titles() -> dict:
         "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
         "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
         "my-results": pgettext_lazy("profile.section", "my_results"),
+        "my-subjects": pgettext_lazy("profile.section", "my_subjects"),
         "pending-answers": pgettext_lazy("accounts.pending_answers", "section_title"),
         "groups": pgettext_lazy("profile.section", "groups"),
         "pending-post-approvals": "Postların idarəetməsi",

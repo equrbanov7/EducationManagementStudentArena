@@ -44,7 +44,15 @@ class Program(UUIDModel, TimeStampedModel):
     code = models.CharField(max_length=32)
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
-    ects_total = models.PositiveIntegerField(default=240, help_text="Proqramın tam ECTS kredit yükü.")
+    ects_total = models.PositiveIntegerField(
+        default=240, help_text="Məzuniyyət üçün tələb olunan tam ECTS kredit yükü (Boloniya)."
+    )
+    # Qayıb (absence) limiti: dərs saatlarının bu %-ini üzrsüz buraxan tələbə
+    # imtahana buraxılmır ("kəsilir"). AZ universitetlərində adətən 25% —
+    # universitetə/proqrama görə konfiqurasiya olunur.
+    absence_limit_percent = models.PositiveSmallIntegerField(
+        default=25, help_text="Üzrsüz qayıb həddi (dərs saatının %-i); keçilərsə imtahana buraxılmır."
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()
@@ -232,6 +240,9 @@ class CourseOffering(UUIDModel, TimeStampedModel):
         related_name="offerings",
         help_text="LMS kursu (fənn içi = mövzular/resurslar) — opsional.",
     )
+    lesson_hours = models.PositiveSmallIntegerField(
+        default=0, help_text="Semestrdə fənnin tam dərs (kontakt) saatı — qayıb limiti üçün baza."
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()
@@ -268,6 +279,9 @@ class Enrollment(UUIDModel, TimeStampedModel):
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="enrollments")
     kind = models.CharField(max_length=16, choices=EnrollmentKind.choices, default=EnrollmentKind.MANDATORY)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.ENROLLED, db_index=True)
+    absence_hours = models.PositiveSmallIntegerField(
+        default=0, help_text="Bu fənn üzrə toplanmış üzrsüz qayıb saatı (qayıb limiti üçün)."
+    )
 
     objects = models.Manager()
 

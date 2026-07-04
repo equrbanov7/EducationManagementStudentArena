@@ -184,3 +184,66 @@ class EnrollmentFlowTest(TestCase):
             self.assertEqual(len(plan["elective_blocks"]["SB1"]["options"]), 2)
             # The group decided EL-B for SB1.
             self.assertEqual(plan["group_decisions"]["SB1"].code, "EL-B")
+
+    def test_credit_summary_bologna_progress(self):
+        from apps.registrar.models import Enrollment
+
+        with bypass_rls():
+            self.program.ects_total = 12  # small for the test
+            self.program.save(update_fields=["ects_total"])
+            services.enroll_mandatory_subjects(record=self.students[0], period=self.period, semester_number=1)
+            # MATH101(default ects=5) + CS101(5) enrolled → in-progress 10, earned 0.
+            summary = services.get_credit_summary(record=self.students[0])
+            self.assertEqual(summary["earned"], 0)
+            self.assertEqual(summary["in_progress"], 10)
+            self.assertEqual(summary["required"], 12)
+            self.assertFalse(summary["can_graduate"])
+            # Complete both → earned 10, remaining 2.
+            Enrollment.objects.filter(student=self.students[0].student).update(status=Enrollment.Status.COMPLETED)
+            summary = services.get_credit_summary(record=self.students[0])
+            self.assertEqual(summary["earned"], 10)
+            self.assertEqual(summary["remaining"], 2)
+
+    def test_exam_eligibility_absence_limit(self):
+        from apps.registrar.models import CourseOffering
+
+        with bypass_rls():
+            self.program.absence_limit_percent = 25
+            self.program.save(update_fields=["absence_limit_percent"])
+            services.enroll_mandatory_subjects(record=self.students[0], period=self.period, semester_number=1)
+            offering = CourseOffering.objects.filter(organization=self.org).first()
+            offering.lesson_hours = 60
+            offering.save(update_fields=["lesson_hours"])
+            enrollment = offering.enrollments.get(student=self.students[0].student)
+            # 25% of 60 = 15 allowed hours.
+            enrollment.absence_hours = 10
+            enrollment.save(update_fields=["absence_hours"])
+            elig = services.get_exam_eligibility(enrollment=enrollment, limit_percent=25)
+            self.assertFalse(elig["barred"])
+            self.assertEqual(elig["allowed_hours"], 15.0)
+            # Exceed the limit → barred from the exam.
+            enrollment.absence_hours = 20
+            enrollment.save(update_fields=["absence_hours"])
+            elig = services.get_exam_eligibility(enrollment=enrollment, limit_percent=25)
+            self.assertTrue(elig["barred"])
+
+    def test_cabinet_data_shape(self):
+        with bypass_rls():
+            services.enroll_mandatory_subjects(record=self.students[0], period=self.period, semester_number=1)
+            services.choose_group_elective(
+                organization=self.org,
+                group=self.group,
+                curriculum=self.curriculum,
+                period=self.period,
+                elective_group="SB1",
+                subject=self.el_a,
+                decided_by=self.owner,
+            )
+            data = services.get_student_cabinet_data(record=self.students[0], period=self.period, semester_number=1)
+            self.assertEqual(len(data["subjects"]), 3)  # 2 mandatory + 1 elective
+            self.assertIn("credit_summary", data)
+            self.assertIn("SB1", data["elective_blocks"])
+            # Each subject row carries ects + eligibility.
+            for row in data["subjects"]:
+                self.assertIn("ects", row)
+                self.assertIn("eligibility", row)
