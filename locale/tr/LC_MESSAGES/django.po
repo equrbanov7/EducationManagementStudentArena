@@ -27011,6 +27011,58 @@ msgstr ""
 "Bir dersi dönem + grup için açar ve öğretmen atar; öğretmenin e-defteri "
 "hemen hazır olur."
 
+msgctxt "registrar.console"
+msgid "Tələbə təyinatları"
+msgstr "Öğrenci atamaları"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyin et"
+msgstr "Öğrenci ata"
+
+msgctxt "registrar.console"
+msgid "qəbul"
+msgstr "kabul"
+
+msgctxt "registrar.console"
+msgid "Hələ tələbə təyinatı yoxdur."
+msgstr "Henüz öğrenci ataması yok."
+
+msgctxt "registrar.console"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "registrar.console"
+msgid "Tədris planı"
+msgstr "Müfredat"
+
+msgctxt "registrar.console"
+msgid "Cari semestrin məcburi fənlərinə yaz"
+msgstr "Mevcut dönemin zorunlu derslerine kaydet"
+
+msgctxt "registrar.console"
+msgid "Semestr nömrəsi (auto-enroll)"
+msgstr "Dönem numarası (oto-kayıt)"
+
+msgctxt "registrar.console"
+msgid "Seçilən tədris planı bu ixtisasa aid deyil."
+msgstr "Seçilen müfredat bu programa ait değil."
+
+msgctxt "registrar.console"
+msgid "Bu tələbə həmin ixtisasa artıq təyin olunub."
+msgstr "Bu öğrenci bu programa zaten atanmış."
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı redaktəsi"
+msgstr "Öğrenci atamasını düzenle"
+
+msgctxt "registrar.console"
+msgid ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+msgstr ""
+"Öğrenciyi programa/müfredata/gruba atar; isteğe bağlı olarak mevcut dönemin "
+"zorunlu derslerine otomatik kaydeder."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

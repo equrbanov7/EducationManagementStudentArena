@@ -33,14 +33,18 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
   semestr fənn/bal/kredit cədvəli + **kredit-çəkili** kumulyativ GPA; tələbə
   kabinetində "Transkript" bölməsi (GPA kartı + toplanmış kredit). Model əlavəsi
   yox — mövcud yekun qiymət üzərində oxu.
-- ✅ **K3.1 Registrar konsolu (qismən)** — `/jurnal/idareetme/`: proqram (ixtisas)
-  və fənn (Subject) web idarəetməsi (list + create + edit), tenant-scoped forma
-  validasiyası (təkrar kod → dostyana xəta), self-contained RBAC (org-sahibi/
-  admin/dekan; accounts importu yox → modul-dövr təhlükəsiz). Django-admin əvəzi.
+- ✅ **K3 Registrar konsolu** — `/jurnal/idareetme/`: tam akademik kataloq +
+  provisioning web idarəetməsi (Django-admin əvəzi). **K3.1** proqram + fənn,
+  **K3.2** tədris planı (curriculum) + plan sətirləri (semestr, məcburi/seçmə),
+  **K3.3** semestr fənni (offering: subject×period×group + müəllim → avtomatik
+  course + jurnal sxemi). Hər mərhələ: tenant-scoped forma validasiyası (təkrar →
+  dostyana xəta), self-contained RBAC (org-sahibi/admin/dekan; accounts importu
+  yox → modul-dövr təhlükəsiz), IDOR + cross-tenant qoruma, 4 dil. Zəncir tam
+  web: Proqram → Fənn → Plan → Plan sətirləri → Offering.
 
-**Qalan (yenilənmiş prioritet):** K3.2 registrar (curriculum + offering + tələbə
-təyinatı) · U5+ status state-machine (akademik məzuniyyət/xaric/məzun) ·
-U6 köçürmə/əlavə/təmizlik · (ən sonda: jurnal dizayn/polish).
+**Qalan (yenilənmiş prioritet):** K3.4 tələbəyə ixtisas/qrup təyini (provisioning
+zəncirinin son halqası) · U5+ status state-machine (akademik məzuniyyət/xaric/
+məzun) · U6 köçürmə/əlavə/təmizlik · (ən sonda: jurnal dizayn/polish).
 
 ---
 

@@ -13,7 +13,14 @@ from django import forms
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import CourseOffering, Curriculum, CurriculumSubject, Program, Subject
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    CurriculumSubject,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
 
 
 class _OrgScopedModelForm(forms.ModelForm):
@@ -239,5 +246,88 @@ class OfferingForm(_OrgScopedModelForm):
             if qs.exists():
                 raise forms.ValidationError(
                     pgettext_lazy("registrar.console", "Bu fənn + semestr + qrup üçün fənn açılışı artıq var.")
+                )
+        return cleaned
+
+
+class StudentRecordForm(_OrgScopedModelForm):
+    """Assign a student to a program/curriculum/group (StudentAcademicRecord).
+
+    Two extra, non-model fields let the registrar auto-enroll the student in the
+    mandatory subjects of a semester right after assignment."""
+
+    auto_enroll = forms.BooleanField(
+        required=False, label=pgettext_lazy("registrar.console", "Cari semestrin məcburi fənlərinə yaz")
+    )
+    enroll_semester = forms.IntegerField(
+        required=False,
+        min_value=1,
+        initial=1,
+        label=pgettext_lazy("registrar.console", "Semestr nömrəsi (auto-enroll)"),
+    )
+
+    class Meta:
+        model = StudentAcademicRecord
+        fields = ["student", "program", "curriculum", "group", "admission_year"]
+        labels = {
+            "student": pgettext_lazy("registrar.console", "Tələbə"),
+            "program": pgettext_lazy("registrar.console", "İxtisas (proqram)"),
+            "curriculum": pgettext_lazy("registrar.console", "Tədris planı"),
+            "group": pgettext_lazy("registrar.console", "Qrup (opsional)"),
+            "admission_year": pgettext_lazy("registrar.console", "Qəbul ili"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        org = self.organization
+        org_unit = django_apps.get_model("organizations", "OrgUnit")
+        from django.contrib.auth import get_user_model
+
+        user_model = get_user_model()
+
+        self.fields["student"].queryset = (
+            user_model.objects.filter(
+                memberships__organization=org,
+                memberships__role__name__in=["student", "lead_student"],
+                memberships__is_active=True,
+            )
+            .distinct()
+            .order_by("username")
+            if org
+            else user_model.objects.none()
+        )
+        self.fields["program"].queryset = (
+            Program.objects.filter(organization=org).order_by("name") if org else Program.objects.none()
+        )
+        self.fields["curriculum"].queryset = (
+            Curriculum.objects.filter(organization=org).select_related("program").order_by("-admission_year")
+            if org
+            else Curriculum.objects.none()
+        )
+        group_field = self.fields["group"]
+        group_field.required = False
+        group_field.queryset = (
+            org_unit.objects.filter(organization=org, unit_type="group").order_by("name")
+            if org
+            else org_unit.objects.none()
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        student = cleaned.get("student")
+        program = cleaned.get("program")
+        curriculum = cleaned.get("curriculum")
+        if curriculum and program and curriculum.program_id != program.id:
+            self.add_error(
+                "curriculum",
+                pgettext_lazy("registrar.console", "Seçilən tədris planı bu ixtisasa aid deyil."),
+            )
+        if student and program:
+            qs = StudentAcademicRecord.objects.filter(organization=self.organization, student=student, program=program)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(
+                    pgettext_lazy("registrar.console", "Bu tələbə həmin ixtisasa artıq təyin olunub.")
                 )
         return cleaned

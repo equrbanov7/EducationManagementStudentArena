@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% if instance %}{% trans "Tələbə təyinatı redaktəsi" context "registrar.console" %}{% else %}{% trans "Tələbə təyin et" context "registrar.console" %}{% endif %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
+{% endblock %}
+
+{% block content %}
+<div class="console-page console-page--form">
+    <div class="console-head">
+        <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
+        <h1 class="console-title"><i class="fas fa-user-graduate"></i>
+            {% if instance %}{{ instance.student.get_full_name|default:instance.student.username }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Tələbə təyin et" context "registrar.console" %}{% endif %}
+        </h1>
+        <p class="console-sub">{% trans "Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin məcburi fənlərinə avtomatik yazır." context "registrar.console" %}</p>
+    </div>
+    {% include "accounts/profile/_messages.html" %}
+    <div class="console-card">
+        {% include "registrar/_console_form.html" %}
+    </div>
+</div>
+{% endblock %}

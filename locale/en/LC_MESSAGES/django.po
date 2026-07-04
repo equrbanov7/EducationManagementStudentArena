@@ -27015,6 +27015,58 @@ msgstr ""
 "Opens a subject for a semester + group and assigns an instructor; the "
 "teacher's e-journal is ready at once."
 
+msgctxt "registrar.console"
+msgid "Tələbə təyinatları"
+msgstr "Student assignments"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyin et"
+msgstr "Assign a student"
+
+msgctxt "registrar.console"
+msgid "qəbul"
+msgstr "admission"
+
+msgctxt "registrar.console"
+msgid "Hələ tələbə təyinatı yoxdur."
+msgstr "No student assignments yet."
+
+msgctxt "registrar.console"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "registrar.console"
+msgid "Tədris planı"
+msgstr "Curriculum"
+
+msgctxt "registrar.console"
+msgid "Cari semestrin məcburi fənlərinə yaz"
+msgstr "Enroll in the current semester's mandatory subjects"
+
+msgctxt "registrar.console"
+msgid "Semestr nömrəsi (auto-enroll)"
+msgstr "Semester number (auto-enroll)"
+
+msgctxt "registrar.console"
+msgid "Seçilən tədris planı bu ixtisasa aid deyil."
+msgstr "The selected curriculum does not belong to this program."
+
+msgctxt "registrar.console"
+msgid "Bu tələbə həmin ixtisasa artıq təyin olunub."
+msgstr "This student is already assigned to that program."
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı redaktəsi"
+msgstr "Edit student assignment"
+
+msgctxt "registrar.console"
+msgid ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+msgstr ""
+"Assigns a student to a program/curriculum/group; optionally auto-enrolls "
+"them in the current semester's mandatory subjects."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

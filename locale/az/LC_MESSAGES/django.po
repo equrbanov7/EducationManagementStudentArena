@@ -27051,6 +27051,58 @@ msgstr ""
 "Fənni semestr + qrup üçün açır və müəllim təyin edir; müəllimin elektron "
 "jurnalı dərhal hazır olur."
 
+msgctxt "registrar.console"
+msgid "Tələbə təyinatları"
+msgstr "Tələbə təyinatları"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyin et"
+msgstr "Tələbə təyin et"
+
+msgctxt "registrar.console"
+msgid "qəbul"
+msgstr "qəbul"
+
+msgctxt "registrar.console"
+msgid "Hələ tələbə təyinatı yoxdur."
+msgstr "Hələ tələbə təyinatı yoxdur."
+
+msgctxt "registrar.console"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "registrar.console"
+msgid "Tədris planı"
+msgstr "Tədris planı"
+
+msgctxt "registrar.console"
+msgid "Cari semestrin məcburi fənlərinə yaz"
+msgstr "Cari semestrin məcburi fənlərinə yaz"
+
+msgctxt "registrar.console"
+msgid "Semestr nömrəsi (auto-enroll)"
+msgstr "Semestr nömrəsi (auto-enroll)"
+
+msgctxt "registrar.console"
+msgid "Seçilən tədris planı bu ixtisasa aid deyil."
+msgstr "Seçilən tədris planı bu ixtisasa aid deyil."
+
+msgctxt "registrar.console"
+msgid "Bu tələbə həmin ixtisasa artıq təyin olunub."
+msgstr "Bu tələbə həmin ixtisasa artıq təyin olunub."
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı redaktəsi"
+msgstr "Tələbə təyinatı redaktəsi"
+
+msgctxt "registrar.console"
+msgid ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+msgstr ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"
