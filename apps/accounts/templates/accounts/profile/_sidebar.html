@@ -416,6 +416,15 @@
             </a>
         </li>
         {% endif %}
+        {% if role_capabilities.can_approve_grades %}
+        <li class="sidebar-menu-item">
+            <a href="{% url 'registrar:approvals_inbox' %}"
+               class="sidebar-menu-link {% if active_main_nav == 'approvals' %}active{% endif %}">
+                <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Qiymət təsdiqləri" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
         {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=org-faculties"

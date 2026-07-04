@@ -27177,6 +27177,105 @@ msgctxt "registrar.model.component_score.meta"
 msgid "component scores"
 msgstr "component scores"
 
+msgctxt "registrar.approval"
+msgid "Draft"
+msgstr "Draft"
+
+msgctxt "registrar.approval"
+msgid "Submitted (awaiting chair)"
+msgstr "Submitted (awaiting chair)"
+
+msgctxt "registrar.approval"
+msgid "Chair approved (awaiting dean)"
+msgstr "Chair approved (awaiting dean)"
+
+msgctxt "registrar.approval"
+msgid "Approved (official)"
+msgstr "Approved (official)"
+
+msgctxt "registrar.approval"
+msgid "Returned for revision"
+msgstr "Returned for revision"
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqi"
+msgstr "Grade approval"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarılma səbəbi"
+msgstr "Return reason"
+
+msgctxt "registrar.approval"
+msgid ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+msgstr ""
+"Submit the journal for approval? Editing is temporarily locked after "
+"submission."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqə göndər"
+msgstr "Submit for approval"
+
+msgctxt "registrar.approval"
+msgid "Kafedra təsdiqi"
+msgstr "Chair approval"
+
+msgctxt "registrar.approval"
+msgid ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+msgstr ""
+"Dean approval makes the grades official and locks the journal permanently. "
+"Continue?"
+
+msgctxt "registrar.approval"
+msgid "Dekan təsdiqi"
+msgstr "Dean approval"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarma səbəbi (opsional)"
+msgstr "Return reason (optional)"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytar"
+msgstr "Return"
+
+msgctxt "registrar.approval"
+msgid "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır."
+msgstr "The journal is under approval — editing is temporarily locked."
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqləri"
+msgstr "Grade approvals"
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)."
+msgstr "Electronic journals awaiting your approval (chair / dean)."
+
+msgctxt "registrar.approval"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "No active organization context."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən jurnal yoxdur."
+msgstr "No journals awaiting your approval."
+
+msgctxt "profile.sidebar"
+msgid "Qiymət təsdiqləri"
+msgstr "Grade approvals"
+
+msgid "Jurnal təsdiqə göndərildi."
+msgstr "The journal has been submitted for approval."
+
+msgid "Kafedra təsdiqi verildi."
+msgstr "Chair approval granted."
+
+msgid "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
+msgstr "Dean approval granted — grades are now official."
+
+msgid "Jurnal düzəliş üçün geri qaytarıldı."
+msgstr "The journal was returned for revision."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

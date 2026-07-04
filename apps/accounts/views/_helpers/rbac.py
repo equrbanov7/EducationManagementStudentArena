@@ -405,6 +405,8 @@ def _role_capabilities(user, profile):
         "can_view_my_appeals": can_view_my_appeals,
         "can_manage_org": can_manage_org,
         "can_manage_registrar": can_manage_registrar,
+        # Grade-approval chain (U7.2): chairs/deans/admins review submitted journals.
+        "can_approve_grades": is_superadmin or is_org_admin or is_unit_manager,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,
         "can_view_student_assignments": can_view_student_assignments,

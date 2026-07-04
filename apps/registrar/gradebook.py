@@ -59,6 +59,16 @@ def ensure_assessment_scheme(*, offering):
     return scheme
 
 
+# Approval-chain statuses that freeze the journal (no mark/score edits) — U7.2.
+_APPROVAL_LOCK_STATUSES = frozenset({"submitted", "chair_approved", "approved"})
+
+
+def journal_is_locked(offering) -> bool:
+    """The journal is locked once finalised OR while under grade approval."""
+    scheme = ensure_assessment_scheme(offering=offering)
+    return scheme.is_published or scheme.approval_status in _APPROVAL_LOCK_STATUSES
+
+
 def lesson_allows_score(lesson) -> bool:
     """Only seminar / lab lessons carry a score; lectures are attendance-only."""
     return lesson.kind in SCORE_LESSON_KINDS
@@ -127,10 +137,9 @@ def save_marks(*, offering, entries, by_user=None):
     Each cell is validated against the offering's own lessons/enrollments
     (cross-offering/tenant injection rejected), honours the per-mark edit window
     (locked cells are skipped) and the lesson type (lecture cells never store a
-    score). Blocked entirely when the scheme is published. Returns cells written.
+    score). Blocked entirely when the journal is locked. Returns cells written.
     """
-    scheme = ensure_assessment_scheme(offering=offering)
-    if scheme.is_published:
+    if journal_is_locked(offering):
         return 0
 
     lessons = {str(latt.id): latt for latt in offering.lessons.all()}
@@ -338,9 +347,8 @@ def save_components(*, offering, definitions, by_user=None):
     """Upsert/delete an offering's assessment components from ``definitions``.
 
     ``definitions`` = list of ``{"id"?, "name", "max_score"}``. Rows with an id
-    not present are deleted. Blocked once the journal scheme is published."""
-    scheme = ensure_assessment_scheme(offering=offering)
-    if scheme.is_published:
+    not present are deleted. Blocked once the journal is locked."""
+    if journal_is_locked(offering):
         return get_components(offering)
 
     existing = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
@@ -375,9 +383,8 @@ def save_components(*, offering, definitions, by_user=None):
 @transaction.atomic
 def save_component_scores(*, offering, entries, by_user=None):
     """Persist per-(component, enrollment) scores. ``entries`` = list of
-    ``{"component_id", "enrollment_id", "score"}``. Publish-locked + tenant-safe."""
-    scheme = ensure_assessment_scheme(offering=offering)
-    if scheme.is_published:
+    ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe."""
+    if journal_is_locked(offering):
         return 0
 
     valid_components = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}

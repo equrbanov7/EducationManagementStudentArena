@@ -140,6 +140,16 @@ status, decided_at)` — müəllim publish → **kafedra müdürü** → **dekan
 Publish yalnız son təsdiqdən sonra transkriptə keçir. **Best practice:** PeopleSoft *Grade Approval*,
 UNEC *dekanlıq təsdiqi*.
 
+> ✅ **İCRA OLUNDU (U7.2).** Ayrıca `GradeApproval` cədvəli əvəzinə mövcud RLS-qorunan
+> `AssessmentScheme`-ə `approval_status` (draft→submitted→chair_approved→approved / returned) +
+> `submitted_by/chair_approved_by/dean_approved_by/returned_reason` sahələri əlavə olundu (miqrasiya
+> 0017). Servis: `apps/registrar/approval.py` (submit/chair_approve/dean_approve/return_for_revision,
+> hər addım `audit`-ə yazılır; dekan təsdiqi `is_published=True` edir). Kilid: təsdiq mərhələsində
+> jurnal redaktəsi bağlıdır (`gradebook.journal_is_locked`). RBAC: kafedra=`chair_head/department_head`,
+> dekan=`dean` (org owner/admin bootstrap). UI: jurnal səhifəsində status-aware əməliyyat paneli +
+> kafedra/dekan üçün **"Qiymət təsdiqləri"** inbox-u (`/jurnal/tesdiqler/`). Testlər: `test_approval.py`
+> (15 test). Növbəti (#3): qiymət dəyişikliyi audit izi (artıq qismən `audit`-ə yazılır).
+
 **Yüksək #3 — Bal dəyişiklik tarixçəsi (audit trail).** `LessonMarkHistory` və ya `GradeChangeLog`
 (mark, old, new, by, reason, at). Enterprise auditor tələbi + apellyasiya sübutu. Onsuz da `audit`
 app var → ora yazmaq kifayətdir (yeni cədvəl minimuma endirilir).

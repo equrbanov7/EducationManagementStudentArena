@@ -386,12 +386,24 @@ class AttendanceStatus(models.TextChoices):
     ABSENT = "absent", pgettext_lazy("registrar.attendance", "Absent")  # qayıb (qb)
 
 
+class ApprovalStatus(models.TextChoices):
+    """Journal grade-approval chain (U7.2): teacher → chair → dean → official."""
+
+    DRAFT = "draft", pgettext_lazy("registrar.approval", "Draft")
+    SUBMITTED = "submitted", pgettext_lazy("registrar.approval", "Submitted (awaiting chair)")
+    CHAIR_APPROVED = "chair_approved", pgettext_lazy("registrar.approval", "Chair approved (awaiting dean)")
+    APPROVED = "approved", pgettext_lazy("registrar.approval", "Approved (official)")
+    RETURNED = "returned", pgettext_lazy("registrar.approval", "Returned for revision")
+
+
 class AssessmentScheme(UUIDModel, TimeStampedModel):
-    """Per-offering journal config (tenant/offering-configurable).
+    """Per-offering journal config + grade-approval state (tenant-configurable).
 
     The electronic journal accumulates the semester "entry score" (giriş balı,
     max ``entry_score_max`` ≈ 50) from seminar/lab lesson scores; the final exam
-    is entered elsewhere. ``is_published`` finalises/locks the journal."""
+    is entered elsewhere. The grade-approval chain (``approval_status``) locks the
+    journal while under review and, on final dean approval, sets ``is_published``
+    (official / transcript-ready)."""
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_schemes"
@@ -407,6 +419,19 @@ class AssessmentScheme(UUIDModel, TimeStampedModel):
         default=17, help_text="Yekun imtahandan keçid üçün minimum bal (kəsilmə qaydası)."
     )
     is_published = models.BooleanField(default=False, help_text="Yekunlaşdırılıb — jurnal redaktəsi bağlıdır.")
+    approval_status = models.CharField(
+        max_length=20, choices=ApprovalStatus.choices, default=ApprovalStatus.DRAFT, db_index=True
+    )
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    chair_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    dean_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    returned_reason = models.TextField(blank=True, help_text="Geri qaytarılma səbəbi (varsa).")
 
     objects = models.Manager()
 
