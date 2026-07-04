@@ -1,10 +1,13 @@
 from django.contrib import admin
 
 from .models import (
+    AssessmentScheme,
+    ComponentScore,
     CourseOffering,
     Curriculum,
     CurriculumSubject,
     Enrollment,
+    GradeComponent,
     GroupElectiveChoice,
     Program,
     StudentAcademicRecord,
@@ -51,10 +54,10 @@ class StudentAcademicRecordAdmin(admin.ModelAdmin):
 
 @admin.register(CourseOffering)
 class CourseOfferingAdmin(admin.ModelAdmin):
-    list_display = ("subject", "period", "group", "course", "organization", "is_active")
+    list_display = ("subject", "period", "group", "instructor", "course", "organization", "is_active")
     list_filter = ("is_active",)
     search_fields = ("subject__code", "subject__name")
-    autocomplete_fields = ("subject", "period", "group", "course")
+    autocomplete_fields = ("subject", "period", "group", "instructor", "course")
 
 
 @admin.register(Enrollment)
@@ -70,3 +73,24 @@ class GroupElectiveChoiceAdmin(admin.ModelAdmin):
     list_display = ("group", "period", "elective_group", "chosen_subject", "decided_by")
     search_fields = ("elective_group", "chosen_subject__code")
     autocomplete_fields = ("group", "period", "chosen_subject", "decided_by")
+
+
+class GradeComponentInline(admin.TabularInline):
+    model = GradeComponent
+    extra = 0
+    fields = ("name", "kind", "max_score", "is_final_exam", "order")
+
+
+@admin.register(AssessmentScheme)
+class AssessmentSchemeAdmin(admin.ModelAdmin):
+    list_display = ("offering", "pass_threshold", "min_final_exam_score", "is_published", "organization")
+    list_filter = ("is_published",)
+    autocomplete_fields = ("offering",)
+    inlines = (GradeComponentInline,)
+
+
+@admin.register(ComponentScore)
+class ComponentScoreAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "component", "score", "entered_by", "organization")
+    search_fields = ("enrollment__student__username", "component__name")
+    raw_id_fields = ("enrollment", "component", "entered_by")

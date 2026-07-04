@@ -303,3 +303,56 @@
 }
 
 .my-subjects-empty p { margin: 0; }
+
+/* ── Subject grade block (elektron jurnal nəticəsi, W4) ────────────────────── */
+.subject-grade {
+    margin-top: 0.35rem;
+    padding: 0.6rem 0;
+    border-top: 1px dashed var(--ems-neutral-200);
+}
+
+.subject-grade-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.subject-grade-total {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+.subject-grade-max { font-size: 0.8rem; font-weight: 400; color: var(--ems-neutral-400); }
+
+.subject-grade-letter {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 2px 9px;
+    border-radius: 6px;
+}
+.grade-A, .grade-B { background: var(--ems-success-100); color: var(--ems-success-600); }
+.grade-C, .grade-D { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.grade-E { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.grade-F { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+.subject-grade-status {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.subject-grade-status.is-pass { background: var(--ems-success-100); color: var(--ems-success-600); }
+.subject-grade-status.is-fail { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.subject-grade-status.is-barred { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+.subject-grade-components {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--ems-neutral-500);
+}
+.grade-comp strong { color: var(--ems-neutral-800); }

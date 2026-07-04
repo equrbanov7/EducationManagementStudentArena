@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Elektron jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260704-1">
+{% endblock %}
+
+{% block content %}
+<div class="journal-page">
+    <div class="journal-head">
+        <h1 class="journal-title">
+            <i class="fas fa-book-open"></i> {% trans "Elektron jurnal" context "registrar.journal" %}
+        </h1>
+        <p class="journal-subtitle">{% trans "Tədris etdiyiniz fənlər üzrə tələbə ballarını idarə edin." context "registrar.journal" %}</p>
+    </div>
+
+    {% if offerings %}
+    <div class="journal-offerings">
+        {% for offering in offerings %}
+        <a class="journal-offering-card" href="{% url 'registrar:journal_detail' offering.id %}">
+            <div class="journal-offering-code">{{ offering.subject.code }}</div>
+            <div class="journal-offering-body">
+                <div class="journal-offering-name">{{ offering.subject.name }}</div>
+                <div class="journal-offering-meta">
+                    {% if offering.group %}<span><i class="fas fa-users"></i> {{ offering.group.name }}</span>{% endif %}
+                    {% if offering.period %}<span><i class="fas fa-calendar-alt"></i> {{ offering.period.name }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="journal-offering-go"><i class="fas fa-arrow-right"></i></div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="journal-empty">
+        <i class="fas fa-folder-open"></i>
+        <p>{% trans "Sizə hələ tədris fənni (offering) təyin olunmayıb." context "registrar.journal" %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

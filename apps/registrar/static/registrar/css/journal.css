@@ -1,0 +1,215 @@
+/* Elektron jurnal (electronic journal) — teacher roster grid + offering list.
+   Flat, institutional, design-token driven (var(--ems-*)); horizontal scroll on
+   the grid so wide component sets stay usable on small screens. */
+
+.journal-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+.journal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    margin: 0 0 0.35rem;
+}
+
+.journal-title i { color: var(--ems-primary-600); }
+
+.journal-subtitle {
+    color: var(--ems-neutral-500);
+    margin: 0 0 1.5rem;
+}
+
+/* ── Offering list ────────────────────────────────────────────────────────── */
+.journal-offerings {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.journal-offering-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.journal-offering-card:hover {
+    border-color: var(--ems-primary-200);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.journal-offering-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-100);
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.journal-offering-body { flex: 1; min-width: 0; }
+.journal-offering-name { font-weight: 600; color: var(--ems-neutral-900); }
+.journal-offering-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-500);
+    margin-top: 2px;
+}
+.journal-offering-go { color: var(--ems-neutral-400); }
+
+/* ── Detail head ──────────────────────────────────────────────────────────── */
+.journal-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+}
+.journal-back:hover { text-decoration: underline; }
+
+.journal-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+    margin: 0.5rem 0 1.25rem;
+}
+.journal-detail-meta i { color: var(--ems-primary-500); margin-right: 3px; }
+
+.journal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.journal-badge--locked { background: var(--ems-neutral-200); color: var(--ems-neutral-700); }
+.journal-badge--pass { background: var(--ems-success-100); color: var(--ems-success-600); }
+.journal-badge--fail { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.journal-badge--barred { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+/* ── Grid ─────────────────────────────────────────────────────────────────── */
+.journal-grid-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+
+.journal-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.journal-grid th,
+.journal-grid td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.journal-grid thead th {
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.journal-grid .col-student {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: var(--ems-neutral-0);
+    z-index: 2;
+    min-width: 160px;
+}
+.journal-grid thead .col-student { z-index: 3; background: var(--ems-neutral-50); }
+.student-name { font-weight: 500; color: var(--ems-neutral-900); }
+
+.col-max { color: var(--ems-neutral-400); font-weight: 400; font-size: 0.78rem; }
+.col-exam { background: var(--ems-primary-50); }
+
+.journal-score,
+.journal-absence {
+    width: 58px;
+    padding: 5px 6px;
+    text-align: center;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.journal-score:focus,
+.journal-absence:focus {
+    outline: none;
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+.journal-score.is-invalid { border-color: var(--ems-danger-500); box-shadow: 0 0 0 3px var(--ems-danger-100); }
+.journal-score-ro { color: var(--ems-neutral-700); }
+
+.cell-total { font-weight: 600; color: var(--ems-neutral-900); }
+.cell-letter {
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+.grade-A, .grade-B { background: var(--ems-success-100); color: var(--ems-success-600); }
+.grade-C, .grade-D { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.grade-E { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.grade-F { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+/* ── Actions / empty ──────────────────────────────────────────────────────── */
+.journal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+.journal-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 10px 20px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.journal-save-btn:hover { background: var(--ems-primary-700); }
+
+.journal-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--ems-neutral-500);
+}
+.journal-empty i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
+.journal-empty p { margin: 0; }

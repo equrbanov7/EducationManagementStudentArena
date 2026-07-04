@@ -81,6 +81,16 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
         semester_number = _resolve_semester_number(request)
 
     data = services.get_student_cabinet_data(record=record, period=period, semester_number=semester_number)
+
+    # Attach each subject's electronic-journal result (component scores → total /
+    # letter / pass), so "Fənlərim" doubles as the student's "Qiymətlərim" view.
+    from apps.registrar import gradebook
+
+    grade_summary = gradebook.get_student_grade_summary(record=record, period=period, semester_number=semester_number)
+    grade_by_enrollment = {row["enrollment"].id: row["result"] for row in grade_summary["subjects"]}
+    for subject_row in data["subjects"]:
+        subject_row["grade"] = grade_by_enrollment.get(subject_row["enrollment"].id)
+
     # Pre-join each elective block with the group's decision so the template
     # renders without a dict-lookup filter (block name → chosen subject).
     group_decisions = data["group_decisions"]

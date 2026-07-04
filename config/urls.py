@@ -62,6 +62,8 @@ urlpatterns = [
     path("labs/", include("apps.labs.urls")),
     # accounts
     path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
+    # registrar — elektron jurnal (müəllim üzü)
+    path("jurnal/", include(("apps.registrar.urls", "registrar"), namespace="registrar")),
     # exams
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
     # appeals (imtahan apellyasiyaları)
