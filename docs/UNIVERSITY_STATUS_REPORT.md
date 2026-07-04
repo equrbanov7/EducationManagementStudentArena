@@ -8,6 +8,25 @@ auditi + [`UNIVERSITY_SYSTEM_ROADMAP.md`](UNIVERSITY_SYSTEM_ROADMAP.md).
 
 ---
 
+## 0. Yeniləmə — U3 elektron jurnal bitdi (2026-07-04)
+
+Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl):
+
+- ✅ **Fənn↔Kurs körpüsü** — `CourseOffering.instructor` + `ensure_offering_course`
+  / `sync_offering_course_members`; fənnə klik real "fənn içi"nə çatır.
+- ✅ **Davamiyyət** — müəllim jurnalda hər tələbə üçün qayıb (qb) saatını daxil edir.
+- ✅ **U3 Elektron jurnal** — `AssessmentScheme`/`GradeComponent`/`ComponentScore`
+  (RLS), komponent-əsaslı qiymətləndirmə (seminar / lab / sərbəst iş / kollokvium
+  / yekun imtahan, 50+50=100 → hərf/GPA), müəllim roster grid (`/jurnal/`,
+  IDOR-qorumalı) + tələbə "Qiymətlərim" ("Fənlərim"də). Boloniya keçid + min-
+  imtahan + 25% qayıb qaydası canlı işləyir.
+
+**Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U3+ təkrar
+imtahan (`ResitRecord`) + jurnal finalizasiya audit · U5 transkript/GPA ·
+U4 dərs cədvəli · U6 köçürmə/əlavə/təmizlik.
+
+---
+
 ## 1. Xülasə (bir baxışda)
 
 **Möhkəm təməl var:** çox-tenant + RLS, rol/iyerarxiya, provisioning, bir-login
