@@ -148,6 +148,24 @@ DEFAULT_ROLES = {
             "description": "Teaching assistant with limited permissions",
         },
         {
+            # Laborant — laboratoriya işlərinə dəstək. Öz kursunun/labının
+            # tapşırıqlarını görür və qiymətləndirməyə kömək edir; imtahan
+            # yaratmır, üzv idarə etmir. RBAC-də ASSISTANT_TEACHER-ə map olunur
+            # (bax core/roles.py MEMBERSHIP_ROLE_ALIASES / map_org_role_to_profile_role).
+            "name": "lab_assistant",
+            "display_name": "Lab Assistant",
+            "level": 40,
+            "scope_type": RoleScopeType.COURSE,
+            "permissions": [
+                "course.view",
+                "grade.view",
+                "grade.input",
+                "exam.view",
+                "analytics.view_own",
+            ],
+            "description": "Laboratory assistant supporting lab work and grading within their course",
+        },
+        {
             # Tyutor — tələbə qruplarına akademik dəstək/kurasiya rolu.
             # Öz scope_unit alt-ağacındakı tələbələri, kursları, imtahan
             # cədvəlini və qrup statistikasını görür; imtahan yaratmır,

@@ -6,6 +6,7 @@ Extracted from test_views.py to keep individual test modules focused.
 
 import re
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache
@@ -129,7 +130,9 @@ class LoginViewTest(TestCase):
             {"username": "loginuser", "password": "StrongPass123!", "next": payload},
         )
 
-        self.assertRedirects(post_response, "/")
+        # An invalid/malicious next falls back to LOGIN_REDIRECT_URL, which for the
+        # e-university cabinet is the profile page (a safe internal destination).
+        self.assertRedirects(post_response, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False)
 
     def test_login_redirects_home_when_safe_next_would_404(self):
         response = self.client.post(

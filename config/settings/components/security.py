@@ -27,7 +27,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Login / logout settings
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"
+# E-university cabinet: authenticated users land on their profile (the role-aware
+# cabinet with courses/exams/journal/schedule sections) instead of the public
+# marketing home. A `?next=` target still takes priority; an invalid/malicious
+# `next` falls back here (a safe internal URL). Override with LOGIN_REDIRECT_URL.
+LOGIN_REDIRECT_URL = os.getenv("LOGIN_REDIRECT_URL", "/accounts/profile/")
 LOGOUT_REDIRECT_URL = "/"
 
 # ---------------------------------------------------------------------------
