@@ -35,6 +35,7 @@ from .teacher.extract_jobs import (
 # ═══════════════════════════════════════════════════════════════
 from .teacher.groups import (
     create_student_group,
+    teacher_add_student_to_group,
     teacher_create_group,
     teacher_delete_group,
     teacher_group_list,
@@ -104,6 +105,7 @@ __all__ = [
     "teacher_delete_group",
     "create_student_group",
     "teacher_remove_student_from_group",
+    "teacher_add_student_to_group",
     # Teacher - Exams
     "teacher_exam_list",
     "createAndEditExamView",

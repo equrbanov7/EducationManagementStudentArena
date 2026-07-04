@@ -27119,6 +27119,10 @@ msgctxt "registrar.console"
 msgid "Başqa qrupa köçür"
 msgstr "Transfer to another group"
 
+msgctxt "exams.view.groups.message"
+msgid "student_added_to_group"
+msgstr "Student added to the group."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"
