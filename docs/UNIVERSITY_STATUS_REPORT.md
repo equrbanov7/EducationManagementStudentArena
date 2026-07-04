@@ -42,9 +42,14 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
   yox → modul-dövr təhlükəsiz), IDOR + cross-tenant qoruma, 4 dil. Zəncir tam
   web: Proqram → Fənn → Plan → Plan sətirləri → Offering.
 
-**Qalan (yenilənmiş prioritet):** K3.4 tələbəyə ixtisas/qrup təyini (provisioning
-zəncirinin son halqası) · U5+ status state-machine (akademik məzuniyyət/xaric/
-məzun) · U6 köçürmə/əlavə/təmizlik · (ən sonda: jurnal dizayn/polish).
+- ✅ **U5+ Akademik status state-machine** — `StudentAcademicRecord.status`
+  (`AcademicStatus`: qeydiyyatlı / akademik məzuniyyət / xaric / məzun,
+  migration 0014). Servis (`status.py`): status dəyişəndə `is_active` sinxron +
+  audit qeydi (best-effort, get_model → modul-dövr yox). Registrar konsolunda
+  status badge + təyinat formunda status seçimi.
+
+**Qalan (yenilənmiş prioritet):** U6 qrup köçürmə + imtahana əl-ilə əlavə +
+org_type UI təmizliyi · (ən sonda: jurnal dizayn/polish).
 
 ---
 

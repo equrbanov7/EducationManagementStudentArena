@@ -177,6 +177,15 @@ class EnrollmentKind(models.TextChoices):
     RETAKE = "retake", pgettext_lazy("registrar.enrollment_kind", "Retake")
 
 
+class AcademicStatus(models.TextChoices):
+    """Where a student stands academically (U5+ status state-machine)."""
+
+    ENROLLED = "enrolled", pgettext_lazy("registrar.academic_status", "Enrolled")
+    ACADEMIC_LEAVE = "academic_leave", pgettext_lazy("registrar.academic_status", "Academic leave")
+    EXPELLED = "expelled", pgettext_lazy("registrar.academic_status", "Expelled")
+    GRADUATED = "graduated", pgettext_lazy("registrar.academic_status", "Graduated")
+
+
 class StudentAcademicRecord(UUIDModel, TimeStampedModel):
     """A student's academic profile within a program: which curriculum + group
     they belong to. Drives the mandatory/elective enrollment flow (roadmap §2)."""
@@ -196,6 +205,13 @@ class StudentAcademicRecord(UUIDModel, TimeStampedModel):
         help_text="Tələbənin qrupu (bölmə/sektor OrgUnit: group).",
     )
     admission_year = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=20,
+        choices=AcademicStatus.choices,
+        default=AcademicStatus.ENROLLED,
+        db_index=True,
+        help_text="Akademik status (qeydiyyatlı / akademik məzuniyyət / xaric / məzun).",
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()

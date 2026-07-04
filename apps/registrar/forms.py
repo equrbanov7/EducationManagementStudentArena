@@ -268,13 +268,14 @@ class StudentRecordForm(_OrgScopedModelForm):
 
     class Meta:
         model = StudentAcademicRecord
-        fields = ["student", "program", "curriculum", "group", "admission_year"]
+        fields = ["student", "program", "curriculum", "group", "admission_year", "status"]
         labels = {
             "student": pgettext_lazy("registrar.console", "Tələbə"),
             "program": pgettext_lazy("registrar.console", "İxtisas (proqram)"),
             "curriculum": pgettext_lazy("registrar.console", "Tədris planı"),
             "group": pgettext_lazy("registrar.console", "Qrup (opsional)"),
             "admission_year": pgettext_lazy("registrar.console", "Qəbul ili"),
+            "status": pgettext_lazy("registrar.console", "Akademik status"),
         }
 
     def __init__(self, *args, **kwargs):

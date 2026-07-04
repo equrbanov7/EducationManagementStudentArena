@@ -143,6 +143,7 @@
                     <div class="console-item-meta">
                         {% if record.group %}<span><i class="fas fa-users"></i> {{ record.group.name }}</span>{% endif %}
                         <span>{% trans "qəbul" context "registrar.console" %} {{ record.admission_year }}</span>
+                        <span class="status-badge status-badge--{{ record.status }}">{{ record.get_status_display }}</span>
                     </div>
                 </li>
                 {% endfor %}

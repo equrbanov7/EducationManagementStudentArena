@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from . import gradebook, services
+from . import status as academic_status
 from .forms import (
     CurriculumForm,
     CurriculumSubjectForm,
@@ -278,12 +279,16 @@ def student_record_form_view(request, pk=None):
         raise Http404
 
     instance = get_object_or_404(StudentAcademicRecord, pk=pk, organization=organization) if pk else None
+    previous_status = instance.status if instance else None
     if request.method == "POST":
         form = StudentRecordForm(request.POST, instance=instance, organization=organization)
         if form.is_valid():
             record = form.save(commit=False)
             record.organization = organization
+            # Keep the legacy is_active flag consistent with the academic status.
+            record.is_active = academic_status.is_active_for(record.status)
             record.save()
+            academic_status.audit_status_change(record=record, previous=previous_status, by_user=request.user)
             if form.cleaned_data.get("auto_enroll"):
                 period = _current_period(organization)
                 if period is not None:
