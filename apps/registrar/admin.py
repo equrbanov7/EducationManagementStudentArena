@@ -6,10 +6,12 @@ from .models import (
     Curriculum,
     CurriculumSubject,
     Enrollment,
+    FinalGrade,
     GroupElectiveChoice,
     Lesson,
     LessonMark,
     Program,
+    ResitRecord,
     ScheduleSlot,
     StudentAcademicRecord,
     Subject,
@@ -106,3 +108,19 @@ class ScheduleSlotAdmin(admin.ModelAdmin):
     list_filter = ("weekday", "week_type")
     search_fields = ("offering__subject__code", "room")
     raw_id_fields = ("offering", "created_by")
+
+
+@admin.register(FinalGrade)
+class FinalGradeAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "exam_score", "is_published", "entered_by", "organization")
+    list_filter = ("is_published",)
+    search_fields = ("enrollment__student__username",)
+    raw_id_fields = ("enrollment", "entered_by")
+
+
+@admin.register(ResitRecord)
+class ResitRecordAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "reason", "status", "resit_score", "decided_by", "organization")
+    list_filter = ("reason", "status")
+    search_fields = ("enrollment__student__username",)
+    raw_id_fields = ("enrollment", "decided_by")

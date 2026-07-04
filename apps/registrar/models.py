@@ -384,6 +384,12 @@ class AssessmentScheme(UUIDModel, TimeStampedModel):
     entry_score_max = models.PositiveSmallIntegerField(
         default=50, help_text="Semestr 'giriş balı' tavanı (Boloniya ≈50; qalan 50 yekun imtahan)."
     )
+    pass_threshold = models.PositiveSmallIntegerField(
+        default=51, help_text="Keçid üçün minimum ümumi bal (giriş + imtahan, adətən 51)."
+    )
+    min_final_exam_score = models.PositiveSmallIntegerField(
+        default=17, help_text="Yekun imtahandan keçid üçün minimum bal (kəsilmə qaydası)."
+    )
     is_published = models.BooleanField(default=False, help_text="Yekunlaşdırılıb — jurnal redaktəsi bağlıdır.")
 
     objects = models.Manager()
@@ -500,3 +506,79 @@ class ScheduleSlot(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.offering_id} · gün {self.weekday} {self.start_time}-{self.end_time}"
+
+
+# ── Yekun qiymət + təkrar imtahan (U3+, kəsilmə/resit qaydası) ────────────────
+#
+# Yekun bal = jurnaldan "giriş balı" (semestr, ≈50) + yekun imtahan balı (≈50).
+# Tələbə kəsilir (imtahana buraxılmır/keçmir) → ``ResitRecord`` (təkrar imtahan
+# hüququ). Hesablama servis qatındadır (``apps/registrar/finals.py``).
+
+
+class FinalGrade(UUIDModel, TimeStampedModel):
+    """The final-exam score for one enrollment (the other half of the total)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="final_grades"
+    )
+    enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name="final_grade")
+    exam_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True, help_text="Yekun imtahan balı (≈max 50)."
+    )
+    is_published = models.BooleanField(default=False, help_text="Nəticə rəsmiləşdirilib.")
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.final.meta", "final grade")
+        verbose_name_plural = pgettext_lazy("registrar.model.final.meta", "final grades")
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"final<{self.enrollment_id}> exam={self.exam_score}"
+
+
+class ResitReason(models.TextChoices):
+    ABSENCE = "absence", pgettext_lazy("registrar.resit_reason", "Barred by absence")
+    TOTAL = "total", pgettext_lazy("registrar.resit_reason", "Total below pass mark")
+    EXAM = "exam", pgettext_lazy("registrar.resit_reason", "Exam below minimum")
+
+
+class ResitStatus(models.TextChoices):
+    ELIGIBLE = "eligible", pgettext_lazy("registrar.resit_status", "Eligible")
+    COMPLETED = "completed", pgettext_lazy("registrar.resit_status", "Completed")
+
+
+class ResitRecord(UUIDModel, TimeStampedModel):
+    """A student's resit (təkrar imtahan) right for one enrollment.
+
+    Created when the student fails; once a ``resit_score`` is entered the final
+    result is recomputed with it in place of the original exam score."""
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="resits")
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="resit_records")
+    reason = models.CharField(max_length=12, choices=ResitReason.choices)
+    status = models.CharField(max_length=12, choices=ResitStatus.choices, default=ResitStatus.ELIGIBLE)
+    resit_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True, help_text="Təkrar imtahan balı."
+    )
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.resit.meta", "resit record")
+        verbose_name_plural = pgettext_lazy("registrar.model.resit.meta", "resit records")
+        constraints = [
+            models.UniqueConstraint(fields=["enrollment"], name="uniq_resit_per_enrollment"),
+        ]
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"resit<{self.enrollment_id}> {self.status}"

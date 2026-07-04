@@ -250,3 +250,37 @@ def test_schedule_deny_all_without_tenant(two_org_schedules):
 
     _enable_rls_for_tenant("")
     assert ScheduleSlot.objects.count() == 0
+
+
+# ── Finals / resit RLS isolation (U3+) ───────────────────────────────────────
+
+
+@pytest.fixture()
+def two_org_finals(two_org_enrollments):
+    """Add a final grade + a resit to each org's enrollment."""
+    from apps.registrar.models import Enrollment, FinalGrade, ResitReason, ResitRecord
+
+    org_a, org_b = two_org_enrollments
+    for org in (org_a, org_b):
+        enrollment = Enrollment.objects.get(organization=org)
+        FinalGrade.objects.create(organization=org, enrollment=enrollment, exam_score=40)
+        ResitRecord.objects.create(organization=org, enrollment=enrollment, reason=ResitReason.TOTAL)
+    return org_a, org_b
+
+
+def test_finals_isolation(two_org_finals):
+    from apps.registrar.models import FinalGrade, ResitRecord
+
+    org_a, _org_b = two_org_finals
+    _enable_rls_for_tenant(org_a.pk)
+    assert FinalGrade.objects.count() == 1
+    assert ResitRecord.objects.count() == 1
+    assert set(FinalGrade.objects.values_list("organization_id", flat=True)) == {org_a.pk}
+
+
+def test_finals_deny_all_without_tenant(two_org_finals):
+    from apps.registrar.models import FinalGrade, ResitRecord
+
+    _enable_rls_for_tenant("")
+    assert FinalGrade.objects.count() == 0
+    assert ResitRecord.objects.count() == 0

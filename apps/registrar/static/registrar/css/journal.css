@@ -242,3 +242,49 @@
 .journal-empty, .journal-hint { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
 .journal-empty i, .journal-hint i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
 .journal-empty p, .journal-hint p { margin: 0; }
+
+/* ── Yekun / Nəticə (final grade + resit, U3+) ────────────────────────────── */
+.journal-finals-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    margin: 2rem 0 0.75rem;
+}
+.journal-finals-title i { color: var(--ems-warning-600); }
+
+.finals-grid th, .finals-grid td { min-width: 70px; }
+.cell-letter { font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.grade-A, .grade-B { background: var(--ems-success-100); color: var(--ems-success-600); }
+.grade-C, .grade-D { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.grade-E { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.grade-F { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+
+.resit-badge {
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.journal-publish-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 10px 20px;
+    margin-left: 8px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.journal-publish-btn:hover { border-color: var(--ems-warning-600); color: var(--ems-warning-800); }
