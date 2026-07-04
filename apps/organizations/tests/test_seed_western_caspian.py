@@ -131,6 +131,8 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             self.assertGreater(az1.absence_hours, 15)
 
     def test_seeds_schedule(self):
+        from collections import Counter
+
         from apps.registrar.models import CourseOffering, ScheduleSlot
 
         self._seed()
@@ -141,6 +143,21 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 ScheduleSlot.objects.filter(organization=org).count(),
                 CourseOffering.objects.filter(organization=org).count(),
             )
+            # At least one group has MULTIPLE lessons on the same weekday (the
+            # timetable must handle >1 lesson/day) — assert per-group, per-weekday.
+            multi_day_seen = False
+            for group_id in (
+                ScheduleSlot.objects.filter(organization=org).values_list("offering__group_id", flat=True).distinct()
+            ):
+                counts = Counter(
+                    ScheduleSlot.objects.filter(organization=org, offering__group_id=group_id).values_list(
+                        "weekday", flat=True
+                    )
+                )
+                if counts and max(counts.values()) >= 2:
+                    multi_day_seen = True
+                    break
+            self.assertTrue(multi_day_seen, "expected a group with 2+ lessons on one weekday")
 
     def test_seeds_finals_and_resit(self):
         from apps.registrar.models import FinalGrade, ResitRecord

@@ -1,6 +1,10 @@
 <section class="profile-section-panel profile-section--profile-info {% if active_section == 'profile-info' %}is-active{% endif %}" data-profile-section-panel="profile-info">
     {% include "accounts/profile/sections/_profile_org_invites.html" %}
     {% include "accounts/profile/sections/_profile_info_identity.html" %}
+    {# Universitet rejimində tələbə dashboard-u sadə saxlanır: LMS/marketinq say
+       kartları (imtahan/kurs/post) gizlədilir — kabinetin öz bölmələri əsasdır. #}
+    {% if not university_mode or not role_capabilities.is_student %}
     {% include "accounts/profile/sections/_profile_info_stats.html" %}
+    {% endif %}
 </section>
  
