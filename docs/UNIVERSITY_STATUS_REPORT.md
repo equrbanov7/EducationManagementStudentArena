@@ -48,8 +48,14 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
   audit qeydi (best-effort, get_model → modul-dövr yox). Registrar konsolunda
   status badge + təyinat formunda status seçimi.
 
-**Qalan (yenilənmiş prioritet):** U6 qrup köçürmə + imtahana əl-ilə əlavə +
-org_type UI təmizliyi · (ən sonda: jurnal dizayn/polish).
+- ✅ **U6 Qrup köçürmə + imtahana əl-ilə əlavə + org_type UI təmizliyi** —
+  **U6.1** `transfer.transfer_student_group` (audit + enrollment re-point);
+  **U6.2** `teacher_add_student_to_group` (tək-tələbə əlavə, resit/köçmə üçün);
+  **U6.3** universitet rejimində sınaq-imtahan/abunə nav girişləri + LMS kurs-
+  marketplace sidebar bölməsi gizlədilir.
+
+**Qalan (yenilənmiş prioritet):** yalnız — **jurnalın dizayn/polish yenidən
+işlənməsi** (ən sonda, istifadəçinin ayrıca sözü ilə).
 
 ---
 

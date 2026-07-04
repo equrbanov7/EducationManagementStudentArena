@@ -217,7 +217,9 @@
         </li>
         {% endif %}
 
-        {% if 'courses' in allowed_sections %}
+        {# Universitet rejimi: LMS kurs-marketplace bölməsi gizlədilir — akademik
+           fənlər registrar (Fənlərim/offering) üzərindən gəlir. #}
+        {% if 'courses' in allowed_sections and not university_mode %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=courses"
                data-section="courses"
