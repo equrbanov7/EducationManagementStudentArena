@@ -129,3 +129,15 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
                 organization=org, offering__subject__code="CS101", student__username="wcu_student_az1"
             )
             self.assertGreater(az1.absence_hours, 15)
+
+    def test_seeds_schedule(self):
+        from apps.registrar.models import CourseOffering, ScheduleSlot
+
+        self._seed()
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            # Every offering has a timetable slot (no teacher/group/room clashes).
+            self.assertEqual(
+                ScheduleSlot.objects.filter(organization=org).count(),
+                CourseOffering.objects.filter(organization=org).count(),
+            )

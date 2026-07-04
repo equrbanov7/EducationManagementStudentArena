@@ -214,3 +214,39 @@ def test_journal_deny_all_without_tenant(two_org_journals):
     assert AssessmentScheme.objects.count() == 0
     assert Lesson.objects.count() == 0
     assert LessonMark.objects.count() == 0
+
+
+# ── Timetable RLS isolation (U4) ─────────────────────────────────────────────
+
+
+@pytest.fixture()
+def two_org_schedules(two_org_enrollments):
+    """Add a schedule slot to each org's offering."""
+    import datetime
+
+    from apps.registrar import schedule
+    from apps.registrar.models import CourseOffering
+
+    org_a, org_b = two_org_enrollments
+    for org in (org_a, org_b):
+        offering = CourseOffering.objects.get(organization=org)
+        schedule.create_slot(
+            offering=offering, weekday=1, start_time=datetime.time(9, 0), end_time=datetime.time(10, 30)
+        )
+    return org_a, org_b
+
+
+def test_schedule_isolation(two_org_schedules):
+    from apps.registrar.models import ScheduleSlot
+
+    org_a, _org_b = two_org_schedules
+    _enable_rls_for_tenant(org_a.pk)
+    assert ScheduleSlot.objects.count() == 1
+    assert set(ScheduleSlot.objects.values_list("organization_id", flat=True)) == {org_a.pk}
+
+
+def test_schedule_deny_all_without_tenant(two_org_schedules):
+    from apps.registrar.models import ScheduleSlot
+
+    _enable_rls_for_tenant("")
+    assert ScheduleSlot.objects.count() == 0

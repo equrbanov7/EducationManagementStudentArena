@@ -25,6 +25,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
 from apps.registrar import gradebook as registrar_gradebook
+from apps.registrar import schedule as registrar_schedule
 from apps.registrar import services as registrar_services
 from apps.registrar.models import (
     CourseOffering,
@@ -398,6 +399,29 @@ class Command(BaseCommand):
                         }
                     )
                 registrar_gradebook.save_marks(offering=offering, entries=entries, by_user=teacher)
+
+        self._seed_schedule(org)
+
+    def _seed_schedule(self, org):
+        """Give each offering a weekly timetable slot (distinct weekday so the
+        shared demo teacher never clashes) — student + teacher schedules populate."""
+        import datetime
+
+        offerings = list(CourseOffering.objects.filter(organization=org).select_related("subject", "group"))
+        for index, offering in enumerate(offerings):
+            if offering.schedule_slots.exists():
+                continue  # idempotent
+            try:
+                registrar_schedule.create_slot(
+                    offering=offering,
+                    weekday=(index % 6) + 1,  # Mon–Sat, one offering each
+                    start_time=datetime.time(9, 0),
+                    end_time=datetime.time(10, 30),
+                    room=str(201 + index),
+                    created_by=offering.instructor,
+                )
+            except registrar_schedule.ScheduleConflict:
+                pass
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile

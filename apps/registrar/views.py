@@ -17,8 +17,19 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import gradebook
-from .models import AttendanceStatus, CourseOffering, LessonKind
+from . import gradebook, schedule
+from .models import AttendanceStatus, CourseOffering, LessonKind, ScheduleSlot, StudentAcademicRecord, WeekType
+
+
+def _current_period(organization):
+    """Current AcademicPeriod for the org (app-registry lookup — no static import)."""
+    from django.apps import apps as django_apps
+
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    return (
+        AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
+        or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
+    )
 
 
 def _can_edit_journal(user, offering) -> bool:
@@ -129,3 +140,118 @@ def _handle_save_marks(request, offering):
     written = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user)
     messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+
+# ── Dərs cədvəli (timetable, U4) ─────────────────────────────────────────────
+
+
+@login_required
+def schedule_view(request):
+    """Role-aware weekly timetable: student → group schedule, teacher → own slots.
+
+    Teachers/org-owners may add slots for the offerings they teach (conflicts are
+    rejected in the service). Tenant scoping comes from the active-org RLS context."""
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        return render(request, "registrar/schedule.html", {"has_context": False, "active_main_nav": "schedule"})
+
+    period = _current_period(organization)
+
+    if request.method == "POST":
+        return _handle_add_slot(request, organization, period)
+
+    record = (
+        StudentAcademicRecord.objects.filter(organization=organization, student=request.user)
+        .select_related("group")
+        .first()
+    )
+    teacher_offerings = []
+    if record and record.group and period:
+        role = "student"
+        owner_label = record.group.name
+        slots = schedule.get_group_schedule(organization=organization, group=record.group, period=period)
+    else:
+        role = "teacher"
+        owner_label = request.user.get_full_name() or request.user.username
+        slots = (
+            schedule.get_teacher_schedule(organization=organization, teacher=request.user, period=period)
+            if period
+            else []
+        )
+        if period:
+            teacher_offerings = list(
+                CourseOffering.objects.filter(
+                    organization=organization, instructor=request.user, period=period, is_active=True
+                ).select_related("subject", "group")
+            )
+
+    return render(
+        request,
+        "registrar/schedule.html",
+        {
+            "has_context": True,
+            "role": role,
+            "owner_label": owner_label,
+            "period": period,
+            "week_grid": schedule.build_week_grid(slots),
+            "teacher_offerings": teacher_offerings,
+            "weekdays": schedule.WEEKDAYS,
+            "week_types": WeekType.choices,
+            "active_main_nav": "schedule",
+        },
+    )
+
+
+def _handle_add_slot(request, organization, period):
+    offering = (
+        CourseOffering.objects.filter(pk=request.POST.get("offering_id"), organization=organization)
+        .select_related("organization")
+        .first()
+    )
+    if offering is None or not _can_edit_journal(request.user, offering):
+        raise Http404  # only the teaching instructor / org owner may schedule
+
+    from django.utils.dateparse import parse_time
+
+    try:
+        weekday = int(request.POST.get("weekday") or 0)
+    except (TypeError, ValueError):
+        weekday = 0
+    start_time = parse_time(request.POST.get("start_time") or "")
+    end_time = parse_time(request.POST.get("end_time") or "")
+    week_type = request.POST.get("week_type")
+    if week_type not in dict(WeekType.choices):
+        week_type = WeekType.ALL
+    if not (1 <= weekday <= 7) or start_time is None or end_time is None or start_time >= end_time:
+        messages.error(request, _("Gün və düzgün başlama/bitmə vaxtı tələb olunur."))
+        return redirect(reverse("registrar:schedule"))
+
+    try:
+        schedule.create_slot(
+            offering=offering,
+            weekday=weekday,
+            start_time=start_time,
+            end_time=end_time,
+            room=(request.POST.get("room") or "").strip(),
+            week_type=week_type,
+            created_by=request.user,
+        )
+        messages.success(request, _("Dərs cədvəlinə slot əlavə edildi."))
+    except schedule.ScheduleConflict as exc:
+        clash = exc.conflict
+        messages.error(
+            request,
+            _("Konflikt: bu vaxt %(subject)s ilə üst-üstə düşür (qrup/müəllim/otaq).")
+            % {"subject": clash.offering.subject.code},
+        )
+    return redirect(reverse("registrar:schedule"))
+
+
+@login_required
+def schedule_slot_delete(request, slot_id):
+    """Delete a slot (only the teaching instructor / org owner / superuser)."""
+    slot = get_object_or_404(ScheduleSlot.objects.select_related("offering", "offering__organization"), pk=slot_id)
+    if request.method == "POST" and _can_edit_journal(request.user, slot.offering):
+        slot.delete()
+        messages.success(request, _("Slot silindi."))
+    return redirect(reverse("registrar:schedule"))

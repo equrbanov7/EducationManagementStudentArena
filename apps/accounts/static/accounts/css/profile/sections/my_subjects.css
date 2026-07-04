@@ -358,3 +358,14 @@
 .grade-comp strong { color: var(--ems-neutral-800); }
 
 .subject-grade-label { font-size: 0.72rem; color: var(--ems-neutral-500); }
+
+.my-subjects-schedule-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+}
+.my-subjects-schedule-link:hover { text-decoration: underline; }
