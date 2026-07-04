@@ -23,8 +23,10 @@ from __future__ import annotations
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.organizations.models import Membership, Organization, OrgUnit, Role
-from core.constants import OrganizationType, OrgUnitType, RoleScopeType
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from apps.registrar import services as registrar_services
+from apps.registrar.models import Curriculum, CurriculumSubject, Program, StudentAcademicRecord, Subject
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -104,6 +106,7 @@ class Command(BaseCommand):
             units = self._ensure_academic_hierarchy(org)
 
             created = 0
+            student_scope = []  # (user, group_scope_key) for the curriculum step
             for username, role_name, profile_role, scope_key in self.ROLE_USERS:
                 role = roles.get(role_name)
                 if role is None:
@@ -123,6 +126,10 @@ class Command(BaseCommand):
                     user=user, organization=org, role=role, scope_unit=scope_unit, assigned_by=owner
                 )
                 created += 1
+                if role_name == "student":
+                    student_scope.append((user, scope_key))
+
+            self._seed_curriculum(org, units, student_scope, decided_by=owner)
 
             superadmin_note = ""
             if options.get("with_superadmin"):
@@ -223,6 +230,83 @@ class Command(BaseCommand):
             "group_az": group_az,
             "group_en": group_en,
         }
+
+    def _seed_curriculum(self, org, units, student_scope, *, decided_by):
+        """Demo curriculum + enrollments so the student academic flow is testable.
+
+        Semester-1 plan: 2 mandatory subjects + a 2-option elective block "SB1".
+        Each seeded student gets an academic record; mandatory subjects are
+        auto-enrolled; each group's elective is decided (→ all group members
+        enrolled), demonstrating the group-level elective flow (roadmap §2.5).
+        """
+        specialty = units["specialty"]
+        program, _ = Program.objects.get_or_create(
+            organization=org,
+            code="CS",
+            defaults={"name": self.SPECIALTY_NAME, "specialty_unit": specialty, "ects_total": 240},
+        )
+        curriculum, _ = Curriculum.objects.get_or_create(
+            organization=org, program=program, admission_year=2024, defaults={"name": "CS 2024 planı"}
+        )
+        subjects = {}
+        for code, name, ects in [
+            ("MATH101", "Riyaziyyat", 6),
+            ("CS101", "Proqramlaşdırmanın əsasları", 6),
+            ("EL-WEB", "Veb texnologiyalar (seçmə)", 4),
+            ("EL-AI", "Süni intellekt (seçmə)", 4),
+        ]:
+            subjects[code], _ = Subject.objects.get_or_create(
+                organization=org, code=code, defaults={"name": name, "ects": ects}
+            )
+        for code in ("MATH101", "CS101"):
+            CurriculumSubject.objects.get_or_create(
+                organization=org, curriculum=curriculum, subject=subjects[code], semester_number=1
+            )
+        for code in ("EL-WEB", "EL-AI"):
+            CurriculumSubject.objects.get_or_create(
+                organization=org,
+                curriculum=curriculum,
+                subject=subjects[code],
+                semester_number=1,
+                defaults={"is_elective": True, "elective_group": "SB1", "required_choices": 1},
+            )
+
+        period, _ = AcademicPeriod.objects.get_or_create(
+            organization=org,
+            name="2024/2025 Payız semestri",
+            defaults={
+                "period_type": AcademicPeriodType.SEMESTER,
+                "academic_year": "2024/2025",
+                "start_date": "2024-09-01",
+                "end_date": "2025-01-31",
+                "is_current": True,
+            },
+        )
+
+        # Academic records + mandatory auto-enroll per student.
+        for user, scope_key in student_scope:
+            group = units.get(scope_key)
+            record, _ = StudentAcademicRecord.objects.get_or_create(
+                organization=org,
+                student=user,
+                program=program,
+                defaults={"curriculum": curriculum, "group": group, "admission_year": 2024},
+            )
+            registrar_services.enroll_mandatory_subjects(record=record, period=period, semester_number=1)
+
+        # Group-level elective decision: AZ group → Veb, EN group → AI.
+        for group_key, subject_code in (("group_az", "EL-WEB"), ("group_en", "EL-AI")):
+            group = units.get(group_key)
+            if group and StudentAcademicRecord.objects.filter(organization=org, group=group).exists():
+                registrar_services.choose_group_elective(
+                    organization=org,
+                    group=group,
+                    curriculum=curriculum,
+                    period=period,
+                    elective_group="SB1",
+                    subject=subjects[subject_code],
+                    decided_by=decided_by,
+                )
 
     def _configure_profile(self, user, org, profile_role, units, scope_key):
         profile = user.profile

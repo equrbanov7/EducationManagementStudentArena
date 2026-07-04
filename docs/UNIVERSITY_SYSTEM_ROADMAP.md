@@ -261,7 +261,7 @@ FinalGrade < pass_threshold  VƏ YA  exam_score < min_exam_score
 |------|-------|------|-----------------|
 | **U0** (bitdi) | Rollar, unit iyerarxiya, provisioning, ilk-giriş, seed, program koordinatoru | — | ✔ |
 | **U1** (bitdi) | Registrar nüvəsi: `apps/registrar` — `Program`, `Subject`, `Curriculum`, `CurriculumSubject` (+RLS izolyasiya, semestr üçün `AcademicPeriod` reuse) | orta (migration) | ✔ |
-| **U2** | `CourseOffering` + `Enrollment` + tələbə akademik axını (§2) | orta | sonra |
+| **U2** (bitdi) | `StudentAcademicRecord` + `CourseOffering` + `Enrollment` + `GroupElectiveChoice` + servis qatı (məcburi auto-enroll + **qrup-əsaslı seçmə**) + RLS + seed demo datası (§2, §2.5) | orta | ✔ |
 | **U3** | `AssessmentScheme` + `GradeComponent` + elektron jurnal (§3) + 25%/resit (§5) | orta-yüksək | sonra |
 | **U4** | Dərs cədvəli `ScheduleSlot` (§4) | aşağı-orta | sonra |
 | **U5** | Transkript + GPA + status state-machine (P3-2 §6-8) | yüksək | sonra |

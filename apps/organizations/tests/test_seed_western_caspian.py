@@ -90,3 +90,20 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
         self.assertTrue(admin.is_superuser)
         self.assertTrue(admin.is_staff)
         self.assertTrue(admin.check_password(self.PASSWORD))
+
+    def test_seeds_curriculum_and_group_based_enrollments(self):
+        from apps.registrar.models import Curriculum, Enrollment, GroupElectiveChoice, Program
+
+        self._seed()
+        with bypass_rls():
+            org = Organization.objects.get(slug="qerbi-kaspi-universiteti")
+            self.assertEqual(Program.objects.filter(organization=org).count(), 1)
+            self.assertEqual(Curriculum.objects.filter(organization=org).count(), 1)
+            # 4 students × (2 mandatory + 1 group elective) = 12 enrollments.
+            self.assertEqual(Enrollment.objects.filter(organization=org).count(), 12)
+            # Each sector group made its own elective decision.
+            decisions = {
+                c.chosen_subject.code
+                for c in GroupElectiveChoice.objects.filter(organization=org).select_related("chosen_subject")
+            }
+            self.assertEqual(decisions, {"EL-WEB", "EL-AI"})
