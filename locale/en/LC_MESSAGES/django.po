@@ -26751,6 +26751,122 @@ msgctxt "registrar.schedule"
 msgid "Hər həftə"
 msgstr "Every week"
 
+msgctxt "registrar.console"
+msgid "Registrar idarəetməsi"
+msgstr "Registrar management"
+
+msgctxt "registrar.console"
+msgid "Akademik kataloqun idarəetməsi — ixtisaslar (proqram) və fənlər."
+msgstr "Manage the academic catalogue — programs and subjects."
+
+msgctxt "registrar.console"
+msgid "İxtisaslar (proqram)"
+msgstr "Programs"
+
+msgctxt "registrar.console"
+msgid "Yeni proqram"
+msgstr "New program"
+
+msgctxt "registrar.console"
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "registrar.console"
+msgid "qayıb"
+msgstr "absence"
+
+msgctxt "registrar.console"
+msgid "deaktiv"
+msgstr "inactive"
+
+msgctxt "registrar.console"
+msgid "Hələ ixtisas yoxdur."
+msgstr "No programs yet."
+
+msgctxt "registrar.console"
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgctxt "registrar.console"
+msgid "Yeni fənn"
+msgstr "New subject"
+
+msgctxt "registrar.console"
+msgid "Hələ fənn yoxdur."
+msgstr "No subjects yet."
+
+msgctxt "registrar.console"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "registrar.console"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "registrar.console"
+msgid "Proqram redaktəsi"
+msgstr "Edit program"
+
+msgctxt "registrar.console"
+msgid "redaktə"
+msgstr "edit"
+
+msgctxt "registrar.console"
+msgid "Yeni ixtisas (proqram)"
+msgstr "New program"
+
+msgctxt "registrar.console"
+msgid "Fənn redaktəsi"
+msgstr "Edit subject"
+
+msgctxt "registrar.console"
+msgid "Bu proqram kodu artıq mövcuddur."
+msgstr "This program code already exists."
+
+msgctxt "registrar.console"
+msgid "Bu fənn kodu artıq mövcuddur."
+msgstr "This subject code already exists."
+
+msgctxt "registrar.console"
+msgid "Kod"
+msgstr "Code"
+
+msgctxt "registrar.console"
+msgid "Ad"
+msgstr "Name"
+
+msgctxt "registrar.console"
+msgid "Təhsil pilləsi"
+msgstr "Degree level"
+
+msgctxt "registrar.console"
+msgid "İxtisas bölməsi (opsional)"
+msgstr "Specialty unit (optional)"
+
+msgctxt "registrar.console"
+msgid "Məzuniyyət ECTS yükü"
+msgstr "Graduation ECTS load"
+
+msgctxt "registrar.console"
+msgid "Qayıb limiti (%)"
+msgstr "Absence limit (%)"
+
+msgctxt "registrar.console"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "registrar.console"
+msgid "ECTS krediti"
+msgstr "ECTS credit"
+
+msgctxt "registrar.console"
+msgid "Təsvir"
+msgstr "Description"
+
+msgctxt "profile.sidebar"
+msgid "Registrar (kataloq)"
+msgstr "Registrar (catalogue)"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

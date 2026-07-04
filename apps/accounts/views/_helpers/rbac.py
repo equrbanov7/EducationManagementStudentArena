@@ -187,6 +187,11 @@ def _role_capabilities(user, profile):
     user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
 
     can_manage_org = is_superadmin or is_org_admin
+    # Registrar console (K3): who may manage the academic catalogue (programs /
+    # subjects). Org-admin (rector/vice-rector/owner) + dekan/kafedra müdürü.
+    # The actual authorisation is re-checked in registrar.views (defence in depth);
+    # this flag only drives nav visibility.
+    can_manage_registrar = is_superadmin or is_org_admin or is_unit_manager
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
@@ -399,6 +404,7 @@ def _role_capabilities(user, profile):
         "can_manage_appeals": can_manage_appeals,
         "can_view_my_appeals": can_view_my_appeals,
         "can_manage_org": can_manage_org,
+        "can_manage_registrar": can_manage_registrar,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,
         "can_view_student_assignments": can_view_student_assignments,

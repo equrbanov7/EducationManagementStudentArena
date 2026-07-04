@@ -1,0 +1,183 @@
+/* Registrar console (K3) — akademik kataloq idarəetməsi. Token-əsaslı (--ems-*). */
+
+.console-page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+.console-page--form {
+    max-width: 640px;
+}
+
+.console-head {
+    margin-bottom: 1.25rem;
+}
+.console-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    margin: 0 0 0.3rem;
+}
+.console-title i { color: var(--ems-primary-600); }
+.console-sub { color: var(--ems-neutral-600); font-size: 0.9rem; margin: 0; }
+.console-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+.console-back:hover { text-decoration: underline; }
+
+/* Two-panel grid */
+.console-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+}
+.console-panel {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+    overflow: hidden;
+}
+.console-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0.85rem 1rem;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+.console-panel-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+    margin: 0;
+}
+.console-panel-title i { color: var(--ems-primary-500); }
+.console-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 6px 12px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.console-add-btn:hover { background: var(--ems-primary-700); }
+
+.console-list { list-style: none; margin: 0; padding: 0; }
+.console-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+.console-item:last-child { border-bottom: none; }
+.console-item.is-inactive { opacity: 0.6; }
+.console-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-decoration: none;
+    min-width: 0;
+}
+.console-item-code { font-weight: 700; color: var(--ems-primary-700); font-size: 0.85rem; }
+.console-item-name { color: var(--ems-neutral-800); font-size: 0.9rem; }
+.console-item-main:hover .console-item-name { text-decoration: underline; }
+.console-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 0.75rem;
+    color: var(--ems-neutral-500);
+}
+.console-badge-off {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.console-empty { padding: 2rem 1rem; text-align: center; color: var(--ems-neutral-500); }
+.console-empty i { font-size: 1.6rem; color: var(--ems-neutral-400); margin-bottom: 0.4rem; }
+.console-empty p { margin: 0; }
+
+/* Form card */
+.console-card {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+    padding: 1.25rem 1.4rem;
+}
+.console-form-errors {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+.console-field { margin-bottom: 1rem; }
+.console-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--ems-neutral-700);
+    margin-bottom: 0.3rem;
+}
+.console-field input[type="text"],
+.console-field input[type="number"],
+.console-field select,
+.console-field textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.console-field input[type="checkbox"] { width: 18px; height: 18px; }
+.console-field.has-error input,
+.console-field.has-error select,
+.console-field.has-error textarea { border-color: var(--ems-danger-strong); }
+.console-field-help { display: block; color: var(--ems-neutral-500); font-size: 0.72rem; margin-top: 0.25rem; }
+.console-field-error { color: var(--ems-danger-strong); font-size: 0.75rem; margin-top: 0.25rem; }
+
+.console-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0.5rem;
+}
+.console-save-btn {
+    padding: 9px 20px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+.console-save-btn:hover { background: var(--ems-primary-700); }
+.console-cancel-link { color: var(--ems-neutral-600); font-size: 0.85rem; text-decoration: none; }
+.console-cancel-link:hover { text-decoration: underline; }
