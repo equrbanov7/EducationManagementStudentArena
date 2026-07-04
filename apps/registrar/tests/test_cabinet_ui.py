@@ -129,6 +129,15 @@ class StudentSubjectsCabinetIntegrationTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn(reverse("accounts:profile"), resp["Location"])
 
+    def test_university_navbar_hides_trial_and_courses(self):
+        # U6.3 — course-centric / subscription menu items (trial-exam request +
+        # the LMS course marketplace) are hidden in UNIVERSITY_MODE.
+        client = self._login("wcu_student_az1")
+        resp = client.get(reverse("accounts:profile") + "?section=profile-info")
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, reverse("trial_exams:request"))
+        self.assertNotContains(resp, 'data-section="courses"')
+
     def test_student_sees_credit_bar_and_elective(self):
         resp = self._get_section("wcu_student_az1")
         self.assertEqual(resp.status_code, 200)

@@ -116,6 +116,8 @@
                                 <span class="blog-header__create-item-desc">{% trans "create_live_exam_desc" context "nav" %}</span>
                             </span>
                         </a>
+                        {% if not university_mode %}
+                        {# Universitet rejimi: sınaq/abunə "təkrar imtahan tələbi" marketinq girişi gizlədilir. #}
                         <a href="{% url 'trial_exams:request' %}" class="blog-header__create-item" role="menuitem">
                             <span class="blog-header__create-item-icon blog-header__create-item-icon--trial" aria-hidden="true">
                                 <i class="fas fa-clipboard-list"></i>
@@ -125,6 +127,7 @@
                                 <span class="blog-header__create-item-desc">{% trans "trial_exam_request_desc" context "nav" %}</span>
                             </span>
                         </a>
+                        {% endif %}
                     </div>
                 </div>
                 {% elif request.user.is_authenticated %}
@@ -149,6 +152,7 @@
                                 <span class="blog-header__create-item-desc">{% trans "join_live_exam_desc" context "nav" %}</span>
                             </span>
                         </a>
+                        {% if not university_mode %}
                         <a href="{% url 'trial_exams:request' %}" class="blog-header__create-item" role="menuitem">
                             <span class="blog-header__create-item-icon blog-header__create-item-icon--trial" aria-hidden="true">
                                 <i class="fas fa-clipboard-list"></i>
@@ -158,6 +162,7 @@
                                 <span class="blog-header__create-item-desc">{% trans "trial_exam_request_desc" context "nav" %}</span>
                             </span>
                         </a>
+                        {% endif %}
                     </div>
                 </div>
                 {% endif %}
@@ -342,6 +347,7 @@
                 <span>{% trans "create_live_exam" context "nav" %}</span>
             </a>
         </li>
+        {% if not university_mode %}
         <li class="blog-header__nav-item">
             <a href="{% url 'trial_exams:request' %}"
                {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
@@ -350,6 +356,7 @@
                 <span>{% trans "trial_exam_request" context "nav" %}</span>
             </a>
         </li>
+        {% endif %}
         {% else %}
         <li class="blog-header__nav-item">
             <a href="{% url 'liveExam:pin_entry' %}"
@@ -359,7 +366,7 @@
                 <span>{% trans "live_exam" context "nav" %}</span>
             </a>
         </li>
-        {% if request.user.is_authenticated %}
+        {% if request.user.is_authenticated and not university_mode %}
         <li class="blog-header__nav-item">
             <a href="{% url 'trial_exams:request' %}"
                {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
