@@ -1,0 +1,136 @@
+/* Akademik analitika paneli (U10) — dekan/kafedra dashboard.
+   WCU blue tokens only; table styles inherit journal.css (.journal-grid). */
+
+.analytics-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.analytics-period-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.analytics-period-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+    margin: 0;
+}
+.analytics-period-select {
+    padding: 7px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-800);
+    background: #fff;
+}
+
+/* ── Stat cards ───────────────────────────────────────────────────────────── */
+.analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.8rem;
+    margin: 1rem 0 1.4rem;
+}
+.analytics-card {
+    background: #fff;
+    border: 1px solid var(--ems-neutral-200);
+    border-top: 3px solid var(--ems-primary-500);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.analytics-card--pass { border-top-color: var(--ems-success-600); }
+.analytics-card--gpa { border-top-color: var(--ems-primary-700); }
+.analytics-card--warn { border-top-color: var(--ems-warning-500); }
+.analytics-card-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    line-height: 1.1;
+}
+.analytics-card-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+.analytics-card-label i { color: var(--ems-primary-500); margin-right: 4px; }
+.analytics-card--pass .analytics-card-label i { color: var(--ems-success-600); }
+.analytics-card--warn .analytics-card-label i { color: var(--ems-warning-800); }
+.analytics-card-hint {
+    font-size: 0.72rem;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Tables (extends .journal-grid) ───────────────────────────────────────── */
+.analytics-table .ta-left { text-align: left; }
+.analytics-code {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-100);
+    border-radius: 6px;
+    padding: 1px 7px;
+    margin-right: 6px;
+}
+.analytics-rate { font-weight: 600; }
+.analytics-rate.is-low { color: var(--ems-danger-strong); }
+.analytics-rate.is-high { color: var(--ems-warning-800); }
+
+/* ── At-risk subjects ─────────────────────────────────────────────────────── */
+.analytics-risk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+.analytics-risk-item {
+    background: #fff;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    padding: 0.75rem 1rem 0.9rem;
+}
+.analytics-risk-main {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.2rem;
+}
+.analytics-risk-name { font-weight: 600; color: var(--ems-neutral-800); font-size: 0.9rem; }
+.analytics-risk-figures {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 0.45rem;
+    flex-wrap: wrap;
+}
+.analytics-risk-fail {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ems-danger-strong);
+}
+.analytics-risk-meta { font-size: 0.76rem; color: var(--ems-neutral-500); }
+.analytics-risk-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+}
+.analytics-risk-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--ems-warning-500), var(--ems-danger-strong));
+    transition: width 0.4s ease;
+}
+
+@media (max-width: 640px) {
+    .analytics-cards { grid-template-columns: repeat(2, 1fr); }
+}

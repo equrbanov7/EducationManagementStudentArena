@@ -424,6 +424,13 @@
                 <span class="sidebar-menu-text">{% trans "Qiymət təsdiqləri" context "profile.sidebar" %}</span>
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{% url 'registrar:analytics' %}"
+               class="sidebar-menu-link {% if active_main_nav == 'analytics' %}active{% endif %}">
+                <i class="fas fa-chart-line sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">{% trans "Akademik analitika" context "profile.sidebar" %}</span>
+            </a>
+        </li>
         {% endif %}
         {% if 'org-faculties' in allowed_sections %}
         <li class="sidebar-menu-item">
