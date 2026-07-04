@@ -440,5 +440,41 @@ def schedule_slot_delete(request, slot_id):
     return redirect(reverse("registrar:schedule"))
 
 
+# ── Akademik təqvim (U11) ────────────────────────────────────────────────────
+
+
+@login_required
+def calendar_view(request):
+    """Academic calendar: semesters with their registration + exam-session windows.
+
+    Read-only and open to every authenticated member of the active organization
+    (students plan around these dates as much as staff). Window editing lives in
+    the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
+    from django.apps import apps as django_apps
+    from django.utils import timezone
+
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
+
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    today = timezone.localdate()
+    periods = []
+    for period in AcademicPeriod.objects.filter(organization=organization).order_by("-start_date"):
+        periods.append(
+            {
+                "period": period,
+                "is_running": period.start_date <= today <= period.end_date,
+                "registration_state": period.registration_state,
+                "exam_session_state": period.exam_session_state,
+            }
+        )
+    return render(
+        request,
+        "registrar/calendar.html",
+        {"has_context": True, "periods": periods, "today": today, "active_main_nav": "calendar"},
+    )
+
+
 # The registrar console (K3) views live in ``apps.registrar.console_views`` to
 # keep this module focused (journal + timetable) and under the size budget.

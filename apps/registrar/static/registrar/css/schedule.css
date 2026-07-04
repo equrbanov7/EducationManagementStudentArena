@@ -35,6 +35,16 @@
     padding: 2px 8px;
     border-radius: 999px;
 }
+.schedule-calendar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-primary-600);
+    text-decoration: none;
+}
+.schedule-calendar-link:hover { color: var(--ems-primary-700); text-decoration: underline; }
 
 /* ── Həftə naviqasiya paneli ──────────────────────────────────────────── */
 .schedule-weekbar {

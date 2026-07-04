@@ -11,6 +11,7 @@ urlpatterns = [
     path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
+    path("teqvim/", views.calendar_view, name="calendar"),
     path("cedvel/", views.schedule_view, name="schedule"),
     path("cedvel/slot/<uuid:slot_id>/sil/", views.schedule_slot_delete, name="schedule_slot_delete"),
     # Registrar console (K3) — literal prefixes, must precede the uuid catch-all.
