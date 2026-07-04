@@ -2,13 +2,14 @@
 
 from django.urls import path
 
-from . import console_views, pdf_views, views
+from . import analytics_views, console_views, pdf_views, views
 
 app_name = "registrar"
 
 urlpatterns = [
     path("", views.journal_list, name="journal_list"),
     path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
+    path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("cedvel/", views.schedule_view, name="schedule"),
     path("cedvel/slot/<uuid:slot_id>/sil/", views.schedule_slot_delete, name="schedule_slot_delete"),

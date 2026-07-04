@@ -27477,6 +27477,117 @@ msgctxt "registrar.pdf"
 msgid "Məzuniyyət yükü (ECTS)"
 msgstr "Mezuniyet yükü (ECTS)"
 
+msgctxt "registrar.analytics"
+msgid "Akademik analitika"
+msgstr "Akademik analitik"
+
+msgctxt "registrar.analytics"
+msgid "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət."
+msgstr "Program ve gruplara göre geçme oranı, ortalama GPA ve devam."
+
+msgctxt "registrar.analytics"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "registrar.analytics"
+msgid "Göstər"
+msgstr "Göster"
+
+msgctxt "registrar.analytics"
+msgid "Bu semestr üçün hələ qiymətləndirmə datası yoxdur."
+msgstr "Bu dönem için henüz not verisi yok."
+
+msgctxt "registrar.analytics"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "registrar.analytics"
+msgid "Fənn qeydiyyatı"
+msgstr "Ders kaydı"
+
+msgctxt "registrar.analytics"
+msgid "Keçid faizi"
+msgstr "Geçme oranı"
+
+msgctxt "registrar.analytics"
+msgid "yekunlaşmış"
+msgstr "sonuçlanan"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA (kredit-çəkili)"
+msgstr "Ort. GPA (kredi ağırlıklı)"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb faizi"
+msgstr "Devamsızlık oranı"
+
+msgctxt "registrar.analytics"
+msgid "tələbə kəsilmə həddində"
+msgstr "öğrenci baraj sınırında"
+
+msgctxt "registrar.analytics"
+msgid "Proqramlar üzrə"
+msgstr "Programlara göre"
+
+msgctxt "registrar.analytics"
+msgid "Proqram"
+msgstr "Program"
+
+msgctxt "registrar.analytics"
+msgid "Qeydiyyat"
+msgstr "Kayıt"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA"
+msgstr "Ort. GPA"
+
+msgctxt "registrar.analytics"
+msgid "Orta yekun bal"
+msgstr "Ort. toplam puan"
+
+msgctxt "registrar.analytics"
+msgid "Qruplar üzrə"
+msgstr "Gruplara göre"
+
+msgctxt "registrar.analytics"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində"
+msgstr "Baraj sınırında"
+
+msgctxt "registrar.analytics"
+msgid "Diqqət tələb edən fənlər"
+msgstr "Dikkat gerektiren dersler"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə faizi ən yüksək fənn açılışları"
+msgstr "kalma oranı en yüksek ders açılışları"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə"
+msgstr "kalma"
+
+msgctxt "registrar.analytics"
+msgid "orta bal"
+msgstr "ort. puan"
+
+msgctxt "profile.sidebar"
+msgid "Akademik analitika"
+msgstr "Akademik analitik"
+
+msgid "Akademik analitika"
+msgstr "Akademik analitik"
+
+msgctxt "registrar.analytics"
+msgid "Keçid"
+msgstr "Geçme"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb"
+msgstr "Devamsızlık"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

@@ -27576,6 +27576,117 @@ msgctxt "registrar.pdf"
 msgid "Məzuniyyət yükü (ECTS)"
 msgstr "Выпускная нагрузка (ECTS)"
 
+msgctxt "registrar.analytics"
+msgid "Akademik analitika"
+msgstr "Академическая аналитика"
+
+msgctxt "registrar.analytics"
+msgid "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət."
+msgstr "Процент сдачи, средний GPA и посещаемость по программам и группам."
+
+msgctxt "registrar.analytics"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "registrar.analytics"
+msgid "Göstər"
+msgstr "Показать"
+
+msgctxt "registrar.analytics"
+msgid "Bu semestr üçün hələ qiymətləndirmə datası yoxdur."
+msgstr "Данных об оценках за этот семестр пока нет."
+
+msgctxt "registrar.analytics"
+msgid "Tələbə"
+msgstr "Студенты"
+
+msgctxt "registrar.analytics"
+msgid "Fənn qeydiyyatı"
+msgstr "Записи на предметы"
+
+msgctxt "registrar.analytics"
+msgid "Keçid faizi"
+msgstr "Процент сдачи"
+
+msgctxt "registrar.analytics"
+msgid "yekunlaşmış"
+msgstr "завершено"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA (kredit-çəkili)"
+msgstr "Средний GPA (по кредитам)"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb faizi"
+msgstr "Процент пропусков"
+
+msgctxt "registrar.analytics"
+msgid "tələbə kəsilmə həddində"
+msgstr "студентов на грани недопуска"
+
+msgctxt "registrar.analytics"
+msgid "Proqramlar üzrə"
+msgstr "По программам"
+
+msgctxt "registrar.analytics"
+msgid "Proqram"
+msgstr "Программа"
+
+msgctxt "registrar.analytics"
+msgid "Qeydiyyat"
+msgstr "Записи"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA"
+msgstr "Средний GPA"
+
+msgctxt "registrar.analytics"
+msgid "Orta yekun bal"
+msgstr "Средний итоговый балл"
+
+msgctxt "registrar.analytics"
+msgid "Qruplar üzrə"
+msgstr "По группам"
+
+msgctxt "registrar.analytics"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində"
+msgstr "На грани недопуска"
+
+msgctxt "registrar.analytics"
+msgid "Diqqət tələb edən fənlər"
+msgstr "Предметы, требующие внимания"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə faizi ən yüksək fənn açılışları"
+msgstr "предметы с наибольшим процентом несдачи"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə"
+msgstr "несдача"
+
+msgctxt "registrar.analytics"
+msgid "orta bal"
+msgstr "средний балл"
+
+msgctxt "profile.sidebar"
+msgid "Akademik analitika"
+msgstr "Академическая аналитика"
+
+msgid "Akademik analitika"
+msgstr "Академическая аналитика"
+
+msgctxt "registrar.analytics"
+msgid "Keçid"
+msgstr "Сдача"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb"
+msgstr "Пропуски"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

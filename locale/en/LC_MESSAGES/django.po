@@ -27481,6 +27481,117 @@ msgctxt "registrar.pdf"
 msgid "Məzuniyyət yükü (ECTS)"
 msgstr "Graduation load (ECTS)"
 
+msgctxt "registrar.analytics"
+msgid "Akademik analitika"
+msgstr "Academic analytics"
+
+msgctxt "registrar.analytics"
+msgid "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət."
+msgstr "Pass rate, average GPA and attendance by programme and group."
+
+msgctxt "registrar.analytics"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "registrar.analytics"
+msgid "Göstər"
+msgstr "Show"
+
+msgctxt "registrar.analytics"
+msgid "Bu semestr üçün hələ qiymətləndirmə datası yoxdur."
+msgstr "No grading data for this semester yet."
+
+msgctxt "registrar.analytics"
+msgid "Tələbə"
+msgstr "Students"
+
+msgctxt "registrar.analytics"
+msgid "Fənn qeydiyyatı"
+msgstr "Enrollments"
+
+msgctxt "registrar.analytics"
+msgid "Keçid faizi"
+msgstr "Pass rate"
+
+msgctxt "registrar.analytics"
+msgid "yekunlaşmış"
+msgstr "finalised"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA (kredit-çəkili)"
+msgstr "Avg GPA (credit-weighted)"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb faizi"
+msgstr "Absence rate"
+
+msgctxt "registrar.analytics"
+msgid "tələbə kəsilmə həddində"
+msgstr "students over the absence bar"
+
+msgctxt "registrar.analytics"
+msgid "Proqramlar üzrə"
+msgstr "By programme"
+
+msgctxt "registrar.analytics"
+msgid "Proqram"
+msgstr "Programme"
+
+msgctxt "registrar.analytics"
+msgid "Qeydiyyat"
+msgstr "Enrollments"
+
+msgctxt "registrar.analytics"
+msgid "Orta GPA"
+msgstr "Avg GPA"
+
+msgctxt "registrar.analytics"
+msgid "Orta yekun bal"
+msgstr "Avg total score"
+
+msgctxt "registrar.analytics"
+msgid "Qruplar üzrə"
+msgstr "By group"
+
+msgctxt "registrar.analytics"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində"
+msgstr "Over absence bar"
+
+msgctxt "registrar.analytics"
+msgid "Diqqət tələb edən fənlər"
+msgstr "Subjects needing attention"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə faizi ən yüksək fənn açılışları"
+msgstr "offerings with the highest fail rate"
+
+msgctxt "registrar.analytics"
+msgid "kəsilmə"
+msgstr "fail rate"
+
+msgctxt "registrar.analytics"
+msgid "orta bal"
+msgstr "avg score"
+
+msgctxt "profile.sidebar"
+msgid "Akademik analitika"
+msgstr "Academic analytics"
+
+msgid "Akademik analitika"
+msgstr "Academic analytics"
+
+msgctxt "registrar.analytics"
+msgid "Keçid"
+msgstr "Pass"
+
+msgctxt "registrar.analytics"
+msgid "Qayıb"
+msgstr "Absence"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

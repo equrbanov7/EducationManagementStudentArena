@@ -45,6 +45,9 @@ def _nav_targets(caps):
         targets.append(
             (_("Qiymət təsdiqləri"), "fa-clipboard-check", reverse("registrar:approvals_inbox"), "təsdiq approval")
         )
+        targets.append(
+            (_("Akademik analitika"), "fa-chart-line", reverse("registrar:analytics"), "analitika statistika gpa keçid")
+        )
     if caps.get("can_manage_registrar"):
         targets.append(
             (_("Registrar (kataloq)"), "fa-sitemap", reverse("registrar:console"), "registrar program fənn kataloq")
