@@ -61,7 +61,7 @@ DEFAULT_DESCRIPTIONS = {
 }
 
 DEFAULT_KEYWORDS = (
-    "EMSArena, LMS Azərbaycan, təhsil idarəetmə sistemi, onlayn imtahan "
+    f"{ORG_NAME}, LMS Azərbaycan, təhsil idarəetmə sistemi, onlayn imtahan "
     "sistemi, elektron jurnal, EdTech Azərbaycan, universitet idarəetmə "
     "sistemi, məktəb idarəetmə sistemi, kurs mərkəzi platforması"
 )

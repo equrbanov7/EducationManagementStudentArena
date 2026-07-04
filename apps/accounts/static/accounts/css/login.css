@@ -1,113 +1,91 @@
-/* Modern Login Page - Blue/Green Theme */
+/* Login / auth page — Qərbi Kaspi Universiteti cabinet.
+   Clean, flat, institutional. Design-token driven (var(--ems-*)); no hard-coded
+   hex, no decorative gradients/blur so it reads as a serious university portal
+   and adapts to light/dark tokens. */
 
-/* --- CSS Variables --- */
-:root {
-    --primary-blue: var(--ems-primary-600);
-    --primary-green: var(--ems-success-600);
-    --primary-hover: var(--ems-primary-800);
-    --text-dark: var(--ems-neutral-800);
-    --text-light: var(--ems-gray-500);
-    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* --- Page Wrapper with Gradient Background --- */
+/* --- Page wrapper --- */
 .auth-page-wrapper {
     min-height: calc(100vh - 170px);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
-    font-family: var(--font-main);
-    position: relative;
-    overflow: hidden;
+    background: var(--ems-neutral-50);
 }
 
-.auth-page-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.auth-page-wrapper::after {
-    content: '';
-    position: absolute;
-    bottom: -50%;
-    left: -20%;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-/* --- Auth Card with Modern Design --- */
+/* --- Auth card --- */
 .auth-card {
-    background: white;
-    max-width: 450px;
-    width: 100%;
-    padding: 50px;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    text-align: center;
     position: relative;
-    z-index: 1;
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: var(--ems-neutral-0);
+    max-width: 420px;
+    width: 100%;
+    padding: 40px 40px 32px;
+    border-radius: 16px;
+    border: 1px solid var(--ems-neutral-200);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+    text-align: center;
 }
 
+/* Thin solid brand accent along the card's top edge (institutional, not gradient). */
 .auth-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 5px;
-    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    border-radius: 24px 24px 0 0;
+    height: 3px;
+    background: var(--ems-primary-600);
+    border-radius: 16px 16px 0 0;
+}
+
+/* --- Brand logo --- */
+.auth-brand {
+    display: block;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-brand-logo {
+    max-width: 220px;
+    height: auto;
 }
 
 /* --- Headings --- */
 .auth-heading {
-    font-size: 2.5rem;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 10px;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    margin: 0 0 6px;
 }
 
 .auth-subheading {
-    color: var(--text-light);
-    font-size: 1.05rem;
-    margin-bottom: 35px;
-    line-height: 1.5;
-}
-
-/* --- Error Messages --- */
-.auth-global-errors {
-    background: linear-gradient(135deg, var(--ems-danger-100) 0%, var(--ems-danger-200) 100%);
-    color: #991b1b;
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    border: 1px solid #fca5a5;
-    text-align: left;
+    color: var(--ems-neutral-500);
     font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    line-height: 1.5;
+    margin: 0 0 28px;
 }
 
-/* --- Form Styles --- */
+/* --- Global (non-field) errors --- */
+.auth-global-errors {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    border: 1px solid var(--ems-danger-200);
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.auth-global-errors p {
+    margin: 0;
+}
+
+/* --- Form --- */
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .auth-form-field {
@@ -116,210 +94,63 @@
 
 .auth-form-field label {
     display: block;
-    font-size: 0.95rem;
-    color: var(--text-dark);
-    margin-bottom: 10px;
-    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ems-neutral-700);
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .auth-form-field input[type="text"],
 .auth-form-field input[type="email"],
 .auth-form-field input[type="password"] {
     width: 100%;
-    padding: 14px 18px;
+    padding: 12px 14px;
     font-size: 1rem;
-    border: 2px solid var(--ems-gray-200);
-    border-radius: 12px;
+    color: var(--ems-neutral-900);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
     outline: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: inherit;
-    background-color: #f9fafb;
+    background-color: var(--ems-neutral-0);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
     box-sizing: border-box;
 }
 
+.auth-form-field input::placeholder {
+    color: var(--ems-neutral-400);
+}
+
+.auth-form-field input:focus {
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+/* --- Password visibility toggle --- */
 .input-visibility-wrapper {
     position: relative;
 }
 
-.input-visibility-wrapper input[type="text"],
-.input-visibility-wrapper input[type="email"],
-.input-visibility-wrapper input[type="password"] {
-    padding-right: 48px;
+.input-visibility-wrapper input {
+    padding-right: 46px;
 }
 
 .input-visibility-toggle {
     position: absolute;
-    right: 12px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     border: 0;
     background: transparent;
-    color: var(--ems-gray-500);
+    color: var(--ems-neutral-400);
     cursor: pointer;
     line-height: 1;
-    padding: 4px;
+    padding: 6px;
+    border-radius: 6px;
 }
 
 .input-visibility-toggle:hover {
-    color: var(--primary-blue);
+    color: var(--ems-primary-600);
 }
 
-.auth-form-field input:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-    background-color: var(--ems-neutral-0);
-    transform: translateY(-2px);
-}
-
-.auth-field-error {
-    color: var(--ems-danger-500);
-    font-size: 0.85rem;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.auth-field-error::before {
-    content: '⚠';
-}
-
-/* --- Forgot Password Link --- */
-.auth-forgot-password {
-    text-align: right;
-    margin-top: -12px;
-    margin-bottom: -8px;
-}
-
-.auth-forgot-password .auth-forget-password-link {
-    color: var(--primary-blue);
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    position: relative;
-}
-
-.auth-forgot-password .auth-forget-password-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    transition: width 0.3s ease;
-}
-
-.auth-forgot-password .auth-forget-password-link:hover::after {
-    width: 100%;
-}
-
-/* --- Submit Button with Gradient --- */
-.auth-submit-btn {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.auth-submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
-}
-
-.auth-submit-btn:hover::before {
-    left: 100%;
-}
-
-.auth-submit-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
-}
-
-.auth-submit-btn:active {
-    transform: translateY(-1px);
-}
-
-/* --- Footer Text --- */
-.auth-footer-text {
-    margin-top: 30px;
-    color: var(--text-light);
-    font-size: 0.95rem;
-}
-
-.auth-footer-text a {
-    color: var(--primary-blue);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    position: relative;
-}
-
-.auth-footer-text a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    transition: width 0.3s ease;
-}
-
-.auth-footer-text a:hover::after {
-    width: 100%;
-}
-
-/* --- Responsive Design --- */
-@media (max-width: 500px) {
-    .auth-page-wrapper {
-        padding: 20px 15px;
-    }
-
-    .auth-card {
-        padding: 35px 25px;
-        margin: 0;
-        border-radius: 20px;
-    }
-
-    .auth-heading {
-        font-size: 2rem;
-    }
-
-    .auth-subheading {
-        font-size: 0.95rem;
-    }
-
-    .auth-form-field input[type="text"],
-    .auth-form-field input[type="email"],
-    .auth-form-field input[type="password"] {
-        padding: 12px 16px;
-    }
-
-    .auth-submit-btn {
-        padding: 14px;
-        font-size: 1rem;
-    }
-}
-
-/* Inline SVG göz ikonları (FontAwesome login-də yüklənmir — audit addım 3).
-   data-visible="true" → parol görünür → "gizlət" ikonu göstərilir. */
 .input-visibility-toggle .visibility-icon-hide {
     display: none;
 }
@@ -332,13 +163,94 @@
     display: inline;
 }
 
-/* WCU brand logo above the auth card heading (J1/K1) */
-.auth-brand {
-    display: block;
-    text-align: center;
-    margin-bottom: 1.25rem;
+/* --- Field-level error --- */
+.auth-field-error {
+    color: var(--ems-danger-600);
+    font-size: 0.82rem;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
-.auth-brand-logo {
-    max-width: 240px;
-    height: auto;
+
+.auth-field-error::before {
+    content: '⚠';
+}
+
+/* --- Forgot-password link --- */
+.auth-forgot-password {
+    text-align: right;
+    margin-top: -6px;
+}
+
+.auth-forget-password-link {
+    color: var(--ems-primary-600);
+    font-size: 0.88rem;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-forget-password-link:hover {
+    text-decoration: underline;
+}
+
+/* --- Submit button --- */
+.auth-submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.auth-submit-btn:hover {
+    background: var(--ems-primary-700);
+}
+
+.auth-submit-btn:active {
+    background: var(--ems-primary-800);
+}
+
+.auth-submit-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+/* --- Footer --- */
+.auth-footer-text {
+    margin-top: 26px;
+    color: var(--ems-neutral-500);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.auth-footer-text a {
+    color: var(--ems-primary-600);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.auth-footer-text a:hover {
+    text-decoration: underline;
+}
+
+/* --- Responsive --- */
+@media (max-width: 500px) {
+    .auth-page-wrapper {
+        padding: 24px 15px;
+    }
+
+    .auth-card {
+        padding: 32px 22px 26px;
+        border-radius: 14px;
+    }
+
+    .auth-heading {
+        font-size: 1.35rem;
+    }
 }
