@@ -81,6 +81,10 @@ def journal_detail(request, offering_id):
             return _handle_add_lesson(request, offering)
         if action == "save_finals":
             return _handle_save_finals(request, offering)
+        if action == "save_components":
+            return _handle_save_components(request, offering)
+        if action == "save_component_scores":
+            return _handle_save_component_scores(request, offering)
         if action == "publish":
             finals.publish_offering(offering=offering, by_user=request.user)
             messages.success(request, _("Jurnal yekunlaşdırıldı."))
@@ -95,11 +99,50 @@ def journal_detail(request, offering_id):
             "offering": offering,
             "journal": journal,
             "finals": finals.get_offering_results(offering=offering),
+            "component_grid": gradebook.get_component_grid(offering=offering),
             "can_edit": not journal["scheme"].is_published,
             "lesson_kinds": LessonKind.choices,
             "active_main_nav": "journal",
         },
     )
+
+
+def _handle_save_components(request, offering):
+    """Define/upsert the offering's assessment components (name + max_score)."""
+    if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
+        messages.warning(request, _("Jurnal yekunlaşdırılıb — komponent redaktəsi bağlıdır."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+    definitions = []
+    index = 0
+    while f"comp_name__{index}" in request.POST:
+        definitions.append(
+            {
+                "id": request.POST.get(f"comp_id__{index}") or None,
+                "name": request.POST.get(f"comp_name__{index}"),
+                "max_score": request.POST.get(f"comp_max__{index}"),
+            }
+        )
+        index += 1
+    gradebook.save_components(offering=offering, definitions=definitions, by_user=request.user)
+    messages.success(request, _("Qiymətləndirmə komponentləri yadda saxlanıldı."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+
+def _handle_save_component_scores(request, offering):
+    """Persist per-(component, enrollment) component scores (cscore__C__E keys)."""
+    entries = []
+    for key, raw in request.POST.items():
+        if not key.startswith("cscore__"):
+            continue
+        parts = key.split("__", 2)
+        if len(parts) != 3:
+            continue
+        _prefix, component_id, enrollment_id = parts
+        entries.append({"component_id": component_id, "enrollment_id": enrollment_id, "score": raw})
+    written = gradebook.save_component_scores(offering=offering, entries=entries, by_user=request.user)
+    messages.success(request, _("Komponent balları yadda saxlanıldı (%(n)s xana).") % {"n": written})
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
 def _handle_save_finals(request, offering):

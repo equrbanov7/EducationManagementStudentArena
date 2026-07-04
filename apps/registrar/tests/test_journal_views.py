@@ -146,6 +146,40 @@ class JournalFinalsViewTest(JournalViewTest):
             fg = FinalGrade.objects.get(enrollment=self.enrollment)
             self.assertEqual(str(fg.exam_score), "42.00")
 
+    def test_save_components_and_scores(self):
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        client = self._client(self.teacher)
+        # 1) Define two components.
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {
+                "action": "save_components",
+                "comp_id__0": "",
+                "comp_name__0": "Seminar",
+                "comp_max__0": "20",
+                "comp_id__1": "",
+                "comp_name__1": "Kollokvium",
+                "comp_max__1": "30",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            comps = {c.name: c for c in AssessmentComponent.objects.filter(offering=self.offering)}
+            self.assertEqual(set(comps), {"Seminar", "Kollokvium"})
+        # 2) Enter a component score.
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {
+                "action": "save_component_scores",
+                f"cscore__{comps['Seminar'].id}__{self.enrollment.id}": "18",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            cs = ComponentScore.objects.get(component=comps["Seminar"], enrollment=self.enrollment)
+            self.assertEqual(str(cs.score), "18.00")
+
     def test_publish_locks_journal(self):
         client = self._client(self.teacher)
         resp = client.post(reverse("registrar:journal_detail", args=[self.offering.id]), {"action": "publish"})

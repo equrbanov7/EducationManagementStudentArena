@@ -288,3 +288,61 @@
     cursor: pointer;
 }
 .journal-publish-btn:hover { border-color: var(--ems-warning-600); color: var(--ems-warning-800); }
+
+/* ── Qiymətləndirmə komponentləri (U7.1) ──────────────────────────────── */
+.journal-components-hint {
+    font-weight: 400;
+    font-size: 0.78rem;
+    color: var(--ems-neutral-500);
+    margin-left: 0.5rem;
+}
+.journal-components-def { margin: 0.5rem 0 1.25rem; }
+.journal-components-rows { display: flex; flex-direction: column; gap: 6px; max-width: 460px; }
+.journal-comp-row { display: flex; gap: 8px; }
+.journal-comp-row input[type="text"] {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.journal-comp-row input[type="number"] {
+    width: 72px;
+    padding: 7px 8px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-align: center;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+.journal-comp-total { margin-left: 12px; font-size: 0.8rem; color: var(--ems-neutral-500); }
+.journal-grid .th-max { font-weight: 400; color: var(--ems-neutral-400); font-size: 0.72rem; }
+.cell-score {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.82rem;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+}
+
+/* Tələbə tərəfi — komponent breakdown çipləri */
+.subject-components {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+}
+.subject-comp-chip {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+.subject-comp-chip strong { color: var(--ems-primary-700); }

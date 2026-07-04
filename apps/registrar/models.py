@@ -482,6 +482,69 @@ class LessonMark(UUIDModel, TimeStampedModel):
         return f"{self.lesson_id} · {self.enrollment_id} = {self.status}"
 
 
+# ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
+#
+# Sadələşdirilmiş jurnal "giriş balı"nı seminar/lab dərs ballarının cəmindən alır.
+# Universitetlər isə tez-tez struktur qiymətləndirmə işlədir: cari bal = seminar +
+# kollokvium(lar) + SDF/sərbəst iş + layihə, hər komponentin öz tavanı (max_score)
+# ilə (cəmi ≈ entry_score_max). Bu, ADDİTİVdir: offering üçün komponent təyin
+# olunmayıbsa, jurnal əvvəlki dərs-cəm məntiqi ilə işləyir (geriyə-uyğun).
+
+
+class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
+    """One weighted entry-score component of an offering (seminar / kollokvium /
+    SDF / layihə). ``max_score`` is its contribution ceiling; the components'
+    ``max_score`` values normally sum to the scheme's ``entry_score_max`` (≈50)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_components"
+    )
+    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="assessment_components")
+    name = models.CharField(max_length=100, help_text="Komponent adı (məs. Seminar, Kollokvium 1, SDF, Layihə).")
+    max_score = models.PositiveSmallIntegerField(default=10, help_text="Bu komponentin giriş balına maksimum töhfəsi.")
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["offering", "order", "name"]
+        verbose_name = pgettext_lazy("registrar.model.component.meta", "assessment component")
+        verbose_name_plural = pgettext_lazy("registrar.model.component.meta", "assessment components")
+        constraints = [
+            models.UniqueConstraint(fields=["offering", "name"], name="uniq_component_offering_name"),
+        ]
+        indexes = [models.Index(fields=["organization", "offering"])]
+
+    def __str__(self):
+        return f"{self.offering_id} · {self.name} (≤{self.max_score})"
+
+
+class ComponentScore(UUIDModel, TimeStampedModel):
+    """One student's score for one assessment component (manual, capped at max)."""
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="component_scores"
+    )
+    component = models.ForeignKey(AssessmentComponent, on_delete=models.CASCADE, related_name="scores")
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="component_scores")
+    score = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Komponent balı.")
+    entered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = pgettext_lazy("registrar.model.component_score.meta", "component score")
+        verbose_name_plural = pgettext_lazy("registrar.model.component_score.meta", "component scores")
+        constraints = [
+            models.UniqueConstraint(fields=["component", "enrollment"], name="uniq_component_enrollment_score"),
+        ]
+        indexes = [models.Index(fields=["organization", "enrollment"])]
+
+    def __str__(self):
+        return f"{self.component_id} · {self.enrollment_id} = {self.score}"
+
+
 # ── Dərs cədvəli (timetable, U4) ─────────────────────────────────────────────
 #
 # Həftəlik təkrarlanan dərs slotu: fənn (offering) + həftənin günü + vaxt +

@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import transaction
 
 from apps.registrar import gradebook, services
-from apps.registrar.models import FinalGrade, LessonMark, ResitReason, ResitRecord, ResitStatus
+from apps.registrar.models import FinalGrade, ResitReason, ResitRecord, ResitStatus
 
 # 0..100 ümumi bal → hərf + GPA nöqtəsi (AZ Boloniya default).
 _LETTER_BANDS = (
@@ -52,12 +52,10 @@ def _clamp(raw, ceiling) -> Decimal:
 
 
 def entry_score_for(enrollment, cap) -> Decimal:
-    """Accumulated semester entry score (seminar/lab marks), capped."""
-    total = sum(
-        (m.score for m in LessonMark.objects.filter(enrollment=enrollment) if m.score is not None),
-        Decimal("0"),
-    )
-    return min(total, Decimal(cap))
+    """Semester entry score — delegates to the canonical component-aware
+    computation in :func:`gradebook.entry_score_for` (weighted components when
+    defined, otherwise the legacy per-lesson mark sum)."""
+    return gradebook.entry_score_for(enrollment, cap)
 
 
 def exam_score_max(scheme) -> int:
