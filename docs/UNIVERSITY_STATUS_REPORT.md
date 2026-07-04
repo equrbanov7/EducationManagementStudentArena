@@ -26,10 +26,13 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
   bozarır, kəsilən qırmızı.
 - ✅ **U4 Dərs cədvəli** — `ScheduleSlot` + konflikt yoxlaması + rol-aware
   həftəlik grid (`/jurnal/cedvel/`).
+- ✅ **U3+ Yekun qiymət + təkrar imtahan** — `FinalGrade` + `ResitRecord`;
+  giriş balı + imtahan → hərf/keçdi-kəsildi; kəsilən → resit hüququ; jurnal
+  finalizasiyası (publish + audit). Müəllim "Yekun nəticə" grid + tələbə nəticə.
 
-**Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U3+ təkrar
-imtahan (`ResitRecord`) + jurnal finalizasiya audit · U5 transkript/GPA ·
-U6 köçürmə/əlavə/təmizlik · (ən sonda: jurnal dizayn/polish).
+**Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U5 transkript/GPA
+(semestrlərarası; yekun qiymət indi var) · U6 köçürmə/əlavə/təmizlik ·
+(ən sonda: jurnal dizayn/polish).
 
 ---
 
