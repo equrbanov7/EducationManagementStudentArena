@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: EMSArena\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 10:57+0400\n"
+"POT-Creation-Date: 2026-07-04 14:06+0400\n"
 "PO-Revision-Date: 2026-02-22 23:58+0400\n"
 "Last-Translator: Codex <noreply@example.com>\n"
 "Language-Team: Russian\n"
@@ -1119,6 +1119,7 @@ msgstr "Post İdarəetmə —"
 
 #: apps/accounts/templates/accounts/org_post_management.html:19
 #: apps/accounts/templates/accounts/superadmin_post_management.html:19
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:19
 msgctxt "accounts.common"
 msgid "back_to_profile"
 msgstr "Вернуться в профиль"
@@ -1126,6 +1127,7 @@ msgstr "Вернуться в профиль"
 #: apps/accounts/templates/accounts/org_post_management.html:27
 #: apps/accounts/templates/accounts/public_profile.html:82
 #: apps/accounts/templates/accounts/superadmin_post_management.html:27
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:27
 #: apps/exams/templates/exams/teacher/partials/_question_bank_list_body.html:102
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:157
 msgid "Axtar"
@@ -1133,11 +1135,13 @@ msgstr "Поиск"
 
 #: apps/accounts/templates/accounts/org_post_management.html:28
 #: apps/accounts/templates/accounts/superadmin_post_management.html:28
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:28
 msgid "Başlıq, müəllif, məzmun..."
 msgstr "Başlıq, müəllif, məzmun..."
 
 #: apps/accounts/templates/accounts/org_post_management.html:31
 #: apps/accounts/templates/accounts/superadmin_post_management.html:40
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:40
 msgid "Rol"
 msgstr "Роль"
 
@@ -1145,16 +1149,21 @@ msgstr "Роль"
 #: apps/accounts/templates/accounts/org_post_management.html:42
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:45
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:54
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:45 2.py:54
 #: apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:31
 #: apps/accounts/templates/accounts/superadmin_post_management.html:33
 #: apps/accounts/templates/accounts/superadmin_post_management.html:42
 #: apps/accounts/templates/accounts/superadmin_post_management.html:51
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:33
+#: 2.py:42 2.py:51
 #: apps/exams/templates/exams/teacher/partials/_exam_bank_picker_modal.html:50
 msgid "Hamısı"
 msgstr "Все"
 
 #: apps/accounts/templates/accounts/org_post_management.html:40
 #: apps/accounts/templates/accounts/superadmin_post_management.html:49
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:49
 #: apps/contact/admin.py:69 apps/contact/admin.py:103
 #: apps/exams/templates/exams/teacher/exam_language_manager.html:44
 #: apps/trial_exams/admin.py:69 apps/trial_exams/admin.py:113
@@ -1167,54 +1176,66 @@ msgstr "Статус"
 #: apps/accounts/templates/accounts/org_post_management.html:91
 #: apps/accounts/templates/accounts/superadmin_post_management.html:52
 #: apps/accounts/templates/accounts/superadmin_post_management.html:100
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:52
+#: 2.py:100
 msgid "Yayımlanmış"
 msgstr "Yayımlanmış"
 
 #: apps/accounts/templates/accounts/org_post_management.html:44
 #: apps/accounts/templates/accounts/superadmin_post_management.html:53
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:53
 msgid "Qaralama"
 msgstr "Здравствуйте"
 
 #: apps/accounts/templates/accounts/org_post_management.html:45
 #: apps/accounts/templates/accounts/superadmin_post_management.html:54
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:54
 msgid "Təsdiq gözləyir"
 msgstr "Отправить подтверждение"
 
 #: apps/accounts/templates/accounts/org_post_management.html:46
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:21
 #: apps/accounts/templates/accounts/superadmin_post_management.html:55
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:55
 msgid "Düzəliş tələb olunur"
 msgstr "Исправление не требуется."
 
 #: apps/accounts/templates/accounts/org_post_management.html:52
 #: apps/accounts/templates/accounts/superadmin_post_management.html:61
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:61
 msgid "Tarixdən"
 msgstr "Дата"
 
 #: apps/accounts/templates/accounts/org_post_management.html:56
 #: apps/accounts/templates/accounts/superadmin_post_management.html:65
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:65
 msgid "Tarixə qədər"
 msgstr "Tarixə qədər"
 
 #: apps/accounts/templates/accounts/org_post_management.html:60
 #: apps/accounts/templates/accounts/superadmin_post_management.html:69
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:69
 msgid "Filtrə et"
 msgstr "Фильтровать"
 
 #: apps/accounts/templates/accounts/org_post_management.html:61
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:82
-#: apps/accounts/templates/accounts/superadmin_post_management.html:70
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:82 apps/accounts/templates/accounts/superadmin_post_management.html:70
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:70
 msgid "Sıfırla"
 msgstr "Сбросить"
 
 #: apps/accounts/templates/accounts/org_post_management.html:66
 #: apps/accounts/templates/accounts/superadmin_post_management.html:75
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:75
 #, python-format
 msgid "%(count)s post tapıldı"
 msgstr "%(count)s post tapıldı"
 
 #: apps/accounts/templates/accounts/org_post_management.html:75
 #: apps/accounts/templates/accounts/superadmin_post_management.html:84
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:84
 msgid "Başlıq"
 msgstr "Партнерство"
 
@@ -1222,11 +1243,13 @@ msgstr "Партнерство"
 #: apps/accounts/templates/accounts/profile/sections/_unit_exams.html:41
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:76
 #: apps/accounts/templates/accounts/superadmin_post_management.html:85
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:85
 msgid "Müəllif"
 msgstr "Müəllif"
 
 #: apps/accounts/templates/accounts/org_post_management.html:79
 #: apps/accounts/templates/accounts/superadmin_post_management.html:88
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:88
 #: templates/organizations/partials/_faculties_content.html:77
 msgid "Əməliyyatlar"
 msgstr "Действие"
@@ -1234,7 +1257,9 @@ msgstr "Действие"
 #: apps/accounts/templates/accounts/org_post_management.html:93
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:96
 #: apps/accounts/templates/accounts/superadmin_post_management.html:102
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:102
 #: apps/exams/templates/exams/student/student_exam_history.html:224
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:224
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:72
 #: apps/projects/templates/projects/review_submissions.html:70
 #: apps/trial_exams/admin.py:119 apps/trial_exams/models.py:45
@@ -1243,6 +1268,7 @@ msgstr "Ожидает"
 
 #: apps/accounts/templates/accounts/org_post_management.html:95
 #: apps/accounts/templates/accounts/superadmin_post_management.html:104
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:104
 msgid "Düzəliş"
 msgstr "Düzəliş"
 
@@ -1252,21 +1278,25 @@ msgstr "Исправление не требуется."
 
 #: apps/accounts/templates/accounts/org_post_management.html:129
 #: apps/accounts/templates/accounts/superadmin_post_management.html:132
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:132
 msgid "Heç bir post tapılmadı."
 msgstr "Текстовое поле не найдено."
 
 #: apps/accounts/templates/accounts/org_post_management.html:136
 #: apps/accounts/templates/accounts/superadmin_post_management.html:139
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:139
 msgid "Post Silinməsi"
 msgstr "Post Silinməsi"
 
 #: apps/accounts/templates/accounts/org_post_management.html:137
 #: apps/accounts/templates/accounts/superadmin_post_management.html:140
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:140
 msgid "postu silinəcək."
 msgstr "postu silinəcək."
 
 #: apps/accounts/templates/accounts/org_post_management.html:142
 #: apps/accounts/templates/accounts/superadmin_post_management.html:144
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:144
 msgid "Silinmə səbəbi (məcburi)"
 msgstr "Silinmə səbəbi (məcburi)"
 
@@ -1274,13 +1304,17 @@ msgstr "Silinmə səbəbi (məcburi)"
 #: apps/accounts/templates/accounts/org_post_management.html:166
 #: apps/accounts/templates/accounts/partials/_role_assignment_content.html:278
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:245
-#: apps/accounts/templates/accounts/pending_review_detail.html:194
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:245 apps/accounts/templates/accounts/pending_review_detail.html:194
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:179
 #: apps/accounts/templates/accounts/profile/sections/_change_password.html:63
+#: apps/accounts/templates/accounts/profile/sections/_change_password.html
+#: 2.py:63
 #: apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:349
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:295
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:327
 #: apps/accounts/templates/accounts/superadmin_post_management.html:148
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:148
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:86
 #: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:79
 msgid "Ləğv et"
@@ -1667,6 +1701,7 @@ msgstr "Поиск пользователя..."
 #: apps/accounts/templates/accounts/partials/_role_assignment_content.html:38
 #: apps/accounts/templates/accounts/partials/_role_assignment_content.html:171
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:51
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:51
 msgid "Axtarışı təmizlə"
 msgstr "Поиск"
 
@@ -2100,8 +2135,11 @@ msgstr "Текстовое поле не найдено."
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:140
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:22
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:52
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:52
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:30
 #: apps/accounts/templates/accounts/superadmin_post_management.html:31
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:31
 msgid "Təşkilat"
 msgstr "Поделиться в организации"
 
@@ -2119,6 +2157,7 @@ msgstr "Экзамены и оценивание"
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:152
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:52
 #: apps/exams/templates/exams/student/student_exam_history.html:43
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:43
 #: templates/partials/_footer.html:51
 msgid "İmtahanlar"
 msgstr "Экзамены"
@@ -2264,12 +2303,14 @@ msgstr "Müəllim"
 #: apps/accounts/templates/accounts/review_result_detail.html:36
 #: apps/assignments/templates/assignments/review_submissions.html:76
 #: apps/labs/templates/labs/lab_detail.html:74
+#: apps/labs/templates/labs/lab_detail.html 2.py:74
 #: apps/projects/templates/projects/review_submissions.html:73
 msgid "Qiymətləndirilib"
 msgstr "Qiymətləndirilib"
 
 #: apps/accounts/templates/accounts/partials/_review_results_content.html:81
 #: apps/exams/templates/exams/student/student_exam_history.html:145
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:145
 #: apps/exams/templates/exams/teacher/exam_language_manager.html:45
 msgid "Əməliyyat"
 msgstr "Действие"
@@ -2352,6 +2393,7 @@ msgstr "Текстовое поле не найдено."
 
 #: apps/accounts/templates/accounts/partials/_role_assignment_content.html:138
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:140
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:140
 msgid "Filtri təmizlə"
 msgstr "Подтвердить удаление"
 
@@ -2557,6 +2599,8 @@ msgstr "Сотрудники"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:121
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:102
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:102
 msgctxt "staff.management"
 msgid "Staff requests"
 msgstr "Заявки сотрудников"
@@ -2612,7 +2656,11 @@ msgstr "Подтвердить"
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:208
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:233
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:80
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:80
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:69
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:69
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:78
 msgctxt "staff.management"
 msgid "Remove from organization"
@@ -2640,10 +2688,16 @@ msgstr "Имя"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:142
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:271
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:403
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:51 2.py:142 2.py:271 2.py:403
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:85
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:45
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:45
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:94
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:82
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:82
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:51
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:140
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:269
@@ -2659,10 +2713,16 @@ msgstr "Имя пользователя"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:143
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:272
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:404
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:52 2.py:143 2.py:272 2.py:404
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:86
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:46
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:46
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:95
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:83
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:83
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:52
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:141
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:270
@@ -2707,11 +2767,14 @@ msgstr ""
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:261
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:297
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:67
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:67
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:112
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:134
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:98
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:113
-#: apps/accounts/views/_helpers/org_sections/management.py:25
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:98 2.py:113 apps/accounts/views/_helpers/org_sections/management.py:25
 #: apps/accounts/views/_helpers/roles_map.py:55
 msgctxt "membership_request.role"
 msgid "Student"
@@ -2730,18 +2793,26 @@ msgstr "Подтвердите, что хотите пригласить выб�
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:304
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:308
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:308
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:115
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:115
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:304
 msgctxt "staff.management"
 msgid "Invite"
 msgstr "Пригласить"
 
 #: apps/accounts/templates/accounts/partials/_student_org_management_content.html:21
+#: apps/accounts/templates/accounts/partials/_student_org_management_content.html
+#: 2.py:21
 msgctxt "accounts.student_org"
 msgid "student_search_ph"
 msgstr "Поиск студентов..."
 
 #: apps/accounts/templates/accounts/partials/_student_org_management_content.html:28
+#: apps/accounts/templates/accounts/partials/_student_org_management_content.html
+#: 2.py:28
 #: apps/accounts/templates/accounts/partials/student_org_management/_invites.html:35
 #: apps/accounts/templates/accounts/partials/student_org_management/_pending.html:37
 #: apps/accounts/templates/accounts/partials/student_org_management/_students.html:85
@@ -2751,6 +2822,8 @@ msgid "search_clear"
 msgstr "Очистить поиск"
 
 #: apps/accounts/templates/accounts/partials/_student_org_management_content.html:36
+#: apps/accounts/templates/accounts/partials/_student_org_management_content.html
+#: 2.py:36
 #: apps/accounts/templates/accounts/partials/student_org_management/_invites.html:43
 #: apps/accounts/templates/accounts/partials/student_org_management/_pending.html:45
 #: apps/accounts/templates/accounts/partials/student_org_management/_students.html:93
@@ -2760,6 +2833,8 @@ msgid "search"
 msgstr "Поиск"
 
 #: apps/accounts/templates/accounts/partials/_student_org_management_content.html:61
+#: apps/accounts/templates/accounts/partials/_student_org_management_content.html
+#: 2.py:61
 msgctxt "accounts.student_org"
 msgid "no_active_org"
 msgstr "Активная организация не найдена."
@@ -3212,6 +3287,8 @@ msgstr "Rədd etmə səbəbi (opsional)"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:124
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:49
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:49
 msgid "Rədd et"
 msgstr "Отклонить"
 
@@ -3237,6 +3314,8 @@ msgstr "Организация не найдена."
 
 # Superadmin User Management
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:7
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:7
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:96
 #: apps/accounts/views/profile/_sections/labels.py:62
 msgctxt "superadmin.users"
@@ -3244,29 +3323,38 @@ msgid "user_management_title"
 msgstr "Управление пользователями"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:10
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:10
 #, python-format
 msgid "%(filtered)s nəticə göstərilir. Ümumi istifadəçi sayı: %(total)s."
 msgstr "%(filtered)s nəticə göstərilir. Ümumi istifadəçi sayı: %(total)s."
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:14
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:14
 #, python-format
 msgid "Aktiv: %(count)s"
 msgstr "Aktiv: %(count)s"
 
 # --- Export documents ---
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:15
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:15
 #, python-format
 msgid "Bloklanmış: %(count)s"
 msgstr "Количество вопросов: %(count)s"
 
 # --- Export documents ---
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:16
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:16
 #, python-format
 msgid "Silinmiş: %(count)s"
 msgstr "Количество вопросов: %(count)s"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:36
-#: apps/exams/templates/exams/teacher/exam_bank_picker.html:40
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:36 apps/exams/templates/exams/teacher/exam_bank_picker.html:40
 #: apps/exams/templates/exams/teacher/partials/_exam_bank_picker_modal.html:29
 #: templates/organizations/partials/_faculties_content.html:37
 #: templates/organizations/partials/_kafedras_content.html:39
@@ -3274,86 +3362,121 @@ msgid "Axtarış"
 msgstr "Поиск"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:40
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:40
 msgctxt "superadmin.users"
 msgid "search_placeholder"
 msgstr "Поиск по имени пользователя, email или имени..."
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:62
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:62
 msgid "Məs: 11A, CS-204"
 msgstr "Məs: 11A, CS-204"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:66
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:66
 msgid "Məs: Riyaziyyat"
 msgstr "Məs: Riyaziyyat"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:69
-#: templates/organizations/partials/_faculties_content.html:45
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:69 templates/organizations/partials/_faculties_content.html:45
 #: templates/organizations/partials/_kafedras_content.html:58
 msgid "Sıralama"
 msgstr "Здравствуйте"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:79
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:79
 msgid "Filterlə"
 msgstr "Фильтровать"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:92
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:92
 msgctxt "superadmin.users"
 msgid "col_username"
 msgstr "Имя пользователя"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:93
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:93
 msgctxt "superadmin.users"
 msgid "col_email"
 msgstr "Email"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:94
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:94
 msgctxt "superadmin.users"
 msgid "col_name"
 msgstr "Имя"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:95
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:95
 msgctxt "superadmin.users"
 msgid "col_role"
 msgstr "Роль"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:96
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:96
 msgctxt "superadmin.users"
 msgid "col_organization"
 msgstr "Организация"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:98
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:98
 msgctxt "superadmin.users"
 msgid "col_status"
 msgstr "Статус"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:100
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:100
 msgctxt "superadmin.users"
 msgid "col_actions"
 msgstr "Действия"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:125
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:125
 #, python-format
 msgid "Silinmə: %(deleted_at)s"
 msgstr "Silinmə: %(deleted_at)s"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:129
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:129
 msgid "Heç daxil olmayıb"
 msgstr "Heç daxil olmayıb"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:131
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:131
 #, python-format
 msgid "Qeydiyyat: %(joined_at)s"
 msgstr "Qeydiyyat: %(joined_at)s"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:142
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:142
 msgid "Müvəqqəti blokla"
 msgstr "Müvəqqəti blokla"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:154
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:154
 msgid "Bloku aç"
 msgstr "Bloku aç"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:166
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:166
 msgctxt "superadmin.users"
 msgid "restore"
 msgstr "Восстановить"
@@ -3361,10 +3484,14 @@ msgstr "Восстановить"
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:175
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:182
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:230
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:175 2.py:182 2.py:230
 msgid "Hesabı sil"
 msgstr "Удалить банк"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:183
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:183
 msgid ""
 "data-modal-description=\"Bu hesab silinmiş istifadəçilər siyahısına "
 "keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
@@ -3373,15 +3500,21 @@ msgstr ""
 "keçiriləcək və sonradan bərpa etmək mümkün olacaq.\""
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:192
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:192
 msgctxt "superadmin.users"
 msgid "hard_delete"
 msgstr "Удалить навсегда"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:199
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:199
 msgid "Hesabı tam sil"
 msgstr "Hesabı tam sil"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:200
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:200
 msgid ""
 "data-modal-description=\"Bu əməliyyat geri qaytarılmır. İstifadəçi hesabı və "
 "ona bağlı qeydlər birdəfəlik silinə bilər.\""
@@ -3390,14 +3523,20 @@ msgstr ""
 "ona bağlı qeydlər birdəfəlik silinə bilər.\""
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:207
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:207
 msgid "Məhdud"
 msgstr "Məhdud"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:220
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:220
 msgid "Seçilmiş filterlərə uyğun istifadəçi tapılmadı."
 msgstr "Текстовое поле не найдено."
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:238
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:238
 msgid ""
 "<strong id=\"superadminUserDeleteName\"></strong> üçün seçilən əməliyyat "
 "tətbiq ediləcək."
@@ -3406,6 +3545,8 @@ msgstr ""
 "tətbiq ediləcək."
 
 #: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html:241
+#: apps/accounts/templates/accounts/partials/_superadmin_user_management_content.html
+#: 2.py:241
 msgid "Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq."
 msgstr "Bu əməliyyatı təsdiqlədikdən sonra davam etmək mümkün olacaq."
 
@@ -3632,17 +3773,23 @@ msgid "Əməliyyat uğurla tamamlandı."
 msgstr "Əməliyyat uğurla tamamlandı."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:11
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:11
 msgctxt "staff.management"
 msgid "Organization staff"
 msgstr "Сотрудники организации"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:13
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:13
 msgctxt "staff.management"
 msgid "Non-teaching staff members are listed here."
 msgstr "Здесь отображаются сотрудники, не являющиеся преподавателями."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:28
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:216
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:28 2.py:216
 msgctxt "staff.management"
 msgid "Search staff..."
 msgstr "Поиск сотрудников..."
@@ -3651,10 +3798,15 @@ msgstr "Поиск сотрудников..."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:126
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:223
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:352
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:35 2.py:126 2.py:223 2.py:352
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:35
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:29
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:29
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:35
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:35
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:29
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:35
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:124
@@ -3668,10 +3820,15 @@ msgstr "Очистить поиск"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:134
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:231
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:360
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:43 2.py:134 2.py:231 2.py:360
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:43
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:37
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:37
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:43
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:43
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:43
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:132
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:229
@@ -3684,10 +3841,16 @@ msgstr "Поиск"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:141
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:270
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:402
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:50 2.py:141 2.py:270 2.py:402
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:84
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:44
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:44
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:93
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:81
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:81
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:50
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:139
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:268
@@ -3699,11 +3862,15 @@ msgstr "Пользователь"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:53
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:274
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:405
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:53 2.py:274 2.py:405
 msgctxt "staff.management"
 msgid "Position"
 msgstr "Должность"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:54
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:54
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:53
 msgctxt "staff.management"
 msgid "Role"
@@ -3713,10 +3880,16 @@ msgstr "Роль"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:146
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:275
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:407
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:55 2.py:146 2.py:275 2.py:407
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:88
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:47
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:47
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:98
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:84
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:84
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:54
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:144
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:272
@@ -3726,21 +3899,29 @@ msgid "Action"
 msgstr "Действие"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:89
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:89
 msgctxt "staff.management"
 msgid "No staff member found."
 msgstr "Сотрудники не найдены."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:104
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:104
 msgctxt "staff.management"
 msgid "Review pending staff requests here."
 msgstr "Здесь можно рассмотреть ожидающие заявки сотрудников."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:119
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:119
 msgctxt "staff.management"
 msgid "Search staff requests..."
 msgstr "Поиск заявок сотрудников..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:144
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:144
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:96
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:142
 msgctxt "staff.management"
@@ -3748,12 +3929,16 @@ msgid "Message"
 msgstr "Сообщение"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:145
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:145
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:143
 msgctxt "staff.management"
 msgid "Request date"
 msgstr "Дата заявки"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:167
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:167
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:98
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:165
 msgctxt "staff.management"
@@ -3761,6 +3946,8 @@ msgid "Approve"
 msgstr "Одобрить"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:178
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:178
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:103
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:176
 msgctxt "staff.management"
@@ -3768,25 +3955,35 @@ msgid "Reject"
 msgstr "Отклонить"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:186
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:186
 msgctxt "staff.management"
 msgid "There are no pending staff requests."
 msgstr "Нет ожидающих заявок сотрудников."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:199
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:199
 msgctxt "staff.management"
 msgid "Staff without organization"
 msgstr "Сотрудники без организации"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:201
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:201
 msgctxt "staff.management"
 msgid "Staff users who can be invited appear here."
 msgstr "Здесь отображаются сотрудники, которым можно отправить приглашение."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:249
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:378
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:249 2.py:378
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:60
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:59
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:60
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:60
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:247
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:374
 msgctxt "staff.management"
@@ -3794,11 +3991,15 @@ msgid "Select all"
 msgstr "Выбрать все"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:255
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:255
 msgctxt "staff.management"
 msgid "Invite selected staff users"
 msgstr "Пригласить выбранных сотрудников"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:256
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:256
 #, python-brace-format
 msgctxt "staff.management"
 msgid "Invite selected staff users ({count} selected)"
@@ -3808,12 +4009,16 @@ msgstr "Пригласить выбранных сотрудников (выбр
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:259
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:389
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:391
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:257 2.py:259 2.py:389 2.py:391
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:71
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:73
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:79
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:81
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:68
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:70
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:68 2.py:70
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:255
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:257
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:385
@@ -3824,13 +4029,19 @@ msgid "Select at least 1 user"
 msgstr "Выберите хотя бы 1 пользователя"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:261
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:261
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:66
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:72
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:66 2.py:72
 msgctxt "staff.management"
 msgid "Invite selected users"
 msgstr "Пригласить выбранных пользователей"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:273
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:273
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:271
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:401
 msgctxt "staff.management"
@@ -3839,33 +4050,44 @@ msgstr "Кафедра"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:289
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:306
-#: apps/accounts/views/_helpers/roles_map.py:58
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:289 2.py:306 apps/accounts/views/_helpers/roles_map.py:58
 msgctxt "membership_request.role"
 msgid "Staff"
 msgstr "Сотрудник"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:314
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:314
 msgctxt "staff.management"
 msgid "No staff member available for invitation."
 msgstr "Нет сотрудников, доступных для приглашения."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:328
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:328
 msgctxt "staff.management"
 msgid "Sent staff invites"
 msgstr "Отправленные приглашения для сотрудников"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:330
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:330
 msgctxt "staff.management"
 msgid "Withdraw pending staff invites from here."
 msgstr "Отсюда можно отозвать непринятые приглашения сотрудников."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:345
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:345
 msgctxt "staff.management"
 msgid "Search staff invites..."
 msgstr "Поиск приглашений сотрудников..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:387
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:393
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:387 2.py:393
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:69
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:75
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:383
@@ -3875,6 +4097,8 @@ msgid "Withdraw selected invites"
 msgstr "Отозвать выбранные приглашения"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:388
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:388
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:70
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:384
 #, python-brace-format
@@ -3883,6 +4107,8 @@ msgid "Withdraw selected invites ({count} selected)"
 msgstr "Отозвать выбранные приглашения (выбрано: {count})"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:406
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:406
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:87
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:402
 msgctxt "staff.management"
@@ -3890,6 +4116,8 @@ msgid "Sender"
 msgstr "Отправитель"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:436
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:436
 #: apps/accounts/templates/accounts/partials/staff_management/_students_invites.html:116
 #: apps/accounts/templates/accounts/partials/staff_management/_teacher_tabs.html:432
 msgctxt "staff.management"
@@ -3897,6 +4125,8 @@ msgid "Withdraw"
 msgstr "Отозвать"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:442
+#: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html
+#: 2.py:442
 msgctxt "staff.management"
 msgid "There are no active staff invites to withdraw."
 msgstr "Нет активных приглашений сотрудников для отзыва."
@@ -3922,22 +4152,32 @@ msgid "There are no active invites to withdraw."
 msgstr "Нет активных приглашений для отзыва."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:5
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:5
 msgctxt "staff.management"
 msgid "Organization students"
 msgstr "Студенты организации"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:7
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:7
 msgctxt "staff.management"
 msgid "Manage active students from here."
 msgstr "Здесь вы можете управлять активными студентами."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:22
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:22
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:28
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:28
 msgctxt "staff.management"
 msgid "Search students..."
 msgstr "Поиск студентов..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:75
+#: apps/accounts/templates/accounts/partials/staff_management/_students_members.html
+#: 2.py:75
 msgctxt "staff.management"
 msgid "No student found."
 msgstr "Студенты не найдены."
@@ -4006,22 +4246,30 @@ msgid "There are no pending students."
 msgstr "Нет ожидающих студентов."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:11
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:11
 msgctxt "staff.management"
 msgid "Students without organization"
 msgstr "Студенты без организации"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:13
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:13
 msgctxt "staff.management"
 msgid "Students who can be invited appear here."
 msgstr "Здесь отображаются студенты, которым можно отправить приглашение."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:67
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:67
 #, python-brace-format
 msgctxt "staff.management"
 msgid "Invite selected users ({count} selected)"
 msgstr "Пригласить выбранных пользователей (выбрано: {count})"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:121
+#: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html
+#: 2.py:121
 msgctxt "staff.management"
 msgid "No student available for invitation."
 msgstr "Нет студентов, доступных для приглашения."
@@ -4861,6 +5109,8 @@ msgstr ""
 
 #: apps/accounts/templates/accounts/password_reset_email.html:28
 #: apps/accounts/templates/accounts/profile/sections/_change_password.html:59
+#: apps/accounts/templates/accounts/profile/sections/_change_password.html
+#: 2.py:59
 msgid "Şifrəni yenilə"
 msgstr "Şifrəni yenilə"
 
@@ -4976,12 +5226,16 @@ msgstr "Сохранить оценку"
 #: apps/accounts/templates/accounts/pending_review_detail.html:279
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:18
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:22
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:22
 msgid "Qiymətləndirməni təsdiqləyin"
 msgstr "Подтвердить отправку"
 
 #: apps/accounts/templates/accounts/pending_review_detail.html:280
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:19
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:23
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:23
 msgid "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 msgstr "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
 
@@ -5139,7 +5393,8 @@ msgstr "Loading"
 
 #: apps/accounts/templates/accounts/profile.html:207
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:22
-#: apps/exams/templates/exams/teacher/teacher_exam_detail.html:351
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:22 apps/exams/templates/exams/teacher/teacher_exam_detail.html:351
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
 msgstr "Meta created at"
@@ -5148,7 +5403,8 @@ msgstr "Meta created at"
 #: apps/exams/templates/exams/components/_exam_modals.html:19
 #: apps/exams/templates/exams/teacher/exam_section.html:120
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:22
-#: apps/exams/templates/exams/teacher/teacher_exam_detail.html:352
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:22 apps/exams/templates/exams/teacher/teacher_exam_detail.html:352
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
 msgstr "Внештатная работа"
@@ -5182,7 +5438,8 @@ msgstr "Код скопирован"
 
 #: apps/accounts/templates/accounts/profile.html:217
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:485
-#: apps/exams/templates/exams/teacher/teacher_exam_detail.html:358
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:485 apps/exams/templates/exams/teacher/teacher_exam_detail.html:358
 msgctxt "exams.wizard"
 msgid "nav_step"
 msgstr "Шаг"
@@ -5200,12 +5457,14 @@ msgid "title_required"
 msgstr "Название экзамена обязательно."
 
 #: apps/accounts/templates/accounts/profile/_header.html:8
+#: apps/accounts/templates/accounts/profile/_header.html 2.py:8
 #: apps/accounts/templates/accounts/profile/_sidebar.html:16
 msgctxt "profile.sidebar"
 msgid "toggle_open"
 msgstr "Открыть боковую панель"
 
 #: apps/accounts/templates/accounts/profile/_header.html:9
+#: apps/accounts/templates/accounts/profile/_header.html 2.py:9
 msgctxt "profile.sidebar"
 msgid "toggle_open_or_close"
 msgstr "Открыть или закрыть боковую панель"
@@ -5239,8 +5498,11 @@ msgstr "Общий"
 
 #: apps/accounts/templates/accounts/profile/_sidebar.html:27
 #: apps/accounts/templates/accounts/profile/sections/_change_password.html:62
+#: apps/accounts/templates/accounts/profile/sections/_change_password.html
+#: 2.py:62
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:125
-#: apps/accounts/views/profile/_sections/labels.py:37
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:125 apps/accounts/views/profile/_sections/labels.py:37
 msgctxt "profile.section"
 msgid "profile_info"
 msgstr "Информация профиля"
@@ -5261,7 +5523,8 @@ msgstr "Уведомления"
 #: apps/accounts/templates/accounts/profile/_sidebar.html:59
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:108
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:109
-#: apps/accounts/views/profile/_sections/labels.py:56
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:108 2.py:109 apps/accounts/views/profile/_sections/labels.py:56
 msgctxt "profile.section"
 msgid "join_organization"
 msgstr "Присоединиться к организации"
@@ -5316,6 +5579,7 @@ msgstr "Мои сообщения"
 
 #: apps/accounts/templates/accounts/profile/_sidebar.html:135
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:9
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:9
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:122
 #: apps/accounts/views/profile/_sections/labels.py:41
 msgctxt "profile.section"
@@ -5429,6 +5693,7 @@ msgstr "Мои результаты"
 #: apps/accounts/templates/accounts/profile/sections/_my_appeals.html:17
 #: apps/accounts/views/profile/_sections/labels.py:70
 #: apps/appeals/templates/appeals/student/appeal_create.html:28
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:28
 #: apps/appeals/templates/appeals/student/my_appeals.html:4
 #: apps/appeals/templates/appeals/student/my_appeals.html:19
 msgctxt "appeals.template"
@@ -5536,6 +5801,7 @@ msgstr "Счет"
 
 #: apps/accounts/templates/accounts/profile/_sidebar.html:483
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:13
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:13
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:238
 #: apps/accounts/views/profile/_sections/labels.py:66
 msgctxt "profile.section"
@@ -5551,6 +5817,8 @@ msgstr "Редактировать профиль"
 #: apps/accounts/templates/accounts/profile/_sidebar.html:493
 #: apps/accounts/templates/accounts/profile/_sidebar.html:497
 #: apps/accounts/templates/accounts/profile/sections/_change_password.html:7
+#: apps/accounts/templates/accounts/profile/sections/_change_password.html
+#: 2.py:7
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:242
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:243
 msgid "Şifrəni dəyiş"
@@ -5920,6 +6188,8 @@ msgid "delete"
 msgstr "Удалить"
 
 #: apps/accounts/templates/accounts/profile/sections/_change_password.html:12
+#: apps/accounts/templates/accounts/profile/sections/_change_password.html
+#: 2.py:12
 msgid "Hesabınızın təhlükəsizliyi üçün yeni, güclü bir şifrə seçin."
 msgstr "Hesabınızın təhlükəsizliyi üçün yeni, güclü bir şifrə seçin."
 
@@ -5960,6 +6230,7 @@ msgid "Kateqoriyaları idarə et"
 msgstr "Поиск вопросов"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:14
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:14
 msgctxt "profile.shortcut"
 msgid "create_post_description"
 msgstr ""
@@ -5967,6 +6238,7 @@ msgstr ""
 "чтобы создать новую публикацию в редакторе по умолчанию."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:30
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:30
 #: apps/blog/templates/post_form.html:25
 msgid ""
 "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
@@ -5974,49 +6246,58 @@ msgstr ""
 "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:35
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:35
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:34
 msgctxt "profile.posts"
 msgid "label_title"
 msgstr "Заголовок"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:40
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:40
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:39
 msgctxt "profile.posts"
 msgid "label_category"
 msgstr "Категория"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:55
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:55
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:54
 msgctxt "profile.posts"
 msgid "label_excerpt"
 msgstr "Короткий контент"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:60
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:60
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:59
 msgctxt "profile.posts"
 msgid "label_content"
 msgstr "Содержание"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:65
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:65
 msgctxt "profile.posts"
 msgid "label_image_url"
 msgstr "URL-адрес изображения"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:70
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:70
 msgctxt "profile.posts"
 msgid "label_upload_image"
 msgstr "Загрузить изображение"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:72
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:72
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:74
 msgid "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB)."
 msgstr "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB)."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:79
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:79
 msgid "Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək."
 msgstr "Bu post avtomatik olaraq təsdiq növbəsinə göndəriləcək."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:81
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:81
 msgid ""
 "“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra "
 "paylaşılır."
@@ -6025,22 +6306,28 @@ msgstr ""
 "paylaşılır."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:90
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:90
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:85
 msgctxt "profile.posts"
 msgid "publish_article"
 msgstr "Опубликуйте свою статью"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:98
+#: apps/accounts/templates/accounts/profile/sections/_create_post.html 2.py:98
 msgctxt "profile.posts"
 msgid "create"
 msgstr "Создать"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:29
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:29
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_title"
 msgstr "Подтвердите удаление аккаунта"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:35
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:35
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_message"
 msgstr ""
@@ -6048,164 +6335,207 @@ msgstr ""
 "подтверждения."
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:39
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:39
 msgctxt "profile.delete_account"
 msgid "delete_account_password_label"
 msgstr "Ваш пароль"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:47
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:47
 msgctxt "profile.delete_account"
 msgid "delete_account_password_placeholder"
 msgstr "Введите текущий пароль"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:52
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:52
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:126
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:126
 #: apps/accounts/templates/accounts/profile/sections/_notifications.html:288
 msgctxt "profile.edit"
 msgid "cancel"
 msgstr "Отмена"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:56
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:56
 msgctxt "profile.delete_account"
 msgid "delete_account_confirm_button"
 msgstr "Да, удалить мой аккаунт"
 
 #: apps/accounts/templates/accounts/profile/sections/_delete_account.html:71
+#: apps/accounts/templates/accounts/profile/sections/_delete_account.html
+#: 2.py:71
 msgctxt "profile.delete_account"
 msgid "processing"
 msgstr "Обработка..."
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:23
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:23
 msgctxt "profile.edit"
 msgid "first_name"
 msgstr "Имя"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:28
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:28
 msgctxt "profile.edit"
 msgid "last_name"
 msgstr "Фамилия"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:33
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:33
 msgctxt "profile.edit"
 msgid "email"
 msgstr "Электронная почта"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:38
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:38
 msgctxt "profile.edit"
 msgid "phone"
 msgstr "Телефон"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:40
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:40
 msgctxt "profile.edit"
 msgid "placeholder_phone"
 msgstr "Введите номер телефона"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:43
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:43
 msgctxt "profile.edit"
 msgid "location"
 msgstr "Расположение"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:45
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:45
 msgctxt "profile.edit"
 msgid "placeholder_location"
 msgstr "Введите местоположение"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:48
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:48
 msgctxt "profile.edit"
 msgid "avatar"
 msgstr "Аватар"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:52
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:52
 msgctxt "profile.edit"
 msgid "institution_name"
 msgstr "Учебное заведение"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:54
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:54
 msgctxt "profile.edit"
 msgid "placeholder_institution"
 msgstr "Войти в учебное заведение"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:57
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:57
 msgctxt "profile.edit"
 msgid "school_code"
 msgstr "Код школы"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:59
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:59
 msgctxt "profile.edit"
 msgid "placeholder_school_code"
 msgstr "Введите код вашей школы"
 
 # Profile Edit Enhancements
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:65
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:65
 msgctxt "profile.edit"
 msgid "organization_type"
 msgstr "Тип организации"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:68
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:68
 msgctxt "profile.edit"
 msgid "org_type_individual"
 msgstr "Индивидуальный"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:71
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:71
 msgctxt "profile.edit"
 msgid "org_type_school"
 msgstr "Школа"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:74
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:74
 msgctxt "profile.edit"
 msgid "org_type_university"
 msgstr "Университет"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:77
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:77
 msgctxt "profile.edit"
 msgid "org_type_course_center"
 msgstr "Учебный центр"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:82
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:82
 msgctxt "profile.edit"
 msgid "specialization"
 msgstr "Специализация / Факультет"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:85
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:85
 msgctxt "profile.edit"
 msgid "placeholder_specialization"
 msgstr "Введите вашу специализацию"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:88
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:88
 msgctxt "profile.edit"
 msgid "group_number"
 msgstr "Группа / Класс"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:91
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:91
 msgctxt "profile.edit"
 msgid "placeholder_group_number"
 msgstr "Введите номер группы"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:94
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:94
 msgctxt "profile.edit"
 msgid "department"
 msgstr "Отдел / Кафедра"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:97
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html 2.py:97
 msgctxt "profile.edit"
 msgid "placeholder_department"
 msgstr "Введите ваш отдел"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:103
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:103
 msgctxt "profile.edit"
 msgid "edit_profile_type_change_warning"
 msgstr "Изменение типа организации может повлиять на ваши курсы и разрешения."
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:115
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:115
 msgctxt "profile.edit"
 msgid "about"
 msgstr "О"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:117
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:117
 msgctxt "profile.edit"
 msgid "placeholder_about"
 msgstr "Напишите краткую информацию о себе"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:122
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html
+#: 2.py:122
 msgctxt "profile.edit"
 msgid "save"
 msgstr "Сохранить"
@@ -6356,70 +6686,84 @@ msgid "create_first_exam"
 msgstr "Создайте первый тест"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:10
 msgctxt "profile.results"
 msgid "title"
 msgstr "Мои результаты"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:18
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:18
 msgctxt "profile.results"
 msgid "tab_all"
 msgstr "Все они"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:22
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:22
 msgctxt "profile.results"
 msgid "tab_exams"
 msgstr "Экзамены"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:26
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:26
 msgctxt "profile.results"
 msgid "tab_assignments"
 msgstr "Свободные работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:30
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:30
 msgctxt "profile.results"
 msgid "tab_labs"
 msgstr "Лаборатории"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:34
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:34
 msgctxt "profile.results"
 msgid "tab_independent"
 msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:46
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:46
 msgid "Nəticə axtar..."
 msgstr "Вернуться к результату"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:86
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:86
 msgctxt "profile.results"
 msgid "score_label"
 msgstr "Мед"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:106
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:106
 msgctxt "profile.results"
 msgid "pending_submitted"
 msgstr "Поданный"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:108
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:108
 msgctxt "profile.results"
 msgid "pending_processing"
 msgstr "Проверка"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:110
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:110
 msgctxt "profile.results"
 msgid "pending_default"
 msgstr "На удерживании"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:119
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:119
 msgctxt "profile.results"
 msgid "view_result"
 msgstr "Посмотреть результат"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:136
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:136
 msgctxt "profile.results"
 msgid "empty_title"
 msgstr "Результат не найден"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:137
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html 2.py:137
 msgctxt "profile.results"
 msgid "empty_description"
 msgstr "На данный момент нет результатов для показа."
@@ -7124,10 +7468,14 @@ msgid "pending_reviews"
 msgstr "Это будет проверено"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:6
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:6
 msgid "Təşkilat dəvətləri"
 msgstr "Təşkilat dəvətləri"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:9
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:9
 msgid ""
 "Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə "
 "bilərsiniz."
@@ -7136,18 +7484,26 @@ msgstr ""
 "bilərsiniz."
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:24
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:24
 msgid "Dəvət edən:"
 msgstr "Dəvət edən:"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:38
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:38
 msgid "Əvvəlcə mövcud təşkilatdan çıxın"
 msgstr "Сначала покиньте текущую организацию, затем примите новое приглашение."
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:39
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:39
 msgid "Qəbul et"
 msgstr "Принять"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html:59
+#: apps/accounts/templates/accounts/profile/sections/_profile_org_invites.html
+#: 2.py:59
 msgid "Bütün qoşulma və dəvət bölməsini aç"
 msgstr "Bütün qoşulma və dəvət bölməsini aç"
 
@@ -7582,6 +7938,7 @@ msgstr "Поиск по названию экзамена"
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:76
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:78
 #: apps/exams/templates/exams/student/student_exam_history.html:140
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:140
 msgid "İmtahan"
 msgstr "Экзамен"
 
@@ -7620,6 +7977,8 @@ msgstr "Удалить экзамен"
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:15
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:60
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:60
 #: apps/exams/templates/exams/teacher/partials/_question_form_bs_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "aria_close"
@@ -7639,6 +7998,8 @@ msgstr ""
 
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:27
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:483
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:483
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_cancel"
 msgstr "Отменить это"
@@ -8782,10 +9143,12 @@ msgid "empty_recent_grades"
 msgstr "Empty recent grades"
 
 #: apps/accounts/templates/accounts/superadmin_post_management.html:4
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:4
 msgid "Post İdarəetmə"
 msgstr "Платформа управления образованием"
 
 #: apps/accounts/templates/accounts/superadmin_post_management.html:16
+#: apps/accounts/templates/accounts/superadmin_post_management.html 2.py:16
 msgid "Post İdarəetmə (Superadmin)"
 msgstr "Post İdarəetmə (Superadmin)"
 
@@ -9438,7 +9801,7 @@ msgstr "Ваш запрос на роль {role} для {org} отправлен
 
 #: apps/accounts/views/profile/_sections/labels.py:65
 #: apps/accounts/views/profile/context_builder/_stage4.py:28
-#: templates/partials/_navbar.html:36 templates/partials/_navbar.html:292
+#: templates/partials/_navbar.html:49 templates/partials/_navbar.html:306
 msgctxt "nav"
 msgid "home"
 msgstr "Главная страница"
@@ -10218,6 +10581,8 @@ msgstr "Рассмотрено"
 #: apps/appeals/templates/appeals/partials/_appeal_detail_body.html:37
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:94
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:105
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:94
+#: 2.py:105
 msgctxt "appeals.template"
 msgid "Suallar"
 msgstr "Вопросы"
@@ -10272,17 +10637,21 @@ msgstr "Изменение балла"
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:15
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:39
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:61
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:15
+#: 2.py:39 2.py:61
 msgctxt "appeals.template"
 msgid "Hamısı"
 msgstr "Все"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:31
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:31
 #: apps/appeals/templates/appeals/partials/_my_appeals_body.html:16
 msgctxt "appeals.template"
 msgid "Axtarış"
 msgstr "Поиск"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:33
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:33
 msgctxt "appeals.template"
 msgid "İmtahan və ya tələbə"
 msgstr "Экзамен или студент"
@@ -10290,6 +10659,8 @@ msgstr "Экзамен или студент"
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:36
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:96
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:107
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:36
+#: 2.py:96 2.py:107
 #: apps/appeals/templates/appeals/partials/_my_appeals_body.html:21
 msgctxt "appeals.template"
 msgid "Status"
@@ -10298,77 +10669,94 @@ msgstr "Статус"
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:47
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:92
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:103
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:47
+#: 2.py:92 2.py:103
 msgctxt "appeals.template"
 msgid "İmtahan"
 msgstr "Экзамен"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:50
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:50
 msgctxt "appeals.template"
 msgid "Bütün imtahanlar"
 msgstr "Все экзамены"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:58
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:58
 #: apps/appeals/templates/appeals/student/appeal_create.html:122
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:122
 msgctxt "appeals.template"
 msgid "Səbəb tipi"
 msgstr "Тип причины"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:69
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:69
 msgctxt "appeals.template"
 msgid "Başlanğıc tarixi"
 msgstr "Дата начала"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:73
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:73
 msgctxt "appeals.template"
 msgid "Son tarix"
 msgstr "Дата окончания"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:78
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:78
 #: apps/appeals/templates/appeals/partials/_my_appeals_body.html:33
 msgctxt "appeals.template"
 msgid "Filtrlə"
 msgstr "Фильтровать"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:81
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:81
 msgctxt "appeals.template"
 msgid "Sıfırla"
 msgstr "Сбросить"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:93
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:104
-#: apps/appeals/templates/appeals/partials/_review_appeal_body.html:17
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:93
+#: 2.py:104 apps/appeals/templates/appeals/partials/_review_appeal_body.html:17
 msgctxt "appeals.template"
 msgid "Tələbə"
 msgstr "Студент"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:95
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:106
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:95
+#: 2.py:106
 msgctxt "appeals.template"
 msgid "Tarix"
 msgstr "Дата"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:97
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:97
 msgctxt "appeals.template"
 msgid "Əməliyyat"
 msgstr "Действие"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:113
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:113
 msgctxt "appeals.template"
 msgid "Bax"
 msgstr "Открыть"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:123
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:123
 #: apps/appeals/templates/appeals/partials/_my_appeals_body.html:61
 msgctxt "appeals.template"
 msgid "Səhifələmə"
 msgstr "Пагинация"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:139
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:139
 msgctxt "appeals.template"
 msgid "Uyğun apellyasiya tapılmadı"
 msgstr "Подходящие апелляции не найдены"
 
 #: apps/appeals/templates/appeals/partials/_manage_appeals_body.html:140
+#: apps/appeals/templates/appeals/partials/_manage_appeals_body.html 2.py:140
 msgctxt "appeals.template"
 msgid "Filtrləri dəyişib yenidən yoxlayın."
 msgstr "Измените фильтры и попробуйте снова."
@@ -10532,41 +10920,49 @@ msgstr "Сохранить решения"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:4
 #: apps/appeals/templates/appeals/student/appeal_create.html:19
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:4 2.py:19
 msgctxt "appeals.template"
 msgid "Apellyasiya göndər"
 msgstr "Подать апелляцию"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:18
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:18
 msgctxt "appeals.template"
 msgid "Apellyasiya mərkəzi"
 msgstr "Центр апелляций"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:25
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:25
 msgctxt "appeals.template"
 msgid "Nəticəyə qayıt"
 msgstr "Вернуться к результату"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:37
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:37
 msgctxt "appeals.template"
 msgid "Sualı seçin"
 msgstr "Выберите вопрос"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:41
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:41
 msgctxt "appeals.template"
 msgid "Səbəbi seçin və izah yazın"
 msgstr "Выберите причину и напишите пояснение"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:45
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:45
 msgctxt "appeals.template"
 msgid "Göndərin"
 msgstr "Отправьте"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:52
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:52
 msgctxt "appeals.template"
 msgid "Şərhə yazmağa başlayan kimi sual avtomatik seçilir"
 msgstr "Вопрос выбирается автоматически, как только вы начинаете печатать"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:54
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:54
 #, python-format
 msgctxt "appeals.template"
 msgid ""
@@ -10577,85 +10973,101 @@ msgstr ""
 "символов."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:66
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:66
 msgctxt "appeals.template"
 msgid "Sualları axtar"
 msgstr "Поиск вопросов"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:70
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:70
 msgctxt "appeals.template"
 msgid "İşarələnmişləri seç"
 msgstr "Выбрать отмеченные"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:80
 #: apps/appeals/templates/appeals/student/appeal_create.html:168
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:80 2.py:168
 msgctxt "appeals.template"
 msgid "Ən azı bir sual seçin."
 msgstr "Выберите хотя бы один вопрос."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:81
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:81
 msgctxt "appeals.template"
 msgid "Səbəb tipini seçin."
 msgstr "Выберите тип причины."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:82
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:82
 #, python-brace-format
 msgctxt "appeals.template"
 msgid "Daha {n} simvol yazın."
 msgstr "Напишите ещё {n} символов."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:83
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:83
 #, python-brace-format
 msgctxt "appeals.template"
 msgid "{n} sual seçildi"
 msgstr "Выбрано вопросов: {n}"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:103
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:103
 msgctxt "appeals.template"
 msgid "Tələbənin işarələdiyi sual"
 msgstr "Вопрос, отмеченный студентом"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:113
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:113
 msgctxt "appeals.template"
 msgid "Apellyasiya et"
 msgstr "Апелляция"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:127
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:127
 msgctxt "appeals.template"
 msgid "Səbəb seçin"
 msgstr "Выберите причину"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:137
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:137
 msgctxt "appeals.template"
 msgid "İzahınız"
 msgstr "Ваше объяснение"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:141
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:141
 msgctxt "appeals.template"
 msgid "simvol"
 msgstr "символов"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:146
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:146
 #, python-format
 msgctxt "appeals.template"
 msgid "Səbəbinizi ən azı %(min)s simvol ilə izah edin"
 msgstr "Опишите причину минимум в %(min)s символов"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:157
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:157
 msgctxt "appeals.template"
 msgid "Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı."
 msgstr "Для этой попытки не найдено вопросов для апелляции."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:166
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:166
 msgctxt "appeals.template"
 msgid "0 sual seçildi"
 msgstr "Выбрано вопросов: 0"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:173
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:173
 msgctxt "appeals.template"
 msgid "Ləğv et"
 msgstr "Отменить"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:176
+#: apps/appeals/templates/appeals/student/appeal_create.html 2.py:176
 msgctxt "appeals.template"
 msgid "Apellyasiyanı göndər"
 msgstr "Отправить апелляцию"
@@ -11133,6 +11545,7 @@ msgstr "Уведомления"
 #: apps/assignments/templates/assignments/assignment_detail.html:36
 #: apps/labs/templates/labs/lab_detail.html:86
 #: apps/labs/templates/labs/lab_detail.html:333
+#: apps/labs/templates/labs/lab_detail.html 2.py:86 2.py:333
 #: apps/projects/templates/projects/project_detail.html:28
 msgid "Cavablarım"
 msgstr "Отвечено"
@@ -11373,6 +11786,7 @@ msgstr "Попытка окончена"
 #: apps/exams/templates/exams/teacher/exam_section.html:232
 #: apps/labs/templates/labs/lab_section.html:149
 #: apps/projects/templates/projects/project_section.html:163
+#: apps/projects/templates/projects/project_section.html 2.py:163
 msgid "Cavablarım ("
 msgstr "Отвечено"
 
@@ -12068,11 +12482,15 @@ msgstr "Назовите цену"
 
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:13
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:17
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:17
 msgid "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 msgstr "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür."
 
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:14
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:18
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:18
 msgid ""
 "Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra "
 "görünəcək."
@@ -12082,16 +12500,22 @@ msgstr ""
 
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:15
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:19
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:19
 msgid "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
 msgstr "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır."
 
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:16
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:20
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:20
 msgid "Yoxla və yadda saxla"
 msgstr "Сохранить"
 
 #: apps/assignments/templates/assignments/partials/_review_submissions_js.html:17
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:21
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:21
 msgid "Yenidən yoxla və yadda saxla"
 msgstr "Сохранить решения"
 
@@ -13073,72 +13497,86 @@ msgid "Hələ sual yaratmamısınız."
 msgstr "Не удалось создать вопросы с ИИ."
 
 #: apps/blog/templates/blog/postDetail.html:4
+#: apps/blog/templates/blog/postDetail.html 2.py:4
 msgctxt "blog.post_detail_page"
 msgid "title_suffix"
 msgstr "My Blog"
 
 #: apps/blog/templates/blog/postDetail.html:18
+#: apps/blog/templates/blog/postDetail.html 2.py:18
 #: apps/labs/templates/labs/lab_submissions.html:263
 msgid "Geri qayıt"
 msgstr "Название банка"
 
 #: apps/blog/templates/blog/postDetail.html:37
+#: apps/blog/templates/blog/postDetail.html 2.py:37
 #: apps/blog/templates/partials/_blogCard.html:33
 #, python-format
 msgid "%(count)s baxış"
 msgstr "%(count)s baxış"
 
 #: apps/blog/templates/blog/postDetail.html:67
+#: apps/blog/templates/blog/postDetail.html 2.py:67
 msgctxt "blog.post_detail_page"
 msgid "avg_rating_label"
 msgstr "Средний рейтинг статьи:"
 
 #: apps/blog/templates/blog/postDetail.html:69
+#: apps/blog/templates/blog/postDetail.html 2.py:69
 msgctxt "blog.post_detail_page"
 msgid "no_rating"
 msgstr "Для этой статьи пока нет оценок."
 
 #: apps/blog/templates/blog/postDetail.html:74
+#: apps/blog/templates/blog/postDetail.html 2.py:74
 msgctxt "blog.post_detail_page"
 msgid "comments_title"
 msgstr "Комментарии"
 
 #: apps/blog/templates/blog/postDetail.html:90
+#: apps/blog/templates/blog/postDetail.html 2.py:90
 msgctxt "blog.post_detail_page"
 msgid "no_comments"
 msgstr "Комментариев пока нет. Оставьте первый комментарий."
 
 #: apps/blog/templates/blog/postDetail.html:95
+#: apps/blog/templates/blog/postDetail.html 2.py:95
 msgctxt "blog.post_detail_page"
 msgid "add_comment_heading"
 msgstr "Написать комментарий"
 
 #: apps/blog/templates/blog/postDetail.html:99
+#: apps/blog/templates/blog/postDetail.html 2.py:99
 msgctxt "blog.post_detail_page"
 msgid "auth_prompt_prefix"
 msgstr "Чтобы оставить комментарий,"
 
 #: apps/blog/templates/blog/postDetail.html:100
+#: apps/blog/templates/blog/postDetail.html 2.py:100
 msgctxt "blog.post_detail_page"
 msgid "auth_login_link"
 msgstr "войдите"
 
 #: apps/blog/templates/blog/postDetail.html:101
+#: apps/blog/templates/blog/postDetail.html 2.py:101
 msgctxt "blog.post_detail_page"
 msgid "auth_prompt_middle"
 msgstr "или"
 
 #: apps/blog/templates/blog/postDetail.html:102
+#: apps/blog/templates/blog/postDetail.html 2.py:102
 msgctxt "blog.post_detail_page"
 msgid "auth_register_link"
 msgstr "зарегистрируйтесь"
 
 #: apps/blog/templates/blog/postDetail.html:102
+#: apps/blog/templates/blog/postDetail.html 2.py:102
 msgctxt "blog.post_detail_page"
 msgid "auth_prompt_suffix"
 msgstr "."
 
 #: apps/blog/templates/blog/postDetail.html:129
+#: apps/blog/templates/blog/postDetail.html 2.py:129
 msgctxt "blog.post_detail_page"
 msgid "submit_comment"
 msgstr "Отправить комментарий"
@@ -13337,11 +13775,13 @@ msgid "empty_categories"
 msgstr "Категории не найдены."
 
 #: apps/blog/templates/partials/_top_posts_section.html:57
+#: apps/blog/templates/partials/_top_posts_section.html 2.py:57
 msgctxt "blog.home_page"
 msgid "comments_label"
 msgstr "комментариев"
 
 #: apps/blog/templates/partials/_top_posts_section.html:64
+#: apps/blog/templates/partials/_top_posts_section.html 2.py:64
 msgctxt "blog.home_page"
 msgid "views_label"
 msgstr "просмотров"
@@ -13668,11 +14108,11 @@ msgctxt "blog.post_detail.message"
 msgid "comment_added_without_rating"
 msgstr "Новый комментарий добавлен, рейтинг не изменен."
 
-#: apps/blog/views/public/pages.py:134
+#: apps/blog/views/public/pages.py:143
 msgid "Haqqımızda – EMSArena"
 msgstr "О нас – EMSArena"
 
-#: apps/blog/views/public/pages.py:136
+#: apps/blog/views/public/pages.py:145
 msgid ""
 "EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız, "
 "missiyamız və platformanın imkanları haqqında məlumat."
@@ -13680,12 +14120,12 @@ msgstr ""
 "EMSArena — платформа управления образованием, LMS и онлайн-экзаменов. "
 "Узнайте о нашей команде, миссии и возможностях платформы."
 
-#: apps/blog/views/public/pages.py:140 apps/contact/views.py:56
+#: apps/blog/views/public/pages.py:149 apps/contact/views.py:56
 #: templates/partials/_footer.html:48
 msgid "Ana səhifə"
 msgstr "Главная"
 
-#: apps/blog/views/public/pages.py:141 templates/partials/_footer.html:49
+#: apps/blog/views/public/pages.py:150 templates/partials/_footer.html:49
 msgid "Haqqımızda"
 msgstr "О нас"
 
@@ -13942,6 +14382,7 @@ msgstr "Обработано"
 
 #: apps/contact/models.py:62
 #: apps/exams/templates/exams/student/student_exam_history.html:142
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:142
 #: apps/trial_exams/models.py:103
 msgid "Göndərilmə tarixi"
 msgstr "Дата отправки"
@@ -14951,139 +15392,169 @@ msgid "error_network"
 msgstr "Ошибка сети."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:10
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:10
 msgctxt "courses.partial.member_modal"
 msgid "student_modal_title"
 msgstr "Добавить студента"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:23
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:23
 msgctxt "courses.partial.member_modal"
 msgid "field_group_name_optional"
 msgstr "Имя группы (необязательно)"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:29
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:29
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_group_name"
 msgstr "Например: 940, 950, 842А1..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:33
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:33
 msgctxt "courses.partial.member_modal"
 msgid "label_students"
 msgstr "Студенты"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:38
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:38
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_students"
 msgstr "Поиск студента (имя, имя пользователя)..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:59
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:59
 msgctxt "courses.partial.member_modal"
 msgid "empty_user_not_found"
 msgstr "Пользователь не найден."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:64
 #: apps/courses/templates/courses/partials/_member_form_modal.html:135
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:64
+#: 2.py:135
 msgctxt "courses.partial.member_modal"
 msgid "selected_count"
 msgstr "Выбрано"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:70
 #: apps/courses/templates/courses/partials/_member_form_modal.html:145
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:70
+#: 2.py:145
 msgctxt "courses.partial.member_modal"
 msgid "loading"
 msgstr "Загрузка..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:72
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:72
 msgctxt "courses.partial.member_modal"
 msgid "students_adding"
 msgstr "Добавление студентов..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:78
 #: apps/courses/templates/courses/partials/_member_form_modal.html:153
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:78
+#: 2.py:153
 msgctxt "courses.partial.member_modal"
 msgid "action_cancel"
 msgstr "Отменить это"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:81
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:81
 msgctxt "courses.partial.member_modal"
 msgid "action_add"
 msgstr "Добавлять"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:94
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:94
 msgctxt "courses.partial.member_modal"
 msgid "group_modal_title"
 msgstr "Добавить группу"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:107
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:107
 msgctxt "courses.partial.member_modal"
 msgid "label_groups"
 msgstr "Группы"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:112
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:112
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_groups"
 msgstr "Поисковая группа..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:130
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:130
 msgctxt "courses.partial.member_modal"
 msgid "empty_group_not_found"
 msgstr "Группа не найдена."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:140
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:140
 msgctxt "courses.partial.member_modal"
 msgid "groups_info_text"
 msgstr "Все учащиеся выбранных групп будут добавлены к курсу."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:147
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:147
 msgctxt "courses.partial.member_modal"
 msgid "groups_adding"
 msgstr "Добавление групп..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:156
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:156
 msgctxt "courses.partial.member_modal"
 msgid "action_add_groups"
 msgstr "Добавить группы"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:166
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:166
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_student"
 msgstr "Выберите хотя бы одного ученика!"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:167
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:167
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_group"
 msgstr "Выберите хотя бы одну группу!"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:168
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:168
 msgctxt "courses.partial.member_modal"
 msgid "msg_adding"
 msgstr "Добавление..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:169
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:169
 msgctxt "courses.partial.member_modal"
 msgid "msg_error_prefix"
 msgstr "Ошибка:"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:170
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:170
 msgctxt "courses.partial.member_modal"
 msgid "msg_unknown_error"
 msgstr "Неизвестная ошибка"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:171
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:171
 msgctxt "courses.partial.member_modal"
 msgid "msg_server_error"
 msgstr "Произошла ошибка сервера."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:172
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:172
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_member_confirm_suffix"
 msgstr "Вы хотите удалить студента из курса?"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:173
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:173
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_failed_prefix"
 msgstr "Не удалено:"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:174
+#: apps/courses/templates/courses/partials/_member_form_modal.html 2.py:174
 msgctxt "courses.partial.member_modal"
 msgid "msg_error"
 msgstr "Ошибка"
@@ -15130,111 +15601,133 @@ msgid "confirm_delete_resource"
 msgstr "Вы хотели удалить этот ресурс?"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:12
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:12
 msgctxt "courses.partial.resource_modal"
 msgid "title_add_resource"
 msgstr "Добавить новый ресурс"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:26
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:26
 msgctxt "courses.partial.resource_modal"
 msgid "field_resource_type"
 msgstr "Тип ресурса"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:33
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:33
 msgctxt "courses.partial.resource_modal"
 msgid "type_file"
 msgstr "Файл"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:39
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:39
 msgctxt "courses.partial.resource_modal"
 msgid "type_link"
 msgstr "Связь"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:45
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:45
 msgctxt "courses.partial.resource_modal"
 msgid "type_video"
 msgstr "Видео"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:51
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:51
 msgctxt "courses.partial.resource_modal"
 msgid "type_document"
 msgstr "Документ"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:59
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:59
 msgctxt "courses.partial.resource_modal"
 msgid "field_resource_title"
 msgstr "Название ресурса"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:63
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:63
 msgctxt "courses.partial.resource_modal"
 msgid "placeholder_resource_title"
 msgstr "Например: Лекция 1 – Введение"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:70
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:70
 msgctxt "courses.partial.resource_modal"
 msgid "field_topic"
 msgstr "Предмет"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:73
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:73
 msgctxt "courses.partial.resource_modal"
 msgid "option_no_topic"
 msgstr "Предмет не выбран (уровень курса)"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:79
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:79
 msgctxt "courses.partial.resource_modal"
 msgid "help_topic_optional"
 msgstr "Необязательно: свяжите ресурс с определенной темой."
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:86
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:86
 msgctxt "courses.partial.resource_modal"
 msgid "field_description"
 msgstr "Раскрытие информации"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:90
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:90
 msgctxt "courses.partial.resource_modal"
 msgid "placeholder_description"
 msgstr "Краткая информация об этом ресурсе"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:96
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:96
 msgctxt "courses.partial.resource_modal"
 msgid "field_file"
 msgstr "Файл"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:101
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:101
 msgctxt "courses.partial.resource_modal"
 msgid "help_supported_formats"
 msgstr "Поддерживаемые форматы: PDF, ZIP, DOC, DOCX, PPT, PPTX, XLS, XLSX."
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:108
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:108
 msgctxt "courses.partial.resource_modal"
 msgid "field_url"
 msgstr "URL-ссылка"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:112
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:112
 msgctxt "courses.partial.resource_modal"
 msgid "placeholder_url"
 msgstr "https://example.com"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:114
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:114
 msgctxt "courses.partial.resource_modal"
 msgid "help_external_link"
 msgstr "Ссылка на внешний ресурс (YouTube, Google Drive и т. д.)"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:124
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:124
 msgctxt "courses.partial.resource_modal"
 msgid "action_add_resource"
 msgstr "Добавить ресурс"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:127
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:127
 msgctxt "courses.partial.resource_modal"
 msgid "action_cancel"
 msgstr "Отменить это"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:170
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:170
 msgctxt "courses.partial.resource_modal"
 msgid "loading"
 msgstr "Загрузка..."
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:202
+#: apps/courses/templates/courses/partials/_resource_form_modal.html 2.py:202
 msgctxt "courses.partial.resource_modal"
 msgid "error_retry"
 msgstr "Произошла ошибка. Пожалуйста, попробуйте еще раз."
@@ -15311,78 +15804,94 @@ msgid "resourceFormModal tapılmadı!"
 msgstr "Текстовое поле не найдено."
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:10
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:10
 msgctxt "courses.partial.topic_edit_modal"
 msgid "title_edit_topic"
 msgstr "Редактировать тему"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:12
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:12
 msgctxt "courses.partial.topic_edit_modal"
 msgid "aria_close"
 msgstr "Закрой это"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:26
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:26
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_name"
 msgstr "Имя субъекта"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:36
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:36
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_description"
 msgstr "Описание Тема"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:48
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:48
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_save"
 msgstr "Сохранить в память"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:51
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:51
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_cancel"
 msgstr "Отменить это"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:66
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:66
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_topic_id_not_found"
 msgstr "Ошибка: идентификатор темы не найден!"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:67
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:67
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_updating"
 msgstr "Обновление..."
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:68
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:68
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_topic_updated"
 msgstr "Тема обновлена!"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:69
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:69
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_error_retry"
 msgstr "Произошла ошибка. Пожалуйста, попробуйте еще раз."
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:70
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:70
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_error"
 msgstr "Ошибка"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:71
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:71
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_errors_header"
 msgstr "Ошибки"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:78
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:78
 msgid "⚠️ topicEditModal və ya topicEditForm tapılmadı!"
 msgstr "⚠️ topicEditModal və ya topicEditForm tapılmadı!"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:88
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:88
 msgid "✓ Modal açıldı, data yazılır:"
 msgstr "✓ Modal açıldı, data yazılır:"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:115
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:115
 msgid "→ editTopic çağırıldı:"
 msgstr "→ editTopic çağırıldı:"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:176
+#: apps/courses/templates/courses/partials/_topic_edit_modal.html 2.py:176
 msgid "Xəta:"
 msgstr "Xəta:"
 
@@ -15515,6 +16024,7 @@ msgstr "Посмотреть ответы"
 
 #: apps/courses/tests/test_views.py:249
 #: apps/projects/templates/projects/project_section.html:85
+#: apps/projects/templates/projects/project_section.html 2.py:85
 msgctxt "projects.section"
 msgid "view_submissions"
 msgstr "Посмотреть ответы"
@@ -18753,6 +19263,7 @@ msgstr "Поданный"
 #: apps/exams/templates/exams/student/exam_result.html:210
 #: apps/exams/templates/exams/student/take_coding_exam.html:411
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:198
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:198
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:274
 msgctxt "exams.template.coding_exam"
 msgid "Main File"
@@ -18760,6 +19271,7 @@ msgstr "Основной файл"
 
 #: apps/exams/templates/exams/student/exam_result.html:222
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:210
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:210
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:285
 #: apps/exams/tests/test_coding_exam.py:497
 #: apps/exams/tests/test_coding_exam.py:509
@@ -18875,10 +19387,12 @@ msgstr "Мои ответы"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:5
 #: apps/exams/templates/exams/student/student_exam_history.html:48
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:5 2.py:48
 msgid "Mənim cavablarım"
 msgstr "Ответ студента"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:26
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:26
 #: apps/exams/templates/exams/teacher/partials/_bank_picker_shell.html:26
 #: apps/exams/templates/exams/teacher/partials/_exam_bank_picker_items.html:46
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:263
@@ -18887,85 +19401,105 @@ msgid "Yüklənir..."
 msgstr "загрузка..."
 
 #: apps/exams/templates/exams/student/student_exam_history.html:64
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:64
 msgid "İstifadə olunmuş cəhd"
 msgstr "İstifadə olunmuş cəhd"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:72
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:72
 msgid "Qalan cəhd"
 msgstr "Qalan cəhd"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:91
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:91
 msgid "Planlanıb"
 msgstr "Planlanıb"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:105
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:105
 msgid "Məhdudiyyətsiz"
 msgstr "Məhdudiyyətsiz"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:120
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:120
 msgid "İmtahan adına görə axtar..."
 msgstr "Поиск по названию экзамена"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:129
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:129
 msgid "Göndərdiyim cavablar"
 msgstr "Отправляется"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:129
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:129
 msgid "İmtahan cəhdlərim"
 msgstr "Экзамены"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:130
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:130
 #, python-format
 msgid "%(count)s nəticə"
 msgstr "%(count)s nəticə"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:144
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:144
 msgid "Qiymət"
 msgstr "Qiymət"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:158
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:158
 msgctxt "exams.template.student_exam_history"
 msgid "type_test"
 msgstr "Тест"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:160
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:160
 msgctxt "exams.template.student_exam_history"
 msgid "type_practical"
 msgstr "Практический"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:162
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:162
 msgctxt "exams.template.student_exam_history"
 msgid "type_written"
 msgstr "Письменный"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:164
 #: apps/exams/templates/exams/student/student_exam_history.html:174
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:164
+#: 2.py:174
 #, python-format
 msgid "Cəhd #%(number)s"
 msgstr "Вопрос №%(number)s"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:179
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:179
 msgid "Qiymətləndirildi"
 msgstr "Qiymətləndirildi"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:183
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:183
 msgid "Yoxlanılır"
 msgstr "Рассмотрено"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:246
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:246
 #, python-format
 msgid "\"%(query)s\" üçün nəticə tapılmadı"
 msgstr "\"%(query)s\" üçün nəticə tapılmadı"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:247
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:247
 msgid "Axtarış sorğusunu dəyişdirməyə çalışın."
 msgstr "Axtarış sorğusunu dəyişdirməyə çalışın."
 
 #: apps/exams/templates/exams/student/student_exam_history.html:249
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:249
 msgid "Hələ nəticə yoxdur"
 msgstr "Апелляций пока нет"
 
 #: apps/exams/templates/exams/student/student_exam_history.html:251
+#: apps/exams/templates/exams/student/student_exam_history.html 2.py:251
 msgctxt "exams.template.student_exam_history"
 msgid "empty_no_exam_attempt"
 msgstr "Максимальное усилие"
@@ -21743,51 +22277,71 @@ msgid "unsaved_save"
 msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:20
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:20
 msgctxt "exams.wizard"
 msgid "rail_kicker"
 msgstr "EMSARENA · ПРЕПОДАВАТЕЛЬ"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:28
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:28
 msgctxt "exams.wizard"
 msgid "step_basics"
 msgstr "Основное"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:28
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:28
 msgctxt "exams.wizard"
 msgid "step_basics_sub"
 msgstr "Название, тип, категория"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:32
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:32
 msgctxt "exams.wizard"
 msgid "step_timing"
 msgstr "Время и вопросы"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:32
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:32
 msgctxt "exams.wizard"
 msgid "step_timing_sub"
 msgstr "Даты, длит., кол-во"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:36
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:36
 msgctxt "exams.wizard"
 msgid "step_access"
 msgstr "Доступ"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:36
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:36
 msgctxt "exams.wizard"
 msgid "step_access_sub"
 msgstr "Статус, доступ"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:40
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:40
 msgctxt "exams.wizard"
 msgid "step_proctor"
 msgstr "Контроль"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:40
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:40
 msgctxt "exams.wizard"
 msgid "step_proctor_sub"
 msgstr "Анти-чит (опц.)"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:45
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:45
 msgctxt "exams.wizard"
 msgid "rail_hint"
 msgstr ""
@@ -21796,12 +22350,16 @@ msgstr ""
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:57
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:78
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:57 2.py:78
 msgctxt "exams.wizard"
 msgid "step_basics_title"
 msgstr "Основы экзамена"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:58
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:79
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:58 2.py:79
 msgctxt "exams.wizard"
 msgid "step_basics_desc"
 msgstr ""
@@ -21809,31 +22367,43 @@ msgstr ""
 "экзамена."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:119
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:119
 msgctxt "exams.wizard"
 msgid "type_desc_test"
 msgstr "Вопросы с выбором ответа, автоматическая оценка."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:123
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:123
 msgctxt "exams.wizard"
 msgid "type_desc_coding"
 msgstr "Практический экзамен на основе кода или задания."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:127
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:127
 msgctxt "exams.wizard"
 msgid "type_desc_written"
 msgstr "Открытый ответ, эссе или Paint — проверяется вручную."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:144
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:144
 msgctxt "exams.template.create_exam_modal_form"
 msgid "exam_type_extended_help"
 msgstr "Академическая категория экзамена (необязательно)."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:152
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:152
 msgctxt "exams.wizard"
 msgid "step_timing_title"
 msgstr "Время и вопросы"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:153
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:153
 msgctxt "exams.wizard"
 msgid "step_timing_desc"
 msgstr ""
@@ -21841,36 +22411,50 @@ msgstr ""
 "каждый студент."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:161
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:161
 msgctxt "exams.wizard"
 msgid "code_generate"
 msgstr "Создать"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:164
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:164
 msgctxt "exams.wizard"
 msgid "code_hint"
 msgstr "6 цифр. Если пусто — экзамен открыт для всех."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:180
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:180
 msgctxt "exams.wizard"
 msgid "section_schedule"
 msgstr "Расписание"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:212
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:212
 msgctxt "exams.wizard"
 msgid "section_distribution"
 msgstr "Распределение вопросов"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:249
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:249
 msgctxt "exams.wizard"
 msgid "step_access_title"
 msgstr "Доступ и статус"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:250
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:250
 msgctxt "exams.wizard"
 msgid "step_access_desc"
 msgstr "Управляйте видимостью экзамена для студентов и тем, кто может войти."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:256
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:256
 msgctxt "exams.wizard"
 msgid "desc_is_active"
 msgstr ""
@@ -21878,21 +22462,29 @@ msgstr ""
 "сохраняется как черновик."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:265
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:265
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
 msgstr "Сделать этот экзамен открытым для всех?"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:266
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:266
 msgctxt "exams.wizard"
 msgid "desc_is_public"
 msgstr "Если открыт, код не требуется и все студенты могут войти."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:275
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:275
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
 msgstr "Включить Paint-ответы для письменного экзамена"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:276
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:276
 msgctxt "exams.wizard"
 msgid "desc_paint"
 msgstr ""
@@ -21900,11 +22492,15 @@ msgstr ""
 "диаграммы)."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:284
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:284
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
 msgstr "Настройки доступа"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:285
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:285
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
@@ -21913,37 +22509,51 @@ msgstr ""
 "или студентов."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:292
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:292
 msgctxt "exams.template.create_exam_modal_form"
 msgid "allowed_groups"
 msgstr "Разрешенные группы"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:295
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:295
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_group"
 msgstr "Поисковая группа..."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:299
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:315
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:299 2.py:315
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_count"
 msgstr "Выбрано"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:308
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:308
 msgctxt "exams.template.create_exam_modal_form"
 msgid "allowed_users_individual"
 msgstr "Индивидуально разрешенные пользователи"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:311
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:311
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_name_or_username"
 msgstr "Username or email"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:329
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:329
 msgctxt "exams.wizard"
 msgid "step_proctor_title"
 msgstr "Контроль экзамена"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:330
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:330
 msgctxt "exams.wizard"
 msgid "step_proctor_desc"
 msgstr ""
@@ -21951,136 +22561,190 @@ msgstr ""
 "обычном режиме."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:338
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:338
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_enable_label"
 msgstr "Включить режим надзора за экзаменом"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:339
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:339
 msgctxt "exams.wizard"
 msgid "desc_supervision"
 msgstr "Полноэкранный режим, контроль вкладок и другие меры против списывания."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:347
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:347
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_label"
 msgstr "Шаблон надзора"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:350
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:350
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_custom"
 msgstr "Пользовательский"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:351
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:351
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_light"
 msgstr "Легкий"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:352
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:352
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_medium"
 msgstr "Средний"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:353
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:353
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_template_strict"
 msgstr "Строгий"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:365
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:365
 msgctxt "exams.wizard"
 msgid "section_measures"
 msgstr "Меры"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:372
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:372
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_force_fullscreen"
 msgstr "Требовать полноэкранный режим"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:380
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:380
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_detect_tab_switch"
 msgstr "Обнаруживать переключение вкладок"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:388
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:388
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_block_copy_paste"
 msgstr "Блокировать Копирование/Вставку"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:396
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:396
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_disable_right_click"
 msgstr "Заблокировать контекстное меню"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:404
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:404
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_disable_text_selection"
 msgstr "Заблокировать выделение текста"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:412
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:412
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_restrict_shortcuts"
 msgstr "Ограничить клавиатурные сочетания"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:419
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:419
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_grace_period_label"
 msgstr "Период восстановления (секунды)"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:427
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:427
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_max_violations_label"
 msgstr "Максимальное количество нарушений"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:435
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:435
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_violation_action_label"
 msgstr "Действие при нарушении"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:438
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:438
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_action_auto_submit"
 msgstr "Автоматическая отправка"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:439
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:439
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_action_lock_exam"
 msgstr "Заблокировать экзамен"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:440
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:440
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_action_remove_student"
 msgstr "Удалить студента"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:441
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:441
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_action_mark_suspicious"
 msgstr "Отметить как подозрительное"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:447
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:447
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_recovery_policy_label"
 msgstr "Политика восстановления"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:450
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:450
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_recovery_no_second_chance"
 msgstr "Без второго шанса"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:451
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:451
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_recovery_one_extra_chance"
 msgstr "Один дополнительный шанс"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:452
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:452
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_recovery_teacher_controlled"
 msgstr "Управляемое учителем"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:464
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:464
 msgctxt "exams.wizard"
 msgid "proctor_unavailable"
 msgstr "Контроль недоступен для этого экзамена."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:472
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:472
 msgctxt "exams.wizard"
 msgid "tip_live_after_create"
 msgstr ""
@@ -22088,21 +22752,29 @@ msgstr ""
 "стиле Kahoot) экзамен."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:480
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:480
 msgctxt "exams.wizard"
 msgid "nav_back"
 msgstr "Назад"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:488
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:488
 msgctxt "exams.wizard"
 msgid "nav_next"
 msgstr "Далее"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:493
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:493
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_save"
 msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:493
+#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html
+#: 2.py:493
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
 msgstr "Создать курс"
@@ -22854,181 +23526,248 @@ msgid "action_confirm_delete"
 msgstr "Подтвердить удаление"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:5
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:5
 msgctxt "exams.template.supervision_monitor"
 msgid "sev_info"
 msgstr "Информация"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:6
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:6
 msgctxt "exams.template.supervision_monitor"
 msgid "sev_low"
 msgstr "Низкий"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:7
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:7
 msgctxt "exams.template.supervision_monitor"
 msgid "sev_medium"
 msgstr "Средний"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:8
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:8
 msgctxt "exams.template.supervision_monitor"
 msgid "sev_high"
 msgstr "Высокий"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:9
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:9
 msgctxt "exams.template.supervision_monitor"
 msgid "sev_critical"
 msgstr "Критический"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:10
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:10
 msgctxt "exams.template.supervision_monitor"
 msgid "chart_count_label"
 msgstr "Количество"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:11
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:11
 msgctxt "exams.template.supervision_monitor"
 msgid "confirm_resume"
 msgstr "Вы хотите разрешить этому студенту продолжить экзамен?"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:12
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:12
 msgctxt "exams.template.supervision_monitor"
 msgid "resume_success"
 msgstr "Разрешение предоставлено. Экзамен студента возобновлён."
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:13
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:13
 msgctxt "exams.template.supervision_monitor"
 msgid "resume_error"
 msgstr "Ошибка: "
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:14
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:14
 msgctxt "exams.template.supervision_monitor"
 msgid "connection_error"
 msgstr "Ошибка соединения."
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:15
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:15
 msgctxt "exams.template.supervision_monitor"
 msgid "confirm_stop"
 msgstr "Вы хотите остановить экзамен этого студента? Экзамен будет сдан."
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:16
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:16
 msgctxt "exams.template.supervision_monitor"
 msgid "stop_success"
 msgstr "Экзамен остановлен."
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:17
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:17
 msgctxt "exams.template.supervision_monitor"
 msgid "stop_error"
 msgstr "Ошибка остановки: "
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:18
-#: apps/exams/templates/exams/teacher/supervision_monitor.html:204
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:18 apps/exams/templates/exams/teacher/supervision_monitor.html:204
 #: apps/exams/templates/exams/teacher/supervision_monitor.html:205
 msgctxt "exams.template.supervision_monitor"
 msgid "action_resume"
 msgstr "Возобновить"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:19
-#: apps/exams/templates/exams/teacher/supervision_monitor.html:216
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:19 apps/exams/templates/exams/teacher/supervision_monitor.html:216
 #: apps/exams/templates/exams/teacher/supervision_monitor.html:217
 msgctxt "exams.template.supervision_monitor"
 msgid "action_stop"
 msgstr "Остановить"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:20
-#: apps/exams/templates/exams/teacher/supervision_monitor.html:97
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:20 apps/exams/templates/exams/teacher/supervision_monitor.html:97
 msgctxt "exams.template.supervision_monitor"
 msgid "action_search"
 msgstr "Поиск"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:21
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:21
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_fullscreen_exited"
 msgstr "Выход из полного экрана"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:22
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:22
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_fullscreen_restored"
 msgstr "Полный экран восстановлен"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:23
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:23
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_tab_switched"
 msgstr "Переключение вкладки"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:24
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:24
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_window_blurred"
 msgstr "Окно потеряло фокус"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:25
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:25
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_window_focused"
 msgstr "Окно вернуло фокус"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:26
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:26
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_copy_attempt"
 msgstr "Попытка копирования"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:27
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:27
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_paste_attempt"
 msgstr "Попытка вставки"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:28
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:28
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_cut_attempt"
 msgstr "Попытка вырезания"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:29
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:29
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_right_click_attempt"
 msgstr "Попытка правого клика"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:30
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:30
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_keyboard_shortcut"
 msgstr "Сочетание клавиш"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:31
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:31
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_text_select_attempt"
 msgstr "Попытка выделения текста"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:32
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:32
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_suspicious_repeated"
 msgstr "Подозрительное повторное действие"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:33
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:33
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_grace_period_expired"
 msgstr "Льготный период истёк"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:34
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:34
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_auto_locked"
 msgstr "Автоматическая блокировка"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:35
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:35
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_auto_submitted"
 msgstr "Автоматическая отправка"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:36
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:36
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_teacher_resumed"
 msgstr "Возобновлено учителем"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:37
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:37
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_teacher_granted_chance"
 msgstr "Учитель дал дополнительный шанс"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:38
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:38
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_exam_started_supervised"
 msgstr "Экзамен под наблюдением начат"
 
 #: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html:39
+#: apps/exams/templates/exams/teacher/partials/_supervision_monitor_js.html
+#: 2.py:39
 msgctxt "exams.template.supervision_monitor"
 msgid "vt_student_acknowledged"
 msgstr "Студент подтвердил"
@@ -23606,34 +24345,41 @@ msgid "action_cancel"
 msgstr "Отмена"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:4
 msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
 msgstr "Проверка письменных ответов"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:14
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:14
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"
 msgstr "На проверке"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:16
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:16
 msgid "Tələbə:"
 msgstr "Студент"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:20
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:20
 msgid "İmtahanı yaradan müəllim:"
 msgstr "İmtahanı yaradan müəllim:"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:27
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:27
 msgid "Nəzarətçi tərəfindən dayandırılıb"
 msgstr "Nəzarətçi tərəfindən dayandırılıb"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:29
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:29
 msgid ""
 "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
 msgstr ""
 "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb."
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:30
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:30
 #, python-format
 msgid ""
 "Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün "
@@ -23645,14 +24391,17 @@ msgstr ""
 "nəticələr bu kontekstdə qiymətləndirilməlidir."
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:37
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:37
 msgid "Başlayıb"
 msgstr "Başlayıb"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:57
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:57
 msgid "Ümumi müddət"
 msgstr "Общее примечание"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:69
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:69
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:34
 #, python-format
 msgid ""
@@ -23664,6 +24413,8 @@ msgstr ""
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:81
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:295
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:81
+#: 2.py:295
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_question"
 msgstr "Вопрос"
@@ -23672,6 +24423,8 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:187
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:269
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:363
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:96
+#: 2.py:187 2.py:269 2.py:363
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_answer"
 msgstr "Ответ отсутствует"
@@ -23679,22 +24432,28 @@ msgstr "Ответ отсутствует"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:98
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:156
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:364
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:98
+#: 2.py:156 2.py:364
 msgctxt "exams.template.teacher_check_attempt"
 msgid "unit_points"
 msgstr "балл"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:100
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:365
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:100
+#: 2.py:365
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_not_checked"
 msgstr "Не проверено"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:102
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:102
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_empty_answer"
 msgstr "Пустой ответ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:170
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:170
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_execution_note"
 msgstr "Примечание о выполнении (нажмите, чтобы развернуть)"
@@ -23702,123 +24461,150 @@ msgstr "Примечание о выполнении (нажмите, чтобы
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:178
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:221
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:375
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:178
+#: 2.py:221 2.py:375
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_uploaded_files"
 msgstr "Загруженные файлы"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:183
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:376
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:183
+#: 2.py:376
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_answered_with_paint"
 msgstr "Ответ с paint"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:263
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:263
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_paint_answer"
 msgstr "Ответ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:270
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:270
 msgctxt "exams.template.teacher_check_attempt"
 msgid "alt_paint"
 msgstr "Paint-ответ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:283
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:283
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_back"
 msgstr "Назад"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:286
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:286
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_changes"
 msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:306
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:370
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:306
+#: 2.py:370
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_ai_grade"
 msgstr "Оценить с ИИ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:314
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:314
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_score"
 msgstr "Балл"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:328
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:328
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_feedback"
 msgstr "Комментарий преподавателя"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:337
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:337
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_cancel"
 msgstr "Отмена"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:338
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:338
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_confirm_temporary"
 msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:347
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:347
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_title"
 msgstr "Несохраненные изменения"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:348
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:348
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
 msgstr "У вас есть несохраненные изменения. Выйти без сохранения?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:350
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:350
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_no_return"
 msgstr "Нет, вернуться"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:351
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:351
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_yes_close"
 msgstr "Да, выйти"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:362
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:362
 msgctxt "exams.template.teacher_check_attempt"
 msgid "modal_title_question_details"
 msgstr "Детали вопроса"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:366
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:366
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_changes_present"
 msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:367
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:367
 msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_title"
 msgstr "Сохранить проверку"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:368
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:368
 msgctxt "exams.template.teacher_check_attempt"
 msgid "confirm_save_review_message"
 msgstr "Вы уверены, что хотите сохранить и завершить эту проверку?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:369
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:369
 msgctxt "exams.template.teacher_check_attempt"
 msgid "ai_grading_in_progress"
 msgstr "ИИ оценивает..."
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:371
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:371
 msgctxt "exams.template.teacher_check_attempt"
 msgid "ai_grade_error"
 msgstr "Ошибка оценки ИИ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:372
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:372
 msgctxt "exams.template.teacher_check_attempt"
 msgid "ai_cached"
 msgstr "Из кэша"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:373
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:373
 msgctxt "exams.template.teacher_check_attempt"
 msgid "ai_quota_info"
 msgstr "{remaining}/{limit} ({window})"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:374
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html 2.py:374
 msgctxt "exams.template.teacher_check_attempt"
 msgid "ai_no_answer_to_grade"
 msgstr "Нет ответа для оценки"
@@ -25968,31 +26754,37 @@ msgid "label_graded_at %(graded_at)s"
 msgstr "Оценка %(graded_at)s"
 
 #: apps/labs/templates/labs/lab_detail.html:42
+#: apps/labs/templates/labs/lab_detail.html 2.py:42
 msgctxt "labs.template.lab_detail"
 msgid "status_open"
 msgstr "Открыть"
 
 #: apps/labs/templates/labs/lab_detail.html:44
+#: apps/labs/templates/labs/lab_detail.html 2.py:44
 msgctxt "labs.template.lab_detail"
 msgid "status_upcoming"
 msgstr "Предстоящие"
 
 #: apps/labs/templates/labs/lab_detail.html:46
+#: apps/labs/templates/labs/lab_detail.html 2.py:46
 msgctxt "labs.template.lab_detail"
 msgid "status_closed"
 msgstr "Закрыто"
 
 #: apps/labs/templates/labs/lab_detail.html:50
+#: apps/labs/templates/labs/lab_detail.html 2.py:50
 msgctxt "labs.template.lab_detail"
 msgid "action_back"
 msgstr "Назад"
 
 #: apps/labs/templates/labs/lab_detail.html:64
+#: apps/labs/templates/labs/lab_detail.html 2.py:64
 msgctxt "labs.template.lab_detail"
 msgid "notice_already_submitted"
 msgstr "Вы уже отправили эту лабораторную работу!"
 
 #: apps/labs/templates/labs/lab_detail.html:67
+#: apps/labs/templates/labs/lab_detail.html 2.py:67
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
@@ -26000,175 +26792,209 @@ msgid ""
 msgstr "%(submitted_at)s · Попытка: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:77
+#: apps/labs/templates/labs/lab_detail.html 2.py:77
 msgid "Nəticə:"
 msgstr "Nəticə:"
 
 #: apps/labs/templates/labs/lab_detail.html:82
+#: apps/labs/templates/labs/lab_detail.html 2.py:82
 msgctxt "labs.template.lab_detail"
 msgid "status_not_graded"
 msgstr "Не оценено"
 
 #: apps/labs/templates/labs/lab_detail.html:102
+#: apps/labs/templates/labs/lab_detail.html 2.py:102
 msgctxt "labs.template.lab_detail"
 msgid "label_answered"
 msgstr "Ответил"
 
 #: apps/labs/templates/labs/lab_detail.html:113
+#: apps/labs/templates/labs/lab_detail.html 2.py:113
 msgctxt "labs.template.lab_detail"
 msgid "label_elapsed_time"
 msgstr "Прошедшее время"
 
 #: apps/labs/templates/labs/lab_detail.html:117
+#: apps/labs/templates/labs/lab_detail.html 2.py:117
 msgctxt "labs.template.lab_detail"
 msgid "label_remaining_time"
 msgstr "Оставшееся время"
 
 #: apps/labs/templates/labs/lab_detail.html:136
+#: apps/labs/templates/labs/lab_detail.html 2.py:136
 msgctxt "labs.template.lab_detail"
 msgid "card_lab_info"
 msgstr "Информация о лаборатории"
 
 #: apps/labs/templates/labs/lab_detail.html:144
+#: apps/labs/templates/labs/lab_detail.html 2.py:144
 msgctxt "labs.template.lab_detail"
 msgid "label_start"
 msgstr "Начинать"
 
 #: apps/labs/templates/labs/lab_detail.html:153
+#: apps/labs/templates/labs/lab_detail.html 2.py:153
 msgctxt "labs.template.lab_detail"
 msgid "label_deadline"
 msgstr "Крайний срок"
 
 #: apps/labs/templates/labs/lab_detail.html:162
+#: apps/labs/templates/labs/lab_detail.html 2.py:162
 msgctxt "labs.template.lab_detail"
 msgid "label_max_score"
 msgstr "Максимальный балл"
 
 #: apps/labs/templates/labs/lab_detail.html:171
+#: apps/labs/templates/labs/lab_detail.html 2.py:171
 msgctxt "labs.template.lab_detail"
 msgid "label_attempt"
 msgstr "Пытаться"
 
 #: apps/labs/templates/labs/lab_detail.html:180
+#: apps/labs/templates/labs/lab_detail.html 2.py:180
 msgctxt "labs.template.lab_detail"
 msgid "label_question_count"
 msgstr "Количество вопросов"
 
 #: apps/labs/templates/labs/lab_detail.html:181
+#: apps/labs/templates/labs/lab_detail.html 2.py:181
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_questions_count_value %(question_count)s"
 msgstr "%(question_count)s элементы"
 
 #: apps/labs/templates/labs/lab_detail.html:190
+#: apps/labs/templates/labs/lab_detail.html 2.py:190
 msgctxt "labs.template.lab_detail"
 msgid "card_materials"
 msgstr "Материалы"
 
 #: apps/labs/templates/labs/lab_detail.html:195
+#: apps/labs/templates/labs/lab_detail.html 2.py:195
 msgctxt "labs.template.lab_detail"
 msgid "label_teacher_file"
 msgstr "Файл учителя"
 
 #: apps/labs/templates/labs/lab_detail.html:205
+#: apps/labs/templates/labs/lab_detail.html 2.py:205
 msgctxt "labs.template.lab_detail"
 msgid "label_instructions"
 msgstr "Инструкции"
 
 #: apps/labs/templates/labs/lab_detail.html:237
+#: apps/labs/templates/labs/lab_detail.html 2.py:237
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_points %(points)s"
 msgstr "%(points)s баллов"
 
 #: apps/labs/templates/labs/lab_detail.html:257
+#: apps/labs/templates/labs/lab_detail.html 2.py:257
 msgctxt "labs.template.lab_detail"
 msgid "placeholder_answer"
 msgstr "Напишите свой ответ здесь..."
 
 #: apps/labs/templates/labs/lab_detail.html:267
+#: apps/labs/templates/labs/lab_detail.html 2.py:267
 msgctxt "labs.template.lab_detail"
 msgid "action_add_file"
 msgstr "Добавить файл"
 
 #: apps/labs/templates/labs/lab_detail.html:268
+#: apps/labs/templates/labs/lab_detail.html 2.py:268
 msgid "Maksimum fayl ölçüsü 10MB"
 msgstr "Maksimum fayl ölçüsü 10MB"
 
 #: apps/labs/templates/labs/lab_detail.html:283
+#: apps/labs/templates/labs/lab_detail.html 2.py:283
 msgctxt "labs.template.lab_detail"
 msgid "status_saved"
 msgstr "Сохранено"
 
 #: apps/labs/templates/labs/lab_detail.html:286
+#: apps/labs/templates/labs/lab_detail.html 2.py:286
 msgctxt "labs.template.lab_detail"
 msgid "status_waiting_for_answer"
 msgstr "Ожидание ответа"
 
 #: apps/labs/templates/labs/lab_detail.html:301
+#: apps/labs/templates/labs/lab_detail.html 2.py:301
 msgctxt "labs.template.lab_detail"
 msgid "warning_label"
 msgstr "Внимание:"
 
 #: apps/labs/templates/labs/lab_detail.html:302
+#: apps/labs/templates/labs/lab_detail.html 2.py:302
 msgctxt "labs.template.lab_detail"
 msgid "warning_submit_locked"
 msgstr "Вы не можете редактировать после отправки!"
 
 #: apps/labs/templates/labs/lab_detail.html:306
+#: apps/labs/templates/labs/lab_detail.html 2.py:306
 msgctxt "labs.template.lab_detail"
 msgid "action_finish_lab"
 msgstr "Завершить лабораторию"
 
 #: apps/labs/templates/labs/lab_detail.html:318
+#: apps/labs/templates/labs/lab_detail.html 2.py:318
 msgctxt "labs.template.lab_detail"
 msgid "empty_no_questions"
 msgstr "К этой лаборатории вопросов нет."
 
 #: apps/labs/templates/labs/lab_detail.html:319
+#: apps/labs/templates/labs/lab_detail.html 2.py:319
 msgctxt "labs.template.lab_detail"
 msgid "empty_teacher_has_not_added_questions"
 msgstr "Учитель еще не добавил вопросы"
 
 #: apps/labs/templates/labs/lab_detail.html:328
+#: apps/labs/templates/labs/lab_detail.html 2.py:328
 msgctxt "labs.template.lab_detail"
 msgid "notice_submission_successful"
 msgstr "Лаборатория успешно отправлена!"
 
 #: apps/labs/templates/labs/lab_detail.html:330
+#: apps/labs/templates/labs/lab_detail.html 2.py:330
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "notice_attempts_exhausted %(attempt_count)s / %(max_attempts)s"
 msgstr "Попытки исчерпаны (%(attempt_count)s / %(max_attempts)s)"
 
 #: apps/labs/templates/labs/lab_detail.html:342
+#: apps/labs/templates/labs/lab_detail.html 2.py:342
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_not_started"
 msgstr "Лаборатория еще не началась"
 
 #: apps/labs/templates/labs/lab_detail.html:344
+#: apps/labs/templates/labs/lab_detail.html 2.py:344
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_start_at %(start_at)s"
 msgstr "Начало: %(start_at)s"
 
 #: apps/labs/templates/labs/lab_detail.html:353
+#: apps/labs/templates/labs/lab_detail.html 2.py:353
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_closed"
 msgstr "Лаборатория закрыта"
 
 #: apps/labs/templates/labs/lab_detail.html:355
+#: apps/labs/templates/labs/lab_detail.html 2.py:355
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_deadline_at %(deadline)s"
 msgstr "Срок: %(deadline)s"
 
 #: apps/labs/templates/labs/lab_detail.html:370
+#: apps/labs/templates/labs/lab_detail.html 2.py:370
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_title"
 msgstr "Вы уверены, что хотите завершить?"
 
 #: apps/labs/templates/labs/lab_detail.html:376
 #: apps/labs/templates/labs/lab_detail.html:405
+#: apps/labs/templates/labs/lab_detail.html 2.py:376 2.py:405
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_description"
 msgstr ""
@@ -26176,56 +27002,67 @@ msgstr ""
 "отредактировать её."
 
 #: apps/labs/templates/labs/lab_detail.html:382
+#: apps/labs/templates/labs/lab_detail.html 2.py:382
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_no_back"
 msgstr "Нет, продолжить"
 
 #: apps/labs/templates/labs/lab_detail.html:385
+#: apps/labs/templates/labs/lab_detail.html 2.py:385
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_yes"
 msgstr "Да, завершить лабораторию"
 
 #: apps/labs/templates/labs/lab_detail.html:401
+#: apps/labs/templates/labs/lab_detail.html 2.py:401
 msgctxt "labs.js.lab_detail"
 msgid "status_saved"
 msgstr "Сохранено"
 
 #: apps/labs/templates/labs/lab_detail.html:402
+#: apps/labs/templates/labs/lab_detail.html 2.py:402
 msgctxt "labs.js.lab_detail"
 msgid "status_saving"
 msgstr "Сохранение..."
 
 #: apps/labs/templates/labs/lab_detail.html:403
+#: apps/labs/templates/labs/lab_detail.html 2.py:403
 msgctxt "labs.js.lab_detail"
 msgid "status_error"
 msgstr "Ошибка"
 
 #: apps/labs/templates/labs/lab_detail.html:404
+#: apps/labs/templates/labs/lab_detail.html 2.py:404
 msgctxt "labs.js.lab_detail"
 msgid "confirm_unanswered"
 msgstr "Вопросы {count} остаются без ответа. Все равно отправить?"
 
 #: apps/labs/templates/labs/lab_detail.html:406
+#: apps/labs/templates/labs/lab_detail.html 2.py:406
 msgctxt "labs.js.lab_detail"
 msgid "action_submitting"
 msgstr "Отправка..."
 
 #: apps/labs/templates/labs/lab_detail.html:407
+#: apps/labs/templates/labs/lab_detail.html 2.py:407
 msgctxt "labs.js.lab_detail"
 msgid "error_prefix"
 msgstr "Ошибка"
 
 #: apps/labs/templates/labs/lab_detail.html:408
+#: apps/labs/templates/labs/lab_detail.html 2.py:408
 msgctxt "labs.js.lab_detail"
 msgid "error_unknown"
 msgstr "Неизвестная ошибка"
 
 #: apps/labs/templates/labs/lab_detail.html:409
+#: apps/labs/templates/labs/lab_detail.html 2.py:409
 msgctxt "labs.js.lab_detail"
 msgid "error_server"
 msgstr "Ошибка сервера"
 
 #: apps/labs/templates/labs/lab_detail.html:410
+#: apps/labs/templates/labs/lab_detail.html 2.py:410
 msgctxt "labs.js.lab_detail"
 msgid "action_finish_lab"
 msgstr "Завершить лабораторию"
@@ -26497,41 +27334,49 @@ msgid "Bu seçim geri qaytarılmır. Seçilmiş lab işi cavabları silinəcək.
 msgstr "Bu seçim geri qaytarılmır. Seçilmiş lab işi cavabları silinəcək."
 
 #: apps/labs/templates/labs/manage_blocks.html:5
+#: apps/labs/templates/labs/manage_blocks.html 2.py:5
 msgctxt "labs.template.manage_blocks"
 msgid "title_suffix_blocks_questions"
 msgstr "Блоки и вопросы"
 
 #: apps/labs/templates/labs/manage_blocks.html:24
+#: apps/labs/templates/labs/manage_blocks.html 2.py:24
 msgctxt "labs.template.manage_blocks"
 msgid "heading_blocks_questions"
 msgstr "Блоки и вопросы"
 
 #: apps/labs/templates/labs/manage_blocks.html:29
+#: apps/labs/templates/labs/manage_blocks.html 2.py:29
 msgctxt "labs.template.manage_blocks"
 msgid "action_random_preview"
 msgstr "Случайный просмотр"
 
 #: apps/labs/templates/labs/manage_blocks.html:32
+#: apps/labs/templates/labs/manage_blocks.html 2.py:32
 msgctxt "labs.template.manage_blocks"
 msgid "action_new_block"
 msgstr "Новый блок"
 
 #: apps/labs/templates/labs/manage_blocks.html:41
+#: apps/labs/templates/labs/manage_blocks.html 2.py:41
 msgctxt "labs.template.manage_blocks"
 msgid "stat_blocks"
 msgstr "Блоки"
 
 #: apps/labs/templates/labs/manage_blocks.html:47
+#: apps/labs/templates/labs/manage_blocks.html 2.py:47
 msgctxt "labs.template.manage_blocks"
 msgid "stat_total_questions"
 msgstr "Всего вопросов"
 
 #: apps/labs/templates/labs/manage_blocks.html:53
+#: apps/labs/templates/labs/manage_blocks.html 2.py:53
 msgctxt "labs.template.manage_blocks"
 msgid "label_all"
 msgstr "Все"
 
 #: apps/labs/templates/labs/manage_blocks.html:55
+#: apps/labs/templates/labs/manage_blocks.html 2.py:55
 msgctxt "labs.template.manage_blocks"
 msgid "stat_per_student"
 msgstr "На одного студента"
@@ -26539,58 +27384,69 @@ msgstr "На одного студента"
 #: apps/labs/templates/labs/manage_blocks.html:60
 #: apps/labs/templates/labs/manage_blocks.html:263
 #: apps/labs/templates/labs/manage_blocks.html:334
+#: apps/labs/templates/labs/manage_blocks.html 2.py:60 2.py:263 2.py:334
 msgctxt "labs.template.manage_blocks"
 msgid "action_save"
 msgstr "Сохранять"
 
 #: apps/labs/templates/labs/manage_blocks.html:69
+#: apps/labs/templates/labs/manage_blocks.html 2.py:69
 msgctxt "labs.template.manage_blocks"
 msgid "status_published"
 msgstr "Опубликовано"
 
 #: apps/labs/templates/labs/manage_blocks.html:71
+#: apps/labs/templates/labs/manage_blocks.html 2.py:71
 msgctxt "labs.template.manage_blocks"
 msgid "status_archived"
 msgstr "В архиве"
 
 #: apps/labs/templates/labs/manage_blocks.html:73
+#: apps/labs/templates/labs/manage_blocks.html 2.py:73
 msgctxt "labs.template.manage_blocks"
 msgid "status_draft"
 msgstr "Черновик"
 
 #: apps/labs/templates/labs/manage_blocks.html:94
+#: apps/labs/templates/labs/manage_blocks.html 2.py:94
 #, python-format
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_badge %(question_count)s"
 msgstr "%(question_count)s вопросы"
 
 #: apps/labs/templates/labs/manage_blocks.html:98
+#: apps/labs/templates/labs/manage_blocks.html 2.py:98
 #, python-format
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_to_pick_badge %(questions_to_pick)s"
 msgstr "%(questions_to_pick)s выбрано"
 
 #: apps/labs/templates/labs/manage_blocks.html:115
+#: apps/labs/templates/labs/manage_blocks.html 2.py:115
 msgctxt "labs.template.manage_blocks"
 msgid "action_edit"
 msgstr "Редактировать"
 
 #: apps/labs/templates/labs/manage_blocks.html:118
+#: apps/labs/templates/labs/manage_blocks.html 2.py:118
 msgctxt "labs.template.manage_blocks"
 msgid "action_delete"
 msgstr "Удалить"
 
 #: apps/labs/templates/labs/manage_blocks.html:123
+#: apps/labs/templates/labs/manage_blocks.html 2.py:123
 msgctxt "labs.template.manage_blocks"
 msgid "action_bulk_import"
 msgstr "Массовый импорт"
 
 #: apps/labs/templates/labs/manage_blocks.html:126
+#: apps/labs/templates/labs/manage_blocks.html 2.py:126
 msgctxt "labs.template.manage_blocks"
 msgid "action_add_question"
 msgstr "Добавить вопрос"
 
 #: apps/labs/templates/labs/manage_blocks.html:137
+#: apps/labs/templates/labs/manage_blocks.html 2.py:137
 msgctxt "labs.template.manage_blocks"
 msgid "table_question"
 msgstr "Вопрос"
@@ -26598,60 +27454,71 @@ msgstr "Вопрос"
 #: apps/labs/templates/labs/manage_blocks.html:138
 #: apps/labs/templates/labs/manage_blocks.html:287
 #: apps/labs/templates/labs/manage_blocks.html:322
+#: apps/labs/templates/labs/manage_blocks.html 2.py:138 2.py:287 2.py:322
 msgctxt "labs.template.manage_blocks"
 msgid "table_points"
 msgstr "Очки"
 
 #: apps/labs/templates/labs/manage_blocks.html:139
+#: apps/labs/templates/labs/manage_blocks.html 2.py:139
 msgctxt "labs.template.manage_blocks"
 msgid "table_action"
 msgstr "Действие"
 
 #: apps/labs/templates/labs/manage_blocks.html:177
+#: apps/labs/templates/labs/manage_blocks.html 2.py:177
 msgctxt "labs.template.manage_blocks"
 msgid "empty_block_no_questions"
 msgstr "В этом блоке пока нет вопросов"
 
 #: apps/labs/templates/labs/manage_blocks.html:192
+#: apps/labs/templates/labs/manage_blocks.html 2.py:192
 msgctxt "labs.template.manage_blocks"
 msgid "empty_no_blocks_yet"
 msgstr "Блоки еще не созданы"
 
 #: apps/labs/templates/labs/manage_blocks.html:193
+#: apps/labs/templates/labs/manage_blocks.html 2.py:193
 msgctxt "labs.template.manage_blocks"
 msgid "empty_create_block_first"
 msgstr "Сначала создайте блок, чтобы добавлять вопросы"
 
 #: apps/labs/templates/labs/manage_blocks.html:195
+#: apps/labs/templates/labs/manage_blocks.html 2.py:195
 msgctxt "labs.template.manage_blocks"
 msgid "action_create_first_block"
 msgstr "Создать первый блок"
 
 #: apps/labs/templates/labs/manage_blocks.html:207
+#: apps/labs/templates/labs/manage_blocks.html 2.py:207
 msgctxt "labs.template.manage_blocks"
 msgid "modal_new_block"
 msgstr "Новый блок"
 
 #: apps/labs/templates/labs/manage_blocks.html:214
 #: apps/labs/templates/labs/manage_blocks.html:248
+#: apps/labs/templates/labs/manage_blocks.html 2.py:214 2.py:248
 msgctxt "labs.template.manage_blocks"
 msgid "label_block_title"
 msgstr "Название блока"
 
 #: apps/labs/templates/labs/manage_blocks.html:218
 #: apps/labs/templates/labs/manage_blocks.html:252
+#: apps/labs/templates/labs/manage_blocks.html 2.py:218 2.py:252
 msgctxt "labs.template.manage_blocks"
 msgid "label_description"
 msgstr "Описание"
 
 #: apps/labs/templates/labs/manage_blocks.html:222
 #: apps/labs/templates/labs/manage_blocks.html:256
+#: apps/labs/templates/labs/manage_blocks.html 2.py:222 2.py:256
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_to_pick"
 msgstr "Вопросы на выбор из этого блока"
 
 #: apps/labs/templates/labs/manage_blocks.html:224
 #: apps/labs/templates/labs/manage_blocks.html:258
+#: apps/labs/templates/labs/manage_blocks.html 2.py:224 2.py:258
 msgctxt "labs.template.manage_blocks"
 msgid "help_zero_all_questions"
 msgstr "0 = все вопросы"
@@ -26661,78 +27528,94 @@ msgstr "0 = все вопросы"
 #: apps/labs/templates/labs/manage_blocks.html:297
 #: apps/labs/templates/labs/manage_blocks.html:333
 #: apps/labs/templates/labs/manage_blocks.html:367
+#: apps/labs/templates/labs/manage_blocks.html 2.py:228 2.py:262 2.py:297
+#: 2.py:333 2.py:367
 msgctxt "labs.template.manage_blocks"
 msgid "action_close"
 msgstr "Закрывать"
 
 #: apps/labs/templates/labs/manage_blocks.html:229
+#: apps/labs/templates/labs/manage_blocks.html 2.py:229
 msgctxt "labs.template.manage_blocks"
 msgid "action_create"
 msgstr "Создавать"
 
 #: apps/labs/templates/labs/manage_blocks.html:240
+#: apps/labs/templates/labs/manage_blocks.html 2.py:240
 msgctxt "labs.template.manage_blocks"
 msgid "modal_edit_block"
 msgstr "Редактировать блок"
 
 #: apps/labs/templates/labs/manage_blocks.html:274
+#: apps/labs/templates/labs/manage_blocks.html 2.py:274
 msgctxt "labs.template.manage_blocks"
 msgid "modal_new_question"
 msgstr "Новый вопрос"
 
 #: apps/labs/templates/labs/manage_blocks.html:282
 #: apps/labs/templates/labs/manage_blocks.html:317
+#: apps/labs/templates/labs/manage_blocks.html 2.py:282 2.py:317
 msgctxt "labs.template.manage_blocks"
 msgid "label_question_text"
 msgstr "Текст вопроса"
 
 #: apps/labs/templates/labs/manage_blocks.html:291
 #: apps/labs/templates/labs/manage_blocks.html:326
+#: apps/labs/templates/labs/manage_blocks.html 2.py:291 2.py:326
 msgctxt "labs.template.manage_blocks"
 msgid "label_attachment_file"
 msgstr "Вложенный файл"
 
 #: apps/labs/templates/labs/manage_blocks.html:298
+#: apps/labs/templates/labs/manage_blocks.html 2.py:298
 msgctxt "labs.template.manage_blocks"
 msgid "action_add"
 msgstr "Добавлять"
 
 #: apps/labs/templates/labs/manage_blocks.html:309
+#: apps/labs/templates/labs/manage_blocks.html 2.py:309
 msgctxt "labs.template.manage_blocks"
 msgid "modal_edit_question"
 msgstr "Редактировать вопрос"
 
 #: apps/labs/templates/labs/manage_blocks.html:345
+#: apps/labs/templates/labs/manage_blocks.html 2.py:345
 msgctxt "labs.template.manage_blocks"
 msgid "modal_bulk_import"
 msgstr "Массовый импорт вопросов"
 
 #: apps/labs/templates/labs/manage_blocks.html:353
+#: apps/labs/templates/labs/manage_blocks.html 2.py:353
 msgctxt "labs.template.manage_blocks"
 msgid "label_format"
 msgstr "Формат"
 
 #: apps/labs/templates/labs/manage_blocks.html:355
+#: apps/labs/templates/labs/manage_blocks.html 2.py:355
 msgctxt "labs.template.manage_blocks"
 msgid "format_line_1"
 msgstr "1. Текст вопроса или 1) Текст вопроса"
 
 #: apps/labs/templates/labs/manage_blocks.html:356
+#: apps/labs/templates/labs/manage_blocks.html 2.py:356
 msgctxt "labs.template.manage_blocks"
 msgid "format_line_2"
 msgstr "2. Еще вопрос или 2) Еще вопрос"
 
 #: apps/labs/templates/labs/manage_blocks.html:357
+#: apps/labs/templates/labs/manage_blocks.html 2.py:357
 msgctxt "labs.template.manage_blocks"
 msgid "format_line_3"
 msgstr "Ненумерованная строка = продолжение предыдущего вопроса"
 
 #: apps/labs/templates/labs/manage_blocks.html:361
+#: apps/labs/templates/labs/manage_blocks.html 2.py:361
 msgctxt "labs.template.manage_blocks"
 msgid "label_paste_questions"
 msgstr "Вставить вопросы"
 
 #: apps/labs/templates/labs/manage_blocks.html:363
+#: apps/labs/templates/labs/manage_blocks.html 2.py:363
 msgctxt "labs.template.manage_blocks"
 msgid "placeholder_import_questions"
 msgstr ""
@@ -26742,81 +27625,97 @@ msgstr ""
 "3. Третий вопрос..."
 
 #: apps/labs/templates/labs/manage_blocks.html:368
+#: apps/labs/templates/labs/manage_blocks.html 2.py:368
 msgctxt "labs.template.manage_blocks"
 msgid "action_import"
 msgstr "Импорт"
 
 #: apps/labs/templates/labs/manage_blocks.html:382
+#: apps/labs/templates/labs/manage_blocks.html 2.py:382
 msgctxt "labs.js.manage_blocks"
 msgid "file_existing"
 msgstr "Файл существует"
 
 #: apps/labs/templates/labs/manage_blocks.html:383
+#: apps/labs/templates/labs/manage_blocks.html 2.py:383
 msgctxt "labs.js.manage_blocks"
 msgid "state_creating"
 msgstr "Создание..."
 
 #: apps/labs/templates/labs/manage_blocks.html:384
+#: apps/labs/templates/labs/manage_blocks.html 2.py:384
 msgctxt "labs.js.manage_blocks"
 msgid "state_saving"
 msgstr "Сохранение..."
 
 #: apps/labs/templates/labs/manage_blocks.html:385
+#: apps/labs/templates/labs/manage_blocks.html 2.py:385
 msgctxt "labs.js.manage_blocks"
 msgid "state_adding"
 msgstr "Добавление..."
 
 #: apps/labs/templates/labs/manage_blocks.html:386
+#: apps/labs/templates/labs/manage_blocks.html 2.py:386
 msgctxt "labs.js.manage_blocks"
 msgid "state_importing"
 msgstr "Импорт..."
 
 #: apps/labs/templates/labs/manage_blocks.html:387
+#: apps/labs/templates/labs/manage_blocks.html 2.py:387
 msgctxt "labs.js.manage_blocks"
 msgid "action_create"
 msgstr "Создавать"
 
 #: apps/labs/templates/labs/manage_blocks.html:388
+#: apps/labs/templates/labs/manage_blocks.html 2.py:388
 msgctxt "labs.js.manage_blocks"
 msgid "action_save"
 msgstr "Сохранять"
 
 #: apps/labs/templates/labs/manage_blocks.html:389
+#: apps/labs/templates/labs/manage_blocks.html 2.py:389
 msgctxt "labs.js.manage_blocks"
 msgid "action_add"
 msgstr "Добавлять"
 
 #: apps/labs/templates/labs/manage_blocks.html:390
+#: apps/labs/templates/labs/manage_blocks.html 2.py:390
 msgctxt "labs.js.manage_blocks"
 msgid "action_import"
 msgstr "Импорт"
 
 #: apps/labs/templates/labs/manage_blocks.html:391
+#: apps/labs/templates/labs/manage_blocks.html 2.py:391
 msgctxt "labs.js.manage_blocks"
 msgid "success_import_default"
 msgstr "Вопросы {count} импортированы."
 
 #: apps/labs/templates/labs/manage_blocks.html:392
+#: apps/labs/templates/labs/manage_blocks.html 2.py:392
 msgctxt "labs.js.manage_blocks"
 msgid "error_prefix"
 msgstr "Ошибка"
 
 #: apps/labs/templates/labs/manage_blocks.html:393
+#: apps/labs/templates/labs/manage_blocks.html 2.py:393
 msgctxt "labs.js.manage_blocks"
 msgid "error_unknown"
 msgstr "Неизвестная ошибка"
 
 #: apps/labs/templates/labs/manage_blocks.html:394
+#: apps/labs/templates/labs/manage_blocks.html 2.py:394
 msgctxt "labs.js.manage_blocks"
 msgid "error_server"
 msgstr "Ошибка сервера"
 
 #: apps/labs/templates/labs/manage_blocks.html:395
+#: apps/labs/templates/labs/manage_blocks.html 2.py:395
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_block"
 msgstr "Удалить блок"
 
 #: apps/labs/templates/labs/manage_blocks.html:396
+#: apps/labs/templates/labs/manage_blocks.html 2.py:396
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_question"
 msgstr "Удалить вопрос"
@@ -29984,36 +30883,50 @@ msgid "delete_confirm"
 msgstr "Вы уверены, что хотите удалить?"
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:10
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:10
 msgctxt "projects.review.js"
 msgid "no_content"
 msgstr "(Текста нет)"
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:11
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:11
 msgctxt "projects.review.js"
 msgid "download"
 msgstr "Скачать"
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:12
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:12
 msgctxt "projects.review.js"
 msgid "sending"
 msgstr "Отправка..."
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:13
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:13
 msgctxt "projects.review.js"
 msgid "error_prefix"
 msgstr "Ошибка: "
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:14
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:14
 msgctxt "projects.review.js"
 msgid "unknown_error"
 msgstr "Неизвестная ошибка"
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:15
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:15
 msgctxt "projects.review.js"
 msgid "server_error"
 msgstr "Ошибка сервера"
 
 #: apps/projects/templates/projects/partials/_review_submissions_js.html:16
+#: apps/projects/templates/projects/partials/_review_submissions_js.html
+#: 2.py:16
 msgctxt "projects.review.js"
 msgid "grade_button"
 msgstr "Поставить оценку"
@@ -30180,115 +31093,137 @@ msgid "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
 msgstr "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
 
 #: apps/projects/templates/projects/project_section.html:14
+#: apps/projects/templates/projects/project_section.html 2.py:14
 msgctxt "projects.section"
 msgid "section_title"
 msgstr "Проекты"
 
 #: apps/projects/templates/projects/project_section.html:31
+#: apps/projects/templates/projects/project_section.html 2.py:31
 msgctxt "projects.section"
 msgid "add_project_button"
 msgstr "Добавить новый проект"
 
 #: apps/projects/templates/projects/project_section.html:46
+#: apps/projects/templates/projects/project_section.html 2.py:46
 msgctxt "projects.section"
 msgid "answers_suffix"
 msgstr "ответов"
 
 #: apps/projects/templates/projects/project_section.html:48
+#: apps/projects/templates/projects/project_section.html 2.py:48
 msgctxt "projects.section"
 msgid "pending_suffix"
 msgstr "ожидает"
 
 #: apps/projects/templates/projects/project_section.html:64
 #: apps/projects/templates/projects/project_section.html:132
+#: apps/projects/templates/projects/project_section.html 2.py:64 2.py:132
 msgctxt "projects.section"
 msgid "status_overdue"
 msgstr "Срок истек"
 
 #: apps/projects/templates/projects/project_section.html:66
 #: apps/projects/templates/projects/project_section.html:134
+#: apps/projects/templates/projects/project_section.html 2.py:66 2.py:134
 msgctxt "projects.section"
 msgid "status_active"
 msgstr "Активно"
 
 #: apps/projects/templates/projects/project_section.html:69
 #: apps/projects/templates/projects/project_section.html:137
+#: apps/projects/templates/projects/project_section.html 2.py:69 2.py:137
 msgctxt "projects.section"
 msgid "status_inactive"
 msgstr "Неактивно"
 
 #: apps/projects/templates/projects/project_section.html:71
+#: apps/projects/templates/projects/project_section.html 2.py:71
 msgctxt "projects.section"
 msgid "status_archived"
 msgstr "В архиве"
 
 #: apps/projects/templates/projects/project_section.html:75
 #: apps/projects/templates/projects/project_section.html:142
+#: apps/projects/templates/projects/project_section.html 2.py:75 2.py:142
 msgctxt "projects.section"
 msgid "max_score_prefix"
 msgstr "Макс. балл:"
 
 #: apps/projects/templates/projects/project_section.html:78
+#: apps/projects/templates/projects/project_section.html 2.py:78
 msgctxt "projects.section"
 msgid "max_attempts_prefix"
 msgstr "Макс. попыток:"
 
 #: apps/projects/templates/projects/project_section.html:89
+#: apps/projects/templates/projects/project_section.html 2.py:89
 msgctxt "projects.section"
 msgid "edit"
 msgstr "Редактировать"
 
 #: apps/projects/templates/projects/project_section.html:93
+#: apps/projects/templates/projects/project_section.html 2.py:93
 msgctxt "projects.section"
 msgid "delete"
 msgstr "Удалить"
 
 #: apps/projects/templates/projects/project_section.html:102
+#: apps/projects/templates/projects/project_section.html 2.py:102
 msgctxt "projects.section"
 msgid "empty_teacher"
 msgstr "Проектов пока нет"
 
 #: apps/projects/templates/projects/project_section.html:104
+#: apps/projects/templates/projects/project_section.html 2.py:104
 msgctxt "projects.section"
 msgid "add_first_project"
 msgstr "Добавить первый проект"
 
 #: apps/projects/templates/projects/project_section.html:147
+#: apps/projects/templates/projects/project_section.html 2.py:147
 msgctxt "projects.section"
 msgid "attempts_label"
 msgstr "Попытки:"
 
 #: apps/projects/templates/projects/project_section.html:152
+#: apps/projects/templates/projects/project_section.html 2.py:152
 msgctxt "projects.section"
 msgid "left_suffix"
 msgstr "осталось"
 
 #: apps/projects/templates/projects/project_section.html:154
+#: apps/projects/templates/projects/project_section.html 2.py:154
 msgctxt "projects.section"
 msgid "attempts_finished"
 msgstr "Попытки закончились"
 
 #: apps/projects/templates/projects/project_section.html:170
+#: apps/projects/templates/projects/project_section.html 2.py:170
 msgctxt "projects.section"
 msgid "submit_project"
 msgstr "Отправить проект"
 
 #: apps/projects/templates/projects/project_section.html:175
+#: apps/projects/templates/projects/project_section.html 2.py:175
 msgctxt "projects.section"
 msgid "disabled_overdue"
 msgstr "Срок истек"
 
 #: apps/projects/templates/projects/project_section.html:179
+#: apps/projects/templates/projects/project_section.html 2.py:179
 msgctxt "projects.section"
 msgid "disabled_inactive"
 msgstr "Неактивно"
 
 #: apps/projects/templates/projects/project_section.html:191
+#: apps/projects/templates/projects/project_section.html 2.py:191
 msgctxt "projects.section"
 msgid "empty_student"
 msgstr "Вам не назначен ни один проект"
 
 #: apps/projects/templates/projects/project_section.html:198
+#: apps/projects/templates/projects/project_section.html 2.py:198
 msgctxt "projects.section"
 msgid "empty_generic"
 msgstr "Проектов нет"
@@ -30859,6 +31794,11 @@ msgctxt "organizations.model.organization_type.choice"
 msgid "individual"
 msgstr "Индивидуальный"
 
+#: core/context_processors.py:33
+msgctxt "brand"
+msgid "Qərbi Kaspi Universiteti"
+msgstr "Западно-Каспийский Университет"
+
 #: core/middleware.py:342
 msgctxt "core.middleware.request_queue.message"
 msgid "Server is busy processing previous requests. Please try again shortly."
@@ -31020,7 +31960,9 @@ msgid "resend"
 msgstr "Отправить код повторно"
 
 #: templates/base.html:13 templates/base_auth.html:24
-msgid "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
+#, fuzzy, python-format
+#| msgid "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
+msgid "%(brand)s – Təhsil İdarəetmə və Onlayn İmtahan Platforması"
 msgstr "Платформа управления образованием"
 
 #: templates/email_templates/welcome_email.html:7
@@ -32051,7 +32993,7 @@ msgctxt "ai_assistant.action"
 msgid "Göndər"
 msgstr "Отправить"
 
-#: templates/partials/_footer.html:14 templates/partials/_navbar.html:21
+#: templates/partials/_footer.html:14
 msgid "EMSArena ana səhifə"
 msgstr "Главная"
 
@@ -32146,99 +33088,99 @@ msgctxt "nav"
 msgid "main_nav_aria"
 msgstr "Основная навигация"
 
-#: templates/partials/_navbar.html:43 templates/partials/_navbar.html:300
+#: templates/partials/_navbar.html:56 templates/partials/_navbar.html:314
 msgctxt "nav"
 msgid "about"
 msgstr "О нас"
 
-#: templates/partials/_navbar.html:50 templates/partials/_navbar.html:308
+#: templates/partials/_navbar.html:63 templates/partials/_navbar.html:322
 msgctxt "nav"
 msgid "contact"
 msgstr "Контакты"
 
-#: templates/partials/_navbar.html:58 templates/partials/_navbar.html:317
+#: templates/partials/_navbar.html:71 templates/partials/_navbar.html:331
 msgctxt "nav"
 msgid "exams"
 msgstr "Экзамены"
 
-#: templates/partials/_navbar.html:75 templates/partials/_navbar.html:135
-#: templates/partials/_navbar.html:346
+#: templates/partials/_navbar.html:88 templates/partials/_navbar.html:149
+#: templates/partials/_navbar.html:360
 msgctxt "nav"
 msgid "live_exam"
 msgstr "Живой экзамен"
 
-#: templates/partials/_navbar.html:92
+#: templates/partials/_navbar.html:106
 msgctxt "nav"
 msgid "create"
 msgstr "Создать"
 
-#: templates/partials/_navbar.html:102 templates/partials/_navbar.html:329
+#: templates/partials/_navbar.html:116 templates/partials/_navbar.html:343
 msgctxt "nav"
 msgid "create_live_exam"
 msgstr "Создать живой экзамен"
 
-#: templates/partials/_navbar.html:103
+#: templates/partials/_navbar.html:117
 msgctxt "nav"
 msgid "create_live_exam_desc"
 msgstr "Мгновенно запустите живой экзамен для студентов"
 
-#: templates/partials/_navbar.html:111 templates/partials/_navbar.html:144
-#: templates/partials/_navbar.html:337
+#: templates/partials/_navbar.html:125 templates/partials/_navbar.html:158
+#: templates/partials/_navbar.html:351
 msgctxt "nav"
 msgid "trial_exam_request"
 msgstr "Заявка на пробный экзамен"
 
-#: templates/partials/_navbar.html:112 templates/partials/_navbar.html:145
+#: templates/partials/_navbar.html:126 templates/partials/_navbar.html:159
 msgctxt "nav"
 msgid "trial_exam_request_desc"
 msgstr "Подайте заявку на проведение пробного экзамена"
 
-#: templates/partials/_navbar.html:125
+#: templates/partials/_navbar.html:139
 msgctxt "nav"
 msgid "join"
 msgstr "Войти"
 
-#: templates/partials/_navbar.html:136
+#: templates/partials/_navbar.html:150
 msgctxt "nav"
 msgid "join_live_exam_desc"
 msgstr "Войдите в живой экзамен по PIN-коду"
 
-#: templates/partials/_navbar.html:217 templates/partials/_navbar.html:368
+#: templates/partials/_navbar.html:231 templates/partials/_navbar.html:382
 msgctxt "nav"
 msgid "my_profile"
 msgstr "Мой профиль"
 
-#: templates/partials/_navbar.html:222 templates/partials/_navbar.html:376
+#: templates/partials/_navbar.html:236 templates/partials/_navbar.html:390
 msgctxt "nav"
 msgid "notifications"
 msgstr "Уведомления"
 
-#: templates/partials/_navbar.html:235 templates/partials/_navbar.html:386
+#: templates/partials/_navbar.html:249 templates/partials/_navbar.html:400
 msgctxt "nav"
 msgid "logout"
 msgstr "Выход"
 
-#: templates/partials/_navbar.html:243 templates/partials/_navbar.html:395
+#: templates/partials/_navbar.html:257 templates/partials/_navbar.html:409
 msgctxt "nav"
 msgid "login"
 msgstr "Войти"
 
-#: templates/partials/_navbar.html:247 templates/partials/_navbar.html:401
+#: templates/partials/_navbar.html:261 templates/partials/_navbar.html:415
 msgctxt "nav"
 msgid "signup"
 msgstr "Регистрация"
 
-#: templates/partials/_navbar.html:253
+#: templates/partials/_navbar.html:267
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Открыть или закрыть меню"
 
-#: templates/partials/_navbar.html:265
+#: templates/partials/_navbar.html:279
 msgctxt "nav"
 msgid "mobile_nav_aria"
 msgstr "Мобильная навигация"
 
-#: templates/partials/_navbar.html:355
+#: templates/partials/_navbar.html:369
 msgctxt "nav"
 msgid "trial_exam"
 msgstr "Пробный экзамен"

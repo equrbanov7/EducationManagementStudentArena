@@ -32,6 +32,38 @@ P3-2 bu modelləri təyin edir (tətbiq mərhələli):
 
 ---
 
+## 1.6 Tam asılılıq xəritəsi (kim kimə bağlıdır)
+
+İstifadəçi tələbi: "dekanlıq, fakültə, ixtisaslar, kafedra, müəllim, tələbə,
+qrup arasında asılılıqları düzgün qur". Mövcud modellərlə (OrgUnit + Membership +
+Course) belə qurulur:
+
+```
+Universitet (Organization)
+ └─ Rektorluq (OrgUnit: rectorate)                    ← rektor, prorektor
+     └─ Fakültə (OrgUnit: faculty)                    ← dekan (scope=faculty)
+         └─ Dekanlıq (OrgUnit: deanery, opsional)     ← dekan müavini, dekanlıq əməkdaşı
+         └─ Kafedra (OrgUnit: chair/department)       ← kafedra müdürü (scope=chair)
+             └─ İxtisas (OrgUnit: specialty)          ← Program/Curriculum bağlanır
+                 └─ Qrup (OrgUnit: group)             ← tələbələr (scope=group), baş tələbə, tyutor
+```
+
+**Əlaqələr (FK / Membership):**
+| Varlıq | Bağlantı | Necə |
+|--------|----------|------|
+| Dekan → Fakültə | `Membership(role=dean, scope_unit=faculty)` | fakültə alt-ağacını idarə edir |
+| Kafedra müdürü → Kafedra | `Membership(role=chair_head, scope_unit=chair)` | kafedra fənlərini/müəllimlərini idarə edir |
+| Müəllim → Fənn | `CourseInstructor` / `OfferingInstructor` | fənni tədris edir (kafedraya bağlı) |
+| Tələbə → Qrup | `Membership(role=student, scope_unit=group)` + `StudentAcademicRecord.group` | qrupa aid |
+| Tələbə → İxtisas | `StudentAcademicRecord.program` (=specialty) | tədris planını müəyyən edir |
+| İxtisas → Fənlər | `Curriculum` + `CurriculumSubject` | plan sətirləri (məcburi/seçmə) |
+| Qrup → Seçmə fənn | `GroupElectiveChoice` (§2.5) | qrupun seçmə qərarı → hamıya |
+
+**Scope enforcement:** hər rol öz `scope_unit` **alt-ağacını** görür
+(`apps/organizations/scoping.py` + RLS). Dekan fakültənin bütün kafedra/ixtisas/
+qruplarını; kafedra müdürü öz kafedrasının ixtisas/qruplarını; tyutor/baş tələbə
+öz qrupunu. Bu ağac artıq OrgUnit `parent` FK ilə qurulub (I1 + seed).
+
 ## 2. Tələbə akademik axını (istifadəçi tələbi — YENİ)
 
 **Ssenari:** tələbəyə ixtisas təyin olunanda, o ixtisasın tədris planındakı fənləri görməlidir; fənnə klik → fənn içi (mövzular/resurslar); bəzi fənlər **seçmə blokdur** — tələbə blokdan birini seçir, o köçürülür; seçmələr də görünməli və içinə baxıla bilməlidir.
@@ -84,6 +116,44 @@ kind = models.CharField(choices=[("mandatory","Məcburi"),("elective","Seçmə")
 - Tələbə seçmə blokdan tam `required_choices` qədər seçməlidir (nə az, nə çox).
 - Seçim müddəti (add/drop window) `Semester`-in registration pəncərəsi ilə məhdudlaşır.
 - Qeydiyyat yalnız öz `StudentAcademicRecord.program`-ının planından (RLS + scope yoxlaması).
+
+### 2.5 Seçmə fənn QRUP səviyyəsindədir (istifadəçi tələbi — VACİB)
+
+AZ universitetlərində seçmə (elective) fənn **fərdi deyil, QRUP səviyyəsində**
+seçilir: qrup bir seçmə fənn üzərində razılaşır, o fənn **bütün qrupa** açılır
+və qrupun HƏR üzvü həmin fənnə keçirilir. Yəni "bir nəfər seçdisə → qrupun
+seçimi budur → hamı keçir".
+
+**Model (§2.3-ə əlavə):**
+```python
+class GroupElectiveChoice(models.Model):     # qrupun seçmə-blok qərarı
+    organization = FK; semester = FK(Semester)
+    group = FK(OrgUnit, limit=GROUP)          # hansı qrup
+    elective_group = CharField                # hansı seçmə blok (CurriculumSubject.elective_group)
+    chosen_subject = FK(Subject)              # qrupun seçdiyi fənn
+    decided_by = FK(User)                     # baş tələbə / tyutor / dekanlıq
+    decided_at = DateTime
+    class Meta: unique_together = [("group","semester","elective_group")]
+```
+
+**Axın:**
+```
+1. Qrup üçün seçmə blok açıqdır (CurriculumSubject.is_elective, elective_group).
+2. Səlahiyyətli şəxs (baş tələbə / tyutor / dekanlıq — konfiqurasiya) blokdan
+   fənni seçir → GroupElectiveChoice yaradılır (qrupun rəsmi qərarı).
+3. Sistem həmin CourseOffering-i qrupa bağlayır və qrupun BÜTÜN aktiv
+   tələbələrinə Enrollment(kind="elective") yaradır (bulk).
+4. Sonradan qrupa əlavə olunan tələbə də avtomatik həmin seçmə fənnə qeyd olunur
+   (qrupun mövcud GroupElectiveChoice-ları tətbiq edilir — §6 köçürmə ilə uyğun).
+```
+
+**Kim seçir (konfiqurasiya):** default — baş tələbə təklif edir, tyutor/dekanlıq
+təsdiqləyir; universitetə görə `AssessmentScheme`-bənzər tenant-parametrlə
+dəyişdirilir. Fərdi seçim (§2.1) yalnız `elective_scope="individual"` olan
+proqramlar üçün; universitet default-u `elective_scope="group"`.
+
+**İcazə:** `GroupElectiveChoice` yaratma — `member.view` + qrup-scope + rol
+(lead_student/tutor/dean). Audit yazılır (kim, nə vaxt, hansı fənn).
 
 ---
 

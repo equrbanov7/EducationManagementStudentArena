@@ -21,7 +21,7 @@ Notes:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {% trans "EMSArena – Təhsil İdarəetmə və Onlayn İmtahan Platforması" as default_seo_title %}
+    {% blocktrans asvar default_seo_title with brand=site_brand_name %}{{ brand }} – Təhsil İdarəetmə və Onlayn İmtahan Platforması{% endblocktrans %}
     <title>{% block title %}{% firstof seo_title default_seo_title %}{% endblock %}</title>
 
     {% include "partials/_seo_head.html" %}
