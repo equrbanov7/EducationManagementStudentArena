@@ -109,6 +109,26 @@ class StudentSubjectsCabinetIntegrationTest(TestCase):
         client = self._login(username)
         return client.get(reverse("accounts:profile") + "?section=my-subjects")
 
+    def test_university_student_dashboard_hides_posts_and_stats(self):
+        # University-mode student dashboard is kept academic: the LMS/marketing
+        # stat cards and the blog (Posts / Create post) sidebar links are hidden,
+        # while the academic sections (My subjects / Transcript) stay.
+        client = self._login("wcu_student_az1")
+        resp = client.get(reverse("accounts:profile") + "?section=profile-info")
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "stats-grid")
+        self.assertNotContains(resp, 'data-section="posts"')
+        self.assertNotContains(resp, 'data-section="create-post"')
+        self.assertContains(resp, 'data-section="my-subjects"')
+
+    def test_university_student_home_redirects_to_cabinet_not_blog(self):
+        # In UNIVERSITY_MODE the public blog home is deactivated: an authenticated
+        # user hitting "/" is sent to their cabinet (no blog feed after login).
+        client = self._login("wcu_student_az1")
+        resp = client.get("/")
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn(reverse("accounts:profile"), resp["Location"])
+
     def test_student_sees_credit_bar_and_elective(self):
         resp = self._get_section("wcu_student_az1")
         self.assertEqual(resp.status_code, 200)

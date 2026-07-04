@@ -414,20 +414,45 @@ class Command(BaseCommand):
         self._seed_schedule(org)
 
     def _seed_schedule(self, org):
-        """Give each offering a weekly timetable slot (distinct weekday so the
-        shared demo teacher never clashes) — student + teacher schedules populate."""
+        """Give each offering a weekly timetable slot. Within a group two lessons
+        are packed onto the same weekday (so a student sees MULTIPLE lessons per
+        day), and each group gets its OWN time bands so the shared demo teacher
+        never clashes across groups at the same weekday/time."""
         import datetime
 
-        offerings = list(CourseOffering.objects.filter(organization=org).select_related("subject", "group"))
+        # Per-group time bands (two 90-min slots), offset by group so different
+        # groups never occupy the same (weekday, time) → no shared-teacher clash.
+        band_table = [
+            (datetime.time(9, 0), datetime.time(10, 30)),
+            (datetime.time(11, 0), datetime.time(12, 30)),
+            (datetime.time(13, 0), datetime.time(14, 30)),
+            (datetime.time(15, 0), datetime.time(16, 30)),
+            (datetime.time(17, 0), datetime.time(18, 30)),
+            (datetime.time(19, 0), datetime.time(20, 30)),
+        ]
+        offerings = list(
+            CourseOffering.objects.filter(organization=org)
+            .select_related("subject", "group")
+            .order_by("group_id", "subject__code")
+        )
+        group_order: dict = {}
+        group_count: dict = {}
         for index, offering in enumerate(offerings):
             if offering.schedule_slots.exists():
                 continue  # idempotent
+            gid = offering.group_id
+            group_index = group_order.setdefault(gid, len(group_order))
+            k = group_count.get(gid, 0)
+            group_count[gid] = k + 1
+            # Two lessons/day within the group; each group uses its own 2 bands.
+            weekday = ((k // 2) % 6) + 1
+            band = band_table[(group_index * 2 + (k % 2)) % len(band_table)]
             try:
                 registrar_schedule.create_slot(
                     offering=offering,
-                    weekday=(index % 6) + 1,  # Mon–Sat, one offering each
-                    start_time=datetime.time(9, 0),
-                    end_time=datetime.time(10, 30),
+                    weekday=weekday,
+                    start_time=band[0],
+                    end_time=band[1],
                     room=str(201 + index),
                     created_by=offering.instructor,
                 )

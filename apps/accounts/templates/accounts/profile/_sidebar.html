@@ -112,7 +112,9 @@
             </a>
         </li>
         {% endif %}
-        {% if 'posts' in allowed_sections %}
+        {# Universitet rejimində tələbə üçün bloq (Postlar / Post yarat) gizlədilir —
+           xəbər/post lenti ana səhifədədir, kabinet akademikdir. #}
+        {% if 'posts' in allowed_sections and not university_mode or 'posts' in allowed_sections and not role_capabilities.is_student %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=posts"
                data-section="posts"
@@ -126,7 +128,7 @@
         </li>
         {% endif %}
 
-        {% if 'create-post' in allowed_sections %}
+        {% if 'create-post' in allowed_sections and not university_mode or 'create-post' in allowed_sections and not role_capabilities.is_student %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=create-post"
                data-section="create-post"
