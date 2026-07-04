@@ -27103,6 +27103,26 @@ msgstr ""
 "Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
 "məcburi fənlərinə avtomatik yazır."
 
+msgctxt "registrar.academic_status"
+msgid "Enrolled"
+msgstr "Qeydiyyatlı"
+
+msgctxt "registrar.academic_status"
+msgid "Academic leave"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "registrar.academic_status"
+msgid "Expelled"
+msgstr "Xaric edilib"
+
+msgctxt "registrar.academic_status"
+msgid "Graduated"
+msgstr "Məzun olub"
+
+msgctxt "registrar.console"
+msgid "Akademik status"
+msgstr "Akademik status"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

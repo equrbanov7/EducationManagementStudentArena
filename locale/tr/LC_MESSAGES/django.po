@@ -27063,6 +27063,26 @@ msgstr ""
 "Öğrenciyi programa/müfredata/gruba atar; isteğe bağlı olarak mevcut dönemin "
 "zorunlu derslerine otomatik kaydeder."
 
+msgctxt "registrar.academic_status"
+msgid "Enrolled"
+msgstr "Kayıtlı"
+
+msgctxt "registrar.academic_status"
+msgid "Academic leave"
+msgstr "Akademik izin"
+
+msgctxt "registrar.academic_status"
+msgid "Expelled"
+msgstr "İlişiği kesildi"
+
+msgctxt "registrar.academic_status"
+msgid "Graduated"
+msgstr "Mezun oldu"
+
+msgctxt "registrar.console"
+msgid "Akademik status"
+msgstr "Akademik durum"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

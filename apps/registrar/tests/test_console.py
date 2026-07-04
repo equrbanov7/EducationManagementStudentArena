@@ -304,15 +304,15 @@ class RegistrarConsoleTest(TestCase):
                 "curriculum": str(curriculum.id),
                 "group": str(self.group.id),
                 "admission_year": "2024",
+                "status": "enrolled",
             },
         )
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
-            self.assertTrue(
-                StudentAcademicRecord.objects.filter(
-                    organization=self.org, student=self.student, program=self.program
-                ).exists()
+            record = StudentAcademicRecord.objects.get(
+                organization=self.org, student=self.student, program=self.program
             )
+            self.assertEqual(record.status, "enrolled")
 
     def test_assign_student_with_auto_enroll(self):
         with bypass_rls():
@@ -333,6 +333,7 @@ class RegistrarConsoleTest(TestCase):
                 "curriculum": str(curriculum.id),
                 "group": str(self.group.id),
                 "admission_year": "2024",
+                "status": "enrolled",
                 "auto_enroll": "on",
                 "enroll_semester": "1",
             },
@@ -344,6 +345,34 @@ class RegistrarConsoleTest(TestCase):
                     organization=self.org, student=self.student, offering__subject=self.subject
                 ).exists()
             )
+
+    def test_change_status_syncs_is_active(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+            record = StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=self.student,
+                program=self.program,
+                curriculum=curriculum,
+                admission_year=2024,
+                status="enrolled",
+            )
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_record_edit", args=[record.id]),
+            {
+                "student": str(self.student.id),
+                "program": str(self.program.id),
+                "curriculum": str(curriculum.id),
+                "admission_year": "2024",
+                "status": "expelled",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            record.refresh_from_db()
+            self.assertEqual(record.status, "expelled")
+            self.assertFalse(record.is_active, "expelled record must not stay academically active")
 
     def test_curriculum_program_mismatch_shows_error(self):
         with bypass_rls():

@@ -27162,6 +27162,26 @@ msgstr ""
 "Назначает студента на программу/учебный план/группу; при желании "
 "автоматически записывает на обязательные предметы текущего семестра."
 
+msgctxt "registrar.academic_status"
+msgid "Enrolled"
+msgstr "Зачислен"
+
+msgctxt "registrar.academic_status"
+msgid "Academic leave"
+msgstr "Академический отпуск"
+
+msgctxt "registrar.academic_status"
+msgid "Expelled"
+msgstr "Отчислен"
+
+msgctxt "registrar.academic_status"
+msgid "Graduated"
+msgstr "Выпущен"
+
+msgctxt "registrar.console"
+msgid "Akademik status"
+msgstr "Академический статус"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

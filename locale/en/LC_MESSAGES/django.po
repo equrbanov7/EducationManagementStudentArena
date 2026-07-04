@@ -27067,6 +27067,26 @@ msgstr ""
 "Assigns a student to a program/curriculum/group; optionally auto-enrolls "
 "them in the current semester's mandatory subjects."
 
+msgctxt "registrar.academic_status"
+msgid "Enrolled"
+msgstr "Enrolled"
+
+msgctxt "registrar.academic_status"
+msgid "Academic leave"
+msgstr "Academic leave"
+
+msgctxt "registrar.academic_status"
+msgid "Expelled"
+msgstr "Expelled"
+
+msgctxt "registrar.academic_status"
+msgid "Graduated"
+msgstr "Graduated"
+
+msgctxt "registrar.console"
+msgid "Akademik status"
+msgstr "Academic status"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Barred"

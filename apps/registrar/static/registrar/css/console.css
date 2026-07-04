@@ -227,3 +227,15 @@
 }
 
 .console-panel-note { font-weight: 500; font-size: 0.8rem; color: var(--ems-neutral-500); }
+
+/* ── Akademik status badge (U5+) ──────────────────────────────────────── */
+.status-badge {
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+.status-badge--enrolled { background: var(--ems-success-100); color: var(--ems-success-600); }
+.status-badge--academic_leave { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.status-badge--expelled { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.status-badge--graduated { background: var(--ems-primary-100); color: var(--ems-primary-700); }
