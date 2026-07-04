@@ -116,6 +116,76 @@
     </div>
     {% endif %}
 
+    {# ── Çəkili qiymətləndirmə komponentləri (U7.1, opsional) ─────────────── #}
+    <h2 class="journal-finals-title"><i class="fas fa-sliders-h"></i> {% trans "Qiymətləndirmə komponentləri" context "registrar.journal" %}
+        <span class="journal-components-hint">{% trans "opsional — giriş balını seminar/kollokvium/SDF üzrə çəkili hesablayır" context "registrar.journal" %}</span>
+    </h2>
+    {% if can_edit %}
+    <form method="post" class="journal-components-def">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_components">
+        <div class="journal-components-rows">
+            {% for c in component_grid.components %}
+            <div class="journal-comp-row">
+                <input type="hidden" name="comp_id__{{ forloop.counter0 }}" value="{{ c.id }}">
+                <input type="text" name="comp_name__{{ forloop.counter0 }}" value="{{ c.name }}" maxlength="100" placeholder="{% trans 'Ad' context 'registrar.journal' %}">
+                <input type="number" name="comp_max__{{ forloop.counter0 }}" value="{{ c.max_score }}" min="1" max="100" step="1" aria-label="max">
+            </div>
+            {% endfor %}
+            {# İki boş sətir — yeni komponent əlavə etmək üçün. #}
+            {% for i in "01" %}
+            <div class="journal-comp-row">
+                <input type="hidden" name="comp_id__{{ component_grid.components|length|add:forloop.counter0 }}" value="">
+                <input type="text" name="comp_name__{{ component_grid.components|length|add:forloop.counter0 }}" maxlength="100" placeholder="{% trans 'Yeni komponent (məs. Kollokvium 1)' context 'registrar.journal' %}">
+                <input type="number" name="comp_max__{{ component_grid.components|length|add:forloop.counter0 }}" min="1" max="100" step="1" placeholder="max" aria-label="max">
+            </div>
+            {% endfor %}
+        </div>
+        <div class="journal-actions">
+            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Komponentləri saxla" context "registrar.journal" %}</button>
+            {% if component_grid.total_max %}<span class="journal-comp-total">{% trans "Cəmi tavan" context "registrar.journal" %}: {{ component_grid.total_max }}</span>{% endif %}
+        </div>
+    </form>
+    {% endif %}
+
+    {% if component_grid.components %}
+    <form method="post" class="journal-components-scores">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_component_scores">
+        <div class="journal-grid-wrap">
+            <table class="journal-grid">
+                <thead>
+                    <tr>
+                        <th class="col-student">{% trans "Tələbə" context "registrar.journal" %}</th>
+                        {% for c in component_grid.components %}<th>{{ c.name }}<span class="th-max">/{{ c.max_score }}</span></th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in component_grid.rows %}
+                    <tr class="journal-row">
+                        <td class="col-student">{{ row.student.get_full_name|default:row.student.username }}</td>
+                        {% for cell in row.cells %}
+                        <td>
+                            {% if can_edit %}
+                            <input class="cell-score" type="number" step="0.01" min="0" max="{{ cell.component.max_score }}"
+                                   name="cscore__{{ cell.component.id }}__{{ row.enrollment.id }}"
+                                   value="{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% endif %}">
+                            {% else %}{{ cell.score|default:"—"|floatformat:'-2' }}{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if can_edit %}
+        <div class="journal-actions">
+            <button type="submit" class="journal-save-btn"><i class="fas fa-save"></i> {% trans "Komponent ballarını saxla" context "registrar.journal" %}</button>
+        </div>
+        {% endif %}
+    </form>
+    {% endif %}
+
     {# ── Yekun / Nəticə (final grade + resit) ────────────────────────────── #}
     <h2 class="journal-finals-title"><i class="fas fa-award"></i> {% trans "Yekun nəticə" context "registrar.finals" %}</h2>
     <form method="post" class="journal-finals-form">

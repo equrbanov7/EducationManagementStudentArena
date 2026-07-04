@@ -135,6 +135,7 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
     for subject_row in data["subjects"]:
         subject_row["journal"] = journal_by_enrollment.get(subject_row["enrollment"].id)
         subject_row["final"] = finals.compute_final_result(enrollment=subject_row["enrollment"])
+        subject_row["components"] = gradebook.get_component_breakdown(subject_row["enrollment"])
 
     # Pre-join each elective block with the group's decision so the template
     # renders without a dict-lookup filter (block name → chosen subject).

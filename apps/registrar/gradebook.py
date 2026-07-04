@@ -24,8 +24,10 @@ from django.utils import timezone
 
 from apps.registrar import services
 from apps.registrar.models import (
+    AssessmentComponent,
     AssessmentScheme,
     AttendanceStatus,
+    ComponentScore,
     Enrollment,
     Lesson,
     LessonKind,
@@ -216,13 +218,10 @@ def get_offering_journal(*, offering):
     for enrollment in enrollments:
         cells = []
         absence_hours = 0
-        entry_score = Decimal("0")
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             if mark is not None and mark.status == AttendanceStatus.ABSENT:
                 absence_hours += lesson.hours
-            if mark is not None and mark.score is not None:
-                entry_score += mark.score
             cells.append(
                 {
                     "lesson": lesson,
@@ -231,7 +230,8 @@ def get_offering_journal(*, offering):
                     "locked": mark is not None and not can_edit_mark(mark, now=now),
                 }
             )
-        entry_score = min(entry_score, Decimal(scheme.entry_score_max))
+        # Canonical entry score (component-weighted when defined, else lesson sum).
+        entry_score = entry_score_for(enrollment, scheme.entry_score_max)
         barred = allowed_absence > 0 and Decimal(absence_hours) > allowed_absence
         warning = (not barred) and allowed_absence > 0 and Decimal(absence_hours) >= warn_at
         rows.append(
@@ -272,10 +272,9 @@ def get_student_journal_summary(*, record, period, semester_number):
         offering = enrollment.offering
         marks = list(LessonMark.objects.filter(enrollment=enrollment).select_related("lesson"))
         absence_hours = sum(m.lesson.hours for m in marks if m.status == AttendanceStatus.ABSENT)
-        entry_score = sum((m.score for m in marks if m.score is not None), Decimal("0"))
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
-        entry_score = min(entry_score, Decimal(cap))
+        entry_score = entry_score_for(enrollment, cap)
         lessons_held = offering.lessons.count()
         total_hours = offering.lesson_hours or 0
         allowed = Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
@@ -297,3 +296,146 @@ def get_student_journal_summary(*, record, period, semester_number):
             }
         )
     return {"subjects": subjects}
+
+
+# ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
+
+
+def entry_score_for(enrollment, cap) -> Decimal:
+    """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
+
+    Component-based (weighted) when the offering defines ``AssessmentComponent``
+    rows — each score capped at its own ``max_score``; otherwise the legacy sum of
+    per-lesson seminar/lab marks. Single source of truth for both the teacher
+    journal and the student summary (finals delegates here)."""
+    cap = Decimal(cap)
+    components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
+    if components:
+        max_by = {c.id: Decimal(c.max_score) for c in components}
+        total = sum(
+            (
+                min(cs.score or Decimal("0"), max_by[cs.component_id])
+                for cs in ComponentScore.objects.filter(component_id__in=list(max_by), enrollment=enrollment)
+            ),
+            Decimal("0"),
+        )
+        return min(total, cap)
+
+    total = sum(
+        (m.score for m in LessonMark.objects.filter(enrollment=enrollment) if m.score is not None),
+        Decimal("0"),
+    )
+    return min(total, cap)
+
+
+def get_components(offering):
+    """Ordered assessment components of an offering."""
+    return list(AssessmentComponent.objects.filter(offering=offering).order_by("order", "name"))
+
+
+@transaction.atomic
+def save_components(*, offering, definitions, by_user=None):
+    """Upsert/delete an offering's assessment components from ``definitions``.
+
+    ``definitions`` = list of ``{"id"?, "name", "max_score"}``. Rows with an id
+    not present are deleted. Blocked once the journal scheme is published."""
+    scheme = ensure_assessment_scheme(offering=offering)
+    if scheme.is_published:
+        return get_components(offering)
+
+    existing = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
+    existing_by_name = {c.name.strip().lower(): c for c in existing.values()}
+    seen: set = set()
+    for order, defn in enumerate(definitions):
+        name = (defn.get("name") or "").strip()
+        if not name:
+            continue
+        max_score = max(1, min(100, int(_to_decimal(defn.get("max_score")))))
+        # Match by explicit id, else by (case-insensitive) name so a re-save
+        # without ids upserts instead of colliding with the unique (offering, name).
+        component = existing.get(str(defn.get("id") or "")) or existing_by_name.get(name.lower())
+        if component is not None and str(component.id) not in seen:
+            component.name = name
+            component.max_score = max_score
+            component.order = order
+            component.save(update_fields=["name", "max_score", "order"])
+            seen.add(str(component.id))
+        elif component is None:
+            created = AssessmentComponent.objects.create(
+                organization=offering.organization, offering=offering, name=name, max_score=max_score, order=order
+            )
+            seen.add(str(created.id))
+    # Drop components the teacher removed from the form.
+    for cid, component in existing.items():
+        if cid not in seen:
+            component.delete()
+    return get_components(offering)
+
+
+@transaction.atomic
+def save_component_scores(*, offering, entries, by_user=None):
+    """Persist per-(component, enrollment) scores. ``entries`` = list of
+    ``{"component_id", "enrollment_id", "score"}``. Publish-locked + tenant-safe."""
+    scheme = ensure_assessment_scheme(offering=offering)
+    if scheme.is_published:
+        return 0
+
+    valid_components = {str(c.id): c for c in AssessmentComponent.objects.filter(offering=offering)}
+    valid_enrollments = {str(e.id): e for e in offering.enrollments.all()}
+    written = 0
+    for entry in entries:
+        component = valid_components.get(str(entry.get("component_id")))
+        enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
+        if component is None or enrollment is None:
+            continue
+        raw = entry.get("score")
+        if raw in (None, ""):
+            ComponentScore.objects.filter(component=component, enrollment=enrollment).delete()
+            continue
+        score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
+        ComponentScore.objects.update_or_create(
+            organization=offering.organization,
+            component=component,
+            enrollment=enrollment,
+            defaults={"score": score, "entered_by": by_user},
+        )
+        written += 1
+    return written
+
+
+def get_component_grid(offering):
+    """Teacher grid: components (columns) × enrolled students (rows) + scores."""
+    components = get_components(offering)
+    enrollments = list(
+        offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
+        .select_related("student")
+        .order_by("student__last_name", "student__username")
+    )
+    comp_ids = [c.id for c in components]
+    score_map: dict = {}
+    if comp_ids:
+        for cs in ComponentScore.objects.filter(component_id__in=comp_ids, enrollment__offering=offering):
+            score_map[(cs.enrollment_id, cs.component_id)] = cs.score
+    rows = [
+        {
+            "enrollment": e,
+            "student": e.student,
+            "cells": [{"component": c, "score": score_map.get((e.id, c.id))} for c in components],
+        }
+        for e in enrollments
+    ]
+    total_max = sum(c.max_score for c in components)
+    return {"components": components, "rows": rows, "total_max": total_max}
+
+
+def get_component_breakdown(enrollment):
+    """Student-facing per-component breakdown (name, score, max)."""
+    components = get_components(enrollment.offering)
+    if not components:
+        return []
+    comp_ids = [c.id for c in components]
+    score_by = {
+        cs.component_id: cs.score
+        for cs in ComponentScore.objects.filter(component_id__in=comp_ids, enrollment=enrollment)
+    }
+    return [{"name": c.name, "score": score_by.get(c.id), "max": c.max_score} for c in components]

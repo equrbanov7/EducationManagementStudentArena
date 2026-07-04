@@ -99,6 +99,13 @@
                         <span class="grade-comp">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ row.journal.lessons_held }}</strong></span>
                         <span class="grade-comp">{% trans "Qayıb" context "profile.subjects" %}: <strong>{{ row.journal.absence_hours }}</strong> {% trans "saat" context "profile.subjects" %} / {{ row.journal.allowed_absence|floatformat:0 }}</span>
                     </div>
+                    {% if row.components %}
+                    <div class="subject-components">
+                        {% for comp in row.components %}
+                        <span class="subject-comp-chip">{{ comp.name }}: <strong>{% if comp.score is not None %}{{ comp.score|floatformat:'-2' }}{% else %}—{% endif %}</strong>/{{ comp.max }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if row.final.graded or row.final.resit %}
                     <div class="subject-final">
                         {% if row.final.graded %}

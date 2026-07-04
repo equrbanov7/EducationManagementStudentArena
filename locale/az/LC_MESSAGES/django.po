@@ -27159,6 +27159,59 @@ msgctxt "exams.view.groups.message"
 msgid "student_added_to_group"
 msgstr "Tələbə qrupa əlavə edildi."
 
+msgctxt "registrar.journal"
+msgid "Qiymətləndirmə komponentləri"
+msgstr "Qiymətləndirmə komponentləri"
+
+msgctxt "registrar.journal"
+msgid "opsional — giriş balını seminar/kollokvium/SDF üzrə çəkili hesablayır"
+msgstr "opsional — giriş balını seminar/kollokvium/SDF üzrə çəkili hesablayır"
+
+msgctxt "registrar.journal"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "registrar.journal"
+msgid "Yeni komponent (məs. Kollokvium 1)"
+msgstr "Yeni komponent (məs. Kollokvium 1)"
+
+msgctxt "registrar.journal"
+msgid "Komponentləri saxla"
+msgstr "Komponentləri saxla"
+
+msgctxt "registrar.journal"
+msgid "Cəmi tavan"
+msgstr "Cəmi tavan"
+
+msgctxt "registrar.journal"
+msgid "Komponent ballarını saxla"
+msgstr "Komponent ballarını saxla"
+
+msgid "Qiymətləndirmə komponentləri yadda saxlanıldı."
+msgstr "Qiymətləndirmə komponentləri yadda saxlanıldı."
+
+msgid "Komponent balları yadda saxlanıldı (%(n)s xana)."
+msgstr "Komponent balları yadda saxlanıldı (%(n)s xana)."
+
+msgid "Jurnal yekunlaşdırılıb — komponent redaktəsi bağlıdır."
+msgstr "Jurnal yekunlaşdırılıb — komponent redaktəsi bağlıdır."
+
+msgctxt "registrar.model.component.meta"
+msgid "assessment component"
+msgstr "qiymətləndirmə komponenti"
+
+msgctxt "registrar.model.component.meta"
+msgid "assessment components"
+msgstr "qiymətləndirmə komponentləri"
+
+msgctxt "registrar.model.component_score.meta"
+msgid "component score"
+msgstr "komponent balı"
+
+msgctxt "registrar.model.component_score.meta"
+msgid "component scores"
+msgstr "komponent balları"
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"
