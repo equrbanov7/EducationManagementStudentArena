@@ -266,7 +266,7 @@ FinalGrade < pass_threshold  VƏ YA  exam_score < min_exam_score
 | **W1** (bitdi) | Fənn↔Kurs körpüsü (`CourseOffering.instructor` + `ensure_offering_course`/`sync_offering_course_members`) — fənnə klik real "fənn içi"nə çatır | orta | ✔ |
 | **U3** (bitdi) | **Elektron jurnal**: `AssessmentScheme` + `GradeComponent` + `ComponentScore` (migration 0006/0007 + RLS) + komponent-əsaslı qiymətləndirmə servisi (seminar/lab/sərbəst iş/kollokvium/imtahan, 50+50=100 → hərf/GPA, keçid + min-imtahan + qayıb qaydası); müəllim roster grid (`/jurnal/`, RBAC + IDOR qorunması); tələbə "Qiymətlərim" ("Fənlərim"ə inteqrasiya) — davamiyyət (qb) jurnalda daxil edilir | yüksək | ✔ |
 | **U3+** | Təkrar imtahan (`ResitRecord`) + jurnal publish/finalizasiya audit (§5) | orta | sonra |
-| **U4** | Dərs cədvəli `ScheduleSlot` (§4) | aşağı-orta | sonra |
+| **U4** (bitdi) | **Dərs cədvəli** `ScheduleSlot` (migration 0010/0011 + RLS) + konflikt yoxlaması (qrup/müəllim/otaq) + rol-aware həftəlik grid (`/jurnal/cedvel/`): tələbə qrup, müəllim öz slotları + əlavə/sil | aşağı-orta | ✔ |
 | **U5** | Transkript + GPA + status state-machine (P3-2 §6-8) | yüksək | sonra |
 | **U6** | Qrup köçürmə (§6) + imtahana əlavə (§7) + org_type UI təmizliyi (§8) | aşağı-orta | qismən |
 

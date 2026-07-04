@@ -21,9 +21,15 @@ Bu hesabatdakı **3 kritik boşluqdan 2-si + U3** artıq tamamlandı (CI yaşıl
   IDOR-qorumalı) + tələbə "Qiymətlərim" ("Fənlərim"də). Boloniya keçid + min-
   imtahan + 25% qayıb qaydası canlı işləyir.
 
+- ✅ **U3 jurnal düzəldildi** (UNEC modeli) — komponent-cəm yox, dərs-bə-dərs
+  iə/qb + seminar balı; kilid (tarix 5 dəq / bal 1 gün); limitə çatan sətir
+  bozarır, kəsilən qırmızı.
+- ✅ **U4 Dərs cədvəli** — `ScheduleSlot` + konflikt yoxlaması + rol-aware
+  həftəlik grid (`/jurnal/cedvel/`).
+
 **Qalan (yenilənmiş prioritet):** K3 registrar provisioning UI · U3+ təkrar
 imtahan (`ResitRecord`) + jurnal finalizasiya audit · U5 transkript/GPA ·
-U4 dərs cədvəli · U6 köçürmə/əlavə/təmizlik.
+U6 köçürmə/əlavə/təmizlik · (ən sonda: jurnal dizayn/polish).
 
 ---
 
