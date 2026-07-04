@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-04 05:01+0400\n"
+"POT-Creation-Date: 2026-07-04 10:57+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -437,17 +437,17 @@ msgstr "Yeni şifrə"
 msgid "Yeni şifrəni təkrarla"
 msgstr "Yeni şifrəni təkrarla"
 
-#: apps/accounts/middleware.py:264
+#: apps/accounts/middleware.py:319
 msgctxt "accounts.view_as"
 msgid "session_ended"
 msgstr "Baxış sessiyası bitdi — icazə və ya kontekst dəyişdi."
 
-#: apps/accounts/middleware.py:272
+#: apps/accounts/middleware.py:327
 msgctxt "accounts.view_as"
 msgid "action_blocked_readonly"
 msgstr "Yalnız baxış rejimindəsiniz — bu əməliyyata icazə yoxdur."
 
-#: apps/accounts/middleware.py:280
+#: apps/accounts/middleware.py:335
 msgctxt "accounts.view_as"
 msgid "action_blocked_sensitive"
 msgstr ""
@@ -627,6 +627,88 @@ msgstr ""
 #, python-format
 msgid "Link və OTP kodu <strong>%(minutes)s dəqiqə</strong> etibarlıdır."
 msgstr "Link və OTP kodu <strong>%(minutes)s dəqiqə</strong> etibarlıdır."
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:4
+msgctxt "accounts.first_login"
+msgid "İlk giriş — parol təyini"
+msgstr ""
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:13
+#, fuzzy
+#| msgid "Xoş gəldiniz!"
+msgctxt "accounts.first_login"
+msgid "Xoş gəlmisiniz"
+msgstr "Xoş gəldiniz!"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:15
+msgctxt "accounts.first_login"
+msgid ""
+"İlk giriş üçün email ünvanınızı təsdiqləyin və öz parolunuzu təyin edin. Bu "
+"email parol bərpası üçün də istifadə olunacaq."
+msgstr ""
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:31
+#, fuzzy
+#| msgid "IP ünvan"
+msgctxt "accounts.first_login"
+msgid "Email ünvanı"
+msgstr "IP ünvan"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:34
+msgctxt "accounts.first_login"
+msgid "ad.soyad@qku.edu.az"
+msgstr ""
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:36
+#, fuzzy
+#| msgid "Təsdiqi göndər"
+msgctxt "accounts.first_login"
+msgid "Təsdiq kodu göndər"
+msgstr "Təsdiqi göndər"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:46
+#, fuzzy, python-format
+#| msgid "Mesajınız göndərildi!"
+msgctxt "accounts.first_login"
+msgid "Kod %(email)s ünvanına göndərildi."
+msgstr "Mesajınız göndərildi!"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:51
+msgctxt "accounts.first_login"
+msgid "Təsdiq kodu (6 rəqəm)"
+msgstr ""
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:56
+#, fuzzy
+#| msgid "Yeni kafedra"
+msgctxt "accounts.first_login"
+msgid "Yeni parol"
+msgstr "Yeni kafedra"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:60
+#, fuzzy
+#| msgctxt "appeals.template"
+#| msgid "Yeni bal (təxmini)"
+msgctxt "accounts.first_login"
+msgid "Yeni parol (təkrar)"
+msgstr "Yeni bal (təxmini)"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:65
+msgctxt "accounts.first_login"
+msgid "Parolu təyin et və davam et"
+msgstr ""
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:74
+#, fuzzy
+#| msgid "Yenidən göndər"
+msgctxt "accounts.first_login"
+msgid "Kodu yenidən göndər"
+msgstr "Yenidən göndər"
+
+#: apps/accounts/templates/accounts/first_login_set_password.html:80
+msgctxt "accounts.first_login"
+msgid "Çıxış"
+msgstr ""
 
 #: apps/accounts/templates/accounts/grading_queue.html:3
 msgctxt "accounts.grading_queue_page"
@@ -29262,105 +29344,114 @@ msgctxt "organizations.views.message"
 msgid "Əməliyyat yerinə yetirilə bilmədi."
 msgstr "Əməliyyat yerinə yetirilə bilmədi."
 
-#: apps/organizations/unit_types.py:12 core/constants.py:213
+#: apps/organizations/unit_types.py:12 core/constants.py:214
 msgctxt "organizations.unit_type"
 msgid "rectorate"
 msgstr "Rektorluq"
 
-#: apps/organizations/unit_types.py:13 core/constants.py:214
+#: apps/organizations/unit_types.py:13 core/constants.py:215
 msgctxt "organizations.unit_type"
 msgid "vice_rectorate"
 msgstr "Prorektorluq"
 
-#: apps/organizations/unit_types.py:14 core/constants.py:215
+#: apps/organizations/unit_types.py:14 core/constants.py:216
 #: templates/organizations/partials/_faculties_content.html:88
 #: templates/organizations/partials/_structure_content.html:136
 msgctxt "organizations.unit_type"
 msgid "faculty"
 msgstr "Fakültə"
 
-#: apps/organizations/unit_types.py:15 core/constants.py:216
+#: apps/organizations/unit_types.py:15 core/constants.py:217
 msgctxt "organizations.unit_type"
 msgid "deanery"
 msgstr "Dekanlıq"
 
-#: apps/organizations/unit_types.py:16 core/constants.py:217
+#: apps/organizations/unit_types.py:16 core/constants.py:218
 #: templates/organizations/partials/_structure_content.html:161
 msgctxt "organizations.unit_type"
 msgid "chair"
 msgstr "Kafedra"
 
-#: apps/organizations/unit_types.py:17 core/constants.py:218
+#: apps/organizations/unit_types.py:17 core/constants.py:219
 msgctxt "organizations.unit_type"
 msgid "department"
 msgstr "Şöbə"
 
-#: apps/organizations/unit_types.py:18 core/constants.py:219
+#: apps/organizations/unit_types.py:20 core/constants.py:220
+#, fuzzy
+#| msgctxt "accounts.form.register.label"
+#| msgid "specialization"
 msgctxt "organizations.unit_type"
-msgid "laboratory"
-msgstr "Laboratoriya"
+msgid "specialty"
+msgstr "İxtisas / Fakültə"
 
-#: apps/organizations/unit_types.py:19 core/constants.py:220
-msgctxt "organizations.unit_type"
-msgid "institute"
-msgstr "İnstitut"
-
-#: apps/organizations/unit_types.py:20 core/constants.py:221
-msgctxt "organizations.unit_type"
-msgid "center"
-msgstr "Mərkəz"
-
-#: apps/organizations/unit_types.py:23 core/constants.py:225
-msgctxt "organizations.unit_type"
-msgid "directorate"
-msgstr "Direktorluq"
-
-#: apps/organizations/unit_types.py:24 core/constants.py:226
-msgctxt "organizations.unit_type"
-msgid "section"
-msgstr "Bölmə"
-
-#: apps/organizations/unit_types.py:25 core/constants.py:227
-msgctxt "organizations.unit_type"
-msgid "parallel"
-msgstr "Paralel"
-
-#: apps/organizations/unit_types.py:26 core/constants.py:228
-msgctxt "organizations.unit_type"
-msgid "class"
-msgstr "Sinif"
-
-#: apps/organizations/unit_types.py:27 core/constants.py:229
-msgctxt "organizations.unit_type"
-msgid "grade_level"
-msgstr "Sinif Səviyyəsi"
-
-#: apps/organizations/unit_types.py:30 core/constants.py:233
-msgctxt "organizations.unit_type"
-msgid "branch"
-msgstr "Filial"
-
-#: apps/organizations/unit_types.py:31 core/constants.py:234
-msgctxt "organizations.unit_type"
-msgid "division"
-msgstr "Bölmə"
-
-#: apps/organizations/unit_types.py:32 core/constants.py:235
+#: apps/organizations/unit_types.py:21 apps/organizations/unit_types.py:36
+#: core/constants.py:237
 msgctxt "organizations.unit_type"
 msgid "group"
 msgstr "Qrup"
 
-#: apps/organizations/unit_types.py:33 core/constants.py:236
+#: apps/organizations/unit_types.py:22 core/constants.py:221
+msgctxt "organizations.unit_type"
+msgid "laboratory"
+msgstr "Laboratoriya"
+
+#: apps/organizations/unit_types.py:23 core/constants.py:222
+msgctxt "organizations.unit_type"
+msgid "institute"
+msgstr "İnstitut"
+
+#: apps/organizations/unit_types.py:24 core/constants.py:223
+msgctxt "organizations.unit_type"
+msgid "center"
+msgstr "Mərkəz"
+
+#: apps/organizations/unit_types.py:27 core/constants.py:227
+msgctxt "organizations.unit_type"
+msgid "directorate"
+msgstr "Direktorluq"
+
+#: apps/organizations/unit_types.py:28 core/constants.py:228
+msgctxt "organizations.unit_type"
+msgid "section"
+msgstr "Bölmə"
+
+#: apps/organizations/unit_types.py:29 core/constants.py:229
+msgctxt "organizations.unit_type"
+msgid "parallel"
+msgstr "Paralel"
+
+#: apps/organizations/unit_types.py:30 core/constants.py:230
+msgctxt "organizations.unit_type"
+msgid "class"
+msgstr "Sinif"
+
+#: apps/organizations/unit_types.py:31 core/constants.py:231
+msgctxt "organizations.unit_type"
+msgid "grade_level"
+msgstr "Sinif Səviyyəsi"
+
+#: apps/organizations/unit_types.py:34 core/constants.py:235
+msgctxt "organizations.unit_type"
+msgid "branch"
+msgstr "Filial"
+
+#: apps/organizations/unit_types.py:35 core/constants.py:236
+msgctxt "organizations.unit_type"
+msgid "division"
+msgstr "Bölmə"
+
+#: apps/organizations/unit_types.py:37 core/constants.py:238
 msgctxt "organizations.unit_type"
 msgid "classroom"
 msgstr "Dərs Otağı"
 
-#: apps/organizations/unit_types.py:36 core/constants.py:240
+#: apps/organizations/unit_types.py:40 core/constants.py:242
 msgctxt "organizations.unit_type"
 msgid "unit"
 msgstr "Bölmə"
 
-#: apps/organizations/unit_types.py:83
+#: apps/organizations/unit_types.py:87
 msgctxt "organizations.unit_type"
 msgid "fallback"
 msgstr "{name}"

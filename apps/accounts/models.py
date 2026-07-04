@@ -342,6 +342,24 @@ class UserProfile(models.Model):
 
     location = models.CharField(max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan")
 
+    # ── E-university provisioning: first-login flow ─────────────────────────
+    # When the administration provisions an account (no public self-signup),
+    # the user first logs in with a temporary password and is then forced to
+    # verify their email (OTP) and set their own password before using the
+    # system. See FirstLoginPasswordMiddleware + accounts:set_initial_password.
+    password_change_required = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name="Parol dəyişməlidir",
+        help_text="İlk girişdə istifadəçi öz parolunu qurana qədər True qalır.",
+    )
+    email_verified = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name="Email təsdiqlənib",
+        help_text="İlk girişdə OTP ilə təsdiqləndikdən sonra True; parol bərpası üçün istifadə olunur.",
+    )
+
     # Soft-delete fields for account deletion
     is_deleted = models.BooleanField(
         default=False,

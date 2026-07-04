@@ -18,6 +18,8 @@ urlpatterns = [
     path("send-otp/", views.send_otp_api_view, name="send_otp_api"),
     path("verify-otp/", views.verify_otp_api_view, name="verify_otp_api"),
     path("resend-otp/", views.resend_otp_api_view, name="resend_otp_api"),
+    # First-login: provisioned users set their own password + verify email.
+    path("set-password/", views.set_initial_password_view, name="set_initial_password"),
     path(
         "login/",
         views.CustomLoginView.as_view(),

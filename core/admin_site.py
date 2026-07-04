@@ -127,9 +127,15 @@ class EMSArenaAdminSite(admin.AdminSite):
         if not admin_2fa_required_for_user(user):
             return response
 
+        from django.conf import settings
+
         next_url = response.headers.get("Location", "")
         default_admin_url = reverse("admin:index", current_app=self.name)
-        if not next_url or next_url == "/":
+        # Django's admin login redirects to LOGIN_REDIRECT_URL when there is no
+        # explicit admin ?next=. For the admin 2FA flow we want to land back in
+        # the admin site, so treat "/", empty, and the (non-admin) app
+        # LOGIN_REDIRECT_URL all as "no admin next" → the admin index.
+        if not next_url or next_url in {"/", getattr(settings, "LOGIN_REDIRECT_URL", "/")}:
             next_url = default_admin_url
         request.current_app = self.name
         return self._begin_admin_otp_challenge(request, user, next_url=next_url)
