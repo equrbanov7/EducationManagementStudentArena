@@ -27271,6 +27271,106 @@ msgctxt "registrar.model.component_score.meta"
 msgid "component scores"
 msgstr "баллы компонентов"
 
+msgctxt "registrar.approval"
+msgid "Draft"
+msgstr "Черновик"
+
+msgctxt "registrar.approval"
+msgid "Submitted (awaiting chair)"
+msgstr "Отправлено (ожидает кафедру)"
+
+msgctxt "registrar.approval"
+msgid "Chair approved (awaiting dean)"
+msgstr "Кафедра одобрила (ожидает декана)"
+
+msgctxt "registrar.approval"
+msgid "Approved (official)"
+msgstr "Одобрено (официально)"
+
+msgctxt "registrar.approval"
+msgid "Returned for revision"
+msgstr "Возвращено на доработку"
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqi"
+msgstr "Утверждение оценок"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarılma səbəbi"
+msgstr "Причина возврата"
+
+msgctxt "registrar.approval"
+msgid ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+msgstr ""
+"Отправить журнал на утверждение? После отправки редактирование временно "
+"блокируется."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqə göndər"
+msgstr "Отправить на утверждение"
+
+msgctxt "registrar.approval"
+msgid "Kafedra təsdiqi"
+msgstr "Одобрение кафедры"
+
+msgctxt "registrar.approval"
+msgid ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+msgstr ""
+"Одобрение декана делает оценки официальными и окончательно блокирует журнал."
+" Продолжить?"
+
+msgctxt "registrar.approval"
+msgid "Dekan təsdiqi"
+msgstr "Одобрение декана"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarma səbəbi (opsional)"
+msgstr "Причина возврата (необязательно)"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytar"
+msgstr "Вернуть"
+
+msgctxt "registrar.approval"
+msgid "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır."
+msgstr "Журнал на утверждении — редактирование временно заблокировано."
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqləri"
+msgstr "Утверждения оценок"
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)."
+msgstr ""
+"Электронные журналы, ожидающие вашего утверждения (кафедра / деканат)."
+
+msgctxt "registrar.approval"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən jurnal yoxdur."
+msgstr "Нет журналов, ожидающих вашего утверждения."
+
+msgctxt "profile.sidebar"
+msgid "Qiymət təsdiqləri"
+msgstr "Утверждения оценок"
+
+msgid "Jurnal təsdiqə göndərildi."
+msgstr "Журнал отправлен на утверждение."
+
+msgid "Kafedra təsdiqi verildi."
+msgstr "Одобрение кафедры выдано."
+
+msgid "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
+msgstr "Одобрение декана выдано — оценки стали официальными."
+
+msgid "Jurnal düzəliş üçün geri qaytarıldı."
+msgstr "Журнал возвращён на доработку."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

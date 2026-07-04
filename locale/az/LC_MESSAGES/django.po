@@ -27212,6 +27212,104 @@ msgctxt "registrar.model.component_score.meta"
 msgid "component scores"
 msgstr "komponent balları"
 
+msgctxt "registrar.approval"
+msgid "Draft"
+msgstr "Qaralama"
+
+msgctxt "registrar.approval"
+msgid "Submitted (awaiting chair)"
+msgstr "Təqdim edilib (kafedra gözlənilir)"
+
+msgctxt "registrar.approval"
+msgid "Chair approved (awaiting dean)"
+msgstr "Kafedra təsdiqlədi (dekan gözlənilir)"
+
+msgctxt "registrar.approval"
+msgid "Approved (official)"
+msgstr "Təsdiqləndi (rəsmi)"
+
+msgctxt "registrar.approval"
+msgid "Returned for revision"
+msgstr "Düzəlişə qaytarıldı"
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqi"
+msgstr "Qiymət təsdiqi"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarılma səbəbi"
+msgstr "Geri qaytarılma səbəbi"
+
+msgctxt "registrar.approval"
+msgid ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+msgstr ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqə göndər"
+msgstr "Təsdiqə göndər"
+
+msgctxt "registrar.approval"
+msgid "Kafedra təsdiqi"
+msgstr "Kafedra təsdiqi"
+
+msgctxt "registrar.approval"
+msgid ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+msgstr ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+
+msgctxt "registrar.approval"
+msgid "Dekan təsdiqi"
+msgstr "Dekan təsdiqi"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarma səbəbi (opsional)"
+msgstr "Geri qaytarma səbəbi (opsional)"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytar"
+msgstr "Geri qaytar"
+
+msgctxt "registrar.approval"
+msgid "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır."
+msgstr "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır."
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqləri"
+msgstr "Qiymət təsdiqləri"
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)."
+msgstr "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)."
+
+msgctxt "registrar.approval"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən jurnal yoxdur."
+msgstr "Təsdiqinizi gözləyən jurnal yoxdur."
+
+msgctxt "profile.sidebar"
+msgid "Qiymət təsdiqləri"
+msgstr "Qiymət təsdiqləri"
+
+msgid "Jurnal təsdiqə göndərildi."
+msgstr "Jurnal təsdiqə göndərildi."
+
+msgid "Kafedra təsdiqi verildi."
+msgstr "Kafedra təsdiqi verildi."
+
+msgid "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
+msgstr "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
+
+msgid "Jurnal düzəliş üçün geri qaytarıldı."
+msgstr "Jurnal düzəliş üçün geri qaytarıldı."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Buraxılmır"

@@ -155,9 +155,9 @@ def evaluate_resit(*, enrollment, by_user=None):
 def set_exam_score(*, enrollment, score, by_user=None):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
 
-    Blocked when the offering's scheme is published (finalised)."""
+    Blocked when the offering's journal is locked (finalised / under approval)."""
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
-    if scheme.is_published:
+    if gradebook.journal_is_locked(enrollment.offering):
         return None
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
@@ -173,7 +173,7 @@ def set_exam_score(*, enrollment, score, by_user=None):
 def set_resit_score(*, enrollment, score, by_user=None):
     """Record a resit exam score → mark the resit completed + recompute."""
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
-    if scheme.is_published:
+    if gradebook.journal_is_locked(enrollment.offering):
         return None
     resit = enrollment.resit_records.first()
     if resit is None:

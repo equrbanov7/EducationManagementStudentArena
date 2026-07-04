@@ -27172,6 +27172,105 @@ msgctxt "registrar.model.component_score.meta"
 msgid "component scores"
 msgstr "bileşen puanları"
 
+msgctxt "registrar.approval"
+msgid "Draft"
+msgstr "Taslak"
+
+msgctxt "registrar.approval"
+msgid "Submitted (awaiting chair)"
+msgstr "Gönderildi (bölüm bekleniyor)"
+
+msgctxt "registrar.approval"
+msgid "Chair approved (awaiting dean)"
+msgstr "Bölüm onayladı (dekan bekleniyor)"
+
+msgctxt "registrar.approval"
+msgid "Approved (official)"
+msgstr "Onaylandı (resmi)"
+
+msgctxt "registrar.approval"
+msgid "Returned for revision"
+msgstr "Düzeltme için iade edildi"
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqi"
+msgstr "Not onayı"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarılma səbəbi"
+msgstr "İade nedeni"
+
+msgctxt "registrar.approval"
+msgid ""
+"Jurnalı təsdiqə göndərmək? Göndərildikdən sonra redaktə müvəqqəti bağlanır."
+msgstr ""
+"Jurnal onaya gönderilsin mi? Gönderildikten sonra düzenleme geçici olarak "
+"kilitlenir."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqə göndər"
+msgstr "Onaya gönder"
+
+msgctxt "registrar.approval"
+msgid "Kafedra təsdiqi"
+msgstr "Bölüm onayı"
+
+msgctxt "registrar.approval"
+msgid ""
+"Dekan təsdiqi qiymətləri rəsmiləşdirir və jurnalı birdəfəlik kilidləyir. "
+"Davam edilsin?"
+msgstr ""
+"Dekan onayı notları resmileştirir ve jurnalı kalıcı olarak kilitler. Devam "
+"edilsin mi?"
+
+msgctxt "registrar.approval"
+msgid "Dekan təsdiqi"
+msgstr "Dekan onayı"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytarma səbəbi (opsional)"
+msgstr "İade nedeni (isteğe bağlı)"
+
+msgctxt "registrar.approval"
+msgid "Geri qaytar"
+msgstr "İade et"
+
+msgctxt "registrar.approval"
+msgid "Jurnal təsdiq mərhələsindədir — redaktə müvəqqəti bağlıdır."
+msgstr "Jurnal onay aşamasında — düzenleme geçici olarak kilitli."
+
+msgctxt "registrar.approval"
+msgid "Qiymət təsdiqləri"
+msgstr "Not onayları"
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən elektron jurnallar (kafedra / dekanlıq)."
+msgstr "Onayınızı bekleyen elektronik jurnallar (bölüm / dekanlık)."
+
+msgctxt "registrar.approval"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktif kuruluş bağlamı yok."
+
+msgctxt "registrar.approval"
+msgid "Təsdiqinizi gözləyən jurnal yoxdur."
+msgstr "Onayınızı bekleyen jurnal yok."
+
+msgctxt "profile.sidebar"
+msgid "Qiymət təsdiqləri"
+msgstr "Not onayları"
+
+msgid "Jurnal təsdiqə göndərildi."
+msgstr "Jurnal onaya gönderildi."
+
+msgid "Kafedra təsdiqi verildi."
+msgstr "Bölüm onayı verildi."
+
+msgid "Dekan təsdiqi verildi — qiymətlər rəsmiləşdi."
+msgstr "Dekan onayı verildi — notlar resmileşti."
+
+msgid "Jurnal düzəliş üçün geri qaytarıldı."
+msgstr "Jurnal düzeltme için iade edildi."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

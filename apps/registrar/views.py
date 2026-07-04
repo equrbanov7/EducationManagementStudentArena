@@ -17,8 +17,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, gradebook, schedule
+from . import approval, finals, gradebook, schedule
 from .models import (
+    ApprovalStatus,
+    AssessmentScheme,
     AttendanceStatus,
     CourseOffering,
     LessonKind,
@@ -67,16 +69,41 @@ def journal_list(request):
 
 @login_required
 def journal_detail(request, offering_id):
-    """Lesson-by-lesson journal for one offering: view (GET) + edit (POST)."""
+    """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
+
+    Access: the offering instructor / org owner / superuser may edit; a chair
+    (kafedra müdiri) or dean (dekan) may *review* a submitted journal (read-only)
+    to approve or return it via the grade-approval chain (U7.2)."""
     offering = get_object_or_404(
         CourseOffering.objects.select_related("subject", "period", "group", "organization"),
         pk=offering_id,
     )
-    if not _can_edit_journal(request.user, offering):
-        raise Http404  # do not leak existence to unauthorised users
+    appr = approval.approval_context(offering=offering, user=request.user)
+    can_edit_perm = _can_edit_journal(request.user, offering)
+    can_review = approval.can_chair_approve(request.user, offering.organization) or approval.can_dean_approve(
+        request.user, offering.organization
+    )
+    # Do not leak existence: only editors, or reviewers of an already-submitted
+    # journal, may open the page.
+    if not can_edit_perm and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+        raise Http404
 
     if request.method == "POST":
         action = request.POST.get("action")
+        # Grade-approval chain actions (services enforce their own RBAC).
+        if action == "submit_approval":
+            return _handle_approval(request, offering, approval.submit_for_approval, _("Jurnal təsdiqə göndərildi."))
+        if action == "chair_approve":
+            return _handle_approval(request, offering, approval.chair_approve, _("Kafedra təsdiqi verildi."))
+        if action == "dean_approve":
+            return _handle_approval(
+                request, offering, approval.dean_approve, _("Dekan təsdiqi verildi — qiymətlər rəsmiləşdi.")
+            )
+        if action == "return_revision":
+            return _handle_return(request, offering)
+        # Editing actions require instructor/owner edit rights.
+        if not can_edit_perm:
+            raise Http404
         if action == "add_lesson":
             return _handle_add_lesson(request, offering)
         if action == "save_finals":
@@ -100,9 +127,66 @@ def journal_detail(request, offering_id):
             "journal": journal,
             "finals": finals.get_offering_results(offering=offering),
             "component_grid": gradebook.get_component_grid(offering=offering),
-            "can_edit": not journal["scheme"].is_published,
+            "can_edit": can_edit_perm and not appr["is_locked"],
+            "approval": appr,
             "lesson_kinds": LessonKind.choices,
             "active_main_nav": "journal",
+        },
+    )
+
+
+def _handle_approval(request, offering, action_fn, success_msg):
+    """Run an approval-chain transition; surface a permission error as a message."""
+    from django.core.exceptions import PermissionDenied
+
+    try:
+        action_fn(offering=offering, by_user=request.user)
+        messages.success(request, success_msg)
+    except PermissionDenied as exc:
+        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+
+def _handle_return(request, offering):
+    """Chair/dean returns the journal to the teacher with an optional reason."""
+    from django.core.exceptions import PermissionDenied
+
+    reason = (request.POST.get("return_reason") or "").strip()
+    try:
+        approval.return_for_revision(offering=offering, by_user=request.user, reason=reason)
+        messages.success(request, _("Jurnal düzəliş üçün geri qaytarıldı."))
+    except PermissionDenied as exc:
+        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
+    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
+
+@login_required
+def approvals_inbox(request):
+    """Chair/dean inbox: journals awaiting the current user's approval step."""
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        return render(request, "registrar/approvals_inbox.html", {"has_context": False, "active_main_nav": "approvals"})
+
+    statuses = []
+    if approval.can_chair_approve(request.user, organization):
+        statuses.append(ApprovalStatus.SUBMITTED)
+    if approval.can_dean_approve(request.user, organization):
+        statuses.append(ApprovalStatus.CHAIR_APPROVED)
+    if not statuses:
+        raise Http404  # not an approver in this org
+
+    schemes = (
+        AssessmentScheme.objects.filter(organization=organization, approval_status__in=statuses)
+        .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
+        .order_by("offering__subject__code")
+    )
+    return render(
+        request,
+        "registrar/approvals_inbox.html",
+        {
+            "has_context": True,
+            "schemes": schemes,
+            "active_main_nav": "approvals",
         },
     )
 
