@@ -1,0 +1,108 @@
+/* EMSArena — assignment detail (inline-CSS extraction 2026-07-04) */
+/* Rəng Palitrası və Xüsusi Dizaynlar */
+:root {
+    --blue-primary: #2563eb;
+    --blue-dark: #1e40af;
+    --blue-light: #bfdbfe;
+    --blue-very-light: #dbeafe;
+
+    --green-primary: #10b981;
+    --green-dark: #059669;
+    --green-light: #a7f3d0;
+    --green-very-light: #d1fae5;
+}
+
+.card-modern {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.info-badge {
+    background-color: var(--blue-very-light);
+    color: var(--blue-dark);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-custom {
+    background-color: var(--blue-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--blue-dark);
+    color: white;
+}
+
+.btn-success-custom {
+    background-color: var(--green-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success-custom:hover {
+    background-color: var(--green-dark);
+    color: white;
+}
+
+.form-control-custom {
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    padding: 0.75rem;
+}
+
+.form-control-custom:focus {
+    border-color: var(--blue-primary);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+.history-item {
+    border-left: 4px solid var(--blue-light);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.history-item.graded {
+    border-left-color: var(--green-primary);
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: var(--green-very-light);
+    color: var(--green-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 auto 1rem auto;
+    border: 4px solid var(--green-light);
+}
+
+/* Faza 6.4 Sprint-3 (2026-07-02): aşağıdakı klasslar bu şablondakı
+   inline style atributlarını əvəz edir. */
+.as-text-dark { color: var(--blue-dark); }
+.as-ic { color: var(--blue-primary); }
+.as-alert-info { background-color: var(--blue-very-light); color: var(--blue-dark); }
+.as-heading-caps { color: var(--blue-dark); letter-spacing: 1px; }
+.as-score-circle--empty { background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280; }
+.as-badge-soft { background-color: var(--blue-very-light); color: var(--blue-primary); }
+.as-badge-green { background-color: var(--green-primary); }
+.as-feedback { background-color: var(--blue-very-light); font-size: 0.85rem; }
