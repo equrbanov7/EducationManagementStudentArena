@@ -238,3 +238,60 @@ class RegisterViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         # A new email must have been sent
         self.assertEqual(len(mail.outbox), 1)
+
+
+@override_settings(PUBLIC_SIGNUP_ENABLED=False)
+class PublicSignupDisabledTest(TestCase):
+    """E-university provisioning: public self-signup is disabled by default.
+
+    When PUBLIC_SIGNUP_ENABLED is off, the public register/verify routes must
+    redirect to the login page (accounts are provisioned by the university
+    administration — see docs/ACCOUNT_PROVISIONING.md) and no account may be
+    created through them.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_register_get_redirects_to_login(self):
+        response = self.client.get(reverse("accounts:register"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("accounts:login"))
+
+    def test_register_post_creates_no_account_and_redirects(self):
+        before = User.objects.count()
+        response = self.client.post(
+            reverse("accounts:register"),
+            {
+                "username": "shouldnotexist",
+                "email": "shouldnotexist@example.com",
+                "password": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "first_name": "No",
+                "last_name": "Signup",
+                "country": "AZ",
+                "organization_type": OrganizationType.INDIVIDUAL,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("accounts:login"))
+        self.assertEqual(User.objects.count(), before)
+        self.assertFalse(User.objects.filter(email="shouldnotexist@example.com").exists())
+
+    def test_verify_code_redirects_to_login(self):
+        response = self.client.get(reverse("accounts:verify_code"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("accounts:login"))
+
+
+@override_settings(PUBLIC_SIGNUP_ENABLED=True)
+class PublicSignupEnabledRouteTest(TestCase):
+    """When explicitly enabled, the register route renders normally (200)."""
+
+    def setUp(self):
+        self.client = Client()
+        Country.objects.get_or_create(code="AZ", defaults={"name": "Azerbaijan", "is_active": True})
+
+    def test_register_get_renders(self):
+        response = self.client.get(reverse("accounts:register"))
+        self.assertEqual(response.status_code, 200)

@@ -25,10 +25,17 @@
                 {% trans "Universitetlər, məktəblər, kurs mərkəzləri və müəllimlər üçün modern təhsil idarəetmə, LMS və onlayn imtahan platforması. Tək məkanda kurslar, imtahanlar, qiymətləndirmə, audit və AI köməkçi." %}
             </p>
             <div class="ems-hero__actions">
+                {% if public_signup_enabled %}
                 <a href="{% url 'accounts:register' %}" class="ems-btn ems-btn--primary">
                     <i class="fas fa-rocket" aria-hidden="true"></i>
                     {% trans "Pulsuz başla" %}
                 </a>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="ems-btn ems-btn--primary">
+                    <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                    {% trans "Daxil ol" %}
+                </a>
+                {% endif %}
                 <a href="{% url 'contact' %}" class="ems-btn ems-btn--ghost">
                     <i class="fas fa-envelope" aria-hidden="true"></i>
                     {% trans "Bizimlə əlaqə" %}
@@ -164,10 +171,17 @@
         <h3>{% trans "Təhsilinizi növbəti səviyyəyə qaldıraq" %}</h3>
         <p>{% trans "Bir abunəlikdə kurs, imtahan, audit və AI — hamısı bir yerdə." %}</p>
         <div class="cta-actions">
+            {% if public_signup_enabled %}
             <a href="{% url 'accounts:register' %}" class="cta-button">
                 <i class="fas fa-user-plus" aria-hidden="true"></i>
                 {% trans "Pulsuz qeydiyyat" %}
             </a>
+            {% else %}
+            <a href="{% url 'accounts:login' %}" class="cta-button">
+                <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                {% trans "Daxil ol" %}
+            </a>
+            {% endif %}
             <a href="{% url 'contact' %}" class="cta-button cta-button--outline">
                 <i class="fas fa-paper-plane" aria-hidden="true"></i>
                 {% trans "Demo tələb et" %}

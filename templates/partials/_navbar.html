@@ -241,9 +241,11 @@
                         <a href="{% url 'accounts:login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
                             {% trans "login" context "nav" %}
                         </a>
+                        {% if public_signup_enabled %}
                         <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
                             {% trans "signup" context "nav" %}
                         </a>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -392,11 +394,13 @@
                 <span>{% trans "login" context "nav" %}</span>
             </a>
         </li>
+        {% if public_signup_enabled %}
         <li class="blog-header__nav-item">
             <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
                 <span>{% trans "signup" context "nav" %}</span>
             </a>
         </li>
+        {% endif %}
         {% endif %}
 
         <li class="blog-header__nav-item blog-header__nav-item--language">

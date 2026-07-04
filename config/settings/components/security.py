@@ -31,6 +31,20 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 # ---------------------------------------------------------------------------
+# Public self-registration (e-university provisioning policy)
+# ---------------------------------------------------------------------------
+# EMSArena is an e-university platform. Following the account-provisioning model
+# used by real universities (UNEC, ADA, Western Caspian, …), end users do NOT
+# self-register: the university administration provisions accounts and assigns
+# roles (see docs/ACCOUNT_PROVISIONING.md). The public `accounts:register`
+# route is therefore DISABLED by default — it redirects to the login page with a
+# "contact your administrator" message. Set PUBLIC_SIGNUP_ENABLED=1 to re-open
+# public self-signup (e.g. for a non-university tenant or a marketing pilot).
+# The test settings enable it so the existing registration-flow tests keep
+# exercising the machinery.
+PUBLIC_SIGNUP_ENABLED = _env_bool_setting("PUBLIC_SIGNUP_ENABLED", False)
+
+# ---------------------------------------------------------------------------
 # Session timeout settings
 # ---------------------------------------------------------------------------
 # Absolute lifetime of the session cookie (seconds).  After this period the
