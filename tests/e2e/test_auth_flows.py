@@ -213,35 +213,37 @@ class TestInvalidCredentials:
 # ── Registration page ─────────────────────────────────────────────────────────
 
 
-class TestRegistrationPage:
-    """Tests for the registration page structure."""
+class TestPublicSignupDisabled:
+    """E-university provisioning: public self-signup is disabled in production.
 
-    def test_register_page_returns_200(self, page: Page) -> None:
-        """The registration page must be reachable and return HTTP 200."""
+    The prod image ships with PUBLIC_SIGNUP_ENABLED=False (accounts are created by
+    the university administration — see docs/ACCOUNT_PROVISIONING.md), so the
+    public register route redirects to login and the login page exposes no
+    "register" link. (If a deployment re-enables signup, these expectations
+    change — update alongside the flag.)
+    """
+
+    def test_register_redirects_to_login(self, page: Page) -> None:
+        """Visiting the register route must land on the login page (302 → login)."""
         response = page.goto(REGISTER_URL)
         assert response is not None
-        assert response.status == 200, f"Register page returned HTTP {response.status}"
+        # Playwright follows the redirect, so the final document is the login page.
+        assert response.status == 200, f"Register route returned HTTP {response.status}"
+        assert "/accounts/login/" in page.url, f"Register did not redirect to login; landed on {page.url}"
 
-    def test_register_page_has_form(self, page: Page) -> None:
-        """The registration page must contain a form element."""
+    def test_register_landing_has_no_wizard(self, page: Page) -> None:
+        """The redirected page is the login form, not the registration wizard."""
         page.goto(REGISTER_URL)
         page.wait_for_load_state("domcontentloaded")
-        form = page.locator("form.register-form, form#registerForm, form")
-        assert form.count() > 0, "No form element found on the registration page"
-
-    def test_register_page_has_wizard_steps(self, page: Page) -> None:
-        """The registration wizard must show step indicators."""
-        page.goto(REGISTER_URL)
-        page.wait_for_load_state("domcontentloaded")
-        # The register template uses .register-wizard-steps and .wizard-step elements.
         wizard = page.locator(".register-wizard-steps, .wizard-step")
-        assert wizard.count() > 0, "No wizard step indicators found on the registration page"
+        assert wizard.count() == 0, "Registration wizard is reachable while public signup is disabled"
 
-    def test_register_page_has_csrf_token(self, page: Page) -> None:
-        """The registration form must include a CSRF token."""
-        page.goto(REGISTER_URL)
-        csrf_input = page.locator("input[name='csrfmiddlewaretoken']")
-        assert csrf_input.count() > 0, "CSRF token not found in registration form"
+    def test_login_page_has_no_signup_link(self, page: Page) -> None:
+        """The login page must not offer a public self-registration link."""
+        page.goto(LOGIN_URL)
+        page.wait_for_load_state("domcontentloaded")
+        signup_links = page.locator("a[href*='/accounts/register/']")
+        assert signup_links.count() == 0, "Login page still exposes a public signup link"
 
 
 # ── Password reset flow ────────────────────────────────────────────────────────
