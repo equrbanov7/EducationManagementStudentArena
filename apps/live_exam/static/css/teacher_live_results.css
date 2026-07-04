@@ -1,0 +1,29 @@
+/* EMSArena — live-exam teacher results (inline-CSS extraction 2026-07-04) */
+.lr-page{max-width:1200px;margin:0 auto;padding:28px 20px 48px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,sans-serif}
+.lr-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;color:#4a5568;text-decoration:none;font-size:.9rem;font-weight:500;transition:color .15s}
+.lr-back:hover{color:#1a56db}
+.lr-header{margin-bottom:28px}
+.lr-header h1{font-size:1.5rem;font-weight:800;margin:0 0 6px;color:#111827}
+.lr-header h1 i{color:#1a56db;margin-right:6px}
+.lr-header p{color:#6b7280;margin:0;font-size:.9rem}
+.lr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+.lr-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:22px;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.lr-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#1a56db,#059669)}
+.lr-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.lr-card__top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.lr-card__pin{font-family:"Courier New",monospace;font-weight:700;font-size:1rem;background:linear-gradient(135deg,#1a56db,#0e7490);color:#fff;padding:5px 12px;border-radius:8px;letter-spacing:.04em}
+.lr-card__date{color:#6b7280;font-size:.84rem;display:flex;align-items:center;gap:5px}
+.lr-card__stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.lr-stat{background:#f8fafc;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.lr-stat__label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280}
+.lr-stat__value{font-size:1.1rem;font-weight:800;color:#111827}
+.lr-stat--green .lr-stat__value{color:#059669}
+.lr-stat--blue .lr-stat__value{color:#1a56db}
+.lr-card__link{display:inline-flex;align-items:center;gap:6px;color:#1a56db;text-decoration:none;font-weight:700;font-size:.9rem;transition:gap .15s}
+.lr-card__link:hover{gap:10px;text-decoration:none;color:#1e40af}
+.lr-empty{text-align:center;padding:64px 20px;color:#6b7280}
+.lr-empty i{font-size:3rem;margin-bottom:14px;display:block;color:#d1d5db}
+.lr-empty p{font-size:1rem;margin:0}
+
+/* C3 (2026-07-03): mikro inline-style köçürmələri */
+  .c3-1 { font-size:.78rem; }

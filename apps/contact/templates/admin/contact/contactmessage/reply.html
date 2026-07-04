@@ -5,53 +5,7 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<style>
-.reply-wrap { max-width: 920px; margin: 24px auto; }
-.reply-card { background: #fff; border-radius: 16px; padding: 28px;
-              box-shadow: 0 10px 28px rgba(15,23,42,0.06);
-              border: 1px solid rgba(15,23,42,0.08); margin-bottom: 18px; }
-.reply-card h2 { margin-top: 0; font-size: 18px; }
-.reply-meta { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px;
-              font-size: 14px; color: #475569; }
-.reply-meta strong { color: #0f172a; }
-.original-msg { background: #f8fafc; border-left: 4px solid #0f766e;
-                padding: 14px 18px; border-radius: 8px; white-space: pre-wrap;
-                line-height: 1.6; color: #334155; margin-top: 12px; }
-.reply-form label { display: block; font-weight: 600; margin-bottom: 6px;
-                    font-size: 14px; color: #0f172a; }
-.reply-form textarea, .reply-form select {
-    width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0;
-    border-radius: 10px; font-size: 14px; font-family: inherit;
-    box-sizing: border-box; background: #f8fafc; }
-.reply-form textarea:focus, .reply-form select:focus {
-    outline: none; border-color: #1e40af; background: #fff;
-    box-shadow: 0 0 0 4px rgba(30,64,175,0.12); }
-.reply-form .help { font-size: 12px; color: #64748b; margin-top: 4px; }
-.reply-form .errorlist { color: #b91c1c; font-size: 13px; padding: 0; list-style: none; }
-.reply-actions { display: flex; gap: 12px; margin-top: 18px; }
-.btn-primary { background: linear-gradient(135deg,#1e40af,#0f766e,#10b981);
-               color: #fff; border: none; padding: 12px 28px; border-radius: 10px;
-               font-weight: 700; cursor: pointer; font-size: 14px;
-               box-shadow: 0 8px 20px rgba(15,118,110,0.25); }
-.btn-primary:hover { transform: translateY(-1px); }
-.btn-ghost { background: #fff; color: #1e40af; border: 1.5px solid #1e40af;
-             padding: 12px 24px; border-radius: 10px; font-weight: 600;
-             text-decoration: none; display: inline-flex; align-items: center; }
-.reply-status-pill { display: inline-block;
-                padding: 4px 12px; border-radius: 999px;
-                font-weight: 600; font-size: 12px; margin-left: 8px; }
-.reply-status-pill--sent { background: #dcfce7; color: #166534; }
-.reply-status-pill--pending { background: #dbeafe; color: #1d4ed8; }
-.reply-status-pill--failed { background: #fee2e2; color: #991b1b; }
-.reply-status-pill--recorded { background: #e2e8f0; color: #475569; }
-.reply-error { margin-top: 12px; color: #991b1b; background: #fef2f2;
-               border: 1px solid #fecaca; padding: 10px 12px;
-               border-radius: 8px; font-size: 13px; }
-
-/* C3 (2026-07-03): mikro inline-style köçürmələri */
-  .c3-1 { margin-bottom:16px; }
-  .c3-2 { border-left-color:#1e40af; }
-</style>
+<link rel="stylesheet" href="{% static 'contact/css/reply.css' %}">
 {% endblock %}
 
 {% block breadcrumbs %}
