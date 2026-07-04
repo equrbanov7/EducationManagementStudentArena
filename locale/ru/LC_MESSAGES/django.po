@@ -27110,6 +27110,58 @@ msgstr ""
 "Открывает предмет для семестра + группы и назначает преподавателя; "
 "электронный журнал сразу готов."
 
+msgctxt "registrar.console"
+msgid "Tələbə təyinatları"
+msgstr "Назначения студентов"
+
+msgctxt "registrar.console"
+msgid "Tələbə təyin et"
+msgstr "Назначить студента"
+
+msgctxt "registrar.console"
+msgid "qəbul"
+msgstr "приём"
+
+msgctxt "registrar.console"
+msgid "Hələ tələbə təyinatı yoxdur."
+msgstr "Пока нет назначений студентов."
+
+msgctxt "registrar.console"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.console"
+msgid "Tədris planı"
+msgstr "Учебный план"
+
+msgctxt "registrar.console"
+msgid "Cari semestrin məcburi fənlərinə yaz"
+msgstr "Записать на обязательные предметы текущего семестра"
+
+msgctxt "registrar.console"
+msgid "Semestr nömrəsi (auto-enroll)"
+msgstr "Номер семестра (авто-запись)"
+
+msgctxt "registrar.console"
+msgid "Seçilən tədris planı bu ixtisasa aid deyil."
+msgstr "Выбранный учебный план не относится к этой программе."
+
+msgctxt "registrar.console"
+msgid "Bu tələbə həmin ixtisasa artıq təyin olunub."
+msgstr "Этот студент уже назначен на эту программу."
+
+msgctxt "registrar.console"
+msgid "Tələbə təyinatı redaktəsi"
+msgstr "Редактировать назначение студента"
+
+msgctxt "registrar.console"
+msgid ""
+"Tələbəni ixtisas/tədris planı/qrupa təyin edir; istəyə görə cari semestrin "
+"məcburi fənlərinə avtomatik yazır."
+msgstr ""
+"Назначает студента на программу/учебный план/группу; при желании "
+"автоматически записывает на обязательные предметы текущего семестра."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Не допущен"

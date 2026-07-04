@@ -5,7 +5,15 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar.models import CourseOffering, Curriculum, CurriculumSubject, Program, Subject
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    CurriculumSubject,
+    Enrollment,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -282,3 +290,99 @@ class RegistrarConsoleTest(TestCase):
         client = self._client(self.owner)
         resp = client.get(reverse("registrar:offering_edit", args=[other_offering.id]))
         self.assertEqual(resp.status_code, 404)
+
+    # ── student assignment (StudentAcademicRecord) ──────────────────────────
+    def test_assign_student_creates_record(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_record_create"),
+            {
+                "student": str(self.student.id),
+                "program": str(self.program.id),
+                "curriculum": str(curriculum.id),
+                "group": str(self.group.id),
+                "admission_year": "2024",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            self.assertTrue(
+                StudentAcademicRecord.objects.filter(
+                    organization=self.org, student=self.student, program=self.program
+                ).exists()
+            )
+
+    def test_assign_student_with_auto_enroll(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+            CurriculumSubject.objects.create(
+                organization=self.org,
+                curriculum=curriculum,
+                subject=self.subject,
+                semester_number=1,
+                is_elective=False,
+            )
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_record_create"),
+            {
+                "student": str(self.student.id),
+                "program": str(self.program.id),
+                "curriculum": str(curriculum.id),
+                "group": str(self.group.id),
+                "admission_year": "2024",
+                "auto_enroll": "on",
+                "enroll_semester": "1",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            self.assertTrue(
+                Enrollment.objects.filter(
+                    organization=self.org, student=self.student, offering__subject=self.subject
+                ).exists()
+            )
+
+    def test_curriculum_program_mismatch_shows_error(self):
+        with bypass_rls():
+            other_program = Program.objects.create(organization=self.org, code="MATH", name="Riyaziyyat")
+            mismatched = Curriculum.objects.create(organization=self.org, program=other_program, admission_year=2024)
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_record_create"),
+            {
+                "student": str(self.student.id),
+                "program": str(self.program.id),
+                "curriculum": str(mismatched.id),
+                "admission_year": "2024",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "bu ixtisasa aid deyil")
+        with bypass_rls():
+            self.assertFalse(StudentAcademicRecord.objects.filter(organization=self.org, student=self.student).exists())
+
+    def test_duplicate_student_record_shows_error(self):
+        with bypass_rls():
+            curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+            StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=self.student,
+                program=self.program,
+                curriculum=curriculum,
+                admission_year=2024,
+            )
+        client = self._client(self.owner)
+        resp = client.post(
+            reverse("registrar:student_record_create"),
+            {
+                "student": str(self.student.id),
+                "program": str(self.program.id),
+                "curriculum": str(curriculum.id),
+                "admission_year": "2024",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "artıq təyin olunub")

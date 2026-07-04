@@ -126,6 +126,31 @@
             <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Bu semestrdə hələ fənn açılışı yoxdur." context "registrar.console" %}</p></div>
             {% endif %}
         </section>
+
+        <section class="console-panel console-panel--wide">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-user-graduate"></i> {% trans "Tələbə təyinatları" context "registrar.console" %}</h2>
+                <a class="console-add-btn" href="{% url 'registrar:student_record_create' %}"><i class="fas fa-plus"></i> {% trans "Tələbə təyin et" context "registrar.console" %}</a>
+            </div>
+            {% if student_records %}
+            <ul class="console-list">
+                {% for record in student_records %}
+                <li class="console-item {% if not record.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:student_record_edit' record.id %}">
+                        <span class="console-item-code">{{ record.student.get_full_name|default:record.student.username }}</span>
+                        <span class="console-item-name">{{ record.program.code }} — {{ record.program.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        {% if record.group %}<span><i class="fas fa-users"></i> {{ record.group.name }}</span>{% endif %}
+                        <span>{% trans "qəbul" context "registrar.console" %} {{ record.admission_year }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ tələbə təyinatı yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
     </div>
 </div>
 {% endblock %}
