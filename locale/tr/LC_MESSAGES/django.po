@@ -26863,6 +26863,94 @@ msgctxt "profile.sidebar"
 msgid "Registrar (kataloq)"
 msgstr "Kayıt (katalog)"
 
+msgctxt "registrar.console"
+msgid "Tədris planları"
+msgstr "Müfredatlar"
+
+msgctxt "registrar.console"
+msgid "Yeni plan"
+msgstr "Yeni müfredat"
+
+msgctxt "registrar.console"
+msgid "fənn"
+msgstr "ders"
+
+msgctxt "registrar.console"
+msgid "Hələ tədris planı yoxdur."
+msgstr "Henüz müfredat yok."
+
+msgctxt "registrar.console"
+msgid "İxtisas (proqram)"
+msgstr "Program"
+
+msgctxt "registrar.console"
+msgid "Qəbul ili"
+msgstr "Kabul yılı"
+
+msgctxt "registrar.console"
+msgid "Ad (opsional)"
+msgstr "Ad (isteğe bağlı)"
+
+msgctxt "registrar.console"
+msgid "Bu proqram + qəbul ili üçün tədris planı artıq var."
+msgstr "Bu program + kabul yılı için bir müfredat zaten var."
+
+msgctxt "registrar.console"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "registrar.console"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "registrar.console"
+msgid "Seçmə fənn"
+msgstr "Seçmeli"
+
+msgctxt "registrar.console"
+msgid "Seçmə blok adı"
+msgstr "Seçmeli blok adı"
+
+msgctxt "registrar.console"
+msgid "Seçim sayı"
+msgstr "Seçim sayısı"
+
+msgctxt "registrar.console"
+msgid "Bu fənn həmin semestrdə plana artıq əlavə olunub."
+msgstr "Bu ders o dönem için plana zaten eklendi."
+
+msgctxt "registrar.console"
+msgid "Plan redaktəsi"
+msgstr "Müfredatı düzenle"
+
+msgctxt "registrar.console"
+msgid "Yeni tədris planı"
+msgstr "Yeni müfredat"
+
+msgctxt "registrar.console"
+msgid "Plan sətirləri (semestr üzrə)"
+msgstr "Plan satırları (döneme göre)"
+
+msgctxt "registrar.console"
+msgid "Plana fənn əlavə et"
+msgstr "Plana ders ekle"
+
+msgctxt "registrar.console"
+msgid "seçmə"
+msgstr "seçmeli"
+
+msgctxt "registrar.console"
+msgid "məcburi"
+msgstr "zorunlu"
+
+msgctxt "registrar.console"
+msgid "Bu sətri silmək?"
+msgstr "Bu satır silinsin mi?"
+
+msgctxt "registrar.console"
+msgid "Bu planda hələ fənn yoxdur."
+msgstr "Bu planda henüz ders yok."
+
 #~ msgctxt "profile.subjects"
 #~ msgid "Buraxılmır"
 #~ msgstr "Giremez"

@@ -13,7 +13,7 @@ from django import forms
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import Program, Subject
+from apps.registrar.models import Curriculum, CurriculumSubject, Program, Subject
 
 
 class _OrgScopedModelForm(forms.ModelForm):
@@ -91,3 +91,82 @@ class SubjectForm(_OrgScopedModelForm):
         if code and self._code_is_taken(Subject, code):
             raise forms.ValidationError(pgettext_lazy("registrar.console", "Bu fənn kodu artıq mövcuddur."))
         return code
+
+
+class CurriculumForm(_OrgScopedModelForm):
+    class Meta:
+        model = Curriculum
+        fields = ["program", "admission_year", "name", "is_active"]
+        widgets = {"name": forms.TextInput(attrs={"maxlength": 255})}
+        labels = {
+            "program": pgettext_lazy("registrar.console", "İxtisas (proqram)"),
+            "admission_year": pgettext_lazy("registrar.console", "Qəbul ili"),
+            "name": pgettext_lazy("registrar.console", "Ad (opsional)"),
+            "is_active": pgettext_lazy("registrar.console", "Aktiv"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields["program"]
+        field.queryset = (
+            Program.objects.filter(organization=self.organization).order_by("name")
+            if self.organization is not None
+            else Program.objects.none()
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        program = cleaned.get("program")
+        year = cleaned.get("admission_year")
+        if program and year:
+            qs = Curriculum.objects.filter(organization=self.organization, program=program, admission_year=year)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(
+                    pgettext_lazy("registrar.console", "Bu proqram + qəbul ili üçün tədris planı artıq var.")
+                )
+        return cleaned
+
+
+class CurriculumSubjectForm(forms.ModelForm):
+    """A plan row. Bound to a curriculum (for the org + duplicate check)."""
+
+    class Meta:
+        model = CurriculumSubject
+        fields = ["subject", "semester_number", "is_elective", "elective_group", "required_choices"]
+        labels = {
+            "subject": pgettext_lazy("registrar.console", "Fənn"),
+            "semester_number": pgettext_lazy("registrar.console", "Semestr"),
+            "is_elective": pgettext_lazy("registrar.console", "Seçmə fənn"),
+            "elective_group": pgettext_lazy("registrar.console", "Seçmə blok adı"),
+            "required_choices": pgettext_lazy("registrar.console", "Seçim sayı"),
+        }
+
+    def __init__(self, *args, curriculum=None, **kwargs):
+        self.curriculum = curriculum
+        super().__init__(*args, **kwargs)
+        org = getattr(curriculum, "organization_id", None)
+        self.fields["subject"].queryset = (
+            Subject.objects.filter(organization_id=org, is_active=True).order_by("code")
+            if org
+            else Subject.objects.none()
+        )
+        self.fields["elective_group"].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        subject = cleaned.get("subject")
+        semester = cleaned.get("semester_number")
+        if subject and semester and self.curriculum is not None:
+            exists = CurriculumSubject.objects.filter(
+                organization=self.curriculum.organization,
+                curriculum=self.curriculum,
+                subject=subject,
+                semester_number=semester,
+            ).exists()
+            if exists:
+                raise forms.ValidationError(
+                    pgettext_lazy("registrar.console", "Bu fənn həmin semestrdə plana artıq əlavə olunub.")
+                )
+        return cleaned

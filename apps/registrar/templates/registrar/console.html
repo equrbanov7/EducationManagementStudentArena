@@ -4,7 +4,7 @@
 {% block title %}{% trans "Registrar idarəetməsi" context "registrar.console" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/console.css' %}?v=20260704-2">
 {% endblock %}
 
 {% block content %}
@@ -66,6 +66,31 @@
             </ul>
             {% else %}
             <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ fənn yoxdur." context "registrar.console" %}</p></div>
+            {% endif %}
+        </section>
+
+        <section class="console-panel console-panel--wide">
+            <div class="console-panel-head">
+                <h2 class="console-panel-title"><i class="fas fa-clipboard-list"></i> {% trans "Tədris planları" context "registrar.console" %}</h2>
+                <a class="console-add-btn" href="{% url 'registrar:curriculum_create' %}"><i class="fas fa-plus"></i> {% trans "Yeni plan" context "registrar.console" %}</a>
+            </div>
+            {% if curricula %}
+            <ul class="console-list">
+                {% for curriculum in curricula %}
+                <li class="console-item {% if not curriculum.is_active %}is-inactive{% endif %}">
+                    <a class="console-item-main" href="{% url 'registrar:curriculum_detail' curriculum.id %}">
+                        <span class="console-item-code">{{ curriculum.program.code }} · {{ curriculum.admission_year }}</span>
+                        <span class="console-item-name">{{ curriculum.name|default:curriculum.program.name }}</span>
+                    </a>
+                    <div class="console-item-meta">
+                        <span><i class="fas fa-list-ol"></i> {{ curriculum.rows.count }} {% trans "fənn" context "registrar.console" %}</span>
+                        {% if not curriculum.is_active %}<span class="console-badge-off">{% trans "deaktiv" context "registrar.console" %}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="console-empty"><i class="fas fa-folder-open"></i><p>{% trans "Hələ tədris planı yoxdur." context "registrar.console" %}</p></div>
             {% endif %}
         </section>
     </div>

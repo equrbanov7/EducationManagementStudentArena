@@ -16,5 +16,9 @@ urlpatterns = [
     path("idareetme/proqram/<uuid:pk>/", views.program_form_view, name="program_edit"),
     path("idareetme/fenn/yeni/", views.subject_form_view, name="subject_create"),
     path("idareetme/fenn/<uuid:pk>/", views.subject_form_view, name="subject_edit"),
+    path("idareetme/plan/yeni/", views.curriculum_form_view, name="curriculum_create"),
+    path("idareetme/plan/<uuid:pk>/redakte/", views.curriculum_form_view, name="curriculum_edit"),
+    path("idareetme/plan/<uuid:pk>/", views.curriculum_detail, name="curriculum_detail"),
+    path("idareetme/plan/setir/<uuid:pk>/sil/", views.curriculum_subject_delete, name="curriculum_subject_delete"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

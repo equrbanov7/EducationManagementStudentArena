@@ -18,10 +18,12 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from . import finals, gradebook, schedule
-from .forms import ProgramForm, SubjectForm
+from .forms import CurriculumForm, CurriculumSubjectForm, ProgramForm, SubjectForm
 from .models import (
     AttendanceStatus,
     CourseOffering,
+    Curriculum,
+    CurriculumSubject,
     LessonKind,
     Program,
     ScheduleSlot,
@@ -358,6 +360,11 @@ def registrar_console(request):
         {
             "programs": Program.objects.filter(organization=organization).order_by("name"),
             "subjects": Subject.objects.filter(organization=organization).order_by("code"),
+            "curricula": (
+                Curriculum.objects.filter(organization=organization)
+                .select_related("program")
+                .order_by("-admission_year", "program__name")
+            ),
             "active_main_nav": "registrar_console",
         },
     )
@@ -412,3 +419,90 @@ def subject_form_view(request, pk=None):
         pk=pk,
         success_msg=_("Fənn yadda saxlanıldı."),
     )
+
+
+@login_required
+def curriculum_form_view(request, pk=None):
+    """Create or edit a Curriculum (tədris planı); success → its detail page."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+
+    instance = get_object_or_404(Curriculum, pk=pk, organization=organization) if pk else None
+    if request.method == "POST":
+        form = CurriculumForm(request.POST, instance=instance, organization=organization)
+        if form.is_valid():
+            curriculum = form.save(commit=False)
+            curriculum.organization = organization
+            curriculum.save()
+            messages.success(request, _("Tədris planı yadda saxlanıldı."))
+            return redirect(reverse("registrar:curriculum_detail", args=[curriculum.pk]))
+    else:
+        form = CurriculumForm(instance=instance, organization=organization)
+
+    return render(
+        request,
+        "registrar/curriculum_form.html",
+        {"form": form, "instance": instance, "active_main_nav": "registrar_console"},
+    )
+
+
+@login_required
+def curriculum_detail(request, pk):
+    """A study plan's rows grouped by semester + an add-row form."""
+    organization = getattr(request, "organization", None)
+    if not _can_manage_registrar(request.user, organization):
+        raise Http404
+    curriculum = get_object_or_404(Curriculum.objects.select_related("program"), pk=pk, organization=organization)
+
+    if request.method == "POST":
+        form = CurriculumSubjectForm(request.POST, curriculum=curriculum)
+        if form.is_valid():
+            row = form.save(commit=False)
+            row.organization = organization
+            row.curriculum = curriculum
+            row.save()
+            messages.success(request, _("Plan sətri əlavə edildi."))
+            return redirect(reverse("registrar:curriculum_detail", args=[curriculum.pk]))
+    else:
+        form = CurriculumSubjectForm(curriculum=curriculum)
+
+    rows = list(
+        CurriculumSubject.objects.filter(organization=organization, curriculum=curriculum)
+        .select_related("subject")
+        .order_by("semester_number", "order", "subject__code")
+    )
+    semesters: dict = {}
+    for row in rows:
+        semesters.setdefault(row.semester_number, []).append(row)
+    semester_groups = [{"semester": num, "rows": semesters[num]} for num in sorted(semesters)]
+
+    return render(
+        request,
+        "registrar/curriculum_detail.html",
+        {
+            "curriculum": curriculum,
+            "form": form,
+            "semester_groups": semester_groups,
+            "total_rows": len(rows),
+            "active_main_nav": "registrar_console",
+        },
+    )
+
+
+@login_required
+def curriculum_subject_delete(request, pk):
+    """Remove a plan row from its curriculum."""
+    row = get_object_or_404(CurriculumSubject.objects.select_related("curriculum", "organization"), pk=pk)
+    organization = getattr(request, "organization", None)
+    if (
+        request.method == "POST"
+        and organization is not None
+        and row.organization_id == organization.id
+        and _can_manage_registrar(request.user, organization)
+    ):
+        curriculum_id = row.curriculum_id
+        row.delete()
+        messages.success(request, _("Plan sətri silindi."))
+        return redirect(reverse("registrar:curriculum_detail", args=[curriculum_id]))
+    raise Http404
